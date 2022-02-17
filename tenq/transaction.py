@@ -1,0 +1,2 @@
+class TenQTransaction(dict):
+    pass
