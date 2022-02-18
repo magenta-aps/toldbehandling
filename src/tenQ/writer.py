@@ -1,6 +1,6 @@
 from django.utils import timezone
 from django.utils.datetime_safe import date
-from prisme.tenQ.dates import get_last_payment_date
+from tenQ.dates import get_last_payment_date
 
 
 # Temporary class for serializing transaction data in a writer
@@ -8,7 +8,7 @@ from prisme.tenQ.dates import get_last_payment_date
 class TenQTransaction(dict):
 
     fieldspec = (
-        ('leverandoer_ident', 4, 'KAS'),
+        ('leverandoer_ident', 4, None),
         ('trans_type', 2, None),
         ('time_stamp', 13, None),  # Timestamp is normally 12 chars, but here we have a prefixed 0
         ('bruger_nummer', 4, '0900'),
@@ -143,11 +143,6 @@ class TenQTransactionWriter(object):
         # Make sure collect_date is on local time
         collect_date = timezone.localtime(collect_date)
 
-        # Late import of TaxYear to avoid circular imports
-        from kas.models import TaxYear  # noqa
-
-        self.tax_year = TaxYear.objects.get(year=year)
-
         time_stamp = TenQTransaction.format_timestamp(timezone.now())
         omraad_nummer = TenQTransaction.format_omraade_nummer(year)
         due_date = collect_date.date()
@@ -173,11 +168,12 @@ class TenQTransactionWriter(object):
         self.transaction_24 = TenQFixWidthFieldLineTransactionType24(**init_data)
         self.transaction_26 = TenQFixWidthFieldLineTransactionType26(**init_data)
 
-    def serialize_transaction(self, cpr_nummer, amount_in_dkk, afstem_noegle):
+    def serialize_transaction(self, cpr_nummer, amount_in_dkk, afstem_noegle, rate_text, leverandoer_ident):
         data = {
             "cpr_nummer": cpr_nummer,
             "rate_beloeb": TenQTransaction.format_amount(amount_in_dkk * 100),  # Amount is in øre, so multiply by 100
             'afstem_noegle': afstem_noegle,
+            "leverandoer_ident": leverandoer_ident,
         }
         # Initial two lines
         result_lines = [
@@ -185,7 +181,7 @@ class TenQTransactionWriter(object):
             self.transaction_24.serialize_transaction(**data),
         ]
         # One type 26 line for each line in the rate text.
-        for line_nr, line in enumerate(self.tax_year.rate_text_for_transactions.splitlines()):
+        for line_nr, line in enumerate(rate_text.splitlines()):
             result_lines.append(
                 self.transaction_26.serialize_transaction(
                     line_number=str(line_nr).rjust(3, '0'),
