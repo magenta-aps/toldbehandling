@@ -1,9 +1,0 @@
-README.md
-pyproject.toml
-setup.cfg
-src/tenq/__init__.py
-src/tenq/transaction.py
-src/tenq.egg-info/PKG-INFO
-src/tenq.egg-info/SOURCES.txt
-src/tenq.egg-info/dependency_links.txt
-src/tenq.egg-info/top_level.txt
