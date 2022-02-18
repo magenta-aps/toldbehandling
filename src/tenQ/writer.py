@@ -140,15 +140,16 @@ class TenQTransactionWriter(object):
     transaction_list = ''
     tax_year = None
 
-    def __init__(self, collect_date, year):
+    def __init__(self, collect_date, year, time_stamp=None):
         # Make sure collect_date is on local time
-        time_stamp = TenQTransaction.format_timestamp(datetime.utcnow().replace(tzinfo=pytz.utc))
+        if time_stamp is None:
+            time_stamp = datetime.utcnow().replace(tzinfo=pytz.utc)
         omraad_nummer = TenQTransaction.format_omraade_nummer(year)
         due_date = collect_date.date()
         last_payment_date = get_last_payment_date(collect_date)
 
         init_data = {
-            'time_stamp': time_stamp,
+            'time_stamp': TenQTransaction.format_timestamp(time_stamp),
             'omraad_nummer': omraad_nummer,
             'paalign_aar': year,
             # Note that the names of the following two datefields have different
