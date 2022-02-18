@@ -1,8 +1,6 @@
 # Utility module containing date calculation methods for the 10Q format
 
 from datetime import timedelta
-from django.utils import timezone
-
 import datetime
 
 
@@ -14,7 +12,6 @@ import datetime
 # reference date. Here it is calculated by taking the first of the reference
 # month and adding four months.
 def get_due_date(reference_datetime):
-    reference_datetime = timezone.localtime(reference_datetime)
 
     # Our resulting day should always be the 1st
     date = reference_datetime.replace(day=1).date()

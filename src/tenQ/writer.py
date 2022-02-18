@@ -1,5 +1,6 @@
-from django.utils import timezone
-from django.utils.datetime_safe import date
+from datetime import date, datetime
+import pytz
+
 from tenQ.dates import get_last_payment_date
 
 
@@ -141,9 +142,7 @@ class TenQTransactionWriter(object):
 
     def __init__(self, collect_date, year):
         # Make sure collect_date is on local time
-        collect_date = timezone.localtime(collect_date)
-
-        time_stamp = TenQTransaction.format_timestamp(timezone.now())
+        time_stamp = TenQTransaction.format_timestamp(datetime.utcnow().replace(tzinfo=pytz.utc))
         omraad_nummer = TenQTransaction.format_omraade_nummer(year)
         due_date = collect_date.date()
         last_payment_date = get_last_payment_date(collect_date)
