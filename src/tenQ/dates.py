@@ -27,14 +27,14 @@ def get_due_date(reference_datetime):
 
     # Create the target date, but with the same time input as the reference
     # datetime.
-    return timezone.make_aware(datetime.datetime(
+    return datetime.datetime(
         year=date.year,
         month=date.month,
         day=date.day,
         hour=reference_datetime.hour,
         minute=reference_datetime.minute,
         second=reference_datetime.second,
-    ))
+    )
 
 
 # Last payment date is the first workday on or after the 20th in the same month
