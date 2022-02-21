@@ -1,5 +1,4 @@
-from datetime import date, datetime
-import pytz
+from datetime import date, datetime, timezone
 
 from tenQ.dates import get_last_payment_date
 
@@ -59,12 +58,12 @@ class TenQTransaction(dict):
         return ''.join(fields)
 
     @staticmethod
-    def format_timestamp(datetime):
-        return '{:0%Y%m%d%H%M}'.format(datetime)
+    def format_timestamp(dt: datetime):
+        return '{:0%Y%m%d%H%M}'.format(dt)
 
     @staticmethod
-    def format_date(date):
-        return '{:%Y%m%d}'.format(date)
+    def format_date(d: date):
+        return '{:%Y%m%d}'.format(d)
 
     @staticmethod
     def format_omraade_nummer(year):
@@ -140,16 +139,14 @@ class TenQTransactionWriter(object):
     transaction_list = ''
     tax_year = None
 
-    def __init__(self, collect_date, year, time_stamp=None):
-        # Make sure collect_date is on local time
-        if time_stamp is None:
-            time_stamp = datetime.utcnow().replace(tzinfo=pytz.utc)
+    def __init__(self, due_date: date, year: int, timestamp: datetime = None):
+        if timestamp is None:
+            timestamp = datetime.utcnow().replace(tzinfo=timezone.utc)
         omraad_nummer = TenQTransaction.format_omraade_nummer(year)
-        due_date = collect_date.date()
-        last_payment_date = get_last_payment_date(collect_date)
+        last_payment_date = get_last_payment_date(due_date)
 
         init_data = {
-            'time_stamp': TenQTransaction.format_timestamp(time_stamp),
+            'time_stamp': TenQTransaction.format_timestamp(timestamp),
             'omraad_nummer': omraad_nummer,
             'paalign_aar': year,
             # Note that the names of the following two datefields have different
@@ -168,7 +165,7 @@ class TenQTransactionWriter(object):
         self.transaction_24 = TenQFixWidthFieldLineTransactionType24(**init_data)
         self.transaction_26 = TenQFixWidthFieldLineTransactionType26(**init_data)
 
-    def serialize_transaction(self, cpr_nummer, amount_in_dkk, afstem_noegle, rate_text, leverandoer_ident):
+    def serialize_transaction(self, cpr_nummer: str, amount_in_dkk: int, afstem_noegle: str, rate_text: str, leverandoer_ident: str):
         data = {
             "cpr_nummer": cpr_nummer,
             "rate_beloeb": TenQTransaction.format_amount(amount_in_dkk * 100),  # Amount is in øre, so multiply by 100
@@ -198,5 +195,5 @@ class TenQTransactionWriter(object):
 # tilbagebetaling = 200
 
 # # Construct the writer
-# transaction_creator = TransactionCreator(collect_date=datetime.now(), tax_year=2020)
+# transaction_creator = TransactionCreator(due_date=datetime.now(), tax_year=2020)
 # print(transaction_creator.make_transaction(cpr_nummer=cpr_nummer, rate_beloeb=tilbagebetaling, afstem_noegle=afstem_noegle))
