@@ -13,3 +13,4 @@ src/tenQ.egg-info/top_level.txt
 src/tenQ/tests/__init__.py
 src/tenQ/tests/test_10q_output.py
 src/tenQ/tests/test_date_calculation.py
+src/tenQ/tests/test_g69_output.py
