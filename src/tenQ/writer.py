@@ -1,8 +1,8 @@
+from collections import OrderedDict
 from datetime import date, datetime, timezone
+from decimal import Decimal
 
 from tenQ.dates import get_last_payment_date
-from collections import OrderedDict
-from decimal import Decimal
 
 
 # Temporary class for serializing transaction data in a writer
@@ -74,7 +74,7 @@ class TenQTransaction(dict):
 
     @staticmethod
     def format_amount(amount):
-        # amount angives i ører og fortegn angives som sidte karakter
+        # amount angives i ører og fortegn angives som sidste karakter
         sign = '-' if amount < 0 else '+'
         return str(abs(amount)).rjust(10, '0') + sign
 
@@ -150,6 +150,7 @@ class TenQTransactionWriter(object):
     def __init__(self, due_date: date, year: int, leverandoer_ident: str, timestamp: datetime = None,
                  periode_fra: date = None, periode_til: date = None, creation_date: date = None,
                  faktura_no: str = None, bruger_nummer: str = None, betal_art: str = None,
+                 last_payment_date: date = None
                  ):
         if timestamp is None:
             timestamp = datetime.utcnow().replace(tzinfo=timezone.utc)
@@ -166,11 +167,12 @@ class TenQTransactionWriter(object):
         if faktura_no is None:
             faktura_no = ''
         omraad_nummer = TenQTransaction.format_omraade_nummer(year)
-        last_payment_date = get_last_payment_date(due_date)
+        if last_payment_date is None:
+            last_payment_date = get_last_payment_date(due_date)
 
         init_data = {
             'time_stamp': TenQTransaction.format_timestamp(timestamp),
-            "leverandoer_ident": leverandoer_ident,
+            'leverandoer_ident': leverandoer_ident,
             'omraad_nummer': omraad_nummer,
             'paalign_aar': year,
             # Note that the names of the following two datefields have different
