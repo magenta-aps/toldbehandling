@@ -150,7 +150,7 @@ class TenQTransactionWriter(object):
     def __init__(self, due_date: date, year: int, leverandoer_ident: str, timestamp: datetime = None,
                  periode_fra: date = None, periode_til: date = None, creation_date: date = None,
                  faktura_no: str = None, bruger_nummer: str = None, betal_art: str = None,
-                 last_payment_date: date = None
+                 last_payment_date: date = None, opkraev_date: date = None, interest_date: date = None
                  ):
         if timestamp is None:
             timestamp = datetime.utcnow().replace(tzinfo=timezone.utc)
@@ -169,6 +169,10 @@ class TenQTransactionWriter(object):
         omraad_nummer = TenQTransaction.format_omraade_nummer(year)
         if last_payment_date is None:
             last_payment_date = get_last_payment_date(due_date)
+        if opkraev_date is None:
+            opkraev_date = last_payment_date
+        if interest_date is None:
+            interest_date = last_payment_date
 
         init_data = {
             'time_stamp': TenQTransaction.format_timestamp(timestamp),
@@ -178,10 +182,10 @@ class TenQTransactionWriter(object):
             # Note that the names of the following two datefields have different
             # meanings in Prisme and in the 10Q format. The way there are used
             # here results in the correct data in Prisme.
-            'opkraev_dato': TenQTransaction.format_date(last_payment_date),
+            'opkraev_dato': TenQTransaction.format_date(opkraev_date),
             'forfald_dato': TenQTransaction.format_date(due_date),
             'betal_dato': TenQTransaction.format_date(last_payment_date),
-            'rentefri_dato': TenQTransaction.format_date(last_payment_date),
+            'rentefri_dato': TenQTransaction.format_date(interest_date),
             'stiftelse_dato': TenQTransaction.format_date(creation_date),
             'fra_periode': TenQTransaction.format_date(periode_fra),
             'til_periode': TenQTransaction.format_date(periode_til),
