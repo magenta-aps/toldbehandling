@@ -1,1 +1,2 @@
 pysftp==0.2.9
+openpyxl==3.0.9
