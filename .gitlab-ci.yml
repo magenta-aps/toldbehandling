@@ -43,8 +43,6 @@ Build image:
   image:
     name: gcr.io/kaniko-project/executor:debug-v0.16.0
     entrypoint: [""]
-  tags:
-    - docker
   script:
     # Login to GitLab registry
     - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
@@ -59,8 +57,6 @@ Build image:
 .test-default: &test-default
   stage: test
   dependencies: []
-  tags:
-    - docker
 
 Unittest:
   <<: *test-default
