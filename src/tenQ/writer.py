@@ -14,9 +14,9 @@ class TenQTransaction(dict):
         ('leverandoer_ident', 4, None),
         ('trans_type', 2, None),
         ('time_stamp', 13, None),  # Timestamp is normally 12 chars, but here we have a prefixed 0
-        ('bruger_nummer', 4, '0900'),  # send altid 0900
+        ('bruger_nummer', 4, '0900'),
         ('omraad_nummer', 3, None),
-        ('betal_art', 3, 209),  # default bruges åbenbart ikke
+        ('betal_art', 3, 209),
         ('paalign_aar', 4, None),
         ('debitor_nummer', 10, None),
         ('sag_nummer', 2, '00'),
