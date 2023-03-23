@@ -32,7 +32,7 @@ class OutputTest(unittest.TestCase):
             beløb=Decimal(123.45),
             deb_kred='D',
             is_cvr=True,
-            ydelse_modtager=12345678
+            ydelse_modtager="12345678"
         )
         prismeG69_content_2 = self.transaction_writer.serialize_transaction(
             post_type='NOR',
@@ -44,7 +44,7 @@ class OutputTest(unittest.TestCase):
             beløb=Decimal(123.45),
             deb_kred='K',
             is_cvr=True,
-            ydelse_modtager=12345678
+            ydelse_modtager="12345678"
         )
         self.assertEqual(
             prismeG69_content_1,
@@ -57,7 +57,7 @@ class OutputTest(unittest.TestCase):
             '&112000000012345 '
             '&113D'
             '&13203'
-            '&1330012345678'
+            '&13312345678'
         )
         self.assertEqual(
             prismeG69_content_2,
@@ -70,7 +70,7 @@ class OutputTest(unittest.TestCase):
             '&112000000012345 '
             '&113K'
             '&13203'
-            '&1330012345678'
+            '&13312345678'
         )
 
     def test_writer_invalid_input(self):
