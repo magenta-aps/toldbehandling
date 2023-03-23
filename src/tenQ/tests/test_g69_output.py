@@ -57,7 +57,7 @@ class OutputTest(unittest.TestCase):
             '&112000000012345 '
             '&113D'
             '&13203'
-            '&1331234567890'
+            '&13312345678'
         )
         self.assertEqual(
             prismeG69_content_2,
