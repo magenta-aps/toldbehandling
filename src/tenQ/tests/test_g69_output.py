@@ -46,6 +46,7 @@ class OutputTest(unittest.TestCase):
             is_cvr=True,
             ydelse_modtager=12345678
         )
+        print(prismeG69_content_1)
         self.assertEqual(
             prismeG69_content_1,
             '012G6900001003401NORFLYD'
