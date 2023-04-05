@@ -15,7 +15,7 @@ class TenQTransaction(dict):
         ('trans_type', 2, None),
         ('time_stamp', 13, None),  # Timestamp is normally 12 chars, but here we have a prefixed 0
         ('bruger_nummer', 4, '0900'),
-        ('omraad_nummer', 3, None),
+        ('omraade_nummer', 3, None),
         ('betal_art', 3, 209),
         ('paalign_aar', 4, None),
         ('debitor_nummer', 10, None),
@@ -159,7 +159,7 @@ class TenQTransactionWriter(object):
                  periode_fra: date = None, periode_til: date = None, creation_date: date = None,
                  faktura_no: str = None, bruger_nummer: str = None, betal_art: str = None,
                  last_payment_date: date = None, opkraev_date: date = None, interest_date: date = None,
-                 omraad_nummer: int = None
+                 omraade_nummer: int = None
                  ):
         if timestamp is None:
             timestamp = datetime.utcnow().replace(tzinfo=timezone.utc)
@@ -175,8 +175,8 @@ class TenQTransactionWriter(object):
             betal_art = 209
         if faktura_no is None:
             faktura_no = ''
-        if omraad_nummer is None:
-            omraad_nummer = year
+        if omraade_nummer is None:
+            omraade_nummer = year
         if last_payment_date is None:
             last_payment_date = get_last_payment_date_from_due_date(due_date)
         if opkraev_date is None:
@@ -187,7 +187,7 @@ class TenQTransactionWriter(object):
         init_data = {
             'time_stamp': TenQTransaction.format_timestamp(timestamp),
             'leverandoer_ident': leverandoer_ident,
-            'omraad_nummer': TenQTransaction.format_omraade_nummer(omraad_nummer),
+            'omraade_nummer': TenQTransaction.format_omraade_nummer(omraade_nummer),
             'paalign_aar': year,
             # Note that the names of the following two datefields have different
             # meanings in Prisme and in the 10Q format. The way there are used
