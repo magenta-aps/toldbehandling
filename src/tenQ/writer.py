@@ -77,8 +77,8 @@ class TenQTransaction(dict):
         return '{:%Y%m%d}'.format(d)
 
     @staticmethod
-    def format_omraade_nummer(year):
-        return str(year)[1:]
+    def format_omraade_nummer(nummer):
+        return str(nummer)[-3:].zfill(3)
 
     @staticmethod
     def format_amount(amount):
