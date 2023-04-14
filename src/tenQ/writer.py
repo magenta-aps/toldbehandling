@@ -250,7 +250,7 @@ class TenQTransactionWriter(object):
             self.transaction_24.serialize_transaction(**data),
         ]
         # One type 26 line for each line in the rate text.
-        for line_nr, line in enumerate(rate_text.splitlines()):
+        for line_nr, line in enumerate(rate_text.splitlines(), 1):
             result_lines.append(
                 self.transaction_26.serialize_transaction(
                     line_number=str(line_nr).rjust(3, '0'),
@@ -371,13 +371,13 @@ class G69TransactionWriter(object):
     organisationstype = 1
     linjeformat = 'FLYD'
 
-    # Line number in the file; successive calls to serialize_transaction increment this.
-    # Be sure to use a new G69TransactionWriter or reset the line number when writing a new file
-    line_number = 1
-
     def __init__(self, registreringssted: int, organisationsenhed: int):
         self.registreringssted = registreringssted
         self.organisationsenhed = organisationsenhed
+
+        # Line number in the file; successive calls to serialize_transaction increment this.
+        # Be sure to use a new G69TransactionWriter or reset the line number when writing a new file
+        self.line_number = 1
 
     def reset_line_number(self):
         self.line_number = 1
