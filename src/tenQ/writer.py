@@ -377,9 +377,11 @@ class G69TransactionWriter(object):
 
         # Line number in the file; successive calls to serialize_transaction increment this.
         # Be sure to use a new G69TransactionWriter or reset the line number when writing a new file
+        print("init self.line_number")
         self.line_number = 1
 
     def reset_line_number(self):
+        print("reset self.line_number")
         self.line_number = 1
 
     def serialize_transaction(self, post_type: str = 'NOR', **kwargs):
@@ -454,6 +456,7 @@ class G69TransactionWriter(object):
                     value = value.rjust(width, '0')
                 code = str(code).rjust(3, '0')
                 output.append(f"{code}{value}")
+        print("increment self.line_number")
         self.line_number += 1
         return '&'.join(output)
 
