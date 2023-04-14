@@ -46,8 +46,8 @@ class TenQTransaction(dict):
         data = {**self}
         data.update(kwargs)
 
-        data['debitor_nummer'] = data['cpr_nummer']
-        data['person_nummer'] = data['cpr_nummer']
+        data['debitor_nummer'] = str(data['cpr_nummer']).zfill(10)
+        data['person_nummer'] = str(data['cpr_nummer']).zfill(10)
 
         fields = []
 
