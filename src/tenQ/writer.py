@@ -396,6 +396,7 @@ class G69TransactionWriter(object):
                 if kwargs[alias] in config['map']:
                     kwargs[name] = config['map'][kwargs[alias]]
 
+        print(f"use self.line_number: {self.line_number}")
         # Header
         output.append(
             ''.join([
@@ -456,9 +457,12 @@ class G69TransactionWriter(object):
                     value = value.rjust(width, '0')
                 code = str(code).rjust(3, '0')
                 output.append(f"{code}{value}")
-        print("increment self.line_number")
         self.line_number += 1
-        return '&'.join(output)
+        x = '&'.join(output)
+        print(x)
+
+        print("increment self.line_number")
+        return x
 
     def serialize_transaction_pair(self, post_type: str = 'NOR', **kwargs):
         return '\r\n'.join([
