@@ -1,0 +1,8 @@
+*.pyc
+*.mo
+env/
+.idea/
+docker-compose.override.yml
+data/er/*
+!data/er/.gitkeep
+/.pre-commit-config.yaml
