@@ -2,6 +2,7 @@ stages:
   - lint
   - build
   - test
+  - release
 
 include:
   - project: 'labs/salt-automation'
@@ -205,3 +206,58 @@ Django check UI:
   script:
     - cd /app
     - python manage.py check ui
+
+
+# Release stage
+###############
+
+.release-godsregistrering:
+  stage: release
+  image: alpine
+  variables:
+    GIT_STRATEGY: none # We do not need the source code
+  dependencies: []
+  before_script:
+    # install skopeo
+    - apk add skopeo
+
+Release REST image:
+  # Releases both stable and RC releases.
+  extends:
+    - .rules:semver-all
+    - .release-godsregistrering
+  needs:
+    ["Build REST image", "Unittest REST", "Django check REST"]
+  script:
+    - skopeo copy
+      --src-creds=${CI_REGISTRY_USER}:${CI_BUILD_TOKEN}
+      --dest-creds=${RELEASE_REGISTRY_USER}:${RELEASE_REGISTRY_PASSWORD}
+      "docker://${REST_IMAGE_SHA}"
+      "docker://${REST_IMAGE_TAG}"
+
+Release UI image:
+  # Releases both stable and RC releases.
+  extends:
+    - .rules:semver-all
+    - .release-godsregistrering
+  needs:
+    ["Build UI image", "Unittest UI", "Django check UI"]
+  script:
+    - skopeo copy
+      --src-creds=${CI_REGISTRY_USER}:${CI_BUILD_TOKEN}
+      --dest-creds=${RELEASE_REGISTRY_USER}:${RELEASE_REGISTRY_PASSWORD}
+      "docker://${UI_IMAGE_SHA}"
+      "docker://${UI_IMAGE_TAG}"
+
+Release ER image:
+  extends:
+    - .rules:semver-all
+    - .release-godsregistrering
+  needs:
+    ["Build ER image"]
+  script:
+    - skopeo copy
+      --src-creds=${CI_REGISTRY_USER}:${CI_BUILD_TOKEN}
+      --dest-creds=${RELEASE_REGISTRY_USER}:${RELEASE_REGISTRY_PASSWORD}
+      "docker://${ER_IMAGE_SHA}"
+      "docker://${ER_IMAGE_TAG}"
