@@ -13,6 +13,7 @@ services:
       - ./dev-environment/rest.env
     volumes:
       - ./rest/:/app
+      - file-data:/upload
     depends_on:
       - postgres
     environment:
@@ -46,7 +47,7 @@ services:
     env_file:
       - ./dev-environment/rest.env
     volumes:
-      - kas-postgres-data:/var/lib/postgresql/data
+      - postgres-data:/var/lib/postgresql/data
 
   godsregistrering-test-idp:
     user: "1000:1000"  # Override in docker-compose.override.yml if your local user is different
@@ -83,4 +84,5 @@ services:
       - ./data/er:/doc
 
 volumes:
-  kas-postgres-data:
+  postgres-data:
+  file-data:
