@@ -13,6 +13,7 @@ services:
       - ./dev-environment/rest.env
     volumes:
       - ./rest/:/app
+      - ./data/er:/static/er
       - file-data:/upload
     depends_on:
       - postgres
@@ -34,6 +35,7 @@ services:
       - ./dev-environment/ui.env
     volumes:
       - ./ui/:/app
+      - ./data/er:/static/er
     environment:
       - MAKE_MIGRATIONS=true
       - MIGRATE=true
