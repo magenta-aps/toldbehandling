@@ -43,3 +43,14 @@ class RestPermission(permissions.BasePermission):
         return request.user.has_perm(
             f"{self.appname}.{self.method_map[request.method]}_{self.modelname}"
         )
+
+
+# Copied from core python because its containing module `distutils` is deprecated.
+def strtobool(val):
+    val = val.lower()
+    if val in ("y", "yes", "t", "true", "on", "1"):
+        return 1
+    elif val in ("n", "no", "f", "false", "off", "0"):
+        return 0
+    else:
+        raise ValueError("invalid truth value %r" % (val,))
