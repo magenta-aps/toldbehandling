@@ -38,8 +38,14 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "rest",
     "django_extensions",
+    "common",
+    "aktør",
+    "anmeldelse",
+    "forsendelse",
+    "sats",
+    "ninja_extra",
+    "ninja_jwt",
 ]
 
 MIDDLEWARE = [
@@ -133,3 +139,8 @@ ENVIRONMENT = os.environ.get("ENVIRONMENT", "development")
 
 # Uploaded files
 MEDIA_ROOT = "/upload/"
+
+
+GRAPH_MODELS = {
+    "app_labels": ["aktør", "anmeldelse", "forsendelse", "sats"],
+}
