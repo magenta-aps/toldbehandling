@@ -2,7 +2,8 @@ version: "3.4"
 services:
 
   godsregistrering-rest:
-    user: "1000:1000"  # Override in docker-compose.override.yml if your local user is different
+    user: "75130:75130"  # Override in docker-compose.override.yml if your local user is different
+    # user: "1000:1000"
     container_name: godsregistrering-rest
     image: godsregistrering-rest:latest
     network_mode: "host"
@@ -21,6 +22,7 @@ services:
       - MAKE_MIGRATIONS=true
       - MIGRATE=true
       - CREATE_USERS=true
+      - TEST=true
     command: gunicorn -b 0.0.0.0:7000 project.wsgi:application --reload -w 1 --access-logfile - --error-logfile - --capture-output # reload on code changes
 
   godsregistrering-ui:

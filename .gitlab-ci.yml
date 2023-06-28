@@ -119,6 +119,9 @@ Build ER image:
 .test-default: &test-default
   stage: test
   dependencies: []
+  services:
+    - name: postgres:13
+      alias: godsregistrering-db
   variables:
     # Simulate development environment while running tests so we use mockup data
     DJANGO_SECRET_KEY: e$s6@0(hs5ja79-&!l7vt^onoe4h^*bv_e4hj&wt5^8*&x76-$
@@ -147,17 +150,22 @@ Build ER image:
     SAML_CONTACT_SUPPORT_EMAIL: test@example.com
     SKIP_IDP_METADATA: "true"
 
-Unittest REST:
+.test-rest: &test-rest
   <<: *test-default
-  needs: ["Build REST image"]
+  needs: [ "Build REST image" ]
   image: ${REST_IMAGE_SHA}
-  services:
-   - name: postgres:13
-     alias: kas-db
+
+.test-ui: &test-ui
+  <<: *test-default
+  needs: [ "Build UI image" ]
+  image: ${UI_IMAGE_SHA}
+
+Unittest REST:
+  <<: *test-rest
   script:
     - cd /app
-    - coverage run --source='.' --omit=manage.py,project/wsgi.py,*/admin.py manage.py test
-    - coverage report
+    - coverage run --source='.' --omit=manage.py,project/asgi.py,project/wsgi.py,project/test_mixins.py,*/admin.py,*/urls.py,*/tests.py,*/__init__.py,*/migrations/* manage.py test
+    - coverage report --show-missing --fail-under=100
     - coverage xml
   coverage: '/^TOTAL.+?(\d+\%)$/'
   artifacts:
@@ -167,16 +175,11 @@ Unittest REST:
           path: /app/coverage.xml
 
 Unittest UI:
-  <<: *test-default
-  needs: ["Build UI image"]
-  image: ${UI_IMAGE_SHA}
-  services:
-    - name: postgres:13
-      alias: kas-db
+  <<: *test-ui
   script:
     - cd /app
-    - coverage run --source='.' --omit=manage.py,project/wsgi.py,*/admin.py manage.py test
-    - coverage report
+    - coverage run --source='.' --omit=manage.py,project/asgi.py,project/wsgi.py,project/test_mixins.py,*/admin.py,*/urls.py,*/tests.py,*/__init__.py,*/migrations/* manage.py test
+    - coverage report --show-missing --fail-under=100
     - coverage xml
   coverage: '/^TOTAL.+?(\d+\%)$/'
   artifacts:
@@ -186,23 +189,13 @@ Unittest UI:
           path: /app/coverage.xml
 
 Django check REST:
-  <<: *test-default
-  needs: [ "Build REST image" ]
-  image: ${REST_IMAGE_SHA}
-  services:
-    - name: postgres:13
-      alias: kas-db
+  <<: *test-rest
   script:
     - cd /app
-    - python manage.py check rest
+    - python manage.py check aktør anmeldelse forsendelse sats
 
 Django check UI:
-  <<: *test-default
-  needs: [ "Build UI image" ]
-  image: ${UI_IMAGE_SHA}
-  services:
-    - name: postgres:13
-      alias: kas-db
+  <<: *test-ui
   script:
     - cd /app
     - python manage.py check ui
