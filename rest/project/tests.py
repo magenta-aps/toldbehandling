@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from project.util import json_dump
+from project.util import json_dump, strtobool
 
 
 class UtilTest(TestCase):
@@ -10,3 +10,14 @@ class UtilTest(TestCase):
 
         with self.assertRaises(TypeError):
             json_dump({"foo": NonSerializable()})
+
+    def test_strtobool(self):
+        for true_value in ("y", "yes", "t", "true", "on", "1"):
+            for value in (true_value.lower(), true_value.upper()):
+                self.assertEqual(strtobool(value), 1)
+        for true_value in ("n", "no", "f", "false", "off", "0"):
+            for value in (true_value.lower(), true_value.upper()):
+                self.assertEqual(strtobool(value), 0)
+        for value in ("j", "ja", "nej", "null", "None", "yep", "hephey", "2"):
+            with self.assertRaises(ValueError):
+                strtobool(value)
