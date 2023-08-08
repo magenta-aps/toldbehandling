@@ -152,11 +152,11 @@ class RestMixin:
     @classmethod
     def object_to_dict(cls, item):
         def format_value(value):
-            if type(value) == date:
+            if type(value) is date:
                 return value.isoformat()
-            if type(value) == FieldFile and not value:
+            if type(value) is FieldFile and not value:
                 return None
-            if type(value) == Decimal:
+            if type(value) is Decimal:
                 return str(value)
             if isinstance(value, Choices):
                 return str(value)
@@ -175,7 +175,7 @@ class RestMixin:
                 data = item.read()
                 item.seek(0)
                 return data
-        if type(item) == str:
+        if type(item) is str:
             path = os.path.normpath(settings.MEDIA_ROOT + "/" + unquote(item))
             with open(path, "rb") as fp:
                 return fp.read()
