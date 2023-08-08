@@ -14,7 +14,7 @@ class ORJSONRenderer(BaseRenderer):
 
     @staticmethod
     def default(o):
-        if type(o) == Decimal:
+        if type(o) is Decimal:
             return str(o)
         if isinstance(o, File):
             with o.open("rb") as file:
