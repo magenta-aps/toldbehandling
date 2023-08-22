@@ -9,16 +9,13 @@ from sats.models import Vareafgiftssats
 
 
 def afgiftsanmeldelse_upload_to(instance, filename):
-    return f"leverandørfakturaer/{instance.pk}/{filename}"  # Relative to MEDIA_ROOT in settings.py
+    return f"leverandørfakturaer/{instance.pk}/{filename}"
 
 
 class Afgiftsanmeldelse(models.Model):
     class Meta:
         ordering = ["dato"]
 
-    anmeldelsesnummer = models.PositiveBigIntegerField(
-        unique=True,
-    )
     afsender = models.ForeignKey(
         Afsender,
         related_name="afgiftsanmeldelser",
@@ -80,7 +77,7 @@ class Afgiftsanmeldelse(models.Model):
             )
 
     def __str__(self):
-        return f"Afgiftsanmeldelse(anmeldelsesnummer={self.anmeldelsesnummer})"
+        return f"Afgiftsanmeldelse(id={self.id})"
 
     def save(self, *args, **kwargs):
         super().full_clean()
@@ -112,8 +109,15 @@ class Varelinje(models.Model):
     )
 
     def __str__(self):
-        return f"Varelinje(afgiftssats={self.afgiftssats}, fakturabeløb={self.fakturabeløb})"
+        return (
+            f"Varelinje(afgiftssats={self.afgiftssats}, "
+            + f"fakturabeløb={self.fakturabeløb})"
+        )
 
     def save(self, *args, **kwargs):
         super().full_clean()
+        self.beregn_afgift()
         super().save(*args, **kwargs)
+
+    def beregn_afgift(self) -> None:
+        self.afgiftsbeløb = self.afgiftssats.beregn_afgift(self)

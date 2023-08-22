@@ -114,6 +114,10 @@ class VareafgiftssatsTest(RestMixin, TestCase):
             self._expected_object_data.update(
                 {
                     "id": self.vareafgiftssats.id,
+                    "minimumsbeløb": None,
+                    "overordnet": None,
+                    "segment_nedre": None,
+                    "segment_øvre": None,
                 }
             )
         return self._expected_object_data
@@ -126,6 +130,10 @@ class VareafgiftssatsTest(RestMixin, TestCase):
             self._expected_list_response_dict.update(
                 {
                     "id": self.vareafgiftssats.id,
+                    "minimumsbeløb": None,
+                    "overordnet": None,
+                    "segment_nedre": None,
+                    "segment_øvre": None,
                 }
             )
         return self._expected_list_response_dict

@@ -15,10 +15,12 @@ from project.util import RestPermission
 
 # Django-ninja har endnu ikke understøttelse for PATCH med filer i multipart/form-data
 # Se https://github.com/vitalik/django-ninja/pull/397
-# Derfor gør vi det så alle skrivninger (POST og PATCH) kommer til at foregå med application/json
-# og fildata liggende som Base64-strenge i json-værdier
-# Hvis det kommer på plads, og vi ønsker at bruge multipart/form-data, skal In-skemaerne ændres til
-# ikke at have filfeltet med, og metoderne der håndterer post og patch skal modtage filen som et File(...) argument:
+# Derfor laver vi alle skrivninger (POST og PATCH)  med application/json
+# og fildata liggende som Base64-strenge i json-værdier.
+#
+# Hvis det kommer på plads, og vi ønsker at bruge multipart/form-data, skal
+# In-skemaerne ændres til ikke at have filfeltet med, og metoderne der
+# håndterer post og patch skal modtage filen som et File(...) argument:
 #
 # @foo_router.post("/", auth=JWTAuth())
 # def create_foo(self, payload: FooIn, filfeltnavn: ninja.File(...)):

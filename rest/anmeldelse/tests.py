@@ -6,10 +6,11 @@ from django.urls import reverse
 from project.test_mixins import RestMixin
 from project.util import json_dump
 
+from sats.models import Vareafgiftssats
+
 
 class AfgiftsanmeldelseTest(RestMixin, TestCase):
     object_class = Afgiftsanmeldelse
-    unique_fields = ["anmeldelsesnummer"]
 
     def setUp(self) -> None:
         super().setUp()
@@ -86,7 +87,7 @@ class AfgiftsanmeldelseTest(RestMixin, TestCase):
     def test_str(self):
         self.assertEqual(
             str(self.afgiftsanmeldelse),
-            f"Afgiftsanmeldelse(anmeldelsesnummer={self.afgiftsanmeldelse_data['anmeldelsesnummer']})",
+            f"Afgiftsanmeldelse(id={self.afgiftsanmeldelse.id})",
         )
 
     def test_create_post_fragt_none(self):
@@ -168,7 +169,7 @@ class VarelinjeTest(RestMixin, TestCase):
             self._expected_object_data = {}
             self._expected_object_data.update(self.strip_id(self.creation_data))
             self._expected_object_data.update(
-                {"id": self.varelinje.id, "afgiftsbeløb": None}
+                {"id": self.varelinje.id, "afgiftsbeløb": "37.50"}
             )
         return self._expected_object_data
 
@@ -205,4 +206,71 @@ class VarelinjeTest(RestMixin, TestCase):
         self.assertEqual(
             str(self.varelinje),
             f"Varelinje(afgiftssats=Vareafgiftssats(afgiftsgruppenummer={self.vareafgiftssats_data['afgiftsgruppenummer']}, afgiftssats={self.vareafgiftssats_data['afgiftssats']}, enhed={self.vareafgiftssats_data['enhed'].label}), fakturabeløb={self.varelinje_data['fakturabeløb']})",
+        )
+
+    def test_sammensat(self):
+        personbiler = Vareafgiftssats.objects.create(
+            afgiftstabel=self.afgiftstabel,
+            afgiftsgruppenummer=72,
+            vareart="PERSONBILER Afgiften svares med et fast beløb på 50.000 + 100 % af den del af fakturaværdien der overstiger 50.000 men ikke 150.000 + 125 % af resten.",
+            enhed=Vareafgiftssats.Enhed.SAMMENSAT,
+            minimumsbeløb=None,
+            afgiftssats=Decimal(0),
+            kræver_indførselstilladelse=False,
+        )
+        Vareafgiftssats.objects.create(
+            overordnet=personbiler,
+            afgiftstabel=self.afgiftstabel,
+            afgiftsgruppenummer=7201,
+            vareart="PERSONBILER, fast beløb på 50.000",
+            enhed=Vareafgiftssats.Enhed.ANTAL,
+            minimumsbeløb=None,
+            afgiftssats=Decimal(50_000),
+            kræver_indførselstilladelse=False,
+        )
+        Vareafgiftssats.objects.create(
+            overordnet=personbiler,
+            afgiftstabel=self.afgiftstabel,
+            afgiftsgruppenummer=7202,
+            vareart="PERSONBILER, 100% af den del af fakturaværdien der overstiger 50.000 men ikke 150.000",
+            enhed=Vareafgiftssats.Enhed.PROCENT,
+            segment_nedre=Decimal(50_000),
+            segment_øvre=Decimal(150_000),
+            minimumsbeløb=None,
+            afgiftssats=Decimal(100),
+            kræver_indførselstilladelse=False,
+        )
+        Vareafgiftssats.objects.create(
+            overordnet=personbiler,
+            afgiftstabel=self.afgiftstabel,
+            afgiftsgruppenummer=7202,
+            vareart="PERSONBILER, 125% af fakturaværdien der overstiger 150.000",
+            enhed=Vareafgiftssats.Enhed.PROCENT,
+            segment_nedre=Decimal(150_000),
+            minimumsbeløb=None,
+            afgiftssats=Decimal(150),
+            kræver_indførselstilladelse=False,
+        )
+        varelinje1 = Varelinje.objects.create(
+            afgiftssats=personbiler,
+            afgiftsanmeldelse=self.afgiftsanmeldelse,
+            kvantum=1,
+            fakturabeløb=30_000,
+        )
+        self.assertEquals(varelinje1.afgiftsbeløb, Decimal(50_000))
+        varelinje2 = Varelinje.objects.create(
+            afgiftssats=personbiler,
+            afgiftsanmeldelse=self.afgiftsanmeldelse,
+            kvantum=1,
+            fakturabeløb=65_000,
+        )
+        self.assertEquals(varelinje2.afgiftsbeløb, Decimal(50_000 + 1.0 * 15_000))
+        varelinje3 = Varelinje.objects.create(
+            afgiftssats=personbiler,
+            afgiftsanmeldelse=self.afgiftsanmeldelse,
+            kvantum=1,
+            fakturabeløb=500_000,
+        )
+        self.assertEquals(
+            varelinje3.afgiftsbeløb, Decimal(50_000 + 1.0 * 100_000 + 1.5 * 350_000)
         )

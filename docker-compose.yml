@@ -6,7 +6,6 @@ services:
     # user: "1000:1000"
     container_name: godsregistrering-rest
     image: godsregistrering-rest:latest
-    network_mode: "host"
     build:
       context: .
       dockerfile: docker/Dockerfile_rest
@@ -17,7 +16,7 @@ services:
       - ./data/er:/static/er
       - file-data:/upload
     depends_on:
-      - postgres
+      - godsregistrering-db
     environment:
       - MAKE_MIGRATIONS=true
       - MIGRATE=true
@@ -29,48 +28,31 @@ services:
     user: "1000:1000"  # Override in docker-compose.override.yml if your local user is different
     container_name: godsregistrering-ui
     image: godsregistrering-ui:latest
-    network_mode: "host"
     build:
       context: .
       dockerfile: docker/Dockerfile_ui
     env_file:
       - ./dev-environment/ui.env
+    depends_on:
+      - godsregistrering-rest
     volumes:
       - ./ui/:/app
       - ./data/er:/static/er
     environment:
       - MAKE_MIGRATIONS=true
       - MIGRATE=true
+    ports:
+      - "8000:8000"
     command: gunicorn -b 0.0.0.0:8000 project.wsgi:application --reload -w 1 --access-logfile - --error-logfile - --capture-output # reload on code changes
 
-  postgres:
+  godsregistrering-db:
     # Do not set `user` here
     container_name: godsregistrering-db
     image: postgres:13
-    network_mode: "host"
     env_file:
       - ./dev-environment/rest.env
     volumes:
       - postgres-data:/var/lib/postgresql/data
-
-  godsregistrering-test-idp:
-    user: "1000:1000"  # Override in docker-compose.override.yml if your local user is different
-    image: kenchan0130/simplesamlphp
-    container_name: godsregistrering-test-idp
-    network_mode: "host"  # Will listen on localhost:8080
-    environment:
-      # Port (8000) must match ui container
-      SIMPLESAMLPHP_SP_ENTITY_ID: http://localhost:8000/saml/metadata/
-      SIMPLESAMLPHP_SP_ASSERTION_CONSUMER_SERVICE: http://localhost:8000/login/callback/
-      SIMPLESAMLPHP_SP_SINGLE_LOGOUT_SERVICE: http://localhost:8000/logout/callback/
-      SIMPLESAMLPHP_IDP_CERTIFICATE: /var/www/simplesamlphp/cert/selfsigned.crt
-      SIMPLESAMLPHP_IDP_PRIVATEKEY: /var/www/simplesamlphp/cert/selfsigned.key
-
-    volumes:
-      - ./dev-environment/cert/idp/selfsigned.crt:/var/www/simplesamlphp/cert/server.crt:ro
-      - ./dev-environment/cert/idp/selfsigned.key:/var/www/simplesamlphp/cert/server.pem:ro
-      - ./dev-idp/authsources.php:/var/www/simplesamlphp/config/authsources.php:ro
-      - ./dev-idp/saml20-sp-remote.php:/var/www/simplesamlphp/metadata/saml20-sp-remote.php:ro
 
   godsregistrering-er:
     user: "1000:1000"  # Override in docker-compose.override.yml if your local user is different
@@ -80,8 +62,7 @@ services:
       context: .
       dockerfile: docker/Dockerfile_er
     depends_on:
-      - postgres
-    network_mode: "host"
+      - godsregistrering-db
     env_file:
       - ./dev-environment/rest.env
     volumes:
