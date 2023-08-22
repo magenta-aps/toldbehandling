@@ -237,7 +237,7 @@ class RestMixin:
         self.assertEqual(
             response.status_code,
             200,
-            f"Attempted to reach READ API endpoint with existing id, expected HTTP 200 for GET {url}",
+            f"Reach READ API endpoint with existing id, expect HTTP 200 for GET {url}",
         )
         self.compare_dicts(
             self.object_to_dict(self.precreated_item),
@@ -257,7 +257,8 @@ class RestMixin:
         self.assertEqual(
             response.status_code,
             404,
-            f"Attempted to reach READ API endpoint with nonexisting id, expected HTTP 404 for GET {url}. Got HTTP {response.status_code}: {response.content}",
+            "Reach READ API endpoint with nonexisting id, expect HTTP 404"
+            + f"for GET {url}. Got HTTP {response.status_code}: {response.content}",
         )
 
     def test_list(self):
@@ -269,7 +270,8 @@ class RestMixin:
         self.assertEqual(
             response.status_code,
             200,
-            f"Attempted to reach LIST API endpoint, expected HTTP 200 for GET {url}. Got HTTP {response.status_code}: {response.content}",
+            f"Reach LIST API endpoint, expect HTTP 200 for GET {url}. "
+            + f"Got HTTP {response.status_code}: {response.content}",
         )
         self.compare_in(
             response.json()["items"],
@@ -294,7 +296,8 @@ class RestMixin:
             self.assertEqual(
                 response.status_code,
                 200,
-                f"Attempted to reach LIST API endpoint with existing id, expected HTTP 200 or 201 for GET {url}. Got HTTP {response.status_code}: {response.content}",
+                "Reach LIST API endpoint with existing id, expect HTTP 200 or 201 "
+                + f"for GET {url}. Got HTTP {response.status_code}: {response.content}",
             )
             self.compare_in(
                 response.json()["items"],
@@ -319,7 +322,8 @@ class RestMixin:
             self.assertEqual(
                 response.status_code,
                 200,
-                f"Attempted to reach LIST API endpoint with existing id, expected HTTP 200 or 201 for GET {url}. Got HTTP {response.status_code}: {response.content}",
+                "Reach LIST API endpoint with existing id, expected HTTP 200 or 201 "
+                + f"for GET {url}. Got HTTP {response.status_code}: {response.content}",
             )
             self.assertNotIn(
                 self.object_to_dict(self.precreated_item),
@@ -354,8 +358,12 @@ class RestMixin:
 
     def test_create(self):
         url = reverse(f"api-1.0.0:{self.create_function}")
+
         # Hvis vi ønsker at overføre data med multipart/form-data, skal dette ændres til
-        # response = self.client.post(url, self.creation_data, HTTP_AUTHORIZATION=f"Bearer {self.access_token}")
+        # response = self.client.post(
+        #     url, self.creation_data, HTTP_AUTHORIZATION=f"Bearer {self.access_token}"
+        # )
+
         response = self.client.post(
             url,
             json_dump(self.creation_data),
@@ -365,7 +373,8 @@ class RestMixin:
         self.assertIn(
             response.status_code,
             (200, 201),
-            f"Attempted to reach CREATE API endpoint, expected HTTP 200 or 201 for POST {url}. Got HTTP {response.status_code}: {response.content}",
+            f"Reach CREATE API endpoint, expect HTTP 200 or 201 for POST {url}.  "
+            + f"Got HTTP {response.status_code}: {response.content}",
         )
         try:
             response_object = json.loads(response.content)
@@ -378,13 +387,15 @@ class RestMixin:
             item = self.object_class.objects.get(id=id)
         except self.object_class.DoesNotExist:
             raise AssertionError(
-                f"Did not find created item {self.object_class.__name__}(id={id}) after creation with POST {url}"
+                f"Did not find created item {self.object_class.__name__}"
+                + f"(id={id}) after creation with POST {url}"
             )
         item_dict = self.object_to_dict(item)
         self.compare_dicts(
             item_dict,
             self.strip_id(self.expected_object_data),
-            f"Created item {self.object_class.__name__}(id={id}) did not match expectation after creation with POST {url}",
+            f"Created item {self.object_class.__name__}(id={id}) did not "
+            + f"match expectation after creation with POST {url}",
         )
 
     def test_create_invalid(self):
@@ -400,7 +411,9 @@ class RestMixin:
                 self.assertIn(
                     response.status_code,
                     (400, 422),
-                    f"Attempted to reach CREATE API endpoint with invalid data, expected HTTP 400 or 422 for POST {url} with data {invalid_data}. Got HTTP {response.status_code}: {response.content}",
+                    "Reach CREATE API endpoint with invalid data, expect HTTP "
+                    + f"400 or 422 for POST {url} with data {invalid_data}. "
+                    + f"Got HTTP {response.status_code}: {response.content}",
                 )
 
     def test_create_unique(self):
@@ -422,7 +435,9 @@ class RestMixin:
             self.assertEqual(
                 response.status_code,
                 400,
-                f"Attempted to reach CREATE API endpoint with data that collides with existing object, expected HTTP 400 for POST {url} with data {invalid_data}. Got HTTP {response.status_code}: {response.content}",
+                "Reach CREATE API endpoint with data that collides with "
+                + f"existing object, expected HTTP 400 for POST {url} with data "
+                + f"{invalid_data}. Got {response.status_code}: {response.content}",
             )
 
     def test_patch_access(self):
@@ -469,7 +484,7 @@ class RestMixin:
         self.assertIn(
             response.status_code,
             (200, 201),
-            f"Attempted to reach UPDATE API endpoint, expected HTTP 200 or 201 for PATCH {url}",
+            f"Reach UPDATE API endpoint, expected HTTP 200 or 201 for PATCH {url}",
         )
         self.precreated_item.refresh_from_db()
         item_dict = self.object_to_dict(self.precreated_item)
@@ -479,7 +494,8 @@ class RestMixin:
         self.compare_dicts(
             item_dict,
             expected_object_data,
-            f"Updated item {self.object_class.__name__}(id={id}) did not match expectation after updating with PATCH {url}",
+            f"Updated item {self.object_class.__name__}(id={id}) did not match "
+            + f"expectation after updating with PATCH {url}",
         )
 
     @classmethod
@@ -540,11 +556,8 @@ class RestMixin:
     @property
     def afgiftsanmeldelse(self) -> Afgiftsanmeldelse:
         if not hasattr(self, "_afgiftsanmeldelse"):
-            try:
-                self._afgiftsanmeldelse = Afgiftsanmeldelse.objects.get(
-                    anmeldelsesnummer=self.afgiftsanmeldelse_data["anmeldelsesnummer"]
-                )
-            except Afgiftsanmeldelse.DoesNotExist:
+            self._afgiftsanmeldelse = Afgiftsanmeldelse.objects.first()
+            if self._afgiftsanmeldelse is None:
                 data = {**self.afgiftsanmeldelse_data}
                 data.update(
                     {
@@ -629,6 +642,7 @@ class RestMixin:
             "telefon": "123456",
             "cvr": 12345678,
             "kreditordning": True,
+            "indførselstilladelse": 123,
         }
 
         self.fragtforsendelse_data = {
@@ -640,7 +654,6 @@ class RestMixin:
             "postforsendelsesnummer": "1234",
         }
         self.afgiftsanmeldelse_data = {
-            "anmeldelsesnummer": 1234,
             "leverandørfaktura_nummer": "12345",
             "modtager_betaler": False,
             "indførselstilladelse": "abcde",
@@ -649,12 +662,13 @@ class RestMixin:
         self.varelinje_data = {
             "kvantum": 15,
             "fakturabeløb": "1000.00",
-            "afgiftsbeløb": "200.00",
+            "afgiftsbeløb": "37.50",
         }
         self.vareafgiftssats_data = {
             "vareart": "Kaffe",
             "afgiftsgruppenummer": 1234,
             "enhed": Vareafgiftssats.Enhed.KG,
             "afgiftssats": "2.50",
+            "kræver_indførselstilladelse": False,
         }
         self.afgiftstabel_data = {}

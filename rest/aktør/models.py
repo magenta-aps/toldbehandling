@@ -60,3 +60,4 @@ class Modtager(Aktør):
     kreditordning = models.BooleanField(
         default=False,
     )
+    indførselstilladelse = models.PositiveSmallIntegerField(default=0)

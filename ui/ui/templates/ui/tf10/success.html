@@ -1,0 +1,12 @@
+{% extends 'ui/layout.html' %}
+{% load i18n %}
+{% block content %}
+<div class="justify-content-md-center d-flex align-items-center vh-100">
+    <div class="card" style="width: 40rem;">
+        <h5 class="card-header">Anmeldelse indregistreret</h5>
+        <div class="card-body">
+            Afgiftsanmeldelsen blev indregistreret.
+            <a href="{% url 'tf10_blanket' %}">Udfyld endnu en blanket</a>
+        </div>
+    </div></div>
+{% endblock %}

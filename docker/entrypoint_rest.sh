@@ -31,7 +31,8 @@ if [ "$TEST" = true ]; then
 fi
 if [ "$DUMMYDATA" = true ]; then
   echo 'creating dummy data!'
-  python manage.py create_dummy_data
+  python manage.py create_dummy_aktører
+  python manage.py create_dummy_satser
 fi
 
 exec "$@"

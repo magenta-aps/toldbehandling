@@ -106,6 +106,11 @@ class PartialVareafgiftssatsIn(ModelSchema):
             "afgiftsgruppenummer",
             "enhed",
             "afgiftssats",
+            "kræver_indførselstilladelse",
+            "minimumsbeløb",
+            "overordnet",
+            "segment_nedre",
+            "segment_øvre",
         ]
         model_fields_optional = "__all__"
 
@@ -120,6 +125,11 @@ class VareafgiftssatsOut(ModelSchema):
             "afgiftsgruppenummer",
             "enhed",
             "afgiftssats",
+            "kræver_indførselstilladelse",
+            "minimumsbeløb",
+            "overordnet",
+            "segment_nedre",
+            "segment_øvre",
         ]
 
 
@@ -129,6 +139,11 @@ class VareafgiftssatsFilterSchema(FilterSchema):
     afgiftsgruppenummer: Optional[int]
     enhed: Optional[str]
     afgiftssats: Optional[Decimal]
+    kræver_indførselstilladelse: Optional[bool]
+    minimumsbeløb: Optional[Decimal]
+    overordnet: Optional[int]
+    segment_nedre: Optional[Decimal]
+    segment_øvre: Optional[Decimal]
 
 
 class VareafgiftssatsPermission(RestPermission):

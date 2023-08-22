@@ -31,7 +31,12 @@ class Postforsendelse(Forsendelse):
     )
 
     def __str__(self):
-        return f"Postforsendelse(postforsendelsesnummer={self.postforsendelsesnummer}, forsendelsestype={Forsendelse.Forsendelsestype(self.forsendelsestype).label})"
+        nummer = self.postforsendelsesnummer
+        slags = Forsendelse.Forsendelsestype(self.forsendelsestype).label
+        return (
+            f"Postforsendelse(postforsendelsesnummer={nummer}, "
+            + f"forsendelsestype={slags})"
+        )
 
 
 def fragtbrev_upload_to(instance, filename):
@@ -55,4 +60,8 @@ class Fragtforsendelse(Forsendelse):
     )
 
     def __str__(self):
-        return f"Fragtforsendelse(fragtbrevsnummer={self.fragtbrevsnummer}, forsendelsestype={Forsendelse.Forsendelsestype(self.forsendelsestype).label})"
+        nummer = self.fragtbrevsnummer
+        slags = Forsendelse.Forsendelsestype(self.forsendelsestype).label
+        return (
+            f"Fragtforsendelse(fragtbrevsnummer={nummer}, " f"forsendelsestype={slags})"
+        )

@@ -26,7 +26,6 @@ class AfgiftsanmeldelseIn(ModelSchema):
     class Config:
         model = Afgiftsanmeldelse
         model_fields = [
-            "anmeldelsesnummer",
             "leverandørfaktura_nummer",
             "modtager_betaler",
             "indførselstilladelse",
@@ -44,7 +43,6 @@ class PartialAfgiftsanmeldelseIn(ModelSchema):
     class Config:
         model = Afgiftsanmeldelse
         model_fields = [
-            "anmeldelsesnummer",
             "leverandørfaktura_nummer",
             "modtager_betaler",
             "indførselstilladelse",
@@ -58,7 +56,6 @@ class AfgiftsanmeldelseOut(ModelSchema):
         model = Afgiftsanmeldelse
         model_fields = [
             "id",
-            "anmeldelsesnummer",
             "afsender",
             "modtager",
             "fragtforsendelse",
@@ -74,7 +71,7 @@ class AfgiftsanmeldelseOut(ModelSchema):
 
 
 class AfgiftsanmeldelseFilterSchema(FilterSchema):
-    anmeldelsesnummer: Optional[int]
+    id: Optional[int]
     afsender: Optional[int]
     modtager: Optional[int]
     fragtforsendelse: Optional[int]

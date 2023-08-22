@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 import os
+from datetime import timedelta
 from distutils.util import strtobool
 from pathlib import Path
 
@@ -21,7 +22,7 @@ SECRET_KEY = os.environ["DJANGO_SECRET_KEY"]
 
 DEBUG = bool(strtobool(os.environ.get("DJANGO_DEBUG", "False")))
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -65,6 +66,12 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "project.wsgi.application"
 
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
+    },
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -108,3 +115,13 @@ USE_THOUSAND_SEPARATOR = True
 
 STATIC_URL = "/static/"
 STATIC_ROOT = "/static"
+
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024
+
+APPEND_SLASH = True
+
+REST_DOMAIN = os.environ["REST_DOMAIN"]
+
+NINJA_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(seconds=20),
+}

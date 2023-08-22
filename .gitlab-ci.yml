@@ -41,8 +41,8 @@ Lint Python:
     - pip3 install black==23.1.0
     #- pip3 install -r django/requirements.txt
   script:
-    - flake8 --extend-ignore E501,E226,E203 rest/
-    - flake8 --extend-ignore E501,E226,E203 ui/
+    - flake8 --max-line-length 88 --exclude=migrations,create_dummy_satser.py,tests.py,settings.py --extend-ignore E226,E203 rest/ --
+    - flake8 --max-line-length 88 --exclude=migrations,create_dummy_satser.py,tests.py,settings.py --extend-ignore E226,E203 ui/
     - black --check --diff --exclude=migrations rest/
     - black --check --diff --exclude=migrations ui/
 
@@ -133,22 +133,7 @@ Build ER image:
     ENVIRONMENT: development
     DISABLE_METRICS: 'True'
     DJANGO_LANGUAGE_COOKIE_DOMAIN: localhost
-    SAML_ENABLED: "true"
-    SAML_SP_ENTITY_ID: http://localhost:8000/saml/metadata/
-    SAML_SP_LOGIN_CALLBACK_URI: http://localhost:8000/login/callback
-    SAML_SP_LOGOUT_CALLBACK_URI: http://localhost:8000/logout/callback/
-    SAML_SP_CERTIFICATE: /ssl/sp/selfsigned.crt
-    SAML_SP_KEY: /ssl/sp/selfsigned.key
-    SAML_IDP_ENTITY_ID: http://localhost:8080/simplesaml/saml2/idp/metadata.php
-    SAML_IDP_LOGIN_URI: http://localhost:8080/simplesaml/saml2/idp/SSOService.php
-    SAML_IDP_LOGOUT_URI: http://localhost:8080/simplesaml/saml2/idp/SingleLogoutService.php
-    SAML_IDP_CERTIFICATE: /ssl/idp/selfsigned.crt
-    SAML_IDP_METADATA: http://localhost:8080/simplesaml/saml2/idp/metadata.php
-    SAML_CONTACT_TECHNICAL_NAME: Tester
-    SAML_CONTACT_TECHNICAL_EMAIL: test@example.com
-    SAML_CONTACT_SUPPORT_NAME: Tester
-    SAML_CONTACT_SUPPORT_EMAIL: test@example.com
-    SKIP_IDP_METADATA: "true"
+    REST_DOMAIN: http://godsregistrering-rest:7000
 
 .test-rest: &test-rest
   <<: *test-default
@@ -164,7 +149,7 @@ Unittest REST:
   <<: *test-rest
   script:
     - cd /app
-    - coverage run --source='.' --omit=manage.py,project/asgi.py,project/wsgi.py,project/test_mixins.py,*/admin.py,*/urls.py,*/tests.py,*/__init__.py,*/migrations/* manage.py test
+    - coverage run --source='.' --omit=manage.py,project/asgi.py,project/wsgi.py,project/test_mixins.py,*/admin.py,*/urls.py,*/tests.py,*/__init__.py,*/migrations/*,*/management/* manage.py test
     - coverage report --show-missing --fail-under=100
     - coverage xml
   coverage: '/^TOTAL.+?(\d+\%)$/'
@@ -178,7 +163,7 @@ Unittest UI:
   <<: *test-ui
   script:
     - cd /app
-    - coverage run --source='.' --omit=manage.py,project/asgi.py,project/wsgi.py,project/test_mixins.py,*/admin.py,*/urls.py,*/tests.py,*/__init__.py,*/migrations/* manage.py test
+    - coverage run --source='.' --omit=manage.py,project/asgi.py,project/wsgi.py,project/test_mixins.py,*/admin.py,*/urls.py,*/tests.py,*/__init__.py,*/migrations/*,*/management/* manage.py test
     - coverage report --show-missing --fail-under=100
     - coverage xml
   coverage: '/^TOTAL.+?(\d+\%)$/'

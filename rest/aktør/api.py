@@ -25,6 +25,10 @@ class AfsenderIn(ModelSchema):
             "telefon",
             "cvr",
         ]
+        model_fields_optional = [
+            "postbox",
+            "cvr",
+        ]
 
 
 class PartialAfsenderIn(ModelSchema):
@@ -135,6 +139,11 @@ class ModtagerIn(ModelSchema):
             "telefon",
             "cvr",
             "kreditordning",
+            "indførselstilladelse",
+        ]
+        model_fields_optional = [
+            "postbox",
+            "cvr",
         ]
 
 
@@ -150,6 +159,7 @@ class PartialModtagerIn(ModelSchema):
             "telefon",
             "cvr",
             "kreditordning",
+            "indførselstilladelse",
         ]
         model_fields_optional = "__all__"
 
@@ -167,6 +177,7 @@ class ModtagerOut(ModelSchema):
             "telefon",
             "cvr",
             "kreditordning",
+            "indførselstilladelse",
         ]
 
 
@@ -179,6 +190,7 @@ class ModtagerFilterSchema(FilterSchema):
     telefon: Optional[str]
     cvr: Optional[int]
     kreditordning: Optional[bool]
+    indførselstilladelse: Optional[int]
 
 
 class ModtagerPermission(RestPermission):

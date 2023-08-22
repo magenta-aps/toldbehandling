@@ -22,7 +22,7 @@ SECRET_KEY = os.environ["DJANGO_SECRET_KEY"]
 
 DEBUG = bool(strtobool(os.environ.get("DJANGO_DEBUG", "False")))
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["godsregistrering-rest"]
 
 
 # Application definition
@@ -135,7 +135,7 @@ ENVIRONMENT = os.environ.get("ENVIRONMENT", "development")
 
 # Uploaded files
 MEDIA_ROOT = "/upload/"
-
+DATA_UPLOAD_MAX_MEMORY_SIZE = 20 * 1024 * 1024
 
 GRAPH_MODELS = {
     "app_labels": ["aktør", "anmeldelse", "forsendelse", "sats"],
