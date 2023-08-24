@@ -22,6 +22,7 @@ class AfgiftsanmeldelseIn(ModelSchema):
     postforsendelse_id: int = None
     fragtforsendelse_id: int = None
     leverandørfaktura: str = None  # Base64
+    leverandørfaktura_navn: str = None
 
     class Config:
         model = Afgiftsanmeldelse
@@ -39,6 +40,7 @@ class PartialAfgiftsanmeldelseIn(ModelSchema):
     postforsendelse: int = None
     fragtforsendelse: int = None
     leverandørfaktura: str = None  # Base64
+    leverandørfaktura_navn: str = None
 
     class Config:
         model = Afgiftsanmeldelse
@@ -47,6 +49,7 @@ class PartialAfgiftsanmeldelseIn(ModelSchema):
             "modtager_betaler",
             "indførselstilladelse",
             "betalt",
+            "godkendt",
         ]
         model_fields_optional = "__all__"
 
@@ -67,6 +70,7 @@ class AfgiftsanmeldelseOut(ModelSchema):
             "afgift_total",
             "betalt",
             "dato",
+            "godkendt",
         ]
 
 
@@ -83,6 +87,7 @@ class AfgiftsanmeldelseFilterSchema(FilterSchema):
     modtager_betaler: Optional[bool]
     indførselstilladelse: Optional[str]
     betalt: Optional[bool]
+    godkendt: Optional[bool]
 
 
 class AfgiftsanmeldelsePermission(RestPermission):
@@ -96,7 +101,7 @@ class AfgiftsanmeldelsePermission(RestPermission):
     permissions=[permissions.IsAuthenticated & AfgiftsanmeldelsePermission],
 )
 class AfgiftsanmeldelseAPI:
-    @route.post("/", auth=JWTAuth(), url_name="afgiftsanmeldelse_create")
+    @route.post("", auth=JWTAuth(), url_name="afgiftsanmeldelse_create")
     def create_afgiftsanmeldelse(
         self,
         payload: AfgiftsanmeldelseIn,
@@ -104,10 +109,13 @@ class AfgiftsanmeldelseAPI:
         try:
             data = payload.dict()
             leverandørfaktura = data.pop("leverandørfaktura", None)
+            leverandørfaktura_navn = data.pop("leverandørfaktura_navn", None) or (
+                str(uuid4()) + ".pdf"
+            )
             item = Afgiftsanmeldelse.objects.create(**data)
             if leverandørfaktura is not None:
                 item.leverandørfaktura = ContentFile(
-                    base64.b64decode(leverandørfaktura), name=str(uuid4()) + ".pdf"
+                    base64.b64decode(leverandørfaktura), name=leverandørfaktura_navn
                 )
                 item.save()
             return {"id": item.id}
@@ -126,7 +134,7 @@ class AfgiftsanmeldelseAPI:
         return get_object_or_404(Afgiftsanmeldelse, id=id)
 
     @route.get(
-        "/",
+        "",
         response=NinjaPaginationResponseSchema[AfgiftsanmeldelseOut],
         auth=JWTAuth(),
         url_name="afgiftsanmeldelse_list",
@@ -212,7 +220,7 @@ class VarelinjePermission(RestPermission):
     permissions=[permissions.IsAuthenticated & VarelinjePermission],
 )
 class VarelinjeAPI:
-    @route.post("/", auth=JWTAuth(), url_name="varelinje_create")
+    @route.post("", auth=JWTAuth(), url_name="varelinje_create")
     def create_varelinje(self, payload: VarelinjeIn):
         item = Varelinje.objects.create(**payload.dict())
         return {"id": item.id}
@@ -222,7 +230,7 @@ class VarelinjeAPI:
         return get_object_or_404(Varelinje, id=id)
 
     @route.get(
-        "/",
+        "",
         response=NinjaPaginationResponseSchema[VarelinjeOut],
         auth=JWTAuth(),
         url_name="varelinje_list",

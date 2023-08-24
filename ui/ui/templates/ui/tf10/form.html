@@ -292,14 +292,16 @@
             </div>
         </div>
 
-        <div id="formset_container">
+        <div id="formset">
         {{ formset.management_form }}
-        {% for subform in formset %}
-            {% include "ui/tf10/blanket_varelinje.html" with subform=subform %}
-        {% endfor %}
+            <div id="formset_container">
+            {% for subform in formset %}
+                {% include "ui/tf10/subform.html" with subform=subform %}
+            {% endfor %}
+            </div>
         </div>
         <div id="formset_prototype" style="display: none">
-            {% include "ui/tf10/blanket_varelinje.html" with subform=formset.empty_form %}
+            {% include "ui/tf10/subform.html" with subform=formset.empty_form %}
         </div>
 
         <div class="row">
@@ -343,7 +345,7 @@
                 "telefon": $("[name={{form.afsender_telefon.name}}]"),
             },
             "searchfields": ["cvr", "navn"],  // Felter som initierer søgning
-            "api": "{% url 'rest' path='afsender/' %}",
+            "api": "{% url 'rest' path='afsender' %}",
         },
         {
             "fields": {
@@ -357,7 +359,7 @@
                 "indførselstilladelse": $("[name={{form.modtager_indførselstilladelse.name}}]"),
             },
             "searchfields": ["cvr", "navn"],
-            "api": "{% url 'rest' path='modtager/' %}",
+            "api": "{% url 'rest' path='modtager' %}",
         }
     ];
 </script>

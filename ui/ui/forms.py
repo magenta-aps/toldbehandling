@@ -2,6 +2,7 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.forms import formset_factory
 from django.utils.translation import gettext_lazy as _
+from requests import HTTPError
 from ui.form_mixins import BootstrapForm, ButtonlessIntegerField
 from ui.form_mixins import MaxSizeFileField
 from ui.rest_client import RestClient
@@ -20,9 +21,12 @@ class LoginForm(BootstrapForm):
         self.token = None
 
     def clean(self):
-        self.token = RestClient.login(
-            self.cleaned_data["username"], self.cleaned_data["password"]
-        )
+        try:
+            self.token = RestClient.login(
+                self.cleaned_data["username"], self.cleaned_data["password"]
+            )
+        except HTTPError:
+            raise ValidationError(_("Login fejlede"))
 
 
 class TF10Form(BootstrapForm):
@@ -228,4 +232,4 @@ TF10VareFormSet = formset_factory(TF10VareForm, min_num=1, extra=0)
 
 
 class TF10GodkendForm(BootstrapForm):
-    godkendt = forms.BooleanField(required=False)
+    godkend = forms.CharField(required=True)

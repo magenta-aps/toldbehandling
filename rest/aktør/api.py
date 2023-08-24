@@ -82,7 +82,7 @@ class AfsenderPermission(RestPermission):
     permissions=[permissions.IsAuthenticated & AfsenderPermission],
 )
 class AfsenderAPI:
-    @route.post("/", auth=JWTAuth(), url_name="afsender_create")
+    @route.post("", auth=JWTAuth(), url_name="afsender_create")
     def create_afsender(self, payload: AfsenderIn):
         try:
             item = Afsender.objects.create(**payload.dict())
@@ -97,7 +97,7 @@ class AfsenderAPI:
         return get_object_or_404(Afsender, id=id)
 
     @route.get(
-        "/",
+        "",
         response=NinjaPaginationResponseSchema[AfsenderOut],
         auth=JWTAuth(),
         url_name="afsender_list",
@@ -204,7 +204,7 @@ class ModtagerPermission(RestPermission):
     permissions=[permissions.IsAuthenticated & ModtagerPermission],
 )
 class ModtagerAPI:
-    @route.post("/", auth=JWTAuth(), url_name="modtager_create")
+    @route.post("", auth=JWTAuth(), url_name="modtager_create")
     def create_modtager(self, payload: ModtagerIn):
         try:
             item = Modtager.objects.create(**payload.dict())
@@ -219,7 +219,7 @@ class ModtagerAPI:
         return get_object_or_404(Modtager, id=id)
 
     @route.get(
-        "/",
+        "",
         response=NinjaPaginationResponseSchema[ModtagerOut],
         auth=JWTAuth(),
         url_name="modtager_list",

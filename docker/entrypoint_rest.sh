@@ -33,6 +33,8 @@ if [ "$DUMMYDATA" = true ]; then
   echo 'creating dummy data!'
   python manage.py create_dummy_aktører
   python manage.py create_dummy_satser
+  python manage.py create_dummy_forsendelser
+  python manage.py create_dummy_anmeldelser
 fi
 
 exec "$@"

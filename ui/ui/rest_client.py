@@ -107,7 +107,17 @@ class RestClient:
     def post(self, path: str, data):
         self.check_access_token_age()
         response = self.session.post(
-            f"{self.domain}/api/{path}/",
+            f"{self.domain}/api/{path}",
+            json.dumps(data),
+            headers={"Content-Type": "application/json"},
+        )
+        response.raise_for_status()
+        return response.json()
+
+    def patch(self, path: str, data):
+        self.check_access_token_age()
+        response = self.session.patch(
+            f"{self.domain}/api/{path}",
             json.dumps(data),
             headers={"Content-Type": "application/json"},
         )
@@ -207,7 +217,8 @@ class RestClient:
                     if is_luftfragt
                     else data["skibsfragt_fragtbrevnr"],
                     "forsendelsestype": "F" if is_luftfragt else "S",
-                    "fragtbrev": self._uploadfile_to_base64str(file),
+                    "fragtbrev": self._uploadfile_to_base64str(file) if file else None,
+                    "fragtbrev_navn": file.name if file else None,
                 },
             )
             return response["id"]
@@ -233,6 +244,7 @@ class RestClient:
                 "leverandørfaktura": self._uploadfile_to_base64str(
                     request.FILES["leverandørfaktura"]
                 ),
+                "leverandørfaktura_navn": request.FILES["leverandørfaktura"].name,
             },
         )
         return response["id"]
@@ -240,22 +252,23 @@ class RestClient:
     def create_varelinjer(self, data: List[dict], afgiftsanmeldelse_id: int):
         response_ids = []
         for subdata in data:
-            varesats = self.varesatser[int(subdata["vareart"])]
-            response = self.post(
-                "varelinje",
-                {
-                    "afgiftsanmeldelse_id": afgiftsanmeldelse_id,
-                    "fakturabeløb": str(subdata["fakturabeløb"]),
-                    "afgiftssats_id": subdata["vareart"],
-                    "kvantum": subdata["antal"]
-                    if varesats["enhed"] == "ant"
-                    else subdata["mængde"],
-                },
-            )
-            response_ids.append(response["id"])
+            if subdata:
+                varesats = self.varesatser[int(subdata["vareart"])]
+                response = self.post(
+                    "varelinje",
+                    {
+                        "afgiftsanmeldelse_id": afgiftsanmeldelse_id,
+                        "fakturabeløb": str(subdata["fakturabeløb"]),
+                        "afgiftssats_id": subdata["vareart"],
+                        "kvantum": subdata["antal"]
+                        if varesats["enhed"] == "ant"
+                        else subdata["mængde"],
+                    },
+                )
+                response_ids.append(response["id"])
         return response_ids
 
     @cached_property
     def varesatser(self) -> Dict[int, Dict]:
-        data = self.get("vareafgiftssats/")
+        data = self.get("vareafgiftssats")
         return {item["id"]: item for item in data["items"]}

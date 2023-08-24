@@ -200,15 +200,19 @@ $(function () {
             $(this).val().split("\\").pop()
         );
         // Validér filstørrelse
-        const maxsize = this.getAttribute("max_size");
-        const filesize = this.files[0].size;
-        if (maxsize && filesize > maxsize) {
-            this.setCustomValidity(this.getAttribute("data-validity-sizeoverflow"));
-        } else {
-            this.setCustomValidity("");
+        if (this.files.length) {
+            const maxsize = this.getAttribute("max_size");
+            const filesize = this.files[0].size;
+            if (maxsize && filesize > maxsize) {
+                this.setCustomValidity(this.getAttribute("data-validity-sizeoverflow"));
+            } else {
+                this.setCustomValidity("");
+            }
         }
     };
-    $("input[type=file]").change(fileUpdate);
+    const fileInputs = $("input[type=file]");
+    fileInputs.change(fileUpdate);
+    fileInputs.each(fileUpdate);
 });
 $(function () {
     // Custom-fejlbeskeder i klientvalidering

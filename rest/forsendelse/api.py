@@ -63,7 +63,7 @@ class PostforsendelsePermission(RestPermission):
     permissions=[permissions.IsAuthenticated & PostforsendelsePermission],
 )
 class PostforsendelseAPI:
-    @route.post("/", auth=JWTAuth(), url_name="postforsendelse_create")
+    @route.post("", auth=JWTAuth(), url_name="postforsendelse_create")
     def create_postforsendelse(self, payload: PostforsendelseIn):
         item = Postforsendelse.objects.create(**payload.dict())
         return {"id": item.id}
@@ -78,7 +78,7 @@ class PostforsendelseAPI:
         return get_object_or_404(Postforsendelse, id=id)
 
     @route.get(
-        "/",
+        "",
         response=NinjaPaginationResponseSchema[PostforsendelseOut],
         auth=JWTAuth(),
         url_name="postforsendelse_list",
@@ -104,6 +104,7 @@ class PostforsendelseAPI:
 
 class FragtforsendelseIn(ModelSchema):
     fragtbrev: str = None  # Base64
+    fragtbrev_navn: str = None
 
     class Config:
         model = Fragtforsendelse
@@ -112,6 +113,7 @@ class FragtforsendelseIn(ModelSchema):
 
 class PartialFragtforsendelseIn(ModelSchema):
     fragtbrev: str = None  # Base64
+    fragtbrev_navn: str = None
 
     class Config:
         model = Fragtforsendelse
@@ -141,17 +143,18 @@ class FragtforsendelsePermission(RestPermission):
     permissions=[permissions.IsAuthenticated & FragtforsendelsePermission],
 )
 class FragtforsendelseAPI:
-    @route.post("/", auth=JWTAuth(), url_name="fragtforsendelse_create")
+    @route.post("", auth=JWTAuth(), url_name="fragtforsendelse_create")
     def create_fragtforsendelse(
         self,
         payload: FragtforsendelseIn,
     ):
         data = payload.dict()
         fragtbrev = data.pop("fragtbrev", None)
+        fragtbrev_navn = data.pop("fragtbrev_navn", None) or (str(uuid4()) + ".pdf")
         item = Fragtforsendelse.objects.create(**data)
         if fragtbrev is not None:
             item.fragtbrev = ContentFile(
-                base64.b64decode(fragtbrev), name=str(uuid4()) + ".pdf"
+                base64.b64decode(fragtbrev), name=fragtbrev_navn
             )
             item.save()
         return {"id": item.id}
@@ -166,7 +169,7 @@ class FragtforsendelseAPI:
         return get_object_or_404(Fragtforsendelse, id=id)
 
     @route.get(
-        "/",
+        "",
         response=NinjaPaginationResponseSchema[FragtforsendelseOut],
         auth=JWTAuth(),
         url_name="fragtforsendelse_list",

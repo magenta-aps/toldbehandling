@@ -39,7 +39,8 @@ services:
       - godsregistrering-rest
     volumes:
       - ./ui/:/app
-      - ./data/er:/static/er
+      - ./data/er:/static/er:ro
+      - file-data:/upload  # rw for at kunne teste; bør være ro i deployments
     environment:
       - MAKE_MIGRATIONS=true
       - MIGRATE=true

@@ -4,7 +4,7 @@ import time
 from collections import defaultdict
 from datetime import timedelta, datetime
 from typing import List, Tuple
-from unittest.mock import patch
+from unittest.mock import patch, mock_open
 from urllib.parse import quote, quote_plus
 
 import requests
@@ -16,7 +16,6 @@ from django.urls import reverse
 from requests import HTTPError, Response
 from ui.forms import TF10Form, TF10VareForm
 from ui.rest_client import RestClient
-from ui.views import TF10FormView
 
 
 class TestLogin(TestCase):
@@ -33,10 +32,10 @@ class TestLogin(TestCase):
 
     @patch.object(requests, "post", return_value=create_response(401, "Unauthorized"))
     def test_incorrect_login(self, mock_method):
-        with self.assertRaises(HTTPError):
-            self.client.post(
-                reverse("login"), {"username": "incorrect", "password": "credentials"}
-            )
+        response = self.client.post(
+            reverse("login"), {"username": "incorrect", "password": "credentials"}
+        )
+        self.assertEquals(response.status_code, 200)  # Rerender form
         mock_method.assert_called_with(
             "http://godsregistrering-rest:7000/api/token/pair",
             json={"username": "incorrect", "password": "credentials"},
@@ -176,7 +175,19 @@ class TestLogin(TestCase):
         self.assertEquals(response.status_code, 500)
 
 
-class TestBlanket(TestCase):
+class HasLogin:
+    def login(self):
+        self.client.cookies.load(
+            {
+                "access_token": "123456",
+                "refresh_token": "abcdef",
+                "access_token_timestamp": time.time(),
+                "refresh_token_timestamp": time.time(),
+            }
+        )
+
+
+class TestBlanket(HasLogin, TestCase):
     formdata1 = {
         "afsender_cvr": "12345678",
         "afsender_navn": "TestFirma1",
@@ -208,7 +219,7 @@ class TestBlanket(TestCase):
     _formfiles1 = {
         "fragtbrev": SimpleUploadedFile("fragtbrev.txt", "Testtekst".encode("utf-8")),
         "leverandørfaktura": SimpleUploadedFile(
-            "fragtbrev.txt", "Testtekst".encode("utf-8")
+            "leverandørfaktura.txt", "Testtekst".encode("utf-8")
         ),
     }
     _formfiles2 = {
@@ -261,16 +272,6 @@ class TestBlanket(TestCase):
         self.assertEquals(
             response.headers["Location"],
             reverse("login") + "?next=" + quote(url, safe=""),
-        )
-
-    def login(self):
-        self.client.cookies.load(
-            {
-                "access_token": "123456",
-                "refresh_token": "abcdef",
-                "access_token_timestamp": time.time(),
-                "refresh_token_timestamp": time.time(),
-            }
         )
 
     def mock_requests_get(self, path):
@@ -617,6 +618,7 @@ class TestBlanket(TestCase):
                     "fragtbrev": base64.b64encode("Testtekst".encode("utf-8")).decode(
                         "ascii"
                     ),
+                    "fragtbrev_navn": "fragtbrev.txt",
                 }
             ],
         )
@@ -633,6 +635,7 @@ class TestBlanket(TestCase):
                     "leverandørfaktura": base64.b64encode(
                         "Testtekst".encode("utf-8")
                     ).decode("ascii"),
+                    "leverandørfaktura_navn": "leverandørfaktura.txt",
                 }
             ],
         )
@@ -672,6 +675,7 @@ class TestBlanket(TestCase):
                     "fragtbrev": base64.b64encode("Testtekst".encode("utf-8")).decode(
                         "ascii"
                     ),
+                    "fragtbrev_navn": "fragtbrev.txt",
                 }
             ],
         )
@@ -688,6 +692,7 @@ class TestBlanket(TestCase):
                     "leverandørfaktura": base64.b64encode(
                         "Testtekst".encode("utf-8")
                     ).decode("ascii"),
+                    "leverandørfaktura_navn": "leverandørfaktura.txt",
                 }
             ],
         )
@@ -759,6 +764,7 @@ class TestBlanket(TestCase):
                     "leverandørfaktura": base64.b64encode(
                         "Testtekst".encode("utf-8")
                     ).decode("ascii"),
+                    "leverandørfaktura_navn": "leverandørfaktura.txt",
                 }
             ],
         )
@@ -793,3 +799,241 @@ class TestBlanket(TestCase):
             self.assertEquals(
                 html_errors[file_field], ["Filen er for stor; den må max. være 10.0 MB"]
             )
+
+
+class TestGodkend(HasLogin, TestCase):
+    def setUp(self):
+        super().setUp()
+        self.patched: List[Tuple[str, str]] = []
+
+    def mock_requests_get(self, path):
+        expected_prefix = "http://godsregistrering-rest:7000/api/"
+        path = path.split("?")[0]
+        path = path.rstrip("/")
+        response = Response()
+        json_content = None
+        content = None
+        status_code = None
+        if path == expected_prefix + "vareafgiftssats/1":
+            json_content = {
+                "id": 1,
+                "afgiftstabel": 1,
+                "vareart": "Båthorn",
+                "afgiftsgruppenummer": 1234567,
+                "enhed": "kg",
+                "afgiftssats": "1.00",
+            }
+
+        if path == expected_prefix + "afsender/1":
+            json_content = {
+                "id": 1,
+                "navn": "Testfirma 1",
+                "adresse": "Testvej 42",
+                "postnummer": 1234,
+                "by": "TestBy",
+                "postbox": "123",
+                "telefon": "123456",
+                "cvr": 12345678,
+            }
+
+        if path == expected_prefix + "modtager/1":
+            json_content = {
+                "id": 1,
+                "navn": "Testfirma 1",
+                "adresse": "Testvej 42",
+                "postnummer": 1234,
+                "by": "TestBy",
+                "postbox": "123",
+                "telefon": "123456",
+                "cvr": 12345678,
+                "kreditordning": True,
+                "indførselstilladelse": 123,
+            }
+
+        if path == expected_prefix + "afgiftsanmeldelse/1":
+            json_content = {
+                "id": 1,
+                "afsender": 1,
+                "modtager": 1,
+                "fragtforsendelse": 1,
+                "postforsendelse": None,
+                "leverandørfaktura_nummer": "1234",
+                "leverandørfaktura": "/leverandørfakturaer/1/leverandørfaktura.txt",
+                "modtager_betaler": False,
+                "indførselstilladelse": "5678",
+                "afgift_total": None,
+                "betalt": False,
+                "dato": "2023-08-22",
+                "godkendt": False,
+            }
+        if path == expected_prefix + "fragtforsendelse/1":
+            json_content = {
+                "id": 1,
+                "forsendelsestype": "S",
+                "fragtbrevsnummer": 1,
+                "fragtbrev": "/leverandørfakturaer/1/leverandørfaktura.txt",
+            }
+
+        if path == expected_prefix + "varelinje":
+            json_content = {
+                "count": 1,
+                "items": [
+                    {
+                        "id": 1,
+                        "afgiftsanmeldelse": 1,
+                        "afgiftssats": 1,
+                        "kvantum": 5,
+                        "afgiftsbeløb": "5000.00",
+                    }
+                ],
+            }
+        if json_content:
+            content = json.dumps(json_content).encode("utf-8")
+        if content:
+            if not status_code:
+                status_code = 200
+            response._content = content
+        response.status_code = status_code or 404
+        return response
+
+    def mock_requests_patch(self, path, data, headers=None):
+        expected_prefix = "http://godsregistrering-rest:7000/api/"
+        path = path.rstrip("/")
+        response = Response()
+        json_content = None
+        content = None
+        status_code = None
+        if path == expected_prefix + "afgiftsanmeldelse/1":
+            json_content = {"id": 1}
+            self.patched.append((path, data))
+        if json_content:
+            content = json.dumps(json_content).encode("utf-8")
+        if content:
+            if not status_code:
+                status_code = 200
+            response._content = content
+        response.status_code = status_code or 404
+        return response
+
+    def mock_requests_error(self, path, *args, **kwargs):
+        response = Response()
+        response.status_code = 500
+        return response
+
+    def test_requires_login(self):
+        url = str(reverse("tf10_blanket"))
+        response = self.client.get(url)
+        self.assertEquals(response.status_code, 302)
+        self.assertEquals(
+            response.headers["Location"],
+            reverse("login") + "?next=" + quote(url, safe=""),
+        )
+
+    @patch.object(requests.Session, "get")
+    def test_get_view(self, mock_get):
+        self.login()
+        url = reverse("tf10_view", kwargs={"id": 1})
+        mock_get.side_effect = self.mock_requests_get
+        response = self.client.get(url)
+        self.assertEquals(response.status_code, 200)
+
+    @patch.object(requests.Session, "get")
+    def test_get_view_not_found(self, mock_get):
+        self.login()
+        url = reverse("tf10_view", kwargs={"id": 2})
+        mock_get.side_effect = self.mock_requests_get
+        response = self.client.get(url)
+        self.assertEquals(response.status_code, 404)
+
+    @patch.object(requests.Session, "patch")
+    def test_post_view(self, mock_patch):
+        self.login()
+        view_url = reverse("tf10_view", kwargs={"id": 1})
+        mock_patch.side_effect = self.mock_requests_patch
+        response = self.client.post(view_url, {"godkend": "1"})
+        self.assertEquals(response.status_code, 302)
+        prefix = "http://godsregistrering-rest:7000/api/"
+        patched_map = defaultdict(list)
+        for url, data in self.patched:
+            patched_map[url].append(json.loads(data))
+        self.assertEquals(
+            patched_map[prefix + "afgiftsanmeldelse/1"], [{"godkendt": True}]
+        )
+
+    @patch.object(requests.Session, "patch")
+    @patch.object(requests.Session, "get")
+    def test_post_view_not_godkendt(self, mock_get, mock_patch):
+        self.login()
+        view_url = reverse("tf10_view", kwargs={"id": 1})
+        mock_get.side_effect = self.mock_requests_get
+        mock_patch.side_effect = self.mock_requests_patch
+        response = self.client.post(view_url, {"godkend": "0"})
+        self.assertEquals(
+            response.status_code, 200  # Redisplaying form, not redirecting
+        )
+
+    @patch.object(requests.Session, "patch")
+    def test_post_view_not_found(self, mock_patch):
+        self.login()
+        view_url = reverse("tf10_view", kwargs={"id": 2})
+        mock_patch.side_effect = self.mock_requests_patch
+        response = self.client.post(view_url, {"godkend": "1"})
+        self.assertEquals(response.status_code, 404)
+        prefix = "http://godsregistrering-rest:7000/api/"
+        patched_map = defaultdict(list)
+        for url, data in self.patched:
+            patched_map[url].append(json.loads(data))
+        self.assertEquals(patched_map[prefix + "afgiftsanmeldelse/2"], [])
+
+    @patch.object(requests.Session, "get")
+    def test_get_view_rest_error(self, mock_get):
+        self.login()
+        url = reverse("tf10_view", kwargs={"id": 1})
+        mock_get.side_effect = self.mock_requests_error
+        response = self.client.get(url)
+        self.assertEquals(response.status_code, 500)
+
+    @patch.object(requests.Session, "patch")
+    def test_post_view_rest_error(self, mock_patch):
+        self.login()
+        view_url = reverse("tf10_view", kwargs={"id": 1})
+        mock_patch.side_effect = self.mock_requests_error
+        response = self.client.post(view_url, {"godkend": "1"})
+        self.assertEquals(response.status_code, 500)
+
+
+class FileViewTest(HasLogin, TestCase):
+    def mock_requests_get(self, path):
+        expected_prefix = "http://godsregistrering-rest:7000/api/"
+        path = path.split("?")[0]
+        path = path.rstrip("/")
+        response = Response()
+        json_content = None
+        content = None
+        status_code = None
+        if path == expected_prefix + "fragtforsendelse/1":
+            json_content = {
+                "id": 1,
+                "forsendelsestype": "S",
+                "fragtbrevsnummer": 1,
+                "fragtbrev": "/leverandørfakturaer/1/leverandørfaktura.txt",
+            }
+        if json_content:
+            content = json.dumps(json_content).encode("utf-8")
+        if content:
+            if not status_code:
+                status_code = 200
+            response._content = content
+        response.status_code = status_code or 404
+        return response
+
+    @patch.object(requests.Session, "get")
+    @patch("builtins.open", mock_open(read_data=b"test_data"))
+    def test_fileview(self, mock_get):
+        self.login()
+        url = reverse("fragtbrev_view", kwargs={"id": 1})
+        mock_get.side_effect = self.mock_requests_get
+        response = self.client.get(url)
+        self.assertEquals(response.status_code, 200)
+        content = list(response.streaming_content)[0]
+        self.assertEquals(content, b"test_data")
