@@ -21,7 +21,8 @@ class LoginRequiredMixin:
                 # Refresh failed, must re-login
                 return redirect(reverse("login") + "?next=" + quote_plus(request.path))
             return HttpResponseServerError(
-                f"Failure in login; got http {e.response.status_code} from API"
+                f"Failure in REST API request; "
+                f"got http {e.response.status_code} from API"
             )
 
 

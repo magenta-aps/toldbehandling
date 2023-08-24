@@ -47,7 +47,7 @@ class AfgiftstabelPermission(RestPermission):
     permissions=[permissions.IsAuthenticated & AfgiftstabelPermission],
 )
 class AfgiftstabelAPI:
-    @route.post("/", auth=JWTAuth(), url_name="afgiftstabel_create")
+    @route.post("", auth=JWTAuth(), url_name="afgiftstabel_create")
     def create_afgiftstabel(self, payload: AfgiftstabelIn):
         item = Afgiftstabel.objects.create(**payload.dict())
         return {"id": item.id}
@@ -59,7 +59,7 @@ class AfgiftstabelAPI:
         return get_object_or_404(Afgiftstabel, id=id)
 
     @route.get(
-        "/",
+        "",
         response=NinjaPaginationResponseSchema[AfgiftstabelOut],
         auth=JWTAuth(),
         url_name="afgiftstabel_list",
@@ -157,7 +157,7 @@ class VareafgiftssatsPermission(RestPermission):
     permissions=[permissions.IsAuthenticated & VareafgiftssatsPermission],
 )
 class VareafgiftssatsAPI:
-    @route.post("/", auth=JWTAuth(), url_name="vareafgiftssats_create")
+    @route.post("", auth=JWTAuth(), url_name="vareafgiftssats_create")
     def create_vareafgiftssats(self, payload: VareafgiftssatsIn):
         item = Vareafgiftssats.objects.create(**payload.dict())
         return {"id": item.id}
@@ -172,7 +172,7 @@ class VareafgiftssatsAPI:
         return get_object_or_404(Vareafgiftssats, id=id)
 
     @route.get(
-        "/",
+        "",
         response=NinjaPaginationResponseSchema[VareafgiftssatsOut],
         auth=JWTAuth(),
         url_name="vareafgiftssats_list",

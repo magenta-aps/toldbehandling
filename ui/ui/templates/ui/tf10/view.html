@@ -1,0 +1,342 @@
+{% extends "ui/layout.html" %}
+{% load static %}
+{% load i18n %}
+{% load l10n %}
+{% load ui_tags %}
+
+{% block content %}
+<form method="post">
+    {% csrf_token %}
+    <div class="container-lg">
+        <h1>Afgiftsanmeldelse {{object.id}}</h1>
+        {% if object.godkendt %}
+        <span class="badge badge-success">Godkendt</span>
+        {% else %}
+        <span class="badge badge-secondary">Ikke godkendt</span>
+        {% endif %}
+        <h4>For indførsel af afgiftspligtige varer i Grønland</h4>
+
+        <hr/>
+        {% localize off %}
+        <div class="row">
+
+            <div class="col-6">
+                <h5>Afsender</h5>
+                <div class="row">
+                    <div class="col-4">
+                        <label>CVR:</label>
+                    </div>
+                    <div class="col-8">
+                        {{object.afsender.cvr|default_if_none:""}}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4">
+                        <label>Navn:</label>
+                    </div>
+                    <div class="col-8">
+                        {{object.afsender.navn}}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4">
+                        <label>Adresse:</label>
+                    </div>
+                    <div class="col-8">
+                        {{object.afsender.adresse|default_if_none:""}}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4">
+                        <label>Postbox:</label>
+                    </div>
+                    <div class="col-8">
+                        {{object.afsender.postbox|default_if_none:""}}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4">
+                        <label>Postnummer:</label>
+                    </div>
+                    <div class="col-8">
+                        {{object.afsender.postnummer|default_if_none:""}}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4">
+                        <label>By:</label>
+                    </div>
+                    <div class="col-8">
+                        {{object.afsender.by|default_if_none:""}}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4">
+                        <label>Telefon:</label>
+                    </div>
+                    <div class="col-8">
+                        {{object.afsender.telefon|default_if_none:""}}
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-6">
+                <h5>Modtager</h5>
+                <div class="row">
+                    <div class="col-4">
+                        <label>CVR:</label>
+                    </div>
+                    <div class="col-8">
+                        {{object.modtager.cvr|default_if_none:""}}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4">
+                        <label>Navn:</label>
+                    </div>
+                    <div class="col-8">
+                        {{object.modtager.navn}}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4">
+                        <label>Adresse:</label>
+                    </div>
+                    <div class="col-8">
+                        {{object.modtager.adresse|default_if_none:""}}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4">
+                        <label>Postbox:</label>
+                    </div>
+                    <div class="col-8">
+                        {{object.modtager.postbox|default_if_none:""}}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4">
+                        <label>Postnummer:</label>
+                    </div>
+                    <div class="col-8">
+                        {{object.modtager.postnummer|default_if_none:""}}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4">
+                        <label>By:</label>
+                    </div>
+                    <div class="col-8">
+                        {{object.modtager.by|default_if_none:""}}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4">
+                        <label>Telefon:</label>
+                    </div>
+                    <div class="col-8">
+                        {{object.modtager.telefon|default_if_none:""}}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% endlocalize %}
+
+        <hr/>
+
+        <div class="row">
+            <div class="col-6">
+                <div class="row">
+                    <div class="col-4">
+                        <label>Leverandørfaktura&shy;nummer:</label>
+                    </div>
+                    <div class="col-8">
+                        {{object.leverandørfaktura_nummer}}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4">
+                        <label>Leverandørfaktura:</label>
+                    </div>
+                    <div class="col-8">
+                        <a href="{% url 'leverandørfaktura_view' id=object.id %}">
+                            {{object.leverandørfaktura|file_basename}}
+                        </a>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4">
+                        <label>Fragtbrev:</label>
+                    </div>
+                    <div class="col-8">
+                        {% if object.fragtforsendelse.fragtbrev %}
+                        <a href="{% url 'fragtbrev_view' id=object.fragtforsendelse.id %}">
+                            {{object.fragtforsendelse.fragtbrev|file_basename}}
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-6">
+
+                <h5>Forsendelses­måde</h5>
+                <div class="row">
+                    <div class="col-4">
+                    </div>
+                    <div class="col-4">
+                        Forbindelsesnr. / afsenderby­kode:
+                    </div>
+                    <div class="col-4">
+                        Fragtbrevnr. / Post­forsendelses­nr.:
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4">
+                        Skibsfragt
+                    </div>
+                    {% if object.fragtforsendelse.forsendelsestype == "S" %}
+                    <div class="col-4">
+                        {{object.fragtforsendelse.forbindelsesnr}}
+                    </div>
+                    <div class="col-4">
+                        {{object.fragtforsendelse.fragtbrevsnummer}}
+                    </div>
+                    {% else %}
+                    <div class="col-8"></div>
+                    {% endif %}
+                </div>
+                <div class="row">
+                    <div class="col-4">
+                        Luftfragt
+                    </div>
+                    {% if object.fragtforsendelse.forsendelsestype == "F" %}
+                    <div class="col-4">
+                        {{object.fragtforsendelse.forbindelsesnr}}
+                    </div>
+                    <div class="col-4">
+                        {{object.fragtforsendelse.fragtbrevsnummer}}
+                    </div>
+                    {% else %}
+                    <div class="col-8"></div>
+                    {% endif %}
+                </div>
+                <div class="row">
+                    <div class="col-4">
+                        Skibspost
+                    </div>
+                    {% if object.postforsendelse.forsendelsestype == "S" %}
+                    <div class="col-4">
+                        {{object.postforsendelse.forbindelsesnr}}
+                    </div>
+                    <div class="col-4">
+                        {{object.postforsendelse.fragtbrevsnummer}}
+                    </div>
+                    {% else %}
+                    <div class="col-8"></div>
+                    {% endif %}
+                </div>
+                <div class="row">
+                    <div class="col-4">
+                        Luftpost
+                    </div>
+                    {% if object.postforsendelse.forsendelsestype == "F" %}
+                    <div class="col-4">
+                        {{object.postforsendelse.forbindelsesnr}}
+                    </div>
+                    <div class="col-4">
+                        {{object.postforsendelse.fragtbrevsnummer}}
+                    </div>
+                    {% else %}
+                    <div class="col-8"></div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <hr/>
+        <p>
+            I henhold til gældende grønlandske afgiftsbestemmelser anmeldes følgende varer til afgiftsberigtigelse
+            overfor den grønlandske landskasse
+        </p>
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th class="col-2 px-0">
+                    Vareart
+                </th>
+                <th class="col-2 px-0">
+                    Varekode
+                </th>
+                <th class="col-1 px-0">
+                    kg | liter
+                </th>
+                <th class="col-1 px-0">
+                    Antal
+                </th>
+                <th class="col-2 px-0">
+                    Fakturabeløb
+                </th>
+                <th class="col-2 px-0">
+                    Afgiftssats
+                </th>
+                <th class="col-2 px-0">
+                    Afgiftsbeløb
+                </th>
+            </tr>
+            </thead>
+            <tbody>
+
+
+            {% for varelinje in object.varelinjer %}
+            {% with varelinje.afgiftssats as sats %}
+
+            <tr>
+                <td class="col-2 px-0">
+                    {{sats.vareart}}
+                </td>
+                <td class="col-2 px-0">
+                    {{sats.afgiftsgruppenummer|zfill:9}}
+                </td>
+                <td class="col-1 px-0">
+                    {% if sats.enhed == "kg" or sats.enhed == "l" %}
+                    {{varelinje.kvantum}}
+                    {% endif %}
+                </td>
+                <!-- TODO: Skal der vises kg/liter eller antal når der er tale om en procentsats eller sammensat sats? -->
+                <td class="col-1 px-0">
+                    {% if sats.enhed == "ant" or sats.enhed == "pct" %}
+                    {{varelinje.kvantum}}
+                    {% endif %}
+                </td>
+                <td class="col-2 px-0">
+                    {{varelinje.fakturabeløb|floatformat:2}}
+                </td>
+                <td class="col-2 px-0">
+                    {{sats.text}}
+                </td>
+                <td class="col-2 px-0">
+                    {{varelinje.afgiftsbeløb|floatformat:2}}
+                </td>
+            </tr>
+            {% endwith %}
+            {% endfor %}
+
+            </tbody>
+        </table>
+
+
+        <div class="form-row">
+            <div class="ml-auto">
+                {% if not object.godkendt %}
+                <button name="{{form.godkend.name}}" type="submit" value="1" class="btn btn-primary">
+                    {{form.godkend.label}}
+                </button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</form>
+
+{% endblock %}

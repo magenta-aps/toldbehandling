@@ -69,6 +69,11 @@ class Afgiftsanmeldelse(models.Model):
         auto_now_add=True,
         db_index=True,
     )
+    godkendt = models.BooleanField(
+        null=True,
+        blank=True,
+        default=None,
+    )
 
     def clean(self):
         if self.fragtforsendelse is None and self.postforsendelse is None:

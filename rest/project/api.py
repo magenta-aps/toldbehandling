@@ -6,7 +6,7 @@ from ninja_jwt.controller import NinjaJWTDefaultController
 from project.util import ORJSONRenderer
 from sats.api import AfgiftstabelAPI, VareafgiftssatsAPI
 
-api = NinjaExtraAPI(title="Godsregistrering", renderer=ORJSONRenderer())
+api = NinjaExtraAPI(title="Godsregistrering", renderer=ORJSONRenderer(), csrf=False)
 api.register_controllers(NinjaJWTDefaultController)
 api.register_controllers(AfsenderAPI, ModtagerAPI)
 api.register_controllers(AfgiftsanmeldelseAPI, VarelinjeAPI)

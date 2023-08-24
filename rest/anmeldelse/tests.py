@@ -36,6 +36,7 @@ class AfgiftsanmeldelseTest(RestMixin, TestCase):
                     "fragtforsendelse": None,
                     "afsender": self.afsender.id,
                     "modtager": self.modtager.id,
+                    "godkendt": None,
                 }
             )
         return self._expected_object_data
@@ -52,6 +53,7 @@ class AfgiftsanmeldelseTest(RestMixin, TestCase):
                     "afgift_total": None,
                     "fragtforsendelse": None,
                     "leverandørfaktura": f"/leverand%C3%B8rfakturaer/{self.afgiftsanmeldelse.id}/leverand%C3%B8rfaktura.pdf",
+                    "godkendt": None,
                 }
             )
         return self._expected_list_response_dict
