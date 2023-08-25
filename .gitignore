@@ -8,3 +8,4 @@ data/er/*
 /.pre-commit-config.yaml
 rest/rest/static/doc/*
 *.sqlite3
+**/.coverage
