@@ -21,6 +21,9 @@ variables:
   UI_IMAGE_SHA: ${CI_REGISTRY_IMAGE}/godsregistrering-ui:${CI_COMMIT_SHA}
   UI_IMAGE_TAG: magentaaps/godsregistrering-ui:${CI_COMMIT_TAG}
 
+  ADMIN_IMAGE_SHA: ${CI_REGISTRY_IMAGE}/godsregistrering-admin:${CI_COMMIT_SHA}
+  ADMIN_IMAGE_TAG: magentaaps/godsregistrering-admin:${CI_COMMIT_TAG}
+
   ER_IMAGE_SHA: ${CI_REGISTRY_IMAGE}/godsregistrering-er:${CI_COMMIT_SHA}
   ER_IMAGE_TAG: magentaaps/godsregistrering-er:${CI_COMMIT_TAG}
 
@@ -98,6 +101,22 @@ Build UI image:
       --dockerfile=$CI_PROJECT_DIR/docker/Dockerfile_ui
       --destination=${UI_IMAGE_SHA}
 
+Build Admin image:
+  stage: build
+  needs: ["Lint Python", "Lint Dockerfiles", "Lint REUSE compliance"]
+  dependencies: []
+  image:
+    name: gcr.io/kaniko-project/executor:debug-v0.16.0
+    entrypoint: [""]
+  script:
+    # Login to GitLab registry
+    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
+    - /kaniko/executor
+      --cache
+      --context=$CI_PROJECT_DIR
+      --dockerfile=$CI_PROJECT_DIR/docker/Dockerfile_admin
+      --destination=${ADMIN_IMAGE_SHA}
+
 Build ER image:
   stage: build
   dependencies: []
@@ -145,6 +164,11 @@ Build ER image:
   needs: [ "Build UI image" ]
   image: ${UI_IMAGE_SHA}
 
+.test-admin: &test-admin
+  <<: *test-default
+  needs: [ "Build Admin image" ]
+  image: ${ADMIN_IMAGE_SHA}
+
 Unittest REST:
   <<: *test-rest
   script:
@@ -170,8 +194,22 @@ Unittest UI:
   artifacts:
     reports:
       coverage_report:
-          coverage_format: cobertura
-          path: /app/coverage.xml
+        coverage_format: cobertura
+        path: /app/coverage.xml
+
+Unittest Admin:
+  <<: *test-admin
+  script:
+    - cd /app
+    - coverage run --source='.' --omit=manage.py,project/asgi.py,project/wsgi.py,project/test_mixins.py,*/admin.py,*/urls.py,*/tests.py,*/__init__.py,*/migrations/*,*/management/* manage.py test
+    - coverage report --show-missing --fail-under=50
+    - coverage xml
+  coverage: '/^TOTAL.+?(\d+\%)$/'
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: /app/coverage.xml
 
 Django check REST:
   <<: *test-rest
@@ -184,6 +222,12 @@ Django check UI:
   script:
     - cd /app
     - python manage.py check ui
+
+Django check Admin:
+  <<: *test-admin
+  script:
+    - cd /app
+    - python manage.py check admin
 
 
 # Release stage

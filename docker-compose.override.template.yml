@@ -6,3 +6,7 @@ services:
   godsregistrering-ui:
     environment:
       - TEST=true
+
+  godsregistrering-admin:
+    environment:
+      - TEST=true
