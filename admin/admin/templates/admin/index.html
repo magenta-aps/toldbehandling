@@ -1,0 +1,24 @@
+{% extends 'admin/layout.html' %}
+{% load i18n %}
+{% block content %}
+<h1>Hi admin!</h1>
+<body>
+You have the following forms which need your attention:
+
+<table class="table table-striped">
+  <tr>
+    <th class="col-2 px-2">Dato</th>
+    <th class="col-2 px-0">status</th>
+    <th class="col-2 px-0">link</th>
+  </tr>
+
+  {% for form in tf10_forms %}
+  <tr>
+    <td class="col-2 px-2">{{ form.date }}</td>
+    <td class="col-2 px-0">{{ form.status }}</td>
+    <td class="col-2 px-0"><a href="{% url 'tf10_view' form.id %}">link</a></td>
+  </tr>
+  {% endfor %}
+</table>
+</body>
+{% endblock %}

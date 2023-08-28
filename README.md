@@ -13,6 +13,8 @@ password = `admin`
 
 You can find the TF10 form [here](http://localhost:8000/tf10).
 
+And you can find the admin portal [here](http://localhost:8001/index).
+
 The app also runs a REST api. It has a swagger interface which can be found
 [here](http://localhost:7000/api/docs). To use it, first obtain a token using
 `POST /api/token/pair` where you supply the following payload:

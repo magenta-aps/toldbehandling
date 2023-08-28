@@ -114,15 +114,15 @@ class RestClient:
         response.raise_for_status()
         return response.json()
 
-    # def patch(self, path: str, data):
-    #     self.check_access_token_age()
-    #     response = self.session.patch(
-    #         f"{self.domain}/api/{path}",
-    #         json.dumps(data),
-    #         headers={"Content-Type": "application/json"},
-    #     )
-    #     response.raise_for_status()
-    #     return response.json()
+    def patch(self, path: str, data):
+        self.check_access_token_age()
+        response = self.session.patch(
+            f"{self.domain}/api/{path}",
+            json.dumps(data),
+            headers={"Content-Type": "application/json"},
+        )
+        response.raise_for_status()
+        return response.json()
 
     def get_or_create_afsender(self, data: dict) -> int:
         afsender_cvr = data["afsender_cvr"]
