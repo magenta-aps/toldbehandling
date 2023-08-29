@@ -8,7 +8,6 @@ urlpatterns = [
     path("logout", views.LogoutView.as_view(url="/"), name="logout"),
     path("api/<path:path>", views.RestView.as_view(), name="rest"),
     path("index", views.IndexView.as_view(), name="index"),
-    path("tf10/<int:id>", views.TF10View.as_view(), name="tf10_view"),
     path(
         "file/leverandørfaktura/<int:id>",
         views.LeverandørFakturaView.as_view(),
@@ -37,6 +36,7 @@ urlpatterns = [
         TemplateView.as_view(template_name="admin/blanket/tf10/list.html"),
         name="tf10_list",
     ),
+    path("blanketter/tf10/<int:id>", views.TF10View.as_view(), name="tf10_view"),
     path(
         "blanketter/tf10/ubehandlede",
         TemplateView.as_view(template_name="admin/blanket/tf10/list_ubehandlede.html"),
@@ -46,6 +46,11 @@ urlpatterns = [
         "blanketter/tf10/behandlede",
         TemplateView.as_view(template_name="admin/blanket/tf10/list_behandlede.html"),
         name="tf10_list_behandlede",
+    ),
+    path(
+        "blanketter/tf10/afsluttede",
+        TemplateView.as_view(template_name="admin/blanket/tf10/list_afsluttede.html"),
+        name="tf10_list_afsluttede",
     ),
     path(
         "faktura",

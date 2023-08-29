@@ -18,7 +18,7 @@
 
 <div class="mx-5">
 
-    <h1>Godkendte afgiftsanmeldelser</h1>
+    <h1>Alle afgiftsanmeldelser</h1>
 
     <form method="get" action="#">
         <div class="row">
@@ -154,35 +154,8 @@
             </div>
         </div>
         <div class="row">
-            <div class="col-4"><label for="anmeldelsesnummer" class="form-label">Anmeldelsesnummer</label></div>
-            <div class="col-8"><input id="anmeldelsesnummer" type="text" class="form-control"/></div>
-        </div>
-        <div class="row">
-            <div class="col-4"><label for="afsender" class="form-label">Afsender</label></div>
-            <div class="col-8"><input id="afsender" type="text" class="form-control"/></div>
-        </div>
-        <div class="row">
-            <div class="col-4"><label for="modtager" class="form-label">Modtager</label></div>
-            <div class="col-8"><input id="modtager" type="text" class="form-control"/></div>
-        </div>
-        {# <div class="row"> #}
-        {#    <div class="col-4"><label for="status" class="form-label">Status</label></div> #}
-        {#    <div class="col-8"><select id="status" class="form-control"><option>Ny</option><option>Godkendt</option><option>Afvist</option></select></div> #}
-        {# </div> #}
-        <div class="row">
-            <div class="col-4"><label for="fragtnummer" class="form-label">Fragtnummer</label></div>
-            <div class="col-8"><input id="fragtnummer" type="text" class="form-control"/></div>
-        </div>
-        <div class="row">
-            <div class="col-4"><label for="forbindelsesnummer" class="form-label">Forbindelsesnummer</label></div>
-            <div class="col-8"><input id="forbindelsesnummer" type="text" class="form-control"/></div>
-        </div>
-        <div class="row">
             <div class="col-6">
                 <button type="submit" class="btn btn-primary">Søg</button>
-            </div>
-            <div class="col-6 clearfix">
-                <a href="#" class="btn btn-primary float-end">Download</a>
             </div>
         </div>
     </form>
@@ -206,13 +179,21 @@
         </thead>
         <tbody>
         <tr>
+            <td>1</td>
+            <td>2023-08-25</td>
+            <td>Engros Ski A/S</td>
+            <td>Sørens Skibutik</td>
+            <td>Godkendt</td>
+            <td></td>
+        </tr>
+        <tr>
             <td>2</td>
             <td>2023-08-24</td>
             <td>Engros Ski A/S</td>
             <td>Sørens Skibutik</td>
-            <td>Godkendt</td>
+            <td>Ikke godkendt</td>
             <td>
-                <a href="{% url 'tf10_view' id=2 %}" class="btn btn-primary">Vis</a>
+                <a href="#" class="btn btn-primary">Redigér</a>
             </td>
         </tr>
         </tbody>
