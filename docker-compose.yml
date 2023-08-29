@@ -67,7 +67,7 @@ services:
     environment:
       - MAKE_MIGRATIONS=true
       - MIGRATE=true
-      - TEST=true
+      - TEST=false
     ports:
       - "8001:8001"
     command: gunicorn -b 0.0.0.0:8001 project.wsgi:application --reload -w 1 --access-logfile - --error-logfile - --capture-output # reload on code changes
