@@ -487,7 +487,7 @@ class Command(BaseCommand):
             vareart="VAREBILER u/ 4 tons totalvægt, fast beløb på 50.000",
             enhed=Vareafgiftssats.Enhed.ANTAL,
             minimumsbeløb=None,
-            afgiftssats=Decimal(1),
+            afgiftssats=Decimal(50_000),
             kræver_indførselstilladelse=False,
         )
         Vareafgiftssats.objects.create(

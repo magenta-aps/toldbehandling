@@ -1,0 +1,231 @@
+{% extends "admin/admin_layout.html" %}
+{% load static %}
+{% load i18n %}
+{% load l10n %}
+
+{# Docs for bootstrap-table: https://bootstrap-table.com/docs/ #}
+{% block extra_headers %}
+<link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.22.1/dist/bootstrap-table.min.css">
+<link rel="stylesheet"
+      href="https://unpkg.com/bootstrap-table@1.22.1/dist/extensions/sticky-header/bootstrap-table-sticky-header.min.css">
+{% endblock %}
+{% block extra_footers %}
+<script src="https://unpkg.com/bootstrap-table@1.22.1/dist/bootstrap-table.min.js"></script>
+<script src="https://unpkg.com/bootstrap-table@1.22.1/dist/extensions/sticky-header/bootstrap-table-sticky-header.min.js"></script>
+{% endblock %}
+
+{% block content %}
+
+<div class="mx-5">
+
+    <h1>Nye afgiftsanmeldelser</h1>
+
+    <form method="get" action="#">
+        <div class="row">
+            <div class="col-4">Dato</div>
+            <div class="col-4"><input id="date_after" type="date" class="form-control"/></div>
+            <div class="col-4"><input id="date_before" type="date" class="form-control"/></div>
+        </div>
+        <div class="row">
+            <div class="col-4"><label for="vareart" class="form-label">Varetype</label></div>
+            <div class="col-8">
+                <select name="vareart" class="form-control mr-2" id="vareart">
+                    <option>---</option>
+                    <option value="1">SUKKER og sirup</option>
+                    <option value="2">KAFFE, pulverkaffe, koncentrater</option>
+                    <option value="3">THE, pulver The, koncentrater</option>
+                    <option value="4">CHOKOLADE, lakrids, sukkervarer</option>
+                    <option value="5">ETHANOLHOLDIGE DRIKKEVARER (Øl, vin, spiritus, cider) med et ethanol indhold)på
+                        1,21 til og
+                        med 3,09 volumenprocent.på 1,21 til og med 3,09 volumenprocent.
+                    </option>
+                    <option value="6">ETHANOLHOLDIGE DRIKKEVARER (Øl, vin, spiritus, cider) med et ethanol indhold)-
+                        3,10 - 4,09
+                        volumenprocent.
+                    </option>
+                    <option value="7">ETHANOLHOLDIGE DRIKKEVARER (Øl, vin, spiritus, cider) med et ethanol indhold)-
+                        4,10 - 5,09
+                        volumenprocent.
+                    </option>
+                    <option value="8">ETHANOLHOLDIGE DRIKKEVARER (Øl, vin, spiritus, cider) med et ethanol indhold)-
+                        5,10 - 7,09
+                        volumenprocent.
+                    </option>
+                    <option value="9">ETHANOLHOLDIGE DRIKKEVARER (Øl, vin, spiritus, cider) med et ethanol indhold)-
+                        7,10 - 9,09
+                        volumenprocent.
+                    </option>
+                    <option value="10">ETHANOLHOLDIGE DRIKKEVARER (Øl, vin, spiritus, cider) med et ethanol indhold)-
+                        9,10 - 11,09
+                        volumenprocent.
+                    </option>
+                    <option value="11">ETHANOLHOLDIGE DRIKKEVARER (Øl, vin, spiritus, cider) med et ethanol indhold)-
+                        11,10 - 13,09
+                        volumenprocent.
+                    </option>
+                    <option value="12">ETHANOLHOLDIGE DRIKKEVARER (Øl, vin, spiritus, cider) med et ethanol indhold)-
+                        13,10 - 15,09
+                        volumenprocent.
+                    </option>
+                    <option value="13">ETHANOLHOLDIGE DRIKKEVARER (Øl, vin, spiritus, cider) med et ethanol indhold)-
+                        15,10 - 18,09
+                        volumenprocent.
+                    </option>
+                    <option value="14">ETHANOLHOLDIGE DRIKKEVARER (Øl, vin, spiritus, cider) med et ethanol indhold)-
+                        18,10 - 22,09
+                        volumenprocent.
+                    </option>
+                    <option value="15">ETHANOLHOLDIGE DRIKKEVARER (Øl, vin, spiritus, cider) med et ethanol indhold)-
+                        22,10 - 26,09
+                        volumenprocent.
+                    </option>
+                    <option value="16">ETHANOLHOLDIGE DRIKKEVARER (Øl, vin, spiritus, cider) med et ethanol indhold)-
+                        26,10 - 30,09
+                        volumenprocent.
+                    </option>
+                    <option value="17">ETHANOLHOLDIGE DRIKKEVARER (Øl, vin, spiritus, cider) med et ethanol indhold)-
+                        30,10 - 35,09
+                        volumenprocent.
+                    </option>
+                    <option value="18">ETHANOLHOLDIGE DRIKKEVARER (Øl, vin, spiritus, cider) med et ethanol indhold)-
+                        35,10 - 45,09
+                        volumenprocent.
+                    </option>
+                    <option value="19">ETHANOLHOLDIGE DRIKKEVARER (Øl, vin, spiritus, cider) med et ethanol indhold)-
+                        45,10 - 60,09
+                        volumenprocent.
+                    </option>
+                    <option value="20">ETHANOLHOLDIGE DRIKKEVARER (Øl, vin, spiritus, cider) med et ethanol indhold)-
+                        60,10 - 100.0
+                        volumenprocent.
+                    </option>
+                    <option value="21">MINERALVAND, sodavand og andre kulsyreholdige læskedrikke.</option>
+                    <option value="22">MINERALVAND, sodavand og andre kulsyreholdige læskedrikke. Indført til Qaanaaq,
+                        Ittoqqortoormiit og Tasiilaq af erhvervsdrivende.
+                    </option>
+                    <option value="23">LÆSKEDRIKKONCENTRAT til brug for fremstilling af kulsyreholdige drikke</option>
+                    <option value="24">EMBALLAGE til drikkevarer, koncentrater og frugtsafter, excl. emballage til
+                        mælkeprodukter
+                        samt grønlandske returflasker: Med nettoindhold til og med 0,25 liter
+                    </option>
+                    <option value="25">EMBALLAGE til drikkevarer, koncentrater og frugtsafter, excl. emballage til
+                        mælkeprodukter
+                        samt grønlandske returflasker: Med nettoindhold på over 0,25 liter
+                    </option>
+                    <option value="26">CIGARER, cerutter &amp; cigarillos 3 gr. pr. stk. og derunder</option>
+                    <option value="27">CIGARER, cerutter &amp; cigarillos over 3 gr.</option>
+                    <option value="28">CIGARETTER</option>
+                    <option value="29">CIGARETPAPIR, inkl. hylstre</option>
+                    <option value="30">TOBAK, grovskåren, granuleret, plader over 1,5 mm snitbredde</option>
+                    <option value="31">ANDEN RØGTOBAK, finskåren under 1,5 mm snitbredde</option>
+                    <option value="32">SNUS / SKRÅ og andet røgfri tobak</option>
+                    <option value="33">LAMME &amp; FÅREKØD og produkter heraf</option>
+                    <option value="34">KØD af hornkvæg og produkter heraf, fersk eller kølet</option>
+                    <option value="35">KØD af hornkvæg og produkter heraf, frosset</option>
+                    <option value="36">SVINEKØD og produkter heraf, fersk, frosset eller kølet</option>
+                    <option value="37">SVINEKØD og produkter heraf, saltet i saltlage, tørret eller røget</option>
+                    <option value="38">SLAGTET FJERKRÆ, fersk, frosset eller kølet</option>
+                    <option value="39">VARER AF LAMME- OG FÅREKØD tilberedt eller konserveret</option>
+                    <option value="40">VARER AF HORNKVÆG, tilberedt eller konserveret</option>
+                    <option value="41">VARER AF SVINEKØD, tilberedt eller konserveret</option>
+                    <option value="42">PØLSER af enhver art</option>
+                    <option value="43">VARER AF LEVER, tilberedt eller konserveret</option>
+                    <option value="44">VARER AF FJERKRÆ, tilberedt eller konserveret</option>
+                    <option value="45">FYRVÆRKERI</option>
+                    <option value="46">KNALLERTER</option>
+                    <option value="47">PERSONBILER Afgiften svares med et fast beløb på 50.000 + 100 % af den del af
+                        fakturaværdien
+                        der overstiger 50.000 men ikke 150.000 + 125 % af resten.
+                    </option>
+                    <option value="51">VAREBILER u/ 4 tons totalvægt. Afgiften svares med et fast beløb på 50.000 + 50 %
+                        af den del
+                        af fakturaværdien der overstiger 50.000.
+                    </option>
+                    <option value="54">LASTBILER, BUSSER OG VAREBILER o/ 4 tons totalvægt.</option>
+                    <option value="55">SNESCOOTER</option>
+                    <option value="56">VANDSCOOTER</option>
+                    <option value="57">PARFUMER, kosmetik og toiletmidler undtagen: sæbe, tandplejemidler, shampoo,
+                        deodorant,
+                        badesalt, pudder &amp; babyplejemidler
+                    </option>
+                    <option value="58">SPILLEAUTOMATER, elektriske billarder, målskydningsapparater m.v.</option>
+                    <option value="59">MINDRE TERRÆNGÅENDE MOTORKØRE-TØJER</option>
+                </select>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-4"><label for="anmeldelsesnummer" class="form-label">Anmeldelsesnummer</label></div>
+            <div class="col-8"><input id="anmeldelsesnummer" type="text" class="form-control"/></div>
+        </div>
+        <div class="row">
+            <div class="col-4"><label for="afsender" class="form-label">Afsender</label></div>
+            <div class="col-8"><input id="afsender" type="text" class="form-control"/></div>
+        </div>
+        <div class="row">
+            <div class="col-4"><label for="modtager" class="form-label">Modtager</label></div>
+            <div class="col-8"><input id="modtager" type="text" class="form-control"/></div>
+        </div>
+        {# <div class="row"> #}
+        {#     <div class="col-4"><label for="status" class="form-label">Status</label></div> #}
+        {#     <div class="col-8"><select id="status" class="form-control"><option>Ny</option><option>Godkendt</option><option>Afvist</option></select></div> #}
+        {# </div> #}
+        <div class="row">
+            <div class="col-4"><label for="fragtnummer" class="form-label">Fragtnummer</label></div>
+            <div class="col-8"><input id="fragtnummer" type="text" class="form-control"/></div>
+        </div>
+        <div class="row">
+            <div class="col-4"><label for="forbindelsesnummer" class="form-label">Forbindelsesnummer</label></div>
+            <div class="col-8"><input id="forbindelsesnummer" type="text" class="form-control"/></div>
+        </div>
+        <div class="row">
+            <div class="col-6">
+                <button type="submit" class="btn btn-primary">Søg</button>
+            </div>
+            <div class="col-6 clearfix">
+                <a href="#" class="btn btn-primary float-end">Download</a>
+            </div>
+        </div>
+    </form>
+    <hr/>
+
+    <table class="table"
+           data-toggle="table"
+           data-sticky-header="true"
+           data-classes="table"
+           data-sortable="true"
+    >
+        <thead>
+        <tr>
+            <th data-sortable="true">Nummer</th>
+            <th data-sortable="true">Dato</th>
+            <th data-sortable="true">Afsender</th>
+            <th data-sortable="true">Modtager</th>
+            <th data-sortable="true">Status</th>
+            <th>Handlinger</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>1</td>
+            <td>2023-08-25</td>
+            <td>Engros Ski A/S</td>
+            <td>Sørens Skibutik</td>
+            <td>Ikke godkendt</td>
+            <td>
+                <a href="{% url 'tf10_view' id=1 %}" class="btn btn-primary">Vis</a>
+            </td>
+        </tr>
+        <tr>
+            <td>2</td>
+            <td>2023-08-24</td>
+            <td>Engros Ski A/S</td>
+            <td>Sørens Skibutik</td>
+            <td>Ikke godkendt</td>
+            <td>
+                <a href="{% url 'tf10_view' id=1 %}" class="btn btn-primary">Vis</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+{% endblock %}

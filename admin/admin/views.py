@@ -1,7 +1,8 @@
 import os
-from typing import Union, Dict, Any
+from typing import Union
 from urllib.parse import unquote
 
+from admin.view_mixins import LoginRequiredMixin, HasRestClientMixin
 from django.conf import settings
 from django.http import JsonResponse, FileResponse, Http404
 from django.shortcuts import redirect
@@ -9,11 +10,7 @@ from django.urls import reverse
 from django.views import View
 from django.views.generic import FormView, RedirectView, TemplateView
 from requests import HTTPError
-from admin.view_mixins import (
-    FormWithFormsetView,
-    LoginRequiredMixin,
-    HasRestClientMixin,
-)
+
 from admin import forms
 
 
@@ -78,7 +75,7 @@ class IndexView(LoginRequiredMixin, HasRestClientMixin, TemplateView):
 
 
 class TF10View(LoginRequiredMixin, HasRestClientMixin, FormView):
-    template_name = "admin/tf10/view.html"
+    template_name = "admin/blanket/tf10/view.html"
     form_class = forms.TF10GodkendForm
 
     def get_context_data(self, **kwargs):

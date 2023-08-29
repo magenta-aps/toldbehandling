@@ -1,0 +1,71 @@
+{% extends "admin/admin_layout.html" %}
+{% load static %}
+{% load i18n %}
+{% load l10n %}
+
+{# Docs for bootstrap-table: https://bootstrap-table.com/docs/ #}
+{% block extra_headers %}
+<link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.22.1/dist/bootstrap-table.min.css">
+<link rel="stylesheet"
+      href="https://unpkg.com/bootstrap-table@1.22.1/dist/extensions/sticky-header/bootstrap-table-sticky-header.min.css">
+{% endblock %}
+{% block extra_footers %}
+<script src="https://unpkg.com/bootstrap-table@1.22.1/dist/bootstrap-table.min.js"></script>
+<script src="https://unpkg.com/bootstrap-table@1.22.1/dist/extensions/sticky-header/bootstrap-table-sticky-header.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="mx-5">
+    <table class="table"
+           data-toggle="table"
+           data-sticky-header="true"
+           data-classes="table"
+           data-sortable="true"
+    >
+        <thead>
+        <tr>
+            <th data-sortable="true">Gyldig fra</th>
+            <th data-sortable="true">Gyldig til</th>
+            <th data-sortable="true">Kladde</th>
+            <th data-sortable="true">Antal afgifts­satser</th>
+            <th>Handlinger</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>2021-01-01</td>
+            <td>2021-12-31</td>
+            <td>Nej</td>
+            <td>59</td>
+            <td><a href="{% url 'afgiftstabel_view' %}" class="btn btn-primary">Vis</a>
+                <a class="btn btn-primary">Download</a>
+            </td>
+        </tr>
+        <tr>
+            <td>2022-01-01</td>
+            <td>2022-12-31</td>
+            <td>Nej</td>
+            <td>59</td>
+            <td><a href="{% url 'afgiftstabel_view' %}" class="btn btn-primary">Vis</a>
+                <a class="btn btn-primary">Download</a></td>
+        </tr>
+        <tr class="table-success">
+            <td>2023-01-01</td>
+            <td></td>
+            <td>Nej</td>
+            <td>59</td>
+            <td><a href="{% url 'afgiftstabel_view' %}" class="btn btn-primary">Vis</a>
+                <a class="btn btn-primary">Download</a></td>
+        </tr>
+        <tr>
+            <td>2023-01-01</td>
+            <td></td>
+            <td>Ja</td>
+            <td>59</td>
+            <td><a href="{% url 'afgiftstabel_view' %}" class="btn btn-primary">Vis</a>
+                <a class="btn btn-primary">Download</a></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+{% endblock %}

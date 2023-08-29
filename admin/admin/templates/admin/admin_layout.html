@@ -1,0 +1,19 @@
+{% extends "admin/layout.html" %}
+{% load i18n %}
+{% block header %}
+<header>
+    <nav class="nav d-flex p-2">
+        <a class="p-2 text-muted" href="{% url 'afgiftstabel_list' %}">Afgiftstabeller</a>
+        <div class="dropdown p-2">
+        <a class="text-muted dropdown-toggle" href="#" role="button" id="afgiftsanmeldelse_dropdown_button" data-bs-toggle="dropdown" aria-expanded="false">
+            Afgiftsanmeldelser
+        </a>
+        <ul class="dropdown-menu">
+            <li><a class="dropdown-item" href="{% url 'tf10_list_ubehandlede' %}">Nye</a></li>
+            <li><a class="dropdown-item" href="{% url 'tf10_list_behandlede' %}">Afsluttede</a></li>
+        </ul>
+        </div>
+    </nav>
+    <hr class="p-0 m-0"/>
+</header>
+{% endblock %}

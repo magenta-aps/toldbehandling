@@ -165,14 +165,14 @@ class TestLogin(TestCase):
                 ).timestamp(),
             }
         )
-        response = self.client.get(reverse("tf10_blanket"))
+        response = self.client.get(reverse("tf10_create"))
         self.assertEquals(response.status_code, 302)
         self.assertEquals(
             response.headers["Location"],
-            "/login?next=" + quote_plus(reverse("tf10_blanket")),
+            "/login?next=" + quote_plus(reverse("tf10_create")),
         )
         mock_get.return_value = self.create_response(500, "")
-        response = self.client.get(reverse("tf10_blanket"))
+        response = self.client.get(reverse("tf10_create"))
         self.assertEquals(response.status_code, 500)
 
 
@@ -267,7 +267,7 @@ class TestBlanket(HasLogin, TestCase):
         self.assertEquals(RestClient._uploadfile_to_base64str(file), "dGVzdGRhdGE=")
 
     def test_requires_login(self):
-        url = str(reverse("tf10_blanket"))
+        url = str(reverse("tf10_create"))
         response = self.client.get(url)
         self.assertEquals(response.status_code, 302)
         self.assertEquals(
@@ -422,7 +422,7 @@ class TestBlanket(HasLogin, TestCase):
     @patch.object(requests.Session, "get")
     def test_get_form(self, mock_get):
         self.login()
-        url = reverse("tf10_blanket")
+        url = reverse("tf10_create")
         mock_get.side_effect = self.mock_requests_get
         response = self.client.get(url)
         self.assertEquals(response.status_code, 200)
@@ -477,9 +477,9 @@ class TestBlanket(HasLogin, TestCase):
     @patch("ui.views.TF10FormView.form_valid")
     def test_form_required_fields(self, mock_form_valid, mock_get):
         self.login()
-        url = reverse("tf10_blanket")
+        url = reverse("tf10_create")
         mock_get.side_effect = self.mock_requests_get
-        mock_form_valid.return_value = redirect(reverse("tf10_blanket"))
+        mock_form_valid.return_value = redirect(reverse("tf10_create"))
         for required_field in (
             "afsender_navn",
             "modtager_navn",
@@ -572,7 +572,7 @@ class TestBlanket(HasLogin, TestCase):
     )
     def test_form_successful(self, mock_post, mock_get):
         self.login()
-        url = reverse("tf10_blanket")
+        url = reverse("tf10_create")
         mock_get.side_effect = self.mock_requests_get
         mock_post.side_effect = self.mock_requests_post
         response = self.client.post(url, data={**self.formdata1, **self.formfiles1})
@@ -650,7 +650,7 @@ class TestBlanket(HasLogin, TestCase):
         self.mock_existing["afsender"] = True
         self.mock_existing["modtager"] = True
         self.login()
-        url = reverse("tf10_blanket")
+        url = reverse("tf10_create")
         mock_get.side_effect = self.mock_requests_get
         mock_post.side_effect = self.mock_requests_post
         response = self.client.post(url, data={**self.formdata1, **self.formfiles1})
@@ -705,7 +705,7 @@ class TestBlanket(HasLogin, TestCase):
     )
     def test_form_successful_postforsendelse(self, mock_post, mock_get):
         self.login()
-        url = reverse("tf10_blanket")
+        url = reverse("tf10_create")
         mock_get.side_effect = self.mock_requests_get
         mock_post.side_effect = self.mock_requests_post
         response = self.client.post(url, data={**self.formdata2, **self.formfiles2})
@@ -774,9 +774,9 @@ class TestBlanket(HasLogin, TestCase):
     @patch("ui.views.TF10FormView.form_valid")
     def test_form_filefields_size(self, mock_form_valid, mock_get):
         self.login()
-        url = reverse("tf10_blanket")
+        url = reverse("tf10_create")
         mock_get.side_effect = self.mock_requests_get
-        mock_form_valid.return_value = redirect(reverse("tf10_blanket"))
+        mock_form_valid.return_value = redirect(reverse("tf10_create"))
         data = {**self.formdata1}
         files = {
             "fragtbrev": SimpleUploadedFile("fragtbrev.txt", b"\x00" * 11000000),
