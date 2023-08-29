@@ -20,7 +20,7 @@ class LoginView(FormView):
         next = self.request.GET.get("next", None)
         if next:
             return next
-        return reverse("tf10_blanket")
+        return reverse("tf10_create")
 
     def form_valid(self, form):
         response = super().form_valid(form)

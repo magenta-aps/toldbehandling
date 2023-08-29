@@ -1,4 +1,4 @@
-{% extends "admin/layout.html" %}
+{% extends "admin/admin_layout.html" %}
 {% load static %}
 {% load i18n %}
 {% load l10n %}
@@ -329,14 +329,57 @@
 
         <div class="form-row">
             <div class="ml-auto">
-                {% if not object.godkendt %}
-                <button name="{{form.godkend.name}}" type="submit" value="1" class="btn btn-primary">
+                {% if object.godkendt is None %}
+                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#godkend_modal">
                     {{form.godkend.label}}
                 </button>
+                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#afvis_modal">
+                    Afvis
+                </button>
+                <a href="#" class="btn btn-primary">Redigér</a>
+                {% elif object.godkendt is True %}
+                <a href="{% url 'faktura_create' %}" class="btn btn-primary">Send til Prisme</a>
                 {% endif %}
             </div>
         </div>
     </div>
+
+    <div class="modal" id="godkend_modal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Godkend afgiftsanmeldelse</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Er du sikker på at du vil godkende afgiftsanmeldelsen?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Nej</button>
+                    <button type="submit" name="{{form.godkend.name}}" value="1" class="btn btn-success">Ja</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="afvis_modal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Afvis afgiftsanmeldelse</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Er du sikker på at du vil afvise afgiftsanmeldelsen?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Nej</button>
+                    <button type="submit" name="afvis" value="1" class="btn btn-danger">Ja</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </form>
 
 {% endblock %}

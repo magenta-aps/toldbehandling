@@ -18,8 +18,38 @@ urlpatterns = [
         "file/fragtbrev/<int:id>", views.FragtbrevView.as_view(), name="fragtbrev_view"
     ),
     path(
-        "tf10/success",
-        TemplateView.as_view(template_name="admin/tf10/success.html"),
-        name="tf10_blanket_success",
+        "afgiftstabel",
+        TemplateView.as_view(template_name="admin/afgiftstabel/list.html"),
+        name="afgiftstabel_list",
+    ),
+    path(
+        "afgiftstabel/1",
+        TemplateView.as_view(template_name="admin/afgiftstabel/view.html"),
+        name="afgiftstabel_view",
+    ),
+    path(
+        "afgiftstabel/create",
+        TemplateView.as_view(template_name="admin/afgiftstabel/form.html"),
+        name="afgiftstabel_create",
+    ),
+    path(
+        "blanketter/tf10",
+        TemplateView.as_view(template_name="admin/blanket/tf10/list.html"),
+        name="tf10_list",
+    ),
+    path(
+        "blanketter/tf10/ubehandlede",
+        TemplateView.as_view(template_name="admin/blanket/tf10/list_ubehandlede.html"),
+        name="tf10_list_ubehandlede",
+    ),
+    path(
+        "blanketter/tf10/behandlede",
+        TemplateView.as_view(template_name="admin/blanket/tf10/list_behandlede.html"),
+        name="tf10_list_behandlede",
+    ),
+    path(
+        "faktura",
+        TemplateView.as_view(template_name="admin/faktura/form.html"),
+        name="faktura_create",
     ),
 ]
