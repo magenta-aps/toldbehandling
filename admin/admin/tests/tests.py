@@ -177,12 +177,7 @@ class TestLogin(TestCase):
         self.assertEquals(response.cookies["access_token"].value, "")
         self.assertEquals(response.cookies["refresh_token"].value, "")
 
-    @patch.object(
-        requests.Session,
-        "get",
-        return_value=create_response(401, ""),
-    )
-    def test_token_refresh_expired(self, mock_get):
+    def test_token_refresh_expired(self):
         self.client.cookies.load(
             {
                 "access_token": "123456",
@@ -332,6 +327,11 @@ class TestGodkend(HasLogin, TestCase):
         response.status_code = 500
         return response
 
+    def mock_requests_error_401(self, path, *args, **kwargs):
+        response = Response()
+        response.status_code = 401
+        return response
+
     def test_requires_login(self):
         url = str(reverse("index"))
         response = self.client.get(url)
@@ -407,6 +407,14 @@ class TestGodkend(HasLogin, TestCase):
         mock_get.side_effect = self.mock_requests_error
         response = self.client.get(url)
         self.assertEquals(response.status_code, 500)
+
+    @patch.object(requests.Session, "get")
+    def test_get_view_rest_error_401(self, mock_get):
+        self.login()
+        url = reverse("tf10_view", kwargs={"id": 1})
+        mock_get.side_effect = self.mock_requests_error_401
+        response = self.client.get(url)
+        self.assertEquals(response.status_code, 302)
 
     @patch.object(requests.Session, "patch")
     def test_post_view_rest_error(self, mock_patch):
