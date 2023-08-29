@@ -1,4 +1,4 @@
-{% extends "ui/layout.html" %}
+{% extends "admin/admin_layout.html" %}
 {% load static %}
 {% load i18n %}
 {% load l10n %}
@@ -294,12 +294,12 @@
         {{ formset.management_form }}
             <div id="formset_container">
             {% for subform in formset %}
-                {% include "ui/tf10/subform.html" with subform=subform %}
+                {% include "admin/tf10/subform.html" with subform=subform %}
             {% endfor %}
             </div>
         </div>
         <div id="formset_prototype" style="display: none">
-            {% include "ui/tf10/subform.html" with subform=formset.empty_form %}
+            {% include "admin/tf10/subform.html" with subform=formset.empty_form %}
         </div>
 
         <div class="row">
