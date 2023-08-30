@@ -27,9 +27,19 @@ urlpatterns = [
         name="afgiftstabel_view",
     ),
     path(
+        "afgiftstabel/2",
+        TemplateView.as_view(template_name="admin/afgiftstabel/view_kladde.html"),
+        name="afgiftstabel_view_kladde",
+    ),
+    path(
         "afgiftstabel/create",
         TemplateView.as_view(template_name="admin/afgiftstabel/form.html"),
         name="afgiftstabel_create",
+    ),
+    path(
+        "afgiftstabel/activate",
+        TemplateView.as_view(template_name="admin/afgiftstabel/aktiver.html"),
+        name="afgiftstabel_activate",
     ),
     path(
         "blanketter/tf10",
