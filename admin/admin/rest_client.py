@@ -13,6 +13,8 @@ from django.core.files.uploadedfile import UploadedFile, InMemoryUploadedFile
 from django.http import HttpResponse, HttpRequest
 from requests import Session
 
+from admin.data import Vareafgiftssats
+
 
 @dataclass
 class JwtTokenInfo:
@@ -269,6 +271,6 @@ class RestClient:
         return response_ids
 
     @cached_property
-    def varesatser(self) -> Dict[int, Dict]:
+    def varesatser(self) -> Dict[int, dict]:
         data = self.get("vareafgiftssats")
         return {item["id"]: item for item in data["items"]}

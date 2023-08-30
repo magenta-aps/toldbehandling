@@ -9,6 +9,7 @@ from urllib.parse import quote, quote_plus
 import requests
 from admin.rest_client import RestClient
 from admin.templatetags.ui_tags import file_basename, zfill
+from bs4 import BeautifulSoup
 from django.test import TestCase
 from django.urls import reverse
 from requests import Response
@@ -26,8 +27,40 @@ class TestLogin(TestCase):
         response._content = content
         return response
 
+    @staticmethod
+    def get_errors(html: str):
+        soup = BeautifulSoup(html, "html.parser")
+        error_fields = {}
+        for element in soup.find_all(class_="is-invalid"):
+            el = element
+            for i in range(1, 3):
+                el = el.parent
+                errorlist = el.find(class_="errorlist")
+                if errorlist:
+                    error_fields[element["name"]] = [
+                        li.text for li in errorlist.find_all(name="li")
+                    ]
+                    break
+        all_errors = soup.find(
+            lambda tag: tag.has_attr("class")
+            and "errorlist" in tag["class"]
+            and "nonfield" in tag["class"]
+        )
+        if all_errors:
+            error_fields["__all__"] = [li.text for li in all_errors.find_all(name="li")]
+        return error_fields
+
+    def submit_get_errors(self, url, data):
+        return self.get_errors(self.client.post(url, data=data).content)
+
     @patch.object(requests, "post", return_value=create_response(401, "Unauthorized"))
     def test_incorrect_login(self, mock_method):
+        response = self.client.post(reverse("login"), {"username": "incorrect"})
+        self.assertEquals(response.status_code, 200)  # Rerender form
+        mock_method.assert_not_called()
+        errors = self.get_errors(response.content)
+        self.assertEquals(errors["password"], ["Dette felt er påkrævet."])
+
         response = self.client.post(
             reverse("login"), {"username": "incorrect", "password": "credentials"}
         )
@@ -325,11 +358,11 @@ class TestGodkend(HasLogin, TestCase):
         self.assertEquals(response.status_code, 404)
 
     @patch.object(requests.Session, "patch")
-    def test_post_view(self, mock_patch):
+    def test_post_view_godkend(self, mock_patch):
         self.login()
         view_url = reverse("tf10_view", kwargs={"id": 1})
         mock_patch.side_effect = self.mock_requests_patch
-        response = self.client.post(view_url, {"godkend": "1"})
+        response = self.client.post(view_url, {"godkendt": "true"})
         self.assertEquals(response.status_code, 302)
         prefix = "http://godsregistrering-rest:7000/api/"
         patched_map = defaultdict(list)
@@ -340,15 +373,18 @@ class TestGodkend(HasLogin, TestCase):
         )
 
     @patch.object(requests.Session, "patch")
-    @patch.object(requests.Session, "get")
-    def test_post_view_not_godkendt(self, mock_get, mock_patch):
+    def test_post_view_afvis(self, mock_patch):
         self.login()
         view_url = reverse("tf10_view", kwargs={"id": 1})
-        mock_get.side_effect = self.mock_requests_get
         mock_patch.side_effect = self.mock_requests_patch
-        response = self.client.post(view_url, {"godkend": "0"})
+        response = self.client.post(view_url, {"godkendt": "false"})
+        self.assertEquals(response.status_code, 302)
+        prefix = "http://godsregistrering-rest:7000/api/"
+        patched_map = defaultdict(list)
+        for url, data in self.patched:
+            patched_map[url].append(json.loads(data))
         self.assertEquals(
-            response.status_code, 200  # Redisplaying form, not redirecting
+            patched_map[prefix + "afgiftsanmeldelse/1"], [{"godkendt": False}]
         )
 
     @patch.object(requests.Session, "patch")
@@ -356,7 +392,7 @@ class TestGodkend(HasLogin, TestCase):
         self.login()
         view_url = reverse("tf10_view", kwargs={"id": 2})
         mock_patch.side_effect = self.mock_requests_patch
-        response = self.client.post(view_url, {"godkend": "1"})
+        response = self.client.post(view_url, {"godkendt": "true"})
         self.assertEquals(response.status_code, 404)
         prefix = "http://godsregistrering-rest:7000/api/"
         patched_map = defaultdict(list)
@@ -377,7 +413,7 @@ class TestGodkend(HasLogin, TestCase):
         self.login()
         view_url = reverse("tf10_view", kwargs={"id": 1})
         mock_patch.side_effect = self.mock_requests_error
-        response = self.client.post(view_url, {"godkend": "1"})
+        response = self.client.post(view_url, {"godkendt": "true"})
         self.assertEquals(response.status_code, 500)
 
 
