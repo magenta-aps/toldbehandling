@@ -15,7 +15,7 @@ from django.test import TestCase
 from django.urls import reverse
 from requests import Response
 from ui.forms import TF10Form, TF10VareForm
-from ui.rest_client import RestClient
+from told_common.rest_client import RestClient
 from ui.templatetags.ui_tags import file_basename, zfill
 
 
@@ -173,7 +173,7 @@ class TestLogin(TestCase):
         )
         mock_get.return_value = self.create_response(500, "")
         response = self.client.get(reverse("tf10_create"))
-        self.assertEquals(response.status_code, 500)
+        self.assertEquals(response.status_code, 302)
 
 
 class HasLogin:

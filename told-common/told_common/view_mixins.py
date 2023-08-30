@@ -1,3 +1,5 @@
+import time
+
 from urllib.parse import quote_plus
 
 from django.http import HttpResponseRedirect, HttpResponseServerError
@@ -5,7 +7,7 @@ from django.shortcuts import redirect
 from django.urls import reverse
 from django.views.generic import FormView
 from requests import HTTPError
-from ui.rest_client import JwtTokenInfo, RestClient
+from told_common.rest_client import JwtTokenInfo, RestClient
 
 
 class LoginRequiredMixin:
@@ -13,6 +15,9 @@ class LoginRequiredMixin:
         if not request.COOKIES.get("access_token") or not request.COOKIES.get(
             "refresh_token"
         ):
+            return redirect(reverse("login") + "?next=" + quote_plus(request.path))
+        refresh_token_timestamp = request.COOKIES.get("refresh_token_timestamp")
+        if (int(time.time() - float(refresh_token_timestamp))) > 24 * 3600:
             return redirect(reverse("login") + "?next=" + quote_plus(request.path))
         try:
             return super().dispatch(request, *args, **kwargs)

@@ -7,7 +7,7 @@ from unittest.mock import patch, mock_open
 from urllib.parse import quote, quote_plus
 
 import requests
-from admin.rest_client import RestClient
+from told_common.rest_client import RestClient
 from admin.templatetags.ui_tags import file_basename, zfill
 from bs4 import BeautifulSoup
 from django.test import TestCase

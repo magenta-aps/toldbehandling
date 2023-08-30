@@ -3,7 +3,7 @@ from decimal import Decimal
 from typing import Union
 from urllib.parse import unquote
 
-from admin.view_mixins import LoginRequiredMixin, HasRestClientMixin
+from told_common.view_mixins import LoginRequiredMixin, HasRestClientMixin
 from django.conf import settings
 from django.http import JsonResponse, FileResponse, Http404
 from django.shortcuts import redirect
@@ -137,7 +137,7 @@ class TF10View(LoginRequiredMixin, HasRestClientMixin, FormView):
     def get_sats(self, sats_id: int) -> Vareafgiftssats:
         if sats_id not in self._satser:
             sats = Vareafgiftssats.from_dict(self.get_data("vareafgiftssats", sats_id))
-            if sats.enhed == "sam":
+            if sats.enhed == Vareafgiftssats.Enhed.SAMMENSAT:
                 response = self.rest_client.get(
                     "vareafgiftssats", {"overordnet": sats_id}
                 )
@@ -145,9 +145,8 @@ class TF10View(LoginRequiredMixin, HasRestClientMixin, FormView):
                     sats.subsatser = []
                     for subsats in response["items"]:
                         subsats = Vareafgiftssats.from_dict(subsats)
-                        subsats_id = subsats.id
-                        if subsats_id not in self._satser:
-                            self._satser[subsats_id] = subsats
+                        if subsats.id not in self._satser:
+                            self._satser[subsats.id] = subsats
                         sats.subsatser.append(subsats)
             self._satser[sats_id] = sats
         return self._satser[sats_id]

@@ -7,7 +7,11 @@ from django.http import JsonResponse, FileResponse
 from django.urls import reverse
 from django.views import View
 from django.views.generic import FormView, RedirectView
-from ui.view_mixins import FormWithFormsetView, LoginRequiredMixin, HasRestClientMixin
+from told_common.view_mixins import (
+    FormWithFormsetView,
+    LoginRequiredMixin,
+    HasRestClientMixin,
+)
 
 from ui import forms
 

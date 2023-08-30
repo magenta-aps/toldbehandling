@@ -24,11 +24,18 @@ def format_int(decimal: Union[Decimal, str]) -> int:
 @dataclass_json
 @dataclass
 class Vareafgiftssats:
+    class Enhed(Enum):
+        SAMMENSAT = "sam"
+        LITER = "l"
+        ANTAL = "ant"
+        KG = "kg"
+        PROCENT = "pct"
+
     id: int
     afgiftstabel: int
     vareart: str
     afgiftsgruppenummer: int
-    enhed: str
+    enhed: Enhed
     afgiftssats: Decimal
     kræver_indførselstilladelse: Optional[bool] = False
     minimumsbeløb: Optional[Decimal] = None
@@ -36,13 +43,6 @@ class Vareafgiftssats:
     segment_nedre: Optional[Decimal] = None
     segment_øvre: Optional[Decimal] = None
     subsatser: Optional[list] = None
-
-    class Enhed(Enum):
-        SAMMENSAT = "sam"
-        LITER = "l"
-        ANTAL = "ant"
-        KG = "kg"
-        PROCENT = "pct"
 
     @cached_property
     def text(self) -> str:

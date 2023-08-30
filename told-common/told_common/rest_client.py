@@ -13,8 +13,6 @@ from django.core.files.uploadedfile import UploadedFile, InMemoryUploadedFile
 from django.http import HttpResponse, HttpRequest
 from requests import Session
 
-from admin.data import Vareafgiftssats
-
 
 @dataclass
 class JwtTokenInfo:

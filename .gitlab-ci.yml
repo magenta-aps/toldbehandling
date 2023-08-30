@@ -46,8 +46,10 @@ Lint Python:
   script:
     - flake8 --max-line-length 88 --exclude=migrations,create_dummy_satser.py,tests.py,settings.py --extend-ignore E226,E203 rest/ --
     - flake8 --max-line-length 88 --exclude=migrations,create_dummy_satser.py,tests.py,settings.py --extend-ignore E226,E203 ui/
+    - flake8 --max-line-length 88 --extend-ignore E226,E203 told-common/
     - black --check --diff --exclude=migrations rest/
     - black --check --diff --exclude=migrations ui/
+    - black --check --diff --exclude=migrations told-common/
 
 Lint Dockerfiles:
   <<: *lint-default
