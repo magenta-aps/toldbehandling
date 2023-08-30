@@ -26,7 +26,9 @@ class Command(BaseCommand):
         )
         Varelinje.objects.create(
             afgiftsanmeldelse=anmeldelse,
-            afgiftssats=Vareafgiftssats.objects.order_by("?")[0],
+            afgiftssats=Vareafgiftssats.objects.filter(
+                overordnet__isnull=True
+            ).order_by("?")[0],
             kvantum=100,
             fakturabeløb=Decimal("2000"),
         )
