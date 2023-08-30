@@ -9,10 +9,12 @@
     {% csrf_token %}
     <div class="container-lg">
         <h1>Afgiftsanmeldelse {{object.id}}</h1>
-        {% if object.godkendt %}
-        <span class="badge badge-success">Godkendt</span>
+        {% if object.godkendt == True %}
+        <span class="badge bg-success">Godkendt</span>
+        {% elif object.godkendt == False %}
+        <span class="badge bg-danger">Afvist</span>
         {% else %}
-        <span class="badge badge-secondary">Ikke godkendt</span>
+        <span class="badge bg-secondary">Ny</span>
         {% endif %}
         <h4>For indførsel af afgiftspligtige varer i Grønland</h4>
 
@@ -181,85 +183,55 @@
 
             <div class="col-6">
 
-                <h5>Forsendelses­måde</h5>
                 <div class="row">
                     <div class="col-4">
+                        <label>Forsendelsesmåde:</label>
                     </div>
+                    <div class="col-8">
+                        {% if object.fragtforsendelse.forsendelsestype == "S" %}
+                        Skibsfragt
+                        {% elif object.fragtforsendelse.forsendelsestype == "F" %}
+                        Luftfragt
+                        {% elif object.postforsendelse.forsendelsestype == "S" %}
+                        Skibspost
+                        {% elif object.postforsendelse.forsendelsestype == "F" %}
+                        Luftpost
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="row">
                     <div class="col-4">
                         Forbindelsesnr. / afsenderby­kode:
                     </div>
-                    <div class="col-4">
-                        Fragtbrevnr. / Post­forsendelses­nr.:
+                    <div class="col-8">
+                        {% if object.fragtforsendelse %}
+                            {{object.fragtforsendelse.forbindelsesnr}}
+                        {% elif object.postforsendelse %}
+                            {{object.postforsendelse.forbindelsesnr}}
+                        {% endif %}
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-4">
-                        Skibsfragt
+                        {% if object.fragtforsendelse %}
+                        Fragtbrevnr.
+                        {% elif object.postforsendelse %}
+                        Post­forsendelses­nr.:
+                        {% endif %}
                     </div>
-                    {% if object.fragtforsendelse.forsendelsestype == "S" %}
-                    <div class="col-4">
-                        {{object.fragtforsendelse.forbindelsesnr}}
-                    </div>
-                    <div class="col-4">
+                    <div class="col-8">
+                        {% if object.fragtforsendelse %}
                         {{object.fragtforsendelse.fragtbrevsnummer}}
-                    </div>
-                    {% else %}
-                    <div class="col-8"></div>
-                    {% endif %}
-                </div>
-                <div class="row">
-                    <div class="col-4">
-                        Luftfragt
-                    </div>
-                    {% if object.fragtforsendelse.forsendelsestype == "F" %}
-                    <div class="col-4">
-                        {{object.fragtforsendelse.forbindelsesnr}}
-                    </div>
-                    <div class="col-4">
-                        {{object.fragtforsendelse.fragtbrevsnummer}}
-                    </div>
-                    {% else %}
-                    <div class="col-8"></div>
-                    {% endif %}
-                </div>
-                <div class="row">
-                    <div class="col-4">
-                        Skibspost
-                    </div>
-                    {% if object.postforsendelse.forsendelsestype == "S" %}
-                    <div class="col-4">
-                        {{object.postforsendelse.forbindelsesnr}}
-                    </div>
-                    <div class="col-4">
+                        {% elif object.postforsendelse %}
                         {{object.postforsendelse.fragtbrevsnummer}}
+                        {% endif %}
                     </div>
-                    {% else %}
-                    <div class="col-8"></div>
-                    {% endif %}
-                </div>
-                <div class="row">
-                    <div class="col-4">
-                        Luftpost
-                    </div>
-                    {% if object.postforsendelse.forsendelsestype == "F" %}
-                    <div class="col-4">
-                        {{object.postforsendelse.forbindelsesnr}}
-                    </div>
-                    <div class="col-4">
-                        {{object.postforsendelse.fragtbrevsnummer}}
-                    </div>
-                    {% else %}
-                    <div class="col-8"></div>
-                    {% endif %}
                 </div>
             </div>
         </div>
 
         <hr/>
-        <p>
-            I henhold til gældende grønlandske afgiftsbestemmelser anmeldes følgende varer til afgiftsberigtigelse
-            overfor den grønlandske landskasse
-        </p>
+
         <table class="table table-striped">
             <thead>
             <tr>
@@ -306,7 +278,7 @@
                 </td>
                 <!-- TODO: Skal der vises kg/liter eller antal når der er tale om en procentsats eller sammensat sats? -->
                 <td class="col-1 px-0">
-                    {% if sats.enhed == "ant" or sats.enhed == "pct" %}
+                    {% if sats.enhed == "ant" or sats.enhed == "pct" or sats.enhed == "sam" %}
                     {{varelinje.kvantum}}
                     {% endif %}
                 </td>
@@ -331,7 +303,7 @@
             <div class="ml-auto">
                 {% if object.godkendt is None %}
                 <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#godkend_modal">
-                    {{form.godkend.label}}
+                    Godkend
                 </button>
                 <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#afvis_modal">
                     Afvis
@@ -356,7 +328,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Nej</button>
-                    <button type="submit" name="{{form.godkend.name}}" value="1" class="btn btn-success">Ja</button>
+                    <button type="submit" name="{{form.godkendt.name}}" value="true" class="btn btn-success">Ja</button>
                 </div>
             </div>
         </div>
@@ -374,7 +346,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Nej</button>
-                    <button type="submit" name="afvis" value="1" class="btn btn-danger">Ja</button>
+                    <button type="submit" name="{{form.godkendt.name}}" value="false" class="btn btn-danger">Ja</button>
                 </div>
             </div>
         </div>

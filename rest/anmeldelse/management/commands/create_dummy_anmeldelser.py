@@ -30,6 +30,12 @@ class Command(BaseCommand):
             kvantum=100,
             fakturabeløb=Decimal("2000"),
         )
+        Varelinje.objects.create(
+            afgiftsanmeldelse=anmeldelse,
+            afgiftssats=Vareafgiftssats.objects.get(afgiftsgruppenummer=72),
+            kvantum=1,
+            fakturabeløb=Decimal("400000"),
+        )
 
         anmeldelse = Afgiftsanmeldelse.objects.create(
             afsender=Afsender.objects.order_by("?").first(),

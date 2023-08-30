@@ -1,4 +1,5 @@
 import os
+from decimal import Decimal
 from typing import Union
 from urllib.parse import unquote
 
@@ -6,12 +7,14 @@ from admin.view_mixins import LoginRequiredMixin, HasRestClientMixin
 from django.conf import settings
 from django.http import JsonResponse, FileResponse, Http404
 from django.shortcuts import redirect
+from django.template.defaultfilters import floatformat
 from django.urls import reverse
 from django.views import View
 from django.views.generic import FormView, RedirectView, TemplateView
 from requests import HTTPError
 
 from admin import forms
+from admin.data import Vareafgiftssats
 
 
 class LoginView(FormView):
@@ -87,19 +90,17 @@ class TF10View(LoginRequiredMixin, HasRestClientMixin, FormView):
         )
 
     def form_valid(self, form):
-        if form.cleaned_data["godkend"] == "1":
-            anmeldelse_id = self.kwargs["id"]
-            try:
-                self.rest_client.patch(
-                    f"afgiftsanmeldelse/{anmeldelse_id}", {"godkendt": True}
-                )
-                return redirect(reverse("tf10_view", kwargs={"id": anmeldelse_id}))
-            except HTTPError as e:
-                if e.response.status_code == 404:
-                    raise Http404("Afgiftsanmeldelse findes ikke")
-                raise
-        else:
-            return self.form_invalid(form)
+        godkendt = form.cleaned_data["godkendt"]
+        anmeldelse_id = self.kwargs["id"]
+        try:
+            self.rest_client.patch(
+                f"afgiftsanmeldelse/{anmeldelse_id}", {"godkendt": godkendt}
+            )
+            return redirect(reverse("tf10_view", kwargs={"id": anmeldelse_id}))
+        except HTTPError as e:
+            if e.response.status_code == 404:
+                raise Http404("Afgiftsanmeldelse findes ikke")
+            raise
 
     def get_object(self):
         try:
@@ -114,12 +115,9 @@ class TF10View(LoginRequiredMixin, HasRestClientMixin, FormView):
         anmeldelse["varelinjer"] = self.rest_client.get(
             "varelinje", {"afgiftsanmeldelse": anmeldelse["id"]}
         )["items"]
-        satser = {}
         for varelinje in anmeldelse["varelinjer"]:
             sats_id = varelinje["afgiftssats"]
-            if sats_id not in satser:
-                satser[sats_id] = self.get_data("vareafgiftssats", sats_id)
-            varelinje["afgiftssats"] = satser[sats_id]
+            varelinje["afgiftssats"] = self.get_sats(sats_id)
         return anmeldelse
 
     def get_data(self, api, id) -> Union[dict, None]:
@@ -133,6 +131,26 @@ class TF10View(LoginRequiredMixin, HasRestClientMixin, FormView):
             if api == key_api and data.get(key_field, None):
                 data[key_field] = unquote(data[key_field])
         return data
+
+    _satser = {}
+
+    def get_sats(self, sats_id: int) -> Vareafgiftssats:
+        if sats_id not in self._satser:
+            sats = Vareafgiftssats.from_dict(self.get_data("vareafgiftssats", sats_id))
+            if sats.enhed == "sam":
+                response = self.rest_client.get(
+                    "vareafgiftssats", {"overordnet": sats_id}
+                )
+                if response["count"] > 0:
+                    sats.subsatser = []
+                    for subsats in response["items"]:
+                        subsats = Vareafgiftssats.from_dict(subsats)
+                        subsats_id = subsats.id
+                        if subsats_id not in self._satser:
+                            self._satser[subsats_id] = subsats
+                        sats.subsatser.append(subsats)
+            self._satser[sats_id] = sats
+        return self._satser[sats_id]
 
 
 class FileView(LoginRequiredMixin, HasRestClientMixin, View):
