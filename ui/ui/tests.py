@@ -14,9 +14,9 @@ from django.shortcuts import redirect
 from django.test import TestCase
 from django.urls import reverse
 from requests import Response
-from ui.forms import TF10Form, TF10VareForm
 from told_common.rest_client import RestClient
-from ui.templatetags.ui_tags import file_basename, zfill
+from told_common.tests import TemplateTagsTest
+from ui.forms import TF10Form, TF10VareForm
 
 
 class TestLogin(TestCase):
@@ -839,9 +839,5 @@ class FileViewTest(HasLogin, TestCase):
         self.assertEquals(content, b"test_data")
 
 
-class TemplateTagsTest(TestCase):
-    def test_file_basename(self):
-        self.assertEquals(file_basename("/path/to/file.txt"), "file.txt")
-
-    def test_zfill(self):
-        self.assertEquals(zfill("444", 10), "0000000444")
+class UiTemplateTagsTest(TemplateTagsTest):
+    pass

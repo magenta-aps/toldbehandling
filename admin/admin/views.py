@@ -1,20 +1,18 @@
 import os
-from decimal import Decimal
 from typing import Union
 from urllib.parse import unquote
 
-from told_common.view_mixins import LoginRequiredMixin, HasRestClientMixin
+from admin.data import Vareafgiftssats
 from django.conf import settings
 from django.http import JsonResponse, FileResponse, Http404
 from django.shortcuts import redirect
-from django.template.defaultfilters import floatformat
 from django.urls import reverse
 from django.views import View
 from django.views.generic import FormView, RedirectView, TemplateView
 from requests import HTTPError
+from told_common.view_mixins import LoginRequiredMixin, HasRestClientMixin
 
 from admin import forms
-from admin.data import Vareafgiftssats
 
 
 class LoginView(FormView):

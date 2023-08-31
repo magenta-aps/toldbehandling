@@ -7,12 +7,12 @@ from unittest.mock import patch, mock_open
 from urllib.parse import quote, quote_plus
 
 import requests
-from told_common.rest_client import RestClient
-from admin.templatetags.ui_tags import file_basename, zfill
 from bs4 import BeautifulSoup
 from django.test import TestCase
 from django.urls import reverse
 from requests import Response
+from told_common.rest_client import RestClient
+from told_common.tests import TemplateTagsTest
 
 
 class TestLogin(TestCase):
@@ -462,9 +462,5 @@ class FileViewTest(HasLogin, TestCase):
         self.assertEquals(content, b"test_data")
 
 
-class TemplateTagsTest(TestCase):
-    def test_file_basename(self):
-        self.assertEquals(file_basename("/path/to/file.txt"), "file.txt")
-
-    def test_zfill(self):
-        self.assertEquals(zfill("444", 10), "0000000444")
+class AdminTemplateTagsTest(TemplateTagsTest):
+    pass
