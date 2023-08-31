@@ -202,60 +202,28 @@
             </div>
 
             <div class="col-6">
-
-                <h5>Forsendelsesmåde</h5>
                 <div class="row">
                     <div class="col-4">
+                        <label for="{{form.fragttype.name}}">Fragttype</label>
                     </div>
-                    <div class="col-4">
-                        Forbindelsesnr. / afsenderby­kode
-                    </div>
-                    <div class="col-4">
-                        Fragtbrevnr. / Post­forsendelses­nr.
+                    <div class="col-8">
+                        {{form.fragttype}}
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-4">
-                        Skibsfragt
+                        <label for="{{form.forbindelsesnr.name}}">Forbindelsesnr</label>
                     </div>
-                    <div class="col-4">
-                        {{form.skibsfragt_forbindelsesnr}}
-                    </div>
-                    <div class="col-4">
-                        {{form.skibsfragt_fragtbrevnr}}
+                    <div class="col-8">
+                        {{form.forbindelsesnr}}
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-4">
-                        Luftfragt
+                        <label for="{{form.fragtbrevnr.name}}">Fragtbrevnr</label>
                     </div>
-                    <div class="col-4">
-                        {{form.luftfragt_forbindelsesnr}}
-                    </div>
-                    <div class="col-4">
-                        {{form.luftfragt_fragtbrevnr}}
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-4">
-                        Skibspost
-                    </div>
-                    <div class="col-4">
-                        {{form.skibspost_forbindelsesnr}}
-                    </div>
-                    <div class="col-4">
-                        {{form.skibspost_fragtbrevnr}}
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-4">
-                        Luftpost
-                    </div>
-                    <div class="col-4">
-                        {{form.luftpost_forbindelsesnr}}
-                    </div>
-                    <div class="col-4">
-                        {{form.luftpost_fragtbrevnr}}
+                    <div class="col-8">
+                        {{form.fragtbrevnr}}
                     </div>
                 </div>
             </div>

@@ -143,46 +143,27 @@ class TF10Form(BootstrapForm):
         max_size=10000000,
         required=False,
     )
-
-    skibsfragt_forbindelsesnr = forms.CharField(
+    fragttype = forms.ChoiceField(
+        required=True,
+        choices=(
+            ("skibsfragt", _("Skibsfragt")),
+            ("luftfragt", _("Luftfragt")),
+            ("skibspost", _("Skibspost")),
+            ("luftpost", _("Luftpost")),
+        ),
+    )
+    forbindelsesnr = forms.CharField(
         required=False,
     )
-    luftfragt_forbindelsesnr = forms.CharField(
-        required=False,
-    )
-    skibspost_forbindelsesnr = forms.CharField(
-        required=False,
-    )
-    luftpost_forbindelsesnr = forms.CharField(
-        required=False,
-    )
-    skibsfragt_fragtbrevnr = forms.CharField(
-        required=False,
-    )
-    luftfragt_fragtbrevnr = forms.CharField(
-        required=False,
-    )
-    skibspost_fragtbrevnr = forms.CharField(
-        required=False,
-    )
-    luftpost_fragtbrevnr = forms.CharField(
-        required=False,
+    fragtbrevnr = forms.CharField(
+        required=True,
     )
 
     def clean(self):
-        has_fragt = bool(
-            self.cleaned_data.get("skibsfragt_fragtbrevnr", None)
-            or self.cleaned_data.get("luftfragt_fragtbrevnr", None)
-        )
-        has_post = bool(
-            self.cleaned_data.get("skibspost_fragtbrevnr", None)
-            or self.cleaned_data.get("luftpost_fragtbrevnr", None)
-        )
-        if not has_fragt and not has_post:
-            raise ValidationError(
-                _("Skal sætte mindst ét fragtbrevnr. eller postforsendelsesnr.")
-            )
-        if has_fragt and not self.files.get("fragtbrev"):
+        if self.cleaned_data["fragttype"] in (
+            "skibsfragt",
+            "luftfragt",
+        ) and not self.files.get("fragtbrev"):
             raise ValidationError(
                 {
                     "fragtbrev": _("Mangler fragtbrev"),

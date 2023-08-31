@@ -206,7 +206,8 @@ class TestBlanket(HasLogin, TestCase):
         "modtager_telefon": "123123",
         "modtager_indførselstilladelse": "123",
         "leverandørfaktura_nummer": "123",
-        "skibsfragt_fragtbrevnr": "123",
+        "fragttype": "skibsfragt",
+        "fragtbrevnr": "123",
         "form-TOTAL_FORMS": "1",
         "form-INITIAL_FORMS": "1",
         "form-0-vareart": "1",
@@ -214,8 +215,7 @@ class TestBlanket(HasLogin, TestCase):
         "form-0-antal": "6",
         "form-0-fakturabeløb": "100.00",
     }
-    formdata2 = {**formdata1, "luftpost_fragtbrevnr": "123"}
-    del formdata2["skibsfragt_fragtbrevnr"]
+    formdata2 = {**formdata1, "fragttype": "luftpost"}
 
     _formfiles1 = {
         "fragtbrev": SimpleUploadedFile("fragtbrev.txt", "Testtekst".encode("utf-8")),
@@ -358,20 +358,6 @@ class TestBlanket(HasLogin, TestCase):
         content = None
         status_code = None
         self.posted.append((path, data))
-        # if path == expected_prefix + "vareafgiftssats/":
-        #     json_content = {
-        #         "count": 1,
-        #         "items": [
-        #             {
-        #                 "id": 1,
-        #                 "afgiftstabel": 1,
-        #                 "vareart": "Båthorn",
-        #                 "afgiftsgruppenummer": 1234567,
-        #                 "enhed": "kg",
-        #                 "afgiftssats": "1.00",
-        #             }
-        #         ],
-        #     }
         if path in (
             expected_prefix + x
             for x in (
@@ -451,14 +437,9 @@ class TestBlanket(HasLogin, TestCase):
             "modtager_postbox",
             "modtager_telefon",
             "modtager_indførselstilladelse",
-            "skibsfragt_forbindelsesnr",
-            "skibsfragt_fragtbrevnr",
-            "skibspost_forbindelsesnr",
-            "skibspost_fragtbrevnr",
-            "luftfragt_fragtbrevnr",
-            "luftfragt_forbindelsesnr",
-            "luftpost_fragtbrevnr",
-            "luftpost_forbindelsesnr",
+            "fragttype",
+            "forbindelsesnr",
+            "fragtbrevnr",
             "leverandørfaktura",
             "leverandørfaktura_nummer",
             "fragtbrev",
@@ -492,34 +473,6 @@ class TestBlanket(HasLogin, TestCase):
             html_errors = self.submit_get_errors(url, data)
             self.assertTrue(required_field in html_errors)
             self.assertEquals(html_errors[required_field], ["Dette felt er påkrævet."])
-
-        fragtbrev_fields = {
-            "skibsfragt_fragtbrevnr": "123",
-            "luftpost_fragtbrevnr": "123",
-            "skibspost_fragtbrevnr": "123",
-            "luftfragt_fragtbrevnr": "123",
-        }
-        data = {**self.formdata1}
-        for field in fragtbrev_fields:
-            if field in data:
-                del data[field]
-        form = TF10Form(data=data, files=self.formfiles1)
-        self.assertEquals(
-            form.errors["__all__"],
-            ["Skal sætte mindst ét fragtbrevnr. eller postforsendelsesnr."],
-        )
-        html_errors = self.submit_get_errors(url, {**data, **self.formfiles1})
-        self.assertEquals(
-            html_errors["__all__"],
-            ["Skal sætte mindst ét fragtbrevnr. eller postforsendelsesnr."],
-        )
-
-        for field in fragtbrev_fields:
-            data[field] = fragtbrev_fields[field]
-            form = TF10Form(data=data, files=self.formfiles1)
-            self.assertEqual(len(form.errors), 0)
-            html_errors = self.submit_get_errors(url, {**data, **self.formfiles1})
-            self.assertEqual(len(html_errors), 0)
 
         files = {**self.formfiles1}
         del files["fragtbrev"]
