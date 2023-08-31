@@ -66,7 +66,7 @@ class TestLogin(TestCase):
         )
         self.assertEquals(response.status_code, 200)  # Rerender form
         mock_method.assert_called_with(
-            "http://godsregistrering-rest:7000/api/token/pair",
+            "http://toldbehandling-rest:7000/api/token/pair",
             json={"username": "incorrect", "password": "credentials"},
             headers={"Content-Type": "application/json"},
         )
@@ -82,7 +82,7 @@ class TestLogin(TestCase):
             {"username": "correct", "password": "credentials"},
         )
         mock_method.assert_called_with(
-            "http://godsregistrering-rest:7000/api/token/pair",
+            "http://toldbehandling-rest:7000/api/token/pair",
             json={"username": "correct", "password": "credentials"},
             headers={"Content-Type": "application/json"},
         )
@@ -214,7 +214,7 @@ class TestGodkend(HasLogin, TestCase):
         self.patched: List[Tuple[str, str]] = []
 
     def mock_requests_get(self, path):
-        expected_prefix = "http://godsregistrering-rest:7000/api/"
+        expected_prefix = "http://toldbehandling-rest:7000/api/"
         path = path.split("?")[0]
         path = path.rstrip("/")
         response = Response()
@@ -304,7 +304,7 @@ class TestGodkend(HasLogin, TestCase):
         return response
 
     def mock_requests_patch(self, path, data, headers=None):
-        expected_prefix = "http://godsregistrering-rest:7000/api/"
+        expected_prefix = "http://toldbehandling-rest:7000/api/"
         path = path.rstrip("/")
         response = Response()
         json_content = None
@@ -364,7 +364,7 @@ class TestGodkend(HasLogin, TestCase):
         mock_patch.side_effect = self.mock_requests_patch
         response = self.client.post(view_url, {"godkendt": "true"})
         self.assertEquals(response.status_code, 302)
-        prefix = "http://godsregistrering-rest:7000/api/"
+        prefix = "http://toldbehandling-rest:7000/api/"
         patched_map = defaultdict(list)
         for url, data in self.patched:
             patched_map[url].append(json.loads(data))
@@ -379,7 +379,7 @@ class TestGodkend(HasLogin, TestCase):
         mock_patch.side_effect = self.mock_requests_patch
         response = self.client.post(view_url, {"godkendt": "false"})
         self.assertEquals(response.status_code, 302)
-        prefix = "http://godsregistrering-rest:7000/api/"
+        prefix = "http://toldbehandling-rest:7000/api/"
         patched_map = defaultdict(list)
         for url, data in self.patched:
             patched_map[url].append(json.loads(data))
@@ -394,7 +394,7 @@ class TestGodkend(HasLogin, TestCase):
         mock_patch.side_effect = self.mock_requests_patch
         response = self.client.post(view_url, {"godkendt": "true"})
         self.assertEquals(response.status_code, 404)
-        prefix = "http://godsregistrering-rest:7000/api/"
+        prefix = "http://toldbehandling-rest:7000/api/"
         patched_map = defaultdict(list)
         for url, data in self.patched:
             patched_map[url].append(json.loads(data))
@@ -427,7 +427,7 @@ class TestGodkend(HasLogin, TestCase):
 
 class FileViewTest(HasLogin, TestCase):
     def mock_requests_get(self, path):
-        expected_prefix = "http://godsregistrering-rest:7000/api/"
+        expected_prefix = "http://toldbehandling-rest:7000/api/"
         path = path.split("?")[0]
         path = path.rstrip("/")
         response = Response()

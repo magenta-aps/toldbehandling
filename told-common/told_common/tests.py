@@ -1,5 +1,5 @@
 from django.test import TestCase
-from told_common.common_tags import file_basename, zfill
+from told_common.templatetags.common_tags import file_basename, zfill
 
 
 class TemplateTagsTest(TestCase):

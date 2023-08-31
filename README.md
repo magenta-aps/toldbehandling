@@ -38,11 +38,11 @@ for an example.
 You can also run tests locally by using `docker exec`:
 
 ```
-docker exec godsregistrering-ui bash -c 'coverage run --source='.' --omit=manage.py,project/asgi.py,project/wsgi.py,project/test_mixins.py,*/admin.py,*/urls.py,*/tests.py,*/__init__.py,*/migrations/*,*/management/* manage.py test ; coverage report --show-missing'
+docker exec toldbehandling-ui bash -c 'coverage run --source='.' --omit=manage.py,project/asgi.py,project/wsgi.py,project/test_mixins.py,*/admin.py,*/urls.py,*/tests.py,*/__init__.py,*/migrations/*,*/management/* manage.py test ; coverage report --show-missing'
 ```
 
 and for the `rest` app:
 
 ```
-docker exec godsregistrering-rest bash -c 'coverage run --source='.' --omit=manage.py,project/asgi.py,project/wsgi.py,project/test_mixins.py,*/admin.py,*/urls.py,*/tests.py,*/__init__.py,*/migrations/*,*/management/* manage.py test ; coverage report --show-missing'
+docker exec toldbehandling-rest bash -c 'coverage run --source='.' --omit=manage.py,project/asgi.py,project/wsgi.py,project/test_mixins.py,*/admin.py,*/urls.py,*/tests.py,*/__init__.py,*/migrations/*,*/management/* manage.py test ; coverage report --show-missing'
 ```

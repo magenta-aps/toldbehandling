@@ -1,12 +1,12 @@
 services:
-  godsregistrering-rest:
+  toldbehandling-rest:
     environment:
       - TEST=true
 
-  godsregistrering-ui:
+  toldbehandling-ui:
     environment:
       - TEST=true
 
-  godsregistrering-admin:
+  toldbehandling-admin:
     environment:
       - TEST=true
