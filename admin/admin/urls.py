@@ -1,21 +1,27 @@
 from django.urls import path
 from django.views.generic import TemplateView
 
+from told_common.views import (
+    LoginView,
+    LogoutView,
+    RestView,
+    FragtbrevView,
+    LeverandørFakturaView,
+)
+
 from admin import views
 
 urlpatterns = [
-    path("login", views.LoginView.as_view(), name="login"),
-    path("logout", views.LogoutView.as_view(url="/"), name="logout"),
-    path("api/<path:path>", views.RestView.as_view(), name="rest"),
+    path("login", LoginView.as_view(), name="login"),
+    path("logout", LogoutView.as_view(url="/"), name="logout"),
+    path("api/<path:path>", RestView.as_view(), name="rest"),
     path("index", views.IndexView.as_view(), name="index"),
     path(
         "file/leverandørfaktura/<int:id>",
-        views.LeverandørFakturaView.as_view(),
+        LeverandørFakturaView.as_view(),
         name="leverandørfaktura_view",
     ),
-    path(
-        "file/fragtbrev/<int:id>", views.FragtbrevView.as_view(), name="fragtbrev_view"
-    ),
+    path("file/fragtbrev/<int:id>", FragtbrevView.as_view(), name="fragtbrev_view"),
     path(
         "afgiftstabel",
         TemplateView.as_view(template_name="admin/afgiftstabel/list.html"),
