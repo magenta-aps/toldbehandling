@@ -1,0 +1,287 @@
+stages:
+  - lint
+  - build
+  - test
+  - release
+
+include:
+  - project: 'labs/salt-automation'
+    file:
+      - '/gitlab-ci-templates/common/rules.v1.yml'
+      - '/gitlab-ci-templates/common/saltbert.v1.yml'
+
+variables:
+  # Project variables
+  RELEASE_REGISTRY: docker.io
+  RELEASE_REGISTRY_IMAGE: index.docker.io/magentaaps/kas
+
+  REST_IMAGE_SHA: ${CI_REGISTRY_IMAGE}/godsregistrering-rest:${CI_COMMIT_SHA}
+  REST_IMAGE_TAG: magentaaps/godsregistrering-rest:${CI_COMMIT_TAG}
+
+  UI_IMAGE_SHA: ${CI_REGISTRY_IMAGE}/godsregistrering-ui:${CI_COMMIT_SHA}
+  UI_IMAGE_TAG: magentaaps/godsregistrering-ui:${CI_COMMIT_TAG}
+
+  ADMIN_IMAGE_SHA: ${CI_REGISTRY_IMAGE}/godsregistrering-admin:${CI_COMMIT_SHA}
+  ADMIN_IMAGE_TAG: magentaaps/godsregistrering-admin:${CI_COMMIT_TAG}
+
+  ER_IMAGE_SHA: ${CI_REGISTRY_IMAGE}/godsregistrering-er:${CI_COMMIT_SHA}
+  ER_IMAGE_TAG: magentaaps/godsregistrering-er:${CI_COMMIT_TAG}
+
+  VERSION: PIPELINE
+
+
+# Lint stage
+#############
+.lint-default: &lint-default
+  stage: lint
+  needs: []
+  image: python:3.8
+
+Lint Python:
+  <<: *lint-default
+  before_script:
+    - pip3 install flake8
+    - pip3 install black==23.1.0
+    #- pip3 install -r django/requirements.txt
+  script:
+    - flake8 --max-line-length 88 --exclude=migrations,create_dummy_satser.py,tests.py,settings.py --extend-ignore E226,E203 rest/ --
+    - flake8 --max-line-length 88 --exclude=migrations,create_dummy_satser.py,tests.py,settings.py --extend-ignore E226,E203 ui/
+    - flake8 --max-line-length 88 --extend-ignore E226,E203 told-common/
+    - black --check --diff --exclude=migrations rest/
+    - black --check --diff --exclude=migrations ui/
+    - black --check --diff --exclude=migrations told-common/
+
+Lint Dockerfiles:
+  <<: *lint-default
+  image: hadolint/hadolint:latest-debian
+  before_script:
+    - apt-get -y update
+    - apt-get -y install --no-install-recommends git
+  script:
+    - git ls-files --exclude='Dockerfile*' --ignored | xargs --max-lines=1 hadolint
+
+Lint REUSE compliance:
+  extends: .lint-default
+  image:
+    name: fsfe/reuse:latest
+    entrypoint: [""]
+  script:
+    - reuse lint
+
+# Build stage
+#############
+
+Build REST image:
+  stage: build
+  needs: ["Lint Python", "Lint Dockerfiles", "Lint REUSE compliance"]
+  dependencies: []
+  image:
+    name: gcr.io/kaniko-project/executor:debug-v0.16.0
+    entrypoint: [""]
+  script:
+    # Login to GitLab registry
+    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
+    - /kaniko/executor
+      --cache
+      --context=$CI_PROJECT_DIR
+      --dockerfile=$CI_PROJECT_DIR/docker/Dockerfile_rest
+      --destination=${REST_IMAGE_SHA}
+
+Build UI image:
+  stage: build
+  needs: ["Lint Python", "Lint Dockerfiles", "Lint REUSE compliance"]
+  dependencies: []
+  image:
+    name: gcr.io/kaniko-project/executor:debug-v0.16.0
+    entrypoint: [""]
+  script:
+    # Login to GitLab registry
+    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
+    - /kaniko/executor
+      --cache
+      --context=$CI_PROJECT_DIR
+      --dockerfile=$CI_PROJECT_DIR/docker/Dockerfile_ui
+      --destination=${UI_IMAGE_SHA}
+
+Build Admin image:
+  stage: build
+  needs: ["Lint Python", "Lint Dockerfiles", "Lint REUSE compliance"]
+  dependencies: []
+  image:
+    name: gcr.io/kaniko-project/executor:debug-v0.16.0
+    entrypoint: [""]
+  script:
+    # Login to GitLab registry
+    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
+    - /kaniko/executor
+      --cache
+      --context=$CI_PROJECT_DIR
+      --dockerfile=$CI_PROJECT_DIR/docker/Dockerfile_admin
+      --destination=${ADMIN_IMAGE_SHA}
+
+Build ER image:
+  stage: build
+  dependencies: []
+  image:
+    name: gcr.io/kaniko-project/executor:debug-v0.16.0
+    entrypoint: [""]
+  script:
+    # Login to GitLab registry
+    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
+    - /kaniko/executor
+      --cache
+      --context=$CI_PROJECT_DIR
+      --dockerfile=$CI_PROJECT_DIR/docker/Dockerfile_er
+      --destination=${ER_IMAGE_SHA}
+
+
+# Test stage
+############
+.test-default: &test-default
+  stage: test
+  dependencies: []
+  services:
+    - name: postgres:13
+      alias: godsregistrering-db
+  variables:
+    # Simulate development environment while running tests so we use mockup data
+    DJANGO_SECRET_KEY: e$s6@0(hs5ja79-&!l7vt^onoe4h^*bv_e4hj&wt5^8*&x76-$
+    DJANGO_TIMEZONE: Europe/Copenhagen
+    POSTGRES_USER: godsregistrering
+    POSTGRES_PASSWORD: godsregistrering
+    POSTGRES_DB: godsregistrering
+    POSTGRES_HOST: godsregistrering-db
+    ENVIRONMENT: development
+    DISABLE_METRICS: 'True'
+    DJANGO_LANGUAGE_COOKIE_DOMAIN: localhost
+    REST_DOMAIN: http://godsregistrering-rest:7000
+
+.test-rest: &test-rest
+  <<: *test-default
+  needs: [ "Build REST image" ]
+  image: ${REST_IMAGE_SHA}
+
+.test-ui: &test-ui
+  <<: *test-default
+  needs: [ "Build UI image" ]
+  image: ${UI_IMAGE_SHA}
+
+.test-admin: &test-admin
+  <<: *test-default
+  needs: [ "Build Admin image" ]
+  image: ${ADMIN_IMAGE_SHA}
+
+Unittest REST:
+  <<: *test-rest
+  script:
+    - cd /app
+    - coverage run --source='.' --omit=manage.py,project/asgi.py,project/wsgi.py,project/test_mixins.py,*/admin.py,*/urls.py,*/tests.py,*/__init__.py,*/migrations/*,*/management/* manage.py test
+    - coverage report --show-missing --fail-under=100
+    - coverage xml
+  coverage: '/^TOTAL.+?(\d+\%)$/'
+  artifacts:
+    reports:
+      coverage_report:
+          coverage_format: cobertura
+          path: /app/coverage.xml
+
+Unittest UI:
+  <<: *test-ui
+  script:
+    - cd /app
+    - coverage run --source='.' --omit=manage.py,project/asgi.py,project/wsgi.py,project/test_mixins.py,*/admin.py,*/urls.py,*/tests.py,*/__init__.py,*/migrations/*,*/management/* manage.py test
+    - coverage report --show-missing --fail-under=100
+    - coverage xml
+  coverage: '/^TOTAL.+?(\d+\%)$/'
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: /app/coverage.xml
+
+Unittest Admin:
+  <<: *test-admin
+  script:
+    - cd /app
+    - coverage run --source='.' --omit=manage.py,project/asgi.py,project/wsgi.py,project/test_mixins.py,*/admin.py,*/urls.py,*/tests.py,*/__init__.py,*/migrations/*,*/management/* manage.py test
+    - coverage report --show-missing --fail-under=50
+    - coverage xml
+  coverage: '/^TOTAL.+?(\d+\%)$/'
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: /app/coverage.xml
+
+Django check REST:
+  <<: *test-rest
+  script:
+    - cd /app
+    - python manage.py check aktør anmeldelse forsendelse sats
+
+Django check UI:
+  <<: *test-ui
+  script:
+    - cd /app
+    - python manage.py check ui
+
+Django check Admin:
+  <<: *test-admin
+  script:
+    - cd /app
+    - python manage.py check admin
+
+
+# Release stage
+###############
+
+.release-godsregistrering:
+  stage: release
+  image: alpine
+  variables:
+    GIT_STRATEGY: none # We do not need the source code
+  dependencies: []
+  before_script:
+    # install skopeo
+    - apk add skopeo
+
+Release REST image:
+  # Releases both stable and RC releases.
+  extends:
+    - .rules:semver-all
+    - .release-godsregistrering
+  needs:
+    ["Build REST image", "Unittest REST", "Django check REST"]
+  script:
+    - skopeo copy
+      --src-creds=${CI_REGISTRY_USER}:${CI_BUILD_TOKEN}
+      --dest-creds=${RELEASE_REGISTRY_USER}:${RELEASE_REGISTRY_PASSWORD}
+      "docker://${REST_IMAGE_SHA}"
+      "docker://${REST_IMAGE_TAG}"
+
+Release UI image:
+  # Releases both stable and RC releases.
+  extends:
+    - .rules:semver-all
+    - .release-godsregistrering
+  needs:
+    ["Build UI image", "Unittest UI", "Django check UI"]
+  script:
+    - skopeo copy
+      --src-creds=${CI_REGISTRY_USER}:${CI_BUILD_TOKEN}
+      --dest-creds=${RELEASE_REGISTRY_USER}:${RELEASE_REGISTRY_PASSWORD}
+      "docker://${UI_IMAGE_SHA}"
+      "docker://${UI_IMAGE_TAG}"
+
+Release ER image:
+  extends:
+    - .rules:semver-all
+    - .release-godsregistrering
+  needs:
+    ["Build ER image"]
+  script:
+    - skopeo copy
+      --src-creds=${CI_REGISTRY_USER}:${CI_BUILD_TOKEN}
+      --dest-creds=${RELEASE_REGISTRY_USER}:${RELEASE_REGISTRY_PASSWORD}
+      "docker://${ER_IMAGE_SHA}"
+      "docker://${ER_IMAGE_TAG}"

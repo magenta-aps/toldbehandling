@@ -1,0 +1,12 @@
+services:
+  godsregistrering-rest:
+    environment:
+      - TEST=true
+
+  godsregistrering-ui:
+    environment:
+      - TEST=true
+
+  godsregistrering-admin:
+    environment:
+      - TEST=true

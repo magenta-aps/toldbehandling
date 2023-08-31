@@ -1,0 +1,365 @@
+{% extends "admin/admin_layout.html" %}
+{% load static %}
+{% load i18n %}
+{% load l10n %}
+
+{% block extra_headers %}
+<script type="text/javascript" src="{% static 'godsregistrering/js/formset.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="container-lg">
+        <h1>Afgiftsanmeldelse</h1>
+        <h4>For indførsel af afgiftspligtige varer i Grønland</h4>
+
+        <div class="row">
+            <div class="col-12">
+                {{form.non_field_errors}}
+            </div>
+        </div>
+
+        <hr/>
+
+        <div class="row">
+
+            <div class="col-6">
+                <h5>Afsender</h5>
+                <div class="row">
+                    <div class="col-4">
+                        <label for="{{form.afsender_cvr.id_for_label}}">{{form.afsender_cvr.label}}</label>
+                    </div>
+                    <div class="col-8">
+                        {{form.afsender_cvr}}
+                        {{form.afsender_cvr.errors}}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4">
+                        <label for="{{form.afsender_navn.id_for_label}}">{{form.afsender_navn.label}}</label>
+                    </div>
+                    <div class="col-8">
+                        {{form.afsender_navn}}
+                        {{form.afsender_navn.errors}}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4">
+                        <label for="{{form.afsender_adresse.id_for_label}}">{{form.afsender_adresse.label}}</label>
+                    </div>
+                    <div class="col-8">
+                        {{form.afsender_adresse}}
+                        {{form.afsender_adresse.errors}}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4">
+                        <label for="{{form.afsender_postbox.id_for_label}}">{{form.afsender_postbox.label}}</label>
+                    </div>
+                    <div class="col-8">
+                        {{form.afsender_postbox}}
+                        {{form.afsender_postbox.errors}}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4">
+                        <label for="{{form.afsender_postnummer.id_for_label}}">{{form.afsender_postnummer.label}}</label>
+                    </div>
+                    <div class="col-8">
+                        {{form.afsender_postnummer}}
+                        {{form.afsender_postnummer.errors}}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4">
+                        <label for="{{form.afsender_by.id_for_label}}">{{form.afsender_by.label}}</label>
+                    </div>
+                    <div class="col-8">
+                        {{form.afsender_by}}
+                        {{form.afsender_by.errors}}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4">
+                        <label for="{{form.afsender_telefon.id_for_label}}">{{form.afsender_telefon.label}}</label>
+                    </div>
+                    <div class="col-8">
+                        {{form.afsender_telefon}}
+                        {{form.afsender_telefon.errors}}
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-6">
+                <h5>Modtager</h5>
+                <div class="row">
+                    <div class="col-4">
+                        <label for="{{form.modtager_cvr.id_for_label}}">{{form.modtager_cvr.label}}</label>
+                    </div>
+                    <div class="col-8">
+                        {{form.modtager_cvr}}
+                        {{form.modtager_cvr.errors}}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4">
+                        <label for="{{form.modtager_navn.id_for_label}}">{{form.modtager_navn.label}}</label>
+                    </div>
+                    <div class="col-8">
+                        {{form.modtager_navn}}
+                        {{form.modtager_navn.errors}}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4">
+                        <label for="{{form.modtager_adresse.id_for_label}}">{{form.modtager_adresse.label}}</label>
+                    </div>
+                    <div class="col-8">
+                        {{form.modtager_adresse}}
+                        {{form.modtager_adresse.errors}}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4">
+                        <label for="{{form.modtager_postbox.id_for_label}}">{{form.modtager_postbox.label}}</label>
+                    </div>
+                    <div class="col-8">
+                        {{form.modtager_postbox}}
+                        {{form.modtager_postbox.errors}}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4">
+                        <label for="{{form.modtager_postnummer.id_for_label}}">{{form.modtager_postnummer.label}}</label>
+                    </div>
+                    <div class="col-8">
+                        {{form.modtager_postnummer}}
+                        {{form.modtager_postnummer.errors}}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4">
+                        <label for="{{form.modtager_by.id_for_label}}">{{form.modtager_by.label}}</label>
+                    </div>
+                    <div class="col-8">
+                        {{form.modtager_by}}
+                        {{form.modtager_by.errors}}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4">
+                        <label for="{{form.modtager_telefon.id_for_label}}">{{form.modtager_telefon.label}}</label>
+                    </div>
+                    <div class="col-8">
+                        {{form.modtager_telefon}}
+                        {{form.modtager_telefon.errors}}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4">
+                        <label for="{{form.modtager_indførselstilladelse.id_for_label}}">{{form.modtager_indførselstilladelse.label}}</label>
+                    </div>
+                    <div class="col-8">
+                        {{form.modtager_indførselstilladelse}}
+                        {{form.modtager_indførselstilladelse.errors}}
+                    </div>
+                </div>
+        </div>
+        </div>
+
+        <hr/>
+
+        <div class="row">
+            <div class="col-6">
+                <div class="row">
+                    <div class="col-4">
+                        <label for="{{form.leverandørfaktura_nummer.id_for_label}}">{{form.leverandørfaktura_nummer.label}}</label>
+                    </div>
+                    <div class="col-8">
+                        {{form.leverandørfaktura_nummer}}
+                        {{form.leverandørfaktura_nummer.errors}}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4">
+                        <label for="{{form.leverandørfaktura.id_for_label}}">{{form.leverandørfaktura.label}}</label>
+                    </div>
+                    <div class="col-8">
+                        {{form.leverandørfaktura}}
+                        {{form.leverandørfaktura.errors}}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4">
+                        <label>Fragtbrev</label>
+                    </div>
+                    <div class="col-8">
+                        {{form.fragtbrev}}
+                        {{form.fragtbrev.errors}}
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-6">
+
+                <h5>Forsendelsesmåde</h5>
+                <div class="row">
+                    <div class="col-4">
+                    </div>
+                    <div class="col-4">
+                        Forbindelsesnr. / afsenderby­kode
+                    </div>
+                    <div class="col-4">
+                        Fragtbrevnr. / Post­forsendelses­nr.
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4">
+                        Skibsfragt
+                    </div>
+                    <div class="col-4">
+                        {{form.skibsfragt_forbindelsesnr}}
+                    </div>
+                    <div class="col-4">
+                        {{form.skibsfragt_fragtbrevnr}}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4">
+                        Luftfragt
+                    </div>
+                    <div class="col-4">
+                        {{form.luftfragt_forbindelsesnr}}
+                    </div>
+                    <div class="col-4">
+                        {{form.luftfragt_fragtbrevnr}}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4">
+                        Skibspost
+                    </div>
+                    <div class="col-4">
+                        {{form.skibspost_forbindelsesnr}}
+                    </div>
+                    <div class="col-4">
+                        {{form.skibspost_fragtbrevnr}}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4">
+                        Luftpost
+                    </div>
+                    <div class="col-4">
+                        {{form.luftpost_forbindelsesnr}}
+                    </div>
+                    <div class="col-4">
+                        {{form.luftpost_fragtbrevnr}}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <hr/>
+
+        <div class="row">
+            <div class="col-2 px-0">
+                <label>Vareart</label>
+            </div>
+            <div class="col-1 px-0">
+                <label>Vare­kode</label>
+            </div>
+            <div class="col-1 px-0">
+                <label>kg | liter</label>
+            </div>
+            <div class="col-1 px-0">
+                <label>antal</label>
+            </div>
+            <div class="col-2 px-0">
+                <label>Fakturabeløb</label>
+            </div>
+            <div class="col-2 px-0">
+                <label>Afgiftssats</label>
+            </div>
+            <div class="col-2 px-0">
+                <label>Afgiftsbeløb</label>
+            </div>
+            <div class="col-1 px-0">
+                <label>Slet</label>
+            </div>
+        </div>
+
+        <div id="formset">
+        {{ formset.management_form }}
+            <div id="formset_container">
+            {% for subform in formset %}
+                {% include "admin/tf10/subform.html" with subform=subform %}
+            {% endfor %}
+            </div>
+        </div>
+        <div id="formset_prototype" style="display: none">
+            {% include "admin/tf10/subform.html" with subform=formset.empty_form %}
+        </div>
+
+        <div class="row">
+            <div class="col-7 px-0">
+                <button type="button" class="btn btn-primary" id="formset_add">+</button>
+            </div>
+            <div class="col-2 px-0">
+                Afgift i alt
+            </div>
+            <div class="col-3 px-0">
+                <input class="form-control display" data-value="sum-afgiftsbeløb"/>
+            </div>
+        </div>
+
+        <hr/>
+            <div class="clearfix">
+                <button type="submit" class="btn btn-success float-end">Opdatér</button>
+            </div>
+        </div>
+    </div>
+</form>
+
+{{ varesatser|json_script:"varesatser" }}
+<script>
+    const satsTekster = {
+        "kg": "{% translate '%f kr/kg' %}",
+        "l": "{% translate '%f kr/l' %}",
+        "ant": "{% translate '%f kr/stk' %}",
+        "pct": "{% translate '%f %' %}",
+        "sam": "",
+    };
+    const aktører = [
+        {
+            "fields": {
+                "cvr": $("[name={{form.afsender_cvr.name}}]"),
+                "navn": $("[name={{form.afsender_navn.name}}]"),
+                "adresse": $("[name={{form.afsender_adresse.name}}]"),
+                "postnummer": $("[name={{form.afsender_postnummer.name}}]"),
+                "by": $("[name={{form.afsender_by.name}}]"),
+                "postbox": $("[name={{form.afsender_postbox.name}}]"),
+                "telefon": $("[name={{form.afsender_telefon.name}}]"),
+            },
+            "searchfields": ["cvr", "navn"],  // Felter som initierer søgning
+            "api": "{% url 'rest' path='afsender' %}",
+        },
+        {
+            "fields": {
+                "cvr": $("[name={{form.modtager_cvr.name}}]"),
+                "navn": $("[name={{form.modtager_navn.name}}]"),
+                "adresse": $("[name={{form.modtager_adresse.name}}]"),
+                "postnummer": $("[name={{form.modtager_postnummer.name}}]"),
+                "by": $("[name={{form.modtager_by.name}}]"),
+                "postbox": $("[name={{form.modtager_postbox.name}}]"),
+                "telefon": $("[name={{form.modtager_telefon.name}}]"),
+                "indførselstilladelse": $("[name={{form.modtager_indførselstilladelse.name}}]"),
+            },
+            "searchfields": ["cvr", "navn"],
+            "api": "{% url 'rest' path='modtager' %}",
+        }
+    ];
+</script>
+<script src="{% static 'godsregistrering/js/blanket.js' %}"></script>
+{% endblock %}

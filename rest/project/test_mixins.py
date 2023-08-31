@@ -1,0 +1,674 @@
+# Create your tests here.
+import json
+import os
+import re
+from datetime import date
+from decimal import Decimal
+from itertools import chain
+from typing import Tuple, List, Union, Any, Dict
+from urllib.parse import urlencode, unquote
+
+from aktør.models import Afsender, Modtager
+from anmeldelse.models import Afgiftsanmeldelse
+from anmeldelse.models import Varelinje
+from django.conf import settings
+from django.contrib.auth.models import User, Permission
+from django.core.files import File
+from django.core.files.base import ContentFile
+from django.db.models import Choices, Model
+from django.db.models.fields.files import FieldFile
+from django.test import Client
+from django.urls import reverse
+from forsendelse.models import Fragtforsendelse
+from forsendelse.models import Postforsendelse
+from project.util import json_dump
+from sats.models import Vareafgiftssats, Afgiftstabel
+
+
+class RestMixin:
+    invalid_itemdata = {}
+    unique_fields = []
+
+    @classmethod
+    def make_user(
+        cls, username, plaintext_password, permissions: Union[List[Permission], None]
+    ) -> Tuple[User, str, str]:
+        user = User.objects.create(username=username)
+        user.set_password(plaintext_password)
+        user.save()
+        if permissions is not None:
+            user.user_permissions.set(permissions)
+        else:
+            user.user_permissions.clear()
+        client = Client()
+        response = client.post(
+            "/api/token/pair",
+            {"username": user.username, "password": plaintext_password},
+            content_type="application/json",
+        )
+        data = response.json()
+        return user, data["access"], data["refresh"]
+
+    @classmethod
+    def setUpClass(cls):
+        super(RestMixin, cls).setUpClass()
+        cls.leverandørfaktura_file = ContentFile(b"file_content")
+        cls.fragtbrev_file = ContentFile(b"file_content")
+
+        (
+            cls.authorized_user,
+            cls.authorized_access_token,
+            authorized_refresh_token,
+        ) = cls.make_user(
+            "testuser1",
+            "testpassword",
+            [
+                Permission.objects.get(
+                    codename=f"{permission}_{cls.object_class.__name__.lower()}"
+                )
+                for permission in (
+                    "add",
+                    "change",
+                    "view",
+                )
+            ],
+        )
+        (
+            cls.viewonly_user,
+            cls.viewonly_access_token,
+            viewonly_refresh_token,
+        ) = cls.make_user(
+            "testuser2",
+            "testpassword",
+            [
+                Permission.objects.get(
+                    codename=f"view_{cls.object_class.__name__.lower()}"
+                )
+            ],
+        )
+        (
+            cls.unauthorized_user,
+            cls.unauthorized_access_token,
+            unauthorized_refresh_token,
+        ) = cls.make_user("testuser3", "testpassword", None)
+
+    def setUp(self) -> None:
+        super().setUp()
+        self.define_static_data()
+        if not hasattr(self, "client"):
+            self.client = Client()
+        self.afgiftsanmeldelse_data["leverandørfaktura"] = self.leverandørfaktura_file
+        self.fragtforsendelse_data["fragtbrev"] = self.fragtbrev_file
+
+    def create_items(self):
+        pass
+
+    @property
+    def create_function(self) -> str:
+        return f"{self.object_class.__name__.lower()}_create"
+
+    @property
+    def get_function(self) -> str:
+        return f"{self.object_class.__name__.lower()}_get"
+
+    @property
+    def list_function(self) -> str:
+        return f"{self.object_class.__name__.lower()}_list"
+
+    @property
+    def update_function(self) -> str:
+        return f"{self.object_class.__name__.lower()}_update"
+
+    @classmethod
+    def model_to_dict_forced(
+        cls, instance: Model, fields=None, exclude=None
+    ) -> Dict[str, Any]:
+        """
+        Same as django's model_to_dict, except we include non-editable fields
+        """
+        opts = instance._meta
+        data = {}
+        for f in chain(opts.concrete_fields, opts.private_fields, opts.many_to_many):
+            if fields is not None and f.name not in fields:
+                continue
+            if exclude and f.name in exclude:
+                continue
+            data[f.name] = f.value_from_object(instance)
+        return data
+
+    @classmethod
+    def traverse(cls, item, replacement_method=None):
+        t = type(item)
+        if t == dict:
+            new = {}
+            for key, value in item.items():
+                new_value = cls.traverse(value)
+                if callable(replacement_method):
+                    new_value = replacement_method(new_value)
+                new[key] = new_value
+            return new
+        return item
+
+    @classmethod
+    def object_to_dict(cls, item):
+        def format_value(value):
+            if type(value) is date:
+                return value.isoformat()
+            if type(value) is FieldFile and not value:
+                return None
+            if type(value) is Decimal:
+                return str(value)
+            if isinstance(value, Choices):
+                return str(value)
+            return value
+
+        return RestMixin.traverse(cls.model_to_dict_forced(item), format_value)
+
+    @classmethod
+    def get_file_data(cls, item) -> bytes:
+        if isinstance(item, File):
+            if item.closed:
+                with item.open("rb") as fp:
+                    return fp.read()
+            else:
+                item.seek(0)
+                data = item.read()
+                item.seek(0)
+                return data
+        if type(item) is str:
+            path = os.path.normpath(settings.MEDIA_ROOT + "/" + unquote(item))
+            with open(path, "rb") as fp:
+                return fp.read()
+
+    def compare_dicts(self, item1: dict, item2: dict, msg: str) -> None:
+        filekeys = set()
+        items_nofiles = [{}, {}]
+        for i, item in enumerate([item1, item2]):
+            for key, value in item.items():
+                if isinstance(value, File):
+                    filekeys.add(key)
+                items_nofiles[i][key] = value
+        for key in filekeys:
+            file1 = self.get_file_data(items_nofiles[0].pop(key))
+            file2 = self.get_file_data(items_nofiles[1].pop(key))
+            self.assertEqual(file1, file2)
+        msg = str(msg) + f" {str(items_nofiles[0])} != {str(items_nofiles[1])}"
+        self.assertEquals(items_nofiles[0], items_nofiles[1], msg)
+
+    def compare_in(self, itemlist: list, item: dict, msg: str) -> None:
+        for expected in itemlist:
+            try:
+                self.compare_dicts(expected, item, msg)
+            except AssertionError:
+                continue
+            return  # Loop until we fint one that doesn't raise AssertionError
+        raise AssertionError(msg + f" {itemlist} vs {item}")
+
+    @classmethod
+    def strip_id(cls, item: Dict[str, Any]) -> Dict[str, Any]:
+        return {re.sub("_id$", "", key): value for key, value in item.items()}
+
+    def test_get_access(self):
+        self.create_items()
+        url = reverse(
+            f"api-1.0.0:{self.get_function}", kwargs={"id": self.precreated_item.id}
+        )
+        response = self.client.get(
+            url, HTTP_AUTHORIZATION=f"Bearer {self.authorized_access_token}"
+        )
+        self.assertEquals(response.status_code, 200)
+        response = self.client.get(
+            url, HTTP_AUTHORIZATION=f"Bearer {self.viewonly_access_token}"
+        )
+        self.assertEquals(response.status_code, 200)
+        response = self.client.get(
+            url, HTTP_AUTHORIZATION=f"Bearer {self.unauthorized_access_token}"
+        )
+        self.assertEquals(response.status_code, 403)
+
+    def test_get(self):
+        self.create_items()
+        url = reverse(
+            f"api-1.0.0:{self.get_function}", kwargs={"id": self.precreated_item.id}
+        )
+        response = self.client.get(
+            url, HTTP_AUTHORIZATION=f"Bearer {self.authorized_access_token}"
+        )
+        self.assertEqual(
+            response.status_code,
+            200,
+            f"Reach READ API endpoint with existing id, expect HTTP 200 for GET {url}",
+        )
+        self.compare_dicts(
+            self.object_to_dict(self.precreated_item),
+            response.json(),
+            f"Querying READ API endpoint, expected data to match for url {url}",
+        )
+
+    def test_get_404(self):
+        self.create_items()
+        url = reverse(
+            f"api-1.0.0:{self.get_function}",
+            kwargs={"id": self.object_class.objects.all().count()},
+        )
+        response = self.client.get(
+            url, HTTP_AUTHORIZATION=f"Bearer {self.authorized_access_token}"
+        )
+        self.assertEqual(
+            response.status_code,
+            404,
+            "Reach READ API endpoint with nonexisting id, expect HTTP 404"
+            + f"for GET {url}. Got HTTP {response.status_code}: {response.content}",
+        )
+
+    def test_list(self):
+        self.create_items()
+        url = reverse(f"api-1.0.0:{self.list_function}")
+        response = self.client.get(
+            url, HTTP_AUTHORIZATION=f"Bearer {self.authorized_access_token}"
+        )
+        self.assertEqual(
+            response.status_code,
+            200,
+            f"Reach LIST API endpoint, expect HTTP 200 for GET {url}. "
+            + f"Got HTTP {response.status_code}: {response.content}",
+        )
+        self.compare_in(
+            response.json()["items"],
+            self.expected_list_response_dict,
+            f"Querying LIST API endpoint, expected data to match for GET {url}",
+        )
+
+    def test_list_filter(self):
+        self.create_items()
+        for key, value in self.creation_data.items():
+            # attribute_model_class = getattr(self.object_class, key)
+            # if isinstance(attribute_model_class, ForwardManyToOneDescriptor):
+            #     key = f"{key}__id"
+            url = (
+                reverse(f"api-1.0.0:{self.list_function}")
+                + "?"
+                + urlencode({key: value})
+            )
+            response = self.client.get(
+                url, HTTP_AUTHORIZATION=f"Bearer {self.authorized_access_token}"
+            )
+            self.assertEqual(
+                response.status_code,
+                200,
+                "Reach LIST API endpoint with existing id, expect HTTP 200 or 201 "
+                + f"for GET {url}. Got HTTP {response.status_code}: {response.content}",
+            )
+            self.compare_in(
+                response.json()["items"],
+                self.expected_list_response_dict,
+                f"Querying LIST API endpoint, expected data to match for GET {url}",
+            )
+
+    def test_list_filter_negative(self):
+        self.create_items()
+        for key, value in self.strip_id(self.creation_data).items():
+            if isinstance(value, File):
+                continue
+            altered_value = self.alter_value(key, value)
+            url = (
+                reverse(f"api-1.0.0:{self.list_function}")
+                + "?"
+                + urlencode({key: altered_value})
+            )
+            response = self.client.get(
+                url, HTTP_AUTHORIZATION=f"Bearer {self.authorized_access_token}"
+            )
+            self.assertEqual(
+                response.status_code,
+                200,
+                "Reach LIST API endpoint with existing id, expected HTTP 200 or 201 "
+                + f"for GET {url}. Got HTTP {response.status_code}: {response.content}",
+            )
+            self.assertNotIn(
+                self.object_to_dict(self.precreated_item),
+                response.json()["items"],
+                f"Querying LIST API endpoint, expected data to not match for GET {url}",
+            )
+
+    def test_post_access(self):
+        data = json_dump(self.creation_data)
+        url = reverse(f"api-1.0.0:{self.create_function}")
+        response = self.client.post(
+            url,
+            data,
+            HTTP_AUTHORIZATION=f"Bearer {self.viewonly_access_token}",
+            content_type="application/json",
+        )
+        self.assertEquals(response.status_code, 403)
+        response = self.client.post(
+            url,
+            data,
+            HTTP_AUTHORIZATION=f"Bearer {self.unauthorized_access_token}",
+            content_type="application/json",
+        )
+        self.assertEquals(response.status_code, 403)
+        response = self.client.post(
+            url,
+            data,
+            HTTP_AUTHORIZATION=f"Bearer {self.authorized_access_token}",
+            content_type="application/json",
+        )
+        self.assertEquals(response.status_code, 200)
+
+    def test_create(self):
+        url = reverse(f"api-1.0.0:{self.create_function}")
+
+        # Hvis vi ønsker at overføre data med multipart/form-data, skal dette ændres til
+        # response = self.client.post(
+        #     url, self.creation_data, HTTP_AUTHORIZATION=f"Bearer {self.access_token}"
+        # )
+
+        response = self.client.post(
+            url,
+            json_dump(self.creation_data),
+            HTTP_AUTHORIZATION=f"Bearer {self.authorized_access_token}",
+            content_type="application/json",
+        )
+        self.assertIn(
+            response.status_code,
+            (200, 201),
+            f"Reach CREATE API endpoint, expect HTTP 200 or 201 for POST {url}.  "
+            + f"Got HTTP {response.status_code}: {response.content}",
+        )
+        try:
+            response_object = json.loads(response.content)
+        except json.decoder.JSONDecodeError:
+            raise AssertionError(
+                f"Non-json response from POST {url}: {response.content}"
+            )
+        id = response_object["id"]
+        try:
+            item = self.object_class.objects.get(id=id)
+        except self.object_class.DoesNotExist:
+            raise AssertionError(
+                f"Did not find created item {self.object_class.__name__}"
+                + f"(id={id}) after creation with POST {url}"
+            )
+        item_dict = self.object_to_dict(item)
+        self.compare_dicts(
+            item_dict,
+            self.strip_id(self.expected_object_data),
+            f"Created item {self.object_class.__name__}(id={id}) did not "
+            + f"match expectation after creation with POST {url}",
+        )
+
+    def test_create_invalid(self):
+        url = reverse(f"api-1.0.0:{self.create_function}")
+        for key, values in self.invalid_itemdata.items():
+            for value in values:
+                invalid_data = {**self.creation_data, key: value}
+                response = self.client.post(
+                    url,
+                    invalid_data,
+                    HTTP_AUTHORIZATION=f"Bearer {self.authorized_access_token}",
+                )
+                self.assertIn(
+                    response.status_code,
+                    (400, 422),
+                    "Reach CREATE API endpoint with invalid data, expect HTTP "
+                    + f"400 or 422 for POST {url} with data {invalid_data}. "
+                    + f"Got HTTP {response.status_code}: {response.content}",
+                )
+
+    def test_create_unique(self):
+        self.create_items()
+        url = reverse(f"api-1.0.0:{self.create_function}")
+        for field in self.unique_fields:
+            invalid_data = json_dump(
+                {
+                    **self.creation_data,
+                    field: getattr(self.precreated_item, field),
+                }
+            )
+            response = self.client.post(
+                url,
+                invalid_data,
+                HTTP_AUTHORIZATION=f"Bearer {self.authorized_access_token}",
+                content_type="application/json",
+            )
+            self.assertEqual(
+                response.status_code,
+                400,
+                "Reach CREATE API endpoint with data that collides with "
+                + f"existing object, expected HTTP 400 for POST {url} with data "
+                + f"{invalid_data}. Got {response.status_code}: {response.content}",
+            )
+
+    def test_patch_access(self):
+        self.create_items()
+        data = json_dump(self.update_object_data)
+        url = reverse(
+            f"api-1.0.0:{self.update_function}", kwargs={"id": self.precreated_item.id}
+        )
+        response = self.client.patch(
+            url,
+            data,
+            content_type="application/json",
+            HTTP_AUTHORIZATION=f"Bearer {self.unauthorized_access_token}",
+        )
+        self.assertEquals(response.status_code, 403)
+        response = self.client.patch(
+            url,
+            data,
+            content_type="application/json",
+            HTTP_AUTHORIZATION=f"Bearer {self.viewonly_access_token}",
+        )
+        self.assertEquals(response.status_code, 403)
+        response = self.client.patch(
+            url,
+            data,
+            content_type="application/json",
+            HTTP_AUTHORIZATION=f"Bearer {self.authorized_access_token}",
+        )
+        self.assertEquals(response.status_code, 200)
+
+    def test_update(self):
+        self.create_items()
+        expected_object_data = self.strip_id(self.object_to_dict(self.precreated_item))
+        url = reverse(
+            f"api-1.0.0:{self.update_function}", kwargs={"id": self.precreated_item.id}
+        )
+        response = self.client.patch(
+            url,
+            json_dump(self.update_object_data),
+            content_type="application/json",
+            secure=False,
+            HTTP_AUTHORIZATION=f"Bearer {self.authorized_access_token}",
+        )
+        self.assertIn(
+            response.status_code,
+            (200, 201),
+            f"Reach UPDATE API endpoint, expected HTTP 200 or 201 for PATCH {url}",
+        )
+        self.precreated_item.refresh_from_db()
+        item_dict = self.object_to_dict(self.precreated_item)
+        expected_object_data.update(
+            {"id": id, **self.strip_id(self.update_object_data)}
+        )
+        self.compare_dicts(
+            item_dict,
+            expected_object_data,
+            f"Updated item {self.object_class.__name__}(id={id}) did not match "
+            + f"expectation after updating with PATCH {url}",
+        )
+
+    @classmethod
+    def alter_value(cls, key: str, value: Any) -> Any:
+        t = type(value)
+        if t == str:
+            return f"{value}_nonexistent"
+        if t == int:
+            return value + 123456
+        if t == bool:
+            return not value
+
+    @property
+    def afsender(self) -> Afsender:
+        if not hasattr(self, "_afsender"):
+            try:
+                self._afsender = Afsender.objects.get(navn=self.afsender_data["navn"])
+            except Afsender.DoesNotExist:
+                self._afsender = Afsender.objects.create(**self.afsender_data)
+        return self._afsender
+
+    @property
+    def modtager(self) -> Modtager:
+        if not hasattr(self, "_modtager"):
+            try:
+                self._modtager = Modtager.objects.get(navn=self.modtager_data["navn"])
+            except Modtager.DoesNotExist:
+                self._modtager = Modtager.objects.create(**self.modtager_data)
+        return self._modtager
+
+    @property
+    def fragtforsendelse(self) -> Fragtforsendelse:
+        if not hasattr(self, "_fragtforsendelse"):
+            try:
+                self._fragtforsendelse = Fragtforsendelse.objects.get(
+                    fragtbrevsnummer=self.fragtforsendelse_data["fragtbrevsnummer"]
+                )
+            except Fragtforsendelse.DoesNotExist:
+                self._fragtforsendelse = Fragtforsendelse.objects.create(
+                    **self.fragtforsendelse_data
+                )
+                self._fragtforsendelse.fragtbrev.save(
+                    "fragtforsendelse.pdf", self.fragtforsendelse_data["fragtbrev"]
+                )
+        return self._fragtforsendelse
+
+    @property
+    def postforsendelse(self) -> Postforsendelse:
+        if not hasattr(self, "_postforsendelse"):
+            self._postforsendelse, _ = Postforsendelse.objects.get_or_create(
+                postforsendelsesnummer=self.postforsendelse_data[
+                    "postforsendelsesnummer"
+                ],
+                defaults=self.postforsendelse_data,
+            )
+        return self._postforsendelse
+
+    @property
+    def afgiftsanmeldelse(self) -> Afgiftsanmeldelse:
+        if not hasattr(self, "_afgiftsanmeldelse"):
+            self._afgiftsanmeldelse = Afgiftsanmeldelse.objects.first()
+            if self._afgiftsanmeldelse is None:
+                data = {**self.afgiftsanmeldelse_data}
+                data.update(
+                    {
+                        "afsender": self.afsender,
+                        "modtager": self.modtager,
+                        "fragtforsendelse": None,
+                        "postforsendelse": self.postforsendelse,
+                    }
+                )
+                self._afgiftsanmeldelse = Afgiftsanmeldelse.objects.create(**data)
+                self._afgiftsanmeldelse.leverandørfaktura.save(
+                    "leverandørfaktura.pdf",
+                    self.afgiftsanmeldelse_data["leverandørfaktura"],
+                )
+
+        return self._afgiftsanmeldelse
+
+    @property
+    def varelinje(self) -> Varelinje:
+        if not hasattr(self, "_varelinje"):
+            try:
+                self._varelinje = Varelinje.objects.get(
+                    afgiftssats=self.vareafgiftssats,
+                    afgiftsanmeldelse=self.afgiftsanmeldelse,
+                )
+            except Varelinje.DoesNotExist:
+                data = {**self.varelinje_data}
+                data.update(
+                    {
+                        "afgiftssats": self.vareafgiftssats,
+                        "afgiftsanmeldelse": self.afgiftsanmeldelse,
+                    }
+                )
+                self._varelinje = Varelinje.objects.create(**data)
+        return self._varelinje
+
+    @property
+    def vareafgiftssats(self) -> Vareafgiftssats:
+        if not hasattr(self, "_vareafgiftssats"):
+            try:
+                self._vareafgiftssats = Vareafgiftssats.objects.get(
+                    afgiftsgruppenummer=1234
+                )
+            except Vareafgiftssats.DoesNotExist:
+                data = {**self.vareafgiftssats_data}
+                data.update({"afgiftstabel": self.afgiftstabel})
+                self._vareafgiftssats = Vareafgiftssats.objects.create(**data)
+        return self._vareafgiftssats
+
+    @property
+    def afgiftstabel(self) -> Afgiftstabel:
+        if not hasattr(self, "_afgiftstabel"):
+            try:
+                today = date.today()
+                self._afgiftstabel = Afgiftstabel.objects.get(
+                    gyldig_fra__year=today.year,
+                    gyldig_fra__month=today.month,
+                    gyldig_fra__day=today.day,
+                )
+            except Afgiftstabel.DoesNotExist:
+                self._afgiftstabel = Afgiftstabel.objects.create(
+                    **self.afgiftstabel_data
+                )
+        return self._afgiftstabel
+
+    def define_static_data(self) -> None:
+        self.afsender_data = {
+            "navn": "Testfirma 1",
+            "adresse": "Testvej 42",
+            "postnummer": 1234,
+            "by": "TestBy",
+            "postbox": "123",
+            "telefon": "123456",
+            "cvr": 12345678,
+        }
+        self.modtager_data = {
+            "navn": "Testfirma 1",
+            "adresse": "Testvej 42",
+            "postnummer": 1234,
+            "by": "TestBy",
+            "postbox": "123",
+            "telefon": "123456",
+            "cvr": 12345678,
+            "kreditordning": True,
+            "indførselstilladelse": 123,
+        }
+
+        self.fragtforsendelse_data = {
+            "forsendelsestype": Fragtforsendelse.Forsendelsestype.SKIB,
+            "fragtbrevsnummer": "1234",
+        }
+        self.postforsendelse_data = {
+            "forsendelsestype": Postforsendelse.Forsendelsestype.SKIB,
+            "postforsendelsesnummer": "1234",
+        }
+        self.afgiftsanmeldelse_data = {
+            "leverandørfaktura_nummer": "12345",
+            "modtager_betaler": False,
+            "indførselstilladelse": "abcde",
+            "betalt": False,
+        }
+        self.varelinje_data = {
+            "kvantum": 15,
+            "fakturabeløb": "1000.00",
+            "afgiftsbeløb": "37.50",
+        }
+        self.vareafgiftssats_data = {
+            "vareart": "Kaffe",
+            "afgiftsgruppenummer": 1234,
+            "enhed": Vareafgiftssats.Enhed.KG,
+            "afgiftssats": "2.50",
+            "kræver_indførselstilladelse": False,
+        }
+        self.afgiftstabel_data = {}
