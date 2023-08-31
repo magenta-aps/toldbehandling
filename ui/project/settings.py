@@ -61,7 +61,7 @@ TEMPLATES = [
                 "django.contrib.messages.context_processors.messages",
             ],
             "libraries": {
-                "common_tags": "told_common.common_tags",
+                "common_tags": "told_common.templatetags.common_tags",
             },
         },
     },
