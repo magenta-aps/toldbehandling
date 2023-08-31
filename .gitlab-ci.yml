@@ -15,17 +15,17 @@ variables:
   RELEASE_REGISTRY: docker.io
   RELEASE_REGISTRY_IMAGE: index.docker.io/magentaaps/kas
 
-  REST_IMAGE_SHA: ${CI_REGISTRY_IMAGE}/godsregistrering-rest:${CI_COMMIT_SHA}
-  REST_IMAGE_TAG: magentaaps/godsregistrering-rest:${CI_COMMIT_TAG}
+  REST_IMAGE_SHA: ${CI_REGISTRY_IMAGE}/toldbehandling-rest:${CI_COMMIT_SHA}
+  REST_IMAGE_TAG: magentaaps/toldbehandling-rest:${CI_COMMIT_TAG}
 
-  UI_IMAGE_SHA: ${CI_REGISTRY_IMAGE}/godsregistrering-ui:${CI_COMMIT_SHA}
-  UI_IMAGE_TAG: magentaaps/godsregistrering-ui:${CI_COMMIT_TAG}
+  UI_IMAGE_SHA: ${CI_REGISTRY_IMAGE}/toldbehandling-ui:${CI_COMMIT_SHA}
+  UI_IMAGE_TAG: magentaaps/toldbehandling-ui:${CI_COMMIT_TAG}
 
-  ADMIN_IMAGE_SHA: ${CI_REGISTRY_IMAGE}/godsregistrering-admin:${CI_COMMIT_SHA}
-  ADMIN_IMAGE_TAG: magentaaps/godsregistrering-admin:${CI_COMMIT_TAG}
+  ADMIN_IMAGE_SHA: ${CI_REGISTRY_IMAGE}/toldbehandling-admin:${CI_COMMIT_SHA}
+  ADMIN_IMAGE_TAG: magentaaps/toldbehandling-admin:${CI_COMMIT_TAG}
 
-  ER_IMAGE_SHA: ${CI_REGISTRY_IMAGE}/godsregistrering-er:${CI_COMMIT_SHA}
-  ER_IMAGE_TAG: magentaaps/godsregistrering-er:${CI_COMMIT_TAG}
+  ER_IMAGE_SHA: ${CI_REGISTRY_IMAGE}/toldbehandling-er:${CI_COMMIT_SHA}
+  ER_IMAGE_TAG: magentaaps/toldbehandling-er:${CI_COMMIT_TAG}
 
   VERSION: PIPELINE
 
@@ -142,19 +142,19 @@ Build ER image:
   dependencies: []
   services:
     - name: postgres:13
-      alias: godsregistrering-db
+      alias: toldbehandling-db
   variables:
     # Simulate development environment while running tests so we use mockup data
     DJANGO_SECRET_KEY: e$s6@0(hs5ja79-&!l7vt^onoe4h^*bv_e4hj&wt5^8*&x76-$
     DJANGO_TIMEZONE: Europe/Copenhagen
-    POSTGRES_USER: godsregistrering
-    POSTGRES_PASSWORD: godsregistrering
-    POSTGRES_DB: godsregistrering
-    POSTGRES_HOST: godsregistrering-db
+    POSTGRES_USER: toldbehandling
+    POSTGRES_PASSWORD: toldbehandling
+    POSTGRES_DB: toldbehandling
+    POSTGRES_HOST: toldbehandling-db
     ENVIRONMENT: development
     DISABLE_METRICS: 'True'
     DJANGO_LANGUAGE_COOKIE_DOMAIN: localhost
-    REST_DOMAIN: http://godsregistrering-rest:7000
+    REST_DOMAIN: http://toldbehandling-rest:7000
 
 .test-rest: &test-rest
   <<: *test-default
@@ -235,7 +235,7 @@ Django check Admin:
 # Release stage
 ###############
 
-.release-godsregistrering:
+.release-toldbehandling:
   stage: release
   image: alpine
   variables:
@@ -249,7 +249,7 @@ Release REST image:
   # Releases both stable and RC releases.
   extends:
     - .rules:semver-all
-    - .release-godsregistrering
+    - .release-toldbehandling
   needs:
     ["Build REST image", "Unittest REST", "Django check REST"]
   script:
@@ -263,7 +263,7 @@ Release UI image:
   # Releases both stable and RC releases.
   extends:
     - .rules:semver-all
-    - .release-godsregistrering
+    - .release-toldbehandling
   needs:
     ["Build UI image", "Unittest UI", "Django check UI"]
   script:
@@ -276,7 +276,7 @@ Release UI image:
 Release ER image:
   extends:
     - .rules:semver-all
-    - .release-godsregistrering
+    - .release-toldbehandling
   needs:
     ["Build ER image"]
   script:

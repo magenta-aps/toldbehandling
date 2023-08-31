@@ -38,7 +38,7 @@ class TestLogin(TestCase):
         )
         self.assertEquals(response.status_code, 200)  # Rerender form
         mock_method.assert_called_with(
-            "http://godsregistrering-rest:7000/api/token/pair",
+            "http://toldbehandling-rest:7000/api/token/pair",
             json={"username": "incorrect", "password": "credentials"},
             headers={"Content-Type": "application/json"},
         )
@@ -54,7 +54,7 @@ class TestLogin(TestCase):
             {"username": "correct", "password": "credentials"},
         )
         mock_method.assert_called_with(
-            "http://godsregistrering-rest:7000/api/token/pair",
+            "http://toldbehandling-rest:7000/api/token/pair",
             json={"username": "correct", "password": "credentials"},
             headers={"Content-Type": "application/json"},
         )
@@ -276,7 +276,7 @@ class TestBlanket(HasLogin, TestCase):
         )
 
     def mock_requests_get(self, path):
-        expected_prefix = "http://godsregistrering-rest:7000/api/"
+        expected_prefix = "http://toldbehandling-rest:7000/api/"
         path = path.split("?")[0]
         path = path.rstrip("/")
         response = Response()
@@ -351,7 +351,7 @@ class TestBlanket(HasLogin, TestCase):
         return response
 
     def mock_requests_post(self, path, data, headers=None):
-        expected_prefix = "http://godsregistrering-rest:7000/api/"
+        expected_prefix = "http://toldbehandling-rest:7000/api/"
         path = path.rstrip("/")
         response = Response()
         json_content = None
@@ -577,7 +577,7 @@ class TestBlanket(HasLogin, TestCase):
         mock_post.side_effect = self.mock_requests_post
         response = self.client.post(url, data={**self.formdata1, **self.formfiles1})
         self.assertEquals(response.status_code, 302)
-        prefix = "http://godsregistrering-rest:7000/api/"
+        prefix = "http://toldbehandling-rest:7000/api/"
         posted_map = defaultdict(list)
         for url, data in self.posted:
             posted_map[url].append(json.loads(data))
@@ -655,7 +655,7 @@ class TestBlanket(HasLogin, TestCase):
         mock_post.side_effect = self.mock_requests_post
         response = self.client.post(url, data={**self.formdata1, **self.formfiles1})
         self.assertEquals(response.status_code, 302)
-        prefix = "http://godsregistrering-rest:7000/api/"
+        prefix = "http://toldbehandling-rest:7000/api/"
         posted_map = defaultdict(list)
         for url, data in self.posted:
             posted_map[url].append(json.loads(data))
@@ -710,7 +710,7 @@ class TestBlanket(HasLogin, TestCase):
         mock_post.side_effect = self.mock_requests_post
         response = self.client.post(url, data={**self.formdata2, **self.formfiles2})
         self.assertEquals(response.status_code, 302)
-        prefix = "http://godsregistrering-rest:7000/api/"
+        prefix = "http://toldbehandling-rest:7000/api/"
         posted_map = defaultdict(list)
         for url, data in self.posted:
             posted_map[url].append(json.loads(data))
@@ -804,7 +804,7 @@ class TestBlanket(HasLogin, TestCase):
 
 class FileViewTest(HasLogin, TestCase):
     def mock_requests_get(self, path):
-        expected_prefix = "http://godsregistrering-rest:7000/api/"
+        expected_prefix = "http://toldbehandling-rest:7000/api/"
         path = path.split("?")[0]
         path = path.rstrip("/")
         response = Response()
