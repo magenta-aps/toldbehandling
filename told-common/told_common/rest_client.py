@@ -174,16 +174,13 @@ class RestClient:
     def create_postforsendelse(self, data: dict) -> Union[int, None]:
         # TODO: Hvad med Forbindelsesnr/afsenderbykode?
         # De fremgår af formularen, men er ikke at finde i modellen
-
-        if data["skibspost_fragtbrevnr"] or data["luftpost_fragtbrevnr"]:
-            is_luftpost = bool(data.get("luftpost_fragtbrevnr"))
+        fragttype = data["fragttype"]
+        if fragttype in ("luftpost", "skibspost"):
             response = self.post(
                 "postforsendelse",
                 {
-                    "postforsendelsesnummer": data["luftpost_fragtbrevnr"]
-                    if is_luftpost
-                    else data["skibspost_fragtbrevnr"],
-                    "forsendelsestype": "F" if is_luftpost else "S",
+                    "postforsendelsesnummer": data["fragtbrevnr"],
+                    "forsendelsestype": "S" if fragttype == "skibspost" else "F",
                 },
             )
             return response["id"]
@@ -208,15 +205,13 @@ class RestClient:
     def create_fragtforsendelse(
         self, data: dict, file: Union[UploadedFile, None]
     ) -> Union[int, None]:
-        if data["skibsfragt_fragtbrevnr"] or data["luftfragt_fragtbrevnr"]:
-            is_luftfragt = bool(data.get("luftfragt_fragtbrevnr"))
+        fragttype = data["fragttype"]
+        if fragttype in ("luftfragt", "skibsfragt"):
             response = self.post(
                 "fragtforsendelse",
                 {
-                    "fragtbrevsnummer": data["luftfragt_fragtbrevnr"]
-                    if is_luftfragt
-                    else data["skibsfragt_fragtbrevnr"],
-                    "forsendelsestype": "F" if is_luftfragt else "S",
+                    "fragtbrevsnummer": data["fragtbrevnr"],
+                    "forsendelsestype": "S" if fragttype == "skibsfragt" else "F",
                     "fragtbrev": self._uploadfile_to_base64str(file) if file else None,
                     "fragtbrev_navn": file.name if file else None,
                 },
