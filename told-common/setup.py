@@ -25,4 +25,5 @@ setuptools.setup(
         "License :: OSI Approved :: MPL 2.0",
         "Operating System :: OS Independent",
     ],
+    include_package_data=True,
 )
