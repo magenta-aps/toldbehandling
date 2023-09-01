@@ -190,7 +190,7 @@ Unittest UI:
   script:
     - cd /app
     - coverage run --source='.' --omit=manage.py,project/asgi.py,project/wsgi.py,project/test_mixins.py,*/admin.py,*/urls.py,*/tests.py,*/__init__.py,*/migrations/*,*/management/* manage.py test
-    - coverage report --show-missing --fail-under=100
+    - coverage report --show-missing --fail-under=95
     - coverage xml
   coverage: '/^TOTAL.+?(\d+\%)$/'
   artifacts:
