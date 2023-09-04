@@ -13,7 +13,7 @@ include:
 variables:
   # Project variables
   RELEASE_REGISTRY: docker.io
-  RELEASE_REGISTRY_IMAGE: index.docker.io/magentaaps/kas
+  RELEASE_REGISTRY_IMAGE: index.docker.io/magentaaps/toldbehandling
 
   REST_IMAGE_SHA: ${CI_REGISTRY_IMAGE}/toldbehandling-rest:${CI_COMMIT_SHA}
   REST_IMAGE_TAG: magentaaps/toldbehandling-rest:${CI_COMMIT_TAG}

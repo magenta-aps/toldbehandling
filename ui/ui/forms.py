@@ -3,8 +3,12 @@ from django.core.exceptions import ValidationError
 from django.forms import formset_factory
 from django.utils.translation import gettext_lazy as _
 from requests import HTTPError
-from told_common.form_mixins import BootstrapForm, ButtonlessIntegerField
-from told_common.form_mixins import MaxSizeFileField
+from told_common.form_mixins import (
+    BootstrapForm,
+    ButtonlessIntegerField,
+    MaxSizeFileField,
+    DateInput,
+)
 from told_common.rest_client import RestClient
 
 
@@ -214,3 +218,25 @@ TF10VareFormSet = formset_factory(TF10VareForm, min_num=1, extra=0)
 
 class TF10GodkendForm(BootstrapForm):
     godkend = forms.CharField(required=True)
+
+
+class TF10SearchForm(BootstrapForm):
+    def __init__(self, *args, **kwargs):
+        self.varesatser = kwargs.pop("varesatser", {})
+        super().__init__(*args, **kwargs)
+        self.fields["vareart"].choices = tuple(
+            [(None, "------")]
+            + [(id, item["vareart"]) for id, item in self.varesatser.items()]
+        )
+
+    vareart = forms.ChoiceField(choices=(), required=False)
+    dato_efter = forms.DateField(required=False, widget=DateInput)
+    dato_før = forms.DateField(required=False, widget=DateInput)
+    json = forms.BooleanField(required=False)
+    htmx = forms.BooleanField(required=False)
+    order_by = forms.CharField(required=False)
+    offset = forms.IntegerField(required=False)
+    limit = forms.IntegerField(required=False)
+
+    sort = forms.CharField(required=False)
+    order = forms.CharField(required=False)

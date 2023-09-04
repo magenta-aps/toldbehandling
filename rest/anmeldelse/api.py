@@ -1,4 +1,5 @@
 import base64
+from datetime import date
 from decimal import Decimal
 from typing import Optional
 from uuid import uuid4
@@ -8,12 +9,15 @@ from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.http import HttpResponseBadRequest
 from django.shortcuts import get_object_or_404
-from ninja import FilterSchema, Query, ModelSchema
+from ninja import FilterSchema, Query, ModelSchema, Field
 from ninja_extra import api_controller, route, permissions
 from ninja_extra.pagination import paginate
 from ninja_extra.schemas import NinjaPaginationResponseSchema
 from ninja_jwt.authentication import JWTAuth
 from project.util import RestPermission, json_dump
+
+from aktør.api import AfsenderOut, ModtagerOut
+from forsendelse.api import FragtforsendelseOut, PostforsendelseOut
 
 
 class AfgiftsanmeldelseIn(ModelSchema):
@@ -74,6 +78,13 @@ class AfgiftsanmeldelseOut(ModelSchema):
         ]
 
 
+class AfgiftsanmeldelseFullOut(AfgiftsanmeldelseOut):
+    afsender: AfsenderOut
+    modtager: ModtagerOut
+    fragtforsendelse: Optional[FragtforsendelseOut]
+    postforsendelse: Optional[PostforsendelseOut]
+
+
 class AfgiftsanmeldelseFilterSchema(FilterSchema):
     id: Optional[int]
     afsender: Optional[int]
@@ -88,6 +99,9 @@ class AfgiftsanmeldelseFilterSchema(FilterSchema):
     indførselstilladelse: Optional[str]
     betalt: Optional[bool]
     godkendt: Optional[bool]
+    dato_efter: Optional[date] = Field(q="dato__gte")
+    dato_før: Optional[date] = Field(q="dato__lt")
+    vareart: Optional[int] = Field(q="varelinje__id")
 
 
 class AfgiftsanmeldelsePermission(RestPermission):
@@ -124,6 +138,48 @@ class AfgiftsanmeldelseAPI:
                 json_dump(e.message_dict), content_type="application/json"
             )
 
+    # List afgiftsanmeldelser. Relaterede objekter refereres med deres id
+    @route.get(
+        "",
+        response=NinjaPaginationResponseSchema[AfgiftsanmeldelseOut],
+        auth=JWTAuth(),
+        url_name="afgiftsanmeldelse_list",
+    )
+    @paginate()  # https://eadwincode.github.io/django-ninja-extra/tutorial/pagination/
+    def list_afgiftsanmeldelser(
+        self,
+        filters: AfgiftsanmeldelseFilterSchema = Query(...),
+        sort: str = None,
+        order: str = None,
+    ):
+        # https://django-ninja.rest-framework.com/guides/input/filtering/
+        qs = filters.filter(Afgiftsanmeldelse.objects.all())
+        order_by = self.map_sort(sort, order)
+        if order_by:
+            qs = qs.order_by(order_by, "id")
+        return list(qs)
+
+    # List afgiftsanmeldelser. Relaterede objekter nestes i hvert item
+    @route.get(
+        "full",
+        response=NinjaPaginationResponseSchema[AfgiftsanmeldelseFullOut],
+        auth=JWTAuth(),
+        url_name="afgiftsanmeldelse_list_full",
+    )
+    @paginate()  # https://eadwincode.github.io/django-ninja-extra/tutorial/pagination/
+    def list_afgiftsanmeldelser_full(
+        self,
+        filters: AfgiftsanmeldelseFilterSchema = Query(...),
+        sort: str = None,
+        order: str = None,
+    ):
+        # https://django-ninja.rest-framework.com/guides/input/filtering/
+        qs = filters.filter(Afgiftsanmeldelse.objects.all())
+        order_by = self.map_sort(sort, order)
+        if order_by:
+            qs = qs.order_by(order_by, "id")
+        return list(qs)
+
     @route.get(
         "/{id}",
         response=AfgiftsanmeldelseOut,
@@ -134,22 +190,22 @@ class AfgiftsanmeldelseAPI:
         return get_object_or_404(Afgiftsanmeldelse, id=id)
 
     @route.get(
-        "",
-        response=NinjaPaginationResponseSchema[AfgiftsanmeldelseOut],
+        "/{id}/full",
+        response=AfgiftsanmeldelseFullOut,
         auth=JWTAuth(),
-        url_name="afgiftsanmeldelse_list",
+        url_name="afgiftsanmeldelse_get_full",
     )
-    @paginate()  # https://eadwincode.github.io/django-ninja-extra/tutorial/pagination/
-    def list_afgiftsanmeldelser(
-        self, filters: AfgiftsanmeldelseFilterSchema = Query(...)
-    ):
-        # https://django-ninja.rest-framework.com/guides/input/filtering/
-        return list(filters.filter(Afgiftsanmeldelse.objects.all()))
-        """
-        return list(Afgiftsanmeldelse.objects.filter(
-            filters.get_filter_expression() & Q("mere filtrering fra vores side")
-        ))
-        """
+    def get_afgiftsanmeldelse_full(self, id: int):
+        return get_object_or_404(Afgiftsanmeldelse, id=id)
+
+    @staticmethod
+    def map_sort(sort, order):
+        if sort is not None:
+            if hasattr(Afgiftsanmeldelse, sort):
+                if sort in ("afsender", "modtager"):
+                    sort += "__navn"
+                return ("-" if order == "desc" else "") + sort
+        return None
 
     @route.patch("/{id}", auth=JWTAuth(), url_name="afgiftsanmeldelse_update")
     def update_afgiftsanmeldelse(

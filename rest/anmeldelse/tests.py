@@ -1,3 +1,5 @@
+import json
+from copy import deepcopy
 from decimal import Decimal
 
 from anmeldelse.models import Afgiftsanmeldelse, Varelinje
@@ -11,6 +13,14 @@ from sats.models import Vareafgiftssats
 
 class AfgiftsanmeldelseTest(RestMixin, TestCase):
     object_class = Afgiftsanmeldelse
+
+    @property
+    def list_full_function(self) -> str:
+        return f"{self.object_class.__name__.lower()}_list_full"
+
+    @property
+    def get_full_function(self) -> str:
+        return f"{self.object_class.__name__.lower()}_get_full"
 
     def setUp(self) -> None:
         super().setUp()
@@ -42,6 +52,36 @@ class AfgiftsanmeldelseTest(RestMixin, TestCase):
         return self._expected_object_data
 
     @property
+    def sort_fields(self):
+        return ("afsender", "modtager", "dato", "godkendt")
+
+    @property
+    def data_map(self):
+        return {
+            "afsender": self.afsender_data,
+            "modtager": self.modtager_data,
+            "fragtforsendelse": self.fragtforsendelse_data,
+            "postforsendelse": self.postforsendelse_data,
+        }
+
+    def nest_expected_data(self, item):
+        for key, value in self.data_map.items():
+            if item.get(key, None) or item.get(key + "_id"):
+                if key + "_id" in item:
+                    del item[key + "_id"]
+                item[key] = {
+                    "id": getattr(self.afgiftsanmeldelse, key).id,
+                    **self.unenumerate(value),
+                }
+
+    @property
+    def expected_full_object_data(self):
+        if not hasattr(self, "_expected_full_object_data"):
+            self._expected_full_object_data = deepcopy(self.expected_object_data)
+            self.nest_expected_data(self._expected_full_object_data)
+        return self._expected_full_object_data
+
+    @property
     def expected_list_response_dict(self):
         if not hasattr(self, "_expected_list_response_dict"):
             self._expected_list_response_dict = {}
@@ -57,6 +97,15 @@ class AfgiftsanmeldelseTest(RestMixin, TestCase):
                 }
             )
         return self._expected_list_response_dict
+
+    @property
+    def expected_list_full_response_dict(self):
+        if not hasattr(self, "_expected_list_full_response_dict"):
+            self._expected_list_full_response_dict = deepcopy(
+                self.expected_list_response_dict
+            )
+            self.nest_expected_data(self._expected_list_full_response_dict)
+        return self._expected_list_full_response_dict
 
     def create_items(self):
         self.precreated_item = self.afgiftsanmeldelse

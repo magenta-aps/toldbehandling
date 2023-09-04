@@ -4,6 +4,7 @@ import os
 import re
 from datetime import date
 from decimal import Decimal
+from enum import Enum
 from itertools import chain
 from typing import Tuple, List, Union, Any, Dict
 from urllib.parse import urlencode, unquote
@@ -112,12 +113,24 @@ class RestMixin:
         return f"{self.object_class.__name__.lower()}_get"
 
     @property
+    def get_full_function(self) -> Union[str, None]:
+        return None
+
+    @property
     def list_function(self) -> str:
         return f"{self.object_class.__name__.lower()}_list"
 
     @property
+    def list_full_function(self) -> Union[str, None]:
+        return None
+
+    @property
     def update_function(self) -> str:
         return f"{self.object_class.__name__.lower()}_update"
+
+    @property
+    def sort_fields(self):
+        return ()
 
     @classmethod
     def model_to_dict_forced(
@@ -261,23 +274,69 @@ class RestMixin:
             + f"for GET {url}. Got HTTP {response.status_code}: {response.content}",
         )
 
+    def test_get_full(self):
+        if self.get_full_function:
+            self.create_items()
+            url = reverse(
+                f"api-1.0.0:{self.get_full_function}",
+                kwargs={"id": self.precreated_item.id},
+            )
+            response = self.client.get(
+                url, HTTP_AUTHORIZATION=f"Bearer {self.authorized_access_token}"
+            )
+            self.assertEqual(
+                response.status_code,
+                200,
+                "Reach READ API endpoint with existing id, "
+                f"expect HTTP 200 for GET {url}",
+            )
+            self.compare_dicts(
+                response.json(),
+                self.expected_full_object_data,
+                f"Querying READ API endpoint, expected data to match for url {url}",
+            )
+
     def test_list(self):
         self.create_items()
-        url = reverse(f"api-1.0.0:{self.list_function}")
-        response = self.client.get(
-            url, HTTP_AUTHORIZATION=f"Bearer {self.authorized_access_token}"
-        )
-        self.assertEqual(
-            response.status_code,
-            200,
-            f"Reach LIST API endpoint, expect HTTP 200 for GET {url}. "
-            + f"Got HTTP {response.status_code}: {response.content}",
-        )
-        self.compare_in(
-            response.json()["items"],
-            self.expected_list_response_dict,
-            f"Querying LIST API endpoint, expected data to match for GET {url}",
-        )
+        for sort in [None] + list(self.sort_fields):
+            for order in ("asc", "desc"):
+                url = (
+                    reverse(f"api-1.0.0:{self.list_function}")
+                    + f"?sort={sort}&order={order}"
+                )
+                response = self.client.get(
+                    url, HTTP_AUTHORIZATION=f"Bearer {self.authorized_access_token}"
+                )
+                self.assertEqual(
+                    response.status_code,
+                    200,
+                    f"Reach LIST API endpoint, expect HTTP 200 for GET {url}. "
+                    + f"Got HTTP {response.status_code}: {response.content}",
+                )
+                self.compare_in(
+                    response.json()["items"],
+                    self.expected_list_response_dict,
+                    f"Querying LIST API endpoint, expected data to match for GET {url}",
+                )
+
+    def test_list_full(self):
+        if self.list_full_function:
+            self.create_items()
+            url = reverse(f"api-1.0.0:{self.list_full_function}") + "?sort=id&order=asc"
+            response = self.client.get(
+                url, HTTP_AUTHORIZATION=f"Bearer {self.authorized_access_token}"
+            )
+            self.assertEqual(
+                response.status_code,
+                200,
+                f"Reach LIST API endpoint, expect HTTP 200 for GET {url}. "
+                + f"Got HTTP {response.status_code}: {response.content}",
+            )
+            self.compare_in(
+                response.json()["items"],
+                self.expected_list_full_response_dict,
+                f"Querying LIST API endpoint, expected data to match for GET {url}",
+            )
 
     def test_list_filter(self):
         self.create_items()
@@ -672,3 +731,10 @@ class RestMixin:
             "kræver_indførselstilladelse": False,
         }
         self.afgiftstabel_data = {}
+
+    @staticmethod
+    def unenumerate(item):
+        return {
+            key: value.value if isinstance(value, Enum) else value
+            for key, value in item.items()
+        }
