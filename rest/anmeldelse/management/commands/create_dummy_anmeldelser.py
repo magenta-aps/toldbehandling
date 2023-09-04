@@ -1,3 +1,5 @@
+import random
+from datetime import date, timedelta
 from decimal import Decimal
 
 from aktør.models import Afsender, Modtager
@@ -39,23 +41,36 @@ class Command(BaseCommand):
             fakturabeløb=Decimal("400000"),
         )
 
-        anmeldelse = Afgiftsanmeldelse.objects.create(
-            afsender=Afsender.objects.order_by("?").first(),
-            modtager=Modtager.objects.order_by("?").first(),
-            fragtforsendelse=None,
-            postforsendelse=Postforsendelse.objects.order_by("?").first(),
-            leverandørfaktura_nummer="5678",
-            modtager_betaler=False,
-            indførselstilladelse="1234",
-            betalt=True,
-            godkendt=True,
-        )
-        anmeldelse.leverandørfaktura.save(
-            "leverandørfaktura.txt", ContentFile("testdata")
-        )
-        Varelinje.objects.create(
-            afgiftsanmeldelse=anmeldelse,
-            afgiftssats=Vareafgiftssats.objects.order_by("?")[0],
-            kvantum=200,
-            fakturabeløb=Decimal("4000"),
-        )
+        for i in range(1, 30):
+            forsendelse = Postforsendelse.objects.create(
+                forsendelsestype=random.choice(
+                    [
+                        Postforsendelse.Forsendelsestype.SKIB,
+                        Postforsendelse.Forsendelsestype.FLY,
+                    ]
+                ),
+                postforsendelsesnummer="1234",
+            )
+
+            anmeldelse = Afgiftsanmeldelse.objects.create(
+                afsender=Afsender.objects.order_by("?").first(),
+                modtager=Modtager.objects.order_by("?").first(),
+                fragtforsendelse=None,
+                postforsendelse=forsendelse,
+                leverandørfaktura_nummer="5678",
+                modtager_betaler=False,
+                indførselstilladelse="1234",
+                betalt=random.choice([False, True]),
+                godkendt=random.choice([None, False, True]),
+            )
+            anmeldelse.dato = date.today() - timedelta(days=random.randint(0, 1000))
+            anmeldelse.save(update_fields=["dato"])
+            anmeldelse.leverandørfaktura.save(
+                "leverandørfaktura.txt", ContentFile("testdata")
+            )
+            Varelinje.objects.create(
+                afgiftsanmeldelse=anmeldelse,
+                afgiftssats=Vareafgiftssats.objects.order_by("?")[0],
+                kvantum=random.randint(1, 400),
+                fakturabeløb=Decimal(random.randint(400, 40000)),
+            )
