@@ -5,12 +5,11 @@ from django.conf import settings
 from django.http import JsonResponse, FileResponse
 from django.views import View
 from django.views.generic import FormView, RedirectView
+from told_common import forms
 from told_common.view_mixins import (
     LoginRequiredMixin,
     HasRestClientMixin,
 )
-
-from told_common import forms
 
 
 class LoginView(FormView):

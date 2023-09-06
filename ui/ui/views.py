@@ -1,13 +1,9 @@
-import os
 from datetime import date
 from typing import Dict, Any
-from urllib.parse import unquote
 
-from django.conf import settings
-from django.http import JsonResponse, FileResponse
+from django.http import JsonResponse
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
-from django.views import View
 from django.views.generic import FormView
 from told_common.view_mixins import (
     FormWithFormsetView,
@@ -166,25 +162,3 @@ class TF10ListView(LoginRequiredMixin, HasRestClientMixin, FormView):
             )
         )
         return kwargs
-
-
-class FileView(LoginRequiredMixin, HasRestClientMixin, View):
-    def get(self, request, *args, **kwargs):
-        object = self.rest_client.get(
-            f"{self.api}/{kwargs['id']}"
-        )  # Vil kaste 404 hvis id ikke findes
-        # settings.MEDIA_ROOT er monteret i Docker så det deles mellem
-        # containerne REST og UI.
-        # Derfor kan vi læse filer der er skrevet af den anden container
-        path = os.path.join(settings.MEDIA_ROOT, unquote(object[self.key]).lstrip("/"))
-        return FileResponse(open(path, "rb"))
-
-
-class LeverandørFakturaView(FileView):
-    api = "afgiftsanmeldelse"
-    key = "leverandørfaktura"
-
-
-class FragtbrevView(FileView):
-    api = "fragtforsendelse"
-    key = "fragtbrev"

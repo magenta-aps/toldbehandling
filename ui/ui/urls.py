@@ -1,6 +1,5 @@
 from django.urls import path
 from django.views.generic import TemplateView
-
 from told_common.views import (
     LoginView,
     LogoutView,
