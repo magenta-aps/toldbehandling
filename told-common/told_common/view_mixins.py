@@ -1,5 +1,4 @@
 import time
-
 from urllib.parse import quote_plus
 
 from django.http import HttpResponseRedirect, HttpResponseServerError

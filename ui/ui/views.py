@@ -1,13 +1,9 @@
-import os
 from datetime import date
 from typing import Dict, Any
-from urllib.parse import unquote
 
-from django.conf import settings
-from django.http import JsonResponse, FileResponse
+from django.http import JsonResponse
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
-from django.views import View
 from django.views.generic import FormView
 from told_common.view_mixins import (
     FormWithFormsetView,
