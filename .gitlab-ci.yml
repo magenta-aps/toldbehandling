@@ -256,7 +256,7 @@ Release REST image:
     ["Build REST image", "Unittest REST", "Django check REST"]
   script:
     - skopeo copy
-      --src-creds=${CI_REGISTRY_USER}:${CI_BUILD_TOKEN}
+      --src-creds=${CI_REGISTRY_USER}:${CI_REGISTRY_PASSWORD}
       --dest-creds=${RELEASE_REGISTRY_USER}:${RELEASE_REGISTRY_PASSWORD}
       "docker://${REST_IMAGE_SHA}"
       "docker://${REST_IMAGE_TAG}"
@@ -270,7 +270,7 @@ Release UI image:
     ["Build UI image", "Unittest UI", "Django check UI"]
   script:
     - skopeo copy
-      --src-creds=${CI_REGISTRY_USER}:${CI_BUILD_TOKEN}
+      --src-creds=${CI_REGISTRY_USER}:${CI_REGISTRY_PASSWORD}
       --dest-creds=${RELEASE_REGISTRY_USER}:${RELEASE_REGISTRY_PASSWORD}
       "docker://${UI_IMAGE_SHA}"
       "docker://${UI_IMAGE_TAG}"
@@ -283,7 +283,7 @@ Release ER image:
     ["Build ER image"]
   script:
     - skopeo copy
-      --src-creds=${CI_REGISTRY_USER}:${CI_BUILD_TOKEN}
+      --src-creds=${CI_REGISTRY_USER}:${CI_REGISTRY_PASSWORD}
       --dest-creds=${RELEASE_REGISTRY_USER}:${RELEASE_REGISTRY_PASSWORD}
       "docker://${ER_IMAGE_SHA}"
       "docker://${ER_IMAGE_TAG}"
