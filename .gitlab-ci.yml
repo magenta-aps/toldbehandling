@@ -280,6 +280,10 @@ Release ER image:
   needs:
     ["Build ER image"]
   script:
+    - skopeo login
+      --username=${RELEASE_REGISTRY_USER}
+      --password=${RELEASE_REGISTRY_PASSWORD}
+      "${RELEASE_REGISTRY_IMAGE}-er"
     - skopeo copy
       --src-creds=${CI_REGISTRY_USER}:${CI_BUILD_TOKEN}
       --dest-creds=${RELEASE_REGISTRY_USER}:${RELEASE_REGISTRY_PASSWORD}
