@@ -7,6 +7,7 @@ from django.shortcuts import redirect
 from django.urls import reverse
 from django.views.generic import FormView, TemplateView
 from requests import HTTPError
+from told_common import views as common_views
 from told_common.view_mixins import LoginRequiredMixin, HasRestClientMixin
 
 from admin import forms
@@ -79,8 +80,8 @@ class TF10View(LoginRequiredMixin, HasRestClientMixin, FormView):
             "varelinje", {"afgiftsanmeldelse": anmeldelse["id"]}
         )["items"]
         for varelinje in anmeldelse["varelinjer"]:
-            sats_id = varelinje["afgiftssats"]
-            varelinje["afgiftssats"] = self.get_sats(sats_id)
+            sats_id = varelinje["vareafgiftssats"]
+            varelinje["vareafgiftssats"] = self.get_sats(sats_id)
         return anmeldelse
 
     def get_data(self, api, id) -> Union[dict, None]:
@@ -113,3 +114,19 @@ class TF10View(LoginRequiredMixin, HasRestClientMixin, FormView):
                         sats.subsatser.append(subsats)
             self._satser[sats_id] = sats
         return self._satser[sats_id]
+
+
+class TF10ListView(common_views.TF10ListView):
+    actions_template = "admin/blanket/tf10/link.html"
+    extend_template = "admin/admin_layout.html"
+
+    def get_context_data(self, **context):
+        return super().get_context_data(**{**context, "can_create": False})
+
+
+class TF10FormUpdateView(common_views.TF10FormUpdateView):
+    extend_template = "admin/admin_layout.html"
+
+    def get_success_url(self):
+        return reverse("tf10_view", kwargs={"id": self.kwargs["id"]})
+

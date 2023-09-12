@@ -1,10 +1,699 @@
-from django.test import TestCase
+import json
+import time
+from copy import deepcopy
+from datetime import timedelta, datetime
+from typing import Tuple, Callable, Any
+from unittest.mock import patch, mock_open
+from urllib.parse import quote, quote_plus, urlparse, parse_qs
+
+import requests
+from bs4 import BeautifulSoup
+from django.urls import reverse
+from requests import Response
+from told_common.rest_client import RestClient
 from told_common.templatetags.common_tags import file_basename, zfill
 
 
-class TemplateTagsTest(TestCase):
+class TemplateTagsTest:
     def test_file_basename(self):
         self.assertEquals(file_basename("/path/to/file.txt"), "file.txt")
 
     def test_zfill(self):
         self.assertEquals(zfill("444", 10), "0000000444")
+
+
+class LoginTest:
+    def restricted_url(self):
+        raise NotImplementedError("Implement in subclasses")
+
+    @staticmethod
+    def create_response(status_code, content):
+        response = Response()
+        response.status_code = status_code
+        if type(content) in (dict, list):
+            content = json.dumps(content)
+        if type(content) is str:
+            content = content.encode("utf-8")
+        response._content = content
+        return response
+
+    @staticmethod
+    def get_errors(html: str):
+        soup = BeautifulSoup(html, "html.parser")
+        error_fields = {}
+        for element in soup.find_all(class_="is-invalid"):
+            el = element
+            for i in range(1, 3):
+                el = el.parent
+                errorlist = el.find(class_="errorlist")
+                if errorlist:
+                    error_fields[element["name"]] = [
+                        li.text for li in errorlist.find_all(name="li")
+                    ]
+                    break
+        all_errors = soup.find(
+            lambda tag: tag.has_attr("class")
+            and "errorlist" in tag["class"]
+            and "nonfield" in tag["class"]
+        )
+        if all_errors:
+            error_fields["__all__"] = [li.text for li in all_errors.find_all(name="li")]
+        return error_fields
+
+    def submit_get_errors(self, url, data):
+        return self.get_errors(self.client.post(url, data=data).content)
+
+    @patch.object(requests, "post", return_value=create_response(401, "Unauthorized"))
+    def test_incorrect_login(self, mock_method):
+        response = self.client.post(reverse("login"), {"username": "incorrect"})
+        self.assertEquals(response.status_code, 200)  # Rerender form
+        mock_method.assert_not_called()
+        errors = self.get_errors(response.content)
+        self.assertEquals(errors["password"], ["Dette felt er påkrævet."])
+
+        response = self.client.post(
+            reverse("login"), {"username": "incorrect", "password": "credentials"}
+        )
+        self.assertEquals(response.status_code, 200)  # Rerender form
+        mock_method.assert_called_with(
+            "http://toldbehandling-rest:7000/api/token/pair",
+            json={"username": "incorrect", "password": "credentials"},
+            headers={"Content-Type": "application/json"},
+        )
+
+    @patch.object(
+        requests,
+        "post",
+        return_value=create_response(200, {"access": "123456", "refresh": "abcdef"}),
+    )
+    def test_correct_login(self, mock_method):
+        response = self.client.post(
+            reverse("login") + "?next=/",
+            {"username": "correct", "password": "credentials"},
+        )
+        mock_method.assert_called_with(
+            "http://toldbehandling-rest:7000/api/token/pair",
+            json={"username": "correct", "password": "credentials"},
+            headers={"Content-Type": "application/json"},
+        )
+        self.assertEquals(response.status_code, 302)
+        self.assertEquals(response.headers["Location"], "/")
+        self.assertEquals(response.cookies["access_token"].value, "123456")
+        self.assertEquals(response.cookies["refresh_token"].value, "abcdef")
+
+    @patch.object(RestClient, "refresh_login")
+    @patch.object(
+        requests.Session,
+        "get",
+        return_value=create_response(200, {"count": 0, "items": []}),
+    )
+    @patch.object(
+        requests,
+        "post",
+        return_value=create_response(200, {"access": "123456", "refresh": "abcdef"}),
+    )
+    def test_token_refresh_not_needed(self, mock_post, mock_get, mock_refresh_login):
+        self.client.post(
+            reverse("login"), {"username": "correct", "password": "credentials"}
+        )
+        self.client.get(reverse("rest", kwargs={"path": "afsender"}))
+        # Check that token refresh is not needed
+        mock_refresh_login.assert_not_called()
+        with self.settings(NINJA_JWT={"ACCESS_TOKEN_LIFETIME": timedelta(seconds=1)}):
+            self.client.get(reverse("rest", kwargs={"path": "afsender"}))
+            # Check that token refresh is needed
+            mock_refresh_login.assert_called()
+
+    @patch.object(RestClient, "refresh_login")
+    @patch.object(
+        requests.Session,
+        "get",
+        return_value=create_response(200, {"count": 0, "items": []}),
+    )
+    @patch.object(
+        requests,
+        "post",
+        return_value=create_response(200, {"access": "123456", "refresh": "abcdef"}),
+    )
+    def test_token_refresh_needed(self, mock_post, mock_get, mock_refresh_login):
+        self.client.post(
+            reverse("login"), {"username": "correct", "password": "credentials"}
+        )
+        self.client.get(reverse("rest", kwargs={"path": "afsender"}))
+        # Check that token refresh is not needed
+        mock_refresh_login.assert_not_called()
+        # Set token max_age way down, so it will be refreshed
+        with self.settings(NINJA_JWT={"ACCESS_TOKEN_LIFETIME": timedelta(seconds=1)}):
+            self.client.get(reverse("rest", kwargs={"path": "afsender"}))
+            # Check that token refresh is needed
+            mock_refresh_login.assert_called()
+
+    @patch.object(
+        requests.Session,
+        "get",
+        return_value=create_response(200, {"count": 0, "items": []}),
+    )
+    @patch.object(
+        requests,
+        "post",
+        return_value=create_response(200, {"access": "123456", "refresh": "abcdef"}),
+    )
+    def test_token_refresh(self, mock_post, mock_get):
+        self.client.post(
+            reverse("login"), {"username": "correct", "password": "credentials"}
+        )
+        mock_post.return_value = self.create_response(200, {"access": "7890ab"})
+        # Set token max_age way down, so it will be refreshed
+        with self.settings(NINJA_JWT={"ACCESS_TOKEN_LIFETIME": timedelta(seconds=1)}):
+            response = self.client.get(reverse("rest", kwargs={"path": "afsender"}))
+            # Check that token refresh is needed
+            self.assertEquals(response.cookies["access_token"].value, "7890ab")
+
+    @patch.object(
+        requests,
+        "post",
+        return_value=create_response(200, {"access": "123456", "refresh": "abcdef"}),
+    )
+    def test_logout(self, mock_post):
+        response = self.client.post(
+            reverse("login") + "?next=/",
+            {"username": "correct", "password": "credentials"},
+        )
+        self.assertEquals(response.status_code, 302)
+        self.assertEquals(response.headers["Location"], "/")
+        self.assertEquals(response.cookies["access_token"].value, "123456")
+        self.assertEquals(response.cookies["refresh_token"].value, "abcdef")
+        response = self.client.get(reverse("logout"))
+        self.assertEquals(response.cookies["access_token"].value, "")
+        self.assertEquals(response.cookies["refresh_token"].value, "")
+
+    @patch.object(
+        requests.Session,
+        "get",
+        return_value=create_response(401, ""),
+    )
+    def test_token_refresh_expired(self, mock_get):
+        self.client.cookies.load(
+            {
+                "access_token": "123456",
+                "refresh_token": "abcdef",
+                "access_token_timestamp": time.time(),
+                "refresh_token_timestamp": (
+                    datetime.now() - timedelta(days=2)
+                ).timestamp(),
+            }
+        )
+        response = self.client.get(self.restricted_url)
+        self.assertEquals(response.status_code, 302)
+        self.assertEquals(
+            response.headers["Location"],
+            "/login?next=" + quote_plus(self.restricted_url),
+        )
+        mock_get.return_value = self.create_response(500, "")
+        response = self.client.get(self.restricted_url)
+        self.assertEquals(response.status_code, 302)
+
+
+class HasLogin:
+    def login(self):
+        self.client.cookies.load(
+            {
+                "access_token": "123456",
+                "refresh_token": "abcdef",
+                "access_token_timestamp": time.time(),
+                "refresh_token_timestamp": time.time(),
+            }
+        )
+
+
+class AnmeldelseListViewTest(HasLogin):
+    def list_url(self):
+        raise NotImplementedError("Implement in subclasses")
+
+    def edit_url(self, id):
+        raise NotImplementedError("Implement in subclasses")
+
+    def view_url(self, id):
+        raise NotImplementedError("Implement in subclasses")
+
+    @staticmethod
+    def get_html_list(html: str):
+        soup = BeautifulSoup(html, "html.parser")
+        headers = [element.text for element in soup.css.select("table thead tr th")]
+        return [
+            dict(zip(headers, [td.text.strip() for td in row.select("td")]))
+            for row in soup.css.select("table tbody tr")
+        ]
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.testdata = [
+            {
+                "id": 1,
+                "leverandørfaktura_nummer": "12345",
+                "modtager_betaler": False,
+                "indførselstilladelse": "abcde",
+                "betalt": False,
+                "leverandørfaktura": "/leverand%C3%B8rfakturaer"
+                "/10/leverand%C3%B8rfaktura.pdf",
+                "afsender": {
+                    "id": 20,
+                    "navn": "Testfirma 5",
+                    "adresse": "Testvej 42",
+                    "postnummer": 1234,
+                    "by": "TestBy",
+                    "postbox": "123",
+                    "telefon": "123456",
+                    "cvr": 12345678,
+                },
+                "modtager": {
+                    "id": 21,
+                    "navn": "Testfirma 3",
+                    "adresse": "Testvej 42",
+                    "postnummer": 1234,
+                    "by": "TestBy",
+                    "postbox": "123",
+                    "telefon": "123456",
+                    "cvr": 12345678,
+                    "kreditordning": True,
+                    "indførselstilladelse": 123,
+                },
+                "postforsendelse": {
+                    "id": 1,
+                    "postforsendelsesnummer": "1234",
+                    "forsendelsestype": "S",
+                },
+                "dato": "2023-09-03",
+                "afgift_total": None,
+                "fragtforsendelse": None,
+                "godkendt": True,
+            },
+            {
+                "id": 2,
+                "leverandørfaktura_nummer": "12345",
+                "modtager_betaler": False,
+                "indførselstilladelse": "abcde",
+                "betalt": False,
+                "leverandørfaktura": "/leverand%C3%B8rfakturaer"
+                "/10/leverand%C3%B8rfaktura.pdf",
+                "afsender": {
+                    "id": 22,
+                    "navn": "Testfirma 4",
+                    "adresse": "Testvej 42",
+                    "postnummer": 1234,
+                    "by": "TestBy",
+                    "postbox": "123",
+                    "telefon": "123456",
+                    "cvr": 12345678,
+                },
+                "modtager": {
+                    "id": 23,
+                    "navn": "Testfirma 1",
+                    "adresse": "Testvej 42",
+                    "postnummer": 1234,
+                    "by": "TestBy",
+                    "postbox": "123",
+                    "telefon": "123456",
+                    "cvr": 12345678,
+                    "kreditordning": True,
+                    "indførselstilladelse": 123,
+                },
+                "postforsendelse": {
+                    "id": 2,
+                    "postforsendelsesnummer": "1234",
+                    "forsendelsestype": "S",
+                },
+                "dato": "2023-09-02",
+                "afgift_total": None,
+                "fragtforsendelse": None,
+                "godkendt": False,
+            },
+            {
+                "id": 3,
+                "leverandørfaktura_nummer": "12345",
+                "modtager_betaler": False,
+                "indførselstilladelse": "abcde",
+                "betalt": False,
+                "leverandørfaktura": "/leverand%C3%B8rfakturaer"
+                "/10/leverand%C3%B8rfaktura.pdf",
+                "afsender": {
+                    "id": 24,
+                    "navn": "Testfirma 6",
+                    "adresse": "Testvej 42",
+                    "postnummer": 1234,
+                    "by": "TestBy",
+                    "postbox": "123",
+                    "telefon": "123456",
+                    "cvr": 12345678,
+                },
+                "modtager": {
+                    "id": 25,
+                    "navn": "Testfirma 2",
+                    "adresse": "Testvej 42",
+                    "postnummer": 1234,
+                    "by": "TestBy",
+                    "postbox": "123",
+                    "telefon": "123456",
+                    "cvr": 12345678,
+                    "kreditordning": True,
+                    "indførselstilladelse": 123,
+                },
+                "postforsendelse": {
+                    "id": 3,
+                    "postforsendelsesnummer": "1234",
+                    "forsendelsestype": "S",
+                },
+                "dato": "2023-09-01",
+                "afgift_total": None,
+                "fragtforsendelse": None,
+                "godkendt": None,
+            },
+        ]
+
+    def mock_requests_get(self, path):
+        expected_prefix = "/api/"
+        p = urlparse(path)
+        path = p.path
+        query = parse_qs(p.query)
+        path = path.rstrip("/")
+        response = Response()
+        json_content = None
+        content = None
+        status_code = None
+        if path == expected_prefix + "afgiftsanmeldelse/full":
+            items = deepcopy(self.testdata)
+            if "dato_før" in query:
+                items = list(filter(lambda i: i["dato"] < query["dato_før"][0], items))
+            if "dato_efter" in query:
+                items = list(
+                    filter(lambda i: i["dato"] >= query["dato_efter"][0], items)
+                )
+            if "offset" in query:
+                items = items[int(query["offset"][0]) :]
+            if "limit" in query:
+                items = items[: int(query["limit"][0])]
+            sort = query.get("sort")
+            reverse = query.get("order") == ["desc"]
+            if sort == ["afsender"]:
+                items.sort(key=lambda x: x["afsender"]["navn"], reverse=reverse)
+            elif sort == ["modtager"]:
+                items.sort(key=lambda x: x["modtager"]["navn"], reverse=reverse)
+            elif sort == ["dato"]:
+                items.sort(key=lambda x: x["dato"], reverse=reverse)
+            elif sort == ["godkendt"]:
+                items.sort(
+                    key=lambda x: (x["godkendt"] is None, x["godkendt"]),
+                    reverse=reverse,
+                )
+
+            json_content = {"count": len(items), "items": items}
+        if path == expected_prefix + "vareafgiftssats":
+            json_content = {
+                "count": 1,
+                "items": [
+                    {
+                        "id": 1,
+                        "afgiftstabel": 1,
+                        "vareart": "Båthorn",
+                        "afgiftsgruppenummer": 1234567,
+                        "enhed": "kg",
+                        "afgiftssats": "1.00",
+                    }
+                ],
+            }
+        if json_content:
+            content = json.dumps(json_content).encode("utf-8")
+        if content:
+            if not status_code:
+                status_code = 200
+            response._content = content
+        response.status_code = status_code or 404
+        return response
+
+    def test_requires_login(self):
+        url = self.list_url
+        response = self.client.get(url)
+        self.assertEquals(response.status_code, 302)
+        self.assertEquals(
+            response.headers["Location"],
+            reverse("login") + "?next=" + quote(url, safe=""),
+        )
+
+    @patch.object(requests.Session, "get")
+    def test_list(self, mock_get):
+        mock_get.side_effect = self.mock_requests_get
+        self.login()
+        url = self.list_url
+        response = self.client.get(url)
+        self.assertEquals(response.status_code, 200)
+        table_data = self.get_html_list(response.content)
+        self.assertEquals(
+            table_data,
+            [
+                {
+                    "Nummer": "1",
+                    "Dato": "2023-09-03",
+                    "Afsender": "Testfirma 5",
+                    "Modtager": "Testfirma 3",
+                    "Status": "Godkendt",
+                    "Handlinger": "Vis" if self.can_view else "",
+                },
+                {
+                    "Nummer": "2",
+                    "Dato": "2023-09-02",
+                    "Afsender": "Testfirma 4",
+                    "Modtager": "Testfirma 1",
+                    "Status": "Afvist",
+                    "Handlinger": "Vis" if self.can_view else "",
+                },
+                {
+                    "Nummer": "3",
+                    "Dato": "2023-09-01",
+                    "Afsender": "Testfirma 6",
+                    "Modtager": "Testfirma 2",
+                    "Status": "Ny",
+                    "Handlinger": " ".join(
+                        filter(
+                            None,
+                            [
+                                "Redigér" if self.can_edit else None,
+                                "Vis" if self.can_view else None,
+                            ],
+                        )
+                    ),
+                },
+            ],
+        )
+
+        url = self.list_url + "?json=1"
+        response = self.client.get(url)
+        self.assertEquals(response.status_code, 200)
+        data = response.json()
+
+        def _view_button(id):
+            if self.can_view:
+                return (
+                    f'<a class="btn btn-primary btn-sm" '
+                    f'href="{self.view_url(id)}">Vis</a>'
+                )
+
+        def _edit_button(id):
+            if self.can_edit:
+                return (
+                    f'<a class="btn btn-primary btn-sm" '
+                    f'href="{self.edit_url(id)}">Redigér</a>'
+                )
+
+        self.assertEquals(
+            self._modify_values(data, (str,), lambda s: s.strip()),
+            {
+                "total": 3,
+                "items": [
+                    {
+                        "id": 1,
+                        "dato": "2023-09-03",
+                        "afsender": "Testfirma 5",
+                        "modtager": "Testfirma 3",
+                        "godkendt": "Godkendt",
+                        "actions": _view_button(1) or "",
+                    },
+                    {
+                        "id": 2,
+                        "dato": "2023-09-02",
+                        "afsender": "Testfirma 4",
+                        "modtager": "Testfirma 1",
+                        "godkendt": "Afvist",
+                        "actions": _view_button(2) or "",
+                    },
+                    {
+                        "id": 3,
+                        "dato": "2023-09-01",
+                        "afsender": "Testfirma 6",
+                        "modtager": "Testfirma 2",
+                        "godkendt": "Ny",
+                        "actions": "\n".join(
+                            filter(
+                                None,
+                                [
+                                    _edit_button(3),
+                                    _view_button(3),
+                                ],
+                            )
+                        ),
+                    },
+                ],
+            },
+        )
+
+    @patch.object(requests.Session, "get")
+    def test_list_sort(self, mock_get):
+        mock_get.side_effect = self.mock_requests_get
+        self.login()
+        sort_tests = [
+            ("afsender", "", [2, 1, 3]),
+            ("afsender", "asc", [2, 1, 3]),
+            ("afsender", "desc", [3, 1, 2]),
+            ("modtager", "", [2, 3, 1]),
+            ("modtager", "asc", [2, 3, 1]),
+            ("modtager", "desc", [1, 3, 2]),
+            ("dato", "", [3, 2, 1]),
+            ("dato", "asc", [3, 2, 1]),
+            ("dato", "desc", [1, 2, 3]),
+            ("godkendt", "", [2, 1, 3]),
+            ("godkendt", "asc", [2, 1, 3]),
+            ("godkendt", "desc", [3, 1, 2]),
+        ]
+        for test in sort_tests:
+            url = self.list_url + f"?json=1&sort={test[0]}&order={test[1]}"
+            response = self.client.get(url)
+            numbers = [int(item["id"]) for item in response.json()["items"]]
+            self.assertEquals(response.status_code, 200)
+            self.assertEquals(numbers, test[2])
+
+    @patch.object(requests.Session, "get")
+    def test_list_filter(self, mock_get):
+        mock_get.side_effect = self.mock_requests_get
+        self.login()
+        filter_tests = [
+            ("dato_før", "2023-09-01", set()),
+            ("dato_før", "2023-09-02", {3}),
+            ("dato_før", "2023-09-03", {3, 2}),
+            ("dato_før", "2023-09-04", {3, 2, 1}),
+            ("dato_efter", "2023-09-01", {1, 2, 3}),
+            ("dato_efter", "2023-09-02", {1, 2}),
+            ("dato_efter", "2023-09-03", {1}),
+            ("dato_efter", "2023-09-04", set()),
+        ]
+        for field, value, expected in filter_tests:
+            url = self.list_url + f"?json=1&{field}={value}"
+            response = self.client.get(url)
+            self.assertEquals(response.status_code, 200)
+            numbers = [int(item["id"]) for item in response.json()["items"]]
+            self.assertEquals(set(numbers), expected)
+
+    @patch.object(requests.Session, "get")
+    def test_list_paginate(self, mock_get):
+        mock_get.side_effect = self.mock_requests_get
+        self.login()
+        paginate_tests = [
+            (-1, 3, [1, 2, 3]),
+            (0, 3, [1, 2, 3]),
+            (1, 3, [2, 3]),
+            (2, 3, [3]),
+            (0, 2, [1, 2]),
+            (1, 2, [2, 3]),
+            (2, 2, [3]),
+            (0, 1, [1]),
+            (1, 1, [2]),
+            (2, 1, [3]),
+            (0, 0, [1]),
+            (1, 0, [2]),
+            (2, 0, [3]),
+        ]
+        for offset, limit, expected in paginate_tests:
+            url = self.list_url + f"?json=1&offset={offset}&limit={limit}"
+            response = self.client.get(url)
+            numbers = [int(item["id"]) for item in response.json()["items"]]
+            self.assertEquals(response.status_code, 200)
+            self.assertEquals(numbers, expected)
+
+    @patch.object(requests.Session, "get")
+    def test_form_invalid(self, mock_get):
+        mock_get.side_effect = self.mock_requests_get
+        invalid = {
+            "dato_efter": ["fejl", "0", "-1", "2023-13-01", "2023-02-29"],
+            "dato_før": ["fejl", "0", "-1", "2023-13-01", "2023-02-29"],
+            "vareafgiftssats": [-1, 10000000, "a"],
+        }
+        self.login()
+        for field, values in invalid.items():
+            for value in values:
+                url = self.list_url + f"?json=1&{field}={value}"
+                response = self.client.get(url)
+                self.assertEquals(response.status_code, 400)
+                data = response.json()
+                self.assertTrue("error" in data)
+                self.assertTrue(field in data["error"])
+
+                url = self.list_url + f"?{field}={value}"
+                response = self.client.get(url)
+                self.assertEquals(response.status_code, 200)
+                soup = BeautifulSoup(response.content, "html.parser")
+                error_fields = [
+                    element["name"] for element in soup.find_all(class_="is-invalid")
+                ]
+                self.assertEquals(error_fields, [field])
+
+    def _modify_values(self, item: Any, types: Tuple, action: Callable) -> Any:
+        t = type(item)
+        if t is dict:
+            return {
+                key: self._modify_values(value, types, action)
+                for key, value in item.items()
+            }
+        if t is list:
+            return [self._modify_values(value, types, action) for value in item]
+        if t in types:
+            return action(item)
+        return item
+
+
+class FileViewTest(HasLogin):
+    def file_view_url(self):
+        raise NotImplementedError("Implement in subclasses")
+
+    def mock_requests_get(self, path):
+        expected_prefix = "http://toldbehandling-rest:7000/api/"
+        path = path.split("?")[0]
+        path = path.rstrip("/")
+        response = Response()
+        json_content = None
+        content = None
+        status_code = None
+        if path == expected_prefix + "fragtforsendelse/1":
+            json_content = {
+                "id": 1,
+                "forsendelsestype": "S",
+                "fragtbrevsnummer": 1,
+                "fragtbrev": "/leverandørfakturaer/1/leverandørfaktura.txt",
+            }
+        if json_content:
+            content = json.dumps(json_content).encode("utf-8")
+        if content:
+            if not status_code:
+                status_code = 200
+            response._content = content
+        response.status_code = status_code or 404
+        return response
+
+    @patch.object(requests.Session, "get")
+    @patch("builtins.open", mock_open(read_data=b"test_data"))
+    def test_fileview(self, mock_get):
+        self.login()
+        url = self.file_view_url
+        mock_get.side_effect = self.mock_requests_get
+        response = self.client.get(url)
+        self.assertEquals(response.status_code, 200)
+        content = list(response.streaming_content)[0]
+        self.assertEquals(content, b"test_data")

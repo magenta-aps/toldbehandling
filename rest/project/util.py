@@ -37,6 +37,7 @@ class RestPermission(permissions.BasePermission):
         "GET": "view",
         "POST": "add",
         "PATCH": "change",
+        "DELETE": "delete",
     }
 
     def has_permission(self, request: HttpRequest, controller: ControllerBase) -> bool:

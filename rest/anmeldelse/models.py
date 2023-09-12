@@ -1,9 +1,8 @@
+from aktør.models import Afsender, Modtager
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-
-from aktør.models import Afsender, Modtager
 from forsendelse.models import Fragtforsendelse, Postforsendelse
 from sats.models import Vareafgiftssats
 
@@ -91,17 +90,24 @@ class Afgiftsanmeldelse(models.Model):
 
 class Varelinje(models.Model):
     class Meta:
-        ordering = ["afgiftssats"]
+        ordering = ["vareafgiftssats"]
 
     afgiftsanmeldelse = models.ForeignKey(
         Afgiftsanmeldelse,
         on_delete=models.CASCADE,
     )
-    afgiftssats = models.ForeignKey(
+    vareafgiftssats = models.ForeignKey(
         Vareafgiftssats,
         on_delete=models.CASCADE,
     )
-    kvantum = models.PositiveIntegerField()  # DecimalField?
+    mængde = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+    )  # DecimalField?
+    antal = models.PositiveIntegerField(
+        null=True,
+        blank=True,
+    )  # DecimalField?
     fakturabeløb = models.DecimalField(
         max_digits=16, decimal_places=2, validators=[MinValueValidator(0)]
     )
@@ -115,7 +121,7 @@ class Varelinje(models.Model):
 
     def __str__(self):
         return (
-            f"Varelinje(afgiftssats={self.afgiftssats}, "
+            f"Varelinje(vareafgiftssats={self.vareafgiftssats}, "
             + f"fakturabeløb={self.fakturabeløb})"
         )
 
@@ -125,4 +131,4 @@ class Varelinje(models.Model):
         super().save(*args, **kwargs)
 
     def beregn_afgift(self) -> None:
-        self.afgiftsbeløb = self.afgiftssats.beregn_afgift(self)
+        self.afgiftsbeløb = self.vareafgiftssats.beregn_afgift(self)

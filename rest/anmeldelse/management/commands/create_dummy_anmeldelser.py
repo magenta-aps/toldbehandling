@@ -28,16 +28,18 @@ class Command(BaseCommand):
         )
         Varelinje.objects.create(
             afgiftsanmeldelse=anmeldelse,
-            afgiftssats=Vareafgiftssats.objects.filter(
+            vareafgiftssats=Vareafgiftssats.objects.filter(
                 overordnet__isnull=True
             ).order_by("?")[0],
-            kvantum=100,
+            mængde=20,
+            antal=100,
             fakturabeløb=Decimal("2000"),
         )
         Varelinje.objects.create(
             afgiftsanmeldelse=anmeldelse,
-            afgiftssats=Vareafgiftssats.objects.get(afgiftsgruppenummer=72),
-            kvantum=1,
+            vareafgiftssats=Vareafgiftssats.objects.get(afgiftsgruppenummer=72),
+            mængde=None,
+            antal=1,
             fakturabeløb=Decimal("400000"),
         )
 
@@ -70,7 +72,10 @@ class Command(BaseCommand):
             )
             Varelinje.objects.create(
                 afgiftsanmeldelse=anmeldelse,
-                afgiftssats=Vareafgiftssats.objects.order_by("?")[0],
-                kvantum=random.randint(1, 400),
+                vareafgiftssats=Vareafgiftssats.objects.filter(
+                    overordnet__isnull=True
+                ).order_by("?")[0],
+                mængde=random.randint(1, 400),
+                antal=random.randint(1, 400),
                 fakturabeløb=Decimal(random.randint(400, 40000)),
             )

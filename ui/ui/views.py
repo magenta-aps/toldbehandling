@@ -1,45 +1,42 @@
-from datetime import date
 from typing import Dict, Any
 
-from django.http import JsonResponse
 from django.urls import reverse
-from django.utils.translation import gettext_lazy as _
-from django.views.generic import FormView
+from told_common import forms as common_forms
+from told_common import views as common_views
 from told_common.view_mixins import (
     FormWithFormsetView,
     LoginRequiredMixin,
     HasRestClientMixin,
 )
 
-from ui import forms
 
-
-class TF10FormView(LoginRequiredMixin, HasRestClientMixin, FormWithFormsetView):
-    form_class = forms.TF10Form
-    formset_class = forms.TF10VareFormSet
-    template_name = "ui/tf10/form.html"
+class TF10FormCreateView(LoginRequiredMixin, HasRestClientMixin, FormWithFormsetView):
+    form_class = common_forms.TF10Form
+    formset_class = common_forms.TF10VareFormSet
+    template_name = "told_common/tf10/form.html"
+    extend_template = "ui/layout.html"
 
     def get_success_url(self):
         return reverse("tf10_blanket_success")
 
     def form_valid(self, form, formset):
-        afsender_id = self.rest_client.get_or_create_afsender(form.cleaned_data)
-        modtager_id = self.rest_client.get_or_create_modtager(form.cleaned_data)
-        postforsendelse_id = self.rest_client.create_postforsendelse(form.cleaned_data)
-        fragtforsendelse_id = self.rest_client.create_fragtforsendelse(
+        afsender_id = self.rest_client.afsender.get_or_create(form.cleaned_data)
+        modtager_id = self.rest_client.modtager.get_or_create(form.cleaned_data)
+        postforsendelse_id = self.rest_client.postforsendelse.create(form.cleaned_data)
+        fragtforsendelse_id = self.rest_client.fragtforsendelse.create(
             form.cleaned_data, self.request.FILES.get("fragtbrev", None)
         )
-        anmeldelse_id = self.rest_client.create_anmeldelse(
-            self.request,
+        anmeldelse_id = self.rest_client.afgiftanmeldelse.create(
             form.cleaned_data,
+            self.request.FILES["leverandørfaktura"],
             afsender_id,
             modtager_id,
             postforsendelse_id,
             fragtforsendelse_id,
         )
-        self.rest_client.create_varelinjer(
-            [subform.cleaned_data for subform in formset], anmeldelse_id
-        )
+        for subform in formset:
+            if subform.cleaned_data:
+                self.rest_client.varelinje.create(subform.cleaned_data, anmeldelse_id)
         return super().form_valid(form, formset)
 
     def get_formset_kwargs(self) -> Dict[str, Any]:
@@ -58,107 +55,17 @@ class TF10FormView(LoginRequiredMixin, HasRestClientMixin, FormWithFormsetView):
 
     def get_context_data(self, **context: Dict[str, Any]) -> Dict[str, Any]:
         return super().get_context_data(
-            **{**context, "varesatser": self.rest_client.varesatser}
+            **{
+                **context,
+                "varesatser": self.rest_client.varesatser,
+                "extend_template": self.extend_template,
+            }
         )
 
 
-class TF10ListView(LoginRequiredMixin, HasRestClientMixin, FormView):
-    template_name = "ui/tf10/list.html"
-    form_class = forms.TF10SearchForm
-    list_size = 20
+class TF10ListView(common_views.TF10ListView):
+    actions_template = "ui/tf10/link.html"
+    extend_template = "ui/layout.html"
 
-    def get(self, request, *args, **kwargs):
-        # Søgeform; viser formularen (med evt. fejl) når den er invalid,
-        # og evt. søgeresultater når den er gyldig
-        form = self.get_form()
-        if form.is_valid():
-            return self.form_valid(form)
-        else:
-            return self.form_invalid(form)
-
-    def form_valid(self, form):
-        search_data = {"offset": 0, "limit": self.list_size}
-        for key, value in form.cleaned_data.items():
-            if key not in ("json",) and value not in ("", None):
-                if type(value) is date:
-                    value = value.isoformat()
-                elif key in ("offset", "limit"):
-                    value = int(value)
-                search_data[key] = value
-        if search_data["offset"] < 0:
-            search_data["offset"] = 0
-        if search_data["limit"] < 1:
-            search_data["limit"] = 1
-        response = self.rest_client.get("afgiftsanmeldelse/full", search_data)
-        total = response["count"]
-        items = response["items"]
-        context = self.get_context_data(
-            items=items, total=total, search_data=search_data
-        )
-        if form.cleaned_data["json"]:
-            return JsonResponse(
-                {
-                    "total": total,
-                    "items": [
-                        {
-                            key: self.map_value(item, key)
-                            for key in (
-                                "id",
-                                "dato",
-                                "afsender",
-                                "modtager",
-                                "godkendt",
-                                "actions",
-                            )
-                        }
-                        for item in items
-                    ],
-                }
-            )
-        return self.render_to_response(context)
-
-    def form_invalid(self, form):
-        if form.cleaned_data["json"]:
-            return JsonResponse(
-                status=400, data={"count": 0, "items": [], "error": form.errors}
-            )
-        return super().form_invalid(form)
-
-    @staticmethod
-    def map_value(item, key):
-        if key == "actions":
-            html = []
-            id = item["id"]
-            if item["godkendt"] is None:
-                html.append(
-                    # TODO: Indsæt den rigtige url (med `reverse()`)
-                    #  når vi har en side at henvise til
-                    # TODO: Læg dette i template og render den?
-                    '<a class="btn btn-primary btn-sm" '
-                    f"href=\"something{id}\">{_('Redigér')}</a>"
-                )
-            return "".join(html)
-        value = item[key]
-        if key in ("afsender", "modtager"):
-            return value["navn"]
-        if key == "godkendt":
-            if value is True:
-                return _("Godkendt")
-            elif value is False:
-                return _("Afvist")
-            else:
-                return _("Ny")
-        return value
-
-    def get_form_kwargs(self) -> Dict[str, Any]:
-        kwargs = super().get_form_kwargs()
-        kwargs["data"] = self.request.GET
-
-        # Will be picked up by TF10SearchForm's constructor
-        kwargs["varesatser"] = dict(
-            filter(
-                lambda pair: pair[1].get("overordnet", None) is None,
-                self.rest_client.varesatser.items(),
-            )
-        )
-        return kwargs
+    def get_context_data(self, **context):
+        return super().get_context_data(**{**context, "can_create": True})

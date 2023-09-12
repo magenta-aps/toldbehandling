@@ -1,4 +1,4 @@
-{% extends "told_common/layout.html" %}
+{% extends extend_template %}
 {% load static %}
 {% load i18n %}
 {% load l10n %}
@@ -29,15 +29,17 @@
             <div class="col-4">{{form.dato_før}}</div>
         </div>
         <div class="row">
-            <div class="col-4"><label for="{{form.vareart.name}}" class="form-label">Varetype</label></div>
+            <div class="col-4"><label for="{{form.vareafgiftssats.name}}" class="form-label">Varetype</label></div>
             <div class="col-8">
-                {{form.vareart}}
+                {{form.vareafgiftssats}}
             </div>
         </div>
         <div class="row">
             <div class="col-12 cleafix">
                 <button type="submit" class="btn btn-primary float-end">Søg</button>
+                {% if can_create %}
                 <a href="{% url 'tf10_create' %}" class="btn btn-primary float-end">Opret ny</a>
+                {% endif %}
             </div>
         </div>
     </form>
@@ -80,9 +82,7 @@
             <td>{{item.modtager.navn}}</td>
             <td>{{item.godkendt|godkendt}}</td>
             <td>
-                {% if item.godkendt is None %}
-                <a href="#" class="btn btn-primary">Redigér</a>
-                {% endif %}
+                {% include actions_template with item=item %}
             </td>
         </tr>
         {% empty %}

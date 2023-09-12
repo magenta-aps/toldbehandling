@@ -29,6 +29,8 @@ class BootstrapForm(forms.Form):
         #        classes.append("form-check-input")
         # else:
         classes.append("form-control")
+        if isinstance(field.widget, forms.Select):
+            classes.append("form-select")
 
         if check_for_errors:
             if self.has_error(name) is True:
@@ -41,7 +43,7 @@ class BootstrapForm(forms.Form):
 
     def update_field(self, name, field):
         if isinstance(field.widget, forms.FileInput):
-            field.widget.template_name = "widgets/file.html"
+            field.widget.template_name = "told_common/widgets/file.html"
             field.widget.attrs["class"] = "custom-file-input"
 
 

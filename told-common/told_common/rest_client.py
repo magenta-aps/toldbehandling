@@ -49,6 +49,290 @@ class JwtTokenInfo:
             self.set_cookies(response, synchronize_refresh_token)
 
 
+class ModelRestClient:
+    def __init__(self, rest):
+        self.rest = rest
+
+
+class AfsenderRestClient(ModelRestClient):
+    def get_or_create(self, data: dict) -> int:
+        afsender_cvr = data["afsender_cvr"]
+        if afsender_cvr:
+            afsender_response = self.rest.get("afsender", {"cvr": afsender_cvr})
+            if afsender_response["count"] > 0:
+                return afsender_response["items"][0]["id"]
+        resp = self.rest.post(
+            "afsender",
+            {
+                key: data["afsender_" + key]
+                for key in (
+                    "navn",
+                    "adresse",
+                    "postnummer",
+                    "by",
+                    "postbox",
+                    "telefon",
+                    "cvr",
+                )
+            },
+        )
+        return resp["id"]
+
+
+class ModtagerRestClient(ModelRestClient):
+    def get_or_create(self, data: dict) -> int:
+        modtager_cvr = data["modtager_cvr"]
+        if modtager_cvr:
+            modtager_response = self.rest.get("modtager", {"cvr": modtager_cvr})
+            if modtager_response["count"] > 0:
+                return modtager_response["items"][0]["id"]
+        resp = self.rest.post(
+            "modtager",
+            {
+                key: data["modtager_" + key]
+                for key in (
+                    "navn",
+                    "adresse",
+                    "postnummer",
+                    "by",
+                    "postbox",
+                    "telefon",
+                    "cvr",
+                    "indførselstilladelse",
+                )
+            },
+        )
+        return resp["id"]
+
+
+class PostforsendelseRestClient(ModelRestClient):
+    @staticmethod
+    def map(data: dict) -> Union[dict, None]:
+        fragttype = data["fragttype"]
+        if fragttype in ("luftpost", "skibspost"):
+            return {
+                "postforsendelsesnummer": data["fragtbrevnr"],
+                "forsendelsestype": "S" if fragttype == "skibspost" else "F",
+            }
+        return None
+
+    @staticmethod
+    def compare(data: dict, existing: dict) -> bool:
+        # Sammenligner output fra map_postforsendelse (input fra form)
+        # med eksisterende data fra REST for at se om de stemmer overens.
+        # False: data passer ikke, og der skal foretages en opdatering
+        # True: data passer, og det er ikke nødvendigt at opdatere.
+        for x in ("forsendelsestype", "postforsendelsesnummer"):
+            if data[x] != existing[x]:
+                return False
+        return True
+
+    def create(self, data: dict) -> Union[int, None]:
+        # TODO: Hvad med Forbindelsesnr/afsenderbykode?
+        # De fremgår af formularen, men er ikke at finde i modellen
+        mapped = self.map(data)
+        if mapped:
+            response = self.rest.post("postforsendelse", mapped)
+            return response["id"]
+
+    def update(self, id: int, data: dict, existing: dict) -> Union[int, None]:
+        # TODO: Hvad med Forbindelsesnr/afsenderbykode?
+        # De fremgår af formularen, men er ikke at finde i modellen
+        mapped = self.map(data)
+        if mapped is None:
+            self.rest.delete(f"postforsendelse/{id}")
+            return None
+        elif self.compare(mapped, existing):
+            # Data passer, spring opdatering over
+            pass
+        else:
+            # Opdatér data
+            self.rest.patch(f"postforsendelse/{id}", mapped)
+        return id
+
+
+class FragtforsendelseRestClient(ModelRestClient):
+    @staticmethod
+    def map(data: dict, file: Union[UploadedFile, None]) -> Union[dict, None]:
+        fragttype = data["fragttype"]
+        if fragttype in ("luftfragt", "skibsfragt"):
+            return {
+                "fragtbrevsnummer": data["fragtbrevnr"],
+                "forsendelsestype": "S" if fragttype == "skibsfragt" else "F",
+                "fragtbrev": RestClient._uploadfile_to_base64str(file)
+                if file
+                else None,
+                "fragtbrev_navn": file.name if file else None,
+            }
+        return None
+
+    @staticmethod
+    def compare(data: dict, existing: dict) -> bool:
+        # Sammenligner output fra map_fragtforsendelse (input fra form)
+        # med eksisterende data fra REST for at se om de stemmer overens.
+        # False: data passer ikke, og der skal foretages en opdatering
+        # True: data passer, og det er ikke nødvendigt at opdatere.
+        for x in ("forsendelsestype", "fragtbrevsnummer"):
+            if data[x] != existing[x]:
+                return False
+        if data["fragtbrev"] is not None:
+            return False
+        return True
+
+    def create(self, data: dict, file: Union[UploadedFile, None]) -> Union[int, None]:
+        fragttype = data["fragttype"]
+        if fragttype in ("luftfragt", "skibsfragt"):
+            response = self.rest.post(
+                "fragtforsendelse",
+                {
+                    "fragtbrevsnummer": data["fragtbrevnr"],
+                    "forsendelsestype": "S" if fragttype == "skibsfragt" else "F",
+                    "fragtbrev": self.rest._uploadfile_to_base64str(file)
+                    if file
+                    else None,
+                    "fragtbrev_navn": file.name if file else None,
+                },
+            )
+            return response["id"]
+
+    def update(
+        self, id, data: dict, file: Union[UploadedFile, None], existing: dict
+    ) -> None:
+        mapped = self.map(data, file)
+        if mapped is None:
+            self.rest.delete(f"fragtforsendelse/{id}")
+            return None
+        elif self.compare(mapped, existing):
+            # Data passer med eksisterende, opdatér ikke
+            pass
+        else:
+            # Håndterer opdatering af eksisterende
+            self.rest.patch(f"fragtforsendelse/{id}", mapped)
+        return id
+
+
+class AfgiftanmeldelseRestClient(ModelRestClient):
+    @staticmethod
+    def compare(data: dict, existing: dict) -> bool:
+        # Sammenligner output fra map_anmeldelse (input fra form)
+        # med eksisterende data fra REST for at se om de stemmer overens.
+        # False: data passer ikke, og der skal foretages en opdatering
+        # True: data passer, og det er ikke nødvendigt at opdatere.
+        if data["leverandørfaktura"]:
+            return False
+        if data["leverandørfaktura_nummer"] != existing["leverandørfaktura_nummer"]:
+            return False
+        for key in ("afsender", "modtager", "postforsendelse", "fragtforsendelse"):
+            existing_sub = existing.get(key, None)  # existing[key] kan være None
+            existing_id = existing_sub["id"] if existing_sub is not None else None
+            if data[f"{key}_id"] != existing_id:
+                return False
+        return True
+
+    def map(
+        self,
+        data: dict,
+        leverandørfaktura: Union[UploadedFile, None],
+        afsender_id: int,
+        modtager_id: int,
+        postforsendelse_id: Union[int, None],
+        fragtforsendelse_id: Union[int, None],
+    ) -> dict:
+        return {
+            "leverandørfaktura_nummer": data["leverandørfaktura_nummer"],
+            "indførselstilladelse": data["modtager_indførselstilladelse"],
+            "afsender_id": afsender_id,
+            "modtager_id": modtager_id,
+            "postforsendelse_id": postforsendelse_id,
+            "fragtforsendelse_id": fragtforsendelse_id,
+            "leverandørfaktura": self.rest._uploadfile_to_base64str(leverandørfaktura)
+            if leverandørfaktura
+            else None,
+            "leverandørfaktura_navn": leverandørfaktura.name
+            if leverandørfaktura
+            else None,
+        }
+
+    def create(
+        self,
+        data: dict,
+        leverandørfaktura: UploadedFile,
+        afsender_id: int,
+        modtager_id: int,
+        postforsendelse_id: Union[int, None],
+        fragtforsendelse_id: Union[int, None],
+    ):
+        mapped = self.map(
+            data,
+            leverandørfaktura,
+            afsender_id,
+            modtager_id,
+            postforsendelse_id,
+            fragtforsendelse_id,
+        )
+        response = self.rest.post("afgiftsanmeldelse", mapped)
+        return response["id"]
+
+    def update(
+        self,
+        id: int,
+        data: dict,
+        leverandørfaktura: Union[UploadedFile, None],
+        afsender_id: int,
+        modtager_id: int,
+        postforsendelse_id: Union[int, None],
+        fragtforsendelse_id: Union[int, None],
+        existing: dict,
+    ):
+        mapped = self.map(
+            data,
+            leverandørfaktura,
+            afsender_id,
+            modtager_id,
+            postforsendelse_id,
+            fragtforsendelse_id,
+        )
+        if not self.compare(mapped, existing):
+            self.rest.patch(f"afgiftsanmeldelse/{id}", mapped)
+        return id
+
+
+class VarelinjeRestClient(ModelRestClient):
+    @staticmethod
+    def map(data: dict, afgiftsanmeldelse_id: int) -> dict:
+        return {
+            "afgiftsanmeldelse_id": afgiftsanmeldelse_id,
+            "fakturabeløb": str(data["fakturabeløb"]),
+            "vareafgiftssats_id": int(data["vareafgiftssats"]),
+            "antal": data["antal"],
+            "mængde": data["mængde"],
+        }
+
+    @staticmethod
+    def compare(data: dict, existing: dict) -> bool:
+        # Sammenligner output fra map_anmeldelse (input fra form)
+        # med eksisterende data fra REST for at se om de stemmer overens.
+        # False: data passer ikke, og der skal foretages en opdatering
+        # True: data passer, og det er ikke nødvendigt at opdatere.
+        for key in ("fakturabeløb", "vareafgiftssats_id", "antal", "mængde"):
+            if data[key] != existing[key]:
+                return False
+        return True
+
+    def create(self, data: dict, afgiftsanmeldelse_id: int):
+        response = self.rest.post("varelinje", self.map(data, afgiftsanmeldelse_id))
+        return response["id"]
+
+    def update(self, id: int, data: dict, existing: dict, afgiftsanmeldelse_id: int):
+        mapped = self.map(data, afgiftsanmeldelse_id)
+        if not self.compare(mapped, existing):
+            self.rest.patch(f"varelinje/{id}", mapped)
+        return id
+
+    def delete(self, id):
+        self.rest.delete(f"varelinje/{id}")
+
+
 class RestClient:
     domain = settings.REST_DOMAIN
 
@@ -56,6 +340,12 @@ class RestClient:
         self.session: Session = requests.session()
         self.token: JwtTokenInfo = token
         self.session.headers = {"Authorization": f"Bearer {self.token.access_token}"}
+        self.afsender = AfsenderRestClient(self)
+        self.modtager = ModtagerRestClient(self)
+        self.postforsendelse = PostforsendelseRestClient(self)
+        self.fragtforsendelse = FragtforsendelseRestClient(self)
+        self.afgiftanmeldelse = AfgiftanmeldelseRestClient(self)
+        self.varelinje = VarelinjeRestClient(self)
 
     def check_access_token_age(self):
         max_age = getattr(settings, "NINJA_JWT", {}).get(
@@ -124,66 +414,13 @@ class RestClient:
         response.raise_for_status()
         return response.json()
 
-    def get_or_create_afsender(self, data: dict) -> int:
-        afsender_cvr = data["afsender_cvr"]
-        if afsender_cvr:
-            afsender_response = self.get("afsender", {"cvr": afsender_cvr})
-            if afsender_response["count"] > 0:
-                return afsender_response["items"][0]["id"]
-        resp = self.post(
-            "afsender",
-            {
-                key: data["afsender_" + key]
-                for key in (
-                    "navn",
-                    "adresse",
-                    "postnummer",
-                    "by",
-                    "postbox",
-                    "telefon",
-                    "cvr",
-                )
-            },
+    def delete(self, path: str):
+        self.check_access_token_age()
+        response = self.session.delete(
+            f"{self.domain}/api/{path}",
         )
-        return resp["id"]
-
-    def get_or_create_modtager(self, data: dict) -> int:
-        modtager_cvr = data["modtager_cvr"]
-        if modtager_cvr:
-            modtager_response = self.get("modtager", {"cvr": modtager_cvr})
-            if modtager_response["count"] > 0:
-                return modtager_response["items"][0]["id"]
-        resp = self.post(
-            "modtager",
-            {
-                key: data["modtager_" + key]
-                for key in (
-                    "navn",
-                    "adresse",
-                    "postnummer",
-                    "by",
-                    "postbox",
-                    "telefon",
-                    "cvr",
-                    "indførselstilladelse",
-                )
-            },
-        )
-        return resp["id"]
-
-    def create_postforsendelse(self, data: dict) -> Union[int, None]:
-        # TODO: Hvad med Forbindelsesnr/afsenderbykode?
-        # De fremgår af formularen, men er ikke at finde i modellen
-        fragttype = data["fragttype"]
-        if fragttype in ("luftpost", "skibspost"):
-            response = self.post(
-                "postforsendelse",
-                {
-                    "postforsendelsesnummer": data["fragtbrevnr"],
-                    "forsendelsestype": "S" if fragttype == "skibspost" else "F",
-                },
-            )
-            return response["id"]
+        response.raise_for_status()
+        return response.json()
 
     @staticmethod
     def _uploadfile_to_base64str(file: UploadedFile) -> str:
@@ -201,67 +438,6 @@ class RestClient:
             return "".join(
                 [b64encode(chunk).decode("ascii") for chunk in file.chunks(48 * 1024)]
             )
-
-    def create_fragtforsendelse(
-        self, data: dict, file: Union[UploadedFile, None]
-    ) -> Union[int, None]:
-        fragttype = data["fragttype"]
-        if fragttype in ("luftfragt", "skibsfragt"):
-            response = self.post(
-                "fragtforsendelse",
-                {
-                    "fragtbrevsnummer": data["fragtbrevnr"],
-                    "forsendelsestype": "S" if fragttype == "skibsfragt" else "F",
-                    "fragtbrev": self._uploadfile_to_base64str(file) if file else None,
-                    "fragtbrev_navn": file.name if file else None,
-                },
-            )
-            return response["id"]
-
-    def create_anmeldelse(
-        self,
-        request: HttpRequest,
-        data: dict,
-        afsender_id: int,
-        modtager_id: int,
-        postforsendelse_id: Union[int, None],
-        fragtforsendelse_id: Union[int, None],
-    ):
-        response = self.post(
-            "afgiftsanmeldelse",
-            {
-                "leverandørfaktura_nummer": data["leverandørfaktura_nummer"],
-                "indførselstilladelse": data["modtager_indførselstilladelse"],
-                "afsender_id": afsender_id,
-                "modtager_id": modtager_id,
-                "postforsendelse_id": postforsendelse_id,
-                "fragtforsendelse_id": fragtforsendelse_id,
-                "leverandørfaktura": self._uploadfile_to_base64str(
-                    request.FILES["leverandørfaktura"]
-                ),
-                "leverandørfaktura_navn": request.FILES["leverandørfaktura"].name,
-            },
-        )
-        return response["id"]
-
-    def create_varelinjer(self, data: List[dict], afgiftsanmeldelse_id: int):
-        response_ids = []
-        for subdata in data:
-            if subdata:
-                varesats = self.varesatser[int(subdata["vareart"])]
-                response = self.post(
-                    "varelinje",
-                    {
-                        "afgiftsanmeldelse_id": afgiftsanmeldelse_id,
-                        "fakturabeløb": str(subdata["fakturabeløb"]),
-                        "afgiftssats_id": subdata["vareart"],
-                        "kvantum": subdata["antal"]
-                        if varesats["enhed"] == "ant"
-                        else subdata["mængde"],
-                    },
-                )
-                response_ids.append(response["id"])
-        return response_ids
 
     @cached_property
     def varesatser(self) -> Dict[int, dict]:

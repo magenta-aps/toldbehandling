@@ -139,11 +139,14 @@ class Vareafgiftssats(models.Model):
 
     def beregn_afgift(self, varelinje) -> Decimal:
         if self.enhed in (
-            Vareafgiftssats.Enhed.ANTAL,
             Vareafgiftssats.Enhed.KG,
             Vareafgiftssats.Enhed.LITER,
         ):
-            return (varelinje.kvantum * self.afgiftssats).quantize(
+            return (varelinje.mængde * self.afgiftssats).quantize(
+                Vareafgiftssats._quantization_source
+            )
+        if self.enhed in (Vareafgiftssats.Enhed.ANTAL,):
+            return (varelinje.antal * self.afgiftssats).quantize(
                 Vareafgiftssats._quantization_source
             )
         if self.enhed == Vareafgiftssats.Enhed.PROCENT:
