@@ -89,3 +89,13 @@ class FormWithFormsetView(FormView):
             return self.form_valid(form, formset)
         else:
             return self.form_invalid(form, formset)
+
+
+class CustomLayoutMixin:
+    def get_context_data(self, **kwargs):
+        return super().get_context_data(
+            **{
+                **kwargs,
+                "extend_template": self.extend_template,
+            }
+        )

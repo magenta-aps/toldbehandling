@@ -29,6 +29,7 @@ from sats.models import Vareafgiftssats, Afgiftstabel
 class RestMixin:
     invalid_itemdata = {}
     unique_fields = []
+    has_delete = False
 
     @classmethod
     def make_user(
@@ -67,11 +68,7 @@ class RestMixin:
                 Permission.objects.get(
                     codename=f"{permission}_{cls.object_class.__name__.lower()}"
                 )
-                for permission in (
-                    "add",
-                    "change",
-                    "view",
-                )
+                for permission in ("add", "change", "view", "delete")
             ],
         )
         (
@@ -127,6 +124,10 @@ class RestMixin:
     @property
     def update_function(self) -> str:
         return f"{self.object_class.__name__.lower()}_update"
+
+    @property
+    def delete_function(self) -> str:
+        return f"{self.object_class.__name__.lower()}_delete"
 
     @property
     def sort_fields(self):
@@ -557,6 +558,28 @@ class RestMixin:
             + f"expectation after updating with PATCH {url}",
         )
 
+    def test_delete(self):
+        if self.has_delete:
+            self.create_items()
+            url = reverse(f"api-1.0.0:{self.delete_function}", kwargs={"id": 10000})
+            response = self.client.delete(
+                url,
+                secure=False,
+                HTTP_AUTHORIZATION=f"Bearer {self.authorized_access_token}",
+            )
+            self.assertEquals(response.status_code, 404)
+
+            url = reverse(
+                f"api-1.0.0:{self.delete_function}",
+                kwargs={"id": self.precreated_item.id},
+            )
+            response = self.client.delete(
+                url,
+                secure=False,
+                HTTP_AUTHORIZATION=f"Bearer {self.authorized_access_token}",
+            )
+            self.assertEquals(response.status_code, 200)
+
     @classmethod
     def alter_value(cls, key: str, value: Any) -> Any:
         t = type(value)
@@ -639,14 +662,14 @@ class RestMixin:
         if not hasattr(self, "_varelinje"):
             try:
                 self._varelinje = Varelinje.objects.get(
-                    afgiftssats=self.vareafgiftssats,
+                    vareafgiftssats=self.vareafgiftssats,
                     afgiftsanmeldelse=self.afgiftsanmeldelse,
                 )
             except Varelinje.DoesNotExist:
                 data = {**self.varelinje_data}
                 data.update(
                     {
-                        "afgiftssats": self.vareafgiftssats,
+                        "vareafgiftssats": self.vareafgiftssats,
                         "afgiftsanmeldelse": self.afgiftsanmeldelse,
                     }
                 )
@@ -719,7 +742,8 @@ class RestMixin:
             "betalt": False,
         }
         self.varelinje_data = {
-            "kvantum": 15,
+            "mængde": 15,
+            "antal": 1,
             "fakturabeløb": "1000.00",
             "afgiftsbeløb": "37.50",
         }

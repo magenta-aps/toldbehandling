@@ -1,4 +1,3 @@
-import json
 from copy import deepcopy
 from decimal import Decimal
 
@@ -7,7 +6,6 @@ from django.test import TestCase
 from django.urls import reverse
 from project.test_mixins import RestMixin
 from project.util import json_dump
-
 from sats.models import Vareafgiftssats
 
 
@@ -191,13 +189,14 @@ class VarelinjeTest(RestMixin, TestCase):
     object_class = Varelinje
     unique_fields = []
     readonly_fields = []
+    has_delete = True
 
     def setUp(self) -> None:
         super().setUp()
         self.varelinje_data.update(
             {
                 "afgiftsanmeldelse_id": self.afgiftsanmeldelse.id,
-                "afgiftssats_id": self.vareafgiftssats.id,
+                "vareafgiftssats_id": self.vareafgiftssats.id,
             }
         )
         self.creation_data = {**self.varelinje_data}
@@ -237,10 +236,10 @@ class VarelinjeTest(RestMixin, TestCase):
         return self._expected_list_response_dict
 
     invalid_itemdata = {
-        "kvantum": ["a", -1],
+        "antal": ["a", -1],
         "fakturabeløb": ["a", -1],
         "afgiftsanmeldelse_id": ["a", -1, 9999],
-        "afgiftssats_id": ["a", -1, 9999],
+        "vareafgiftssats_id": ["a", -1, 9999],
     }
 
     @property
@@ -256,7 +255,7 @@ class VarelinjeTest(RestMixin, TestCase):
     def test_str(self):
         self.assertEqual(
             str(self.varelinje),
-            f"Varelinje(afgiftssats=Vareafgiftssats(afgiftsgruppenummer={self.vareafgiftssats_data['afgiftsgruppenummer']}, afgiftssats={self.vareafgiftssats_data['afgiftssats']}, enhed={self.vareafgiftssats_data['enhed'].label}), fakturabeløb={self.varelinje_data['fakturabeløb']})",
+            f"Varelinje(vareafgiftssats=Vareafgiftssats(afgiftsgruppenummer={self.vareafgiftssats_data['afgiftsgruppenummer']}, afgiftssats={self.vareafgiftssats_data['afgiftssats']}, enhed={self.vareafgiftssats_data['enhed'].label}), fakturabeløb={self.varelinje_data['fakturabeløb']})",
         )
 
     def test_sammensat(self):
@@ -303,23 +302,23 @@ class VarelinjeTest(RestMixin, TestCase):
             kræver_indførselstilladelse=False,
         )
         varelinje1 = Varelinje.objects.create(
-            afgiftssats=personbiler,
+            vareafgiftssats=personbiler,
             afgiftsanmeldelse=self.afgiftsanmeldelse,
-            kvantum=1,
+            antal=1,
             fakturabeløb=30_000,
         )
         self.assertEquals(varelinje1.afgiftsbeløb, Decimal(50_000))
         varelinje2 = Varelinje.objects.create(
-            afgiftssats=personbiler,
+            vareafgiftssats=personbiler,
             afgiftsanmeldelse=self.afgiftsanmeldelse,
-            kvantum=1,
+            antal=1,
             fakturabeløb=65_000,
         )
         self.assertEquals(varelinje2.afgiftsbeløb, Decimal(50_000 + 1.0 * 15_000))
         varelinje3 = Varelinje.objects.create(
-            afgiftssats=personbiler,
+            vareafgiftssats=personbiler,
             afgiftsanmeldelse=self.afgiftsanmeldelse,
-            kvantum=1,
+            antal=1,
             fakturabeløb=500_000,
         )
         self.assertEquals(

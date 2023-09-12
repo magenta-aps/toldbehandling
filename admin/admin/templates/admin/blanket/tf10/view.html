@@ -262,7 +262,7 @@
 
 
             {% for varelinje in object.varelinjer %}
-            {% with varelinje.afgiftssats as sats %}
+            {% with varelinje.vareafgiftssats as sats %}
 
             <tr>
                 <td class="col-2 px-0">
@@ -272,15 +272,11 @@
                     {{sats.afgiftsgruppenummer|zfill:9}}
                 </td>
                 <td class="col-1 px-0">
-                    {% if sats.enhed == "kg" or sats.enhed == "l" %}
-                    {{varelinje.kvantum}}
-                    {% endif %}
+                    {{varelinje.mængde|default_if_none:""}}
                 </td>
                 <!-- TODO: Skal der vises kg/liter eller antal når der er tale om en procentsats eller sammensat sats? -->
                 <td class="col-1 px-0">
-                    {% if sats.enhed == "ant" or sats.enhed == "pct" or sats.enhed == "sam" %}
-                    {{varelinje.kvantum}}
-                    {% endif %}
+                    {{varelinje.antal|default_if_none:""}}
                 </td>
                 <td class="col-2 px-0">
                     {{varelinje.fakturabeløb|floatformat:2}}
@@ -298,7 +294,6 @@
             </tbody>
         </table>
 
-
         <div class="form-row">
             <div class="ml-auto">
                 {% if object.godkendt is None %}
@@ -308,7 +303,7 @@
                 <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#afvis_modal">
                     Afvis
                 </button>
-                <a href="#" class="btn btn-primary">Redigér</a>
+                <a href="{% url 'tf10_edit' id=object.id %}" class="btn btn-primary">Redigér</a>
                 {% elif object.godkendt is True %}
                 <a href="{% url 'faktura_create' %}" class="btn btn-primary">Send til Prisme</a>
                 {% endif %}

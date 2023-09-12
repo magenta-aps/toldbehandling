@@ -1,5 +1,6 @@
 import os
 from typing import Union
+from urllib import parse
 
 from django.template.defaultfilters import register
 from django.utils.translation import gettext_lazy as _
@@ -23,3 +24,8 @@ def godkendt(item: Union[bool, None]) -> str:
         return _("Afvist")
     else:
         return _("Ny")
+
+
+@register.filter
+def unquote(item: str) -> str:
+    return parse.unquote(item)

@@ -4,20 +4,19 @@ from decimal import Decimal
 from typing import Optional
 from uuid import uuid4
 
+from aktør.api import AfsenderOut, ModtagerOut
 from anmeldelse.models import Afgiftsanmeldelse, Varelinje
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
-from django.http import HttpResponseBadRequest
+from django.http import HttpResponseBadRequest, Http404
 from django.shortcuts import get_object_or_404
+from forsendelse.api import FragtforsendelseOut, PostforsendelseOut
 from ninja import FilterSchema, Query, ModelSchema, Field
 from ninja_extra import api_controller, route, permissions
 from ninja_extra.pagination import paginate
 from ninja_extra.schemas import NinjaPaginationResponseSchema
 from ninja_jwt.authentication import JWTAuth
 from project.util import RestPermission, json_dump
-
-from aktør.api import AfsenderOut, ModtagerOut
-from forsendelse.api import FragtforsendelseOut, PostforsendelseOut
 
 
 class AfgiftsanmeldelseIn(ModelSchema):
@@ -41,8 +40,8 @@ class AfgiftsanmeldelseIn(ModelSchema):
 class PartialAfgiftsanmeldelseIn(ModelSchema):
     afsender_id: int = None
     modtager_id: int = None
-    postforsendelse: int = None
-    fragtforsendelse: int = None
+    postforsendelse_id: int = None
+    fragtforsendelse_id: int = None
     leverandørfaktura: str = None  # Base64
     leverandørfaktura_navn: str = None
 
@@ -101,7 +100,7 @@ class AfgiftsanmeldelseFilterSchema(FilterSchema):
     godkendt: Optional[bool]
     dato_efter: Optional[date] = Field(q="dato__gte")
     dato_før: Optional[date] = Field(q="dato__lt")
-    vareart: Optional[int] = Field(q="varelinje__id")
+    vareafgiftssats: Optional[int] = Field(q="varelinje__id")
 
 
 class AfgiftsanmeldelsePermission(RestPermission):
@@ -230,17 +229,24 @@ class AfgiftsanmeldelseAPI:
 class VarelinjeIn(ModelSchema):
     fakturabeløb: str
     afgiftsanmeldelse_id: int = None
-    afgiftssats_id: int = None
+    vareafgiftssats_id: int = None
 
     class Config:
         model = Varelinje
-        model_fields = ["kvantum"]
+        model_fields = ["mængde", "antal"]
 
 
 class PartialVarelinjeIn(ModelSchema):
+    afgiftsanmeldelse_id: int = None
+    vareafgiftssats_id: int = None
+
     class Config:
         model = Varelinje
-        model_fields = ["afgiftsanmeldelse", "afgiftssats", "kvantum", "fakturabeløb"]
+        model_fields = [
+            "mængde",
+            "antal",
+            "fakturabeløb",
+        ]
         model_fields_optional = "__all__"
 
 
@@ -250,8 +256,9 @@ class VarelinjeOut(ModelSchema):
         model_fields = [
             "id",
             "afgiftsanmeldelse",
-            "afgiftssats",
-            "kvantum",
+            "vareafgiftssats",
+            "mængde",
+            "antal",
             "fakturabeløb",
             "afgiftsbeløb",
         ]
@@ -259,8 +266,9 @@ class VarelinjeOut(ModelSchema):
 
 class VarelinjeFilterSchema(FilterSchema):
     afgiftsanmeldelse: Optional[int]
-    afgiftssats: Optional[int]
-    kvantum: Optional[int]
+    vareafgiftssats: Optional[int]
+    mængde: Optional[int]
+    antal: Optional[int]
     fakturabeløb: Optional[Decimal]
     afgiftsbeløb: Optional[Decimal]
 
@@ -308,4 +316,11 @@ class VarelinjeAPI:
             if value is not None:
                 setattr(item, attr, value)
         item.save()
+        return {"success": True}
+
+    @route.delete("/{id}", auth=JWTAuth(), url_name="varelinje_delete")
+    def delete_varelinje(self, id):
+        count, details = Varelinje.objects.filter(id=id).delete()
+        if count == 0:
+            raise Http404("No Varelinje matches the given query.")
         return {"success": True}

@@ -15,7 +15,7 @@ fi
 
 if [ "$MAKE_MIGRATIONS" = true ]; then
   echo 'generating migrations'
-  python manage.py makemigrations
+  python manage.py makemigrations --no-input
 fi
 if [ "$MIGRATE" = true ]; then
   echo 'running migrations'

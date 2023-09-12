@@ -3,6 +3,7 @@ from typing import Optional
 from uuid import uuid4
 
 from django.core.files.base import ContentFile
+from django.http import Http404
 from django.shortcuts import get_object_or_404
 from forsendelse.models import Postforsendelse, Fragtforsendelse
 from ninja import ModelSchema, FilterSchema, Query
@@ -99,6 +100,13 @@ class PostforsendelseAPI:
         for attr, value in payload.dict().items():
             setattr(item, attr, value)
         item.save()
+        return {"success": True}
+
+    @route.delete("/{id}", auth=JWTAuth(), url_name="postforsendelse_delete")
+    def delete_postforsendelse(self, id):
+        count, details = Postforsendelse.objects.filter(id=id).delete()
+        if count == 0:
+            raise Http404("No Postforsendelse matches the given query.")
         return {"success": True}
 
 
@@ -198,4 +206,11 @@ class FragtforsendelseAPI:
                 base64.b64decode(fragtbrev), name=str(uuid4()) + ".pdf"
             )
         item.save()
+        return {"success": True}
+
+    @route.delete("/{id}", auth=JWTAuth(), url_name="fragtforsendelse_delete")
+    def delete_fragtforsendelse(self, id):
+        count, details = Fragtforsendelse.objects.filter(id=id).delete()
+        if count == 0:
+            raise Http404("No Fragtforsendelse matches the given query.")
         return {"success": True}

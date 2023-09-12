@@ -8,11 +8,6 @@ $(function () {
         for (let j = 0; j < aktør["searchfields"].length; j++) {
             const searchfield = aktør["searchfields"][j];
             fields[searchfield].on("change", function () {
-                /*for (let name in fields) {
-                    if (name !== searchfield) {
-                        fields[name].val("");
-                    }
-                }*/
                 $.ajax({
                     "url": api + "?" + searchfield + "=" + this.value,
                     "success": function (response_data) {
@@ -95,8 +90,11 @@ $(function () {
         if (!subform) {
             subform = $(this);
         }
-        const vareart = subform.find("[name$=vareart]");
-        const varesats = varesatser[vareart.val()];
+        if (!(subform instanceof $)) {
+            subform = $(subform);
+        }
+        const vareafgiftssats = subform.find("[name$=vareafgiftssats]");
+        const varesats = varesatser[vareafgiftssats.val()];
         const enhed = varesats["enhed"];
         const varekode = String(varesats["afgiftsgruppenummer"]).padStart(9, "0");
         subform.find("[data-value=varekode]").val(varekode);
@@ -135,11 +133,11 @@ $(function () {
     }
 
     const calcAfgift = function (subform) {
-        if (!subform) {
-            subform = $(this);
+        if (!(subform instanceof $)) {
+            subform = $(subform);
         }
-        const vareart = subform.find("[name$=vareart]");
-        const varesats = varesatser[vareart.val()];
+        const vareafgiftssats = subform.find("[name$=vareafgiftssats]");
+        const varesats = varesatser[vareafgiftssats.val()];
         const afgift = calcSubAfgift(
             varesats,
             parseInt(subform.find("[name$=mængde]").val()),
@@ -166,21 +164,27 @@ $(function () {
 
     // Formset
     // -------
+    const formset = container.formset("form", $("#formset_prototype"));
     const subformAdded = function(subform) {
-        if (!subform) {
-            subform = $(this);
+        if (!(subform instanceof $)) {
+            subform = $(subform);
         }
         subform.find(".remove-row").click(removeForm.bind(subform, subform));
-        subform.find("[name$=vareart]").on("change", updateVareart.bind(subform, subform));
+        subform.find("[name$=vareafgiftssats]").on("change", updateVareart.bind(subform, subform));
         subform.find("input,select").on("change", calcAfgift.bind(subform, subform));
         updateVareart(subform);
         calcAfgift(subform);
     };
     const subformRemoved = function(subform) {
         calcAfgiftSum();
+        container.find(".row").each(function (index, element) {
+            $(this).find("input[name],select[name]").each(function (){
+                this.id = this.id.replace(/-\d+-/, "-"+index+"-");
+                this.name = this.name.replace(/-\d+-/, "-"+index+"-");
+            });
+        });
     };
 
-    const formset = container.formset("form", $("#formset_prototype"));
     const addForm = function () {
         const newForm = formset.addForm();
         subformAdded(newForm);
@@ -190,15 +194,11 @@ $(function () {
         subformRemoved(subform);
     };
     $("#formset_add").click(addForm);
-    container.find(".row").each(subformAdded);
+    container.find(".row").each(function (){subformAdded(this)});
 
     // Filefield
     // ---------
     const fileUpdate = function() {
-        // Vis filnavn
-        $(this).parents(".custom-file").find(".custom-file-label").text(
-            $(this).val().split("\\").pop()
-        );
         // Validér filstørrelse
         if (this.files.length) {
             const maxsize = this.getAttribute("max_size");

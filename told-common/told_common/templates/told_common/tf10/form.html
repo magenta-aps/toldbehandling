@@ -1,7 +1,8 @@
-{% extends "told_common/layout.html" %}
+{% extends extend_template %}
 {% load static %}
 {% load i18n %}
 {% load l10n %}
+{% load common_tags %}
 
 {% block extra_headers %}
 <script type="text/javascript" src="{% static 'toldbehandling/js/formset.js' %}"></script>
@@ -188,6 +189,11 @@
                     <div class="col-8">
                         {{form.leverandørfaktura}}
                         {{form.leverandørfaktura.errors}}
+                        {% if item %}
+                        <a href="{% url 'leverandørfaktura_view' id=item.id %}">
+                            {{item.leverandørfaktura|file_basename|unquote}}
+                        </a>
+                        {% endif %}
                     </div>
                 </div>
                 <div class="row">
@@ -197,6 +203,11 @@
                     <div class="col-8">
                         {{form.fragtbrev}}
                         {{form.fragtbrev.errors}}
+                        {% if item.fragtforsendelse %}
+                        <a href="{% url 'fragtbrev_view' id=item.fragtforsendelse.id %}">
+                            {{item.fragtforsendelse.fragtbrev|file_basename|unquote}}
+                        </a>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -264,12 +275,12 @@
         {{ formset.management_form }}
             <div id="formset_container">
             {% for subform in formset %}
-                {% include "ui/tf10/subform.html" with subform=subform %}
+                {% include "told_common/tf10/subform.html" with subform=subform %}
             {% endfor %}
             </div>
         </div>
         <div id="formset_prototype" style="display: none">
-            {% include "ui/tf10/subform.html" with subform=formset.empty_form %}
+            {% include "told_common/tf10/subform.html" with subform=formset.empty_form %}
         </div>
 
         <div class="row">
@@ -286,7 +297,9 @@
 
         <hr/>
             <div class="clearfix">
-                <button type="submit" class="btn btn-success float-end">Indsend</button>
+                <button type="submit" class="btn btn-success float-end">
+                    {% if item %}Opdatér{% else %}Indsend{% endif %}
+                </button>
             </div>
         </div>
     </div>

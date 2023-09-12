@@ -19,7 +19,7 @@ if [ "$COMPILEMESSAGES" = true ]; then
 fi
 if [ "$DJANGO_DEBUG" = false ]; then
   echo 'collecting static files'
-  ./manage.py collectstatic --no-input --clear
+  ./manage.py collectstatic --no-input
 fi
 
 exec "$@"
