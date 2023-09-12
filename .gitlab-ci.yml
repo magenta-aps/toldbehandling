@@ -287,3 +287,16 @@ Release ER image:
       --dest-creds=${RELEASE_REGISTRY_USER}:${RELEASE_REGISTRY_PASSWORD}
       "docker://${ER_IMAGE_SHA}"
       "docker://${ER_IMAGE_TAG}"
+
+Release Admin image:
+  extends:
+    - .rules:semver-all
+    - .release-toldbehandling
+  needs:
+    ["Build Admin image"]
+  script:
+    - skopeo copy
+      --src-creds=${CI_REGISTRY_USER}:${CI_REGISTRY_PASSWORD}
+      --dest-creds=${RELEASE_REGISTRY_USER}:${RELEASE_REGISTRY_PASSWORD}
+      "docker://${ADMIN_IMAGE_SHA}"
+      "docker://${ADMIN_IMAGE_TAG}"
