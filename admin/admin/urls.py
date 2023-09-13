@@ -21,11 +21,11 @@ urlpatterns = [
     ),
     path(
         "afgiftstabel",
-        TemplateView.as_view(template_name="admin/afgiftstabel/list.html"),
+        views.AfgiftstabelListView.as_view(),
         name="afgiftstabel_list",
     ),
     path(
-        "afgiftstabel/1",
+        "afgiftstabel/<int:id>",
         TemplateView.as_view(template_name="admin/afgiftstabel/view.html"),
         name="afgiftstabel_view",
     ),

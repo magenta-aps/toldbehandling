@@ -1,0 +1,6 @@
+{% load i18n %}
+<a href="{% url 'afgiftstabel_view' id=item.id %}" class="btn btn-sm btn-primary">{% translate "Vis" %}</a>
+<a class="btn btn-sm btn-primary">{% translate "Download" %}</a>
+{% if item.kladde %}
+<a class="btn btn-sm btn-danger">{% translate "Slet" %}</a>
+{% endif %}

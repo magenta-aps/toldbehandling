@@ -1,4 +1,5 @@
 import time
+from typing import Dict, Any
 from urllib.parse import quote_plus
 
 from django.http import HttpResponseRedirect, HttpResponseServerError
@@ -89,6 +90,20 @@ class FormWithFormsetView(FormView):
             return self.form_valid(form, formset)
         else:
             return self.form_invalid(form, formset)
+
+
+class GetFormView(FormView):
+    def get(self, request, *args, **kwargs):
+        # Søgeform; viser formularen (med evt. fejl) når den er invalid,
+        # og evt. søgeresultater når den er gyldig
+        form = self.get_form()
+        if form.is_valid():
+            return self.form_valid(form)
+        else:
+            return self.form_invalid(form)
+
+    def get_form_kwargs(self) -> Dict[str, Any]:
+        return {**super().get_form_kwargs(), "data": self.request.GET}
 
 
 class CustomLayoutMixin:

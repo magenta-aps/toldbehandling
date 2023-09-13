@@ -2,13 +2,15 @@ from typing import Union
 from urllib.parse import unquote
 
 from admin.data import Vareafgiftssats
-from django.http import Http404
+from django.http import Http404, JsonResponse
 from django.shortcuts import redirect
+from django.template import loader
 from django.urls import reverse
+from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView, TemplateView
 from requests import HTTPError
 from told_common import views as common_views
-from told_common.view_mixins import LoginRequiredMixin, HasRestClientMixin
+from told_common.view_mixins import LoginRequiredMixin, HasRestClientMixin, GetFormView
 
 from admin import forms
 
@@ -130,3 +132,64 @@ class TF10FormUpdateView(common_views.TF10FormUpdateView):
     def get_success_url(self):
         return reverse("tf10_view", kwargs={"id": self.kwargs["id"]})
 
+
+class AfgiftstabelListView(LoginRequiredMixin, HasRestClientMixin, GetFormView):
+    template_name = "admin/afgiftstabel/list.html"
+    form_class = forms.AfgiftstabelSearchForm
+    actions_template = "admin/afgiftstabel/handlinger.html"
+    list_size = 20
+
+    def get_context_data(self, **context):
+        return super().get_context_data(
+            **{**context, "actions_template": self.actions_template}
+        )
+
+    def form_valid(self, form):
+        search_data = {"offset": 0, "limit": self.list_size}
+        for key, value in form.cleaned_data.items():
+            if key not in ("json",) and value not in ("", None):
+                if key in ("offset", "limit"):
+                    value = int(value)
+                search_data[key] = value
+        if search_data["offset"] < 0:
+            search_data["offset"] = 0
+        if search_data["limit"] < 1:
+            search_data["limit"] = 1
+        response = self.rest_client.get("afgiftstabel", search_data)
+        total = response["count"]
+        items = response["items"]
+        context = self.get_context_data(
+            items=items, total=total, search_data=search_data
+        )
+        if form.cleaned_data["json"]:
+            return JsonResponse(
+                {
+                    "total": total,
+                    "items": [
+                        {
+                            key: self.map_value(item, key)
+                            for key in (
+                                "id",
+                                "gyldig_fra",
+                                "gyldig_til",
+                                "kladde",
+                                "actions",
+                            )
+                        }
+                        for item in items
+                    ],
+                }
+            )
+        return self.render_to_response(context)
+
+    def map_value(self, item, key):
+        if key == "actions":
+            return loader.render_to_string(
+                self.actions_template, {"item": item}, self.request
+            )
+        value = item[key]
+        if type(value) is bool:
+            value = _("ja") if value else _("nej")
+        if value is None:
+            value = ""
+        return value
