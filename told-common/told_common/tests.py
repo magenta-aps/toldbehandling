@@ -506,7 +506,7 @@ class AnmeldelseListViewTest(HasLogin):
                 )
 
         self.assertEquals(
-            self._modify_values(data, (str,), lambda s: s.strip()),
+            modify_values(data, (str,), lambda s: s.strip()),
             {
                 "total": 3,
                 "items": [
@@ -645,19 +645,6 @@ class AnmeldelseListViewTest(HasLogin):
                 ]
                 self.assertEquals(error_fields, [field])
 
-    def _modify_values(self, item: Any, types: Tuple, action: Callable) -> Any:
-        t = type(item)
-        if t is dict:
-            return {
-                key: self._modify_values(value, types, action)
-                for key, value in item.items()
-            }
-        if t is list:
-            return [self._modify_values(value, types, action) for value in item]
-        if t in types:
-            return action(item)
-        return item
-
 
 class FileViewTest(HasLogin):
     def file_view_url(self):
@@ -697,3 +684,14 @@ class FileViewTest(HasLogin):
         self.assertEquals(response.status_code, 200)
         content = list(response.streaming_content)[0]
         self.assertEquals(content, b"test_data")
+
+
+def modify_values(item: Any, types: Tuple, action: Callable) -> Any:
+    t = type(item)
+    if t is dict:
+        return {key: modify_values(value, types, action) for key, value in item.items()}
+    if t is list:
+        return [modify_values(value, types, action) for value in item]
+    if t in types:
+        return action(item)
+    return item

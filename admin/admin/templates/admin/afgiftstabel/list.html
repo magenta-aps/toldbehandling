@@ -6,69 +6,67 @@
 {# Docs for bootstrap-table: https://bootstrap-table.com/docs/ #}
 {% block extra_headers %}
 <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.22.1/dist/bootstrap-table.min.css">
-<link rel="stylesheet"
-      href="https://unpkg.com/bootstrap-table@1.22.1/dist/extensions/sticky-header/bootstrap-table-sticky-header.min.css">
+<link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.22.1/dist/extensions/sticky-header/bootstrap-table-sticky-header.min.css">
 {% endblock %}
 {% block extra_footers %}
 <script src="https://unpkg.com/bootstrap-table@1.22.1/dist/bootstrap-table.min.js"></script>
 <script src="https://unpkg.com/bootstrap-table@1.22.1/dist/extensions/sticky-header/bootstrap-table-sticky-header.min.js"></script>
+<script src="https://unpkg.com/bootstrap-table@1.22.1/dist/extensions/defer-url/bootstrap-table-defer-url.min.js"></script>
 {% endblock %}
 
 {% block content %}
 <div class="mx-5">
-    <table class="table"
+    <table class="table table-bordered table-striped"
            data-toggle="table"
            data-sticky-header="true"
            data-classes="table"
+           data-data-field="items"
            data-sortable="true"
+           data-pagination="true"
+           data-pagination-parts="['pageList']"
+           data-page-size="20"
+           data-page-number="{{search_data.offset}}"
+           data-side-pagination="server"
+           data-pagination-loop="false"
+           data-defer-url="{% url 'afgiftstabel_list' %}?json=1"
+           data-query-params="queryParams"
+           data-total-rows="{{total}}"
+           data-silent-sort="true" {# vil vi vise en loading-boks? #}
+           data-remember-order="true"
     >
         <thead>
         <tr>
-            <th data-sortable="true">Gyldig fra</th>
-            <th data-sortable="true">Gyldig til</th>
-            <th data-sortable="true">Kladde</th>
-            <th data-sortable="true">Antal afgifts­satser</th>
-            <th>Handlinger</th>
+            <th data-sortable="true" data-field="gyldig_fra">Gyldig fra</th>
+            <th data-sortable="true" data-field="gyldig_til">Gyldig til</th>
+            <th data-sortable="true" data-field="kladde">Kladde</th>
+            <th data-field="actions">Handlinger</th>
         </tr>
         </thead>
         <tbody>
+        {% for item in items %}
         <tr>
-            <td>2021-01-01</td>
-            <td>2021-12-31</td>
-            <td>Nej</td>
-            <td>59</td>
-            <td><a href="{% url 'afgiftstabel_view' %}" class="btn btn-primary">Vis</a>
-                <a class="btn btn-primary">Download</a>
-            </td>
+            <td>{{item.gyldig_fra|default_if_none:""}}</td>
+            <td>{{item.gyldig_til|default_if_none:""}}</td>
+            <td>{{item.kladde|yesno}}</td>
+            <td>{% include actions_template with item=item %}</td>
         </tr>
-        <tr>
-            <td>2022-01-01</td>
-            <td>2022-12-31</td>
-            <td>Nej</td>
-            <td>59</td>
-            <td><a href="{% url 'afgiftstabel_view' %}" class="btn btn-primary">Vis</a>
-                <a class="btn btn-primary">Download</a></td>
-        </tr>
-        <tr class="table-success">
-            <td>2023-01-01</td>
-            <td></td>
-            <td>Nej</td>
-            <td>59</td>
-            <td><a href="{% url 'afgiftstabel_view' %}" class="btn btn-primary">Vis</a>
-                <a class="btn btn-primary">Download</a></td>
-        </tr>
-        <tr>
-            <td></td>
-            <td></td>
-            <td>Ja</td>
-            <td>59</td>
-            <td>
-                <a href="{% url 'afgiftstabel_view_kladde' %}" class="btn btn-primary">Vis</a>
-                <a class="btn btn-primary">Download</a>
-                <a class="btn btn-danger">Slet</a>
-            </td>
-        </tr>
+        {% endfor %}
         </tbody>
     </table>
 </div>
+
+<script>
+    function queryParams(params){  // Kaldes af bootstrap-table fordi vi peger på den med data-query-params
+        if (params["offset"] < 0) {
+            params["offset"] = 0;
+        }
+        /*const search_data = JSON.parse($("#search_data").text());
+        for (let key in search_data) {
+            if (key !== "offset" && key !== "limit") {
+                params[key] = search_data[key];
+            }
+        }*/
+        return params;
+    }
+</script>
 {% endblock %}
