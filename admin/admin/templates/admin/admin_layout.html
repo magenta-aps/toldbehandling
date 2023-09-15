@@ -4,9 +4,10 @@
 <header>
     <nav class="nav d-flex p-2">
         <a class="p-2 text-muted" href="{% url 'afgiftstabel_list' %}">Afgiftstabeller</a>
+        <a class="p-2 text-muted" href="{% url 'tf10_list' %}">Afgiftsanmeldelser</a>
         <div class="dropdown p-2">
         <a class="text-muted dropdown-toggle" href="#" role="button" id="afgiftsanmeldelse_dropdown_button" data-bs-toggle="dropdown" aria-expanded="false">
-            Afgiftsanmeldelser
+            Afgiftsanmeldelser (mock)
         </a>
         <ul class="dropdown-menu">
             <li><a class="dropdown-item" href="{% url 'tf10_list_ubehandlede' %}">Nye</a></li>
