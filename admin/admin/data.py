@@ -1,12 +1,16 @@
-from dataclasses import dataclass
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+from datetime import date
 from decimal import Decimal
 from enum import Enum
 from functools import cached_property
-from typing import Union, Optional
+from typing import Union, Optional, Callable, List
 
-from dataclasses_json import dataclass_json
+from dataclasses_json import dataclass_json, config
 from django.template.defaultfilters import floatformat
 from django.utils.translation import gettext_lazy as _
+from marshmallow import fields
 
 
 def format_decimal(decimal: Decimal) -> str:
@@ -122,3 +126,40 @@ class Vareafgiftssats:
                     pct=afgiftssats, nedre=format_decimal(segment_nedre)
                 )
             return _("{pct}% af fakturabeløb").format(pct=afgiftssats)
+
+    def populate_subs(self, sub_getter: Callable[[int], List[Vareafgiftssats]]) -> None:
+        if self.enhed == Vareafgiftssats.Enhed.SAMMENSAT:
+            subs = sub_getter(self.id)
+            if len(subs) > 0:
+                self.subsatser = []
+                for subsats in subs:
+                    self.subsatser.append(subsats)
+
+
+def encode_optional_isoformat(d):
+    if d is None:
+        return None
+    return d.isoformat()
+
+
+@dataclass_json
+@dataclass
+class Afgiftstabel:
+    kladde: bool
+    gyldig_fra: Optional[date] = field(
+        metadata=config(
+            encoder=encode_optional_isoformat,
+            decoder=date.fromisoformat,
+            mm_field=fields.Date(format="iso"),
+        ),
+        default=None,
+    )
+    gyldig_til: Optional[date] = field(
+        metadata=config(
+            encoder=encode_optional_isoformat,
+            decoder=date.fromisoformat,
+            mm_field=fields.Date(format="iso"),
+        ),
+        default=None,
+    )
+    vareafgiftssatser: Optional[List[Vareafgiftssats]] = None

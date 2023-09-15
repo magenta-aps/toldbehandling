@@ -26,7 +26,7 @@ urlpatterns = [
     ),
     path(
         "afgiftstabel/<int:id>",
-        TemplateView.as_view(template_name="admin/afgiftstabel/view.html"),
+        views.AfgiftstabelDetailView.as_view(),
         name="afgiftstabel_view",
     ),
     path(

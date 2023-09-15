@@ -8,7 +8,7 @@ from anmeldelse.models import Varelinje
 from django.core.files.base import ContentFile
 from django.core.management.base import BaseCommand
 from forsendelse.models import Fragtforsendelse, Postforsendelse
-from sats.models import Vareafgiftssats
+from sats.models import Vareafgiftssats, Afgiftstabel
 
 
 class Command(BaseCommand):
@@ -26,10 +26,12 @@ class Command(BaseCommand):
         anmeldelse.leverandørfaktura.save(
             "leverandørfaktura.txt", ContentFile("testdata")
         )
+        tabel = Afgiftstabel.objects.first()
         Varelinje.objects.create(
             afgiftsanmeldelse=anmeldelse,
             vareafgiftssats=Vareafgiftssats.objects.filter(
-                overordnet__isnull=True
+                overordnet__isnull=True,
+                afgiftstabel=tabel,
             ).order_by("?")[0],
             mængde=20,
             antal=100,
@@ -37,7 +39,9 @@ class Command(BaseCommand):
         )
         Varelinje.objects.create(
             afgiftsanmeldelse=anmeldelse,
-            vareafgiftssats=Vareafgiftssats.objects.get(afgiftsgruppenummer=72),
+            vareafgiftssats=Vareafgiftssats.objects.get(
+                afgiftstabel=tabel, afgiftsgruppenummer=72
+            ),
             mængde=None,
             antal=1,
             fakturabeløb=Decimal("400000"),

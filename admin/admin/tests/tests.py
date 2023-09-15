@@ -606,19 +606,19 @@ class AfgiftstabelListViewTest(HasLogin, TestCase):
                 {
                     "Gyldig fra": "2022-01-01",
                     "Gyldig til": "2023-01-01",
-                    "Kladde": "nej",
+                    "Kladde": "Nej",
                     "Handlinger": "\n".join(["Vis", "Download"]),
                 },
                 {
                     "Gyldig fra": "2023-01-01",
                     "Gyldig til": "",
-                    "Kladde": "nej",
+                    "Kladde": "Nej",
                     "Handlinger": "\n".join(["Vis", "Download"]),
                 },
                 {
                     "Gyldig fra": "",
                     "Gyldig til": "",
-                    "Kladde": "ja",
+                    "Kladde": "Ja",
                     "Handlinger": "\n".join(["Vis", "Download", "Slet"]),
                 },
             ],

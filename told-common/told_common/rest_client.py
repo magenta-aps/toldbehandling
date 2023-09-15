@@ -10,6 +10,7 @@ from urllib.parse import urlencode
 import requests
 from django.conf import settings
 from django.core.files.uploadedfile import UploadedFile, InMemoryUploadedFile
+from django.core.serializers.json import DjangoJSONEncoder
 from django.http import HttpResponse, HttpRequest
 from requests import Session
 
@@ -333,6 +334,32 @@ class VarelinjeRestClient(ModelRestClient):
         self.rest.delete(f"varelinje/{id}")
 
 
+class AfgiftstabelRestClient(ModelRestClient):
+    @staticmethod
+    def compare(data: dict, existing: dict) -> bool:
+        # Sammenligner output fra map_postforsendelse (input fra form)
+        # med eksisterende data fra REST for at se om de stemmer overens.
+        # False: data passer ikke, og der skal foretages en opdatering
+        # True: data passer, og det er ikke nødvendigt at opdatere.
+        for x in ("gyldig_fra", "gyldig_til", "kladde"):
+            if data[x] != existing[x]:
+                return False
+        return True
+
+    def create(self, data: dict) -> Union[int, None]:
+        response = self.rest.post("afgiftstabel", data)
+        return response["id"]
+
+    def update(self, id: int, data: dict, existing: dict = None) -> Union[int, None]:
+        if existing is not None and self.compare(data, existing):
+            # Data passer, spring opdatering over
+            pass
+        else:
+            # Opdatér data
+            self.rest.patch(f"afgiftstabel/{id}", data)
+        return id
+
+
 class RestClient:
     domain = settings.REST_DOMAIN
 
@@ -346,6 +373,7 @@ class RestClient:
         self.fragtforsendelse = FragtforsendelseRestClient(self)
         self.afgiftanmeldelse = AfgiftanmeldelseRestClient(self)
         self.varelinje = VarelinjeRestClient(self)
+        self.afgiftstabel = AfgiftstabelRestClient(self)
 
     def check_access_token_age(self):
         max_age = getattr(settings, "NINJA_JWT", {}).get(
@@ -398,7 +426,7 @@ class RestClient:
         self.check_access_token_age()
         response = self.session.post(
             f"{self.domain}/api/{path}",
-            json.dumps(data),
+            json.dumps(data, cls=DjangoJSONEncoder),
             headers={"Content-Type": "application/json"},
         )
         response.raise_for_status()
@@ -408,7 +436,7 @@ class RestClient:
         self.check_access_token_age()
         response = self.session.patch(
             f"{self.domain}/api/{path}",
-            json.dumps(data),
+            json.dumps(data, cls=DjangoJSONEncoder),
             headers={"Content-Type": "application/json"},
         )
         response.raise_for_status()

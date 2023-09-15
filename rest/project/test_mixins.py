@@ -341,7 +341,7 @@ class RestMixin:
 
     def test_list_filter(self):
         self.create_items()
-        for key, value in self.creation_data.items():
+        for key, value in self.filter_data.items():
             # attribute_model_class = getattr(self.object_class, key)
             # if isinstance(attribute_model_class, ForwardManyToOneDescriptor):
             #     key = f"{key}__id"
@@ -365,9 +365,13 @@ class RestMixin:
                 f"Querying LIST API endpoint, expected data to match for GET {url}",
             )
 
+    @property
+    def filter_data(self):
+        return self.strip_id(self.creation_data)
+
     def test_list_filter_negative(self):
         self.create_items()
-        for key, value in self.strip_id(self.creation_data).items():
+        for key, value in self.filter_data.items():
             if isinstance(value, File):
                 continue
             altered_value = self.alter_value(key, value)
@@ -754,7 +758,7 @@ class RestMixin:
             "afgiftssats": "2.50",
             "kræver_indførselstilladelse": False,
         }
-        self.afgiftstabel_data = {}
+        self.afgiftstabel_data = {"gyldig_fra": date.today().isoformat()}
 
     @staticmethod
     def unenumerate(item):

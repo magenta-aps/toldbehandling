@@ -17,18 +17,35 @@ class AfgiftstabelTest(RestMixin, TestCase):
     def create_items(self):
         self.precreated_item = self.afgiftstabel
 
+    @property
+    def sort_fields(self):
+        return ("gyldig_fra", "gyldig_til", "kladde")
+
     @classmethod
     def alter_value(cls, key, value):
         # Change value a little for lookup, so it's incorrect but still the right type
         # This is used to check that the changed value does not find the object
-        if key in ("gyldig_fra", "gyldig_til"):
-            newdate = date.fromisoformat(value) + timedelta(days=100)
+        if key.startswith("gyldig_fra") or key.startswith("gyldig_til"):
+            if key.endswith("lt") or key.endswith("lte"):
+                dt = timedelta(days=-100)
+            else:
+                dt = timedelta(days=100)
+            newdate = date.fromisoformat(value) + dt
             return newdate.isoformat()
         return super().alter_value(key, value)
 
     invalid_itemdata = {"gyldig_til": [-1, "a", "2020-13-13"], "kladde": [-1, "foo"]}
     valid_itemdata = {}
     unique_fields = []
+
+    @property
+    def filter_data(self):
+        return {
+            "gyldig_fra__gt": (date.today() - timedelta(days=20)).isoformat(),
+            "gyldig_fra__lt": (date.today() + timedelta(days=20)).isoformat(),
+            "gyldig_fra__gte": (date.today()).isoformat(),
+            "gyldig_fra__lte": (date.today()).isoformat(),
+        }
 
     @property
     def expected_object_data(self):
@@ -58,11 +75,6 @@ class AfgiftstabelTest(RestMixin, TestCase):
                 for key, value in self.expected_object_data.items()
                 if value is not None
             }
-            self._update_object_data.update(
-                {
-                    "gyldig_til": (date.today() + timedelta(days=200)).isoformat(),
-                }
-            )
         return self._update_object_data
 
     def test_str(self):
@@ -70,6 +82,38 @@ class AfgiftstabelTest(RestMixin, TestCase):
             str(self.afgiftstabel),
             f"Afgiftstabel(gyldig_fra={date.today().isoformat()}, gyldig_til={None}, kladde={True})",
         )
+
+    def test_update_gyldig_til(self):
+        # Tjek at gyldig_til opdateres automatisk
+        tabel1 = Afgiftstabel.objects.create(gyldig_fra=date(2020, 1, 1), kladde=False)
+        tabel2 = Afgiftstabel.objects.create(gyldig_fra=date(2021, 1, 1), kladde=False)
+        tabel3 = Afgiftstabel.objects.create(gyldig_fra=date(2022, 1, 1), kladde=False)
+        tabeller = [tabel1, tabel2, tabel3]
+        for tabel in tabeller:
+            tabel.refresh_from_db()
+        self.assertEquals(tabel1.gyldig_til, date(2020, 12, 31))
+        self.assertEquals(tabel2.gyldig_til, date(2021, 12, 31))
+        self.assertEquals(tabel3.gyldig_til, None)
+
+        # Indsæt ny tabel midt i sekvensen og tjek at gyldig_til opdateres
+        tabel4 = Afgiftstabel.objects.create(gyldig_fra=date(2021, 7, 1), kladde=False)
+        tabeller.append(tabel4)
+        for tabel in tabeller:
+            tabel.refresh_from_db()
+        self.assertEquals(tabel1.gyldig_til, date(2020, 12, 31))
+        self.assertEquals(tabel2.gyldig_til, date(2021, 6, 30))
+        self.assertEquals(tabel3.gyldig_til, None)
+        self.assertEquals(tabel4.gyldig_til, date(2021, 12, 31))
+
+        # Flyt tabel til andet sted i sekvensen og tjek at gyldig_til opdateres
+        tabel4.gyldig_fra = date(2020, 3, 10)
+        tabel4.save()
+        for tabel in tabeller:
+            tabel.refresh_from_db()
+        self.assertEquals(tabel1.gyldig_til, date(2020, 3, 9))
+        self.assertEquals(tabel2.gyldig_til, date(2021, 12, 31))
+        self.assertEquals(tabel3.gyldig_til, None)
+        self.assertEquals(tabel4.gyldig_til, date(2020, 12, 31))
 
 
 class VareafgiftssatsTest(RestMixin, TestCase):
