@@ -257,6 +257,14 @@ class TF10SearchForm(BootstrapForm):
         )
 
     vareafgiftssats = forms.ChoiceField(choices=(), required=False)
+    godkendt = forms.ChoiceField(
+        choices=(
+            (None, _("Ny")),
+            (True, _("Godkendt")),
+            (False, _("Afvist")),
+        ),
+        required=False,
+    )
     dato_efter = forms.DateField(required=False, widget=DateInput)
     dato_før = forms.DateField(required=False, widget=DateInput)
     json = forms.BooleanField(required=False)

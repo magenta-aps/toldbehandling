@@ -122,8 +122,11 @@ class TF10ListView(common_views.TF10ListView):
     actions_template = "admin/blanket/tf10/link.html"
     extend_template = "admin/admin_layout.html"
 
-    def get_context_data(self, **context):
-        return super().get_context_data(**{**context, "can_create": False})
+    def get_context_data(self, **kwargs):
+        context = super(TF10ListView, self).get_context_data(**kwargs)
+        context["title"] = "Afgiftsanmeldelser"
+        context["can_create"] = False
+        return context
 
 
 class TF10FormUpdateView(common_views.TF10FormUpdateView):

@@ -18,7 +18,7 @@
 
 <div class="mx-5">
 
-    <h1>Mine afgiftsanmeldelser</h1>
+    <h1>{{ title }}</h1>
 
     {{form.errors}}
 
@@ -32,6 +32,12 @@
             <div class="col-4"><label for="{{form.vareafgiftssats.name}}" class="form-label">Varetype</label></div>
             <div class="col-8">
                 {{form.vareafgiftssats}}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-4"><label for="{{form.godkendt.name}}" class="form-label">Status</label></div>
+            <div class="col-8">
+                {{form.godkendt}}
             </div>
         </div>
         <div class="row">

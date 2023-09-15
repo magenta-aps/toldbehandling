@@ -247,6 +247,14 @@ class TF10ListView(LoginRequiredMixin, HasRestClientMixin, CustomLayoutMixin, Fo
     form_class = forms.TF10SearchForm
     list_size = 20
 
+    def get_context_data(self, **context: Dict[str, Any]) -> Dict[str, Any]:
+        return super().get_context_data(
+            **{
+                **context,
+                "title": "Mine afgiftsanmeldelser",
+            }
+        )
+
     def get(self, request, *args, **kwargs):
         # Søgeform; viser formularen (med evt. fejl) når den er invalid,
         # og evt. søgeresultater når den er gyldig

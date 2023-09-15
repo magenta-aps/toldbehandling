@@ -43,7 +43,7 @@ class Command(BaseCommand):
             fakturabeløb=Decimal("400000"),
         )
 
-        for i in range(1, 30):
+        for i in range(1, 100):
             forsendelse = Postforsendelse.objects.create(
                 forsendelsestype=random.choice(
                     [
