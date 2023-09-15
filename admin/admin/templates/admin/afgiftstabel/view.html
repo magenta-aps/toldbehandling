@@ -2,6 +2,8 @@
 {% load static %}
 {% load i18n %}
 {% load l10n %}
+{% load admin_tags %}
+{% load common_tags %}
 
 {# Docs for bootstrap-table: https://bootstrap-table.com/docs/ #}
 {% block extra_headers %}
@@ -16,21 +18,64 @@
 {% block content %}
 <div class="mx-5">
     <h1>Afgiftstabel</h1>
-    <div class="row">
-        <div class="col-6">
-            <dl class="row">
-                <dt class="col-2">Gyldig fra</dt>
-                <dd class="col-10">2023-01-01</dd>
-                <dt class="col-2">Gyldig til</dt>
-                <dd class="col-10"></dd>
-                <dt class="col-2">Kladde</dt>
-                <dd class="col-10">Nej</dd>
-            </dl>
+    <form method="post" action="">
+        {% csrf_token %}
+        <div class="row">
+            <div class="col-6">
+                <div class="row">
+                    <div class="col-2"><label for="{{form.gyldig_fra.name}}">{% translate "Gyldig fra" %}</label></div>
+                    <div class="col-10">
+                        {% if can_edit %}
+                        {{form.gyldig_fra}}
+                        {{form.gyldig_fra.errors}}
+                        {% else %}
+                        {{object.gyldig_fra|default_if_none:"-"}}
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-2"><label>{% translate "Gyldig til" %}</label></div>
+                    <div class="col-10">{{object.gyldig_til|default_if_none:"-"}}</div>
+                </div>
+                <div class="row">
+                    <div class="col-2"><label for="{{form.kladde.name}}">{% translate "Kladde" %}</label></div>
+                    <div class="col-10">
+                        {% if can_edit %}
+                            {{form.kladde}}
+                            {{form.kladde.errors}}
+                        {% endif %}
+                        {% if not object.kladde %}
+                            {% translate "Nej" %}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 clearfix">
+                <a href="#" class="btn btn-primary float-end">Download</a>
+                {% if can_edit %}
+                <button type="submit" class="btn btn-success float-end">Opdatér</button>
+                {% endif %}
+            </div>
         </div>
-        <div class="col-6 clearfix">
-            <a href="#" class="btn btn-primary float-end">Download</a>
+    </form>
+    <div class="card">
+        <div class="card-body">
+            <ul class="mb-0">
+                <li>
+                    {% blocktranslate %}
+                    Der kan kun ændres tabeller som er kladder eller som begynder i fremtiden
+                    {% endblocktranslate %}
+                </li>
+                <li>
+                    {% blocktranslate %}
+                    En aktiv afgiftstabel er gældende fra dens begyndelsestidspunkt
+                    frem til begyndelsen på den næste aktive afgiftstabel
+                    {% endblocktranslate %}
+                </li>
+            </ul>
         </div>
     </div>
+
     <table class="table"
            data-toggle="table"
            data-sticky-header="true"
@@ -38,658 +83,54 @@
     >
         <thead>
         <tr>
-            <th class="col-1">Afgiftsgruppenummer</th>
-            <th class="col-5">Vareart</th>
-            <th class="col-1">Enhed</th>
-            <th class="col-1">Kræver indførsels­tilladelse</th>
-            <th class="col-1">Minimumsbeløb</th>
-            <th class="col-1">Afgiftssats</th>
-            <th class="col-1">Nedre mængde­grænse</th>
-            <th class="col-1">Øvre mængde­grænse</th>
+            <th class="col-1">{% translate "Afgifts­gruppe­nummer" %}</th>
+            <th class="col-5">{% translate "Vareart" %}</th>
+            <th class="col-1">{% translate "Enhed" %}</th>
+            <th class="col-1">{% translate "Kræver indførsels­tilladelse" %}</th>
+            <th class="col-1">{% translate "Minimumsbeløb" %}</th>
+            <th class="col-1">{% translate "Afgiftssats" %}</th>
+            <th class="col-1">{% translate "Nedre mængde­grænse" %}</th>
+            <th class="col-1">{% translate "Øvre mængde­grænse" %}</th>
         </tr>
         </thead>
         <tbody>
-        <tr>
-            <td>1</td>
-            <td>SUKKER og sirup</td>
-            <td>kilogram</td>
-            <td>nej</td>
-            <td>0,00</td>
-            <td>6,00</td>
-            <td></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>2</td>
-            <td>KAFFE, pulverkaffe, koncentrater</td>
-            <td>kilogram</td>
-            <td>nej</td>
-            <td>0,00</td>
-            <td>6,00</td>
-            <td></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>3</td>
-            <td>THE, pulver The, koncentrater</td>
-            <td>kilogram</td>
-            <td>nej</td>
-            <td>0,00</td>
-            <td>6,60</td>
-            <td></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>4</td>
-            <td>CHOKOLADE, lakrids, sukkervarer</td>
-            <td>kilogram</td>
-            <td>nej</td>
-            <td>0,00</td>
-            <td>58,00</td>
-            <td></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>11</td>
-            <td>ETHANOLHOLDIGE DRIKKEVARER (Øl, vin, spiritus, cider) med et ethanol indhold) på 1,21 til og med 3,09
-                volumenprocent.på 1,21 til og med 3,09 volumenprocent.
-            </td>
-            <td>liter</td>
-            <td>nej</td>
-            <td>0,00</td>
-            <td>3,50</td>
-            <td></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>12</td>
-            <td>ETHANOLHOLDIGE DRIKKEVARER (Øl, vin, spiritus, cider) med et ethanol indhold)- 3,10- 4,09
-                volumenprocent.
-            </td>
-            <td>liter</td>
-            <td>nej</td>
-            <td>0,00</td>
-            <td>8,00</td>
-            <td></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>13</td>
-            <td>ETHANOLHOLDIGE DRIKKEVARER (Øl, vin, spiritus, cider) med et ethanol indhold)- 4,10- 5,09
-                volumenprocent.
-            </td>
-            <td>liter</td>
-            <td>nej</td>
-            <td>0,00</td>
-            <td>21,00</td>
-            <td></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>14</td>
-            <td>ETHANOLHOLDIGE DRIKKEVARER (Øl, vin, spiritus, cider) med et ethanol indhold)- 5,10- 7,09
-                volumenprocent.
-            </td>
-            <td>liter</td>
-            <td>nej</td>
-            <td>0,00</td>
-            <td>30,00</td>
-            <td></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>15</td>
-            <td>ETHANOLHOLDIGE DRIKKEVARER (Øl, vin, spiritus, cider) med et ethanol indhold)- 7,10- 9,09
-                volumenprocent.
-            </td>
-            <td>liter</td>
-            <td>nej</td>
-            <td>0,00</td>
-            <td>43,00</td>
-            <td></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>16</td>
-            <td>ETHANOLHOLDIGE DRIKKEVARER (Øl, vin, spiritus, cider) med et ethanol indhold)- 9,10- 11,09
-                volumenprocent.
-            </td>
-            <td>liter</td>
-            <td>nej</td>
-            <td>0,00</td>
-            <td>56,00</td>
-            <td></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>17</td>
-            <td>ETHANOLHOLDIGE DRIKKEVARER (Øl, vin, spiritus, cider) med et ethanol indhold)- 11,10- 13,09
-                volumenprocent.
-            </td>
-            <td>liter</td>
-            <td>nej</td>
-            <td>0,00</td>
-            <td>66,00</td>
-            <td></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>18</td>
-            <td>ETHANOLHOLDIGE DRIKKEVARER (Øl, vin, spiritus, cider) med et ethanol indhold)- 13,10- 15,09
-                volumenprocent.
-            </td>
-            <td>liter</td>
-            <td>nej</td>
-            <td>0,00</td>
-            <td>92,00</td>
-            <td></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>19</td>
-            <td>ETHANOLHOLDIGE DRIKKEVARER (Øl, vin, spiritus, cider) med et ethanol indhold)- 15,10- 18,09
-                volumenprocent.
-            </td>
-            <td>liter</td>
-            <td>nej</td>
-            <td>0,00</td>
-            <td>114,00</td>
-            <td></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>20</td>
-            <td>ETHANOLHOLDIGE DRIKKEVARER (Øl, vin, spiritus, cider) med et ethanol indhold)- 18,10- 22,09
-                volumenprocent.
-            </td>
-            <td>liter</td>
-            <td>nej</td>
-            <td>0,00</td>
-            <td>147,00</td>
-            <td></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>21</td>
-            <td>ETHANOLHOLDIGE DRIKKEVARER (Øl, vin, spiritus, cider) med et ethanol indhold)- 22,10- 26,09
-                volumenprocent.
-            </td>
-            <td>liter</td>
-            <td>nej</td>
-            <td>0,00</td>
-            <td>187,00</td>
-            <td></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>22</td>
-            <td>ETHANOLHOLDIGE DRIKKEVARER (Øl, vin, spiritus, cider) med et ethanol indhold)- 26,10- 30,09
-                volumenprocent.
-            </td>
-            <td>liter</td>
-            <td>nej</td>
-            <td>0,00</td>
-            <td>230,00</td>
-            <td></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>23</td>
-            <td>ETHANOLHOLDIGE DRIKKEVARER (Øl, vin, spiritus, cider) med et ethanol indhold)- 30,10- 35,09
-                volumenprocent.
-            </td>
-            <td>liter</td>
-            <td>nej</td>
-            <td>0,00</td>
-            <td>280,00</td>
-            <td></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>24</td>
-            <td>ETHANOLHOLDIGE DRIKKEVARER (Øl, vin, spiritus, cider) med et ethanol indhold)- 35,10- 45,09
-                volumenprocent.
-            </td>
-            <td>liter</td>
-            <td>nej</td>
-            <td>0,00</td>
-            <td>361,00</td>
-            <td></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>25</td>
-            <td>ETHANOLHOLDIGE DRIKKEVARER (Øl, vin, spiritus, cider) med et ethanol indhold)- 45,10- 60,09
-                volumenprocent.
-            </td>
-            <td>liter</td>
-            <td>nej</td>
-            <td>0,00</td>
-            <td>495,00</td>
-            <td></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>26</td>
-            <td>ETHANOLHOLDIGE DRIKKEVARER (Øl, vin, spiritus, cider) med et ethanol indhold)- 60,10- 100.0
-                volumenprocent.
-            </td>
-            <td>liter</td>
-            <td>nej</td>
-            <td>0,00</td>
-            <td>591,00</td>
-            <td></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>31</td>
-            <td>MINERALVAND, sodavand og andre kulsyreholdige læskedrikke.</td>
-            <td>liter</td>
-            <td>nej</td>
-            <td>0,00</td>
-            <td>7,50</td>
-            <td></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>32</td>
-            <td>MINERALVAND, sodavand og andre kulsyreholdige læskedrikke. Indført til Qaanaaq, Ittoqqortoormiit og
-                Tasiilaq
-                af erhvervsdrivende.
-            </td>
-            <td>liter</td>
-            <td>nej</td>
-            <td>0,00</td>
-            <td>5,75</td>
-            <td></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>33</td>
-            <td>LÆSKEDRIKKONCENTRAT til brug for fremstilling af kulsyreholdige drikke</td>
-            <td>liter</td>
-            <td>nej</td>
-            <td>0,00</td>
-            <td>46,30</td>
-            <td></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>34</td>
-            <td>EMBALLAGE til drikkevarer, koncentrater og frugtsafter, excl. emballage til mælkeprodukter
-                samtgrønlandske
-                returflasker: Med nettoindhold til og med 0,25liter
-            </td>
-            <td>antal</td>
-            <td>nej</td>
-            <td>0,00</td>
-            <td>2,00</td>
-            <td></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>35</td>
-            <td>EMBALLAGE til drikkevarer, koncentrater og frugtsafter, excl. emballage til mælkeprodukter
-                samtgrønlandske
-                returflasker: Med nettoindhold på over 0,25liter
-            </td>
-            <td>antal</td>
-            <td>nej</td>
-            <td>0,00</td>
-            <td>3,50</td>
-            <td></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>41</td>
-            <td>CIGARER, cerutter & cigarillos 3gr. pr. stk. og derunder</td>
-            <td>antal</td>
-            <td>nej</td>
-            <td>0,00</td>
-            <td>1,30</td>
-            <td></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>42</td>
-            <td>CIGARER, cerutter & cigarillos over 3gr.</td>
-            <td>antal</td>
-            <td>nej</td>
-            <td>0,00</td>
-            <td>1,58</td>
-            <td></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>43</td>
-            <td>CIGARETTER</td>
-            <td>antal</td>
-            <td>nej</td>
-            <td>0,00</td>
-            <td>2,23</td>
-            <td></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>44</td>
-            <td>CIGARETPAPIR, inkl. hylstre</td>
-            <td>antal</td>
-            <td>nej</td>
-            <td>0,00</td>
-            <td>0,48</td>
-            <td></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>45</td>
-            <td>TOBAK, grovskåren, granuleret, plader over 1,5mm snitbredde</td>
-            <td>kilogram</td>
-            <td>nej</td>
-            <td>0,00</td>
-            <td>492,00</td>
-            <td></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>46</td>
-            <td>ANDEN RØGTOBAK, finskåren under 1,5mm snitbredde</td>
-            <td>kilogram</td>
-            <td>nej</td>
-            <td>0,00</td>
-            <td>1.165,00</td>
-            <td></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>47</td>
-            <td>SNUS / SKRÅ og andet røgfri tobak</td>
-            <td>procent</td>
-            <td>nej</td>
-            <td>0,00</td>
-            <td>300,00</td>
-            <td></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>51</td>
-            <td>LAMME & FÅREKØD og produkter heraf</td>
-            <td>kilogram</td>
-            <td>nej</td>
-            <td>0,00</td>
-            <td>25,00</td>
-            <td></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>52</td>
-            <td>KØD af hornkvæg og produkter heraf, fersk eller kølet</td>
-            <td>kilogram</td>
-            <td>nej</td>
-            <td>0,00</td>
-            <td>10,00</td>
-            <td></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>53</td>
-            <td>KØD af hornkvæg og produkter heraf, frosset</td>
-            <td>kilogram</td>
-            <td>nej</td>
-            <td>0,00</td>
-            <td>6,75</td>
-            <td></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>54</td>
-            <td>SVINEKØD og produkter heraf, fersk, frosset eller kølet</td>
-            <td>kilogram</td>
-            <td>nej</td>
-            <td>0,00</td>
-            <td>2,25</td>
-            <td></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>55</td>
-            <td>SVINEKØD og produkter heraf, saltet i saltlage, tørret eller røget</td>
-            <td>kilogram</td>
-            <td>nej</td>
-            <td>0,00</td>
-            <td>3,25</td>
-            <td></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>56</td>
-            <td>SLAGTET FJERKRÆ, fersk, frosset eller kølet</td>
-            <td>kilogram</td>
-            <td>nej</td>
-            <td>0,00</td>
-            <td>3,50</td>
-            <td></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>57</td>
-            <td>VARER AF LAMME- OG FÅREKØD tilberedt eller konserveret</td>
-            <td>kilogram</td>
-            <td>nej</td>
-            <td>0,00</td>
-            <td>25,00</td>
-            <td></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>58</td>
-            <td>VARER AF HORNKVÆG, tilberedt eller konserveret</td>
-            <td>kilogram</td>
-            <td>nej</td>
-            <td>0,00</td>
-            <td>4,00</td>
-            <td></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>59</td>
-            <td>VARER AF SVINEKØD, tilberedt eller konserveret</td>
-            <td>kilogram</td>
-            <td>nej</td>
-            <td>0,00</td>
-            <td>2,00</td>
-            <td></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>60</td>
-            <td>PØLSER af enhver art</td>
-            <td>kilogram</td>
-            <td>nej</td>
-            <td>0,00</td>
-            <td>3,00</td>
-            <td></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>61</td>
-            <td>VARER AF LEVER, tilberedt eller konserveret</td>
-            <td>kilogram</td>
-            <td>nej</td>
-            <td>0,00</td>
-            <td>2,50</td>
-            <td></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>62</td>
-            <td>VARER AF FJERKRÆ, tilberedt eller konserveret</td>
-            <td>kilogram</td>
-            <td>nej</td>
-            <td>0,00</td>
-            <td>3,50</td>
-            <td></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>70</td>
-            <td>FYRVÆRKERI</td>
-            <td>procent</td>
-            <td>nej</td>
-            <td>0,00</td>
-            <td>100,00</td>
-            <td></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>71</td>
-            <td>KNALLERTER</td>
-            <td>antal</td>
-            <td>nej</td>
-            <td>0,00</td>
-            <td>2.530,00</td>
-            <td></td>
-            <td></td>
-        </tr>
-
-
-        <tr>
-            <td rowspan="4">72</td>
-            <td>PERSONBILER Afgiften svares med et fast beløb på 50.000 + 100% af den del af fakturaværdien der
-                overstiger
-                50.000 men ikke 150.000 + 125% af resten.
-            </td>
-            <td>sammensat</td>
-            <td>nej</td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>PERSONBILER, fast beløb på 50.000</td>
-            <td>antal</td>
-            <td></td>
-            <td></td>
-            <td>50.000,00</td>
-            <td></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>PERSONBILER, 100% af den del af fakturaværdien der overstiger 50.000 men ikke 150.000</td>
-            <td>procent</td>
-            <td></td>
-            <td></td>
-            <td>100,00</td>
-            <td>50.000,00</td>
-            <td>150.000,00</td>
-        </tr>
-        <tr>
-            <td>PERSONBILER, 125% af fakturaværdien der overstiger 150.000</td>
-            <td>procent</td>
-            <td></td>
-            <td></td>
-            <td>150,00</td>
-            <td>150.000,00</td>
-            <td></td>
-        </tr>
-
-
-        <tr>
-            <td rowspan="3">73</td>
-            <td>VAREBILER u/ 4tons totalvægt. Afgiften svares med et fast beløb på 50.000 + 50% af den del af
-                fakturaværdien
-                der overstiger 50.000.
-            </td>
-            <td>sammensat</td>
-            <td>nej</td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>VAREBILER u/ 4tons totalvægt, fast beløb på 50.000</td>
-            <td>antal</td>
-            <td></td>
-            <td></td>
-            <td>50.000,00</td>
-            <td></td>
-            <td></td>
-        </tr>
-        <tr>
-
-            <td>VAREBILER u/ 4tons totalvægt, 50% af den del af fakturaværdien der overstiger 50.000</td>
-            <td>procent</td>
-            <td></td>
-            <td></td>
-            <td>50,00</td>
-            <td>50.000,00</td>
-            <td></td>
-        </tr>
-
-
-        <tr>
-            <td>80</td>
-            <td>LASTBILER, BUSSER OG VAREBILER o/ 4tons totalvægt.</td>
-            <td>antal</td>
-            <td>nej</td>
-            <td>0,00</td>
-            <td>50.000,00</td>
-            <td></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>83</td>
-            <td>SNESCOOTER</td>
-            <td>antal</td>
-            <td>nej</td>
-            <td>0,00</td>
-            <td>22.000,00</td>
-            <td></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>84</td>
-            <td>VANDSCOOTER</td>
-            <td>antal</td>
-            <td>nej</td>
-            <td>0,00</td>
-            <td>30.000,00</td>
-            <td></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>90</td>
-            <td>PARFUMER, kosmetik og toiletmidler undtagen: sæbe, tandplejemidler, shampoo, deodorant, badesalt, pudder
-                & babyplejemidler
-            </td>
-            <td>procent</td>
-            <td>nej</td>
-            <td>0,00</td>
-            <td>38,00</td>
-            <td></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>91</td>
-            <td>SPILLEAUTOMATER, elektriske billarder, målskydningsapparater m.v.</td>
-            <td>procent</td>
-            <td>nej</td>
-            <td>0,00</td>
-            <td>50,00</td>
-            <td></td>
-            <td></td>
-        </tr>
-        <tr>
-            <td>92</td>
-            <td>MINDRE TERRÆNGÅENDE MOTORKØRETØJER</td>
-            <td>antal</td>
-            <td>nej</td>
-            <td>0,00</td>
-            <td>5.000,00</td>
-            <td></td>
-            <td></td>
-        </tr>
+        {% for vareafgiftssats in object.vareafgiftssatser %}
+        {% if not vareafgiftssats.overordnet %}
+            <tr>
+                {% if vareafgiftssats.subsatser %}
+                    <td rowspan="{{vareafgiftssats.subsatser|length|add:1}}">
+                        {% localize off %}{{vareafgiftssats.afgiftsgruppenummer}}{% endlocalize %}
+                    </td>
+                    <td>{{vareafgiftssats.vareart}}</td>
+                    <td>{{vareafgiftssats.enhed|enhedsnavn}}</td>
+                    <td>{{vareafgiftssats.kræver_indførselstilladelse|yesno}}</td>
+                    <td colspan="4"></td>
+                {% else %}
+                    <td>
+                        {% localize off %}{{vareafgiftssats.afgiftsgruppenummer}}{% endlocalize %}
+                    </td>
+                    <td>{{vareafgiftssats.vareart}}</td>
+                    <td>{{vareafgiftssats.enhed|enhedsnavn}}</td>
+                    <td></td>
+                    <td>{{vareafgiftssats.minimumsbeløb|default_if_none:""}}</td>
+                    <td>{{vareafgiftssats.afgiftssats}}</td>
+                    <td>{{vareafgiftssats.segment_nedre|default_if_none:""}}</td>
+                    <td>{{vareafgiftssats.segment_øvre|default_if_none:""}}</td>
+                {% endif %}
+            </tr>
+            {% for subsats in vareafgiftssats.subsatser %}
+            <tr>
+                <td>{{subsats.vareart}}</td>
+                <td>{{subsats.enhed|enhedsnavn}}</td>
+                <td></td>
+                <td>{{vareafgiftssats.minimumsbeløb|default_if_none:""}}</td>
+                <td>{{subsats.afgiftssats}}</td>
+                <td>{{subsats.segment_nedre|default_if_none:""}}</td>
+                <td>{{subsats.segment_øvre|default_if_none:""}}</td>
+            </tr>
+            {% endfor %}
+        {% endif %}
+        {% endfor %}
         </tbody>
     </table>
 </div>

@@ -1,15 +1,27 @@
+from __future__ import annotations
+
+from datetime import timedelta
 from decimal import Decimal
 
 from django.db import models
+from django.db.models import CheckConstraint, Q
+from django.db.models.signals import post_save
 from django.utils.translation import gettext_lazy as _
 
 
 class Afgiftstabel(models.Model):
     class Meta:
         ordering = ["-gyldig_fra", "-gyldig_til"]
+        constraints = [
+            CheckConstraint(
+                check=Q(kladde=True) | Q(gyldig_fra__isnull=False),
+                name="kladde_or_has_gyldig_fra",
+            )
+        ]
 
     gyldig_fra = models.DateField(
-        auto_now_add=True,
+        null=True,
+        blank=True,
     )
     gyldig_til = models.DateField(
         null=True,
@@ -28,6 +40,31 @@ class Afgiftstabel(models.Model):
     def save(self, *args, **kwargs):
         super().full_clean()
         super().save(*args, **kwargs)
+
+    @staticmethod
+    def on_update(sender, instance: Afgiftstabel, **kwargs):
+        # En afgiftstabel har (måske) fået ændret sin `gyldig_fra`
+        # Opdatér `gyldig_til` på alle tabeller som er påvirkede
+        # (tidl. prev, ny prev, tabellen selv)
+        # Det er nemmest og sikrest at loope over hele banden,
+        # så vi er sikre på at ramme alle
+        update_fields = kwargs.get("update_fields", None)
+        if not update_fields or "gyldig_fra" in update_fields:
+            gyldig_til = None
+            for item in Afgiftstabel.objects.filter(kladde=False).order_by(
+                "-gyldig_fra"
+            ):
+                # Loop over alle tabeller fra sidste til første
+                if item.gyldig_til != gyldig_til:
+                    item.gyldig_til = gyldig_til
+                    # Sæt kun `gyldig_til`, så vi forhindrer rekursion
+                    item.save(update_fields=("gyldig_til",))
+                gyldig_til = item.gyldig_fra - timedelta(days=1)
+
+
+post_save.connect(
+    Afgiftstabel.on_update, sender=Afgiftstabel, dispatch_uid="afgiftstabel_update"
+)
 
 
 class Vareafgiftssats(models.Model):

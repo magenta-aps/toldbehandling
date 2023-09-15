@@ -14,13 +14,13 @@ from sats.models import Afgiftstabel, Vareafgiftssats
 class AfgiftstabelIn(ModelSchema):
     class Config:
         model = Afgiftstabel
-        model_fields = ["gyldig_til", "kladde"]
+        model_fields = ["gyldig_fra", "kladde"]
 
 
 class PartialAfgiftstabelIn(ModelSchema):
     class Config:
         model = Afgiftstabel
-        model_fields = ["gyldig_til", "kladde"]
+        model_fields = ["gyldig_fra", "kladde"]
         model_fields_optional = "__all__"
 
 
@@ -31,8 +31,14 @@ class AfgiftstabelOut(ModelSchema):
 
 
 class AfgiftstabelFilterSchema(FilterSchema):
-    gyldig_fra: Optional[str]
-    gyldig_til: Optional[str]
+    gyldig_fra__gt: Optional[str]
+    gyldig_fra__lt: Optional[str]
+    gyldig_fra__gte: Optional[str]
+    gyldig_fra__lte: Optional[str]
+    gyldig_til__gt: Optional[str]
+    gyldig_til__lt: Optional[str]
+    gyldig_til__gte: Optional[str]
+    gyldig_til__lte: Optional[str]
     kladde: Optional[bool]
 
 
@@ -65,14 +71,30 @@ class AfgiftstabelAPI:
         url_name="afgiftstabel_list",
     )
     @paginate()  # https://eadwincode.github.io/django-ninja-extra/tutorial/pagination/
-    def list_afgiftstabeller(self, filters: AfgiftstabelFilterSchema = Query(...)):
+    def list_afgiftstabeller(
+        self,
+        filters: AfgiftstabelFilterSchema = Query(...),
+        sort: str = None,
+        order: str = None,
+    ):
         # https://django-ninja.rest-framework.com/guides/input/filtering/
-        return list(filters.filter(Afgiftstabel.objects.all()))
+        qs = filters.filter(Afgiftstabel.objects.all())
+        order_by = self.map_sort(sort, order)
+        if order_by:
+            qs = qs.order_by(order_by, "id")
+        return list(qs)
         """
         return list(Afgiftstabel.objects.filter(
             filters.get_filter_expression() & Q("mere filtrering fra vores side")
         ))
         """
+
+    @staticmethod
+    def map_sort(sort, order):
+        if sort is not None:
+            if hasattr(Afgiftstabel, sort):
+                return ("-" if order == "desc" else "") + sort
+        return None
 
     @route.patch("/{id}", auth=JWTAuth(), url_name="afgiftstabel_update")
     def update_afgiftstabel(self, id: int, payload: PartialAfgiftstabelIn):

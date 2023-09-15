@@ -1,6 +1,10 @@
-from typing import Union
+from collections import defaultdict
+from datetime import date
+from functools import cached_property
+from typing import Union, List
 from urllib.parse import unquote
 
+from admin.data import Afgiftstabel
 from admin.data import Vareafgiftssats
 from django.http import Http404, JsonResponse
 from django.shortcuts import redirect
@@ -103,19 +107,19 @@ class TF10View(LoginRequiredMixin, HasRestClientMixin, FormView):
     def get_sats(self, sats_id: int) -> Vareafgiftssats:
         if sats_id not in self._satser:
             sats = Vareafgiftssats.from_dict(self.get_data("vareafgiftssats", sats_id))
-            if sats.enhed == Vareafgiftssats.Enhed.SAMMENSAT:
-                response = self.rest_client.get(
-                    "vareafgiftssats", {"overordnet": sats_id}
-                )
-                if response["count"] > 0:
-                    sats.subsatser = []
-                    for subsats in response["items"]:
-                        subsats = Vareafgiftssats.from_dict(subsats)
-                        if subsats.id not in self._satser:
-                            self._satser[subsats.id] = subsats
-                        sats.subsatser.append(subsats)
+            sats.populate_subs(self.get_subsatser)
             self._satser[sats_id] = sats
         return self._satser[sats_id]
+
+    def get_subsatser(self, parent_id: int) -> List[Vareafgiftssats]:
+        response = self.rest_client.get("vareafgiftssats", {"overordnet": parent_id})
+        subsatser = []
+        for subsats in response["items"]:
+            subsats = Vareafgiftssats.from_dict(subsats)
+            if subsats.id not in self._satser:
+                self._satser[subsats.id] = subsats
+            subsatser.append(subsats)
+        return subsatser
 
 
 class TF10ListView(common_views.TF10ListView):
@@ -196,3 +200,61 @@ class AfgiftstabelListView(LoginRequiredMixin, HasRestClientMixin, GetFormView):
         if value is None:
             value = ""
         return value
+
+
+class AfgiftstabelDetailView(LoginRequiredMixin, HasRestClientMixin, FormView):
+    template_name = "admin/afgiftstabel/view.html"
+    form_class = forms.AfgiftstabelUpdateForm
+
+    def get_context_data(self, **kwargs):
+        return super().get_context_data(
+            **{
+                **kwargs,
+                "object": self.item,
+                "can_edit": self.item.kladde or self.item.gyldig_fra > date.today(),
+            }
+        )
+
+    def get_initial(self):
+        return {
+            "gyldig_fra": self.item.gyldig_fra,
+            "kladde": self.item.kladde,
+        }
+
+    def form_valid(self, form):
+        tabel_id = self.kwargs["id"]
+        try:
+            self.rest_client.afgiftstabel.update(tabel_id, form.cleaned_data)
+            return redirect(reverse("afgiftstabel_list"))
+        except HTTPError as e:
+            if e.response.status_code == 404:
+                raise Http404("Afgiftstabel findes ikke")
+            raise
+
+    @cached_property
+    def item(self) -> Afgiftstabel:
+        try:
+            afgiftstabel = Afgiftstabel.from_dict(
+                self.rest_client.get(f"afgiftstabel/{self.kwargs['id']}")
+            )
+            afgiftstabel.vareafgiftssatser = self.get_satser()
+        except HTTPError as e:
+            if e.response.status_code == 404:
+                raise Http404("Afgiftstabel findes ikke")
+            raise
+        return afgiftstabel
+
+    def get_satser(self):
+        satser = [
+            Vareafgiftssats.from_dict(result)
+            for result in self.rest_client.get(
+                "vareafgiftssats", {"afgiftstabel": self.kwargs["id"]}
+            )["items"]
+        ]
+        by_overordnet = defaultdict(list)
+        for sats in satser:
+            if sats.overordnet:
+                by_overordnet[sats.overordnet].append(sats)
+        for sats in satser:
+            sats.populate_subs(lambda id: by_overordnet.get(id))
+        return satser

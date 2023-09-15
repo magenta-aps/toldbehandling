@@ -16,7 +16,7 @@
 
 {% block content %}
 <div class="mx-5">
-    <table class="table table-bordered table-striped"
+    <table class="table table-bordered"
            data-toggle="table"
            data-sticky-header="true"
            data-classes="table"
@@ -44,10 +44,15 @@
         </thead>
         <tbody>
         {% for item in items %}
+        {% if item.kladde %}
+        <tr class="table-secondary">
+            {% else %}
         <tr>
+            {% endif %}
+
             <td>{{item.gyldig_fra|default_if_none:""}}</td>
             <td>{{item.gyldig_til|default_if_none:""}}</td>
-            <td>{{item.kladde|yesno}}</td>
+            <td>{{item.kladde|yesno|capfirst}}</td>
             <td>{% include actions_template with item=item %}</td>
         </tr>
         {% endfor %}
