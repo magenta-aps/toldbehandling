@@ -1,17 +1,20 @@
+import csv
 from collections import defaultdict
 from datetime import date
 from functools import cached_property
-from typing import Union, List
+from typing import Union, Iterable, List
 from urllib.parse import unquote
 
 from admin.data import Afgiftstabel
 from admin.data import Vareafgiftssats
-from django.http import Http404, JsonResponse
+from django.http import Http404, JsonResponse, HttpResponseBadRequest, HttpResponse
 from django.shortcuts import redirect
 from django.template import loader
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
+from django.views import View
 from django.views.generic import FormView, TemplateView
+from openpyxl import Workbook
 from requests import HTTPError
 from told_common import views as common_views
 from told_common.view_mixins import LoginRequiredMixin, HasRestClientMixin, GetFormView
@@ -258,3 +261,92 @@ class AfgiftstabelDetailView(LoginRequiredMixin, HasRestClientMixin, FormView):
         for sats in satser:
             sats.populate_subs(lambda id: by_overordnet.get(id))
         return satser
+
+
+class AfgiftstabelDownloadView(HasRestClientMixin, View):
+    valid_formats = ("xlsx", "csv")
+    headers = (
+        "afgiftsgruppenummer",
+        "overordnet",
+        "vareart",
+        "enhed",
+        "afgiftssats",
+        "kræver_indførselstilladelse",
+        "minimumsbeløb",
+        "segment_nedre",
+        "segment_øvre",
+    )
+
+    def get(self, request, *args, **kwargs):
+        format = kwargs["format"]
+        if format not in self.valid_formats:
+            return HttpResponseBadRequest(
+                f"Ugyldigt format {format}. Gyldige formater: {', '.join(self.valid_formats)}"
+            )
+
+        afgiftstabel = self.rest_client.get(f"afgiftstabel/{kwargs['id']}")
+        items = [
+            Vareafgiftssats.from_dict(item)
+            for item in self.rest_client.get(
+                f"vareafgiftssats", {"afgiftstabel": kwargs["id"]}
+            )["items"]
+        ]
+
+        items_by_id = {item.id: item for item in items}
+        rows = [
+            list(item.spreadsheet_row(self.headers, lambda id: items_by_id[id]))
+            for item in items
+        ]
+
+        if afgiftstabel["kladde"]:
+            filename = f"Afgiftstabel_kladde.{format}"
+        else:
+            filename = (
+                f"Afgiftstabel_"
+                f"{afgiftstabel['gyldig_fra']}_"
+                f"{afgiftstabel['gyldig_til'] if afgiftstabel['gyldig_til'] else 'altid'}."
+                f"{format}"
+            )
+
+        if format == "xlsx":
+            return self.render_xlsx(self.headers_pretty, rows, filename)
+        if format == "csv":
+            return self.render_csv(self.headers_pretty, rows, filename)
+
+    @cached_property
+    def headers_pretty(self):
+        return [header.replace("_", " ").capitalize() for header in self.headers]
+
+    def render_xlsx(
+        self,
+        headers: Iterable[str],
+        items: Iterable[Iterable[Union[str, int, bool]]],
+        filename: str,
+    ) -> HttpResponse:
+        wb = Workbook(write_only=True)
+        ws = wb.create_sheet()
+        ws.append(headers)
+        for item in items:
+            ws.append(item)
+        response = HttpResponse(
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            headers={"Content-Disposition": "attachment; filename={}".format(filename)},
+        )
+        wb.save(response)
+        return response
+
+    def render_csv(
+        self,
+        headers: Iterable[str],
+        items: Iterable[Iterable[Union[str, int, bool]]],
+        filename: str,
+    ) -> HttpResponse:
+        response = HttpResponse(
+            content_type="text/csv",
+            headers={"Content-Disposition": "attachment; filename={}".format(filename)},
+        )
+        writer = csv.writer(response)
+        writer.writerow(headers)
+        for item in items:
+            writer.writerow(item)
+        return response

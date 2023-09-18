@@ -81,7 +81,7 @@ class Vareafgiftssats(models.Model):
             "ant",
             _("Antal"),
         )
-        KG = (
+        KILOGRAM = (
             "kg",
             _("Kilogram"),
         )
@@ -176,7 +176,7 @@ class Vareafgiftssats(models.Model):
 
     def beregn_afgift(self, varelinje) -> Decimal:
         if self.enhed in (
-            Vareafgiftssats.Enhed.KG,
+            Vareafgiftssats.Enhed.KILOGRAM,
             Vareafgiftssats.Enhed.LITER,
         ):
             return (varelinje.mængde * self.afgiftssats).quantize(

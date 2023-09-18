@@ -5,7 +5,7 @@ from datetime import date
 from decimal import Decimal
 from enum import Enum
 from functools import cached_property
-from typing import Union, Optional, Callable, List
+from typing import Union, Optional, List, Callable
 
 from dataclasses_json import dataclass_json, config
 from django.template.defaultfilters import floatformat
@@ -17,7 +17,7 @@ def format_decimal(decimal: Decimal) -> str:
     decimal = float(str(decimal))
     # if isinstance(decimal, str):
     #    decimal = float(decimal.replace(".", "").replace(",", "."))
-    d = str(floatformat(text=decimal, arg=2))
+    d = str(floatformat(text=decimal, arg=2)) + ""
     return d
 
 
@@ -32,7 +32,7 @@ class Vareafgiftssats:
         SAMMENSAT = "sam"
         LITER = "l"
         ANTAL = "ant"
-        KG = "kg"
+        KILOGRAM = "kg"
         PROCENT = "pct"
 
     id: int
@@ -76,7 +76,7 @@ class Vareafgiftssats:
                 )
             return _("{kr} kr. pr liter").format(kr=afgiftssats)
 
-        if self.enhed == Vareafgiftssats.Enhed.KG:
+        if self.enhed == Vareafgiftssats.Enhed.KILOGRAM:
             if segment_øvre and segment_nedre:
                 return _("{kr} kr. pr kg mellem {nedre} kg og {øvre} kg").format(
                     kr=afgiftssats,
@@ -135,6 +135,29 @@ class Vareafgiftssats:
                 for subsats in subs:
                     self.subsatser.append(subsats)
 
+    def spreadsheet_row(
+        self, headers: List[str], lookup_afgiftssats: Callable[[int], Vareafgiftssats]
+    ) -> List[Union[str, int, bool]]:
+        row = []
+        for header in headers:
+            value = getattr(self, header, None)
+            if value is not None:
+                if header == "overordnet":
+                    value = lookup_afgiftssats(value).afgiftsgruppenummer
+                elif header in (
+                    "afgiftssats",
+                    "minimumsbeløb",
+                    "segment_øvre",
+                    "segment_nedre",
+                ):
+                    value = format_decimal(value)
+                elif header == "kræver_indførselstilladelse":
+                    value = "ja" if value else "nej"
+                elif header == "enhed":
+                    value = value.name.lower()
+            row.append(value)
+        return row
+
 
 def encode_optional_isoformat(d):
     if d is None:
@@ -145,6 +168,7 @@ def encode_optional_isoformat(d):
 @dataclass_json
 @dataclass
 class Afgiftstabel:
+    id: int
     kladde: bool
     gyldig_fra: Optional[date] = field(
         metadata=config(

@@ -1,10 +1,12 @@
+import csv
 import json
 import re
 import time
 from collections import defaultdict
 from copy import deepcopy
 from datetime import timedelta, datetime
-from typing import List, Tuple
+from io import BytesIO, StringIO
+from typing import List, Tuple, Dict
 from unittest.mock import patch, mock_open
 from urllib.parse import quote, quote_plus, urlparse, parse_qs
 
@@ -12,6 +14,7 @@ import requests
 from bs4 import BeautifulSoup
 from django.test import TestCase
 from django.urls import reverse
+from openpyxl import load_workbook
 from requests import Response
 from told_common.rest_client import RestClient
 from told_common.tests import (
@@ -601,25 +604,26 @@ class AfgiftstabelListViewTest(HasLogin, TestCase):
         self.assertEquals(response.status_code, 200)
         table_data = self.get_html_list(response.content)
         self.assertEquals(
-            table_data,
+            # Tag table_data og fjern alle html-tags i strengen. Join med mellemrum.
+            self.strip_html_tags(table_data),
             [
                 {
                     "Gyldig fra": "2022-01-01",
                     "Gyldig til": "2023-01-01",
                     "Kladde": "Nej",
-                    "Handlinger": "\n".join(["Vis", "Download"]),
+                    "Handlinger": "Vis Download .xlsx .csv",
                 },
                 {
                     "Gyldig fra": "2023-01-01",
                     "Gyldig til": "",
                     "Kladde": "Nej",
-                    "Handlinger": "\n".join(["Vis", "Download"]),
+                    "Handlinger": "Vis Download .xlsx .csv",
                 },
                 {
                     "Gyldig fra": "",
                     "Gyldig til": "",
                     "Kladde": "Ja",
-                    "Handlinger": "\n".join(["Vis", "Download", "Slet"]),
+                    "Handlinger": "Vis Download .xlsx .csv Slet",
                 },
             ],
         )
@@ -629,25 +633,8 @@ class AfgiftstabelListViewTest(HasLogin, TestCase):
         self.assertEquals(response.status_code, 200)
         data = response.json()
 
-        def _view_button(id):
-            return (
-                f'<a href="{self.view_url(id)}" class="btn btn-sm btn-primary">Vis</a>'
-            )
-
-        def _download_button(id):
-            return f'<a class="btn btn-sm btn-primary">Download</a>'
-
-        def _delete_button(id):
-            return f'<a class="btn btn-sm btn-danger">Slet</a>'
-
         self.assertEquals(
-            modify_values(
-                data,
-                (str,),
-                lambda s: " ".join(
-                    filter(None, re.sub("<[^>]+>", "", s.strip()).split("\n"))
-                ),
-            ),
+            self.strip_html_tags(data),
             {
                 "total": 3,
                 "items": [
@@ -656,24 +643,38 @@ class AfgiftstabelListViewTest(HasLogin, TestCase):
                         "gyldig_fra": "2022-01-01",
                         "gyldig_til": "2023-01-01",
                         "kladde": "nej",
-                        "actions": "Vis Download",
+                        "actions": "Vis Download .xlsx .csv",
                     },
                     {
                         "id": 2,
                         "gyldig_fra": "2023-01-01",
                         "gyldig_til": "",
                         "kladde": "nej",
-                        "actions": "Vis Download",
+                        "actions": "Vis Download .xlsx .csv",
                     },
                     {
                         "id": 3,
                         "gyldig_fra": "",
                         "gyldig_til": "",
                         "kladde": "ja",
-                        "actions": "Vis Download Slet",
+                        "actions": "Vis Download .xlsx .csv Slet",
                     },
                 ],
             },
+        )
+
+    @staticmethod
+    def strip_html_tags(data: Dict) -> Dict:
+        # Tag table_data og fjern alle html-tags i alle streng-values. Join med mellemrum.
+        return modify_values(
+            data,
+            (str,),
+            lambda s: " ".join(
+                filter(
+                    None,
+                    [x.strip() for x in re.sub("<[^>]+>", "", s).split("\n")],
+                )
+            ),
         )
 
     @patch.object(requests.Session, "get")
@@ -723,3 +724,146 @@ class AfgiftstabelListViewTest(HasLogin, TestCase):
             numbers = [int(item["id"]) for item in response.json()["items"]]
             self.assertEquals(response.status_code, 200)
             self.assertEquals(numbers, expected)
+
+
+class AfgiftstabelDownloadTest(HasLogin, TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.afgiftstabel = {
+            "id": 1,
+            "gyldig_fra": "2022-01-01",
+            "gyldig_til": "2023-01-01",
+            "kladde": False,
+        }
+        cls.afgiftssatser = [
+            {
+                "id": 1,
+                "afgiftstabel": 1,
+                "afgiftsgruppenummer": 70,
+                "vareart": "FYRVÆRKERI",
+                "enhed": "pct",
+                "minimumsbeløb": False,
+                "afgiftssats": "100.00",
+                "kræver_indførselstilladelse": False,
+            },
+            {
+                "id": 2,
+                "afgiftstabel": 1,
+                "afgiftsgruppenummer": 71,
+                "vareart": "KNALLERTER",
+                "enhed": "ant",
+                "minimumsbeløb": False,
+                "afgiftssats": "2530.00",
+                "kræver_indførselstilladelse": False,
+            },
+        ]
+
+    def mock_requests_get(self, path):
+        expected_prefix = "/api/"
+        p = urlparse(path)
+        path = p.path
+        query = parse_qs(p.query)
+        path = path.rstrip("/")
+        response = Response()
+        json_content = None
+        content = None
+        status_code = None
+        if path == expected_prefix + "afgiftstabel/1":
+            json_content = self.afgiftstabel
+        if path == expected_prefix + "vareafgiftssats":
+            json_content = {
+                "count": len(self.afgiftssatser),
+                "items": self.afgiftssatser,
+            }
+        if json_content:
+            content = json.dumps(json_content).encode("utf-8")
+        if content:
+            if not status_code:
+                status_code = 200
+            response._content = content
+        response.status_code = status_code or 404
+        return response
+
+    @patch.object(requests.Session, "get")
+    def test_xlsx(self, mock_get):
+        mock_get.side_effect = self.mock_requests_get
+        self.login()
+        response = self.client.get(
+            reverse("afgiftstabel_download", kwargs={"id": 1, "format": "xlsx"})
+        )
+        self.assertEquals(response.status_code, 200)
+        self.assertEquals(
+            response.headers["Content-Type"],
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+        self.assertTrue(len(response.content) > 0)
+        workbook = load_workbook(BytesIO(response.content))
+        self.assertEquals(
+            list(workbook.active.values),
+            [
+                (
+                    "Afgiftsgruppenummer",
+                    "Overordnet",
+                    "Vareart",
+                    "Enhed",
+                    "Afgiftssats",
+                    "Kræver indførselstilladelse",
+                    "Minimumsbeløb",
+                    "Segment nedre",
+                    "Segment øvre",
+                ),
+                (
+                    70,
+                    None,
+                    "FYRVÆRKERI",
+                    "procent",
+                    "100,00",
+                    "nej",
+                    "0,00",
+                    None,
+                    None,
+                ),
+                (
+                    71,
+                    None,
+                    "KNALLERTER",
+                    "antal",
+                    "2.530,00",
+                    "nej",
+                    "0,00",
+                    None,
+                    None,
+                ),
+            ],
+        )
+
+    @patch.object(requests.Session, "get")
+    def test_csv(self, mock_get):
+        mock_get.side_effect = self.mock_requests_get
+        self.login()
+        response = self.client.get(
+            reverse("afgiftstabel_download", kwargs={"id": 1, "format": "csv"})
+        )
+        self.assertEquals(response.status_code, 200)
+        self.assertEquals(response.headers["Content-Type"], "text/csv")
+        self.assertTrue(len(response.content) > 0)
+        reader = csv.reader(StringIO(response.content.decode("utf-8")))
+        self.assertEquals(
+            [row for row in reader],
+            [
+                [
+                    "Afgiftsgruppenummer",
+                    "Overordnet",
+                    "Vareart",
+                    "Enhed",
+                    "Afgiftssats",
+                    "Kræver indførselstilladelse",
+                    "Minimumsbeløb",
+                    "Segment nedre",
+                    "Segment øvre",
+                ],
+                ["70", "", "FYRVÆRKERI", "procent", "100,00", "nej", "0,00", "", ""],
+                ["71", "", "KNALLERTER", "antal", "2.530,00", "nej", "0,00", "", ""],
+            ],
+        )

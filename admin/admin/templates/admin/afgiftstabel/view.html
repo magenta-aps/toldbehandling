@@ -51,7 +51,15 @@
                 </div>
             </div>
             <div class="col-6 clearfix">
-                <a href="#" class="btn btn-primary float-end">Download</a>
+                <div class="dropdown">
+            	<button class="btn btn-primary float-end dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                Download
+            	</button>
+		            <ul class="dropdown-menu">
+		                <li><a href="{% url 'afgiftstabel_download' id=object.id format='xlsx' %}" class="dropdown-item">.xlsx</a></li>
+		                <li><a href="{% url 'afgiftstabel_download' id=object.id format='csv' %}" class="dropdown-item">.csv</a></li>
+		            </ul>
+		        </div>
                 {% if can_edit %}
                 <button type="submit" class="btn btn-success float-end">Opdatér</button>
                 {% endif %}

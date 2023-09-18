@@ -1,6 +1,14 @@
 {% load i18n %}
 <a href="{% url 'afgiftstabel_view' id=item.id %}" class="btn btn-sm btn-primary">{% translate "Vis" %}</a>
-<a class="btn btn-sm btn-primary">{% translate "Download" %}</a>
+<span class="dropdown">
+    <button class="btn btn-primary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+        Download
+    </button>
+    <ul class="dropdown-menu">
+        <li><a href="{% url 'afgiftstabel_download' id=item.id format='xlsx' %}" class="dropdown-item">.xlsx</a></li>
+        <li><a href="{% url 'afgiftstabel_download' id=item.id format='csv' %}" class="dropdown-item">.csv</a></li>
+    </ul>
+</span>
 {% if item.kladde %}
 <a class="btn btn-sm btn-danger">{% translate "Slet" %}</a>
 {% endif %}
