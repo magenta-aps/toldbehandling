@@ -6,7 +6,7 @@ from admin.data import Vareafgiftssats
 
 @register.filter
 def enhedsnavn(item: Vareafgiftssats.Enhed) -> str:
-    if item == Vareafgiftssats.Enhed.KG:
+    if item == Vareafgiftssats.Enhed.KILOGRAM:
         return _("kilogram")
     if item == Vareafgiftssats.Enhed.LITER:
         return _("liter")

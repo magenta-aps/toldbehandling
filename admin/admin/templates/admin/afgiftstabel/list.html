@@ -33,6 +33,7 @@
            data-total-rows="{{total}}"
            data-silent-sort="true" {# vil vi vise en loading-boks? #}
            data-remember-order="true"
+
     >
         <thead>
         <tr>
@@ -60,6 +61,17 @@
     </table>
 </div>
 
+<div style="display: none" id="action_templates">
+    <div data-action="vis">
+    <a href="{% url 'afgiftstabel_view' id=0 %}" class="btn btn-sm btn-primary">{% translate "Vis" %}</a>
+    </div>
+    <a class="btn btn-sm btn-primary">{% translate "Download" %}</a>
+    {% if item.kladde %}
+    <a class="btn btn-sm btn-danger">{% translate "Slet" %}</a>
+    {% endif %}
+
+
+</div>
 <script>
     function queryParams(params){  // Kaldes af bootstrap-table fordi vi peger på den med data-query-params
         if (params["offset"] < 0) {
