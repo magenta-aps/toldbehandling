@@ -36,7 +36,7 @@ urlpatterns = [
     ),
     path(
         "afgiftstabel/create",
-        TemplateView.as_view(template_name="admin/afgiftstabel/form.html"),
+        views.AfgiftstabelCreateView.as_view(),
         name="afgiftstabel_create",
     ),
     path(

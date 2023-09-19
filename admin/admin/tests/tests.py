@@ -12,8 +12,10 @@ from urllib.parse import quote, quote_plus, urlparse, parse_qs
 
 import requests
 from bs4 import BeautifulSoup
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 from django.urls import reverse
+from openpyxl import Workbook
 from openpyxl import load_workbook
 from requests import Response
 from told_common.rest_client import RestClient
@@ -866,4 +868,212 @@ class AfgiftstabelDownloadTest(HasLogin, TestCase):
                 ["70", "", "FYRVÆRKERI", "procent", "100,00", "nej", "0,00", "", ""],
                 ["71", "", "KNALLERTER", "antal", "2.530,00", "nej", "0,00", "", ""],
             ],
+        )
+
+
+class AfgiftstabelUploadTest(HasLogin):
+    def setUp(self):
+        super().setUp()
+        self.posted = []
+        self.id_counter = 1
+
+        self.data = [
+            [
+                "Afgiftsgruppenummer",
+                "Overordnet",
+                "Vareart",
+                "Enhed",
+                "Afgiftssats",
+                "Kræver indførselstilladelse",
+                "Minimumsbeløb",
+                "Segment nedre",
+                "Segment øvre",
+            ],
+            ["1", "", "SUKKER og sirup", "kilogram", "6,00", "nej", "0,00", "", ""],
+            [
+                "2",
+                "",
+                "KAFFE, pulverkaffe, koncentrater",
+                "kilogram",
+                "6,00",
+                "nej",
+                "0,00",
+                "",
+                "",
+            ],
+            [
+                "3",
+                "",
+                "THE, pulver The, koncentrater",
+                "kilogram",
+                "6,60",
+                "nej",
+                "0,00",
+                "",
+                "",
+            ],
+        ]
+
+    def mock_requests_post(self, path, data, headers=None):
+        expected_prefix = "http://toldbehandling-rest:7000/api/"
+        path = path.rstrip("/")
+        response = Response()
+        json_content = None
+        content = None
+        status_code = None
+        if path == expected_prefix + "afgiftstabel":
+            json_content = {"id": 1}
+            self.posted.append((path, data))
+        if path == expected_prefix + "vareafgiftssats":
+            json_content = {"id": self.id_counter}
+            self.id_counter += 1
+            self.posted.append((path, data))
+        if json_content:
+            content = json.dumps(json_content).encode("utf-8")
+        if content:
+            if not status_code:
+                status_code = 200
+            response._content = content
+        response.status_code = status_code or 404
+        return response
+
+    @staticmethod
+    def get_errors(html: str):
+        soup = BeautifulSoup(html, "html.parser")
+        error_fields = {}
+        for element in soup.find_all(class_="is-invalid"):
+            el = element
+            for i in range(1, 3):
+                el = el.parent
+                errorlist = el.find(class_="errorlist")
+                if errorlist:
+                    error_fields[element["name"]] = [
+                        li.text for li in errorlist.find_all(name="li")
+                    ]
+                    break
+        all_errors = soup.find(
+            lambda tag: tag.has_attr("class")
+            and "errorlist" in tag["class"]
+            and "nonfield" in tag["class"]
+        )
+        if all_errors:
+            error_fields["__all__"] = [li.text for li in all_errors.find_all(name="li")]
+        return error_fields
+
+    @patch.object(requests.Session, "post")
+    def test_successful_upload(self, mock_post):
+        mock_post.side_effect = self.mock_requests_post
+        response = self.upload(self.data)
+        self.assertEquals(response.status_code, 302)
+        self.assertEquals(response.headers["Location"], reverse("afgiftstabel_list"))
+
+    @patch.object(requests.Session, "post")
+    def test_failure_wrong_content_type(self, mock_post):
+        mock_post.side_effect = self.mock_requests_post
+        response = self.upload(self.data, "text/plain")
+        self.assertEquals(response.status_code, 200)
+        errors = self.get_errors(response.content)
+        self.assertTrue("fil" in errors)
+        self.assertEquals(errors["fil"], ["Ugyldig content-type: text/plain"])
+
+    @patch.object(requests.Session, "post")
+    def test_failure_header_missing(self, mock_post):
+        mock_post.side_effect = self.mock_requests_post
+        for i in range(0, 9):
+            data = deepcopy(self.data)
+            for line in data:
+                line.pop(i)
+            response = self.upload(data)
+            self.assertEquals(response.status_code, 200)
+            errors = self.get_errors(response.content)
+            self.assertTrue("fil" in errors)
+            self.assertEquals(errors["fil"], [f"Mangler kolonne med {self.data[0][i]}"])
+
+    @patch.object(requests.Session, "post")
+    def test_failure_number_twice(self, mock_post):
+        mock_post.side_effect = self.mock_requests_post
+        self.data[3][0] = "2"
+        response = self.upload(self.data)
+        self.assertEquals(response.status_code, 200)
+        errors = self.get_errors(response.content)
+        self.assertTrue("fil" in errors)
+        self.assertEquals(
+            errors["fil"], ["Afgiftsgruppenummer 2 optræder to gange (linjer: 3, 4)"]
+        )
+
+    @patch.object(requests.Session, "post")
+    def test_failure_missing_reference(self, mock_post):
+        mock_post.side_effect = self.mock_requests_post
+        self.data[3][1] = "4"
+        response = self.upload(self.data)
+        self.assertEquals(response.status_code, 200)
+        errors = self.get_errors(response.content)
+        self.assertTrue("fil" in errors)
+        self.assertEquals(
+            errors["fil"],
+            [
+                "Afgiftssats med afgiftsgruppenummer 3 (linje 4) peger på overordnet 4, som ikke findes"
+            ],
+        )
+
+    @patch.object(requests.Session, "post")
+    def test_failure_reference_self(self, mock_post):
+        mock_post.side_effect = self.mock_requests_post
+        self.data[1][1] = "1"
+        response = self.upload(self.data)
+        self.assertEquals(response.status_code, 200)
+        errors = self.get_errors(response.content)
+        self.assertTrue("fil" in errors)
+        self.assertEquals(
+            errors["fil"],
+            ["Vareafgiftssats 1 (linje 2) peger på sig selv som overordnet"],
+        )
+
+    @patch.object(requests.Session, "post")
+    def test_failure_circular_reference(self, mock_post):
+        mock_post.side_effect = self.mock_requests_post
+        self.data[1][1] = "3"
+        self.data[2][1] = "1"
+        self.data[3][1] = "2"
+        response = self.upload(self.data)
+        self.assertEquals(response.status_code, 200)
+        errors = self.get_errors(response.content)
+        self.assertTrue("fil" in errors)
+        self.assertEquals(
+            errors["fil"],
+            [
+                "Vareafgiftssats 2 (linje 3) har 1 (linje 2) som overordnet, men 1 har også 2 i kæden af overordnede"
+            ],
+        )
+
+
+class AfgiftstabelUploadCsvTest(AfgiftstabelUploadTest, TestCase):
+    def upload(self, data: List[List[str]], content_type: str = "text/csv"):
+        encoded = "\n".join(
+            [",".join([f'"{cell}"' for cell in line]) for line in data]
+        ).encode("utf-8")
+        self.login()
+        return self.client.post(
+            reverse("afgiftstabel_create"),
+            {"fil": SimpleUploadedFile("test.csv", encoded, content_type)},
+        )
+
+
+class AfgiftstabelUploadXlsxTest(AfgiftstabelUploadTest, TestCase):
+    def upload(
+        self,
+        data: List[List[str]],
+        content_type: str = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    ):
+        wb = Workbook(write_only=True)
+        ws = wb.create_sheet()
+        for item in data:
+            ws.append(item)
+        output = BytesIO()
+        wb.save(output)
+        encoded = output.getvalue()
+        self.login()
+        return self.client.post(
+            reverse("afgiftstabel_create"),
+            {"fil": SimpleUploadedFile("test.xlsx", encoded, content_type)},
         )

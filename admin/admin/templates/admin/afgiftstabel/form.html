@@ -5,24 +5,19 @@
 
 {% block content %}
 <div class="mx-5">
-    <form method="get" action="{% url 'afgiftstabel_view' %}">
-    <h1>Opret Afgiftstabel</h1>
-    <div class="row">
-        <div class="col-4"><label for="date_from">Gyldig fra:</label></div>
-        <div class="col-8"><input id="date_from" type="date" class="form-control" required=""/></div>
-    </div>
-    <div class="row">
-        <div class="col-4"><label for="file">Regneark:</label></div>
-        <div class="col-8">
-            <div class="col custom-file">
-                <input type="file" name="file" data-validity-sizeoverflow="Filen er for stor; den må max. være 10.0 MB" max_size="10000000" class="mr-2 custom-file-input form-control" required="" id="file">
-                <label class="custom-file-label"></label>
+    <form method="post" action="{% url 'afgiftstabel_create' %}" enctype="multipart/form-data">
+        {% csrf_token %}
+        <h1>Opret Afgiftstabel</h1>
+        <div class="row">
+            <div class="col-4"><label for="{{form.fil.name}}">Regneark:</label></div>
+            <div class="col-8">
+                {{form.fil}}
+                {{form.fil.errors}}
             </div>
         </div>
-    </div>
-    <div class="clearfix">
-        <button type="submit" class="btn btn-success float-end">Opret</button>
-    </div>
+        <div class="clearfix">
+            <button type="submit" class="btn btn-success float-end">Opret</button>
+        </div>
     </form>
 </div>
 <script>
