@@ -1,9 +1,11 @@
 from datetime import date, timedelta
 
+from admin.data import Vareafgiftssats
+from admin.exceptions import SpreadsheetImportException
 from django import forms
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
-from told_common.form_mixins import BootstrapForm, DateInput
+from told_common.form_mixins import BootstrapForm, DateInput, MaxSizeFileField
 
 
 class TF10GodkendForm(BootstrapForm):
@@ -51,3 +53,32 @@ class AfgiftstabelUpdateForm(BootstrapForm):
         if value is not None and value <= date.today():
             raise ValidationError(_("Dato skal være efter i dag"))
         return value
+
+
+class AfgiftstabelCreateForm(BootstrapForm):
+    fil = MaxSizeFileField(
+        required=True,
+        max_size=10000000,
+    )
+
+    def __init__(self, *args, **kwargs):
+        self.parsed_satser = None
+        super().__init__(*args, **kwargs)
+
+    def clean_fil(self):
+        data = self.cleaned_data["fil"]
+        try:
+            if data.content_type == "text/csv":
+                satser = Vareafgiftssats.load_csv(data)
+            elif (
+                data.content_type
+                == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            ):
+                satser = Vareafgiftssats.load_xlsx(data)
+            else:
+                raise ValidationError(f"Ugyldig content-type: {data.content_type}")
+            Vareafgiftssats.validate_satser(satser)
+        except SpreadsheetImportException as e:
+            raise ValidationError(e)
+        self.parsed_satser = satser
+        return data

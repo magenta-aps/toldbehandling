@@ -1,0 +1,2 @@
+class SpreadsheetImportException(Exception):
+    pass

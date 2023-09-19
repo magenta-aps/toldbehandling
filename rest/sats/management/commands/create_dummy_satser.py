@@ -473,7 +473,7 @@ class Command(BaseCommand):
             Vareafgiftssats.objects.create(
                 overordnet=personbiler,
                 afgiftstabel=tabel,
-                afgiftsgruppenummer=7202,
+                afgiftsgruppenummer=7203,
                 vareart="PERSONBILER, 125% af fakturaværdien der overstiger 150.000",
                 enhed=Vareafgiftssats.Enhed.PROCENT,
                 segment_nedre=Decimal(150_000),

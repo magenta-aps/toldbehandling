@@ -11,15 +11,17 @@ class BootstrapForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super(BootstrapForm, self).__init__(*args, **kwargs)
         for name, field in self.fields.items():
-            self.set_field_classes(name, field)
             self.update_field(name, field)
+            self.set_field_classes(name, field)
 
     def full_clean(self):
         result = super(BootstrapForm, self).full_clean()
+        self.set_all_field_classes()
+        return result
+
+    def set_all_field_classes(self):
         for name, field in self.fields.items():
             self.set_field_classes(name, field, True)
-
-        return result
 
     def set_field_classes(self, name, field, check_for_errors=False):
         classes = self.split_class(field.widget.attrs.get("class"))
@@ -44,7 +46,9 @@ class BootstrapForm(forms.Form):
     def update_field(self, name, field):
         if isinstance(field.widget, forms.FileInput):
             field.widget.template_name = "told_common/widgets/file.html"
-            field.widget.attrs["class"] = "custom-file-input"
+            if "class" not in field.widget.attrs:
+                field.widget.attrs["class"] = ""
+            field.widget.attrs["class"] += " custom-file-input"
 
 
 class ErrorMessagesFieldMixin:

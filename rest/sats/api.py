@@ -113,19 +113,7 @@ class AfgiftstabelAPI:
 
 class VareafgiftssatsIn(ModelSchema):
     afgiftstabel_id: int
-
-    class Config:
-        model = Vareafgiftssats
-        model_fields = [
-            "vareart",
-            "afgiftsgruppenummer",
-            "enhed",
-            "afgiftssats",
-        ]
-
-
-class PartialVareafgiftssatsIn(ModelSchema):
-    afgiftstabel_id: int = None
+    overordnet_id: int = None
 
     class Config:
         model = Vareafgiftssats
@@ -136,7 +124,30 @@ class PartialVareafgiftssatsIn(ModelSchema):
             "afgiftssats",
             "kræver_indførselstilladelse",
             "minimumsbeløb",
-            "overordnet",
+            "segment_nedre",
+            "segment_øvre",
+        ]
+        model_fields_optional = [
+            "kræver_indførselstilladelse",
+            "minimumsbeløb",
+            "segment_nedre",
+            "segment_øvre",
+        ]
+
+
+class PartialVareafgiftssatsIn(ModelSchema):
+    afgiftstabel_id: int = None
+    overordnet_id: Optional[int] = None
+
+    class Config:
+        model = Vareafgiftssats
+        model_fields = [
+            "vareart",
+            "afgiftsgruppenummer",
+            "enhed",
+            "afgiftssats",
+            "kræver_indførselstilladelse",
+            "minimumsbeløb",
             "segment_nedre",
             "segment_øvre",
         ]
