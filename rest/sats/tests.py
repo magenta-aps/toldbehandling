@@ -9,6 +9,7 @@ from sats.models import Afgiftstabel, Vareafgiftssats
 class AfgiftstabelTest(RestMixin, TestCase):
     __test__ = True
     object_class = Afgiftstabel
+    has_delete = True
 
     def setUp(self) -> None:
         super().setUp()

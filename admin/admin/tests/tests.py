@@ -623,7 +623,7 @@ class AfgiftstabelListViewTest(HasLogin, TestCase):
                     "Gyldig fra": "",
                     "Gyldig til": "",
                     "Kladde": "Ja",
-                    "Handlinger": "Vis Download .xlsx .csv Slet",
+                    "Handlinger": "Vis Download .xlsx .csv",
                 },
             ],
         )
@@ -657,7 +657,7 @@ class AfgiftstabelListViewTest(HasLogin, TestCase):
                         "gyldig_fra": "",
                         "gyldig_til": "",
                         "kladde": "ja",
-                        "actions": "Vis Download .xlsx .csv Slet",
+                        "actions": "Vis Download .xlsx .csv",
                     },
                 ],
             },

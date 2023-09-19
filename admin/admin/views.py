@@ -225,9 +225,14 @@ class AfgiftstabelDetailView(LoginRequiredMixin, HasRestClientMixin, FormView):
         }
 
     def form_valid(self, form):
-        tabel_id = self.kwargs["id"]
+        tabel_id = self.item.id
+        if form.cleaned_data["delete"]:
+            if self.item.kladde:
+                self.rest_client.afgiftstabel.delete(tabel_id)
+            return redirect(reverse("afgiftstabel_list"))
         try:
-            self.rest_client.afgiftstabel.update(tabel_id, form.cleaned_data)
+            if self.item.kladde or self.item.gyldig_fra > date.today():
+                self.rest_client.afgiftstabel.update(tabel_id, form.cleaned_data)
             return redirect(reverse("afgiftstabel_list"))
         except HTTPError as e:
             if e.response.status_code == 404:

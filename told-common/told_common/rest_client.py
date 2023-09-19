@@ -359,6 +359,9 @@ class AfgiftstabelRestClient(ModelRestClient):
             self.rest.patch(f"afgiftstabel/{id}", data)
         return id
 
+    def delete(self, id: int) -> None:
+        self.rest.delete(f"afgiftstabel/{id}")
+
 
 class RestClient:
     domain = settings.REST_DOMAIN
