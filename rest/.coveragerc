@@ -1,0 +1,16 @@
+[run]
+relative_files = True
+source = .
+omit = 
+    manage.py
+    project/settings.py
+    project/asgi.py
+    project/wsgi.py
+    project/test_mixins.py
+    */admin.py
+    */urls.py
+    */tests.py
+    */__init__.py
+    */migrations/*
+    */management/*
+    */tests/*

@@ -42,13 +42,19 @@ creating a `docker-compose.override.yml` file. See the
 You can also run tests locally by using `docker exec`:
 
 ```
-docker exec toldbehandling-ui bash -c 'coverage run --source='.' --omit=manage.py,project/asgi.py,project/wsgi.py,project/test_mixins.py,*/admin.py,*/urls.py,*/tests.py,*/__init__.py,*/migrations/*,*/management/* manage.py test ; coverage report --show-missing'
+docker exec toldbehandling-ui bash -c 'coverage run manage.py test ; coverage report --show-missing'
 ```
 
 and for the `rest` app:
 
 ```
-docker exec toldbehandling-rest bash -c 'coverage run --source='.' --omit=manage.py,project/asgi.py,project/wsgi.py,project/test_mixins.py,*/admin.py,*/urls.py,*/tests.py,*/__init__.py,*/migrations/*,*/management/* manage.py test ; coverage report --show-missing'
+docker exec toldbehandling-rest bash -c 'coverage run manage.py test ; coverage report --show-missing'
+```
+
+and for the `admin` app:
+
+```
+docker exec toldbehandling-admin bash -c 'coverage run manage.py test ; coverage report --show-missing'
 ```
 
 
