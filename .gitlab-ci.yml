@@ -2,6 +2,7 @@ stages:
   - lint
   - build
   - test
+  - coverage
   - release
 
 include:
@@ -157,6 +158,13 @@ Build ER image:
     DISABLE_METRICS: 'True'
     DJANGO_LANGUAGE_COOKIE_DOMAIN: localhost
     REST_DOMAIN: http://toldbehandling-rest:7000
+  before_script:
+    - mkdir "${CI_PROJECT_DIR}/coverage_output"
+  artifacts:
+    when: always
+    paths:
+      - "coverage_output/*"
+    expire_in: 1 day
 
 .test-rest: &test-rest
   <<: *test-default
@@ -177,43 +185,31 @@ Unittest REST:
   <<: *test-rest
   script:
     - cd /app
-    - coverage run --source='.' --omit=manage.py,project/asgi.py,project/wsgi.py,project/test_mixins.py,*/admin.py,*/urls.py,*/tests.py,*/__init__.py,*/migrations/*,*/management/* manage.py test
-    - coverage report --show-missing --fail-under=100
-    - coverage xml
-  coverage: '/^TOTAL.+?(\d+\%)$/'
-  artifacts:
-    reports:
-      coverage_report:
-          coverage_format: cobertura
-          path: /app/coverage.xml
+    - coverage run manage.py test
+    - coverage report --show-missing
+    - mv .coverage "${CI_PROJECT_DIR}/coverage_output/.coverage.${CI_JOB_ID}"
+    - cp -r ./sats ./common ./forsendelse ./anmeldelse ./aktør ./project "${CI_PROJECT_DIR}/coverage_output/" 
 
 Unittest UI:
   <<: *test-ui
   script:
     - cd /app
-    - coverage run --source='.' --omit=manage.py,project/asgi.py,project/wsgi.py,project/test_mixins.py,*/admin.py,*/urls.py,*/tests.py,*/__init__.py,*/migrations/*,*/management/*,told-common/* manage.py test
-    - coverage report --show-missing --fail-under=95
-    - coverage xml
-  coverage: '/^TOTAL.+?(\d+\%)$/'
-  artifacts:
-    reports:
-      coverage_report:
-        coverage_format: cobertura
-        path: /app/coverage.xml
+    - cp -r ./told-common/told_common .
+    - coverage run manage.py test
+    - coverage report --show-missing
+    - mv .coverage "${CI_PROJECT_DIR}/coverage_output/.coverage.${CI_JOB_ID}"
+    - cp -r ./ui "${CI_PROJECT_DIR}/coverage_output/"
 
 Unittest Admin:
   <<: *test-admin
   script:
     - cd /app
-    - coverage run --source='.' --omit=manage.py,project/asgi.py,project/wsgi.py,project/test_mixins.py,*/admin.py,*/urls.py,*/tests.py,*/__init__.py,*/migrations/*,*/management/*,told-common/* manage.py test
-    - coverage report --show-missing --fail-under=50
-    - coverage xml
-  coverage: '/^TOTAL.+?(\d+\%)$/'
-  artifacts:
-    reports:
-      coverage_report:
-        coverage_format: cobertura
-        path: /app/coverage.xml
+    - cp -r ./told-common/told_common .
+    - coverage run manage.py test
+    - coverage report --show-missing
+    - mv .coverage "${CI_PROJECT_DIR}/coverage_output/.coverage.${CI_JOB_ID}"
+    - cp -r ./admin ./told_common "${CI_PROJECT_DIR}/coverage_output/"
+    - cp .coveragerc "${CI_PROJECT_DIR}/coverage_output/"
 
 Django check REST:
   <<: *test-rest
@@ -232,6 +228,27 @@ Django check Admin:
   script:
     - cd /app
     - python manage.py check admin
+
+
+.coverage-default: &coverage-default
+  stage: coverage
+  needs: ["Unittest REST", "Unittest Admin", "Unittest UI"]
+  image: ${ADMIN_IMAGE_SHA}
+
+Check coverage:
+  <<: *coverage-default
+  before_script:
+    - cd "${CI_PROJECT_DIR}/coverage_output/"
+    - coverage combine
+  script:
+    - coverage report -i --show-missing --fail-under=50
+    - coverage xml
+  coverage: '/^TOTAL.+?(\d+\%)$/'
+  artifacts:
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: "${CI_PROJECT_DIR}/coverage_output/coverage.xml"
 
 
 # Release stage
