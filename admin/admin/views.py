@@ -2,7 +2,7 @@ import csv
 from collections import defaultdict
 from datetime import date
 from functools import cached_property
-from typing import Union, Iterable, List
+from typing import Union, Iterable, List, Dict
 from urllib.parse import unquote
 
 from admin.data import Afgiftstabel
@@ -225,9 +225,14 @@ class AfgiftstabelDetailView(LoginRequiredMixin, HasRestClientMixin, FormView):
         }
 
     def form_valid(self, form):
-        tabel_id = self.kwargs["id"]
+        tabel_id = self.item.id
+        if form.cleaned_data["delete"]:
+            if self.item.kladde:
+                self.rest_client.afgiftstabel.delete(tabel_id)
+            return redirect(reverse("afgiftstabel_list"))
         try:
-            self.rest_client.afgiftstabel.update(tabel_id, form.cleaned_data)
+            if self.item.kladde or self.item.gyldig_fra > date.today():
+                self.rest_client.afgiftstabel.update(tabel_id, form.cleaned_data)
             return redirect(reverse("afgiftstabel_list"))
         except HTTPError as e:
             if e.response.status_code == 404:
@@ -350,3 +355,41 @@ class AfgiftstabelDownloadView(HasRestClientMixin, View):
         for item in items:
             writer.writerow(item)
         return response
+
+
+class AfgiftstabelCreateView(LoginRequiredMixin, HasRestClientMixin, FormView):
+    template_name = "admin/afgiftstabel/form.html"
+    form_class = forms.AfgiftstabelCreateForm
+
+    def get_success_url(self):
+        return reverse("afgiftstabel_list")
+
+    def form_valid(self, form):
+        satser = form.parsed_satser
+        self.save(satser)
+        return super().form_valid(form)
+
+    def save(self, satser: List[Dict[str, Union[str, int, bool]]]) -> int:
+        tabel_id = self.rest_client.afgiftstabel.create({})
+        afgiftsgruppenummer_to_id = {}
+        by_afgiftsgruppenummer = {x["afgiftsgruppenummer"]: x for x in satser}
+
+        # Sørg for at vi opretter alle overordnede før deres underordnede
+        def save_one(vareafgiftssats: Dict[str, Union[str, int, bool]]):
+            afgiftsgruppenummer = vareafgiftssats["afgiftsgruppenummer"]
+            if afgiftsgruppenummer not in afgiftsgruppenummer_to_id:
+                overordnet = vareafgiftssats["overordnet"]
+                if overordnet is not None:
+                    if overordnet not in afgiftsgruppenummer_to_id:
+                        save_one(by_afgiftsgruppenummer[overordnet])
+                    vareafgiftssats["overordnet_id"] = afgiftsgruppenummer_to_id[
+                        overordnet
+                    ]
+                vareafgiftssats["afgiftstabel_id"] = tabel_id
+                sats_id = self.rest_client.vareafgiftssats.create(vareafgiftssats)
+                afgiftsgruppenummer_to_id[afgiftsgruppenummer] = sats_id
+
+        for vareafgiftssats in satser:
+            print(vareafgiftssats)
+            save_one(vareafgiftssats)
+        return tabel_id

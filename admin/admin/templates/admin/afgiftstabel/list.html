@@ -15,7 +15,12 @@
 {% endblock %}
 
 {% block content %}
-<div class="mx-5">
+
+<div class="clearfix">
+    <a class="float-end btn btn-primary" href="{% url 'afgiftstabel_create' %}">Opret ny tabel fra regneark</a>
+</div>
+
+<div class="mx-5 my-1">
     <table class="table table-bordered"
            data-toggle="table"
            data-sticky-header="true"
@@ -37,10 +42,10 @@
     >
         <thead>
         <tr>
-            <th data-sortable="true" data-field="gyldig_fra">Gyldig fra</th>
-            <th data-sortable="true" data-field="gyldig_til">Gyldig til</th>
-            <th data-sortable="true" data-field="kladde">Kladde</th>
-            <th data-field="actions">Handlinger</th>
+            <th data-sortable="true" data-field="gyldig_fra" class="col-3">Gyldig fra</th>
+            <th data-sortable="true" data-field="gyldig_til" class="col-3">Gyldig til</th>
+            <th data-sortable="true" data-field="kladde" class="col-3">Kladde</th>
+            <th data-field="actions" class="col-3">Handlinger</th>
         </tr>
         </thead>
         <tbody>
@@ -61,17 +66,6 @@
     </table>
 </div>
 
-<div style="display: none" id="action_templates">
-    <div data-action="vis">
-    <a href="{% url 'afgiftstabel_view' id=0 %}" class="btn btn-sm btn-primary">{% translate "Vis" %}</a>
-    </div>
-    <a class="btn btn-sm btn-primary">{% translate "Download" %}</a>
-    {% if item.kladde %}
-    <a class="btn btn-sm btn-danger">{% translate "Slet" %}</a>
-    {% endif %}
-
-
-</div>
 <script>
     function queryParams(params){  // Kaldes af bootstrap-table fordi vi peger på den med data-query-params
         if (params["offset"] < 0) {

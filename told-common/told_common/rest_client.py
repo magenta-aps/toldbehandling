@@ -359,6 +359,15 @@ class AfgiftstabelRestClient(ModelRestClient):
             self.rest.patch(f"afgiftstabel/{id}", data)
         return id
 
+    def delete(self, id: int) -> None:
+        self.rest.delete(f"afgiftstabel/{id}")
+
+
+class VareafgiftssatsRestClient(ModelRestClient):
+    def create(self, data: dict) -> Union[int, None]:
+        response = self.rest.post("vareafgiftssats", data)
+        return response["id"]
+
 
 class RestClient:
     domain = settings.REST_DOMAIN
@@ -374,6 +383,7 @@ class RestClient:
         self.afgiftanmeldelse = AfgiftanmeldelseRestClient(self)
         self.varelinje = VarelinjeRestClient(self)
         self.afgiftstabel = AfgiftstabelRestClient(self)
+        self.vareafgiftssats = VareafgiftssatsRestClient(self)
 
     def check_access_token_age(self):
         max_age = getattr(settings, "NINJA_JWT", {}).get(

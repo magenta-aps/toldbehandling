@@ -8,7 +8,8 @@
 {# Docs for bootstrap-table: https://bootstrap-table.com/docs/ #}
 {% block extra_headers %}
 <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.22.1/dist/bootstrap-table.min.css">
-<link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.22.1/dist/extensions/sticky-header/bootstrap-table-sticky-header.min.css">
+<link rel="stylesheet"
+      href="https://unpkg.com/bootstrap-table@1.22.1/dist/extensions/sticky-header/bootstrap-table-sticky-header.min.css">
 {% endblock %}
 {% block extra_footers %}
 <script src="https://unpkg.com/bootstrap-table@1.22.1/dist/bootstrap-table.min.js"></script>
@@ -16,11 +17,11 @@
 {% endblock %}
 
 {% block content %}
-<div class="mx-5">
-    <h1>Afgiftstabel</h1>
-    <form method="post" action="">
+<form method="post" action="">
+    <div class="mx-5">
+        <h1>Afgiftstabel</h1>
         {% csrf_token %}
-        <div class="row">
+        <div class="row my-1">
             <div class="col-6">
                 <div class="row">
                     <div class="col-2"><label for="{{form.gyldig_fra.name}}">{% translate "Gyldig fra" %}</label></div>
@@ -41,89 +42,101 @@
                     <div class="col-2"><label for="{{form.kladde.name}}">{% translate "Kladde" %}</label></div>
                     <div class="col-10">
                         {% if can_edit %}
-                            {{form.kladde}}
-                            {{form.kladde.errors}}
+                        {{form.kladde}}
+                        {{form.kladde.errors}}
                         {% endif %}
                         {% if not object.kladde %}
-                            {% translate "Nej" %}
+                        {% translate "Nej" %}
                         {% endif %}
                     </div>
                 </div>
             </div>
             <div class="col-6 clearfix">
                 <div class="dropdown">
-            	<button class="btn btn-primary float-end dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                Download
-            	</button>
-		            <ul class="dropdown-menu">
-		                <li><a href="{% url 'afgiftstabel_download' id=object.id format='xlsx' %}" class="dropdown-item">.xlsx</a></li>
-		                <li><a href="{% url 'afgiftstabel_download' id=object.id format='csv' %}" class="dropdown-item">.csv</a></li>
-		            </ul>
-		        </div>
+                    <button class="btn btn-primary float-end dropdown-toggle" type="button" data-bs-toggle="dropdown"
+                            aria-expanded="false">
+                        Download
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a href="{% url 'afgiftstabel_download' id=object.id format='xlsx' %}"
+                               class="dropdown-item">.xlsx</a></li>
+                        <li><a href="{% url 'afgiftstabel_download' id=object.id format='csv' %}" class="dropdown-item">.csv</a>
+                        </li>
+                    </ul>
+                </div>
                 {% if can_edit %}
                 <button type="submit" class="btn btn-success float-end">Opdatér</button>
                 {% endif %}
+                {% if object.kladde %}
+                <button type="button" class="btn btn-danger float-end" data-bs-toggle="modal"
+                        data-bs-target="#delete_modal">Slet
+                </button>
+                {% endif %}
             </div>
         </div>
-    </form>
-    <div class="card">
-        <div class="card-body">
-            <ul class="mb-0">
-                <li>
-                    {% blocktranslate %}
-                    Der kan kun ændres tabeller som er kladder eller som begynder i fremtiden
-                    {% endblocktranslate %}
-                </li>
-                <li>
-                    {% blocktranslate %}
-                    En aktiv afgiftstabel er gældende fra dens begyndelsestidspunkt
-                    frem til begyndelsen på den næste aktive afgiftstabel
-                    {% endblocktranslate %}
-                </li>
-            </ul>
+        <div class="card">
+            <div class="card-body">
+                <ul class="mb-0">
+                    <li>
+                        {% blocktranslate %}
+                        Der kan kun ændres tabeller som er kladder eller som begynder i fremtiden
+                        {% endblocktranslate %}
+                    </li>
+                    <li>
+                        {% blocktranslate %}
+                        Der kan kun slettes tabeller som er kladder
+                        {% endblocktranslate %}
+                    </li>
+                    <li>
+                        {% blocktranslate %}
+                        En aktiv afgiftstabel er gældende fra dens begyndelsestidspunkt
+                        frem til begyndelsen på den næste aktive afgiftstabel
+                        {% endblocktranslate %}
+                    </li>
+                </ul>
+            </div>
         </div>
-    </div>
 
-    <table class="table"
-           data-toggle="table"
-           data-sticky-header="true"
-           data-classes="table"
-    >
-        <thead>
-        <tr>
-            <th class="col-1">{% translate "Afgifts­gruppe­nummer" %}</th>
-            <th class="col-5">{% translate "Vareart" %}</th>
-            <th class="col-1">{% translate "Enhed" %}</th>
-            <th class="col-1">{% translate "Kræver indførsels­tilladelse" %}</th>
-            <th class="col-1">{% translate "Minimumsbeløb" %}</th>
-            <th class="col-1">{% translate "Afgiftssats" %}</th>
-            <th class="col-1">{% translate "Nedre mængde­grænse" %}</th>
-            <th class="col-1">{% translate "Øvre mængde­grænse" %}</th>
-        </tr>
-        </thead>
-        <tbody>
-        {% for vareafgiftssats in object.vareafgiftssatser %}
-        {% if not vareafgiftssats.overordnet %}
+        <table class="table"
+               data-toggle="table"
+               data-sticky-header="true"
+               data-classes="table"
+        >
+            <thead>
+            <tr>
+                <th class="col-1">{% translate "Afgifts­gruppe­nummer" %}</th>
+                <th class="col-5">{% translate "Vareart" %}</th>
+                <th class="col-1">{% translate "Enhed" %}</th>
+                <th class="col-1">{% translate "Kræver indførsels­tilladelse" %}</th>
+                <th class="col-1">{% translate "Minimumsbeløb" %}</th>
+                <th class="col-1">{% translate "Afgiftssats" %}</th>
+                <th class="col-1">{% translate "Nedre mængde­grænse" %}</th>
+                <th class="col-1">{% translate "Øvre mængde­grænse" %}</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for vareafgiftssats in object.vareafgiftssatser %}
+            {% if not vareafgiftssats.overordnet %}
             <tr>
                 {% if vareafgiftssats.subsatser %}
-                    <td rowspan="{{vareafgiftssats.subsatser|length|add:1}}">
-                        {% localize off %}{{vareafgiftssats.afgiftsgruppenummer}}{% endlocalize %}
-                    </td>
-                    <td>{{vareafgiftssats.vareart}}</td>
-                    <td>{{vareafgiftssats.enhed|enhedsnavn}}</td>
-                    <td>{{vareafgiftssats.kræver_indførselstilladelse|yesno}}</td>
-                    <td colspan="4"></td>
+                <td rowspan="{{vareafgiftssats.subsatser|length|add:1}}">
+                    {% localize off %}{{vareafgiftssats.afgiftsgruppenummer}}{% endlocalize %}
+                </td>
+                <td>{{vareafgiftssats.vareart}}</td>
+                <td>{{vareafgiftssats.enhed|enhedsnavn}}</td>
+                <td>{{vareafgiftssats.kræver_indførselstilladelse|yesno}}</td>
+                <td colspan="4"></td>
                 {% else %}
-                    <td>
-                        {% localize off %}{{vareafgiftssats.afgiftsgruppenummer}}{% endlocalize %}
-                    </td>
-                    <td>{{vareafgiftssats.vareart}}</td>
-                    <td>{{vareafgiftssats.enhed|enhedsnavn}}</td>
-                    <td></td>
-                    <td>{{vareafgiftssats.minimumsbeløb|default_if_none:""}}</td>
-                    <td>{{vareafgiftssats.afgiftssats}}</td>
-                    <td>{{vareafgiftssats.segment_nedre|default_if_none:""}}</td>
-                    <td>{{vareafgiftssats.segment_øvre|default_if_none:""}}</td>
+                <td>
+                    {% localize off %}{{vareafgiftssats.afgiftsgruppenummer}}{% endlocalize %}
+                </td>
+                <td>{{vareafgiftssats.vareart}}</td>
+                <td>{{vareafgiftssats.enhed|enhedsnavn}}</td>
+                <td></td>
+                <td>{{vareafgiftssats.minimumsbeløb|default_if_none:""}}</td>
+                <td>{{vareafgiftssats.afgiftssats}}</td>
+                <td>{{vareafgiftssats.segment_nedre|default_if_none:""}}</td>
+                <td>{{vareafgiftssats.segment_øvre|default_if_none:""}}</td>
                 {% endif %}
             </tr>
             {% for subsats in vareafgiftssats.subsatser %}
@@ -137,9 +150,27 @@
                 <td>{{subsats.segment_øvre|default_if_none:""}}</td>
             </tr>
             {% endfor %}
-        {% endif %}
-        {% endfor %}
-        </tbody>
-    </table>
-</div>
+            {% endif %}
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div id="delete_modal" class="modal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Slet afgiftstabel</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Luk"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Er du sikker på at du vil slette denne afgiftstabel?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Nej</button>
+                    <button type="submit" class="btn btn-danger" name="{{form.delete.name}}" value="1">Ja</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
 {% endblock %}
