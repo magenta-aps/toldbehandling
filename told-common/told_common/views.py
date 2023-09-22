@@ -267,7 +267,11 @@ class TF10ListView(LoginRequiredMixin, HasRestClientMixin, CustomLayoutMixin, Fo
     def form_valid(self, form):
         search_data = {"offset": 0, "limit": self.list_size}
         for key, value in form.cleaned_data.items():
-            if key not in ("json",) and value not in ("", None, "explicitly_none"):
+            if key not in ("json", "vareafgiftssats") and value not in (
+                "",
+                None,
+                "explicitly_none",
+            ):
                 if type(value) is date:
                     value = value.isoformat()
                 elif key in ("offset", "limit"):
@@ -277,6 +281,7 @@ class TF10ListView(LoginRequiredMixin, HasRestClientMixin, CustomLayoutMixin, Fo
             search_data["offset"] = 0
         if search_data["limit"] < 1:
             search_data["limit"] = 1
+
         response = self.rest_client.get("afgiftsanmeldelse/full", search_data)
         total = response["count"]
         items = response["items"]
@@ -338,13 +343,28 @@ class TF10ListView(LoginRequiredMixin, HasRestClientMixin, CustomLayoutMixin, Fo
 
         if query_dict.get("godkendt", "") == "explicitly_none":
             query_dict["godkendt_is_null"] = "True"
-        kwargs["data"] = query_dict
 
         # Will be picked up by TF10SearchForm's constructor
-        kwargs["varesatser"] = dict(
+        varesatser = dict(
             filter(
                 lambda pair: pair[1].get("overordnet", None) is None,
                 self.rest_client.varesatser.items(),
             )
         )
+
+        # One vare-type exists in multiple tables. With multiple different
+        # sats values. When searching, we would like to search all values
+        # of a specific name
+        sats_id = query_dict.get("vareafgiftssats", "")
+        if sats_id:
+            sats_ids = []
+            name = varesatser[int(sats_id)]["vareart"]
+
+            for varesats_id, varesats in varesatser.items():
+                if varesats["vareart"] == name:
+                    sats_ids.append(str(varesats_id))
+            query_dict["vareafgiftssats_list"] = sats_ids
+
+        kwargs["data"] = query_dict
+        kwargs["varesatser"] = varesatser
         return kwargs

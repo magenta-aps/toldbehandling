@@ -2,6 +2,7 @@ import base64
 from datetime import date
 from decimal import Decimal
 from typing import Optional
+from typing import List
 from uuid import uuid4
 
 from aktør.api import AfsenderOut, ModtagerOut
@@ -104,6 +105,9 @@ class AfgiftsanmeldelseFilterSchema(FilterSchema):
     dato_efter: Optional[date] = Field(q="dato__gte")
     dato_før: Optional[date] = Field(q="dato__lt")
     vareafgiftssats: Optional[int] = Field(q="varelinje__vareafgiftssats__id")
+    vareafgiftssats_list: Optional[List[int]] = Field(
+        q="varelinje__vareafgiftssats__id__in"
+    )
 
 
 class AfgiftsanmeldelsePermission(RestPermission):

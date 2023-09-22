@@ -427,7 +427,7 @@ class RestClient:
         ] = None,
     ) -> dict:
         self.check_access_token_age()
-        param_string = ("?" + urlencode(params)) if params is not None else ""
+        param_string = ("?" + urlencode(params, True)) if params is not None else ""
         response = self.session.get(f"{self.domain}/api/{path}{param_string}")
         response.raise_for_status()
         return response.json()

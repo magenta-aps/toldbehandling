@@ -247,6 +247,28 @@ class TF10VareForm(BootstrapForm):
 TF10VareFormSet = formset_factory(TF10VareForm, min_num=1, extra=0)
 
 
+class MultipleValueWidget(forms.TextInput):
+    def value_from_datadict(self, data, files, name):
+        return data.getlist(name)
+
+
+class MultipleValueField(forms.Field):
+    widget = MultipleValueWidget
+
+
+def clean_int(x):
+    try:
+        return int(x)
+    except ValueError:
+        raise ValidationError("Cannot convert to integer: {}".format(repr(x)))
+
+
+class MultipleIntField(MultipleValueField):
+    def clean(self, value):
+        if value:
+            return [clean_int(x) for x in value[0]]
+
+
 class TF10SearchForm(BootstrapForm):
     def __init__(self, *args, **kwargs):
         self.varesatser = kwargs.pop("varesatser", {})
@@ -275,6 +297,7 @@ class TF10SearchForm(BootstrapForm):
         required=False,
     )
 
+    vareafgiftssats_list = MultipleIntField()
     dato_efter = forms.DateField(required=False, widget=DateInput)
     dato_før = forms.DateField(required=False, widget=DateInput)
     json = forms.BooleanField(required=False)
