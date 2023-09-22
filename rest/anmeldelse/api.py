@@ -103,7 +103,7 @@ class AfgiftsanmeldelseFilterSchema(FilterSchema):
     )
     dato_efter: Optional[date] = Field(q="dato__gte")
     dato_før: Optional[date] = Field(q="dato__lt")
-    vareafgiftssats: Optional[int] = Field(q="varelinje__vareafgiftssats__id")
+    vareart: Optional[str] = Field(q="varelinje__vareafgiftssats__vareart")
 
 
 class AfgiftsanmeldelsePermission(RestPermission):
