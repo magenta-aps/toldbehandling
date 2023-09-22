@@ -479,5 +479,15 @@ class RestClient:
 
     @cached_property
     def varesatser(self) -> Dict[int, dict]:
-        data = self.get("vareafgiftssats")
-        return {item["id"]: item for item in data["items"]}
+        limit = 100
+        offset = 0
+        items = []
+
+        data = self.get("vareafgiftssats", {"limit": limit, "offset": offset})
+        items.extend(data["items"])
+        while len(data["items"]) == limit:
+            offset += limit
+            data = self.get("vareafgiftssats", {"limit": limit, "offset": offset})
+            items.extend(data["items"])
+
+        return {item["id"]: item for item in items}
