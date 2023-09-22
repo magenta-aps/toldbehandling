@@ -381,6 +381,7 @@ class AnmeldelseListViewTest(HasLogin):
         json_content = None
         content = None
         status_code = None
+        true_false_dict = {"True": True, "False": False}
         if path == expected_prefix + "afgiftsanmeldelse/full":
             items = deepcopy(self.testdata)
             if "dato_før" in query:
@@ -388,6 +389,21 @@ class AnmeldelseListViewTest(HasLogin):
             if "dato_efter" in query:
                 items = list(
                     filter(lambda i: i["dato"] >= query["dato_efter"][0], items)
+                )
+            if "godkendt" in query:
+                items = list(
+                    filter(
+                        lambda i: i["godkendt"]
+                        == true_false_dict[query["godkendt"][0]],
+                        items,
+                    )
+                )
+            if "godkendt_is_null" in query:
+                items = list(
+                    filter(
+                        lambda i: i["godkendt"] is None,
+                        items,
+                    )
                 )
             if "offset" in query:
                 items = items[int(query["offset"][0]) :]
@@ -584,6 +600,10 @@ class AnmeldelseListViewTest(HasLogin):
             ("dato_efter", "2023-09-02", {1, 2}),
             ("dato_efter", "2023-09-03", {1}),
             ("dato_efter", "2023-09-04", set()),
+            ("godkendt", "True", {1}),
+            ("godkendt", "False", {2}),
+            ("godkendt", "", {1, 2, 3}),
+            ("godkendt", "explicitly_none", {3}),
         ]
         for field, value, expected in filter_tests:
             url = self.list_url + f"?json=1&{field}={value}"
