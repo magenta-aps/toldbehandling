@@ -97,7 +97,10 @@ class AfgiftsanmeldelseFilterSchema(FilterSchema):
     modtager_betaler: Optional[bool]
     indførselstilladelse: Optional[str]
     betalt: Optional[bool]
-    godkendt: Optional[bool] = Field(q="godkendt", ignore_none=False)
+    godkendt: Optional[bool]
+    godkendt_is_null: Optional[bool] = Field(
+        q="godkendt__isnull",
+    )
     dato_efter: Optional[date] = Field(q="dato__gte")
     dato_før: Optional[date] = Field(q="dato__lt")
     vareafgiftssats: Optional[int] = Field(q="varelinje__vareafgiftssats__id")

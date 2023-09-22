@@ -267,7 +267,7 @@ class TF10ListView(LoginRequiredMixin, HasRestClientMixin, CustomLayoutMixin, Fo
     def form_valid(self, form):
         search_data = {"offset": 0, "limit": self.list_size}
         for key, value in form.cleaned_data.items():
-            if key not in ("json",) and value not in ("", None):
+            if key not in ("json",) and value not in ("", None, "explicitly_none"):
                 if type(value) is date:
                     value = value.isoformat()
                 elif key in ("offset", "limit"):
@@ -334,7 +334,11 @@ class TF10ListView(LoginRequiredMixin, HasRestClientMixin, CustomLayoutMixin, Fo
 
     def get_form_kwargs(self) -> Dict[str, Any]:
         kwargs = super().get_form_kwargs()
-        kwargs["data"] = self.request.GET
+        query_dict = self.request.GET.copy()
+
+        if query_dict.get("godkendt", "") == "explicitly_none":
+            query_dict["godkendt_is_null"] = "True"
+        kwargs["data"] = query_dict
 
         # Will be picked up by TF10SearchForm's constructor
         kwargs["varesatser"] = dict(
