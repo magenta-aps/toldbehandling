@@ -250,6 +250,8 @@ TF10VareFormSet = formset_factory(TF10VareForm, min_num=1, extra=0)
 class TF10SearchForm(BootstrapForm):
     def __init__(self, *args, **kwargs):
         self.varesatser = kwargs.pop("varesatser", {})
+        self.afsendere = kwargs.pop("afsendere", {})
+        self.modtagere = kwargs.pop("modtagere", {})
         super().__init__(*args, **kwargs)
 
         # We use 'set' here, because one 'vareafgiftssats' can exist in many
@@ -263,6 +265,22 @@ class TF10SearchForm(BootstrapForm):
                         for item in self.varesatser.values()
                     ]
                 ),
+                key=lambda items: items[1],
+            )
+        )
+
+        self.fields["afsender"].choices = tuple(
+            [(None, "------")]
+            + sorted(
+                [(item["id"], item["navn"]) for item in self.afsendere.values()],
+                key=lambda items: items[1],
+            )
+        )
+
+        self.fields["modtager"].choices = tuple(
+            [(None, "------")]
+            + sorted(
+                [(item["id"], item["navn"]) for item in self.modtagere.values()],
                 key=lambda items: items[1],
             )
         )
@@ -296,3 +314,7 @@ class TF10SearchForm(BootstrapForm):
 
     sort = forms.CharField(required=False)
     order = forms.CharField(required=False)
+
+    id = forms.IntegerField(required=False)
+    afsender = forms.ChoiceField(required=False)
+    modtager = forms.ChoiceField(required=False)

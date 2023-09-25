@@ -405,6 +405,29 @@ class AnmeldelseListViewTest(HasLogin):
                         items,
                     )
                 )
+            if "id" in query:
+                items = list(
+                    filter(
+                        lambda i: i["id"] == int(query["id"][0]),
+                        items,
+                    )
+                )
+
+            if "modtager" in query:
+                items = list(
+                    filter(
+                        lambda i: i["modtager"]["id"] == int(query["modtager"][0]),
+                        items,
+                    )
+                )
+            if "afsender" in query:
+                items = list(
+                    filter(
+                        lambda i: i["afsender"]["id"] == int(query["afsender"][0]),
+                        items,
+                    )
+                )
+
             if "offset" in query:
                 items = items[int(query["offset"][0]) :]
             if "limit" in query:
@@ -438,6 +461,45 @@ class AnmeldelseListViewTest(HasLogin):
                     }
                 ],
             }
+
+        if path == expected_prefix + "afsender":
+            json_content = {
+                "count": 3,
+                "items": [
+                    {
+                        "id": 20,
+                        "navn": "Testfirma 5",
+                    },
+                    {
+                        "id": 22,
+                        "navn": "Testfirma 4",
+                    },
+                    {
+                        "id": 24,
+                        "navn": "Testfirma 6",
+                    },
+                ],
+            }
+
+        if path == expected_prefix + "modtager":
+            json_content = {
+                "count": 3,
+                "items": [
+                    {
+                        "id": 21,
+                        "navn": "Testfirma 3",
+                    },
+                    {
+                        "id": 23,
+                        "navn": "Testfirma 1",
+                    },
+                    {
+                        "id": 25,
+                        "navn": "Testfirma 2",
+                    },
+                ],
+            }
+
         if json_content:
             content = json.dumps(json_content).encode("utf-8")
         if content:
@@ -604,6 +666,12 @@ class AnmeldelseListViewTest(HasLogin):
             ("godkendt", "False", {2}),
             ("godkendt", "", {1, 2, 3}),
             ("godkendt", "explicitly_none", {3}),
+            ("id", "1", {1}),
+            ("id", "2", {2}),
+            ("afsender", "20", {1}),
+            ("afsender", "22", {2}),
+            ("modtager", "21", {1}),
+            ("modtager", "23", {2}),
         ]
         for field, value, expected in filter_tests:
             url = self.list_url + f"?json=1&{field}={value}"
