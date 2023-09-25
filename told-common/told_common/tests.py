@@ -644,7 +644,7 @@ class AnmeldelseListViewTest(HasLogin):
         invalid = {
             "dato_efter": ["fejl", "0", "-1", "2023-13-01", "2023-02-29"],
             "dato_før": ["fejl", "0", "-1", "2023-13-01", "2023-02-29"],
-            "vareafgiftssats": [-1, 10000000, "a"],
+            "vareart": [-1, 10000000, "a"],
         }
         self.login()
         for field, values in invalid.items():

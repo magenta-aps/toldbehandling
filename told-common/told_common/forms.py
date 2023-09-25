@@ -251,12 +251,23 @@ class TF10SearchForm(BootstrapForm):
     def __init__(self, *args, **kwargs):
         self.varesatser = kwargs.pop("varesatser", {})
         super().__init__(*args, **kwargs)
-        self.fields["vareafgiftssats"].choices = tuple(
+
+        # We use 'set' here, because one 'vareafgiftssats' can exist in many
+        # different tables
+        self.fields["vareart"].choices = tuple(
             [(None, "------")]
-            + [(id, item["vareart"]) for id, item in self.varesatser.items()]
+            + sorted(
+                set(
+                    [
+                        (item["vareart"], item["vareart"].lower().capitalize())
+                        for item in self.varesatser.values()
+                    ]
+                ),
+                key=lambda items: items[1],
+            )
         )
 
-    vareafgiftssats = forms.ChoiceField(choices=(), required=False)
+    vareart = forms.ChoiceField(choices=(), required=False)
     godkendt = forms.ChoiceField(
         choices=(
             (None, _("------")),
