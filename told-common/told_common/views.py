@@ -347,4 +347,10 @@ class TF10ListView(LoginRequiredMixin, HasRestClientMixin, CustomLayoutMixin, Fo
                 self.rest_client.varesatser.items(),
             )
         )
+        kwargs["afsendere"] = {
+            item[1]["id"]: item[1] for item in self.rest_client.afsendere.items()
+        }
+        kwargs["modtagere"] = {
+            item[1]["id"]: item[1] for item in self.rest_client.modtagere.items()
+        }
         return kwargs

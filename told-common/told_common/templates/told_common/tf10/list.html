@@ -41,6 +41,24 @@
             </div>
         </div>
         <div class="row">
+            <div class="col-4"><label for="{{form.id.name}}" class="form-label">Anmeldelsesnummer</label></div>
+            <div class="col-8">
+                {{form.id}}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-4"><label for="{{form.afsender.name}}" class="form-label">Afsender</label></div>
+            <div class="col-8">
+                {{form.afsender}}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-4"><label for="{{form.modtager.name}}" class="form-label">Modtager</label></div>
+            <div class="col-8">
+                {{form.modtager}}
+            </div>
+        </div>
+        <div class="row">
             <div class="col-12 cleafix">
                 <button type="submit" class="btn btn-primary float-end">Søg</button>
                 {% if can_create %}

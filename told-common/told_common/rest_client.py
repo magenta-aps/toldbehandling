@@ -477,17 +477,28 @@ class RestClient:
                 [b64encode(chunk).decode("ascii") for chunk in file.chunks(48 * 1024)]
             )
 
-    @cached_property
-    def varesatser(self) -> Dict[int, dict]:
+    def get_all_items(self, route) -> Dict[int, dict]:
         limit = 100
         offset = 0
         items = []
 
-        data = self.get("vareafgiftssats", {"limit": limit, "offset": offset})
+        data = self.get(route, {"limit": limit, "offset": offset})
         items.extend(data["items"])
         while len(data["items"]) == limit:
             offset += limit
-            data = self.get("vareafgiftssats", {"limit": limit, "offset": offset})
+            data = self.get(route, {"limit": limit, "offset": offset})
             items.extend(data["items"])
 
         return {item["id"]: item for item in items}
+
+    @cached_property
+    def varesatser(self) -> Dict[int, dict]:
+        return self.get_all_items("vareafgiftssats")
+
+    @cached_property
+    def afsendere(self) -> Dict[int, dict]:
+        return self.get_all_items("afsender")
+
+    @cached_property
+    def modtagere(self) -> Dict[int, dict]:
+        return self.get_all_items("modtager")

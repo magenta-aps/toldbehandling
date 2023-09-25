@@ -61,21 +61,6 @@ urlpatterns = [
         name="tf10_edit",
     ),
     path(
-        "blanket/tf10/ubehandlede",
-        TemplateView.as_view(template_name="admin/blanket/tf10/list_ubehandlede.html"),
-        name="tf10_list_ubehandlede",
-    ),
-    path(
-        "blanket/tf10/behandlede",
-        TemplateView.as_view(template_name="admin/blanket/tf10/list_behandlede.html"),
-        name="tf10_list_behandlede",
-    ),
-    path(
-        "blanket/tf10/afsluttede",
-        TemplateView.as_view(template_name="admin/blanket/tf10/list_afsluttede.html"),
-        name="tf10_list_afsluttede",
-    ),
-    path(
         "faktura",
         TemplateView.as_view(template_name="admin/faktura/form.html"),
         name="faktura_create",
