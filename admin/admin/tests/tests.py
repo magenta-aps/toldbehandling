@@ -11,6 +11,9 @@ from unittest.mock import patch, mock_open
 from urllib.parse import quote, quote_plus, urlparse, parse_qs
 
 import requests
+from admin.views import AfgiftstabelDownloadView
+from admin.views import AfgiftstabelListView
+from admin.views import TF10View, TF10ListView
 from bs4 import BeautifulSoup
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
@@ -22,9 +25,12 @@ from told_common.rest_client import RestClient
 from told_common.tests import (
     TemplateTagsTest,
     LoginTest,
+    HasLogin,
+    PermissionsTest,
     AnmeldelseListViewTest,
     modify_values,
 )
+from told_common.views import FragtbrevView
 
 
 class TestLogin(TestCase):
@@ -65,11 +71,38 @@ class TestLogin(TestCase):
     def submit_get_errors(self, url, data):
         return self.get_errors(self.client.post(url, data=data).content)
 
+    @staticmethod
+    def mock_requests_get(path):
+        expected_prefix = "http://toldbehandling-rest:7000/api/"
+        path = path.split("?")[0]
+        path = path.rstrip("/")
+        response = Response()
+        status_code = None
+        if path == expected_prefix + "user":
+            json_content = {
+                "username": "admin",
+                "first_name": "Administrator",
+                "last_name": "",
+                "email": "admin@told.gl",
+                "is_superuser": True,
+            }
+        else:
+            json_content = {"count": 0, "items": []}
+        content = json.dumps(json_content).encode("utf-8")
+        if content:
+            if not status_code:
+                status_code = 200
+            response._content = content
+        response.status_code = status_code or 404
+        return response
+
+    @patch.object(requests.sessions.Session, "get")
     @patch.object(requests, "post", return_value=create_response(401, "Unauthorized"))
-    def test_incorrect_login(self, mock_method):
+    def test_incorrect_login(self, mock_post, mock_get):
+        mock_get.side_effect = self.mock_requests_get
         response = self.client.post(reverse("login"), {"username": "incorrect"})
         self.assertEquals(response.status_code, 200)  # Rerender form
-        mock_method.assert_not_called()
+        mock_post.assert_not_called()
         errors = self.get_errors(response.content)
         self.assertEquals(errors["password"], ["Dette felt er påkrævet."])
 
@@ -77,23 +110,25 @@ class TestLogin(TestCase):
             reverse("login"), {"username": "incorrect", "password": "credentials"}
         )
         self.assertEquals(response.status_code, 200)  # Rerender form
-        mock_method.assert_called_with(
+        mock_post.assert_called_with(
             "http://toldbehandling-rest:7000/api/token/pair",
             json={"username": "incorrect", "password": "credentials"},
             headers={"Content-Type": "application/json"},
         )
 
+    @patch.object(requests.sessions.Session, "get")
     @patch.object(
         requests,
         "post",
         return_value=create_response(200, {"access": "123456", "refresh": "abcdef"}),
     )
-    def test_correct_login(self, mock_method):
+    def test_correct_login(self, mock_post, mock_get):
+        mock_get.side_effect = self.mock_requests_get
         response = self.client.post(
             reverse("login") + "?next=/",
             {"username": "correct", "password": "credentials"},
         )
-        mock_method.assert_called_with(
+        mock_post.assert_called_with(
             "http://toldbehandling-rest:7000/api/token/pair",
             json={"username": "correct", "password": "credentials"},
             headers={"Content-Type": "application/json"},
@@ -105,9 +140,8 @@ class TestLogin(TestCase):
 
     @patch.object(RestClient, "refresh_login")
     @patch.object(
-        requests.Session,
+        requests.sessions.Session,
         "get",
-        return_value=create_response(200, {"count": 0, "items": []}),
     )
     @patch.object(
         requests,
@@ -115,6 +149,7 @@ class TestLogin(TestCase):
         return_value=create_response(200, {"access": "123456", "refresh": "abcdef"}),
     )
     def test_token_refresh_not_needed(self, mock_post, mock_get, mock_refresh_login):
+        mock_get.side_effect = self.mock_requests_get
         self.client.post(
             reverse("login"), {"username": "correct", "password": "credentials"}
         )
@@ -128,9 +163,8 @@ class TestLogin(TestCase):
 
     @patch.object(RestClient, "refresh_login")
     @patch.object(
-        requests.Session,
+        requests.sessions.Session,
         "get",
-        return_value=create_response(200, {"count": 0, "items": []}),
     )
     @patch.object(
         requests,
@@ -138,6 +172,7 @@ class TestLogin(TestCase):
         return_value=create_response(200, {"access": "123456", "refresh": "abcdef"}),
     )
     def test_token_refresh_needed(self, mock_post, mock_get, mock_refresh_login):
+        mock_get.side_effect = self.mock_requests_get
         self.client.post(
             reverse("login"), {"username": "correct", "password": "credentials"}
         )
@@ -151,9 +186,8 @@ class TestLogin(TestCase):
             mock_refresh_login.assert_called()
 
     @patch.object(
-        requests.Session,
+        requests.sessions.Session,
         "get",
-        return_value=create_response(200, {"count": 0, "items": []}),
     )
     @patch.object(
         requests,
@@ -161,6 +195,7 @@ class TestLogin(TestCase):
         return_value=create_response(200, {"access": "123456", "refresh": "abcdef"}),
     )
     def test_token_refresh(self, mock_post, mock_get):
+        mock_get.side_effect = self.mock_requests_get
         self.client.post(
             reverse("login"), {"username": "correct", "password": "credentials"}
         )
@@ -171,12 +206,14 @@ class TestLogin(TestCase):
             # Check that token refresh is needed
             self.assertEquals(response.cookies["access_token"].value, "7890ab")
 
+    @patch.object(requests.sessions.Session, "get")
     @patch.object(
         requests,
         "post",
         return_value=create_response(200, {"access": "123456", "refresh": "abcdef"}),
     )
-    def test_logout(self, mock_post):
+    def test_logout(self, mock_post, mock_get):
+        mock_get.side_effect = self.mock_requests_get
         response = self.client.post(
             reverse("login") + "?next=/",
             {"username": "correct", "password": "credentials"},
@@ -208,19 +245,13 @@ class TestLogin(TestCase):
         )
 
 
-class HasLogin:
-    def login(self):
-        self.client.cookies.load(
-            {
-                "access_token": "123456",
-                "refresh_token": "abcdef",
-                "access_token_timestamp": time.time(),
-                "refresh_token_timestamp": time.time(),
-            }
-        )
+class TestGodkend(PermissionsTest, TestCase):
+    view = TF10View
 
+    check_permissions = (
+        (reverse("tf10_view", kwargs={"id": 1}), view.required_permissions),
+    )
 
-class TestGodkend(HasLogin, TestCase):
     def setUp(self):
         super().setUp()
         self.patched: List[Tuple[str, str]] = []
@@ -353,7 +384,7 @@ class TestGodkend(HasLogin, TestCase):
             reverse("login") + "?next=" + quote(url, safe=""),
         )
 
-    @patch.object(requests.Session, "get")
+    @patch.object(requests.sessions.Session, "get")
     def test_get_view(self, mock_get):
         self.login()
         url = reverse("tf10_view", kwargs={"id": 1})
@@ -361,7 +392,7 @@ class TestGodkend(HasLogin, TestCase):
         response = self.client.get(url)
         self.assertEquals(response.status_code, 200)
 
-    @patch.object(requests.Session, "get")
+    @patch.object(requests.sessions.Session, "get")
     def test_get_view_not_found(self, mock_get):
         self.login()
         url = reverse("tf10_view", kwargs={"id": 2})
@@ -369,7 +400,7 @@ class TestGodkend(HasLogin, TestCase):
         response = self.client.get(url)
         self.assertEquals(response.status_code, 404)
 
-    @patch.object(requests.Session, "patch")
+    @patch.object(requests.sessions.Session, "patch")
     def test_post_view_godkend(self, mock_patch):
         self.login()
         view_url = reverse("tf10_view", kwargs={"id": 1})
@@ -384,7 +415,7 @@ class TestGodkend(HasLogin, TestCase):
             patched_map[prefix + "afgiftsanmeldelse/1"], [{"godkendt": True}]
         )
 
-    @patch.object(requests.Session, "patch")
+    @patch.object(requests.sessions.Session, "patch")
     def test_post_view_afvis(self, mock_patch):
         self.login()
         view_url = reverse("tf10_view", kwargs={"id": 1})
@@ -399,7 +430,7 @@ class TestGodkend(HasLogin, TestCase):
             patched_map[prefix + "afgiftsanmeldelse/1"], [{"godkendt": False}]
         )
 
-    @patch.object(requests.Session, "patch")
+    @patch.object(requests.sessions.Session, "patch")
     def test_post_view_not_found(self, mock_patch):
         self.login()
         view_url = reverse("tf10_view", kwargs={"id": 2})
@@ -412,7 +443,7 @@ class TestGodkend(HasLogin, TestCase):
             patched_map[url].append(json.loads(data))
         self.assertEquals(patched_map[prefix + "afgiftsanmeldelse/2"], [])
 
-    @patch.object(requests.Session, "get")
+    @patch.object(requests.sessions.Session, "get")
     def test_get_view_rest_error(self, mock_get):
         self.login()
         url = reverse("tf10_view", kwargs={"id": 1})
@@ -420,7 +451,7 @@ class TestGodkend(HasLogin, TestCase):
         response = self.client.get(url)
         self.assertEquals(response.status_code, 500)
 
-    @patch.object(requests.Session, "get")
+    @patch.object(requests.sessions.Session, "get")
     def test_get_view_rest_error_401(self, mock_get):
         self.login()
         url = reverse("tf10_view", kwargs={"id": 1})
@@ -428,7 +459,7 @@ class TestGodkend(HasLogin, TestCase):
         response = self.client.get(url)
         self.assertEquals(response.status_code, 302)
 
-    @patch.object(requests.Session, "patch")
+    @patch.object(requests.sessions.Session, "patch")
     def test_post_view_rest_error(self, mock_patch):
         self.login()
         view_url = reverse("tf10_view", kwargs={"id": 1})
@@ -437,7 +468,13 @@ class TestGodkend(HasLogin, TestCase):
         self.assertEquals(response.status_code, 500)
 
 
-class FileViewTest(HasLogin, TestCase):
+class FileViewTest(PermissionsTest, TestCase):
+    view = FragtbrevView
+
+    check_permissions = (
+        (reverse("fragtbrev_view", kwargs={"id": 1}), view.required_permissions),
+    )
+
     def mock_requests_get(self, path):
         expected_prefix = "http://toldbehandling-rest:7000/api/"
         path = path.split("?")[0]
@@ -451,7 +488,7 @@ class FileViewTest(HasLogin, TestCase):
                 "id": 1,
                 "forsendelsestype": "S",
                 "fragtbrevsnummer": 1,
-                "fragtbrev": "/leverandørfakturaer/1/leverandørfaktura.txt",
+                "fragtbrev": "/fragtbreve/1/fragtbrev.txt",
             }
         if json_content:
             content = json.dumps(json_content).encode("utf-8")
@@ -462,7 +499,7 @@ class FileViewTest(HasLogin, TestCase):
         response.status_code = status_code or 404
         return response
 
-    @patch.object(requests.Session, "get")
+    @patch.object(requests.sessions.Session, "get")
     @patch("builtins.open", mock_open(read_data=b"test_data"))
     def test_fileview(self, mock_get):
         self.login()
@@ -472,6 +509,21 @@ class FileViewTest(HasLogin, TestCase):
         self.assertEquals(response.status_code, 200)
         content = list(response.streaming_content)[0]
         self.assertEquals(content, b"test_data")
+
+    @patch("builtins.open", mock_open(read_data=b"test_data"))
+    @patch.object(requests.sessions.Session, "get")
+    def test_permissions_admin(self, mock_get):
+        super(FileViewTest, self).test_permissions_admin(mock_get)
+
+    @patch("builtins.open", mock_open(read_data=b"test_data"))
+    @patch.object(requests.sessions.Session, "get")
+    def test_permissions_allowed(self, mock_get):
+        super(FileViewTest, self).test_permissions_allowed(mock_get)
+
+    @patch("builtins.open", mock_open(read_data=b"test_data"))
+    @patch.object(requests.sessions.Session, "get")
+    def test_permissions_disallowed(self, mock_get):
+        super(FileViewTest, self).test_permissions_disallowed(mock_get)
 
 
 class AdminTemplateTagsTest(TemplateTagsTest, TestCase):
@@ -484,9 +536,11 @@ class AdminLoginTest(LoginTest, TestCase):
         return str(reverse("tf10_list"))
 
 
-class AdminAnmeldelseListViewTest(AnmeldelseListViewTest, TestCase):
+class AdminAnmeldelseListViewTest(PermissionsTest, AnmeldelseListViewTest, TestCase):
     can_view = True
     can_edit = False
+    view = TF10ListView
+    check_permissions = ((reverse("tf10_list"), view.required_permissions),)
 
     @property
     def list_url(self):
@@ -505,7 +559,10 @@ class AdminFileViewTest(FileViewTest, TestCase):
         return str(reverse("fragtbrev_view", kwargs={"id": 1}))
 
 
-class AfgiftstabelListViewTest(HasLogin, TestCase):
+class AfgiftstabelListViewTest(PermissionsTest, TestCase):
+    view = AfgiftstabelListView
+    check_permissions = ((reverse("afgiftstabel_list"), view.required_permissions),)
+
     @property
     def list_url(self):
         return reverse("afgiftstabel_list")
@@ -596,7 +653,7 @@ class AfgiftstabelListViewTest(HasLogin, TestCase):
             reverse("login") + "?next=" + quote(url, safe=""),
         )
 
-    @patch.object(requests.Session, "get")
+    @patch.object(requests.sessions.Session, "get")
     def test_list(self, mock_get):
         self.maxDiff = None
         mock_get.side_effect = self.mock_requests_get
@@ -679,7 +736,7 @@ class AfgiftstabelListViewTest(HasLogin, TestCase):
             ),
         )
 
-    @patch.object(requests.Session, "get")
+    @patch.object(requests.sessions.Session, "get")
     def test_list_sort(self, mock_get):
         mock_get.side_effect = self.mock_requests_get
         self.login()
@@ -701,7 +758,7 @@ class AfgiftstabelListViewTest(HasLogin, TestCase):
             self.assertEquals(response.status_code, 200)
             self.assertEquals(numbers, test[2], f"{test[0]} {test[1]}")
 
-    @patch.object(requests.Session, "get")
+    @patch.object(requests.sessions.Session, "get")
     def test_list_paginate(self, mock_get):
         mock_get.side_effect = self.mock_requests_get
         self.login()
@@ -728,7 +785,19 @@ class AfgiftstabelListViewTest(HasLogin, TestCase):
             self.assertEquals(numbers, expected)
 
 
-class AfgiftstabelDownloadTest(HasLogin, TestCase):
+class AfgiftstabelDownloadTest(PermissionsTest, TestCase):
+    view = AfgiftstabelDownloadView
+    check_permissions = (
+        (
+            reverse("afgiftstabel_download", kwargs={"id": 1, "format": "xlsx"}),
+            view.required_permissions,
+        ),
+        (
+            reverse("afgiftstabel_download", kwargs={"id": 1, "format": "csv"}),
+            view.required_permissions,
+        ),
+    )
+
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -787,7 +856,7 @@ class AfgiftstabelDownloadTest(HasLogin, TestCase):
         response.status_code = status_code or 404
         return response
 
-    @patch.object(requests.Session, "get")
+    @patch.object(requests.sessions.Session, "get")
     def test_xlsx(self, mock_get):
         mock_get.side_effect = self.mock_requests_get
         self.login()
@@ -840,7 +909,7 @@ class AfgiftstabelDownloadTest(HasLogin, TestCase):
             ],
         )
 
-    @patch.object(requests.Session, "get")
+    @patch.object(requests.sessions.Session, "get")
     def test_csv(self, mock_get):
         mock_get.side_effect = self.mock_requests_get
         self.login()
@@ -960,14 +1029,14 @@ class AfgiftstabelUploadTest(HasLogin):
             error_fields["__all__"] = [li.text for li in all_errors.find_all(name="li")]
         return error_fields
 
-    @patch.object(requests.Session, "post")
+    @patch.object(requests.sessions.Session, "post")
     def test_successful_upload(self, mock_post):
         mock_post.side_effect = self.mock_requests_post
         response = self.upload(self.data)
         self.assertEquals(response.status_code, 302)
         self.assertEquals(response.headers["Location"], reverse("afgiftstabel_list"))
 
-    @patch.object(requests.Session, "post")
+    @patch.object(requests.sessions.Session, "post")
     def test_failure_wrong_content_type(self, mock_post):
         mock_post.side_effect = self.mock_requests_post
         response = self.upload(self.data, "text/plain")
@@ -976,7 +1045,7 @@ class AfgiftstabelUploadTest(HasLogin):
         self.assertTrue("fil" in errors)
         self.assertEquals(errors["fil"], ["Ugyldig content-type: text/plain"])
 
-    @patch.object(requests.Session, "post")
+    @patch.object(requests.sessions.Session, "post")
     def test_failure_header_missing(self, mock_post):
         mock_post.side_effect = self.mock_requests_post
         for i in range(0, 9):
@@ -989,7 +1058,7 @@ class AfgiftstabelUploadTest(HasLogin):
             self.assertTrue("fil" in errors)
             self.assertEquals(errors["fil"], [f"Mangler kolonne med {self.data[0][i]}"])
 
-    @patch.object(requests.Session, "post")
+    @patch.object(requests.sessions.Session, "post")
     def test_failure_number_twice(self, mock_post):
         mock_post.side_effect = self.mock_requests_post
         self.data[3][0] = "2"
@@ -1001,7 +1070,7 @@ class AfgiftstabelUploadTest(HasLogin):
             errors["fil"], ["Afgiftsgruppenummer 2 optræder to gange (linjer: 3, 4)"]
         )
 
-    @patch.object(requests.Session, "post")
+    @patch.object(requests.sessions.Session, "post")
     def test_failure_missing_reference(self, mock_post):
         mock_post.side_effect = self.mock_requests_post
         self.data[3][1] = "4"
@@ -1016,7 +1085,7 @@ class AfgiftstabelUploadTest(HasLogin):
             ],
         )
 
-    @patch.object(requests.Session, "post")
+    @patch.object(requests.sessions.Session, "post")
     def test_failure_reference_self(self, mock_post):
         mock_post.side_effect = self.mock_requests_post
         self.data[1][1] = "1"
@@ -1029,7 +1098,7 @@ class AfgiftstabelUploadTest(HasLogin):
             ["Vareafgiftssats 1 (linje 2) peger på sig selv som overordnet"],
         )
 
-    @patch.object(requests.Session, "post")
+    @patch.object(requests.sessions.Session, "post")
     def test_failure_circular_reference(self, mock_post):
         mock_post.side_effect = self.mock_requests_post
         self.data[1][1] = "3"

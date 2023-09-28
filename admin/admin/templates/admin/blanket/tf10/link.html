@@ -1,2 +1,4 @@
 {% load i18n %}
+{% if can_view %}
 <a class="btn btn-primary btn-sm" href="{% url 'tf10_view' id=item.id %}">{% translate 'Vis' %}</a>
+{% endif %}

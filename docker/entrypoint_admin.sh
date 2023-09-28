@@ -1,10 +1,20 @@
 #!/bin/bash
 set -e
+MAKE_MIGRATIONS=${MAKE_MIGRATIONS:=false}
+MIGRATE=${MIGRATE:=false}
 TEST=${TEST:=false}
 MAKEMESSAGES=${MAKEMESSAGES:=true}
 COMPILEMESSAGES=${COMPILEMESSAGES:=true}
 DJANGO_DEBUG=${DJANGO_DEBUG:=false}
 
+if [ "$MAKE_MIGRATIONS" = true ]; then
+  echo 'generating migrations'
+  python manage.py makemigrations --no-input
+fi
+if [ "$MIGRATE" = true ]; then
+  echo 'running migrations'
+  python manage.py migrate
+fi
 if [ "$TEST" = true ]; then
   echo 'running tests'
   python manage.py test

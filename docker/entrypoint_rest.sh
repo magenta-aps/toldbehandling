@@ -3,6 +3,7 @@ set -e
 MAKE_MIGRATIONS=${MAKE_MIGRATIONS:=false}
 MIGRATE=${MIGRATE:=false}
 TEST=${TEST:=false}
+CREATE_GROUPS=${CREATE_GROUPS:=true}
 CREATE_USERS=${CREATE_USERS:=false}
 DUMMYDATA=${DUMMYDATA:=false}
 DJANGO_DEBUG=${DJANGO_DEBUG:=false}
@@ -21,6 +22,12 @@ if [ "$MIGRATE" = true ]; then
   echo 'running migrations'
   python manage.py migrate
 fi
+
+if [ "$CREATE_GROUPS" = true ]; then
+  echo 'create groups'
+  python manage.py create_groups
+fi
+
 if [ "$CREATE_USERS" = true ]; then
   echo 'create users'
   python manage.py create_dummy_users

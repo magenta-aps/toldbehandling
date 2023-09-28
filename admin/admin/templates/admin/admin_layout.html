@@ -2,9 +2,13 @@
 {% load i18n %}
 {% block header %}
 <header>
-    <nav class="nav d-flex p-2">
-        <a class="p-2 text-muted" href="{% url 'afgiftstabel_list' %}">Afgiftstabeller</a>
+    <nav class="nav flex-column flex-sm-row p-1">
+        <a class="p-2 text-muted " href="{% url 'afgiftstabel_list' %}">Afgiftstabeller</a>
         <a class="p-2 text-muted" href="{% url 'tf10_list' %}">Afgiftsanmeldelser</a>
+        <span class="p-2 ms-auto">
+            {{user.first_name}} {{user.last_name}} ({{user.username}})
+        </span>
+        <a href="{% url 'logout' %}" class="m-1 btn btn-sm btn-primary">Log ud</a>
     </nav>
     <hr class="p-0 m-0"/>
 </header>

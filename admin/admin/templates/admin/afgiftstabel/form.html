@@ -4,6 +4,7 @@
 {% load l10n %}
 
 {% block content %}
+
 <div class="mx-5">
     <form method="post" action="{% url 'afgiftstabel_create' %}" enctype="multipart/form-data">
         {% csrf_token %}
@@ -20,6 +21,7 @@
         </div>
     </form>
 </div>
+
 <script>
     $(function () {
         // Filefield
