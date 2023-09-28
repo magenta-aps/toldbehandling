@@ -373,7 +373,7 @@ class RestClient:
     domain = settings.REST_DOMAIN
 
     def __init__(self, token: JwtTokenInfo):
-        self.session: Session = requests.session()
+        self.session: Session = requests.sessions.Session()
         self.token: JwtTokenInfo = token
         self.session.headers = {"Authorization": f"Bearer {self.token.access_token}"}
         self.afsender = AfsenderRestClient(self)

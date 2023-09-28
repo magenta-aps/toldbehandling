@@ -1,9 +1,18 @@
+from __future__ import annotations
+
 import time
-from typing import Dict, Any
+from functools import cached_property
+from typing import Dict, Any, Iterable, Optional
 from urllib.parse import quote_plus
 
-from django.http import HttpResponseRedirect, HttpResponseServerError
+from django.http import (
+    HttpResponseRedirect,
+    HttpResponseServerError,
+    HttpResponse,
+    HttpRequest,
+)
 from django.shortcuts import redirect
+from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.views.generic import FormView
 from requests import HTTPError
@@ -11,14 +20,29 @@ from told_common.rest_client import JwtTokenInfo, RestClient
 
 
 class LoginRequiredMixin:
-    def dispatch(self, request, *args, **kwargs):
-        if not request.COOKIES.get("access_token") or not request.COOKIES.get(
+    def needs_login(self, request):
+        return redirect(reverse("login") + "?next=" + quote_plus(request.path))
+
+    def login_check(self):
+        if not self.request.COOKIES.get("access_token") or not self.request.COOKIES.get(
             "refresh_token"
         ):
-            return redirect(reverse("login") + "?next=" + quote_plus(request.path))
-        refresh_token_timestamp = request.COOKIES.get("refresh_token_timestamp")
+            return self.needs_login(self.request)
+        refresh_token_timestamp = self.request.COOKIES.get("refresh_token_timestamp")
         if (int(time.time() - float(refresh_token_timestamp))) > 24 * 3600:
-            return redirect(reverse("login") + "?next=" + quote_plus(request.path))
+            return self.needs_login(self.request)
+        return None
+
+    def check(self) -> Optional[HttpResponse]:
+        # Underklasser kan overstyre denne metode
+        # for at stille yderligere krav til brugeren
+        return None
+
+    def dispatch(self, request, *args, **kwargs):
+        # self.request = request  klares af superklassen View
+        redir = self.login_check() or self.check()
+        if redir is not None:
+            return redir
         try:
             return super().dispatch(request, *args, **kwargs)
         except HTTPError as e:
@@ -29,6 +53,101 @@ class LoginRequiredMixin:
                 f"Failure in REST API request; "
                 f"got http {e.response.status_code} from API"
             )
+
+    def get_context_data(self, **context):
+        return super().get_context_data(**{**context, "user": self.userdata})
+
+    @cached_property
+    def userdata(self):
+        return self.request.session["user"]
+
+
+class GroupRequiredMixin(LoginRequiredMixin):
+    # Liste af gruppenavne som har tilladelse til at komme ind
+    allowed_groups: Iterable[str] = ()
+
+    # Skal stemme overens med de grupper der oprettes i create_groups.py
+    INDBERETTERE = "Indberettere"
+    TOLDMEDARBEJDERE = "Toldmedarbejdere"
+    AFSTEMMERE_BOGHOLDERE = "Afstemmere/bogholdere"
+    DATAANSVARLIGE = "Dataansvarlige"
+
+    # Som LoginRequiredMixin, men kræver også at brugeren har den rette Permission
+    # til at komme ind på admin-sitet
+    def check(self) -> Optional[HttpResponse]:
+        response = super().check()
+        if response:
+            return response
+        if self.userdata["is_superuser"]:
+            return None
+
+        user_groups = set(self.userdata["groups"])
+        required_groups = set(self.allowed_groups)
+        if required_groups.intersection(user_groups):
+            return None
+
+        return TemplateResponse(
+            request=self.request,
+            template="told_common/access_denied.html",
+            context={"missing_groups": self.allowed_groups},
+            headers={"Cache-Control": "no-cache"},
+        )
+
+    def get_context_data(self, **kwargs):
+        return super().get_context_data(
+            **{
+                **kwargs,
+                "user_groups": self.userdata["groups"],
+            }
+        )
+
+
+class PermissionsRequiredMixin(LoginRequiredMixin):
+    # Liste af permissions påkræves for adgang
+    required_permissions: Iterable[str] = ()
+
+    # Som LoginRequiredMixin, men kræver også at brugeren har de rette Permissions
+    def check(self) -> Optional[HttpResponse]:
+        return super().check() or self.check_permissions(self.required_permissions)
+
+    def check_permissions(
+        self, required_permissions: Iterable[str]
+    ) -> Optional[HttpResponse]:
+        if not self.has_permissions(
+            request=self.request, required_permissions=required_permissions
+        ):
+            user_permissions = set(self.userdata["permissions"])
+            return TemplateResponse(
+                request=self.request,
+                status=403,
+                template="told_common/access_denied.html",
+                context={
+                    "missing_permissions": set(required_permissions).difference(
+                        user_permissions
+                    )
+                },
+                headers={"Cache-Control": "no-cache"},
+            )
+        return None
+
+    @classmethod
+    def has_permissions(
+        cls,
+        userdata: dict = None,
+        request: HttpRequest = None,
+        required_permissions: Iterable[str] = None,
+    ) -> bool:
+        if userdata is None:
+            if request is None:
+                raise Exception("Must specify either userdata or request")
+            userdata = request.session["user"]
+        if userdata["is_superuser"]:
+            return True
+        if required_permissions is None:
+            required_permissions = cls.required_permissions
+        required_permissions = set(required_permissions)
+        user_permissions = set(userdata["permissions"])
+        return required_permissions.issubset(user_permissions)
 
 
 class HasRestClientMixin:

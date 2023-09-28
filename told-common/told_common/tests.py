@@ -8,6 +8,7 @@ from urllib.parse import quote, quote_plus, urlparse, parse_qs
 
 import requests
 from bs4 import BeautifulSoup
+from django.contrib.auth.models import Permission
 from django.urls import reverse
 from requests import Response
 from told_common.rest_client import RestClient
@@ -38,6 +39,31 @@ class LoginTest:
         return response
 
     @staticmethod
+    def mock_requests_get(path):
+        expected_prefix = "http://toldbehandling-rest:7000/api/"
+        path = path.split("?")[0]
+        path = path.rstrip("/")
+        response = Response()
+        status_code = None
+        if path == expected_prefix + "user":
+            json_content = {
+                "username": "admin",
+                "first_name": "Administrator",
+                "last_name": "",
+                "email": "admin@told.gl",
+                "is_superuser": True,
+            }
+        else:
+            json_content = {"count": 0, "items": []}
+        content = json.dumps(json_content).encode("utf-8")
+        if content:
+            if not status_code:
+                status_code = 200
+            response._content = content
+        response.status_code = status_code or 404
+        return response
+
+    @staticmethod
     def get_errors(html: str):
         soup = BeautifulSoup(html, "html.parser")
         error_fields = {}
@@ -63,11 +89,13 @@ class LoginTest:
     def submit_get_errors(self, url, data):
         return self.get_errors(self.client.post(url, data=data).content)
 
+    @patch.object(requests.sessions.Session, "get")
     @patch.object(requests, "post", return_value=create_response(401, "Unauthorized"))
-    def test_incorrect_login(self, mock_method):
+    def test_incorrect_login(self, mock_post, mock_get):
+        mock_get.side_effect = self.mock_requests_get
         response = self.client.post(reverse("login"), {"username": "incorrect"})
         self.assertEquals(response.status_code, 200)  # Rerender form
-        mock_method.assert_not_called()
+        mock_post.assert_not_called()
         errors = self.get_errors(response.content)
         self.assertEquals(errors["password"], ["Dette felt er påkrævet."])
 
@@ -75,23 +103,25 @@ class LoginTest:
             reverse("login"), {"username": "incorrect", "password": "credentials"}
         )
         self.assertEquals(response.status_code, 200)  # Rerender form
-        mock_method.assert_called_with(
+        mock_post.assert_called_with(
             "http://toldbehandling-rest:7000/api/token/pair",
             json={"username": "incorrect", "password": "credentials"},
             headers={"Content-Type": "application/json"},
         )
 
+    @patch.object(requests.sessions.Session, "get")
     @patch.object(
         requests,
         "post",
         return_value=create_response(200, {"access": "123456", "refresh": "abcdef"}),
     )
-    def test_correct_login(self, mock_method):
+    def test_correct_login(self, mock_post, mock_get):
+        mock_get.side_effect = self.mock_requests_get
         response = self.client.post(
             reverse("login") + "?next=/",
             {"username": "correct", "password": "credentials"},
         )
-        mock_method.assert_called_with(
+        mock_post.assert_called_with(
             "http://toldbehandling-rest:7000/api/token/pair",
             json={"username": "correct", "password": "credentials"},
             headers={"Content-Type": "application/json"},
@@ -102,17 +132,14 @@ class LoginTest:
         self.assertEquals(response.cookies["refresh_token"].value, "abcdef")
 
     @patch.object(RestClient, "refresh_login")
-    @patch.object(
-        requests.Session,
-        "get",
-        return_value=create_response(200, {"count": 0, "items": []}),
-    )
+    @patch.object(requests.sessions.Session, "get")
     @patch.object(
         requests,
         "post",
         return_value=create_response(200, {"access": "123456", "refresh": "abcdef"}),
     )
     def test_token_refresh_not_needed(self, mock_post, mock_get, mock_refresh_login):
+        mock_get.side_effect = self.mock_requests_get
         self.client.post(
             reverse("login"), {"username": "correct", "password": "credentials"}
         )
@@ -125,17 +152,14 @@ class LoginTest:
             mock_refresh_login.assert_called()
 
     @patch.object(RestClient, "refresh_login")
-    @patch.object(
-        requests.Session,
-        "get",
-        return_value=create_response(200, {"count": 0, "items": []}),
-    )
+    @patch.object(requests.sessions.Session, "get")
     @patch.object(
         requests,
         "post",
         return_value=create_response(200, {"access": "123456", "refresh": "abcdef"}),
     )
     def test_token_refresh_needed(self, mock_post, mock_get, mock_refresh_login):
+        mock_get.side_effect = self.mock_requests_get
         self.client.post(
             reverse("login"), {"username": "correct", "password": "credentials"}
         )
@@ -148,17 +172,14 @@ class LoginTest:
             # Check that token refresh is needed
             mock_refresh_login.assert_called()
 
-    @patch.object(
-        requests.Session,
-        "get",
-        return_value=create_response(200, {"count": 0, "items": []}),
-    )
+    @patch.object(requests.sessions.Session, "get")
     @patch.object(
         requests,
         "post",
         return_value=create_response(200, {"access": "123456", "refresh": "abcdef"}),
     )
     def test_token_refresh(self, mock_post, mock_get):
+        mock_get.side_effect = self.mock_requests_get
         self.client.post(
             reverse("login"), {"username": "correct", "password": "credentials"}
         )
@@ -169,12 +190,14 @@ class LoginTest:
             # Check that token refresh is needed
             self.assertEquals(response.cookies["access_token"].value, "7890ab")
 
+    @patch.object(requests.sessions.Session, "get")
     @patch.object(
         requests,
         "post",
         return_value=create_response(200, {"access": "123456", "refresh": "abcdef"}),
     )
-    def test_logout(self, mock_post):
+    def test_logout(self, mock_post, mock_get):
+        mock_get.side_effect = self.mock_requests_get
         response = self.client.post(
             reverse("login") + "?next=/",
             {"username": "correct", "password": "credentials"},
@@ -215,7 +238,7 @@ class LoginTest:
 
 
 class HasLogin:
-    def login(self):
+    def login(self, userdata=None):
         self.client.cookies.load(
             {
                 "access_token": "123456",
@@ -224,6 +247,93 @@ class HasLogin:
                 "refresh_token_timestamp": time.time(),
             }
         )
+        session = self.client.session
+        if userdata:
+            session["user"] = userdata
+        else:
+            session["user"] = {
+                "username": "admin",
+                "first_name": "Administrator",
+                "last_name": "",
+                "email": "admin@told.gl",
+                "is_superuser": True,
+                "permissions": [
+                    f"{p.content_type.app_label}.{p.codename}"
+                    for p in Permission.objects.all()
+                ],
+            }
+        session.save()
+
+
+class PermissionsTest(HasLogin):
+    check_permissions = ()
+
+    def setUp(self):
+        super().setUp()
+        self.userdata = {}
+
+    def mock_perm_get(self, url):
+        expected_prefix = "/api/"
+        p = urlparse(url)
+        path = p.path
+        path = path.rstrip("/")
+        response = Response()
+        if path == expected_prefix + "user":
+            json_content = self.userdata
+            response._content = json.dumps(json_content).encode("utf-8")
+            response.status_code = 200
+            return response
+        else:
+            return self.mock_requests_get(url)
+
+    @patch.object(requests.sessions.Session, "get")
+    def test_permissions_admin(self, mock_get, *args):
+        self.userdata = {
+            "username": "admin",
+            "first_name": "Administrator",
+            "last_name": "",
+            "email": "admin@told.gl",
+            "is_superuser": True,
+        }
+        self.login(self.userdata)
+        mock_get.side_effect = self.mock_perm_get
+        for url, permissions in self.check_permissions:
+            response = self.client.get(url)
+            self.assertEquals(200, response.status_code)
+
+    @patch.object(requests.sessions.Session, "get")
+    def test_permissions_allowed(self, mock_get, *args):
+        self.userdata = {
+            "username": "allowed_user",
+            "first_name": "Allowed",
+            "last_name": "User",
+            "email": "allowed@told.gl",
+            "is_superuser": False,
+        }
+        mock_get.side_effect = self.mock_perm_get
+        for url, permissions in self.check_permissions:
+            self.userdata["permissions"] = permissions
+            self.login(self.userdata)
+            response = self.client.get(url)
+            self.assertEquals(200, response.status_code)
+
+    @patch.object(requests.sessions.Session, "get")
+    def test_permissions_disallowed(self, mock_get, *args):
+        mock_get.side_effect = self.mock_perm_get
+        for url, permissions in self.check_permissions:
+            self.userdata = {
+                "username": "disallowed_user",
+                "first_name": "disallowed",
+                "last_name": "User",
+                "email": "disallowed@told.gl",
+                "is_superuser": False,
+            }
+            for p in permissions:
+                reduced_permissions = list(filter(lambda x: x != p, permissions))
+                self.userdata["permissions"] = reduced_permissions
+                self.login(self.userdata)
+                response = self.client.get(url)
+                self.assertEquals(403, response.status_code)
 
 
 class AnmeldelseListViewTest(HasLogin):
@@ -382,7 +492,15 @@ class AnmeldelseListViewTest(HasLogin):
         content = None
         status_code = None
         true_false_dict = {"True": True, "False": False}
-        if path == expected_prefix + "afgiftsanmeldelse/full":
+        if path == expected_prefix + "user":
+            json_content = {
+                "username": "admin",
+                "first_name": "Administrator",
+                "last_name": "",
+                "email": "admin@told.gl",
+                "is_superuser": True,
+            }
+        elif path == expected_prefix + "afgiftsanmeldelse/full":
             items = deepcopy(self.testdata)
             if "dato_før" in query:
                 items = list(filter(lambda i: i["dato"] < query["dato_før"][0], items))
@@ -447,7 +565,7 @@ class AnmeldelseListViewTest(HasLogin):
                 )
 
             json_content = {"count": len(items), "items": items}
-        if path == expected_prefix + "vareafgiftssats":
+        elif path == expected_prefix + "vareafgiftssats":
             json_content = {
                 "count": 1,
                 "items": [
@@ -462,7 +580,7 @@ class AnmeldelseListViewTest(HasLogin):
                 ],
             }
 
-        if path == expected_prefix + "afsender":
+        elif path == expected_prefix + "afsender":
             json_content = {
                 "count": 3,
                 "items": [
@@ -481,7 +599,7 @@ class AnmeldelseListViewTest(HasLogin):
                 ],
             }
 
-        if path == expected_prefix + "modtager":
+        elif path == expected_prefix + "modtager":
             json_content = {
                 "count": 3,
                 "items": [
@@ -500,6 +618,8 @@ class AnmeldelseListViewTest(HasLogin):
                 ],
             }
 
+        else:
+            print(f"Mock got unrecognized path: {path}")
         if json_content:
             content = json.dumps(json_content).encode("utf-8")
         if content:
@@ -518,7 +638,7 @@ class AnmeldelseListViewTest(HasLogin):
             reverse("login") + "?next=" + quote(url, safe=""),
         )
 
-    @patch.object(requests.Session, "get")
+    @patch.object(requests.sessions.Session, "get")
     def test_list(self, mock_get):
         mock_get.side_effect = self.mock_requests_get
         self.login()
@@ -583,6 +703,7 @@ class AnmeldelseListViewTest(HasLogin):
                     f'href="{self.edit_url(id)}">Redigér</a>'
                 )
 
+        self.maxDiff = None
         self.assertEquals(
             modify_values(data, (str,), lambda s: s.strip()),
             {

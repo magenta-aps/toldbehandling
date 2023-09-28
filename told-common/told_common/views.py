@@ -12,11 +12,13 @@ from django.utils.translation import gettext_lazy as _
 from django.views import View
 from django.views.generic import FormView, RedirectView
 from told_common import forms
+from told_common.rest_client import RestClient
 from told_common.view_mixins import (
     FormWithFormsetView,
     LoginRequiredMixin,
     HasRestClientMixin,
     CustomLayoutMixin,
+    PermissionsRequiredMixin,
 )
 
 
@@ -32,6 +34,8 @@ class LoginView(FormView):
     def form_valid(self, form):
         response = super().form_valid(form)
         form.token.synchronize(response, synchronize_refresh_token=True)
+        userdata = RestClient(form.token).get("user")
+        self.request.session["user"] = userdata
         return response
 
 
@@ -63,19 +67,35 @@ class FileView(LoginRequiredMixin, HasRestClientMixin, View):
         return FileResponse(open(path, "rb"))
 
 
-class LeverandørFakturaView(FileView):
+class LeverandørFakturaView(PermissionsRequiredMixin, FileView):
+    required_permissions = ("anmeldelse.view_afgiftsanmeldelse",)
     api = "afgiftsanmeldelse"
     key = "leverandørfaktura"
 
 
-class FragtbrevView(FileView):
+class FragtbrevView(PermissionsRequiredMixin, FileView):
+    required_permissions = ("forsendelse.view_fragtforsendelse",)
     api = "fragtforsendelse"
     key = "fragtbrev"
 
 
 class TF10FormUpdateView(
-    LoginRequiredMixin, HasRestClientMixin, CustomLayoutMixin, FormWithFormsetView
+    PermissionsRequiredMixin, HasRestClientMixin, CustomLayoutMixin, FormWithFormsetView
 ):
+    required_permissions = (
+        "aktør.view_afsender",
+        "aktør.view_modtager",
+        "forsendelse.view_postforsendelse",
+        "forsendelse.view_fragtforsendelse",
+        "anmeldelse.view_afgiftsanmeldelse",
+        "anmeldelse.view_varelinje",
+        "aktør.add_afsender",
+        "aktør.add_modtager",
+        "forsendelse.add_postforsendelse",
+        "forsendelse.add_fragtforsendelse",
+        "anmeldelse.add_afgiftsanmeldelse",
+        "anmeldelse.add_varelinje",
+    )
     form_class = forms.TF10Form
     formset_class = forms.TF10VareFormSet
     template_name = "told_common/tf10/form.html"
@@ -241,7 +261,17 @@ class TF10FormUpdateView(
         return initial
 
 
-class TF10ListView(LoginRequiredMixin, HasRestClientMixin, CustomLayoutMixin, FormView):
+class TF10ListView(
+    PermissionsRequiredMixin, HasRestClientMixin, CustomLayoutMixin, FormView
+):
+    required_permissions = (
+        "aktør.view_afsender",
+        "aktør.view_modtager",
+        "forsendelse.view_postforsendelse",
+        "forsendelse.view_fragtforsendelse",
+        "anmeldelse.view_afgiftsanmeldelse",
+        "anmeldelse.view_varelinje",
+    )
     template_name = "told_common/tf10/list.html"
     extend_template = "told_common/layout.html"
     form_class = forms.TF10SearchForm
@@ -292,7 +322,7 @@ class TF10ListView(LoginRequiredMixin, HasRestClientMixin, CustomLayoutMixin, Fo
                     "total": total,
                     "items": [
                         {
-                            key: self.map_value(item, key)
+                            key: self.map_value(item, key, context)
                             for key in (
                                 "id",
                                 "dato",
@@ -315,10 +345,12 @@ class TF10ListView(LoginRequiredMixin, HasRestClientMixin, CustomLayoutMixin, Fo
             )
         return super().form_invalid(form)
 
-    def map_value(self, item, key):
+    def map_value(self, item, key, context):
         if key == "actions":
             return loader.render_to_string(
-                self.actions_template, {"item": item}, self.request
+                self.actions_template,
+                {"item": item, **context},
+                self.request,
             )
         value = item[key]
         if key in ("afsender", "modtager"):

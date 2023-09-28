@@ -17,13 +17,18 @@ from django.views.generic import FormView, TemplateView
 from openpyxl import Workbook
 from requests import HTTPError
 from told_common import views as common_views
-from told_common.view_mixins import LoginRequiredMixin, HasRestClientMixin, GetFormView
+from told_common.view_mixins import (
+    HasRestClientMixin,
+    GetFormView,
+    PermissionsRequiredMixin,
+)
 
 from admin import forms
 
 
-class IndexView(LoginRequiredMixin, HasRestClientMixin, TemplateView):
+class IndexView(PermissionsRequiredMixin, HasRestClientMixin, TemplateView):
     template_name = "admin/index.html"
+    required_permissions = ("auth.admin",)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -50,7 +55,20 @@ class IndexView(LoginRequiredMixin, HasRestClientMixin, TemplateView):
         return context
 
 
-class TF10View(LoginRequiredMixin, HasRestClientMixin, FormView):
+class TF10View(PermissionsRequiredMixin, HasRestClientMixin, FormView):
+    required_permissions = (
+        "auth.admin",
+        "aktør.view_afsender",
+        "aktør.view_modtager",
+        "forsendelse.view_postforsendelse",
+        "forsendelse.view_fragtforsendelse",
+        "anmeldelse.view_afgiftsanmeldelse",
+        "anmeldelse.view_varelinje",
+        "sats.view_vareafgiftssats",
+    )
+    edit_permissions = ("anmeldelse.change_afgiftsanmeldelse",)
+    prisme_permissions = ("anmeldelse.prisme_afgiftsanmeldelse",)
+
     template_name = "admin/blanket/tf10/view.html"
     form_class = forms.TF10GodkendForm
 
@@ -59,10 +77,21 @@ class TF10View(LoginRequiredMixin, HasRestClientMixin, FormView):
             **{
                 **kwargs,
                 "object": self.get_object(),
+                "can_edit": self.has_permissions(
+                    request=self.request, required_permissions=self.edit_permissions
+                ),
+                "can_send_prisme": self.has_permissions(
+                    request=self.request, required_permissions=self.prisme_permissions
+                ),
             }
         )
 
     def form_valid(self, form):
+        # Yderligere tjek for om brugeren må ændre noget.
+        # Vi kan have en situation hvor brugeren må se siden men ikke submitte formularen
+        response = self.check_permissions(self.edit_permissions)
+        if response:
+            return response
         godkendt = form.cleaned_data["godkendt"]
         anmeldelse_id = self.kwargs["id"]
         try:
@@ -128,22 +157,36 @@ class TF10View(LoginRequiredMixin, HasRestClientMixin, FormView):
 class TF10ListView(common_views.TF10ListView):
     actions_template = "admin/blanket/tf10/link.html"
     extend_template = "admin/admin_layout.html"
+    required_permissions = (
+        "auth.admin",
+        *common_views.TF10ListView.required_permissions,
+    )
 
     def get_context_data(self, **kwargs):
         context = super(TF10ListView, self).get_context_data(**kwargs)
         context["title"] = "Afgiftsanmeldelser"
         context["can_create"] = False
+        context["can_view"] = TF10View.has_permissions(request=self.request)
         return context
 
 
 class TF10FormUpdateView(common_views.TF10FormUpdateView):
     extend_template = "admin/admin_layout.html"
+    required_permissions = (
+        "auth.admin",
+        *common_views.TF10FormUpdateView.required_permissions,
+    )
 
     def get_success_url(self):
         return reverse("tf10_view", kwargs={"id": self.kwargs["id"]})
 
 
-class AfgiftstabelListView(LoginRequiredMixin, HasRestClientMixin, GetFormView):
+class AfgiftstabelListView(PermissionsRequiredMixin, HasRestClientMixin, GetFormView):
+    required_permissions = (
+        "auth.admin",
+        "sats.view_afgiftstabel",
+        "common.admin_site_access",
+    )
     template_name = "admin/afgiftstabel/list.html"
     form_class = forms.AfgiftstabelSearchForm
     actions_template = "admin/afgiftstabel/handlinger.html"
@@ -151,8 +194,21 @@ class AfgiftstabelListView(LoginRequiredMixin, HasRestClientMixin, GetFormView):
 
     def get_context_data(self, **context):
         return super().get_context_data(
-            **{**context, "actions_template": self.actions_template}
+            **{
+                **context,
+                "actions_template": self.actions_template,
+                "can_upload": self.can_upload,
+                "can_download": self.can_download,
+            }
         )
+
+    @cached_property
+    def can_upload(self):
+        return AfgiftstabelCreateView.has_permissions(request=self.request)
+
+    @cached_property
+    def can_download(self):
+        return AfgiftstabelDownloadView.has_permissions(request=self.request)
 
     def form_valid(self, form):
         search_data = {"offset": 0, "limit": self.list_size}
@@ -195,7 +251,9 @@ class AfgiftstabelListView(LoginRequiredMixin, HasRestClientMixin, GetFormView):
     def map_value(self, item, key):
         if key == "actions":
             return loader.render_to_string(
-                self.actions_template, {"item": item}, self.request
+                self.actions_template,
+                {"item": item, "can_download": self.can_download},
+                self.request,
             )
         value = item[key]
         if type(value) is bool:
@@ -205,7 +263,14 @@ class AfgiftstabelListView(LoginRequiredMixin, HasRestClientMixin, GetFormView):
         return value
 
 
-class AfgiftstabelDetailView(LoginRequiredMixin, HasRestClientMixin, FormView):
+class AfgiftstabelDetailView(PermissionsRequiredMixin, HasRestClientMixin, FormView):
+    required_permissions = (
+        "auth.admin",
+        "sats.view_afgiftstabel",
+        "sats.view_vareafgiftssats",
+    )
+    edit_permissions = ("sats.change_afgiftstabel",)
+    delete_permissions = ("sats.delete_afgiftstabel",)
     template_name = "admin/afgiftstabel/view.html"
     form_class = forms.AfgiftstabelUpdateForm
 
@@ -214,7 +279,17 @@ class AfgiftstabelDetailView(LoginRequiredMixin, HasRestClientMixin, FormView):
             **{
                 **kwargs,
                 "object": self.item,
-                "can_edit": self.item.kladde or self.item.gyldig_fra > date.today(),
+                "can_edit": (self.item.kladde or self.item.gyldig_fra > date.today())
+                and self.has_permissions(
+                    request=self.request, required_permissions=self.edit_permissions
+                ),
+                "can_delete": self.item.kladde
+                and self.has_permissions(
+                    request=self.request, required_permissions=self.delete_permissions
+                ),
+                "can_download": AfgiftstabelDownloadView.has_permissions(
+                    request=self.request
+                ),
             }
         )
 
@@ -225,6 +300,11 @@ class AfgiftstabelDetailView(LoginRequiredMixin, HasRestClientMixin, FormView):
         }
 
     def form_valid(self, form):
+        response = self.check_permissions(
+            self.edit_permissions
+        )  # Access denied view hvis permissions fejler
+        if response:
+            return response
         tabel_id = self.item.id
         if form.cleaned_data["delete"]:
             if self.item.kladde:
@@ -268,7 +348,12 @@ class AfgiftstabelDetailView(LoginRequiredMixin, HasRestClientMixin, FormView):
         return satser
 
 
-class AfgiftstabelDownloadView(HasRestClientMixin, View):
+class AfgiftstabelDownloadView(PermissionsRequiredMixin, HasRestClientMixin, View):
+    required_permissions = (
+        "auth.admin",
+        "sats.view_afgiftstabel",
+        "sats.view_vareafgiftssats",
+    )
     valid_formats = ("xlsx", "csv")
     headers = (
         "afgiftsgruppenummer",
@@ -357,9 +442,14 @@ class AfgiftstabelDownloadView(HasRestClientMixin, View):
         return response
 
 
-class AfgiftstabelCreateView(LoginRequiredMixin, HasRestClientMixin, FormView):
+class AfgiftstabelCreateView(PermissionsRequiredMixin, HasRestClientMixin, FormView):
     template_name = "admin/afgiftstabel/form.html"
     form_class = forms.AfgiftstabelCreateForm
+    required_permissions = (
+        "auth.admin",
+        "sats.add_afgiftstabel",
+        "sats.add_vareafgiftssats",
+    )
 
     def get_success_url(self):
         return reverse("afgiftstabel_list")
@@ -390,6 +480,5 @@ class AfgiftstabelCreateView(LoginRequiredMixin, HasRestClientMixin, FormView):
                 afgiftsgruppenummer_to_id[afgiftsgruppenummer] = sats_id
 
         for vareafgiftssats in satser:
-            print(vareafgiftssats)
             save_one(vareafgiftssats)
         return tabel_id

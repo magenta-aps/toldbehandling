@@ -5,16 +5,33 @@ from told_common import forms as common_forms
 from told_common import views as common_views
 from told_common.view_mixins import (
     FormWithFormsetView,
-    LoginRequiredMixin,
     HasRestClientMixin,
+    PermissionsRequiredMixin,
 )
 
 
-class TF10FormCreateView(LoginRequiredMixin, HasRestClientMixin, FormWithFormsetView):
+class TF10FormCreateView(
+    PermissionsRequiredMixin, HasRestClientMixin, FormWithFormsetView
+):
     form_class = common_forms.TF10Form
     formset_class = common_forms.TF10VareFormSet
     template_name = "told_common/tf10/form.html"
     extend_template = "ui/layout.html"
+    required_permissions = (
+        "aktør.view_afsender",
+        "aktør.view_modtager",
+        "aktør.add_afsender",
+        "aktør.add_modtager",
+        "forsendelse.view_postforsendelse",
+        "forsendelse.view_fragtforsendelse",
+        "forsendelse.add_postforsendelse",
+        "forsendelse.add_fragtforsendelse",
+        "anmeldelse.view_afgiftsanmeldelse",
+        "anmeldelse.view_varelinje",
+        "anmeldelse.add_afgiftsanmeldelse",
+        "anmeldelse.add_varelinje",
+        "sats.view_vareafgiftssats",
+    )
 
     def get_success_url(self):
         return reverse("tf10_blanket_success")
