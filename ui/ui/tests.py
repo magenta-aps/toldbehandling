@@ -49,6 +49,7 @@ class BlanketTest(HasLogin, TestCase):
         "form-0-mængde": "3",
         "form-0-antal": "6",
         "form-0-fakturabeløb": "100.00",
+        "forbindelsesnr": "1337",
     }
     formdata2 = {**formdata1, "fragttype": "luftpost"}
 
@@ -404,6 +405,7 @@ class BlanketTest(HasLogin, TestCase):
                 {
                     "fragtbrevsnummer": "123",
                     "forsendelsestype": "S",
+                    "forbindelsesnr": "1337",
                     "fragtbrev": base64.b64encode("Testtekst".encode("utf-8")).decode(
                         "ascii"
                     ),
@@ -460,6 +462,7 @@ class BlanketTest(HasLogin, TestCase):
             [
                 {
                     "fragtbrevsnummer": "123",
+                    "forbindelsesnr": "1337",
                     "forsendelsestype": "S",
                     "fragtbrev": base64.b64encode("Testtekst".encode("utf-8")).decode(
                         "ascii"
@@ -537,6 +540,7 @@ class BlanketTest(HasLogin, TestCase):
                 {
                     "postforsendelsesnummer": "123",
                     "forsendelsestype": "F",
+                    "afsenderbykode": "1337",
                 }
             ],
         )

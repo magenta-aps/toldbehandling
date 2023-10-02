@@ -19,6 +19,7 @@ class Migration(migrations.Migration):
                 ('forsendelsestype', models.CharField(choices=[('S', 'Skib'), ('F', 'Fly')], default='S', max_length=1)),
                 ('fragtbrevsnummer', models.CharField(db_index=True, max_length=20)),
                 ('fragtbrev', models.FileField(blank=True, null=True, upload_to=forsendelse.models.fragtbrev_upload_to)),
+                ('forbindelsesnr', models.CharField(db_index=True, max_length=100)),
             ],
             options={
                 'ordering': ['fragtbrevsnummer'],
@@ -30,6 +31,7 @@ class Migration(migrations.Migration):
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('forsendelsestype', models.CharField(choices=[('S', 'Skib'), ('F', 'Fly')], default='S', max_length=1)),
                 ('postforsendelsesnummer', models.CharField(db_index=True, max_length=20)),
+                ('afsenderbykode', models.CharField(db_index=True, max_length=4)),
             ],
             options={
                 'ordering': ['postforsendelsesnummer'],

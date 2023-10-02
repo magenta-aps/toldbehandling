@@ -16,7 +16,7 @@ class Command(BaseCommand):
         anmeldelse = Afgiftsanmeldelse.objects.create(
             afsender=Afsender.objects.order_by("?").first(),
             modtager=Modtager.objects.order_by("?").first(),
-            fragtforsendelse=Fragtforsendelse.objects.order_by("?").first(),
+            fragtforsendelse=Fragtforsendelse.objects.first(),
             postforsendelse=None,
             leverandørfaktura_nummer="1234",
             modtager_betaler=False,
@@ -47,22 +47,15 @@ class Command(BaseCommand):
             fakturabeløb=Decimal("400000"),
         )
 
-        for i in range(1, 100):
-            forsendelse = Postforsendelse.objects.create(
-                forsendelsestype=random.choice(
-                    [
-                        Postforsendelse.Forsendelsestype.SKIB,
-                        Postforsendelse.Forsendelsestype.FLY,
-                    ]
-                ),
-                postforsendelsesnummer="1234",
-            )
+        fragtforsendelser = Fragtforsendelse.objects.all()
+        postforsendelser = Postforsendelse.objects.all()
 
+        for i in range(1, 100):
             anmeldelse = Afgiftsanmeldelse.objects.create(
                 afsender=Afsender.objects.order_by("?").first(),
                 modtager=Modtager.objects.order_by("?").first(),
-                fragtforsendelse=None,
-                postforsendelse=forsendelse,
+                fragtforsendelse=fragtforsendelser[i] if i % 2 else None,
+                postforsendelse=postforsendelser[i] if not i % 2 else None,
                 leverandørfaktura_nummer="5678",
                 modtager_betaler=False,
                 indførselstilladelse="1234",

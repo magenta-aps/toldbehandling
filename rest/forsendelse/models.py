@@ -29,13 +29,16 @@ class Postforsendelse(Forsendelse):
         max_length=20,
         db_index=True,
     )
+    afsenderbykode = models.CharField(max_length=4, db_index=True)
 
     def __str__(self):
         nummer = self.postforsendelsesnummer
         slags = Forsendelse.Forsendelsestype(self.forsendelsestype).label
+        afsenderbykode = self.afsenderbykode
         return (
             f"Postforsendelse(postforsendelsesnummer={nummer}, "
-            + f"forsendelsestype={slags})"
+            + f"forsendelsestype={slags}, "
+            + f"afsenderbykode={afsenderbykode})"
         )
 
 
@@ -53,6 +56,8 @@ class Fragtforsendelse(Forsendelse):
         max_length=20,
         db_index=True,
     )
+    forbindelsesnr = models.CharField(max_length=100, db_index=True)
+
     fragtbrev = models.FileField(
         upload_to=fragtbrev_upload_to,
         null=True,
@@ -62,6 +67,9 @@ class Fragtforsendelse(Forsendelse):
     def __str__(self):
         nummer = self.fragtbrevsnummer
         slags = Forsendelse.Forsendelsestype(self.forsendelsestype).label
+        forbindelsesnr = self.forbindelsesnr
         return (
-            f"Fragtforsendelse(fragtbrevsnummer={nummer}, " f"forsendelsestype={slags})"
+            f"Fragtforsendelse(fragtbrevsnummer={nummer}, "
+            f"forsendelsestype={slags}, "
+            f"forbindelsesnr={forbindelsesnr})"
         )

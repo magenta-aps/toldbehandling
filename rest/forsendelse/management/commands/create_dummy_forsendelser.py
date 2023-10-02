@@ -1,28 +1,35 @@
 from django.core.files.base import ContentFile
 from django.core.management.base import BaseCommand
+import random
 
 from forsendelse.models import Fragtforsendelse, Postforsendelse
 
 
 class Command(BaseCommand):
     def handle(self, *args, **kwargs):
-        fragtforsendelse1 = Fragtforsendelse.objects.create(
-            forsendelsestype=Fragtforsendelse.Forsendelsestype.SKIB,
-            fragtbrevsnummer="1234",
-        )
-        fragtforsendelse1.fragtbrev.save("fragtbrev.txt", ContentFile("testdata"))
+        for i in range(200):
+            fragtforsendelsestype = random.choice(
+                [
+                    Fragtforsendelse.Forsendelsestype.SKIB,
+                    Fragtforsendelse.Forsendelsestype.FLY,
+                ]
+            )
+            postforsendelsestype = random.choice(
+                [
+                    Postforsendelse.Forsendelsestype.SKIB,
+                    Postforsendelse.Forsendelsestype.FLY,
+                ]
+            )
 
-        fragtforsendelse2 = Fragtforsendelse.objects.create(
-            forsendelsestype=Fragtforsendelse.Forsendelsestype.FLY,
-            fragtbrevsnummer="5678",
-        )
-        fragtforsendelse2.fragtbrev.save("fragtbrev.txt", ContentFile("testdata"))
+            fragtforsendelse = Fragtforsendelse.objects.create(
+                forsendelsestype=fragtforsendelsestype,
+                fragtbrevsnummer=str(i),
+                forbindelsesnr=random.choice(["1337", "7331"]),
+            )
+            fragtforsendelse.fragtbrev.save("fragtbrev.txt", ContentFile("testdata"))
 
-        Postforsendelse.objects.create(
-            forsendelsestype=Postforsendelse.Forsendelsestype.SKIB,
-            postforsendelsesnummer="1234",
-        )
-        Postforsendelse.objects.create(
-            forsendelsestype=Postforsendelse.Forsendelsestype.FLY,
-            postforsendelsesnummer="5678",
-        )
+            Postforsendelse.objects.create(
+                forsendelsestype=postforsendelsestype,
+                postforsendelsesnummer=str(i) + "001",
+                afsenderbykode=random.choice(["8200", "1050"]),
+            )

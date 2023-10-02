@@ -201,13 +201,17 @@
                 </div>
                 <div class="row">
                     <div class="col-4">
-                        Forbindelsesnr. / afsenderby­kode:
+                        {% if object.fragtforsendelse %}
+                        Forbindelsesnr.:
+                        {% elif object.postforsendelse %}
+                        Afsenderby­kode:
+                        {% endif %}
                     </div>
                     <div class="col-8">
                         {% if object.fragtforsendelse %}
                             {{object.fragtforsendelse.forbindelsesnr}}
                         {% elif object.postforsendelse %}
-                            {{object.postforsendelse.forbindelsesnr}}
+                            {{object.postforsendelse.afsenderbykode}}
                         {% endif %}
                     </div>
                 </div>
@@ -223,7 +227,7 @@
                         {% if object.fragtforsendelse %}
                         {{object.fragtforsendelse.fragtbrevsnummer}}
                         {% elif object.postforsendelse %}
-                        {{object.postforsendelse.fragtbrevsnummer}}
+                        {{object.postforsendelse.postforsendelsesnummer}}
                         {% endif %}
                     </div>
                 </div>

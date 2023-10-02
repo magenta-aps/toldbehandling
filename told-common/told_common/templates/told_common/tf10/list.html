@@ -59,6 +59,18 @@
             </div>
         </div>
         <div class="row">
+            <div class="col-4"><label for="{{form.afsenderbykode_or_forbindelsesnr.name}}" class="form-label">Afsender bykode/forbindelsesnummer</label></div>
+            <div class="col-8">
+                {{form.afsenderbykode_or_forbindelsesnr}}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-4"><label for="{{form.postforsendelsesnummer_or_fragtbrevsnummer.name}}" class="form-label">Postforsendelsesnummer/fragtbrevsnummer</label></div>
+            <div class="col-8">
+                {{form.postforsendelsesnummer_or_fragtbrevsnummer}}
+            </div>
+        </div>
+        <div class="row">
             <div class="col-12 cleafix">
                 <button type="submit" class="btn btn-primary float-end">Søg</button>
                 {% if can_create %}

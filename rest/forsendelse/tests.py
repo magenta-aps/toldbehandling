@@ -60,10 +60,10 @@ class PostforsendelseTest(RestMixin, TestCase):
         return self._update_object_data
 
     def test_str(self):
-        self.assertEqual(
-            str(self.postforsendelse),
-            f"Postforsendelse(postforsendelsesnummer={self.postforsendelse_data['postforsendelsesnummer']}, forsendelsestype={self.postforsendelse_data['forsendelsestype'].label})",
-        )
+        string = str(self.postforsendelse)
+        self.assertIn(self.postforsendelse_data["postforsendelsesnummer"], string)
+        self.assertIn(str(self.postforsendelse_data["forsendelsestype"].label), string)
+        self.assertIn(self.postforsendelse_data["afsenderbykode"], string)
 
 
 class FragtforsendelseTest(RestMixin, TestCase):
@@ -126,7 +126,7 @@ class FragtforsendelseTest(RestMixin, TestCase):
         return self._update_object_data
 
     def test_str(self):
-        self.assertEqual(
-            str(self.fragtforsendelse),
-            f"Fragtforsendelse(fragtbrevsnummer={self.fragtforsendelse_data['fragtbrevsnummer']}, forsendelsestype={self.fragtforsendelse_data['forsendelsestype'].label})",
-        )
+        string = str(self.fragtforsendelse)
+        self.assertIn(self.fragtforsendelse_data["fragtbrevsnummer"], string)
+        self.assertIn(str(self.fragtforsendelse_data["forsendelsestype"].label), string)
+        self.assertIn(self.fragtforsendelse_data["forbindelsesnr"], string)

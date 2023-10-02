@@ -654,6 +654,14 @@ class RestMixin:
                     }
                 )
                 self._afgiftsanmeldelse = Afgiftsanmeldelse.objects.create(**data)
+
+                faktura_id = self._afgiftsanmeldelse.pk
+                media_path = f"../upload/leverandørfakturaer/{faktura_id}"
+                try:
+                    os.remove(os.path.join(media_path, "leverandørfaktura.pdf"))
+                except FileNotFoundError:
+                    pass
+
                 self._afgiftsanmeldelse.leverandørfaktura.save(
                     "leverandørfaktura.pdf",
                     self.afgiftsanmeldelse_data["leverandørfaktura"],
@@ -734,10 +742,12 @@ class RestMixin:
         self.fragtforsendelse_data = {
             "forsendelsestype": Fragtforsendelse.Forsendelsestype.SKIB,
             "fragtbrevsnummer": "1234",
+            "forbindelsesnr": "1337",
         }
         self.postforsendelse_data = {
             "forsendelsestype": Postforsendelse.Forsendelsestype.SKIB,
             "postforsendelsesnummer": "1234",
+            "afsenderbykode": "8200",
         }
         self.afgiftsanmeldelse_data = {
             "leverandørfaktura_nummer": "12345",

@@ -113,6 +113,7 @@ class PostforsendelseRestClient(ModelRestClient):
         if fragttype in ("luftpost", "skibspost"):
             return {
                 "postforsendelsesnummer": data["fragtbrevnr"],
+                "afsenderbykode": data["forbindelsesnr"],
                 "forsendelsestype": "S" if fragttype == "skibspost" else "F",
             }
         return None
@@ -123,22 +124,18 @@ class PostforsendelseRestClient(ModelRestClient):
         # med eksisterende data fra REST for at se om de stemmer overens.
         # False: data passer ikke, og der skal foretages en opdatering
         # True: data passer, og det er ikke nødvendigt at opdatere.
-        for x in ("forsendelsestype", "postforsendelsesnummer"):
+        for x in ("forsendelsestype", "postforsendelsesnummer", "afsenderbykode"):
             if data[x] != existing[x]:
                 return False
         return True
 
     def create(self, data: dict) -> Union[int, None]:
-        # TODO: Hvad med Forbindelsesnr/afsenderbykode?
-        # De fremgår af formularen, men er ikke at finde i modellen
         mapped = self.map(data)
         if mapped:
             response = self.rest.post("postforsendelse", mapped)
             return response["id"]
 
     def update(self, id: int, data: dict, existing: dict) -> Union[int, None]:
-        # TODO: Hvad med Forbindelsesnr/afsenderbykode?
-        # De fremgår af formularen, men er ikke at finde i modellen
         mapped = self.map(data)
         if mapped is None:
             self.rest.delete(f"postforsendelse/{id}")
@@ -160,6 +157,7 @@ class FragtforsendelseRestClient(ModelRestClient):
             return {
                 "fragtbrevsnummer": data["fragtbrevnr"],
                 "forsendelsestype": "S" if fragttype == "skibsfragt" else "F",
+                "forbindelsesnr": data["forbindelsesnr"],
                 "fragtbrev": RestClient._uploadfile_to_base64str(file)
                 if file
                 else None,
@@ -173,7 +171,7 @@ class FragtforsendelseRestClient(ModelRestClient):
         # med eksisterende data fra REST for at se om de stemmer overens.
         # False: data passer ikke, og der skal foretages en opdatering
         # True: data passer, og det er ikke nødvendigt at opdatere.
-        for x in ("forsendelsestype", "fragtbrevsnummer"):
+        for x in ("forsendelsestype", "fragtbrevsnummer", "forbindelsesnr"):
             if data[x] != existing[x]:
                 return False
         if data["fragtbrev"] is not None:
@@ -187,6 +185,7 @@ class FragtforsendelseRestClient(ModelRestClient):
                 "fragtforsendelse",
                 {
                     "fragtbrevsnummer": data["fragtbrevnr"],
+                    "forbindelsesnr": data["forbindelsesnr"],
                     "forsendelsestype": "S" if fragttype == "skibsfragt" else "F",
                     "fragtbrev": self.rest._uploadfile_to_base64str(file)
                     if file
