@@ -1,10 +1,12 @@
 from django.urls import path
 from django.views.generic import TemplateView
 from told_common import views as common_views
+from django.views.generic.base import RedirectView
 
 from admin import views
 
 urlpatterns = [
+    path("", RedirectView.as_view(pattern_name="tf10_list")),
     path("login", common_views.LoginView.as_view(), name="login"),
     path("logout", common_views.LogoutView.as_view(url="/"), name="logout"),
     path("api/<path:path>", common_views.RestView.as_view(), name="rest"),
