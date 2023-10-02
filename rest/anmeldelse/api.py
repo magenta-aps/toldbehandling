@@ -104,6 +104,18 @@ class AfgiftsanmeldelseFilterSchema(FilterSchema):
     dato_efter: Optional[date] = Field(q="dato__gte")
     dato_før: Optional[date] = Field(q="dato__lt")
     vareart: Optional[str] = Field(q="varelinje__vareafgiftssats__vareart")
+    afsenderbykode_or_forbindelsesnr: Optional[str] = Field(
+        q=[
+            "postforsendelse__afsenderbykode",
+            "fragtforsendelse__forbindelsesnr",
+        ]
+    )
+    postforsendelsesnummer_or_fragtbrevsnummer: Optional[str] = Field(
+        q=[
+            "postforsendelse__postforsendelsesnummer",
+            "fragtforsendelse__fragtbrevsnummer",
+        ]
+    )
 
 
 class AfgiftsanmeldelsePermission(RestPermission):

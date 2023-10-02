@@ -32,25 +32,31 @@ from project.util import RestPermission
 class PostforsendelseIn(ModelSchema):
     class Config:
         model = Postforsendelse
-        model_fields = ["forsendelsestype", "postforsendelsesnummer"]
+        model_fields = ["forsendelsestype", "postforsendelsesnummer", "afsenderbykode"]
 
 
 class PartialPostforsendelseIn(ModelSchema):
     class Config:
         model = Postforsendelse
-        model_fields = ["forsendelsestype", "postforsendelsesnummer"]
+        model_fields = ["forsendelsestype", "postforsendelsesnummer", "afsenderbykode"]
         model_fields_optional = "__all__"
 
 
 class PostforsendelseOut(ModelSchema):
     class Config:
         model = Postforsendelse
-        model_fields = ["id", "forsendelsestype", "postforsendelsesnummer"]
+        model_fields = [
+            "id",
+            "forsendelsestype",
+            "postforsendelsesnummer",
+            "afsenderbykode",
+        ]
 
 
 class PostforsendelseFilterSchema(FilterSchema):
     forsendelsestype: Optional[str]
     postforsendelsesnummer: Optional[str]
+    afsenderbykode: Optional[str]
 
 
 class PostforsendelsePermission(RestPermission):
@@ -116,7 +122,7 @@ class FragtforsendelseIn(ModelSchema):
 
     class Config:
         model = Fragtforsendelse
-        model_fields = ["forsendelsestype", "fragtbrevsnummer"]
+        model_fields = ["forsendelsestype", "fragtbrevsnummer", "forbindelsesnr"]
 
 
 class PartialFragtforsendelseIn(ModelSchema):
@@ -125,19 +131,26 @@ class PartialFragtforsendelseIn(ModelSchema):
 
     class Config:
         model = Fragtforsendelse
-        model_fields = ["forsendelsestype", "fragtbrevsnummer"]
+        model_fields = ["forsendelsestype", "fragtbrevsnummer", "forbindelsesnr"]
         model_fields_optional = "__all__"
 
 
 class FragtforsendelseOut(ModelSchema):
     class Config:
         model = Fragtforsendelse
-        model_fields = ["id", "forsendelsestype", "fragtbrevsnummer", "fragtbrev"]
+        model_fields = [
+            "id",
+            "forsendelsestype",
+            "fragtbrevsnummer",
+            "fragtbrev",
+            "forbindelsesnr",
+        ]
 
 
 class FragtforsendelseFilterSchema(FilterSchema):
     forsendelsestype: Optional[str]
     fragtbrevsnummer: Optional[str]
+    forbindelsesnr: Optional[str]
 
 
 class FragtforsendelsePermission(RestPermission):

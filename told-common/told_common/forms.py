@@ -318,3 +318,6 @@ class TF10SearchForm(BootstrapForm):
     id = forms.IntegerField(required=False)
     afsender = forms.ChoiceField(required=False)
     modtager = forms.ChoiceField(required=False)
+
+    afsenderbykode_or_forbindelsesnr = forms.CharField(required=False)
+    postforsendelsesnummer_or_fragtbrevsnummer = forms.CharField(required=False)

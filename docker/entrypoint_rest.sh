@@ -37,10 +37,13 @@ if [ "$TEST" = true ]; then
   python manage.py test
 fi
 if [ "$DUMMYDATA" = true ]; then
-  echo 'creating dummy data!'
+  echo 'creating dummy aktører'
   python manage.py create_dummy_aktører
+  echo 'creating dummy satser'
   python manage.py create_dummy_satser
+  echo 'creating dummy forsendelser'
   python manage.py create_dummy_forsendelser
+  echo 'creating dummy anmeldelser'
   python manage.py create_dummy_anmeldelser
 fi
 

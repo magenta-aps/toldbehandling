@@ -251,6 +251,7 @@ class TF10FormUpdateView(
                     else "luftfragt"
                 )
                 initial["fragtbrevnr"] = fragtforsendelse["fragtbrevsnummer"]
+                initial["forbindelsesnr"] = fragtforsendelse["forbindelsesnr"]
             elif postforsendelse:
                 initial["fragttype"] = (
                     "skibspost"
@@ -258,6 +259,7 @@ class TF10FormUpdateView(
                     else "luftpost"
                 )
                 initial["fragtbrevnr"] = postforsendelse["postforsendelsesnummer"]
+                initial["forbindelsesnr"] = postforsendelse["afsenderbykode"]
         return initial
 
 
