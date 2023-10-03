@@ -8,11 +8,13 @@ from aktør.api import AfsenderOut, ModtagerOut
 from anmeldelse.models import Afgiftsanmeldelse, Varelinje
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
-from django.http import HttpResponseBadRequest, Http404
+from django.db.models import QuerySet
+from django.http import HttpResponseBadRequest
 from django.shortcuts import get_object_or_404
 from forsendelse.api import FragtforsendelseOut, PostforsendelseOut
 from ninja import FilterSchema, Query, ModelSchema, Field
 from ninja_extra import api_controller, route, permissions
+from ninja_extra.exceptions import PermissionDenied
 from ninja_extra.pagination import paginate
 from ninja_extra.schemas import NinjaPaginationResponseSchema
 from ninja_jwt.authentication import JWTAuth
@@ -140,7 +142,9 @@ class AfgiftsanmeldelseAPI:
             leverandørfaktura_navn = data.pop("leverandørfaktura_navn", None) or (
                 str(uuid4()) + ".pdf"
             )
-            item = Afgiftsanmeldelse.objects.create(**data)
+            item = Afgiftsanmeldelse.objects.create(
+                **data, oprettet_af=self.context.request.user
+            )
             if leverandørfaktura is not None:
                 item.leverandørfaktura = ContentFile(
                     base64.b64decode(leverandørfaktura), name=leverandørfaktura_navn
@@ -166,8 +170,9 @@ class AfgiftsanmeldelseAPI:
         sort: str = None,
         order: str = None,
     ):
+        qs = self.filter_user(Afgiftsanmeldelse.objects.all())
         # https://django-ninja.rest-framework.com/guides/input/filtering/
-        qs = filters.filter(Afgiftsanmeldelse.objects.all())
+        qs = filters.filter(qs)
         order_by = self.map_sort(sort, order)
         if order_by:
             qs = qs.order_by(order_by, "id")
@@ -187,8 +192,9 @@ class AfgiftsanmeldelseAPI:
         sort: str = None,
         order: str = None,
     ):
+        qs = self.filter_user(Afgiftsanmeldelse.objects.all())
         # https://django-ninja.rest-framework.com/guides/input/filtering/
-        qs = filters.filter(Afgiftsanmeldelse.objects.all())
+        qs = filters.filter(qs)
         order_by = self.map_sort(sort, order)
         if order_by:
             qs = qs.order_by(order_by, "id")
@@ -201,7 +207,9 @@ class AfgiftsanmeldelseAPI:
         url_name="afgiftsanmeldelse_get",
     )
     def get_afgiftsanmeldelse(self, id: int):
-        return get_object_or_404(Afgiftsanmeldelse, id=id)
+        item = get_object_or_404(Afgiftsanmeldelse, id=id)
+        self.check_user(item)
+        return item
 
     @route.get(
         "/{id}/full",
@@ -210,7 +218,9 @@ class AfgiftsanmeldelseAPI:
         url_name="afgiftsanmeldelse_get_full",
     )
     def get_afgiftsanmeldelse_full(self, id: int):
-        return get_object_or_404(Afgiftsanmeldelse, id=id)
+        item = get_object_or_404(Afgiftsanmeldelse, id=id)
+        self.check_user(item)
+        return item
 
     @staticmethod
     def map_sort(sort, order):
@@ -228,6 +238,7 @@ class AfgiftsanmeldelseAPI:
         payload: PartialAfgiftsanmeldelseIn,
     ):
         item = get_object_or_404(Afgiftsanmeldelse, id=id)
+        self.check_user(item)
         data = payload.dict()
         leverandørfaktura = data.pop("leverandørfaktura", None)
         for attr, value in data.items():
@@ -239,6 +250,19 @@ class AfgiftsanmeldelseAPI:
             )
         item.save()
         return {"success": True}
+
+    def filter_user(self, qs: QuerySet) -> QuerySet:
+        user = self.context.request.user
+        if not user.has_perm("anmeldelse.view_all_anmeldelse"):
+            qs = qs.filter(oprettet_af=user)
+        return qs
+
+    def check_user(self, item: Afgiftsanmeldelse):
+        user = self.context.request.user
+        if not (
+            user.has_perm("anmeldelse.view_all_anmeldelse") or item.oprettet_af == user
+        ):
+            raise PermissionDenied
 
 
 class VarelinjeIn(ModelSchema):
@@ -306,7 +330,9 @@ class VarelinjeAPI:
 
     @route.get("/{id}", response=VarelinjeOut, auth=JWTAuth(), url_name="varelinje_get")
     def get_varelinje(self, id: int):
-        return get_object_or_404(Varelinje, id=id)
+        item = get_object_or_404(Varelinje, id=id)
+        self.check_user(item)
+        return item
 
     @route.get(
         "",
@@ -317,7 +343,7 @@ class VarelinjeAPI:
     @paginate()  # https://eadwincode.github.io/django-ninja-extra/tutorial/pagination/
     def list_varelinjer(self, filters: VarelinjeFilterSchema = Query(...)):
         # https://django-ninja.rest-framework.com/guides/input/filtering/
-        return list(filters.filter(Varelinje.objects.all()))
+        return list(filters.filter(self.filter_user(Varelinje.objects.all())))
         """
         return Varelinje.objects.filter(
             filters.get_filter_expression() & Q("mere filtrering fra vores side")
@@ -327,6 +353,7 @@ class VarelinjeAPI:
     @route.patch("/{id}", auth=JWTAuth(), url_name="varelinje_update")
     def update_varelinje(self, id: int, payload: PartialVarelinjeIn):
         item = get_object_or_404(Varelinje, id=id)
+        self.check_user(item)
         for attr, value in payload.dict().items():
             if value is not None:
                 setattr(item, attr, value)
@@ -335,7 +362,22 @@ class VarelinjeAPI:
 
     @route.delete("/{id}", auth=JWTAuth(), url_name="varelinje_delete")
     def delete_varelinje(self, id):
-        count, details = Varelinje.objects.filter(id=id).delete()
-        if count == 0:
-            raise Http404("No Varelinje matches the given query.")
+        item = get_object_or_404(Varelinje, id=id)
+        self.check_user(item)
+        item.delete()
         return {"success": True}
+
+    def filter_user(self, qs: QuerySet) -> QuerySet:
+        user = self.context.request.user
+        if not user.has_perm("anmeldelse.view_all_anmeldelse"):
+            qs = qs.filter(afgiftsanmeldelse__oprettet_af=user)
+        return qs
+
+    def check_user(self, item: Varelinje):
+        user = self.context.request.user
+        if not (
+            user.has_perm("anmeldelse.view_all_anmeldelse")
+            or item.afgiftsanmeldelse is None
+            or item.afgiftsanmeldelse.oprettet_af == user
+        ):
+            raise PermissionDenied

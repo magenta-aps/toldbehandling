@@ -1,9 +1,8 @@
+from aktør.models import Afsender, Modtager
+from anmeldelse.models import Afgiftsanmeldelse, Varelinje
 from django.contrib.auth.models import Group, Permission, User
 from django.contrib.contenttypes.models import ContentType
 from django.core.management.base import BaseCommand
-
-from aktør.models import Afsender, Modtager
-from anmeldelse.models import Afgiftsanmeldelse, Varelinje
 from forsendelse.models import Postforsendelse, Fragtforsendelse
 from sats.models import Afgiftstabel, Vareafgiftssats
 
@@ -14,7 +13,6 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         # Med disse rettigheder på plads vil et forsøg på at køre en
         # REST-kommando, som man ikke har adgang til, resultere i en HTTP 403 fra API'et
-
         indberettere = Group.objects.create(
             name="Indberettere",
         )
@@ -59,6 +57,21 @@ class Command(BaseCommand):
             name="Kan sende afgiftsanmeldelser til Prisme",
             codename="prisme_afgiftsanmeldelse",
             content_type=afgiftsanmeldelse_model,
+        )
+        se_alle_afgiftsanmeldelser = Permission.objects.create(
+            name="Kan se alle afgiftsanmeldelser, ikke kun egne",
+            codename="view_all_anmeldelse",
+            content_type=afgiftsanmeldelse_model,
+        )
+        se_alle_fragtforsendelser = Permission.objects.create(
+            name="Kan se alle fragtforsendeler, ikke kun egne",
+            codename="view_all_fragtforsendelser",
+            content_type=fragtforsendelse_model,
+        )
+        se_alle_postforsendelser = Permission.objects.create(
+            name="Kan se alle postforsendelser, ikke kun egne",
+            codename="view_all_postforsendelser",
+            content_type=postforsendelse_model,
         )
         # Brugere uden denne permission kan stadig lave REST-kald
         # som defineret af deres andre permissions
@@ -120,6 +133,9 @@ class Command(BaseCommand):
             )
         toldmedarbejdere.permissions.add(send_til_prisme)
         toldmedarbejdere.permissions.add(admin_site_access)
+        toldmedarbejdere.permissions.add(se_alle_afgiftsanmeldelser)
+        toldmedarbejdere.permissions.add(se_alle_fragtforsendelser)
+        toldmedarbejdere.permissions.add(se_alle_postforsendelser)
 
         for action, model in (
             ("view", afsender_model),
@@ -140,3 +156,6 @@ class Command(BaseCommand):
                 )
             )
         afstemmere_bogholdere.permissions.add(admin_site_access)
+        afstemmere_bogholdere.permissions.add(se_alle_afgiftsanmeldelser)
+        afstemmere_bogholdere.permissions.add(se_alle_fragtforsendelser)
+        afstemmere_bogholdere.permissions.add(se_alle_postforsendelser)

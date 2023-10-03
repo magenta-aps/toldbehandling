@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -14,6 +15,11 @@ class Forsendelse(models.Model):
         max_length=1,
         choices=Forsendelsestype.choices,
         default=Forsendelsestype.SKIB,
+    )
+    oprettet_af = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,  # Vi kan slette brugere & beholde deres forsendelser
+        null=True,
     )
 
     def save(self, *args, **kwargs):
