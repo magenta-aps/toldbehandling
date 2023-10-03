@@ -372,7 +372,7 @@ class TF10ListView(
 
     def get_form_kwargs(self) -> Dict[str, Any]:
         kwargs = super().get_form_kwargs()
-        query_dict = self.request.GET.copy()
+        query_dict = self.request.POST.copy()
 
         if query_dict.get("godkendt", "") == "explicitly_none":
             query_dict["godkendt_is_null"] = "True"

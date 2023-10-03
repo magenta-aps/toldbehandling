@@ -290,8 +290,26 @@ class PermissionsTest(HasLogin):
         else:
             return self.mock_requests_get(url)
 
+    def mock_perm_post(self, url):
+        expected_prefix = "/api/"
+        p = urlparse(url)
+        path = p.path
+        path = path.rstrip("/")
+        response = Response()
+        if path == expected_prefix + "user":
+            json_content = self.userdata
+            response._content = json.dumps(json_content).encode("utf-8")
+            response.status_code = 200
+            return response
+        else:
+            if hasattr(self, "mock_requests_post"):
+                return self.mock_requests_post(url)
+            else:
+                return requests.sessions.Session.post(url)
+
     @patch.object(requests.sessions.Session, "get")
-    def test_permissions_admin(self, mock_get, *args):
+    @patch.object(requests.sessions.Session, "post")
+    def test_permissions_admin(self, mock_get, mock_post, *args):
         self.userdata = {
             "username": "admin",
             "first_name": "Administrator",
@@ -301,12 +319,14 @@ class PermissionsTest(HasLogin):
         }
         self.login(self.userdata)
         mock_get.side_effect = self.mock_perm_get
+        mock_post.side_effect = self.mock_perm_post
         for url, permissions in self.check_permissions:
             response = self.client.get(url)
             self.assertEquals(200, response.status_code)
 
     @patch.object(requests.sessions.Session, "get")
-    def test_permissions_allowed(self, mock_get, *args):
+    @patch.object(requests.sessions.Session, "post")
+    def test_permissions_allowed(self, mock_get, mock_post, *args):
         self.userdata = {
             "username": "allowed_user",
             "first_name": "Allowed",
@@ -315,6 +335,7 @@ class PermissionsTest(HasLogin):
             "is_superuser": False,
         }
         mock_get.side_effect = self.mock_perm_get
+        mock_post.side_effect = self.mock_perm_post
         for url, permissions in self.check_permissions:
             self.userdata["permissions"] = permissions
             self.login(self.userdata)
@@ -489,13 +510,11 @@ class AnmeldelseListViewTest(HasLogin):
         expected_prefix = "/api/"
         p = urlparse(path)
         path = p.path
-        query = parse_qs(p.query)
         path = path.rstrip("/")
         response = Response()
         json_content = None
         content = None
         status_code = None
-        true_false_dict = {"True": True, "False": False}
         if path == expected_prefix + "user":
             json_content = {
                 "username": "admin",
@@ -504,7 +523,29 @@ class AnmeldelseListViewTest(HasLogin):
                 "email": "admin@told.gl",
                 "is_superuser": True,
             }
-        elif path == expected_prefix + "afgiftsanmeldelse/full":
+        else:
+            print(f"Mock got unrecognized path: {path}")
+        if json_content:
+            content = json.dumps(json_content).encode("utf-8")
+        if content:
+            if not status_code:
+                status_code = 200
+            response._content = content
+        response.status_code = status_code or 404
+        return response
+
+    def mock_requests_post(self, path):
+        expected_prefix = "/api/"
+        p = urlparse(path)
+        path = p.path
+        query = parse_qs(p.query)
+        path = path.rstrip("/")
+        response = Response()
+        json_content = None
+        content = None
+        status_code = None
+        true_false_dict = {"True": True, "False": False}
+        if path == expected_prefix + "afgiftsanmeldelse/full":
             items = deepcopy(self.testdata)
             if "dato_før" in query:
                 items = list(filter(lambda i: i["dato"] < query["dato_før"][0], items))
@@ -643,11 +684,13 @@ class AnmeldelseListViewTest(HasLogin):
         )
 
     @patch.object(requests.sessions.Session, "get")
-    def test_list(self, mock_get):
+    @patch.object(requests.sessions.Session, "post")
+    def test_list(self, mock_get, mock_post):
         mock_get.side_effect = self.mock_requests_get
+        mock_post.side_effect = self.mock_requests_post
         self.login()
         url = self.list_url
-        response = self.client.get(url)
+        response = self.client.post(url)
         self.assertEquals(response.status_code, 200)
         table_data = self.get_html_list(response.content)
         self.assertEquals(
@@ -688,8 +731,8 @@ class AnmeldelseListViewTest(HasLogin):
             ],
         )
 
-        url = self.list_url + "?json=1"
-        response = self.client.get(url)
+        url = self.list_url
+        response = self.client.post(url, data={"json": 1})
         self.assertEquals(response.status_code, 200)
         data = response.json()
 
@@ -750,8 +793,10 @@ class AnmeldelseListViewTest(HasLogin):
         )
 
     @patch.object(requests.Session, "get")
-    def test_list_sort(self, mock_get):
+    @patch.object(requests.Session, "post")
+    def test_list_sort(self, mock_get, mock_post):
         mock_get.side_effect = self.mock_requests_get
+        mock_post.side_effect = self.mock_requests_post
         self.login()
         sort_tests = [
             ("afsender", "", [2, 1, 3]),
@@ -768,15 +813,20 @@ class AnmeldelseListViewTest(HasLogin):
             ("godkendt", "desc", [3, 1, 2]),
         ]
         for test in sort_tests:
-            url = self.list_url + f"?json=1&sort={test[0]}&order={test[1]}"
-            response = self.client.get(url)
+            url = self.list_url
+            response = self.client.post(
+                url, data={"json": 1, "sort": test[0], "order": test[1]}
+            )
             numbers = [int(item["id"]) for item in response.json()["items"]]
             self.assertEquals(response.status_code, 200)
             self.assertEquals(numbers, test[2])
 
     @patch.object(requests.Session, "get")
-    def test_list_filter(self, mock_get):
+    @patch.object(requests.Session, "post")
+    def test_list_filter(self, mock_get, mock_post):
         mock_get.side_effect = self.mock_requests_get
+        mock_post.side_effect = self.mock_requests_post
+
         self.login()
         filter_tests = [
             ("dato_før", "2023-09-01", set()),
@@ -800,14 +850,17 @@ class AnmeldelseListViewTest(HasLogin):
         ]
         for field, value, expected in filter_tests:
             url = self.list_url + f"?json=1&{field}={value}"
-            response = self.client.get(url)
+            response = self.client.post(url, data={"json": 1, field: value})
             self.assertEquals(response.status_code, 200)
             numbers = [int(item["id"]) for item in response.json()["items"]]
             self.assertEquals(set(numbers), expected)
 
     @patch.object(requests.Session, "get")
-    def test_list_paginate(self, mock_get):
+    @patch.object(requests.Session, "post")
+    def test_list_paginate(self, mock_get, mock_post):
         mock_get.side_effect = self.mock_requests_get
+        mock_post.side_effect = self.mock_requests_post
+
         self.login()
         paginate_tests = [
             (-1, 3, [1, 2, 3]),
@@ -825,15 +878,20 @@ class AnmeldelseListViewTest(HasLogin):
             (2, 0, [3]),
         ]
         for offset, limit, expected in paginate_tests:
-            url = self.list_url + f"?json=1&offset={offset}&limit={limit}"
-            response = self.client.get(url)
+            url = self.list_url
+            response = self.client.post(
+                url, data={"json": 1, "offset": offset, "limit": limit}
+            )
             numbers = [int(item["id"]) for item in response.json()["items"]]
             self.assertEquals(response.status_code, 200)
             self.assertEquals(numbers, expected)
 
     @patch.object(requests.Session, "get")
-    def test_form_invalid(self, mock_get):
+    @patch.object(requests.Session, "post")
+    def test_form_invalid(self, mock_get, mock_post):
         mock_get.side_effect = self.mock_requests_get
+        mock_post.side_effect = self.mock_requests_post
+
         invalid = {
             "dato_efter": ["fejl", "0", "-1", "2023-13-01", "2023-02-29"],
             "dato_før": ["fejl", "0", "-1", "2023-13-01", "2023-02-29"],
@@ -842,15 +900,15 @@ class AnmeldelseListViewTest(HasLogin):
         self.login()
         for field, values in invalid.items():
             for value in values:
-                url = self.list_url + f"?json=1&{field}={value}"
-                response = self.client.get(url)
+                url = self.list_url
+                response = self.client.post(url, data={"json": 1, field: value})
                 self.assertEquals(response.status_code, 400)
                 data = response.json()
                 self.assertTrue("error" in data)
                 self.assertTrue(field in data["error"])
 
-                url = self.list_url + f"?{field}={value}"
-                response = self.client.get(url)
+                url = self.list_url
+                response = self.client.post(url, data={field: value})
                 self.assertEquals(response.status_code, 200)
                 soup = BeautifulSoup(response.content, "html.parser")
                 error_fields = [

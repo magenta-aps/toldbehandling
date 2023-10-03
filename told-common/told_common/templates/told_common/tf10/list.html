@@ -22,7 +22,8 @@
 
     {{form.errors}}
 
-    <form method="get" action="{% url 'tf10_list' %}">
+    <form method="post" action="{% url 'tf10_list' %}">
+        {% csrf_token %}
         <div class="row">
             <div class="col-4">Dato</div>
             <div class="col-4">{{form.dato_efter}}</div>
