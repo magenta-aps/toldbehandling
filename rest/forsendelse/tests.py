@@ -6,6 +6,7 @@ from project.test_mixins import RestMixin
 class PostforsendelseTest(RestMixin, TestCase):
     object_class = Postforsendelse
     unique_fields = []
+    exclude_fields = ["oprettet_af"]
     has_delete = True
 
     def setUp(self) -> None:
@@ -70,6 +71,7 @@ class FragtforsendelseTest(RestMixin, TestCase):
     plural_classname = "fragtforsendelser"
     object_class = Fragtforsendelse
     unique_fields = []
+    exclude_fields = ["oprettet_af"]
     has_delete = True
 
     def setUp(self) -> None:

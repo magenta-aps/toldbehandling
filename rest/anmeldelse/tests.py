@@ -11,6 +11,8 @@ from sats.models import Vareafgiftssats
 
 class AfgiftsanmeldelseTest(RestMixin, TestCase):
     object_class = Afgiftsanmeldelse
+    exclude_fields = ["oprettet_af"]
+    object_restriction = True
 
     @property
     def list_full_function(self) -> str:

@@ -14,6 +14,7 @@ from anmeldelse.models import Afgiftsanmeldelse
 from anmeldelse.models import Varelinje
 from django.conf import settings
 from django.contrib.auth.models import User, Permission
+from django.contrib.contenttypes.models import ContentType
 from django.core.files import File
 from django.core.files.base import ContentFile
 from django.db.models import Choices, Model
@@ -29,7 +30,9 @@ from sats.models import Vareafgiftssats, Afgiftstabel
 class RestMixin:
     invalid_itemdata = {}
     unique_fields = []
+    exclude_fields = []
     has_delete = False
+    object_restriction = False
 
     @classmethod
     def make_user(
@@ -56,6 +59,32 @@ class RestMixin:
         super(RestMixin, cls).setUpClass()
         cls.leverandørfaktura_file = ContentFile(b"file_content")
         cls.fragtbrev_file = ContentFile(b"file_content")
+        view_all_anmeldelser = Permission.objects.create(
+            name="Kan se alle afgiftsanmeldelser, ikke kun egne",
+            codename="view_all_anmeldelse",
+            content_type=ContentType.objects.get_for_model(
+                Afgiftsanmeldelse, for_concrete_model=False
+            ),
+        )
+        view_all_fragtforsendelser = Permission.objects.create(
+            name="Kan se alle fragtforsendeler, ikke kun egne",
+            codename="view_all_fragtforsendelser",
+            content_type=ContentType.objects.get_for_model(
+                Fragtforsendelse, for_concrete_model=False
+            ),
+        )
+        view_all_postforsendelser = Permission.objects.create(
+            name="Kan se alle postforsendelser, ikke kun egne",
+            codename="view_all_postforsendelser",
+            content_type=ContentType.objects.get_for_model(
+                Postforsendelse, for_concrete_model=False
+            ),
+        )
+        view_all = [
+            view_all_anmeldelser,
+            view_all_fragtforsendelser,
+            view_all_postforsendelser,
+        ]
 
         (
             cls.authorized_user,
@@ -69,8 +98,10 @@ class RestMixin:
                     codename=f"{permission}_{cls.object_class.__name__.lower()}"
                 )
                 for permission in ("add", "change", "view", "delete")
-            ],
+            ]
+            + view_all,
         )
+
         (
             cls.viewonly_user,
             cls.viewonly_access_token,
@@ -82,13 +113,29 @@ class RestMixin:
                 Permission.objects.get(
                     codename=f"view_{cls.object_class.__name__.lower()}"
                 )
-            ],
+            ]
+            + view_all,
         )
+
         (
             cls.unauthorized_user,
             cls.unauthorized_access_token,
             unauthorized_refresh_token,
         ) = cls.make_user("testuser3", "testpassword", None)
+
+        (
+            cls.viewonly_own_user,
+            cls.viewonly_own_access_token,
+            viewonly_own_refresh_token,
+        ) = cls.make_user(
+            "testuser4",
+            "testpassword",
+            [
+                Permission.objects.get(
+                    codename=f"view_{cls.object_class.__name__.lower()}"
+                )
+            ],
+        )  # udelad view_all
 
     def setUp(self) -> None:
         super().setUp()
@@ -179,6 +226,13 @@ class RestMixin:
         return RestMixin.traverse(cls.model_to_dict_forced(item), format_value)
 
     @classmethod
+    def filter_keys(cls, item: Dict[str, Any], keys: List[str]) -> Dict[str, Any]:
+        if not keys:
+            return item
+        keyset = set(keys)
+        return {key: value for key, value in item.items() if key not in keyset}
+
+    @classmethod
     def get_file_data(cls, item) -> bytes:
         if isinstance(item, File):
             if item.closed:
@@ -239,6 +293,11 @@ class RestMixin:
             url, HTTP_AUTHORIZATION=f"Bearer {self.unauthorized_access_token}"
         )
         self.assertEquals(response.status_code, 403)
+        if self.object_restriction:
+            response = self.client.get(
+                url, HTTP_AUTHORIZATION=f"Bearer {self.viewonly_own_access_token}"
+            )
+            self.assertEquals(response.status_code, 403)
 
     def test_get(self):
         self.create_items()
@@ -254,7 +313,9 @@ class RestMixin:
             f"Reach READ API endpoint with existing id, expect HTTP 200 for GET {url}",
         )
         self.compare_dicts(
-            self.object_to_dict(self.precreated_item),
+            self.filter_keys(
+                self.object_to_dict(self.precreated_item), self.exclude_fields
+            ),
             response.json(),
             f"Querying READ API endpoint, expected data to match for url {url}",
         )
@@ -454,7 +515,7 @@ class RestMixin:
                 f"Did not find created item {self.object_class.__name__}"
                 + f"(id={id}) after creation with POST {url}"
             )
-        item_dict = self.object_to_dict(item)
+        item_dict = self.filter_keys(self.object_to_dict(item), self.exclude_fields)
         self.compare_dicts(
             item_dict,
             self.strip_id(self.expected_object_data),
@@ -621,7 +682,8 @@ class RestMixin:
                 )
             except Fragtforsendelse.DoesNotExist:
                 self._fragtforsendelse = Fragtforsendelse.objects.create(
-                    **self.fragtforsendelse_data
+                    **self.fragtforsendelse_data,
+                    oprettet_af=self.authorized_user,
                 )
                 self._fragtforsendelse.fragtbrev.save(
                     "fragtforsendelse.pdf", self.fragtforsendelse_data["fragtbrev"]
@@ -635,6 +697,7 @@ class RestMixin:
                 postforsendelsesnummer=self.postforsendelse_data[
                     "postforsendelsesnummer"
                 ],
+                oprettet_af=self.authorized_user,
                 defaults=self.postforsendelse_data,
             )
         return self._postforsendelse
@@ -651,6 +714,7 @@ class RestMixin:
                         "modtager": self.modtager,
                         "fragtforsendelse": None,
                         "postforsendelse": self.postforsendelse,
+                        "oprettet_af": self.authorized_user,
                     }
                 )
                 self._afgiftsanmeldelse = Afgiftsanmeldelse.objects.create(**data)

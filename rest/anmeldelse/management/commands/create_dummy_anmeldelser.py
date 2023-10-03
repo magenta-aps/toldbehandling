@@ -22,6 +22,7 @@ class Command(BaseCommand):
             modtager_betaler=False,
             indførselstilladelse="5678",
             betalt=False,
+            oprettet_af=Fragtforsendelse.objects.first().oprettet_af,
         )
         anmeldelse.leverandørfaktura.save(
             "leverandørfaktura.txt", ContentFile("testdata")
@@ -51,16 +52,19 @@ class Command(BaseCommand):
         postforsendelser = Postforsendelse.objects.all()
 
         for i in range(1, 100):
+            fragtforsendelse = fragtforsendelser[i] if i % 2 else None
+            postforsendelse = postforsendelser[i] if not i % 2 else None
             anmeldelse = Afgiftsanmeldelse.objects.create(
                 afsender=Afsender.objects.order_by("?").first(),
                 modtager=Modtager.objects.order_by("?").first(),
-                fragtforsendelse=fragtforsendelser[i] if i % 2 else None,
-                postforsendelse=postforsendelser[i] if not i % 2 else None,
+                fragtforsendelse=fragtforsendelse,
+                postforsendelse=postforsendelse,
                 leverandørfaktura_nummer="5678",
                 modtager_betaler=False,
                 indførselstilladelse="1234",
                 betalt=random.choice([False, True]),
                 godkendt=random.choice([None, False, True]),
+                oprettet_af=(fragtforsendelse or postforsendelse).oprettet_af,
             )
             anmeldelse.dato = date.today() - timedelta(days=random.randint(0, 1000))
             anmeldelse.save(update_fields=["dato"])

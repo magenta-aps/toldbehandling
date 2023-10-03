@@ -1,4 +1,5 @@
 from aktør.models import Afsender, Modtager
+from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
@@ -15,6 +16,12 @@ class Afgiftsanmeldelse(models.Model):
     class Meta:
         ordering = ["dato"]
 
+    oprettet_af = models.ForeignKey(
+        User,
+        related_name="afgiftsanmeldelser",
+        on_delete=models.SET_NULL,  # Vi kan slette brugere og beholde deres anmeldelser
+        null=True,
+    )
     afsender = models.ForeignKey(
         Afsender,
         related_name="afgiftsanmeldelser",

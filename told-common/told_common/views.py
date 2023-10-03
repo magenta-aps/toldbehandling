@@ -59,7 +59,7 @@ class FileView(LoginRequiredMixin, HasRestClientMixin, View):
     def get(self, request, *args, **kwargs):
         object = self.rest_client.get(
             f"{self.api}/{kwargs['id']}"
-        )  # Vil kaste 404 hvis id ikke findes
+        )  # Vil kaste 404 hvis id ikke findes, eller 403 hvis brugeren ikke har adgang
         # settings.MEDIA_ROOT er monteret i Docker så det deles mellem
         # containerne REST og UI.
         # Derfor kan vi læse filer der er skrevet af den anden container

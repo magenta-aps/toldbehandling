@@ -55,6 +55,22 @@ class Command(BaseCommand):
         )
         indberetter.groups.add(indberetter_group)
 
+        indberetter2, created = User.objects.update_or_create(
+            defaults={
+                "first_name": "Indberetter2",
+                "last_name": "",
+                "email": "",
+                "password": make_password(
+                    os.environ.get("INDBERETTER_PASSWORD", "indberetter2")
+                ),
+                "is_active": True,
+                "is_staff": False,
+                "is_superuser": False,
+            },
+            username="indberetter2",
+        )
+        indberetter2.groups.add(indberetter_group)
+
         toldmedarbejder, created = User.objects.update_or_create(
             defaults={
                 "first_name": "Toldmedarbejder",
