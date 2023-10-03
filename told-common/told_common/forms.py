@@ -289,15 +289,18 @@ class TF10SearchForm(BootstrapForm):
             )
         )
 
+    select_widget = forms.Select(attrs={"onchange": "form.submit();"})
+
     vareart = forms.ChoiceField(choices=(), required=False)
     godkendt = forms.ChoiceField(
         choices=(
-            (None, _("------")),
+            (None, _("Alle")),
             (True, _("Godkendt")),
             (False, _("Afvist")),
             ("explicitly_none", _("Ny")),
         ),
         required=False,
+        widget=select_widget,
     )
     godkendt_is_null = forms.ChoiceField(
         choices=(
