@@ -6,19 +6,22 @@ FROM python:3.11
 ENV PYTHONUNBUFFERED=1
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN mkdir /app && \
+mkdir -p /var/cache/told && \
 #gid/uid from salt
-groupadd -g 75050 -r toldbehandling && \
+groupadd -g 75130 -r toldbehandling && \
 groupadd -g 75100 -r certificate_exporter && \
-useradd -u 75050 --no-log-init -r -g toldbehandling -G certificate_exporter toldbehandling
+useradd -u 75130 --no-log-init -r -g toldbehandling -G certificate_exporter toldbehandling && \
+chown toldbehandling:toldbehandling /var/cache/told && \
+chmod a+w /var/cache/told
+# hadolint ignore=DL3008
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends gettext python3-distutils libxmlsec1-dev xmlsec1 && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 COPY ui/requirements.txt /app/requirements.txt
 # Include & install told-common package
 COPY ./told-common /app/told-common
 RUN pushd /app/told-common && pip wheel -w dist . && popd || exit
 RUN pip install --no-cache-dir -r /app/requirements.txt
-# hadolint ignore=DL3008
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends gettext python3-distutils && \
-    apt-get clean && rm -rf /var/lib/apt/lists/*
 
 USER toldbehandling
 COPY ./docker/entrypoint_ui.sh /entrypoint.sh
@@ -26,4 +29,5 @@ COPY --chown=toldbehandling:toldbehandling ./ui /app
 EXPOSE 8000
 ENTRYPOINT ["/entrypoint.sh"]
 WORKDIR /app
+VOLUME /var/cache/told
 CMD ["gunicorn", "-b", "0.0.0.0:8000", "project.wsgi:application", "-w 4", "--timeout 120", "--error-logfile", "-", "--capture-output"]

@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "told_common",
     "ui",
+    "django_mitid_auth",
 ]
 
 MIDDLEWARE = [
@@ -46,9 +47,11 @@ MIDDLEWARE = [
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
-    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django_mitid_auth.middleware.LoginManager",
+    # "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "django_session_timeout.middleware.SessionTimeoutMiddleware",
 ]
 
 ROOT_URLCONF = "project.urls"
@@ -134,3 +137,12 @@ REST_DOMAIN = os.environ["REST_DOMAIN"]
 NINJA_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(seconds=20),
 }
+
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.db.DatabaseCache",
+        "LOCATION": "default_cache",
+    },
+}
+
+from .login_settings import *  # noqa

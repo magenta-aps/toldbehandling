@@ -301,15 +301,15 @@
         <div class="form-row">
             <div class="ml-auto">
                 {% if object.godkendt is None and can_edit %}
-                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#godkend_modal">
-                        Godkend
-                    </button>
-                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#afvis_modal">
-                        Afvis
-                    </button>
-                    <a href="{% url 'tf10_edit' id=object.id %}" class="btn btn-primary">Redigér</a>
+                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#godkend_modal">
+                    Godkend
+                </button>
+                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#afvis_modal">
+                    Afvis
+                </button>
+                <a href="{% url 'tf10_edit' id=object.id %}" class="btn btn-primary">Redigér</a>
                 {% elif object.godkendt is True and can_send_prisme %}
-                    <a href="{% url 'faktura_create' %}" class="btn btn-primary">Send til Prisme</a>
+                <a href="{% url 'faktura_create' %}" class="btn btn-primary">Send til Prisme</a>
                 {% endif %}
             </div>
         </div>

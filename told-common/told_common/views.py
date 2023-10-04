@@ -31,26 +31,25 @@ class LoginView(FormView):
     template_name = "told_common/login.html"
 
     def get_success_url(self):
-        next = self.request.GET.get("next", None)
+        next = self.request.GET.get("back", None)
         if next:
             return next
 
     def form_valid(self, form):
-        response = super().form_valid(form)
-        form.token.synchronize(response, synchronize_refresh_token=True)
+        form.token.save(self.request, save_refresh_token=True)
         userdata = RestClient(form.token).get("user")
         self.request.session["user"] = userdata
-        return response
+        return super().form_valid(form)
 
 
 class LogoutView(RedirectView):
     pattern_name = "login"
 
     def get(self, request, *args, **kwargs):
-        response = super().get(request, *args, **kwargs)
-        response.delete_cookie("access_token")
-        response.delete_cookie("refresh_token")
-        return response
+        for key in ("access_token", "refresh_token", "user"):
+            if key in request.session:
+                del request.session[key]
+        return super().get(request, *args, **kwargs)
 
 
 class RestView(LoginRequiredMixin, HasRestClientMixin, View):
@@ -61,9 +60,8 @@ class RestView(LoginRequiredMixin, HasRestClientMixin, View):
 
 class FileView(LoginRequiredMixin, HasRestClientMixin, View):
     def get(self, request, *args, **kwargs):
-        object = self.rest_client.get(
-            f"{self.api}/{kwargs['id']}"
-        )  # Vil kaste 404 hvis id ikke findes, eller 403 hvis brugeren ikke har adgang
+        # Vil kaste 404 hvis id ikke findes
+        object = self.rest_client.get(f"{self.api}/{kwargs['id']}")
         # settings.MEDIA_ROOT er monteret i Docker så det deles mellem
         # containerne REST og UI.
         # Derfor kan vi læse filer der er skrevet af den anden container

@@ -9,6 +9,7 @@ from functools import cached_property
 from typing import Dict, Any, Iterable, Optional
 from urllib.parse import quote_plus
 
+from django.conf import settings
 from django.http import (
     HttpResponseRedirect,
     HttpResponseServerError,
@@ -25,14 +26,29 @@ from told_common.rest_client import JwtTokenInfo, RestClient
 
 class LoginRequiredMixin:
     def needs_login(self, request):
-        return redirect(reverse("login") + "?next=" + quote_plus(request.path))
+        if getattr(settings, "LOGIN_PROVIDER_CLASS", None):
+            saml_data = request.session.get(settings.LOGIN_SESSION_DATA_KEY, None)
+            if saml_data:
+                # Get or create django User, obtain REST token
+                user, token = RestClient.login_saml_user(saml_data)
+                request.session["user"] = user
+                # Save token to session
+                token.save(request, save_refresh_token=True)
+                return None
+            else:
+                # Redirect to SAML login
+                return HttpResponseRedirect(
+                    reverse("login:login") + "?back=" + quote_plus(request.path)
+                )
+        else:
+            return redirect(reverse("login") + "?back=" + quote_plus(request.path))
 
     def login_check(self):
-        if not self.request.COOKIES.get("access_token") or not self.request.COOKIES.get(
+        if not self.request.session.get("access_token") or not self.request.session.get(
             "refresh_token"
         ):
             return self.needs_login(self.request)
-        refresh_token_timestamp = self.request.COOKIES.get("refresh_token_timestamp")
+        refresh_token_timestamp = self.request.session.get("refresh_token_timestamp")
         if (int(time.time() - float(refresh_token_timestamp))) > 24 * 3600:
             return self.needs_login(self.request)
         return None
@@ -52,7 +68,7 @@ class LoginRequiredMixin:
         except HTTPError as e:
             if e.response.status_code == 401:
                 # Refresh failed, must re-login
-                return redirect(reverse("login") + "?next=" + quote_plus(request.path))
+                return self.needs_login(request)
             return HttpResponseServerError(
                 f"Failure in REST API request; "
                 f"got http {e.response.status_code} from API"
@@ -156,9 +172,9 @@ class PermissionsRequiredMixin(LoginRequiredMixin):
 
 class HasRestClientMixin:
     def dispatch(self, request, *args, **kwargs):
-        self.rest_client = RestClient(token=JwtTokenInfo.from_cookies(request))
+        self.rest_client = RestClient(token=JwtTokenInfo.load(request))
         response = super().dispatch(request, *args, **kwargs)
-        self.rest_client.token.synchronize(response)
+        self.rest_client.token.save(request)
         return response
 
 
