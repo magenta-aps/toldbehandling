@@ -9,6 +9,8 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import User, Group
 from django.core.management.base import BaseCommand
 
+from common.models import IndberetterProfile
+
 
 class Command(BaseCommand):
     help = "Creates dummy users"
@@ -58,6 +60,9 @@ class Command(BaseCommand):
             username="indberetter",
         )
         indberetter.groups.add(indberetter_group)
+        IndberetterProfile.objects.update_or_create(
+            defaults={"cpr": 1111111111}, user=indberetter
+        )
 
         indberetter2, created = User.objects.update_or_create(
             defaults={
@@ -74,6 +79,9 @@ class Command(BaseCommand):
             username="indberetter2",
         )
         indberetter2.groups.add(indberetter_group)
+        IndberetterProfile.objects.update_or_create(
+            defaults={"cpr": 1111111112}, user=indberetter2
+        )
 
         toldmedarbejder, created = User.objects.update_or_create(
             defaults={

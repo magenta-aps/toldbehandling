@@ -67,7 +67,9 @@ class Command(BaseCommand):
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
                 afgiftsgruppenummer=11,
-                vareart="ETHANOLHOLDIGE DRIKKEVARER (Øl, vin, spiritus, cider) med et ethanol indhold)på 1,21 til og med 3,09 volumenprocent.på 1,21 til og med 3,09 volumenprocent.",
+                vareart="ETHANOLHOLDIGE DRIKKEVARER (Øl, vin, spiritus, cider) "
+                "med et ethanol indhold)på 1,21 til og med 3,09 "
+                "volumenprocent.på 1,21 til og med 3,09 volumenprocent.",
                 enhed=Vareafgiftssats.Enhed.LITER,
                 minimumsbeløb=False,
                 afgiftssats=Decimal("3.50"),
@@ -76,7 +78,8 @@ class Command(BaseCommand):
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
                 afgiftsgruppenummer=12,
-                vareart="ETHANOLHOLDIGE DRIKKEVARER (Øl, vin, spiritus, cider) med et ethanol indhold)- 3,10 - 4,09 volumenprocent.",
+                vareart="ETHANOLHOLDIGE DRIKKEVARER (Øl, vin, spiritus, cider) "
+                "med et ethanol indhold)- 3,10 - 4,09 volumenprocent.",
                 enhed=Vareafgiftssats.Enhed.LITER,
                 minimumsbeløb=False,
                 afgiftssats=Decimal("8.00"),
@@ -85,7 +88,8 @@ class Command(BaseCommand):
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
                 afgiftsgruppenummer=13,
-                vareart="ETHANOLHOLDIGE DRIKKEVARER (Øl, vin, spiritus, cider) med et ethanol indhold)- 4,10 - 5,09 volumenprocent.",
+                vareart="ETHANOLHOLDIGE DRIKKEVARER (Øl, vin, spiritus, cider) "
+                "med et ethanol indhold)- 4,10 - 5,09 volumenprocent.",
                 enhed=Vareafgiftssats.Enhed.LITER,
                 minimumsbeløb=False,
                 afgiftssats=Decimal("21.00"),
@@ -94,7 +98,8 @@ class Command(BaseCommand):
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
                 afgiftsgruppenummer=14,
-                vareart="ETHANOLHOLDIGE DRIKKEVARER (Øl, vin, spiritus, cider) med et ethanol indhold)- 5,10 - 7,09 volumenprocent.",
+                vareart="ETHANOLHOLDIGE DRIKKEVARER (Øl, vin, spiritus, cider) "
+                "med et ethanol indhold)- 5,10 - 7,09 volumenprocent.",
                 enhed=Vareafgiftssats.Enhed.LITER,
                 minimumsbeløb=False,
                 afgiftssats=Decimal("30.00"),
@@ -103,7 +108,8 @@ class Command(BaseCommand):
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
                 afgiftsgruppenummer=15,
-                vareart="ETHANOLHOLDIGE DRIKKEVARER (Øl, vin, spiritus, cider) med et ethanol indhold)- 7,10 - 9,09 volumenprocent.",
+                vareart="ETHANOLHOLDIGE DRIKKEVARER (Øl, vin, spiritus, cider) "
+                "med et ethanol indhold)- 7,10 - 9,09 volumenprocent.",
                 enhed=Vareafgiftssats.Enhed.LITER,
                 minimumsbeløb=False,
                 afgiftssats=Decimal("43.00"),
@@ -112,7 +118,8 @@ class Command(BaseCommand):
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
                 afgiftsgruppenummer=16,
-                vareart="ETHANOLHOLDIGE DRIKKEVARER (Øl, vin, spiritus, cider) med et ethanol indhold)- 9,10 - 11,09 volumenprocent.",
+                vareart="ETHANOLHOLDIGE DRIKKEVARER (Øl, vin, spiritus, cider) "
+                "med et ethanol indhold)- 9,10 - 11,09 volumenprocent.",
                 enhed=Vareafgiftssats.Enhed.LITER,
                 minimumsbeløb=False,
                 afgiftssats=Decimal("56.00"),
@@ -121,7 +128,8 @@ class Command(BaseCommand):
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
                 afgiftsgruppenummer=17,
-                vareart="ETHANOLHOLDIGE DRIKKEVARER (Øl, vin, spiritus, cider) med et ethanol indhold)- 11,10 - 13,09 volumenprocent.",
+                vareart="ETHANOLHOLDIGE DRIKKEVARER (Øl, vin, spiritus, cider) "
+                "med et ethanol indhold)- 11,10 - 13,09 volumenprocent.",
                 enhed=Vareafgiftssats.Enhed.LITER,
                 minimumsbeløb=False,
                 afgiftssats=Decimal("66.00"),
@@ -130,7 +138,8 @@ class Command(BaseCommand):
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
                 afgiftsgruppenummer=18,
-                vareart="ETHANOLHOLDIGE DRIKKEVARER (Øl, vin, spiritus, cider) med et ethanol indhold)- 13,10 - 15,09 volumenprocent.",
+                vareart="ETHANOLHOLDIGE DRIKKEVARER (Øl, vin, spiritus, cider) "
+                "med et ethanol indhold)- 13,10 - 15,09 volumenprocent.",
                 enhed=Vareafgiftssats.Enhed.LITER,
                 minimumsbeløb=False,
                 afgiftssats=Decimal("92.00"),
@@ -139,7 +148,8 @@ class Command(BaseCommand):
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
                 afgiftsgruppenummer=19,
-                vareart="ETHANOLHOLDIGE DRIKKEVARER (Øl, vin, spiritus, cider) med et ethanol indhold)- 15,10 - 18,09 volumenprocent.",
+                vareart="ETHANOLHOLDIGE DRIKKEVARER (Øl, vin, spiritus, cider) "
+                "med et ethanol indhold)- 15,10 - 18,09 volumenprocent.",
                 enhed=Vareafgiftssats.Enhed.LITER,
                 minimumsbeløb=False,
                 afgiftssats=Decimal("114.00"),
@@ -148,7 +158,8 @@ class Command(BaseCommand):
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
                 afgiftsgruppenummer=20,
-                vareart="ETHANOLHOLDIGE DRIKKEVARER (Øl, vin, spiritus, cider) med et ethanol indhold)- 18,10 - 22,09 volumenprocent.",
+                vareart="ETHANOLHOLDIGE DRIKKEVARER (Øl, vin, spiritus, cider) "
+                "med et ethanol indhold)- 18,10 - 22,09 volumenprocent.",
                 enhed=Vareafgiftssats.Enhed.LITER,
                 minimumsbeløb=False,
                 afgiftssats=Decimal("147.00"),
@@ -157,7 +168,8 @@ class Command(BaseCommand):
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
                 afgiftsgruppenummer=21,
-                vareart="ETHANOLHOLDIGE DRIKKEVARER (Øl, vin, spiritus, cider) med et ethanol indhold)- 22,10 - 26,09 volumenprocent.",
+                vareart="ETHANOLHOLDIGE DRIKKEVARER (Øl, vin, spiritus, cider) "
+                "med et ethanol indhold)- 22,10 - 26,09 volumenprocent.",
                 enhed=Vareafgiftssats.Enhed.LITER,
                 minimumsbeløb=False,
                 afgiftssats=Decimal("187.00"),
@@ -166,7 +178,8 @@ class Command(BaseCommand):
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
                 afgiftsgruppenummer=22,
-                vareart="ETHANOLHOLDIGE DRIKKEVARER (Øl, vin, spiritus, cider) med et ethanol indhold)- 26,10 - 30,09 volumenprocent.",
+                vareart="ETHANOLHOLDIGE DRIKKEVARER (Øl, vin, spiritus, cider) "
+                "med et ethanol indhold)- 26,10 - 30,09 volumenprocent.",
                 enhed=Vareafgiftssats.Enhed.LITER,
                 minimumsbeløb=False,
                 afgiftssats=Decimal("230.00"),
@@ -175,7 +188,8 @@ class Command(BaseCommand):
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
                 afgiftsgruppenummer=23,
-                vareart="ETHANOLHOLDIGE DRIKKEVARER (Øl, vin, spiritus, cider) med et ethanol indhold)- 30,10 - 35,09 volumenprocent.",
+                vareart="ETHANOLHOLDIGE DRIKKEVARER (Øl, vin, spiritus, cider) "
+                "med et ethanol indhold)- 30,10 - 35,09 volumenprocent.",
                 enhed=Vareafgiftssats.Enhed.LITER,
                 minimumsbeløb=False,
                 afgiftssats=Decimal("280.00"),
@@ -184,7 +198,8 @@ class Command(BaseCommand):
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
                 afgiftsgruppenummer=24,
-                vareart="ETHANOLHOLDIGE DRIKKEVARER (Øl, vin, spiritus, cider) med et ethanol indhold)- 35,10 - 45,09 volumenprocent.",
+                vareart="ETHANOLHOLDIGE DRIKKEVARER (Øl, vin, spiritus, cider) "
+                "med et ethanol indhold)- 35,10 - 45,09 volumenprocent.",
                 enhed=Vareafgiftssats.Enhed.LITER,
                 minimumsbeløb=False,
                 afgiftssats=Decimal("361.00"),
@@ -193,7 +208,8 @@ class Command(BaseCommand):
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
                 afgiftsgruppenummer=25,
-                vareart="ETHANOLHOLDIGE DRIKKEVARER (Øl, vin, spiritus, cider) med et ethanol indhold)- 45,10 - 60,09 volumenprocent.",
+                vareart="ETHANOLHOLDIGE DRIKKEVARER (Øl, vin, spiritus, cider) "
+                "med et ethanol indhold)- 45,10 - 60,09 volumenprocent.",
                 enhed=Vareafgiftssats.Enhed.LITER,
                 minimumsbeløb=False,
                 afgiftssats=Decimal("495.00"),
@@ -202,7 +218,8 @@ class Command(BaseCommand):
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
                 afgiftsgruppenummer=26,
-                vareart="ETHANOLHOLDIGE DRIKKEVARER (Øl, vin, spiritus, cider) med et ethanol indhold)- 60,10 - 100.0 volumenprocent.",
+                vareart="ETHANOLHOLDIGE DRIKKEVARER (Øl, vin, spiritus, cider) "
+                "med et ethanol indhold)- 60,10 - 100.0 volumenprocent.",
                 enhed=Vareafgiftssats.Enhed.LITER,
                 minimumsbeløb=None,
                 afgiftssats=Decimal("591.00"),
@@ -220,7 +237,9 @@ class Command(BaseCommand):
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
                 afgiftsgruppenummer=32,
-                vareart="MINERALVAND, sodavand og andre kulsyreholdige læskedrikke. Indført til Qaanaaq, Ittoqqortoormiit og Tasiilaq af erhvervsdrivende.",
+                vareart="MINERALVAND, sodavand og andre kulsyreholdige læskedrikke. "
+                "Indført til Qaanaaq, Ittoqqortoormiit og Tasiilaq af "
+                "erhvervsdrivende.",
                 enhed=Vareafgiftssats.Enhed.LITER,
                 minimumsbeløb=None,
                 afgiftssats=Decimal("5.75"),
@@ -229,7 +248,8 @@ class Command(BaseCommand):
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
                 afgiftsgruppenummer=33,
-                vareart="LÆSKEDRIKKONCENTRAT til brug for fremstilling af kulsyreholdige drikke",
+                vareart="LÆSKEDRIKKONCENTRAT til brug for fremstilling af "
+                "kulsyreholdige drikke",
                 enhed=Vareafgiftssats.Enhed.LITER,
                 minimumsbeløb=False,
                 afgiftssats=Decimal("46.30"),
@@ -238,7 +258,9 @@ class Command(BaseCommand):
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
                 afgiftsgruppenummer=34,
-                vareart="EMBALLAGE til drikkevarer, koncentrater og frugtsafter, excl. emballage til mælkeprodukter samt grønlandske returflasker: Med nettoindhold til og med 0,25 liter",
+                vareart="EMBALLAGE til drikkevarer, koncentrater og frugtsafter, "
+                "excl. emballage til mælkeprodukter samt grønlandske "
+                "returflasker: Med nettoindhold til og med 0,25 liter",
                 enhed=Vareafgiftssats.Enhed.ANTAL,
                 minimumsbeløb=False,
                 afgiftssats=Decimal("2.00"),
@@ -247,7 +269,9 @@ class Command(BaseCommand):
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
                 afgiftsgruppenummer=35,
-                vareart="EMBALLAGE til drikkevarer, koncentrater og frugtsafter, excl. emballage til mælkeprodukter samt grønlandske returflasker: Med nettoindhold på over 0,25 liter",
+                vareart="EMBALLAGE til drikkevarer, koncentrater og frugtsafter, "
+                "excl. emballage til mælkeprodukter samt grønlandske "
+                "returflasker: Med nettoindhold på over 0,25 liter",
                 enhed=Vareafgiftssats.Enhed.ANTAL,
                 minimumsbeløb=False,
                 afgiftssats=Decimal("3.50"),
@@ -355,7 +379,8 @@ class Command(BaseCommand):
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
                 afgiftsgruppenummer=55,
-                vareart="SVINEKØD og produkter heraf, saltet i saltlage, tørret eller røget",
+                vareart="SVINEKØD og produkter heraf, saltet i saltlage, "
+                "tørret eller røget",
                 enhed=Vareafgiftssats.Enhed.KILOGRAM,
                 minimumsbeløb=False,
                 afgiftssats=Decimal("3.25"),
@@ -446,7 +471,9 @@ class Command(BaseCommand):
             personbiler = Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
                 afgiftsgruppenummer=72,
-                vareart="PERSONBILER Afgiften svares med et fast beløb på 50.000 + 100 % af den del af fakturaværdien der overstiger 50.000 men ikke 150.000 + 125 % af resten.",
+                vareart="PERSONBILER Afgiften svares med et fast beløb på 50.000 "
+                "+ 100 % af den del af fakturaværdien der overstiger "
+                "50.000 men ikke 150.000 + 125 % af resten.",
                 enhed=Vareafgiftssats.Enhed.SAMMENSAT,
                 minimumsbeløb=None,
                 afgiftssats=Decimal(0),
@@ -466,7 +493,8 @@ class Command(BaseCommand):
                 overordnet=personbiler,
                 afgiftstabel=tabel,
                 afgiftsgruppenummer=7202,
-                vareart="PERSONBILER, 100% af den del af fakturaværdien der overstiger 50.000 men ikke 150.000",
+                vareart="PERSONBILER, 100% af den del af fakturaværdien der "
+                "overstiger 50.000 men ikke 150.000",
                 enhed=Vareafgiftssats.Enhed.PROCENT,
                 segment_nedre=Decimal(50_000),
                 segment_øvre=Decimal(150_000),
@@ -489,7 +517,9 @@ class Command(BaseCommand):
             varebiler = Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
                 afgiftsgruppenummer=73,
-                vareart="VAREBILER u/ 4 tons totalvægt. Afgiften svares med et fast beløb på 50.000 + 50 % af den del af fakturaværdien der overstiger 50.000.",
+                vareart="VAREBILER u/ 4 tons totalvægt. Afgiften svares med et "
+                "fast beløb på 50.000 + 50 % af den del af "
+                "fakturaværdien der overstiger 50.000.",
                 enhed=Vareafgiftssats.Enhed.SAMMENSAT,
                 minimumsbeløb=None,
                 afgiftssats=Decimal(0),
@@ -509,7 +539,8 @@ class Command(BaseCommand):
                 overordnet=varebiler,
                 afgiftstabel=tabel,
                 afgiftsgruppenummer=7302,
-                vareart="VAREBILER u/ 4 tons totalvægt, 50 % af den del af fakturaværdien der overstiger 50.000",
+                vareart="VAREBILER u/ 4 tons totalvægt, 50 % af den del af "
+                "fakturaværdien der overstiger 50.000",
                 enhed=Vareafgiftssats.Enhed.PROCENT,
                 segment_nedre=Decimal(50_000),
                 minimumsbeløb=None,
@@ -547,7 +578,9 @@ class Command(BaseCommand):
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
                 afgiftsgruppenummer=90,
-                vareart="PARFUMER, kosmetik og toiletmidler undtagen: sæbe, tandplejemidler, shampoo, deodorant, badesalt, pudder & babyplejemidler",
+                vareart="PARFUMER, kosmetik og toiletmidler undtagen: sæbe, "
+                "tandplejemidler, shampoo, deodorant, badesalt, "
+                "pudder & babyplejemidler",
                 enhed=Vareafgiftssats.Enhed.PROCENT,
                 minimumsbeløb=None,
                 afgiftssats=Decimal(38),
@@ -556,7 +589,8 @@ class Command(BaseCommand):
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
                 afgiftsgruppenummer=91,
-                vareart="SPILLEAUTOMATER, elektriske billarder, målskydningsapparater m.v.",
+                vareart="SPILLEAUTOMATER, elektriske billarder, "
+                "målskydningsapparater m.v.",
                 enhed=Vareafgiftssats.Enhed.PROCENT,
                 minimumsbeløb=None,
                 afgiftssats=Decimal(50),

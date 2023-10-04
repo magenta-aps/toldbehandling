@@ -4,15 +4,13 @@
 
 import told_common.views as common_views
 from django.urls import path
-from django.views.generic import TemplateView
-from django.views.generic.base import RedirectView
+from django.views.generic import TemplateView, RedirectView
+from django_mitid_auth.saml.views import AccessDeniedView
 
 from ui import views
 
 urlpatterns = [
     path("", RedirectView.as_view(pattern_name="tf10_list")),
-    path("login", common_views.LoginView.as_view(), name="login"),
-    path("logout", common_views.LogoutView.as_view(url="/"), name="logout"),
     path("api/<path:path>", common_views.RestView.as_view(), name="rest"),
     path(
         "file/leverandørfaktura/<int:id>",
@@ -27,7 +25,7 @@ urlpatterns = [
     path("blanket/tf10/create", views.TF10FormCreateView.as_view(), name="tf10_create"),
     path(
         "blanket/tf10/<int:id>",
-        common_views.TF10FormUpdateView.as_view(),
+        views.TF10FormUpdateView.as_view(),
         name="tf10_edit",
     ),
     path(
@@ -39,5 +37,15 @@ urlpatterns = [
         "blanket/tf10",
         views.TF10ListView.as_view(),
         name="tf10_list",
+    ),
+    path(
+        "error/login-timeout/",
+        AccessDeniedView.as_view(template_name="ui/error/login_timeout.html"),
+        name="login-timeout",
+    ),
+    path(
+        "error/login-repeat/",
+        AccessDeniedView.as_view(template_name="ui/error/login_repeat.html"),
+        name="login-repeat",
     ),
 ]

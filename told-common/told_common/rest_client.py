@@ -8,15 +8,15 @@ from base64 import b64encode
 from dataclasses import dataclass, field
 from datetime import timedelta
 from functools import cached_property
-from typing import Union, Dict, List
+from typing import Union, Dict, List, Tuple
 from urllib.parse import urlencode
 
 import requests
 from django.conf import settings
 from django.core.files.uploadedfile import UploadedFile, InMemoryUploadedFile
 from django.core.serializers.json import DjangoJSONEncoder
-from django.http import HttpResponse, HttpRequest
-from requests import Session
+from django.http import HttpRequest
+from requests import Session, HTTPError
 
 
 @dataclass
@@ -29,29 +29,26 @@ class JwtTokenInfo:
     refresh_token_timestamp: float = field(default_factory=time.time)
     synchronized: bool = False
 
-    def set_cookies(self, response: HttpResponse, set_refresh_token: bool = False):
-        response.set_cookie("access_token", self.access_token)
-        response.set_cookie("access_token_timestamp", self.access_token_timestamp)
-        if set_refresh_token:
-            response.set_cookie("refresh_token", self.refresh_token)
-            response.set_cookie("refresh_token_timestamp", self.refresh_token_timestamp)
-        self.synchronized = True
-
     @staticmethod
-    def from_cookies(request: HttpRequest):
+    def load(request: HttpRequest):
         return JwtTokenInfo(
-            access_token=request.COOKIES["access_token"],
-            access_token_timestamp=float(request.COOKIES["access_token_timestamp"]),
-            refresh_token=request.COOKIES["refresh_token"],
-            refresh_token_timestamp=float(request.COOKIES["refresh_token_timestamp"]),
+            access_token=request.session["access_token"],
+            access_token_timestamp=float(request.session["access_token_timestamp"]),
+            refresh_token=request.session["refresh_token"],
+            refresh_token_timestamp=float(request.session["refresh_token_timestamp"]),
             synchronized=True,
         )
 
-    def synchronize(
-        self, response: HttpResponse, synchronize_refresh_token: bool = False
-    ):
+    def save(self, request: HttpRequest, save_refresh_token: bool = False):
         if not self.synchronized:
-            self.set_cookies(response, synchronize_refresh_token)
+            request.session["access_token"] = self.access_token
+            request.session["access_token_timestamp"] = self.access_token_timestamp
+            if save_refresh_token:
+                request.session["refresh_token"] = self.refresh_token
+                request.session[
+                    "refresh_token_timestamp"
+                ] = self.refresh_token_timestamp
+            self.synchronized = True
 
 
 class ModelRestClient:
@@ -419,8 +416,37 @@ class RestClient:
         data = response.json()
         self.token.access_token = data["access"]
         self.token.access_token_timestamp = time.time()
-        self.token.synchronized = False  # Set cookies on next response
+        self.token.synchronized = False
         self.session.headers = {"Authorization": f"Bearer {self.token.access_token}"}
+
+    @classmethod
+    def login_saml_user(cls, saml_data: dict) -> Tuple[Dict, JwtTokenInfo]:
+        cpr = saml_data["cpr"]
+        cvr = saml_data.get("cvr", None)
+        client = RestClient(RestClient.login("admin", "admin"))
+        try:
+            user = client.get(f"user/cpr/{int(cpr)}")
+        except HTTPError as e:
+            if e.response.status_code == 404:
+                user = client.post(
+                    "user",
+                    {
+                        "indberetter_data": {"cpr": cpr, "cvr": cvr},
+                        "username": " / ".join(filter(None, [cpr, cvr])),
+                        "first_name": saml_data["firstname"],
+                        "last_name": saml_data["lastname"],
+                        "email": saml_data["email"],
+                        "is_superuser": False,
+                        "groups": ["Indberettere"],
+                    },
+                )
+            else:
+                raise
+        token = JwtTokenInfo(
+            access_token=user.pop("access_token"),
+            refresh_token=user.pop("refresh_token"),
+        )
+        return user, token
 
     def get(
         self,

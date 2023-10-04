@@ -11,6 +11,7 @@ from urllib.parse import quote
 
 import requests
 from bs4 import BeautifulSoup
+from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile, TemporaryUploadedFile
 from django.shortcuts import redirect
 from django.test import TestCase
@@ -20,7 +21,6 @@ from told_common.forms import TF10Form, TF10VareForm
 from told_common.rest_client import RestClient
 from told_common.tests import (
     TemplateTagsTest,
-    LoginTest,
     AnmeldelseListViewTest,
     FileViewTest,
     HasLogin,
@@ -28,6 +28,10 @@ from told_common.tests import (
 
 
 class BlanketTest(HasLogin, TestCase):
+    @property
+    def login_url(self):
+        return str(reverse("login:login"))
+
     formdata1 = {
         "afsender_cvr": "12345678",
         "afsender_navn": "TestFirma1",
@@ -112,11 +116,11 @@ class BlanketTest(HasLogin, TestCase):
         self.assertEquals(response.status_code, 302)
         self.assertEquals(
             response.headers["Location"],
-            reverse("login") + "?next=" + quote(url, safe=""),
+            reverse("login:login") + "?back=" + quote(url, safe=""),
         )
 
     def mock_requests_get(self, path):
-        expected_prefix = "http://toldbehandling-rest:7000/api/"
+        expected_prefix = f"{settings.REST_DOMAIN}/api/"
         path = path.split("?")[0]
         path = path.rstrip("/")
         response = Response()
@@ -191,7 +195,7 @@ class BlanketTest(HasLogin, TestCase):
         return response
 
     def mock_requests_post(self, path, data, headers=None):
-        expected_prefix = "http://toldbehandling-rest:7000/api/"
+        expected_prefix = f"{settings.REST_DOMAIN}/api/"
         path = path.rstrip("/")
         response = Response()
         json_content = None
@@ -370,7 +374,7 @@ class BlanketTest(HasLogin, TestCase):
         mock_post.side_effect = self.mock_requests_post
         response = self.client.post(url, data={**self.formdata1, **self.formfiles1})
         self.assertEquals(response.status_code, 302)
-        prefix = "http://toldbehandling-rest:7000/api/"
+        prefix = f"{settings.REST_DOMAIN}/api/"
         posted_map = defaultdict(list)
         for url, data in self.posted:
             posted_map[url].append(json.loads(data))
@@ -449,7 +453,7 @@ class BlanketTest(HasLogin, TestCase):
         mock_post.side_effect = self.mock_requests_post
         response = self.client.post(url, data={**self.formdata1, **self.formfiles1})
         self.assertEquals(response.status_code, 302)
-        prefix = "http://toldbehandling-rest:7000/api/"
+        prefix = f"{settings.REST_DOMAIN}/api/"
         posted_map = defaultdict(list)
         for url, data in self.posted:
             posted_map[url].append(json.loads(data))
@@ -505,7 +509,7 @@ class BlanketTest(HasLogin, TestCase):
         mock_post.side_effect = self.mock_requests_post
         response = self.client.post(url, data={**self.formdata2, **self.formfiles2})
         self.assertEquals(response.status_code, 302)
-        prefix = "http://toldbehandling-rest:7000/api/"
+        prefix = f"{settings.REST_DOMAIN}/api/"
         posted_map = defaultdict(list)
         for url, data in self.posted:
             posted_map[url].append(json.loads(data))
@@ -602,15 +606,13 @@ class UiTemplateTagsTest(TemplateTagsTest, TestCase):
     pass
 
 
-class UiLoginTest(LoginTest, TestCase):
-    @property
-    def restricted_url(self):
-        return str(reverse("tf10_create"))
-
-
 class UiAnmeldelseListViewTest(AnmeldelseListViewTest, TestCase):
     can_view = False
     can_edit = True
+
+    @property
+    def login_url(self):
+        return str(reverse("login:login"))
 
     @property
     def list_url(self):
@@ -621,6 +623,10 @@ class UiAnmeldelseListViewTest(AnmeldelseListViewTest, TestCase):
 
 
 class UiFileViewTest(FileViewTest, TestCase):
+    @property
+    def login_url(self):
+        return str(reverse("login:login"))
+
     @property
     def file_view_url(self):
         return str(reverse("fragtbrev_view", kwargs={"id": 1}))

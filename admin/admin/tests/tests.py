@@ -19,6 +19,7 @@ from admin.views import AfgiftstabelDownloadView
 from admin.views import AfgiftstabelListView
 from admin.views import TF10View, TF10ListView
 from bs4 import BeautifulSoup
+from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 from django.urls import reverse
@@ -77,7 +78,7 @@ class TestLogin(TestCase):
 
     @staticmethod
     def mock_requests_get(path):
-        expected_prefix = "http://toldbehandling-rest:7000/api/"
+        expected_prefix = f"{settings.REST_DOMAIN}/api/"
         path = path.split("?")[0]
         path = path.rstrip("/")
         response = Response()
@@ -115,7 +116,7 @@ class TestLogin(TestCase):
         )
         self.assertEquals(response.status_code, 200)  # Rerender form
         mock_post.assert_called_with(
-            "http://toldbehandling-rest:7000/api/token/pair",
+            f"{settings.REST_DOMAIN}/api/token/pair",
             json={"username": "incorrect", "password": "credentials"},
             headers={"Content-Type": "application/json"},
         )
@@ -129,18 +130,18 @@ class TestLogin(TestCase):
     def test_correct_login(self, mock_post, mock_get):
         mock_get.side_effect = self.mock_requests_get
         response = self.client.post(
-            reverse("login") + "?next=/",
+            reverse("login") + "?back=/",
             {"username": "correct", "password": "credentials"},
         )
         mock_post.assert_called_with(
-            "http://toldbehandling-rest:7000/api/token/pair",
+            f"{settings.REST_DOMAIN}/api/token/pair",
             json={"username": "correct", "password": "credentials"},
             headers={"Content-Type": "application/json"},
         )
         self.assertEquals(response.status_code, 302)
         self.assertEquals(response.headers["Location"], "/")
-        self.assertEquals(response.cookies["access_token"].value, "123456")
-        self.assertEquals(response.cookies["refresh_token"].value, "abcdef")
+        self.assertEquals(self.client.session["access_token"], "123456")
+        self.assertEquals(self.client.session["refresh_token"], "abcdef")
 
     @patch.object(RestClient, "refresh_login")
     @patch.object(
@@ -208,7 +209,7 @@ class TestLogin(TestCase):
         with self.settings(NINJA_JWT={"ACCESS_TOKEN_LIFETIME": timedelta(seconds=1)}):
             response = self.client.get(reverse("rest", kwargs={"path": "afsender"}))
             # Check that token refresh is needed
-            self.assertEquals(response.cookies["access_token"].value, "7890ab")
+            self.assertEquals(self.client.session["access_token"], "7890ab")
 
     @patch.object(requests.sessions.Session, "get")
     @patch.object(
@@ -219,19 +220,20 @@ class TestLogin(TestCase):
     def test_logout(self, mock_post, mock_get):
         mock_get.side_effect = self.mock_requests_get
         response = self.client.post(
-            reverse("login") + "?next=/",
+            reverse("login") + "?back=/",
             {"username": "correct", "password": "credentials"},
         )
         self.assertEquals(response.status_code, 302)
         self.assertEquals(response.headers["Location"], "/")
-        self.assertEquals(response.cookies["access_token"].value, "123456")
-        self.assertEquals(response.cookies["refresh_token"].value, "abcdef")
+        self.assertEquals(self.client.session["access_token"], "123456")
+        self.assertEquals(self.client.session["refresh_token"], "abcdef")
         response = self.client.get(reverse("logout"))
-        self.assertEquals(response.cookies["access_token"].value, "")
-        self.assertEquals(response.cookies["refresh_token"].value, "")
+        self.assertNotIn("access_token", self.client.session)
+        self.assertNotIn("refresh_token", self.client.session)
 
     def test_token_refresh_expired(self):
-        self.client.cookies.load(
+        session = self.client.session
+        session.update(
             {
                 "access_token": "123456",
                 "refresh_token": "abcdef",
@@ -241,11 +243,23 @@ class TestLogin(TestCase):
                 ).timestamp(),
             }
         )
+        session.save()
+        session_cookie = settings.SESSION_COOKIE_NAME
+        self.client.cookies[session_cookie] = session.session_key
+        cookie_data = {
+            "max-age": None,
+            "path": "/",
+            "domain": settings.SESSION_COOKIE_DOMAIN,
+            "secure": settings.SESSION_COOKIE_SECURE or None,
+            "expires": None,
+        }
+        self.client.cookies[session_cookie].update(cookie_data)
+
         response = self.client.get(reverse("index"))
         self.assertEquals(response.status_code, 302)
         self.assertEquals(
             response.headers["Location"],
-            "/login?next=" + quote_plus(reverse("index")),
+            "/login?back=" + quote_plus(reverse("index")),
         )
 
 
@@ -261,7 +275,7 @@ class TestGodkend(PermissionsTest, TestCase):
         self.patched: List[Tuple[str, str]] = []
 
     def mock_requests_get(self, path):
-        expected_prefix = "http://toldbehandling-rest:7000/api/"
+        expected_prefix = f"{settings.REST_DOMAIN}/api/"
         path = path.split("?")[0]
         path = path.rstrip("/")
         response = Response()
@@ -351,7 +365,7 @@ class TestGodkend(PermissionsTest, TestCase):
         return response
 
     def mock_requests_patch(self, path, data, headers=None):
-        expected_prefix = "http://toldbehandling-rest:7000/api/"
+        expected_prefix = f"{settings.REST_DOMAIN}/api/"
         path = path.rstrip("/")
         response = Response()
         json_content = None
@@ -385,7 +399,7 @@ class TestGodkend(PermissionsTest, TestCase):
         self.assertEquals(response.status_code, 302)
         self.assertEquals(
             response.headers["Location"],
-            reverse("login") + "?next=" + quote(url, safe=""),
+            reverse("login") + "?back=" + quote(url, safe=""),
         )
 
     @patch.object(requests.sessions.Session, "get")
@@ -411,7 +425,7 @@ class TestGodkend(PermissionsTest, TestCase):
         mock_patch.side_effect = self.mock_requests_patch
         response = self.client.post(view_url, {"godkendt": "true"})
         self.assertEquals(response.status_code, 302)
-        prefix = "http://toldbehandling-rest:7000/api/"
+        prefix = f"{settings.REST_DOMAIN}/api/"
         patched_map = defaultdict(list)
         for url, data in self.patched:
             patched_map[url].append(json.loads(data))
@@ -426,7 +440,7 @@ class TestGodkend(PermissionsTest, TestCase):
         mock_patch.side_effect = self.mock_requests_patch
         response = self.client.post(view_url, {"godkendt": "false"})
         self.assertEquals(response.status_code, 302)
-        prefix = "http://toldbehandling-rest:7000/api/"
+        prefix = f"{settings.REST_DOMAIN}/api/"
         patched_map = defaultdict(list)
         for url, data in self.patched:
             patched_map[url].append(json.loads(data))
@@ -441,7 +455,7 @@ class TestGodkend(PermissionsTest, TestCase):
         mock_patch.side_effect = self.mock_requests_patch
         response = self.client.post(view_url, {"godkendt": "true"})
         self.assertEquals(response.status_code, 404)
-        prefix = "http://toldbehandling-rest:7000/api/"
+        prefix = f"{settings.REST_DOMAIN}/api/"
         patched_map = defaultdict(list)
         for url, data in self.patched:
             patched_map[url].append(json.loads(data))
@@ -475,12 +489,16 @@ class TestGodkend(PermissionsTest, TestCase):
 class FileViewTest(PermissionsTest, TestCase):
     view = FragtbrevView
 
+    @property
+    def login_url(self):
+        return str(reverse("login"))
+
     check_permissions = (
         (reverse("fragtbrev_view", kwargs={"id": 1}), view.required_permissions),
     )
 
     def mock_requests_get(self, path):
-        expected_prefix = "http://toldbehandling-rest:7000/api/"
+        expected_prefix = f"{settings.REST_DOMAIN}/api/"
         path = path.split("?")[0]
         path = path.rstrip("/")
         response = Response()
@@ -547,6 +565,10 @@ class AdminAnmeldelseListViewTest(PermissionsTest, AnmeldelseListViewTest, TestC
     check_permissions = ((reverse("tf10_list"), view.required_permissions),)
 
     @property
+    def login_url(self):
+        return str(reverse("login"))
+
+    @property
     def list_url(self):
         return str(reverse("tf10_list"))
 
@@ -559,11 +581,19 @@ class AdminAnmeldelseListViewTest(PermissionsTest, AnmeldelseListViewTest, TestC
 
 class AdminFileViewTest(FileViewTest, TestCase):
     @property
+    def login_url(self):
+        return str(reverse("login"))
+
+    @property
     def file_view_url(self):
         return str(reverse("fragtbrev_view", kwargs={"id": 1}))
 
 
 class AfgiftstabelListViewTest(PermissionsTest, TestCase):
+    @property
+    def login_url(self):
+        return str(reverse("login"))
+
     view = AfgiftstabelListView
     check_permissions = ((reverse("afgiftstabel_list"), view.required_permissions),)
 
@@ -654,7 +684,7 @@ class AfgiftstabelListViewTest(PermissionsTest, TestCase):
         self.assertEquals(response.status_code, 302)
         self.assertEquals(
             response.headers["Location"],
-            reverse("login") + "?next=" + quote(url, safe=""),
+            self.login_url + "?back=" + quote(url, safe=""),
         )
 
     @patch.object(requests.sessions.Session, "get")
@@ -790,6 +820,10 @@ class AfgiftstabelListViewTest(PermissionsTest, TestCase):
 
 
 class AfgiftstabelDownloadTest(PermissionsTest, TestCase):
+    @property
+    def login_url(self):
+        return str(reverse("login"))
+
     view = AfgiftstabelDownloadView
     check_permissions = (
         (
@@ -945,6 +979,10 @@ class AfgiftstabelDownloadTest(PermissionsTest, TestCase):
 
 
 class AfgiftstabelUploadTest(HasLogin):
+    @property
+    def login_url(self):
+        return str(reverse("login"))
+
     def setUp(self):
         super().setUp()
         self.posted = []
@@ -988,7 +1026,7 @@ class AfgiftstabelUploadTest(HasLogin):
         ]
 
     def mock_requests_post(self, path, data, headers=None):
-        expected_prefix = "http://toldbehandling-rest:7000/api/"
+        expected_prefix = f"{settings.REST_DOMAIN}/api/"
         path = path.rstrip("/")
         response = Response()
         json_content = None

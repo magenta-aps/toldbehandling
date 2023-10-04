@@ -8,6 +8,7 @@ from django.urls import path, include
 
 urlpatterns = [
     path("", include("ui.urls")),
+    path("", include("django_mitid_auth.urls", namespace="login")),
 ]
 
 if settings.DEBUG:

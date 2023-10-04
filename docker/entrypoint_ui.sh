@@ -11,6 +11,10 @@ TEST=${TEST:=false}
 MAKEMESSAGES=${MAKEMESSAGES:=true}
 COMPILEMESSAGES=${COMPILEMESSAGES:=true}
 DJANGO_DEBUG=${DJANGO_DEBUG:=false}
+SKIP_IDP_METADATA=${SKIP_IDP_METADATA:=false}
+
+python manage.py wait_for_db
+
 
 if [ "$MAKE_MIGRATIONS" = true ]; then
   echo 'generating migrations'
@@ -19,6 +23,10 @@ fi
 if [ "$MIGRATE" = true ]; then
   echo 'running migrations'
   python manage.py migrate
+fi
+python manage.py createcachetable
+if [ "$SKIP_IDP_METADATA" = false ]; then
+  python manage.py update_mitid_idp_metadata
 fi
 if [ "$TEST" = true ]; then
   echo 'running tests'

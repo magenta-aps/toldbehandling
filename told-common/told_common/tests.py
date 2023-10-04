@@ -12,6 +12,7 @@ from urllib.parse import quote, quote_plus, urlparse, parse_qs
 
 import requests
 from bs4 import BeautifulSoup
+from django.conf import settings
 from django.contrib.auth.models import Permission
 from django.urls import reverse
 from requests import Response
@@ -44,7 +45,7 @@ class LoginTest:
 
     @staticmethod
     def mock_requests_get(path):
-        expected_prefix = "http://toldbehandling-rest:7000/api/"
+        expected_prefix = f"{settings.REST_DOMAIN}/api/"
         path = path.split("?")[0]
         path = path.rstrip("/")
         response = Response()
@@ -108,7 +109,7 @@ class LoginTest:
         )
         self.assertEquals(response.status_code, 200)  # Rerender form
         mock_post.assert_called_with(
-            "http://toldbehandling-rest:7000/api/token/pair",
+            f"{settings.REST_DOMAIN}/api/token/pair",
             json={"username": "incorrect", "password": "credentials"},
             headers={"Content-Type": "application/json"},
         )
@@ -122,18 +123,18 @@ class LoginTest:
     def test_correct_login(self, mock_post, mock_get):
         mock_get.side_effect = self.mock_requests_get
         response = self.client.post(
-            reverse("login") + "?next=/",
+            reverse("login") + "?back=/",
             {"username": "correct", "password": "credentials"},
         )
         mock_post.assert_called_with(
-            "http://toldbehandling-rest:7000/api/token/pair",
+            f"{settings.REST_DOMAIN}/api/token/pair",
             json={"username": "correct", "password": "credentials"},
             headers={"Content-Type": "application/json"},
         )
         self.assertEquals(response.status_code, 302)
         self.assertEquals(response.headers["Location"], "/")
-        self.assertEquals(response.cookies["access_token"].value, "123456")
-        self.assertEquals(response.cookies["refresh_token"].value, "abcdef")
+        self.assertEquals(self.client.session["access_token"], "123456")
+        self.assertEquals(self.client.session["refresh_token"], "abcdef")
 
     @patch.object(RestClient, "refresh_login")
     @patch.object(requests.sessions.Session, "get")
@@ -191,8 +192,9 @@ class LoginTest:
         # Set token max_age way down, so it will be refreshed
         with self.settings(NINJA_JWT={"ACCESS_TOKEN_LIFETIME": timedelta(seconds=1)}):
             response = self.client.get(reverse("rest", kwargs={"path": "afsender"}))
+            self.assertEquals(response.status_code, 200)
             # Check that token refresh is needed
-            self.assertEquals(response.cookies["access_token"].value, "7890ab")
+            self.assertEquals(self.client.session["access_token"], "7890ab")
 
     @patch.object(requests.sessions.Session, "get")
     @patch.object(
@@ -203,16 +205,16 @@ class LoginTest:
     def test_logout(self, mock_post, mock_get):
         mock_get.side_effect = self.mock_requests_get
         response = self.client.post(
-            reverse("login") + "?next=/",
+            reverse("login") + "?back=/",
             {"username": "correct", "password": "credentials"},
         )
         self.assertEquals(response.status_code, 302)
         self.assertEquals(response.headers["Location"], "/")
-        self.assertEquals(response.cookies["access_token"].value, "123456")
-        self.assertEquals(response.cookies["refresh_token"].value, "abcdef")
+        self.assertEquals(self.client.session["access_token"], "123456")
+        self.assertEquals(self.client.session["refresh_token"], "abcdef")
         response = self.client.get(reverse("logout"))
-        self.assertEquals(response.cookies["access_token"].value, "")
-        self.assertEquals(response.cookies["refresh_token"].value, "")
+        self.assertNotIn("access_token", self.client.session)
+        self.assertNotIn("refresh_token", self.client.session)
 
     @patch.object(
         requests.Session,
@@ -234,7 +236,7 @@ class LoginTest:
         self.assertEquals(response.status_code, 302)
         self.assertEquals(
             response.headers["Location"],
-            "/login?next=" + quote_plus(self.restricted_url),
+            "/login?back=" + quote_plus(self.restricted_url),
         )
         mock_get.return_value = self.create_response(500, "")
         response = self.client.get(self.restricted_url)
@@ -242,20 +244,14 @@ class LoginTest:
 
 
 class HasLogin:
+    @property
+    def login_url(self):
+        raise NotImplementedError
+
     def login(self, userdata=None):
-        self.client.cookies.load(
-            {
-                "access_token": "123456",
-                "refresh_token": "abcdef",
-                "access_token_timestamp": time.time(),
-                "refresh_token_timestamp": time.time(),
-            }
-        )
         session = self.client.session
-        if userdata:
-            session["user"] = userdata
-        else:
-            session["user"] = {
+        if not userdata:
+            userdata = {
                 "username": "admin",
                 "first_name": "Administrator",
                 "last_name": "",
@@ -266,6 +262,19 @@ class HasLogin:
                     for p in Permission.objects.all()
                 ],
             }
+        session.update(
+            {
+                "access_token": "123456",
+                "refresh_token": "abcdef",
+                "access_token_timestamp": time.time(),
+                "refresh_token_timestamp": time.time(),
+                "user": userdata,
+                "saml_user": {
+                    "cpr": 1234567890,
+                    "cvr": 12345678,
+                },
+            }
+        )
         session.save()
 
 
@@ -639,7 +648,7 @@ class AnmeldelseListViewTest(HasLogin):
         self.assertEquals(response.status_code, 302)
         self.assertEquals(
             response.headers["Location"],
-            reverse("login") + "?next=" + quote(url, safe=""),
+            self.login_url + "?back=" + quote(url, safe=""),
         )
 
     @patch.object(requests.sessions.Session, "get")
@@ -864,7 +873,7 @@ class FileViewTest(HasLogin):
         raise NotImplementedError("Implement in subclasses")
 
     def mock_requests_get(self, path):
-        expected_prefix = "http://toldbehandling-rest:7000/api/"
+        expected_prefix = f"{settings.REST_DOMAIN}/api/"
         path = path.split("?")[0]
         path = path.rstrip("/")
         response = Response()
