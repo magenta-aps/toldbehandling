@@ -15,13 +15,17 @@
 {% endblock %}
 
 {% block content %}
-{% if can_upload %}
-<div class="clearfix">
-    <a class="float-end btn btn-primary" href="{% url 'afgiftstabel_create' %}">Opret ny tabel fra regneark</a>
-</div>
-{% endif %}
 
-<div class="mx-5 my-1">
+<div class="mx-5">
+
+    <h1>Afgiftstabeller</h1>
+
+    {% if can_upload %}
+    <div class="clearfix">
+        <a class="float-end btn btn-primary" href="{% url 'afgiftstabel_create' %}">Opret ny tabel fra regneark</a>
+    </div>
+    {% endif %}
+
     <table class="table table-bordered"
            data-toggle="table"
            data-sticky-header="true"
