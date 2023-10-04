@@ -3,5 +3,5 @@ Upstream-Name: Toldbehandling
 Upstream-Contact: Magenta ApS <info@magenta.dk>
 
 Files: told-common/* rest/* ui/* admin/* dev-environment/* docker/* mockup/* dev-idp/* docker-compose.yml docker-compose.override.template.yml SUMMARY README.md .gitignore .gitlab-ci.yml
-Copyright: 2021-2022 Magenta ApS <info@magenta.dk>
+Copyright: 2023 Magenta ApS <info@magenta.dk>
 License: MPL-2.0

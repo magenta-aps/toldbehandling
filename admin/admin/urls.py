@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2023 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: MPL-2.0
+
 from django.urls import path
 from django.views.generic import TemplateView
 from told_common import views as common_views

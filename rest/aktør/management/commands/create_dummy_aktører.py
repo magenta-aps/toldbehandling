@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2023 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: MPL-2.0
+
 from django.core.management.base import BaseCommand
 
 from aktør.models import Afsender, Modtager

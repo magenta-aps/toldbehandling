@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2023 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: MPL-2.0
+
 import base64
 from typing import Optional
 from uuid import uuid4
