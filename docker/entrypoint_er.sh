@@ -1,4 +1,9 @@
 #!/bin/bash
+
+# SPDX-FileCopyrightText: 2023 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: MPL-2.0
+
 set -e
 
 GENERATE_DB_DOCUMENTATION=${GENERATE_DB_DOCUMENTATION:=true}

@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2023 Magenta ApS <info@magenta.dk>
+
+SPDX-License-Identifier: MPL-2.0
+-->
+
 # Toldbehandling
 
 This repository contains the Toldbehandling applications (internal and
