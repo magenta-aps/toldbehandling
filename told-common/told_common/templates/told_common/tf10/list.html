@@ -24,27 +24,15 @@
 
     <form method="get" action="{% url 'tf10_list' %}">
         <div class="row">
-            <div class="col-4">Dato</div>
-            <div class="col-4">{{form.dato_efter}}</div>
-            <div class="col-4">{{form.dato_før}}</div>
-        </div>
-        <div class="row">
-            <div class="col-4"><label for="{{form.vareart.name}}" class="form-label">Varetype</label></div>
-            <div class="col-8">
-                {{form.vareart}}
-            </div>
-        </div>
-        <div class="row">
             <div class="col-4"><label for="{{form.godkendt.name}}" class="form-label">Status</label></div>
             <div class="col-8">
                 {{form.godkendt}}
             </div>
         </div>
         <div class="row">
-            <div class="col-4"><label for="{{form.id.name}}" class="form-label">Anmeldelsesnummer</label></div>
-            <div class="col-8">
-                {{form.id}}
-            </div>
+            <div class="col-4">Dato</div>
+            <div class="col-4">{{form.dato_efter}}</div>
+            <div class="col-4">{{form.dato_før}}</div>
         </div>
         <div class="row">
             <div class="col-4"><label for="{{form.afsender.name}}" class="form-label">Afsender</label></div>
@@ -56,6 +44,18 @@
             <div class="col-4"><label for="{{form.modtager.name}}" class="form-label">Modtager</label></div>
             <div class="col-8">
                 {{form.modtager}}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-4"><label for="{{form.vareart.name}}" class="form-label">Varetype</label></div>
+            <div class="col-8">
+                {{form.vareart}}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-4"><label for="{{form.id.name}}" class="form-label">Anmeldelsesnummer</label></div>
+            <div class="col-8">
+                {{form.id}}
             </div>
         </div>
         <div class="row">
