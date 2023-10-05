@@ -696,6 +696,7 @@ class AfgiftstabelListViewTest(PermissionsTest, TestCase):
         response = self.client.get(url)
         self.assertEquals(response.status_code, 200)
         table_data = self.get_html_list(response.content)
+        print(self.strip_html_tags(table_data))
         self.assertEquals(
             # Tag table_data og fjern alle html-tags i strengen. Join med mellemrum.
             self.strip_html_tags(table_data),
@@ -708,13 +709,13 @@ class AfgiftstabelListViewTest(PermissionsTest, TestCase):
                 },
                 {
                     "Gyldig fra": "2023-01-01",
-                    "Gyldig til": "",
+                    "Gyldig til": "-",
                     "Kladde": "Nej",
                     "Handlinger": "Vis Download .xlsx .csv",
                 },
                 {
-                    "Gyldig fra": "",
-                    "Gyldig til": "",
+                    "Gyldig fra": "-",
+                    "Gyldig til": "-",
                     "Kladde": "Ja",
                     "Handlinger": "Vis Download .xlsx .csv",
                 },
@@ -735,22 +736,25 @@ class AfgiftstabelListViewTest(PermissionsTest, TestCase):
                         "id": 1,
                         "gyldig_fra": "2022-01-01",
                         "gyldig_til": "2023-01-01",
-                        "kladde": "nej",
+                        "kladde": False,
                         "actions": "Vis Download .xlsx .csv",
+                        "gældende": False,
                     },
                     {
                         "id": 2,
                         "gyldig_fra": "2023-01-01",
-                        "gyldig_til": "",
-                        "kladde": "nej",
+                        "gyldig_til": None,
+                        "kladde": False,
                         "actions": "Vis Download .xlsx .csv",
+                        "gældende": True,
                     },
                     {
                         "id": 3,
-                        "gyldig_fra": "",
-                        "gyldig_til": "",
-                        "kladde": "ja",
+                        "gyldig_fra": None,
+                        "gyldig_til": None,
+                        "kladde": True,
                         "actions": "Vis Download .xlsx .csv",
+                        "gældende": False,
                     },
                 ],
             },

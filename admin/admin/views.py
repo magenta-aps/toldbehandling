@@ -231,39 +231,45 @@ class AfgiftstabelListView(PermissionsRequiredMixin, HasRestClientMixin, GetForm
         context = self.get_context_data(
             items=items, total=total, search_data=search_data
         )
+        items = [
+            {
+                key: self.map_value(item, key)
+                for key in (
+                    "id",
+                    "gyldig_fra",
+                    "gyldig_til",
+                    "kladde",
+                    "actions",
+                    "gældende",
+                )
+            }
+            for item in items
+        ]
+        context["items"] = items
         if form.cleaned_data["json"]:
             return JsonResponse(
                 {
                     "total": total,
-                    "items": [
-                        {
-                            key: self.map_value(item, key)
-                            for key in (
-                                "id",
-                                "gyldig_fra",
-                                "gyldig_til",
-                                "kladde",
-                                "actions",
-                            )
-                        }
-                        for item in items
-                    ],
+                    "items": items,
                 }
             )
         return self.render_to_response(context)
 
     def map_value(self, item, key):
+        value = item.get(key, None)
         if key == "actions":
             return loader.render_to_string(
                 self.actions_template,
                 {"item": item, "can_download": self.can_download},
                 self.request,
             )
-        value = item[key]
-        if type(value) is bool:
-            value = _("ja") if value else _("nej")
-        if value is None:
-            value = ""
+        if key == "gældende":
+            today = date.today().isoformat()
+            value = (
+                not item["kladde"]
+                and item["gyldig_fra"] < today
+                and (item["gyldig_til"] is None or today < item["gyldig_til"])
+            )
         return value
 
 

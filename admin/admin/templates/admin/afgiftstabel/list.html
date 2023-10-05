@@ -40,32 +40,34 @@
            data-pagination-loop="false"
            data-defer-url="{% url 'afgiftstabel_list' %}?json=1"
            data-query-params="queryParams"
+           data-row-style="rowStyle"
            data-total-rows="{{total}}"
            data-silent-sort="true" {# vil vi vise en loading-boks? #}
            data-remember-order="true"
-
     >
         <thead>
         <tr>
             <th data-sortable="true" data-field="gyldig_fra" class="col-3">Gyldig fra</th>
             <th data-sortable="true" data-field="gyldig_til" class="col-3">Gyldig til</th>
-            <th data-sortable="true" data-field="kladde" class="col-3">Kladde</th>
+            <th data-sortable="true" data-field="kladde" class="col-3" data-formatter="kladdeFormatter">Kladde</th>
             <th data-field="actions" class="col-3">Handlinger</th>
         </tr>
         </thead>
         <tbody>
         {% for item in items %}
-        {% if item.kladde %}
-        <tr class="table-secondary">
+            {% if item.kladde %}
+            <tr class="table-secondary">
+            {% elif item.gældende %}
+            <tr class="table-success">
             {% else %}
-        <tr>
+            <tr>
             {% endif %}
 
-            <td>{{item.gyldig_fra|default_if_none:""}}</td>
-            <td>{{item.gyldig_til|default_if_none:""}}</td>
-            <td>{{item.kladde|yesno|capfirst}}</td>
-            <td>{% include actions_template with item=item %}</td>
-        </tr>
+                <td>{{item.gyldig_fra|default_if_none:"-"}}</td>
+                <td>{{item.gyldig_til|default_if_none:"-"}}</td>
+                <td>{{item.kladde|yesno|capfirst}}</td>
+                <td>{% include actions_template with item=item %}</td>
+            </tr>
         {% endfor %}
         </tbody>
     </table>
@@ -83,6 +85,21 @@
             }
         }*/
         return params;
+    }
+    function bool(value) {
+        return value === true || value === "Ja"
+    }
+    function rowStyle(rowdata, index) {
+        if (bool(rowdata["kladde"])) {
+            return {"classes": "table-secondary"}
+        }
+        if (bool(rowdata["gældende"])) {
+            return {"classes": "table-success"}
+        }
+        return {}
+    }
+    function kladdeFormatter(value, row) {
+        return bool(value) ? "Ja" : "Nej";
     }
 </script>
 {% endblock %}
