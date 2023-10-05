@@ -2,5 +2,6 @@
 #
 # SPDX-License-Identifier: MPL-2.0
 
+
 class SpreadsheetImportException(Exception):
     pass

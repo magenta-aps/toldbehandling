@@ -6,9 +6,9 @@ import json
 import time
 from base64 import b64encode
 from dataclasses import dataclass, field
-from datetime import timedelta
+from datetime import timedelta, date
 from functools import cached_property
-from typing import Union, Dict, List, Tuple
+from typing import Union, Dict, List, Tuple, Any, Optional
 from urllib.parse import urlencode
 
 import requests
@@ -506,23 +506,37 @@ class RestClient:
                 [b64encode(chunk).decode("ascii") for chunk in file.chunks(48 * 1024)]
             )
 
-    def get_all_items(self, route) -> Dict[int, dict]:
+    def get_all_items(
+        self, route: str, filter: Optional[Dict[str, Any]] = None
+    ) -> Dict[int, dict]:
         limit = 100
         offset = 0
         items = []
+        if filter is None:
+            filter = {}
 
-        data = self.get(route, {"limit": limit, "offset": offset})
+        data = self.get(route, {**filter, "limit": limit, "offset": offset})
         items.extend(data["items"])
         while len(data["items"]) == limit:
             offset += limit
-            data = self.get(route, {"limit": limit, "offset": offset})
+            data = self.get(route, {**filter, "limit": limit, "offset": offset})
             items.extend(data["items"])
 
         return {item["id"]: item for item in items}
 
     @cached_property
     def varesatser(self) -> Dict[int, dict]:
-        return self.get_all_items("vareafgiftssats")
+        today = date.today().isoformat()
+        afgiftstabeller = self.get(
+            "afgiftstabel",
+            {"gyldig_fra__lte": today, "gyldig_til__gte": today, "kladde": False},
+        )
+        if afgiftstabeller["count"] == 1:
+            afgiftstabel = afgiftstabeller["items"][0]
+            return self.get_all_items(
+                "vareafgiftssats", {"afgiftstabel": afgiftstabel["id"]}
+            )
+        return {}
 
     @cached_property
     def afsendere(self) -> Dict[int, dict]:
