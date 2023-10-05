@@ -593,6 +593,19 @@ class AnmeldelseListViewTest(HasLogin):
                 ],
             }
 
+        elif path == expected_prefix + "afgiftstabel":
+            json_content = {
+                "count": 1,
+                "items": [
+                    {
+                        "id": 1,
+                        "gyldig_fra": "2023-01-01",
+                        "gyldig_til": None,
+                        "kladde": False,
+                    }
+                ],
+            }
+
         elif path == expected_prefix + "afsender":
             json_content = {
                 "count": 3,

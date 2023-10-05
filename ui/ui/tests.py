@@ -128,7 +128,19 @@ class BlanketTest(HasLogin, TestCase):
         content = None
         status_code = None
         empty = {"count": 0, "items": []}
-        if path == expected_prefix + "vareafgiftssats":
+        if path == expected_prefix + "afgiftstabel":
+            json_content = {
+                "count": 1,
+                "items": [
+                    {
+                        "id": 1,
+                        "gyldig_fra": "2023-01-01",
+                        "gyldig_til": None,
+                        "kladde": False,
+                    }
+                ],
+            }
+        elif path == expected_prefix + "vareafgiftssats":
             if self.mock_existing["vareafgiftssats"]:
                 json_content = {
                     "count": 1,
@@ -145,7 +157,7 @@ class BlanketTest(HasLogin, TestCase):
                 }
             else:
                 json_content = empty
-        if path == expected_prefix + "afsender":
+        elif path == expected_prefix + "afsender":
             if self.mock_existing["afsender"]:
                 json_content = {
                     "count": 1,
@@ -164,7 +176,7 @@ class BlanketTest(HasLogin, TestCase):
                 }
             else:
                 json_content = empty
-        if path == expected_prefix + "modtager":
+        elif path == expected_prefix + "modtager":
             if self.mock_existing["modtager"]:
                 json_content = {
                     "count": 1,
@@ -185,6 +197,8 @@ class BlanketTest(HasLogin, TestCase):
                 }
             else:
                 json_content = empty
+        else:
+            print(f"Mock got unrecognized path: {path}")
         if json_content:
             content = json.dumps(json_content).encode("utf-8")
         if content:
