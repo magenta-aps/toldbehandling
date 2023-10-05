@@ -18,7 +18,7 @@ def afgiftsanmeldelse_upload_to(instance, filename):
 
 class Afgiftsanmeldelse(models.Model):
     class Meta:
-        ordering = ["dato"]
+        ordering = ["id"]
 
     oprettet_af = models.ForeignKey(
         User,
