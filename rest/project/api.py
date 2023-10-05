@@ -4,12 +4,12 @@
 
 from aktør.api import AfsenderAPI, ModtagerAPI
 from anmeldelse.api import AfgiftsanmeldelseAPI, VarelinjeAPI
-from forsendelse.api import PostforsendelseAPI, FragtforsendelseAPI
+from common.api import UserAPI
+from forsendelse.api import FragtforsendelseAPI, PostforsendelseAPI
 from ninja_extra import NinjaExtraAPI
 from ninja_jwt.controller import NinjaJWTDefaultController
 from project.util import ORJSONRenderer
 from sats.api import AfgiftstabelAPI, VareafgiftssatsAPI
-from common.api import UserAPI
 
 api = NinjaExtraAPI(title="Toldbehandling", renderer=ORJSONRenderer(), csrf=False)
 api.register_controllers(NinjaJWTDefaultController)

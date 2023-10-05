@@ -4,7 +4,7 @@
 
 import random
 
-from django.contrib.auth.models import User, Group
+from django.contrib.auth.models import Group, User
 from django.core.files.base import ContentFile
 from django.core.management.base import BaseCommand
 from forsendelse.models import Fragtforsendelse, Postforsendelse

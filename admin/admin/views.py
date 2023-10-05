@@ -6,12 +6,9 @@ import csv
 from collections import defaultdict
 from datetime import date
 from functools import cached_property
-from typing import Union, Iterable, List, Dict
+from typing import Dict, Iterable, List, Union
 from urllib.parse import unquote
 
-from admin.data import Afgiftstabel
-from admin.data import Vareafgiftssats
-from django.http import Http404, JsonResponse, HttpResponseBadRequest, HttpResponse
 from django.shortcuts import redirect
 from django.template import loader
 from django.urls import reverse
@@ -21,13 +18,21 @@ from django.views.generic import FormView, TemplateView
 from openpyxl import Workbook
 from requests import HTTPError
 from told_common import views as common_views
-from told_common.view_mixins import (
-    HasRestClientMixin,
-    GetFormView,
-    PermissionsRequiredMixin,
-)
 
 from admin import forms
+from admin.data import Afgiftstabel, Vareafgiftssats
+
+from django.http import (  # isort: skip
+    Http404,
+    HttpResponse,
+    HttpResponseBadRequest,
+    JsonResponse,
+)
+from told_common.view_mixins import (  # isort: skip
+    GetFormView,
+    HasRestClientMixin,
+    PermissionsRequiredMixin,
+)
 
 
 class IndexView(PermissionsRequiredMixin, HasRestClientMixin, TemplateView):

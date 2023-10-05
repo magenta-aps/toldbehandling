@@ -7,13 +7,14 @@ from django.core.exceptions import ValidationError
 from django.forms import formset_factory
 from django.utils.translation import gettext_lazy as _
 from requests import HTTPError
-from told_common.form_mixins import (
+from told_common.rest_client import RestClient
+
+from told_common.form_mixins import (  # isort: skip
     BootstrapForm,
     ButtonlessIntegerField,
-    MaxSizeFileField,
     DateInput,
+    MaxSizeFileField,
 )
-from told_common.rest_client import RestClient
 
 
 class LoginForm(BootstrapForm):

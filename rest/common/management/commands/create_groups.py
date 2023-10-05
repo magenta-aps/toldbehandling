@@ -7,7 +7,7 @@ from anmeldelse.models import Afgiftsanmeldelse, Varelinje
 from django.contrib.auth.models import Group, Permission, User
 from django.contrib.contenttypes.models import ContentType
 from django.core.management.base import BaseCommand
-from forsendelse.models import Postforsendelse, Fragtforsendelse
+from forsendelse.models import Fragtforsendelse, Postforsendelse
 from sats.models import Afgiftstabel, Vareafgiftssats
 
 

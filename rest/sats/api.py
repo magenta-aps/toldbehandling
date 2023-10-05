@@ -6,8 +6,8 @@ from decimal import Decimal
 from typing import Optional
 
 from django.shortcuts import get_object_or_404
-from ninja import ModelSchema, FilterSchema, Query
-from ninja_extra import api_controller, route, permissions
+from ninja import FilterSchema, ModelSchema, Query
+from ninja_extra import api_controller, permissions, route
 from ninja_extra.pagination import paginate
 from ninja_extra.schemas import NinjaPaginationResponseSchema
 from ninja_jwt.authentication import JWTAuth

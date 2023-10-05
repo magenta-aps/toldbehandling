@@ -4,13 +4,13 @@
 
 import base64
 from decimal import Decimal
-from typing import Union, Dict, List
+from typing import Dict, List, Union
 
 import orjson
 from django.core.files import File
 from django.http import HttpRequest
 from ninja.renderers import BaseRenderer
-from ninja_extra import permissions, ControllerBase
+from ninja_extra import ControllerBase, permissions
 
 
 class ORJSONRenderer(BaseRenderer):

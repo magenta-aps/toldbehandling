@@ -7,19 +7,20 @@ from __future__ import annotations
 import csv
 from dataclasses import dataclass, field
 from datetime import date
-from decimal import Decimal, Context
+from decimal import Context, Decimal
 from enum import Enum
 from functools import cached_property
 from io import StringIO
-from typing import Union, Optional, List, Callable, Dict, Iterable
+from typing import Callable, Dict, Iterable, List, Optional, Union
 
-from admin.exceptions import SpreadsheetImportException
-from dataclasses_json import dataclass_json, config
+from dataclasses_json import config, dataclass_json
 from django.core.files.uploadedfile import UploadedFile
 from django.template.defaultfilters import floatformat
 from django.utils.translation import gettext_lazy as _
 from marshmallow import fields
 from openpyxl import load_workbook
+
+from admin.exceptions import SpreadsheetImportException
 
 
 def format_decimal(decimal: Decimal) -> str:

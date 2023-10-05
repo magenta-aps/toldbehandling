@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: MPL-2.0
 
 from django.urls import path
-from rest.api import api
 
+from rest.api import api
 
 urlpatterns = [path("", api.urls)]

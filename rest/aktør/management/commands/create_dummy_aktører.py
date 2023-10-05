@@ -2,11 +2,11 @@
 #
 # SPDX-License-Identifier: MPL-2.0
 
-from django.core.management.base import BaseCommand
-
-from aktør.models import Afsender, Modtager
 import random
 import string
+
+from aktør.models import Afsender, Modtager
+from django.core.management.base import BaseCommand
 
 # Source: Wikipedia
 company_names = [

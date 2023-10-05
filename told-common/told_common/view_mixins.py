@@ -6,22 +6,23 @@ from __future__ import annotations
 
 import time
 from functools import cached_property
-from typing import Dict, Any, Iterable, Optional
+from typing import Any, Dict, Iterable, Optional
 from urllib.parse import quote_plus
 
 from django.conf import settings
-from django.http import (
-    HttpResponseRedirect,
-    HttpResponseServerError,
-    HttpResponse,
-    HttpRequest,
-)
 from django.shortcuts import redirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.views.generic import FormView
 from requests import HTTPError
 from told_common.rest_client import JwtTokenInfo, RestClient
+
+from django.http import (  # isort: skip
+    HttpRequest,
+    HttpResponse,
+    HttpResponseRedirect,
+    HttpResponseServerError,
+)
 
 
 class LoginRequiredMixin:

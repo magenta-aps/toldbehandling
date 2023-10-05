@@ -10,15 +10,14 @@ from anmeldelse.models import Varelinje
 from django.core.files.base import ContentFile
 from django.db.models import QuerySet
 from django.shortcuts import get_object_or_404
-from forsendelse.models import Postforsendelse, Fragtforsendelse
-from ninja import ModelSchema, FilterSchema, Query
-from ninja_extra import api_controller, route, permissions
+from forsendelse.models import Fragtforsendelse, Postforsendelse
+from ninja import FilterSchema, ModelSchema, Query
+from ninja_extra import api_controller, permissions, route
 from ninja_extra.exceptions import PermissionDenied
 from ninja_extra.pagination import paginate
 from ninja_extra.schemas import NinjaPaginationResponseSchema
 from ninja_jwt.authentication import JWTAuth
 from project.util import RestPermission
-
 
 # Django-ninja har endnu ikke understøttelse for PATCH med filer i multipart/form-data
 # Se https://github.com/vitalik/django-ninja/pull/397

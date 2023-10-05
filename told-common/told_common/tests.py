@@ -5,10 +5,10 @@
 import json
 import time
 from copy import deepcopy
-from datetime import timedelta, datetime
-from typing import Tuple, Callable, Any
-from unittest.mock import patch, mock_open
-from urllib.parse import quote, quote_plus, urlparse, parse_qs
+from datetime import datetime, timedelta
+from typing import Any, Callable, Tuple
+from unittest.mock import mock_open, patch
+from urllib.parse import parse_qs, quote, quote_plus, urlparse
 
 import requests
 from bs4 import BeautifulSoup

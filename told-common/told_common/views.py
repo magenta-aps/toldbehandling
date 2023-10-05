@@ -5,22 +5,23 @@
 import os
 from datetime import date
 from functools import cached_property
-from typing import Dict, Any
+from typing import Any, Dict
 from urllib.parse import unquote
 
 from django.conf import settings
-from django.http import JsonResponse, FileResponse
+from django.http import FileResponse, JsonResponse
 from django.template import loader
 from django.urls import reverse
 from django.views import View
 from django.views.generic import FormView, RedirectView
 from told_common import forms
 from told_common.rest_client import RestClient
-from told_common.view_mixins import (
-    FormWithFormsetView,
-    LoginRequiredMixin,
-    HasRestClientMixin,
+
+from told_common.view_mixins import (  # isort: skip
     CustomLayoutMixin,
+    FormWithFormsetView,
+    HasRestClientMixin,
+    LoginRequiredMixin,
     PermissionsRequiredMixin,
 )
 
