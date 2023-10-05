@@ -12,7 +12,6 @@ from django.conf import settings
 from django.http import JsonResponse, FileResponse
 from django.template import loader
 from django.urls import reverse
-from django.utils.translation import gettext_lazy as _
 from django.views import View
 from django.views.generic import FormView, RedirectView
 from told_common import forms
@@ -357,15 +356,6 @@ class TF10ListView(
                 self.request,
             )
         value = item[key]
-        if key in ("afsender", "modtager"):
-            return value["navn"]
-        if key == "godkendt":
-            if value is True:
-                return _("Godkendt")
-            elif value is False:
-                return _("Afvist")
-            else:
-                return _("Ny")
         return value
 
     def get_form_kwargs(self) -> Dict[str, Any]:

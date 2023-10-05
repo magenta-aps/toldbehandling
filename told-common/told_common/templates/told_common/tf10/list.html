@@ -103,9 +103,9 @@
         <tr>
             <th data-sortable="true" data-field="id">Nummer</th>
             <th data-sortable="true" data-field="dato">Dato</th>
-            <th data-sortable="true" data-field="afsender">Afsender</th>
-            <th data-sortable="true" data-field="modtager">Modtager</th>
-            <th data-sortable="true" data-field="godkendt">Status</th>
+            <th data-sortable="true" data-field="afsender" data-formatter="aktørFormatter">Afsender</th>
+            <th data-sortable="true" data-field="modtager" data-formatter="aktørFormatter">Modtager</th>
+            <th data-sortable="true" data-field="godkendt" data-formatter="statusFormatter">Status</th>
             <th data-field="actions">Handlinger</th>
         </tr>
         </thead>
@@ -147,6 +147,22 @@ function queryParams(params){  // Kaldes af bootstrap-table fordi vi peger på d
         }
     }
     return params;
+}
+function statusFormatter(value) {
+    if (value === true) {
+        return "Godkendt";
+    } else if (value === false) {
+        return "Afvist";
+    } else if (value === null) {
+        return "Ny"
+    }
+    return value;
+}
+function aktørFormatter(value) {
+    if (value) {
+        return value["navn"];
+    }
+    return value;
 }
 </script>
 {% endblock %}
