@@ -4,7 +4,7 @@
 
 import told_common.views as common_views
 from django.urls import path
-from django.views.generic import TemplateView, RedirectView
+from django.views.generic import RedirectView, TemplateView
 from django_mitid_auth.saml.views import AccessDeniedView
 
 from ui import views

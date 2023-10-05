@@ -10,14 +10,13 @@ from datetime import date
 from decimal import Decimal
 from enum import Enum
 from itertools import chain
-from typing import Tuple, List, Union, Any, Dict
-from urllib.parse import urlencode, unquote
+from typing import Any, Dict, List, Tuple, Union
+from urllib.parse import unquote, urlencode
 
 from aktør.models import Afsender, Modtager
-from anmeldelse.models import Afgiftsanmeldelse
-from anmeldelse.models import Varelinje
+from anmeldelse.models import Afgiftsanmeldelse, Varelinje
 from django.conf import settings
-from django.contrib.auth.models import User, Permission
+from django.contrib.auth.models import Permission, User
 from django.contrib.contenttypes.models import ContentType
 from django.core.files import File
 from django.core.files.base import ContentFile
@@ -25,10 +24,9 @@ from django.db.models import Choices, Model
 from django.db.models.fields.files import FieldFile
 from django.test import Client
 from django.urls import reverse
-from forsendelse.models import Fragtforsendelse
-from forsendelse.models import Postforsendelse
+from forsendelse.models import Fragtforsendelse, Postforsendelse
 from project.util import json_dump
-from sats.models import Vareafgiftssats, Afgiftstabel
+from sats.models import Afgiftstabel, Vareafgiftssats
 
 
 class RestMixin:

@@ -8,9 +8,8 @@ from aktør.models import Afsender, Modtager
 from django.core.exceptions import ValidationError
 from django.http import HttpResponseBadRequest
 from django.shortcuts import get_object_or_404
-from ninja import FilterSchema, Query, Field, ModelSchema
-from ninja_extra import api_controller, route
-from ninja_extra import permissions
+from ninja import Field, FilterSchema, ModelSchema, Query
+from ninja_extra import api_controller, permissions, route
 from ninja_extra.pagination import paginate
 from ninja_extra.schemas import NinjaPaginationResponseSchema
 from ninja_jwt.authentication import JWTAuth

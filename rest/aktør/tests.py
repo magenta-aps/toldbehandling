@@ -4,7 +4,6 @@
 
 from aktør.models import Afsender, Modtager
 from django.test import TestCase
-
 from project.test_mixins import RestMixin
 
 

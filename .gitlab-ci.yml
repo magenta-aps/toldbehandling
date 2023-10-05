@@ -45,6 +45,7 @@ Lint Python:
   before_script:
     - pip3 install flake8
     - pip3 install black==23.1.0
+    - pip3 install isort==5.12.0
     #- pip3 install -r django/requirements.txt
   script:
     - flake8 --max-line-length 88 --exclude=migrations,tests.py,settings.py --extend-ignore E226,E203 rest/ --
@@ -53,6 +54,11 @@ Lint Python:
     - black --check --diff --exclude=migrations rest/
     - black --check --diff --exclude=migrations ui/
     - black --check --diff --exclude=migrations told-common/
+    - isort -c --diff --skip migrations rest/
+    - isort -c --diff --skip migrations admin/
+    - isort -c --diff --skip migrations told-common/
+    - isort -c --diff --skip migrations ui/
+
 
 Lint Dockerfiles:
   <<: *lint-default

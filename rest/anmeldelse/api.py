@@ -16,8 +16,8 @@ from django.db.models import QuerySet
 from django.http import HttpResponseBadRequest
 from django.shortcuts import get_object_or_404
 from forsendelse.api import FragtforsendelseOut, PostforsendelseOut
-from ninja import FilterSchema, Query, ModelSchema, Field
-from ninja_extra import api_controller, route, permissions
+from ninja import Field, FilterSchema, ModelSchema, Query
+from ninja_extra import api_controller, permissions, route
 from ninja_extra.exceptions import PermissionDenied
 from ninja_extra.pagination import paginate
 from ninja_extra.schemas import NinjaPaginationResponseSchema

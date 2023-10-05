@@ -4,8 +4,9 @@
 
 from decimal import Decimal
 
-from admin.data import Vareafgiftssats, format_decimal, format_int
 from django.test import TestCase
+
+from admin.data import Vareafgiftssats, format_decimal, format_int
 
 
 class VareafgiftsSatsTest(TestCase):

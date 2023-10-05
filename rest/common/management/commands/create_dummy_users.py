@@ -4,12 +4,11 @@
 
 import os
 
+from common.models import IndberetterProfile
 from django.conf import settings
 from django.contrib.auth.hashers import make_password
-from django.contrib.auth.models import User, Group
+from django.contrib.auth.models import Group, User
 from django.core.management.base import BaseCommand
-
-from common.models import IndberetterProfile
 
 
 class Command(BaseCommand):

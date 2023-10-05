@@ -6,7 +6,6 @@ from datetime import date
 from decimal import Decimal
 
 from django.core.management.base import BaseCommand
-
 from sats.models import Afgiftstabel, Vareafgiftssats
 
 

@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: MPL-2.0
 
 from django.test import TestCase
-from forsendelse.models import Postforsendelse, Fragtforsendelse
+from forsendelse.models import Fragtforsendelse, Postforsendelse
 from project.test_mixins import RestMixin
 
 

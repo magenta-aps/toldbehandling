@@ -6,17 +6,17 @@ import json
 import time
 from base64 import b64encode
 from dataclasses import dataclass, field
-from datetime import timedelta, date
+from datetime import date, timedelta
 from functools import cached_property
-from typing import Union, Dict, List, Tuple, Any, Optional
+from typing import Any, Dict, List, Optional, Tuple, Union
 from urllib.parse import urlencode
 
 import requests
 from django.conf import settings
-from django.core.files.uploadedfile import UploadedFile, InMemoryUploadedFile
+from django.core.files.uploadedfile import InMemoryUploadedFile, UploadedFile
 from django.core.serializers.json import DjangoJSONEncoder
 from django.http import HttpRequest
-from requests import Session, HTTPError
+from requests import HTTPError, Session
 
 
 @dataclass

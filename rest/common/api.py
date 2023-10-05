@@ -2,12 +2,17 @@
 #
 # SPDX-License-Identifier: MPL-2.0
 
-from typing import List, Optional, Dict
+from typing import Dict, List, Optional
 
 from common.models import IndberetterProfile
-from django.contrib.auth.models import User, Group
+from django.contrib.auth.models import Group, User
 from django.shortcuts import get_object_or_404
-from ninja import Field
+from ninja import Field, ModelSchema
+from ninja.errors import ValidationError
+from ninja.schema import Schema
+from ninja_extra import api_controller, permissions, route
+from ninja_jwt.authentication import JWTAuth
+from ninja_jwt.tokens import RefreshToken
 
 # Django-ninja har endnu ikke understøttelse for PATCH med filer i multipart/form-data
 # Se https://github.com/vitalik/django-ninja/pull/397
@@ -22,12 +27,6 @@ from ninja import Field
 # def create_foo(self, payload: FooIn, filfeltnavn: ninja.File(...)):
 #     item = Foo.objects.create(**payload.dict(), filfeltnavn=filfeltnavn)
 #
-from ninja import ModelSchema
-from ninja.errors import ValidationError
-from ninja.schema import Schema
-from ninja_extra import api_controller, route, permissions
-from ninja_jwt.authentication import JWTAuth
-from ninja_jwt.tokens import RefreshToken
 
 
 class IndberetterProfileOut(ModelSchema):

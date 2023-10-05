@@ -8,34 +8,38 @@ import re
 import time
 from collections import defaultdict
 from copy import deepcopy
-from datetime import timedelta, datetime
+from datetime import datetime, timedelta
 from io import BytesIO, StringIO
-from typing import List, Tuple, Dict
-from unittest.mock import patch, mock_open
-from urllib.parse import quote, quote_plus, urlparse, parse_qs
+from typing import Dict, List, Tuple
+from unittest.mock import mock_open, patch
+from urllib.parse import parse_qs, quote, quote_plus, urlparse
 
 import requests
-from admin.views import AfgiftstabelDownloadView
-from admin.views import AfgiftstabelListView
-from admin.views import TF10View, TF10ListView
 from bs4 import BeautifulSoup
 from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 from django.urls import reverse
-from openpyxl import Workbook
-from openpyxl import load_workbook
+from openpyxl import Workbook, load_workbook
 from requests import Response
 from told_common.rest_client import RestClient
-from told_common.tests import (
-    TemplateTagsTest,
-    LoginTest,
-    HasLogin,
-    PermissionsTest,
+from told_common.views import FragtbrevView
+
+from told_common.tests import (  # isort: skip
     AnmeldelseListViewTest,
+    HasLogin,
+    LoginTest,
+    PermissionsTest,
+    TemplateTagsTest,
     modify_values,
 )
-from told_common.views import FragtbrevView
+
+from admin.views import (  # isort: skip
+    AfgiftstabelDownloadView,
+    AfgiftstabelListView,
+    TF10ListView,
+    TF10View,
+)
 
 
 class TestLogin(TestCase):
