@@ -12,7 +12,7 @@ groupadd -g 75100 -r certificate_exporter && \
 useradd -u 75130 --no-log-init -r -g toldbehandling -G certificate_exporter toldbehandling
 COPY admin/requirements.txt /app/requirements.txt
 # Include & install told-common package
-COPY ./told-common /app/told-common
+COPY --chown=toldbehandling:toldbehandling ./told-common /app/told-common
 RUN pushd /app/told-common && pip wheel -w dist . && popd || exit
 RUN pip install --no-cache-dir -r /app/requirements.txt
 # hadolint ignore=DL3008
@@ -26,4 +26,4 @@ COPY --chown=toldbehandling:toldbehandling ./admin /app
 EXPOSE 8000
 ENTRYPOINT ["/entrypoint.sh"]
 WORKDIR /app
-CMD ["gunicorn","-b","0.0.0.0:8000","project.wsgi:application","-w 4","--timeout 120","--error-logfile","-","--capture-output"]
+CMD ["gunicorn","-b","0.0.0.0:8000","project.wsgi:application","-w","4","--timeout","120","--error-logfile","-","--capture-output"]
