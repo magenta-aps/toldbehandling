@@ -34,7 +34,7 @@ def format_decimal(decimal: Decimal) -> str:
 def unformat_decimal(string: str) -> Optional[Decimal]:
     if string in (None, ""):
         return None
-    return Decimal(string.replace(".", "").replace(",", "."), context=Context(prec=2))
+    return Decimal(str(string).replace(".", "").replace(",", "."), context=Context(prec=2))
 
 
 def format_int(decimal: Union[Decimal, str]) -> int:
