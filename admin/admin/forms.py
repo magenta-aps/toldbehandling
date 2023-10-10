@@ -8,13 +8,25 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 from told_common.form_mixins import BootstrapForm, DateInput, MaxSizeFileField
+from told_common.forms import TF10Form
 
-from admin.data import Vareafgiftssats
-from admin.exceptions import SpreadsheetImportException
+from admin.spreadsheet import (  # isort: skip
+    SpreadsheetImportException,
+    VareafgiftssatsSpreadsheetUtil,
+)
 
 
 class TF10GodkendForm(BootstrapForm):
     godkendt = forms.BooleanField(required=False)
+    notat = forms.CharField(
+        widget=forms.Textarea(attrs={"placeholder": _("Notat")}), required=False
+    )
+
+
+class TF10UpdateForm(TF10Form):
+    notat = forms.CharField(
+        widget=forms.Textarea(attrs={"placeholder": _("Notat")}), required=False
+    )
 
 
 class ListForm(forms.Form):
@@ -74,15 +86,15 @@ class AfgiftstabelCreateForm(BootstrapForm):
         data = self.cleaned_data["fil"]
         try:
             if data.content_type == "text/csv":
-                satser = Vareafgiftssats.load_csv(data)
+                satser = VareafgiftssatsSpreadsheetUtil.load_csv(data)
             elif (
                 data.content_type
                 == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
             ):
-                satser = Vareafgiftssats.load_xlsx(data)
+                satser = VareafgiftssatsSpreadsheetUtil.load_xlsx(data)
             else:
                 raise ValidationError(f"Ugyldig content-type: {data.content_type}")
-            Vareafgiftssats.validate_satser(satser)
+            VareafgiftssatsSpreadsheetUtil.validate_satser(satser)
         except SpreadsheetImportException as e:
             raise ValidationError(e)
         self.parsed_satser = satser

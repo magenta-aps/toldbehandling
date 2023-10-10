@@ -152,6 +152,7 @@ class TF10FormUpdateView(
             postforsendelse_id,
             fragtforsendelse_id,
             self.item,
+            force_write=True,
         )
 
         data_map = {
@@ -265,29 +266,9 @@ class TF10FormUpdateView(
         return initial
 
 
-class TF10ListView(
-    PermissionsRequiredMixin, HasRestClientMixin, CustomLayoutMixin, FormView
-):
-    required_permissions = (
-        "aktør.view_afsender",
-        "aktør.view_modtager",
-        "forsendelse.view_postforsendelse",
-        "forsendelse.view_fragtforsendelse",
-        "anmeldelse.view_afgiftsanmeldelse",
-        "anmeldelse.view_varelinje",
-    )
-    template_name = "told_common/tf10/list.html"
-    extend_template = "told_common/layout.html"
-    form_class = forms.TF10SearchForm
+class ListView(FormView):
     list_size = 20
-
-    def get_context_data(self, **context: Dict[str, Any]) -> Dict[str, Any]:
-        return super().get_context_data(
-            **{
-                **context,
-                "title": "Mine afgiftsanmeldelser",
-            }
-        )
+    form_class = forms.PaginateForm
 
     def get(self, request, *args, **kwargs):
         # Søgeform; viser formularen (med evt. fejl) når den er invalid,
@@ -297,6 +278,14 @@ class TF10ListView(
             return self.form_valid(form)
         else:
             return self.form_invalid(form)
+
+    def get_items(self, search_data: Dict[str, Any]):
+        return {"count": 0, "items": []}
+
+    def item_to_json_dict(
+        self, item: Dict[str, Any], context: Dict[str, Any], index: int
+    ) -> Dict[str, Any]:
+        return item
 
     def form_valid(self, form):
         search_data = {"offset": 0, "limit": self.list_size}
@@ -311,7 +300,7 @@ class TF10ListView(
             search_data["offset"] = 0
         if search_data["limit"] < 1:
             search_data["limit"] = 1
-        response = self.rest_client.get("afgiftsanmeldelse/full", search_data)
+        response = self.get_items(search_data)
         total = response["count"]
         items = response["items"]
         context = self.get_context_data(
@@ -320,24 +309,16 @@ class TF10ListView(
             search_data=search_data,
             actions_template=self.actions_template,
         )
+        items = [
+            self.item_to_json_dict(item, context, index)
+            for index, item in enumerate(items)
+        ]
+        context["items"] = items
         if form.cleaned_data["json"]:
             return JsonResponse(
                 {
                     "total": total,
-                    "items": [
-                        {
-                            key: self.map_value(item, key, context)
-                            for key in (
-                                "id",
-                                "dato",
-                                "afsender",
-                                "modtager",
-                                "godkendt",
-                                "actions",
-                            )
-                        }
-                        for item in items
-                    ],
+                    "items": items,
                 }
             )
         return self.render_to_response(context)
@@ -348,6 +329,55 @@ class TF10ListView(
                 status=400, data={"count": 0, "items": [], "error": form.errors}
             )
         return super().form_invalid(form)
+
+    def get_form_kwargs(self) -> Dict[str, Any]:
+        kwargs = super().get_form_kwargs()
+        query_dict = self.request.GET.copy()
+        kwargs["data"] = query_dict
+        return kwargs
+
+
+class TF10ListView(
+    PermissionsRequiredMixin, HasRestClientMixin, CustomLayoutMixin, ListView
+):
+    required_permissions = (
+        "aktør.view_afsender",
+        "aktør.view_modtager",
+        "forsendelse.view_postforsendelse",
+        "forsendelse.view_fragtforsendelse",
+        "anmeldelse.view_afgiftsanmeldelse",
+        "anmeldelse.view_varelinje",
+    )
+    template_name = "told_common/tf10/list.html"
+    extend_template = "told_common/layout.html"
+    form_class = forms.TF10SearchForm
+    list_size = 20
+
+    def get_items(self, search_data: Dict[str, Any]):
+        return self.rest_client.get("afgiftsanmeldelse/full", search_data)
+
+    def get_context_data(self, **context: Dict[str, Any]) -> Dict[str, Any]:
+        return super().get_context_data(
+            **{
+                **context,
+                "title": "Mine afgiftsanmeldelser",
+            }
+        )
+
+    def item_to_json_dict(
+        self, item: Dict[str, Any], context: Dict[str, Any], index: int
+    ) -> Dict[str, Any]:
+        return {
+            key: self.map_value(item, key, context)
+            for key in (
+                "id",
+                "dato",
+                "afsender",
+                "modtager",
+                "godkendt",
+                "actions",
+            )
+        }
 
     def map_value(self, item, key, context):
         if key == "actions":

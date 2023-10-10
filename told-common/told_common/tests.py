@@ -883,7 +883,11 @@ class AnmeldelseListViewTest(HasLogin):
         for field, value, expected in filter_tests:
             url = self.list_url + f"?json=1&{field}={value}"
             response = self.client.get(url)
-            self.assertEquals(response.status_code, 200)
+            self.assertEquals(
+                response.status_code,
+                200,
+                f"Failed for {field}={value}: {response.content}",
+            )
             numbers = [int(item["id"]) for item in response.json()["items"]]
             self.assertEquals(set(numbers), expected)
 

@@ -5,8 +5,7 @@
 from decimal import Decimal
 
 from django.test import TestCase
-
-from admin.data import Vareafgiftssats, format_decimal, format_int
+from told_common.data import Vareafgiftssats, format_decimal, format_int
 
 
 class VareafgiftsSatsTest(TestCase):

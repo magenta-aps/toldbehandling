@@ -86,7 +86,7 @@ class TF10FormCreateView(
 
 
 class TF10ListView(common_views.TF10ListView):
-    actions_template = "ui/tf10/link.html"
+    actions_template = "ui/tf10/actions.html"
     extend_template = "ui/layout.html"
 
     def get_context_data(self, **context):

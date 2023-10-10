@@ -2,6 +2,7 @@
 {% load static %}
 {% load i18n %}
 {% load l10n %}
+{% load common_tags %}
 
 {% block extra_headers %}
 <script type="text/javascript" src="{% static 'toldbehandling/js/formset.js' %}"></script>
@@ -10,7 +11,7 @@
 {% block content %}
 <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
-    <div class="container-lg">
+    <div class="mx-5">
         <h1>Afgiftsanmeldelse</h1>
         <h4>For indførsel af afgiftspligtige varer i Grønland</h4>
 
@@ -188,6 +189,11 @@
                     <div class="col-8">
                         {{form.leverandørfaktura}}
                         {{form.leverandørfaktura.errors}}
+                        {% if item %}
+                        <a href="{% url 'leverandørfaktura_view' id=item.id %}">
+                            {{item.leverandørfaktura|file_basename|unquote}}
+                        </a>
+                        {% endif %}
                     </div>
                 </div>
                 <div class="row">
@@ -197,71 +203,46 @@
                     <div class="col-8">
                         {{form.fragtbrev}}
                         {{form.fragtbrev.errors}}
+                        {% if item.fragtforsendelse %}
+                        <a href="{% url 'fragtbrev_view' id=item.fragtforsendelse.id %}">
+                            {{item.fragtforsendelse.fragtbrev|file_basename|unquote}}
+                        </a>
+                        {% endif %}
                     </div>
                 </div>
             </div>
 
             <div class="col-6">
-
-                <h5>Forsendelsesmåde</h5>
                 <div class="row">
-                    <div class="col-4">
+                    <div class="col-6">
+                        <label for="{{form.fragttype.name}}">Fragttype</label>
                     </div>
-                    <div class="col-4">
-                        Forbindelsesnr. / afsenderby­kode
-                    </div>
-                    <div class="col-4">
-                        Fragtbrevnr. / Post­forsendelses­nr.
+                    <div class="col-6">
+                        {{form.fragttype}}
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-4">
-                        Skibsfragt
+                    <div class="col-6">
+                        <label for="{{form.forbindelsesnr.name}}">Forbindelsesnr/afsenderbykode</label>
                     </div>
-                    <div class="col-4">
-                        {{form.skibsfragt_forbindelsesnr}}
-                    </div>
-                    <div class="col-4">
-                        {{form.skibsfragt_fragtbrevnr}}
+                    <div class="col-6">
+                        {{form.forbindelsesnr}}
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-4">
-                        Luftfragt
+                    <div class="col-6">
+                        <label for="{{form.fragtbrevnr.name}}">Fragtbrevnr/postforsendelsesnummer</label>
                     </div>
-                    <div class="col-4">
-                        {{form.luftfragt_forbindelsesnr}}
-                    </div>
-                    <div class="col-4">
-                        {{form.luftfragt_fragtbrevnr}}
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-4">
-                        Skibspost
-                    </div>
-                    <div class="col-4">
-                        {{form.skibspost_forbindelsesnr}}
-                    </div>
-                    <div class="col-4">
-                        {{form.skibspost_fragtbrevnr}}
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col-4">
-                        Luftpost
-                    </div>
-                    <div class="col-4">
-                        {{form.luftpost_forbindelsesnr}}
-                    </div>
-                    <div class="col-4">
-                        {{form.luftpost_fragtbrevnr}}
+                    <div class="col-6">
+                        {{form.fragtbrevnr}}
                     </div>
                 </div>
             </div>
         </div>
 
         <hr/>
+
+        <h5>Varelinjer</h5>
 
         <div class="row">
             <div class="col-2 px-0">
@@ -294,12 +275,12 @@
         {{ formset.management_form }}
             <div id="formset_container">
             {% for subform in formset %}
-                {% include "admin/tf10/subform.html" with subform=subform %}
+                {% include "told_common/tf10/subform.html" with subform=subform %}
             {% endfor %}
             </div>
         </div>
         <div id="formset_prototype" style="display: none">
-            {% include "admin/tf10/subform.html" with subform=formset.empty_form %}
+            {% include "told_common/tf10/subform.html" with subform=formset.empty_form %}
         </div>
 
         <div class="row">
@@ -315,9 +296,41 @@
         </div>
 
         <hr/>
-            <div class="clearfix">
-                <button type="submit" class="btn btn-success float-end">Gem</button>
+
+
+        <h5>Notater</h5>
+
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th class="col-2">Bruger</th>
+                <th class="col-2">Tidspunkt</th>
+                <th class="col-8">Notat</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for notat in notater %}
+            <tr>
+                <td>{{notat.brugernavn}}</td>
+                <td>{{notat.oprettet}}</td>
+                <td>{{notat.tekst}}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="3" class="text-center">Ingen notater</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="row">
+            <div class="col-12 px-0">
+                {{form.notat}}
             </div>
+        </div>
+
+        <div class="clearfix my-1">
+            <button type="submit" class="btn btn-success float-end">Gem</button>
         </div>
     </div>
 </form>

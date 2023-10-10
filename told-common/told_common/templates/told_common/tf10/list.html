@@ -2,6 +2,7 @@
 {% load static %}
 {% load i18n %}
 {% load l10n %}
+{% load common_tags %}
 
 {# Docs for bootstrap-table: https://bootstrap-table.com/docs/ #}
 {% block extra_headers %}
@@ -159,7 +160,7 @@ function statusFormatter(value) {
     return value;
 }
 function aktørFormatter(value) {
-    if (value) {
+    if (typeof(value) === "object") {
         return value["navn"];
     }
     return value;

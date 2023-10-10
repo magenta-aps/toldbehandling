@@ -4,8 +4,7 @@
 
 from django.template.defaultfilters import register
 from django.utils.translation import gettext_lazy as _
-
-from admin.data import Vareafgiftssats
+from told_common.data import Vareafgiftssats
 
 
 @register.filter

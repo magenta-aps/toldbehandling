@@ -41,3 +41,8 @@ table.scrollbody tbody {
     overflow-y: auto;    /* Trigger vertical scroll    */
     overflow-x: hidden;  /* Hide the horizontal scroll */
 }
+
+
+textarea {
+    resize: none;
+}

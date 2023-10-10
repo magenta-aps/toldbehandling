@@ -4,7 +4,7 @@
 
 from django import forms
 from django.core.exceptions import ValidationError
-from django.forms import formset_factory
+from django.forms import Form, formset_factory
 from django.utils.translation import gettext_lazy as _
 from requests import HTTPError
 from told_common.rest_client import RestClient
@@ -252,7 +252,13 @@ class TF10VareForm(BootstrapForm):
 TF10VareFormSet = formset_factory(TF10VareForm, min_num=1, extra=0)
 
 
-class TF10SearchForm(BootstrapForm):
+class PaginateForm(Form):
+    json = forms.BooleanField(required=False)
+    offset = forms.IntegerField(required=False)
+    limit = forms.IntegerField(required=False)
+
+
+class TF10SearchForm(PaginateForm, BootstrapForm):
     def __init__(self, *args, **kwargs):
         self.varesatser = kwargs.pop("varesatser", {})
         self.afsendere = kwargs.pop("afsendere", {})
@@ -312,11 +318,8 @@ class TF10SearchForm(BootstrapForm):
 
     dato_efter = forms.DateField(required=False, widget=DateInput)
     dato_før = forms.DateField(required=False, widget=DateInput)
-    json = forms.BooleanField(required=False)
     htmx = forms.BooleanField(required=False)
     order_by = forms.CharField(required=False)
-    offset = forms.IntegerField(required=False)
-    limit = forms.IntegerField(required=False)
 
     sort = forms.CharField(required=False)
     order = forms.CharField(required=False)

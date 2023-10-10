@@ -16,6 +16,7 @@ setuptools.setup(
         "django==4.2.2",
         "gunicorn==20.1.0",
         "requests==2.31.0",
+        "dataclasses-json==0.6.0",
     ],
     classifiers=[
         "Programming Language :: Python :: 3",

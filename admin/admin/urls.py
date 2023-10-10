@@ -67,6 +67,16 @@ urlpatterns = [
         name="tf10_edit",
     ),
     path(
+        "blanket/tf10/<int:id>/history",
+        views.TF10HistoryListView.as_view(),
+        name="tf10_history",
+    ),
+    path(
+        "blanket/tf10/<int:id>/history/<int:index>",
+        views.TF10HistoryDetailView.as_view(),
+        name="tf10_history_view",
+    ),
+    path(
         "faktura",
         TemplateView.as_view(template_name="admin/faktura/form.html"),
         name="faktura_create",

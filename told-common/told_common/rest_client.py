@@ -5,6 +5,7 @@
 import json
 import time
 from base64 import b64encode
+from collections import defaultdict
 from dataclasses import dataclass, field
 from datetime import date, timedelta
 from functools import cached_property
@@ -17,6 +18,7 @@ from django.core.files.uploadedfile import InMemoryUploadedFile, UploadedFile
 from django.core.serializers.json import DjangoJSONEncoder
 from django.http import HttpRequest
 from requests import HTTPError, Session
+from told_common.data import Afgiftstabel, Notat, Vareafgiftssats
 
 
 @dataclass
@@ -284,6 +286,7 @@ class AfgiftanmeldelseRestClient(ModelRestClient):
         postforsendelse_id: Union[int, None],
         fragtforsendelse_id: Union[int, None],
         existing: dict,
+        force_write: bool = False,
     ):
         mapped = self.map(
             data,
@@ -293,9 +296,12 @@ class AfgiftanmeldelseRestClient(ModelRestClient):
             postforsendelse_id,
             fragtforsendelse_id,
         )
-        if not self.compare(mapped, existing):
+        if force_write or not self.compare(mapped, existing):
             self.rest.patch(f"afgiftsanmeldelse/{id}", mapped)
         return id
+
+    def set_godkendt(self, id: int, godkendt: bool):
+        self.rest.patch(f"afgiftsanmeldelse/{id}", {"godkendt": godkendt})
 
 
 class VarelinjeRestClient(ModelRestClient):
@@ -330,8 +336,35 @@ class VarelinjeRestClient(ModelRestClient):
             self.rest.patch(f"varelinje/{id}", mapped)
         return id
 
+    def list(self, afgiftsanmeldelse_id: int):
+        return self.rest.get("varelinje", {"afgiftsanmeldelse": afgiftsanmeldelse_id})[
+            "items"
+        ]
+
     def delete(self, id):
         self.rest.delete(f"varelinje/{id}")
+
+
+class NotatRestClient(ModelRestClient):
+    @staticmethod
+    def map(data: dict, afgiftsanmeldelse_id: int) -> dict:
+        return {
+            "afgiftsanmeldelse_id": afgiftsanmeldelse_id,
+            "tekst": str(data["tekst"]),
+        }
+
+    def create(self, data: dict, afgiftsanmeldelse_id: int):
+        response = self.rest.post("notat", self.map(data, afgiftsanmeldelse_id))
+        return response["id"]
+
+    def delete(self, id):
+        self.rest.delete(f"notat/{id}")
+
+    def list(self, afgiftsanmeldelse_id, afgiftsanmeldelse_history_index=None):
+        params = {"afgiftsanmeldelse": afgiftsanmeldelse_id}
+        if afgiftsanmeldelse_history_index is not None:
+            params["afgiftsanmeldelse_history_index"] = afgiftsanmeldelse_history_index
+        return [Notat.from_dict(x) for x in self.rest.get("notat", params)["items"]]
 
 
 class AfgiftstabelRestClient(ModelRestClient):
@@ -345,6 +378,9 @@ class AfgiftstabelRestClient(ModelRestClient):
             if data[x] != existing[x]:
                 return False
         return True
+
+    def get(self, id: int) -> Afgiftstabel:
+        return Afgiftstabel.from_dict(self.rest.get(f"afgiftstabel/{id}"))
 
     def create(self, data: dict) -> Union[int, None]:
         response = self.rest.post("afgiftstabel", data)
@@ -368,6 +404,21 @@ class VareafgiftssatsRestClient(ModelRestClient):
         response = self.rest.post("vareafgiftssats", data)
         return response["id"]
 
+    def list(self, afgiftstabel: int) -> List[Vareafgiftssats]:
+        satser = [
+            Vareafgiftssats.from_dict(result)
+            for result in self.rest.get(
+                "vareafgiftssats", {"afgiftstabel": afgiftstabel}
+            )["items"]
+        ]
+        by_overordnet = defaultdict(list)
+        for sats in satser:
+            if sats.overordnet:
+                by_overordnet[sats.overordnet].append(sats)
+        for sats in satser:
+            sats.populate_subs(lambda id: by_overordnet.get(id))
+        return satser
+
 
 class RestClient:
     domain = settings.REST_DOMAIN
@@ -384,6 +435,7 @@ class RestClient:
         self.varelinje = VarelinjeRestClient(self)
         self.afgiftstabel = AfgiftstabelRestClient(self)
         self.vareafgiftssats = VareafgiftssatsRestClient(self)
+        self.notat = NotatRestClient(self)
 
     def check_access_token_age(self):
         max_age = getattr(settings, "NINJA_JWT", {}).get(

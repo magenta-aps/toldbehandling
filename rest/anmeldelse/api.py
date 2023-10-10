@@ -3,17 +3,17 @@
 # SPDX-License-Identifier: MPL-2.0
 
 import base64
-from datetime import date
+from datetime import date, datetime, timedelta
 from decimal import Decimal
-from typing import Optional
+from typing import Optional, Tuple
 from uuid import uuid4
 
 from aktør.api import AfsenderOut, ModtagerOut
-from anmeldelse.models import Afgiftsanmeldelse, Varelinje
+from anmeldelse.models import Afgiftsanmeldelse, Notat, Varelinje
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.db.models import QuerySet
-from django.http import HttpResponseBadRequest
+from django.http import Http404, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404
 from forsendelse.api import FragtforsendelseOut, PostforsendelseOut
 from ninja import Field, FilterSchema, ModelSchema, Query
@@ -88,6 +88,30 @@ class AfgiftsanmeldelseFullOut(AfgiftsanmeldelseOut):
     modtager: ModtagerOut
     fragtforsendelse: Optional[FragtforsendelseOut]
     postforsendelse: Optional[PostforsendelseOut]
+
+
+class AfgiftsanmeldelseHistoryOut(AfgiftsanmeldelseOut):
+    history_username: Optional[str]
+    history_date: datetime
+
+    @staticmethod
+    def resolve_history_username(historical_afgiftsanmeldelse):
+        return (
+            historical_afgiftsanmeldelse.history_user
+            and historical_afgiftsanmeldelse.history_user.username
+        )
+
+
+class AfgiftsanmeldelseHistoryFullOut(AfgiftsanmeldelseFullOut):
+    history_username: Optional[str]
+    history_date: datetime
+
+    @staticmethod
+    def resolve_history_username(historical_afgiftsanmeldelse):
+        return (
+            historical_afgiftsanmeldelse.history_user
+            and historical_afgiftsanmeldelse.history_user.username
+        )
 
 
 class AfgiftsanmeldelseFilterSchema(FilterSchema):
@@ -226,6 +250,29 @@ class AfgiftsanmeldelseAPI:
         self.check_user(item)
         return item
 
+    @route.get(
+        "/{id}/history",
+        response=NinjaPaginationResponseSchema[AfgiftsanmeldelseHistoryOut],
+        auth=JWTAuth(),
+        url_name="afgiftsanmeldelse_get_history",
+    )
+    @paginate()  # https://eadwincode.github.io/django-ninja-extra/tutorial/pagination/
+    def get_afgiftsanmeldelse_history(self, id: int):
+        item = get_object_or_404(Afgiftsanmeldelse, id=id)
+        self.check_user(item)
+        return list(item.history.order_by("history_date"))
+
+    @route.get(
+        "/{id}/history/{index}",
+        response=AfgiftsanmeldelseHistoryFullOut,
+        auth=JWTAuth(),
+        url_name="afgiftsanmeldelse_get_history_item",
+    )
+    def get_afgiftsanmeldelse_history_item(self, id: int, index: int):
+        item = get_object_or_404(Afgiftsanmeldelse, id=id)
+        self.check_user(item)
+        return item.history.order_by("history_date")[index]
+
     @staticmethod
     def map_sort(sort, order):
         if sort is not None:
@@ -267,6 +314,25 @@ class AfgiftsanmeldelseAPI:
             user.has_perm("anmeldelse.view_all_anmeldelse") or item.oprettet_af == user
         ):
             raise PermissionDenied
+
+    @staticmethod
+    def get_historical(id: int, index: int) -> Tuple[Afgiftsanmeldelse, datetime]:
+        anmeldelse = Afgiftsanmeldelse.objects.get(id=id)
+        historiske_anmeldelser = anmeldelse.history.order_by("history_date")
+        if index < 0 or index >= historiske_anmeldelser.count():
+            raise Http404
+        next = historiske_anmeldelser[index].next_record
+        if next:  # next er None hvis vi har fat i den seneste version
+            as_of = next.history_date - timedelta(microseconds=1)
+        else:
+            as_of = datetime.now()
+        anmeldelse = anmeldelse.history.as_of(as_of)
+        return anmeldelse, as_of
+
+    @staticmethod
+    def get_historical_count(id: int):
+        anmeldelse = Afgiftsanmeldelse.objects.get(id=id)
+        return anmeldelse.history.count()
 
 
 class VarelinjeIn(ModelSchema):
@@ -345,14 +411,29 @@ class VarelinjeAPI:
         url_name="varelinje_list",
     )
     @paginate()  # https://eadwincode.github.io/django-ninja-extra/tutorial/pagination/
-    def list_varelinjer(self, filters: VarelinjeFilterSchema = Query(...)):
+    def list_varelinjer(
+        self,
+        filters: VarelinjeFilterSchema = Query(...),
+        afgiftsanmeldelse_history_index: Optional[int] = None,
+    ):
         # https://django-ninja.rest-framework.com/guides/input/filtering/
-        return list(filters.filter(self.filter_user(Varelinje.objects.all())))
-        """
-        return Varelinje.objects.filter(
-            filters.get_filter_expression() & Q("mere filtrering fra vores side")
-        )
-        """
+        if filters.afgiftsanmeldelse and afgiftsanmeldelse_history_index is not None:
+            # Historik-opslag: Find varelinjer for en
+            # given version af en afgiftsanmeldelse
+            try:
+                anmeldelse, as_of = AfgiftsanmeldelseAPI.get_historical(
+                    filters.afgiftsanmeldelse, afgiftsanmeldelse_history_index
+                )
+                # `anmeldelse` er nu et historik-objekt
+                qs = anmeldelse.varelinje_set.all()
+            except Afgiftsanmeldelse.DoesNotExist:
+                qs = Varelinje.objects.none
+        else:
+            qs = Varelinje.objects.all()
+        qs = qs.filter(
+            filters.get_filter_expression()
+        )  # Inkluderer evt. filtrering på anmeldelse-id
+        return list(qs)
 
     @route.patch("/{id}", auth=JWTAuth(), url_name="varelinje_update")
     def update_varelinje(self, id: int, payload: PartialVarelinjeIn):
@@ -378,6 +459,121 @@ class VarelinjeAPI:
         return qs
 
     def check_user(self, item: Varelinje):
+        user = self.context.request.user
+        if not (
+            user.has_perm("anmeldelse.view_all_anmeldelse")
+            or item.afgiftsanmeldelse is None
+            or item.afgiftsanmeldelse.oprettet_af == user
+        ):
+            raise PermissionDenied
+
+
+class NotatIn(ModelSchema):
+    tekst: str
+    afgiftsanmeldelse_id: int = None
+
+    class Config:
+        model = Notat
+        model_fields = ["tekst"]
+
+
+class NotatOut(ModelSchema):
+    brugernavn: str = None
+
+    class Config:
+        model = Notat
+        model_fields = [
+            "id",
+            "afgiftsanmeldelse",
+            "oprettet",
+            "tekst",
+            "index",
+        ]
+
+    @staticmethod
+    def resolve_brugernavn(item):
+        return item.user and item.user.username
+
+
+class NotatFilterSchema(FilterSchema):
+    afgiftsanmeldelse: Optional[int]
+
+
+class NotatPermission(RestPermission):
+    appname = "anmeldelse"
+    modelname = "notat"
+
+
+@api_controller(
+    "/notat",
+    tags=["Notat"],
+    permissions=[permissions.IsAuthenticated & NotatPermission],
+)
+class NotatAPI:
+    @route.post("", auth=JWTAuth(), url_name="notat_create")
+    def create_notat(self, payload: NotatIn):
+        item = Notat.objects.create(
+            **payload.dict(),
+            user=self.context.request.user,
+            index=AfgiftsanmeldelseAPI.get_historical_count(
+                payload.afgiftsanmeldelse_id
+            )
+            - 1
+        )
+        return {"id": item.id}
+
+    @route.get("/{id}", response=NotatOut, auth=JWTAuth(), url_name="notat_get")
+    def get_notat(self, id: int):
+        item = get_object_or_404(Notat, id=id)
+        self.check_user(item)
+        return item
+
+    @route.get(
+        "",
+        response=NinjaPaginationResponseSchema[NotatOut],
+        auth=JWTAuth(),
+        url_name="notat_list",
+    )
+    @paginate()  # https://eadwincode.github.io/django-ninja-extra/tutorial/pagination/
+    def list_notater(
+        self,
+        filters: NotatFilterSchema = Query(...),
+        afgiftsanmeldelse_history_index: Optional[int] = None,
+    ):
+        # https://django-ninja.rest-framework.com/guides/input/filtering/
+        if filters.afgiftsanmeldelse and afgiftsanmeldelse_history_index is not None:
+            # Historik-opslag: Find notater for en given version af en afgiftsanmeldelse
+            try:
+                anmeldelse, as_of = AfgiftsanmeldelseAPI.get_historical(
+                    filters.afgiftsanmeldelse, afgiftsanmeldelse_history_index
+                )
+                # # Find notater som de så ud lige før den næste version
+                # qs = anmeldelse.notat_set.filter(oprettet__lte=as_of)
+                qs = anmeldelse.notat_set.filter(
+                    index__lte=afgiftsanmeldelse_history_index
+                )
+            except Afgiftsanmeldelse.DoesNotExist:
+                qs = Notat.objects.none
+        else:
+            qs = Notat.objects.all()
+        # Inkluderer evt. filtrering på anmeldelse-id
+        qs = qs.filter(filters.get_filter_expression())
+        return list(qs)
+
+    @route.delete("/{id}", auth=JWTAuth(), url_name="notat_delete")
+    def delete_notat(self, id):
+        item = get_object_or_404(Notat, id=id)
+        self.check_user(item)
+        item.delete()
+        return {"success": True}
+
+    def filter_user(self, qs: QuerySet) -> QuerySet:
+        user = self.context.request.user
+        if not user.has_perm("anmeldelse.view_all_anmeldelse"):
+            qs = qs.filter(afgiftsanmeldelse__oprettet_af=user)
+        return qs
+
+    def check_user(self, item: Notat):
         user = self.context.request.user
         if not (
             user.has_perm("anmeldelse.view_all_anmeldelse")

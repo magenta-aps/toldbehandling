@@ -6,9 +6,11 @@ import csv
 import json
 import re
 import time
+import traceback
 from collections import defaultdict
 from copy import deepcopy
 from datetime import datetime, timedelta
+from decimal import Decimal
 from io import BytesIO, StringIO
 from typing import Dict, List, Tuple
 from unittest.mock import mock_open, patch
@@ -20,18 +22,17 @@ from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 from django.urls import reverse
+from django.views.generic import TemplateView
 from openpyxl import Workbook, load_workbook
 from requests import Response
+from told_common.data import Notat, Vareafgiftssats
 from told_common.rest_client import RestClient
 from told_common.views import FragtbrevView
 
-from told_common.tests import (  # isort: skip
-    AnmeldelseListViewTest,
-    HasLogin,
-    LoginTest,
-    PermissionsTest,
-    TemplateTagsTest,
-    modify_values,
+from admin.views import (  # isort: skip
+    TF10FormUpdateView,
+    TF10HistoryDetailView,
+    TF10HistoryListView,
 )
 
 from admin.views import (  # isort: skip
@@ -39,6 +40,14 @@ from admin.views import (  # isort: skip
     AfgiftstabelListView,
     TF10ListView,
     TF10View,
+)
+from told_common.tests import (  # isort: skip
+    AnmeldelseListViewTest,
+    HasLogin,
+    LoginTest,
+    PermissionsTest,
+    TemplateTagsTest,
+    modify_values,
 )
 
 
@@ -296,7 +305,7 @@ class TestGodkend(PermissionsTest, TestCase):
                 "afgiftssats": "1.00",
             }
 
-        if path == expected_prefix + "afsender/1":
+        elif path == expected_prefix + "afsender/1":
             json_content = {
                 "id": 1,
                 "navn": "Testfirma 1",
@@ -308,7 +317,7 @@ class TestGodkend(PermissionsTest, TestCase):
                 "cvr": 12345678,
             }
 
-        if path == expected_prefix + "modtager/1":
+        elif path == expected_prefix + "modtager/1":
             json_content = {
                 "id": 1,
                 "navn": "Testfirma 1",
@@ -322,7 +331,7 @@ class TestGodkend(PermissionsTest, TestCase):
                 "indførselstilladelse": 123,
             }
 
-        if path == expected_prefix + "afgiftsanmeldelse/1":
+        elif path == expected_prefix + "afgiftsanmeldelse/1":
             json_content = {
                 "id": 1,
                 "afsender": 1,
@@ -338,7 +347,7 @@ class TestGodkend(PermissionsTest, TestCase):
                 "dato": "2023-08-22",
                 "godkendt": False,
             }
-        if path == expected_prefix + "fragtforsendelse/1":
+        elif path == expected_prefix + "fragtforsendelse/1":
             json_content = {
                 "id": 1,
                 "forsendelsestype": "S",
@@ -346,7 +355,7 @@ class TestGodkend(PermissionsTest, TestCase):
                 "fragtbrev": "/leverandørfakturaer/1/leverandørfaktura.txt",
             }
 
-        if path == expected_prefix + "varelinje":
+        elif path == expected_prefix + "varelinje":
             json_content = {
                 "count": 1,
                 "items": [
@@ -359,6 +368,23 @@ class TestGodkend(PermissionsTest, TestCase):
                     }
                 ],
             }
+
+        elif path == expected_prefix + "notat":
+            json_content = {
+                "count": 1,
+                "items": [
+                    {
+                        "id": 1,
+                        "afgiftsanmeldelse": 1,
+                        "tekst": "Hephey",
+                        "brugernavn": "tester",
+                        "oprettet": "2023-10-01T00:00:00.000000+00:00",
+                        "index": 0,
+                    }
+                ],
+            }
+        else:
+            print(f"Mock got unrecognized path: {path}")
         if json_content:
             content = json.dumps(json_content).encode("utf-8")
         if content:
@@ -583,6 +609,665 @@ class AdminAnmeldelseListViewTest(PermissionsTest, AnmeldelseListViewTest, TestC
         return str(reverse("tf10_view", kwargs={"id": id}))
 
 
+class AnmeldelseHistoryListViewTest(PermissionsTest, TestCase):
+    view = TF10HistoryListView
+    check_permissions = (
+        (reverse("tf10_history", kwargs={"id": 1}), view.required_permissions),
+    )
+
+    @property
+    def login_url(self):
+        return str(reverse("login"))
+
+    @staticmethod
+    def get_html_list(html: str):
+        soup = BeautifulSoup(html, "html.parser")
+        headers = [element.text for element in soup.css.select("table thead tr th")]
+        return [
+            dict(zip(headers, [td.text.strip() for td in row.select("td")]))
+            for row in soup.css.select("table tbody tr")
+        ]
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.testdata = [
+            {
+                "id": 1,
+                "leverandørfaktura_nummer": "12345",
+                "modtager_betaler": False,
+                "indførselstilladelse": "abcde",
+                "betalt": False,
+                "leverandørfaktura": "/leverand%C3%B8rfakturaer"
+                "/10/leverand%C3%B8rfaktura.pdf",
+                "afsender": 1,
+                "modtager": 1,
+                "postforsendelse": 1,
+                "dato": "2023-09-03",
+                "afgift_total": None,
+                "fragtforsendelse": None,
+                "godkendt": False,
+                "history_username": "admin",
+                "history_date": "2023-10-01",
+            },
+            {
+                "id": 1,
+                "leverandørfaktura_nummer": "12345",
+                "modtager_betaler": False,
+                "indførselstilladelse": "abcde",
+                "betalt": False,
+                "leverandørfaktura": "/leverand%C3%B8rfakturaer"
+                "/10/leverand%C3%B8rfaktura.pdf",
+                "afsender": 1,
+                "modtager": 1,
+                "postforsendelse": 1,
+                "dato": "2023-09-03",
+                "afgift_total": None,
+                "fragtforsendelse": None,
+                "godkendt": True,
+                "history_username": "admin",
+                "history_date": "2023-10-02",
+            },
+        ]
+
+    def mock_requests_get(self, path):
+        expected_prefix = "/api/"
+        p = urlparse(path)
+        path = p.path
+        path = path.rstrip("/")
+        response = Response()
+        json_content = None
+        content = None
+        status_code = None
+        if path == expected_prefix + "afgiftsanmeldelse/1/history":
+            items = deepcopy(self.testdata)
+            json_content = {"count": len(items), "items": items}
+        elif path == expected_prefix + "notat":
+            json_content = {"count": 0, "items": []}
+        else:
+            print(f"Mock got unrecognized path: {path}")
+        if json_content:
+            content = json.dumps(json_content).encode("utf-8")
+        if content:
+            if not status_code:
+                status_code = 200
+            response._content = content
+        response.status_code = status_code or 404
+        return response
+
+    @patch.object(requests.sessions.Session, "get")
+    def test_list_view(self, mock_get):
+        mock_get.side_effect = self.mock_requests_get
+        self.login()
+        url = reverse("tf10_history", kwargs={"id": 1})
+        response = self.client.get(url)
+        self.assertEquals(response.status_code, 200)
+        list_items = self.get_html_list(response.content)
+        self.assertEquals(
+            list_items,
+            [
+                {
+                    "Dato": "2023-10-01 00:00:00",
+                    "Ændret af": "admin",
+                    "Notat": "",
+                    "Handlinger": "Vis",
+                },
+                {
+                    "Dato": "2023-10-02 00:00:00",
+                    "Ændret af": "admin",
+                    "Notat": "",
+                    "Handlinger": "Vis",
+                },
+            ],
+        )
+
+
+class AnmeldelseHistoryDetailViewTest(PermissionsTest, TestCase):
+    view = TF10HistoryDetailView
+    check_permissions = (
+        (
+            reverse("tf10_history_view", kwargs={"id": 1, "index": 0}),
+            view.required_permissions,
+        ),
+    )
+
+    @property
+    def login_url(self):
+        return str(reverse("login"))
+
+    def mock_requests_get(self, path):
+        expected_prefix = "/api/"
+        p = urlparse(path)
+        path = p.path
+        path = path.rstrip("/")
+        response = Response()
+        json_content = None
+        content = None
+        status_code = None
+        if path == expected_prefix + "afgiftsanmeldelse/1/history/0":
+            json_content = {
+                "id": 1,
+                "afsender": {
+                    "id": 1,
+                    "navn": "Testfirma1",
+                    "adresse": "Testvej 1",
+                    "postnummer": 1234,
+                    "by": "Testby",
+                    "postbox": None,
+                    "telefon": "123456",
+                    "cvr": 12345678,
+                },
+                "modtager": {
+                    "id": 2,
+                    "navn": "Testfirma2",
+                    "adresse": "Testvej 2",
+                    "postnummer": 1234,
+                    "by": "Testby",
+                    "postbox": None,
+                    "telefon": "789012",
+                    "cvr": 12345679,
+                    "kreditordning": False,
+                    "indførselstilladelse": 0,
+                },
+                "fragtforsendelse": {
+                    "id": 1,
+                    "forsendelsestype": "F",
+                    "fragtbrevsnummer": "0",
+                    "fragtbrev": "/fragtbreve/1/fragtbrev.txt",
+                    "forbindelsesnr": "7331",
+                },
+                "postforsendelse": None,
+                "leverandørfaktura_nummer": "1234",
+                "leverandørfaktura": "/leverandørfakturaer/1/leverandørfaktura.txt",
+                "modtager_betaler": False,
+                "indførselstilladelse": "5678",
+                "afgift_total": None,
+                "betalt": False,
+                "dato": "2023-10-06",
+                "godkendt": None,
+                "history_username": "admin",
+                "history_date": "2023-10-01T00:00:00.000000+00:00",
+            }
+        elif path == expected_prefix + "varelinje":
+            json_content = {
+                "count": 1,
+                "items": [
+                    {
+                        "id": 1,
+                        "afgiftsanmeldelse": 1,
+                        "vareafgiftssats": 1,
+                        "antal": 5,
+                        "afgiftsbeløb": "5000.00",
+                    }
+                ],
+            }
+        elif path == expected_prefix + "vareafgiftssats/1":
+            json_content = {
+                "id": 1,
+                "afgiftstabel": 1,
+                "vareart": "Båthorn",
+                "afgiftsgruppenummer": 1234567,
+                "enhed": "kg",
+                "afgiftssats": "1.00",
+            }
+        elif path == expected_prefix + "notat":
+            json_content = {
+                "count": 1,
+                "items": [
+                    {
+                        "id": 1,
+                        "afgiftsanmeldelse": 1,
+                        "oprettet": "2023-10-01T00:00:00.000000+00:00",
+                        "tekst": "Test tekst",
+                        "index": 0,
+                    }
+                ],
+            }
+        else:
+            print(f"Mock got unrecognized path: {path}")
+        if json_content:
+            content = json.dumps(json_content).encode("utf-8")
+        if content:
+            if not status_code:
+                status_code = 200
+            response._content = content
+        response.status_code = status_code or 404
+        return response
+
+    @patch.object(requests.sessions.Session, "get")
+    @patch.object(TemplateView, "get_context_data")
+    def test_context_data(self, mock_super_context_data, mock_get):
+        mock_get.side_effect = self.mock_requests_get
+        self.login()
+        try:
+            self.client.get(reverse("tf10_history_view", kwargs={"id": 1, "index": 0}))
+            mock_super_context_data.assert_called_with(
+                {
+                    "id": 1,
+                    "index": 0,
+                    "object": {
+                        "id": 1,
+                        "afsender": {
+                            "id": 1,
+                            "navn": "Testfirma1",
+                            "adresse": "Testvej 1",
+                            "postnummer": 1234,
+                            "by": "Testby",
+                            "postbox": None,
+                            "telefon": "123456",
+                            "cvr": 12345678,
+                        },
+                        "modtager": {
+                            "id": 2,
+                            "navn": "Testfirma2",
+                            "adresse": "Testvej 2",
+                            "postnummer": 1234,
+                            "by": "Testby",
+                            "postbox": None,
+                            "telefon": "789012",
+                            "cvr": 12345679,
+                            "kreditordning": False,
+                            "indførselstilladelse": 0,
+                        },
+                        "fragtforsendelse": {
+                            "id": 1,
+                            "forsendelsestype": "F",
+                            "fragtbrevsnummer": "0",
+                            "fragtbrev": "/fragtbreve/1/fragtbrev.txt",
+                            "forbindelsesnr": "7331",
+                        },
+                        "postforsendelse": None,
+                        "leverandørfaktura_nummer": "1234",
+                        "leverandørfaktura": "/leverandørfakturaer/1/leverandørfaktura.txt",
+                        "modtager_betaler": False,
+                        "indførselstilladelse": "5678",
+                        "afgift_total": None,
+                        "betalt": False,
+                        "dato": "2023-10-06",
+                        "godkendt": None,
+                        "history_username": "admin",
+                        "history_date": "2023-10-01T00:00:00.000000+00:00",
+                        "varelinjer": [
+                            {
+                                "id": 1,
+                                "afgiftsanmeldelse": 1,
+                                "vareafgiftssats": Vareafgiftssats(
+                                    id=1,
+                                    afgiftstabel=1,
+                                    vareart="Båthorn",
+                                    afgiftsgruppenummer=1234567,
+                                    enhed=Vareafgiftssats.Enhed.KILOGRAM,
+                                    afgiftssats=Decimal("1.00"),
+                                    kræver_indførselstilladelse=False,
+                                    minimumsbeløb=None,
+                                    overordnet=None,
+                                    segment_nedre=None,
+                                    segment_øvre=None,
+                                    subsatser=None,
+                                ),
+                                "antal": 5,
+                                "afgiftsbeløb": "5000.00",
+                            }
+                        ],
+                        "notater": [
+                            Notat(
+                                id=1,
+                                tekst="Test tekst",
+                                afgiftsanmeldelse=1,
+                                oprettet=datetime.datetime(
+                                    2023, 10, 1, 0, 0, tzinfo=datetime.timezone.utc
+                                ),
+                                brugernavn=None,
+                                index=0,
+                            )
+                        ],
+                    },
+                    "user": {
+                        "username": "admin",
+                        "first_name": "Administrator",
+                        "last_name": "",
+                        "email": "admin@told.gl",
+                        "is_superuser": True,
+                        "permissions": [
+                            "auth.add_group",
+                            "auth.change_group",
+                            "auth.delete_group",
+                            "auth.view_group",
+                            "auth.add_permission",
+                            "auth.change_permission",
+                            "auth.delete_permission",
+                            "auth.view_permission",
+                            "auth.add_user",
+                            "auth.change_user",
+                            "auth.delete_user",
+                            "auth.view_user",
+                            "contenttypes.add_contenttype",
+                            "contenttypes.change_contenttype",
+                            "contenttypes.delete_contenttype",
+                            "contenttypes.view_contenttype",
+                            "sessions.add_session",
+                            "sessions.change_session",
+                            "sessions.delete_session",
+                            "sessions.view_session",
+                        ],
+                    },
+                }
+            )
+        except TypeError:
+            pass  # Vi overstyrer TemplateView.get_context_data for at detektere og asserte på dens input,
+            # men det betyder at den ikke rigtigt renderer siden. Det er vi dog. p.t. ligeglade med
+
+
+class AnmeldelseNotatTest(PermissionsTest, TestCase):
+    view = TF10FormUpdateView
+    check_permissions = (
+        (
+            reverse("tf10_edit", kwargs={"id": 1}),
+            view.required_permissions,
+        ),
+    )
+
+    def setUp(self):
+        super().setUp()
+        self.patched: List[Tuple[str, str]] = []
+        self.posted: List[Tuple[str, str]] = []
+
+    @staticmethod
+    def mock_requests_get(path):
+        expected_prefix = f"{settings.REST_DOMAIN}/api/"
+        path = path.split("?")[0]
+        path = path.rstrip("/")
+        response = Response()
+        json_content = None
+        content = None
+        status_code = None
+        if path == expected_prefix + "vareafgiftssats":
+            json_content = {
+                "count": 1,
+                "items": [
+                    {
+                        "id": 1,
+                        "afgiftstabel": 1,
+                        "vareart": "Båthorn",
+                        "afgiftsgruppenummer": 1234567,
+                        "enhed": "kg",
+                        "afgiftssats": "1.00",
+                    }
+                ],
+            }
+        elif path == expected_prefix + "vareafgiftssats/1":
+            json_content = {
+                "id": 1,
+                "afgiftstabel": 1,
+                "vareart": "Båthorn",
+                "afgiftsgruppenummer": 1234567,
+                "enhed": "kg",
+                "afgiftssats": "1.00",
+            }
+
+        elif path == expected_prefix + "afsender/1":
+            json_content = {
+                "id": 1,
+                "navn": "Testfirma 1",
+                "adresse": "Testvej 42",
+                "postnummer": 1234,
+                "by": "TestBy",
+                "postbox": "123",
+                "telefon": "123456",
+                "cvr": 12345678,
+            }
+        elif path == expected_prefix + "afsender":
+            json_content = {
+                "count": 1,
+                "items": [
+                    {
+                        "id": 1,
+                        "navn": "Testfirma 1",
+                        "adresse": "Testvej 42",
+                        "postnummer": 1234,
+                        "by": "TestBy",
+                        "postbox": "123",
+                        "telefon": "123456",
+                        "cvr": 12345678,
+                    }
+                ],
+            }
+
+        elif path == expected_prefix + "modtager/1":
+            json_content = {
+                "id": 1,
+                "navn": "Testfirma 1",
+                "adresse": "Testvej 42",
+                "postnummer": 1234,
+                "by": "TestBy",
+                "postbox": "123",
+                "telefon": "123456",
+                "cvr": 12345678,
+                "kreditordning": True,
+                "indførselstilladelse": 123,
+            }
+
+        elif path == expected_prefix + "modtager":
+            json_content = {
+                "count": 1,
+                "items": [
+                    {
+                        "id": 1,
+                        "navn": "Testfirma 1",
+                        "adresse": "Testvej 42",
+                        "postnummer": 1234,
+                        "by": "TestBy",
+                        "postbox": "123",
+                        "telefon": "123456",
+                        "cvr": 12345678,
+                        "kreditordning": True,
+                        "indførselstilladelse": 123,
+                    }
+                ],
+            }
+
+        elif path == expected_prefix + "afgiftsanmeldelse/1":
+            json_content = {
+                "id": 1,
+                "afsender": 1,
+                "modtager": 1,
+                "fragtforsendelse": 1,
+                "postforsendelse": None,
+                "leverandørfaktura_nummer": "1234",
+                "leverandørfaktura": "/leverandørfakturaer/1/leverandørfaktura.txt",
+                "modtager_betaler": False,
+                "indførselstilladelse": "5678",
+                "afgift_total": None,
+                "betalt": False,
+                "dato": "2023-08-22",
+                "godkendt": False,
+            }
+        elif path == expected_prefix + "afgiftsanmeldelse/1/full":
+            json_content = {
+                "id": 1,
+                "leverandørfaktura_nummer": "1234",
+                "modtager_betaler": False,
+                "indførselstilladelse": "abcde",
+                "betalt": False,
+                "leverandørfaktura": "/leverandørfakturaer/1/leverandørfaktura.txt",
+                "afsender": {
+                    "id": 20,
+                    "navn": "Testfirma 5",
+                    "adresse": "Testvej 42",
+                    "postnummer": 1234,
+                    "by": "TestBy",
+                    "postbox": "123",
+                    "telefon": "123456",
+                    "cvr": 12345678,
+                },
+                "modtager": {
+                    "id": 21,
+                    "navn": "Testfirma 3",
+                    "adresse": "Testvej 42",
+                    "postnummer": 1234,
+                    "by": "TestBy",
+                    "postbox": "123",
+                    "telefon": "123456",
+                    "cvr": 12345678,
+                    "kreditordning": True,
+                    "indførselstilladelse": 123,
+                },
+                "postforsendelse": {
+                    "id": 1,
+                    "postforsendelsesnummer": "1234",
+                    "forsendelsestype": "S",
+                    "afsenderbykode": "2468",
+                },
+                "dato": "2023-09-03",
+                "afgift_total": None,
+                "fragtforsendelse": None,
+                "godkendt": False,
+            }
+        elif path == expected_prefix + "fragtforsendelse/1":
+            json_content = {
+                "id": 1,
+                "forsendelsestype": "S",
+                "fragtbrevsnummer": 1,
+                "fragtbrev": "/leverandørfakturaer/1/leverandørfaktura.txt",
+            }
+
+        elif path == expected_prefix + "varelinje":
+            json_content = {
+                "count": 1,
+                "items": [
+                    {
+                        "id": 1,
+                        "afgiftsanmeldelse": 1,
+                        "vareafgiftssats": 1,
+                        "antal": 5,
+                        "mængde": 2,
+                        "fakturabeløb": "25000.00",
+                        "afgiftsbeløb": "5000.00",
+                    }
+                ],
+            }
+
+        elif path == expected_prefix + "notat":
+            json_content = {
+                "count": 1,
+                "items": [
+                    {
+                        "id": 1,
+                        "afgiftsanmeldelse": 1,
+                        "tekst": "Hephey",
+                        "brugernavn": "tester",
+                        "oprettet": "2023-10-01T00:00:00.000000+00:00",
+                        "index": 0,
+                    }
+                ],
+            }
+        elif path == expected_prefix + "afgiftstabel":
+            json_content = {
+                "count": 1,
+                "items": [
+                    {
+                        "id": 1,
+                        "gyldig_fra": "2022-01-01",
+                        "gyldig_til": "2023-01-01",
+                        "kladde": False,
+                    },
+                ],
+            }
+        else:
+            print(f"Mock got unrecognized path: {path}")
+            traceback.print_stack()
+        if json_content:
+            content = json.dumps(json_content).encode("utf-8")
+        if content:
+            if not status_code:
+                status_code = 200
+            response._content = content
+        response.status_code = status_code or 404
+        return response
+
+    def mock_requests_patch(self, path, data, headers=None):
+        path = path.rstrip("/")
+        response = Response()
+        content = None
+        status_code = None
+        json_content = {"id": 1}
+        self.patched.append((path, data))
+        if json_content:
+            content = json.dumps(json_content).encode("utf-8")
+        if content:
+            if not status_code:
+                status_code = 200
+            response._content = content
+        response.status_code = status_code or 404
+        return response
+
+    def mock_requests_post(self, path, data, headers=None):
+        path = path.rstrip("/")
+        response = Response()
+        content = None
+        status_code = None
+        json_content = {"id": 1}
+        self.posted.append((path, data))
+        if json_content:
+            content = json.dumps(json_content).encode("utf-8")
+        if content:
+            if not status_code:
+                status_code = 200
+            response._content = content
+        response.status_code = status_code or 404
+        return response
+
+    @patch.object(requests.sessions.Session, "get")
+    @patch.object(requests.sessions.Session, "patch")
+    @patch.object(requests.sessions.Session, "post")
+    def test_add_notat(self, mock_post, mock_patch, mock_get):
+        self.login()
+        mock_get.side_effect = self.mock_requests_get
+        mock_patch.side_effect = self.mock_requests_patch
+        mock_post.side_effect = self.mock_requests_post
+        self.client.post(
+            reverse("tf10_edit", kwargs={"id": 1}),
+            {
+                "afsender_cvr": "12345678",
+                "afsender_navn": "Testfirma 5",
+                "afsender_adresse": "Testvej 42",
+                "afsender_postbox": "123",
+                "afsender_postnummer": "1234",
+                "afsender_by": "TestBy",
+                "afsender_telefon": "123456",
+                "modtager_cvr": "12345678",
+                "modtager_navn": "Testfirma 3",
+                "modtager_adresse": "Testvej 42",
+                "modtager_postbox": "123",
+                "modtager_postnummer": ["3506"],
+                "modtager_by": "TestBy",
+                "modtager_telefon": "123456",
+                "modtager_indførselstilladelse": "123",
+                "leverandørfaktura_nummer": "5678",
+                "fragttype": "skibspost",
+                "forbindelsesnr": "2468",
+                "fragtbrevnr": "1234",
+                "form-TOTAL_FORMS": "1",
+                "form-INITIAL_FORMS": "1",
+                "form-MIN_NUM_FORMS": "1",
+                "form-MAX_NUM_FORMS": "1000",
+                "form-0-id": 1,
+                "form-0-vareafgiftssats": 1,
+                "form-0-mængde": 2,
+                "form-0-antal": 5,
+                "form-0-fakturabeløb": "25000.00",
+                "notat": "Testnotat",
+            },
+        )
+        self.assertIn(
+            (
+                f"{settings.REST_DOMAIN}/api/notat",
+                '{"afgiftsanmeldelse_id": 1, "tekst": "Testnotat"}',
+            ),
+            self.posted,
+        )
+
+
 class AdminFileViewTest(FileViewTest, TestCase):
     @property
     def login_url(self):
@@ -700,7 +1385,6 @@ class AfgiftstabelListViewTest(PermissionsTest, TestCase):
         response = self.client.get(url)
         self.assertEquals(response.status_code, 200)
         table_data = self.get_html_list(response.content)
-        print(self.strip_html_tags(table_data))
         self.assertEquals(
             # Tag table_data og fjern alle html-tags i strengen. Join med mellemrum.
             self.strip_html_tags(table_data),
