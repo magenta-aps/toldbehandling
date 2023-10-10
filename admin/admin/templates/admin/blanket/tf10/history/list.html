@@ -1,0 +1,87 @@
+{% extends "admin/admin_layout.html" %}
+{% load static %}
+{% load i18n %}
+{% load l10n %}
+
+{# Docs for bootstrap-table: https://bootstrap-table.com/docs/ #}
+{% block extra_headers %}
+<link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.22.1/dist/bootstrap-table.min.css">
+<link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.22.1/dist/extensions/sticky-header/bootstrap-table-sticky-header.min.css">
+{% endblock %}
+{% block extra_footers %}
+<script src="https://unpkg.com/bootstrap-table@1.22.1/dist/bootstrap-table.min.js"></script>
+<script src="https://unpkg.com/bootstrap-table@1.22.1/dist/extensions/sticky-header/bootstrap-table-sticky-header.min.js"></script>
+<script src="https://unpkg.com/bootstrap-table@1.22.1/dist/extensions/defer-url/bootstrap-table-defer-url.min.js"></script>
+{% endblock %}
+
+{% block content %}
+
+<div class="mx-5">
+
+    <h1>Historik for afgiftsanmeldelse {{id}}</h1>
+
+    <table class="table table-bordered table-striped"
+           data-toggle="table"
+           data-sticky-header="true"
+           data-classes="table"
+           data-data-field="items"
+           data-sortable="true"
+           data-pagination="true"
+           data-pagination-parts="['pageList']"
+           data-page-size="20"
+           data-page-number="{{search_data.offset}}"
+           data-side-pagination="server"
+           data-pagination-loop="false"
+           data-defer-url="{% url 'tf10_history' id=id %}?json=1"
+           data-query-params="queryParams"
+           data-total-rows="{{total}}"
+           data-silent-sort="true" {# vil vi vise en loading-boks? #}
+           data-remember-order="true"
+    >
+        <thead>
+        <tr>
+            <th data-field="history_date" class="col-2">Dato</th>
+            <th data-field="history_username" class="col-2">Ændret af</th>
+            <th data-field="history_notat" class="col-6">Notat</th>
+            <th data-field="actions" class="col-2">Handlinger</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for item in items %}
+        <tr>
+            <td>{{item.history_date}}</td>
+            <td>{{item.history_username}}</td>
+            <td>{{item.notat}}</td>
+            <td>
+                {% include actions_template with item=item index=forloop.counter0 %}
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="6">
+                {% translate "Ingen søgeresultater" %}
+            </td>
+        </tr>
+        {% endfor %}
+
+        </tbody>
+    </table>
+</div>
+
+{{search_data|json_script:"search_data"}}
+
+<script>
+function queryParams(params){  // Kaldes af bootstrap-table fordi vi peger på den med data-query-params
+    if (params["offset"] < 0) {
+        params["offset"] = 0;
+    }
+    const search_data = JSON.parse($("#search_data").text());
+    for (let key in search_data) {
+        if (key !== "offset" && key !== "limit") {
+            params[key] = search_data[key];
+        }
+    }
+    return params;
+}
+</script>
+{% endblock %}

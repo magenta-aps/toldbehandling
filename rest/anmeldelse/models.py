@@ -10,6 +10,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 from forsendelse.models import Fragtforsendelse, Postforsendelse
 from sats.models import Vareafgiftssats
+from simple_history.models import HistoricalRecords, HistoricForeignKey
 
 
 def afgiftsanmeldelse_upload_to(instance, filename):
@@ -20,6 +21,7 @@ class Afgiftsanmeldelse(models.Model):
     class Meta:
         ordering = ["id"]
 
+    history = HistoricalRecords()
     oprettet_af = models.ForeignKey(
         User,
         related_name="afgiftsanmeldelser",
@@ -103,7 +105,8 @@ class Varelinje(models.Model):
     class Meta:
         ordering = ["vareafgiftssats"]
 
-    afgiftsanmeldelse = models.ForeignKey(
+    history = HistoricalRecords()
+    afgiftsanmeldelse = HistoricForeignKey(
         Afgiftsanmeldelse,
         on_delete=models.CASCADE,
     )
@@ -143,3 +146,25 @@ class Varelinje(models.Model):
 
     def beregn_afgift(self) -> None:
         self.afgiftsbeløb = self.vareafgiftssats.beregn_afgift(self)
+
+
+class Notat(models.Model):
+    user = models.ForeignKey(
+        User,
+        null=True,
+        on_delete=models.SET_NULL,
+    )
+    tekst = models.TextField()
+    oprettet = models.DateTimeField(auto_now_add=True)
+    afgiftsanmeldelse = models.ForeignKey(
+        Afgiftsanmeldelse,
+        on_delete=models.CASCADE,
+    )
+    index = models.PositiveSmallIntegerField(
+        null=False,
+        default=0,
+    )
+
+
+# Vis alle gældende notater i view
+# Historisk: vis ikke fremtidige notater

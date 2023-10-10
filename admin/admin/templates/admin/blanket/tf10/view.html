@@ -7,7 +7,7 @@
 {% block content %}
 <form method="post">
     {% csrf_token %}
-    <div class="container-lg">
+    <div class="mx-5">
         <h1>Afgiftsanmeldelse {{object.id}}</h1>
         {% if object.godkendt == True %}
         <span class="badge bg-success">Godkendt</span>
@@ -236,6 +236,8 @@
 
         <hr/>
 
+        <h5>Varelinjer</h5>
+
         <table class="table table-striped">
             <thead>
             <tr>
@@ -298,18 +300,56 @@
             </tbody>
         </table>
 
+        <hr/>
+
+        <h5>Notater</h5>
+
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th class="col-2">Bruger</th>
+                    <th class="col-2">Tidspunkt</th>
+                    <th class="col-8">Notat</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for notat in object.notater %}
+            <tr>
+                <td>{{notat.brugernavn}}</td>
+                <td>{{notat.oprettet}}</td>
+                <td>{{notat.tekst}}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="3" class="text-center">Ingen notater</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
         <div class="form-row">
             <div class="ml-auto">
-                {% if object.godkendt is None and can_edit %}
-                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#godkend_modal">
-                    Godkend
-                </button>
-                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#afvis_modal">
-                    Afvis
-                </button>
-                <a href="{% url 'tf10_edit' id=object.id %}" class="btn btn-primary">Redigér</a>
-                {% elif object.godkendt is True and can_send_prisme %}
+                {% if can_edit %}
+                    {% if object.godkendt is not True %}
+                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#godkend_modal">
+                        Godkend
+                    </button>
+                    {% endif %}
+                    {% if object.godkendt is None %}
+                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#afvis_modal">
+                        Afvis
+                    </button>
+                    {% endif %}
+                    {% if object.godkendt is not True %}
+                    <a href="{% url 'tf10_edit' id=object.id %}" class="btn btn-primary">Redigér</a>
+                    {% endif %}
+                {% endif %}
+
+                {% if object.godkendt is True and can_send_prisme %}
                 <a href="{% url 'faktura_create' %}" class="btn btn-primary">Send til Prisme</a>
+                {% endif %}
+                {% if can_view_history %}
+                    <a href="{% url 'tf10_history' id=object.id %}" class="btn btn-primary">Historik</a>
                 {% endif %}
             </div>
         </div>
@@ -324,6 +364,7 @@
                 </div>
                 <div class="modal-body">
                     <p>Er du sikker på at du vil godkende afgiftsanmeldelsen?</p>
+                    {{form.notat}}
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Nej</button>
@@ -342,6 +383,7 @@
                 </div>
                 <div class="modal-body">
                     <p>Er du sikker på at du vil afvise afgiftsanmeldelsen?</p>
+                    {{form.notat}}
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Nej</button>

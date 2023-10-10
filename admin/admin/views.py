@@ -3,24 +3,23 @@
 # SPDX-License-Identifier: MPL-2.0
 
 import csv
-from collections import defaultdict
-from datetime import date
+from datetime import date, datetime
 from functools import cached_property
-from typing import Dict, Iterable, List, Union
+from typing import Any, Dict, Iterable, List, Union
 from urllib.parse import unquote
 
 from django.shortcuts import redirect
 from django.template import loader
 from django.urls import reverse
-from django.utils.translation import gettext_lazy as _
 from django.views import View
 from django.views.generic import FormView, TemplateView
 from openpyxl import Workbook
 from requests import HTTPError
 from told_common import views as common_views
+from told_common.data import Afgiftstabel, Vareafgiftssats
 
 from admin import forms
-from admin.data import Afgiftstabel, Vareafgiftssats
+from admin.spreadsheet import VareafgiftssatsSpreadsheetUtil
 
 from django.http import (  # isort: skip
     Http404,
@@ -28,6 +27,8 @@ from django.http import (  # isort: skip
     HttpResponseBadRequest,
     JsonResponse,
 )
+
+
 from told_common.view_mixins import (  # isort: skip
     GetFormView,
     HasRestClientMixin,
@@ -64,73 +65,7 @@ class IndexView(PermissionsRequiredMixin, HasRestClientMixin, TemplateView):
         return context
 
 
-class TF10View(PermissionsRequiredMixin, HasRestClientMixin, FormView):
-    required_permissions = (
-        "auth.admin",
-        "aktør.view_afsender",
-        "aktør.view_modtager",
-        "forsendelse.view_postforsendelse",
-        "forsendelse.view_fragtforsendelse",
-        "anmeldelse.view_afgiftsanmeldelse",
-        "anmeldelse.view_varelinje",
-        "sats.view_vareafgiftssats",
-    )
-    edit_permissions = ("anmeldelse.change_afgiftsanmeldelse",)
-    prisme_permissions = ("anmeldelse.prisme_afgiftsanmeldelse",)
-
-    template_name = "admin/blanket/tf10/view.html"
-    form_class = forms.TF10GodkendForm
-
-    def get_context_data(self, **kwargs):
-        return super().get_context_data(
-            **{
-                **kwargs,
-                "object": self.get_object(),
-                "can_edit": self.has_permissions(
-                    request=self.request, required_permissions=self.edit_permissions
-                ),
-                "can_send_prisme": self.has_permissions(
-                    request=self.request, required_permissions=self.prisme_permissions
-                ),
-            }
-        )
-
-    def form_valid(self, form):
-        # Yderligere tjek for om brugeren må ændre noget.
-        # Vi kan have en situation hvor brugeren må se siden men ikke submitte formularen
-        response = self.check_permissions(self.edit_permissions)
-        if response:
-            return response
-        godkendt = form.cleaned_data["godkendt"]
-        anmeldelse_id = self.kwargs["id"]
-        try:
-            self.rest_client.patch(
-                f"afgiftsanmeldelse/{anmeldelse_id}", {"godkendt": godkendt}
-            )
-            return redirect(reverse("tf10_view", kwargs={"id": anmeldelse_id}))
-        except HTTPError as e:
-            if e.response.status_code == 404:
-                raise Http404("Afgiftsanmeldelse findes ikke")
-            raise
-
-    def get_object(self):
-        try:
-            anmeldelse = self.get_data("afgiftsanmeldelse", self.kwargs["id"])
-        except HTTPError as e:
-            if e.response.status_code == 404:
-                raise Http404("Afgiftsanmeldelse findes ikke")
-            raise
-        for key in ("afsender", "modtager", "fragtforsendelse", "postforsendelse"):
-            if anmeldelse[key] is not None:
-                anmeldelse[key] = self.get_data(key, anmeldelse[key])
-        anmeldelse["varelinjer"] = self.rest_client.get(
-            "varelinje", {"afgiftsanmeldelse": anmeldelse["id"]}
-        )["items"]
-        for varelinje in anmeldelse["varelinjer"]:
-            sats_id = varelinje["vareafgiftssats"]
-            varelinje["vareafgiftssats"] = self.get_sats(sats_id)
-        return anmeldelse
-
+class TF10BaseView(HasRestClientMixin):
     def get_data(self, api, id) -> Union[dict, None]:
         # Filfelter som indeholder en sti der er urlquotet af Django Ninja
         unquote_keys = (
@@ -163,6 +98,78 @@ class TF10View(PermissionsRequiredMixin, HasRestClientMixin, FormView):
         return subsatser
 
 
+class TF10View(PermissionsRequiredMixin, TF10BaseView, FormView):
+    required_permissions = (
+        "auth.admin",
+        "aktør.view_afsender",
+        "aktør.view_modtager",
+        "forsendelse.view_postforsendelse",
+        "forsendelse.view_fragtforsendelse",
+        "anmeldelse.view_afgiftsanmeldelse",
+        "anmeldelse.view_varelinje",
+        "sats.view_vareafgiftssats",
+    )
+    edit_permissions = ("anmeldelse.change_afgiftsanmeldelse",)
+    prisme_permissions = ("anmeldelse.prisme_afgiftsanmeldelse",)
+
+    template_name = "admin/blanket/tf10/view.html"
+    form_class = forms.TF10GodkendForm
+
+    def get_context_data(self, **kwargs):
+        return super().get_context_data(
+            **{
+                **kwargs,
+                "object": self.get_object(),
+                "can_edit": self.has_permissions(
+                    request=self.request, required_permissions=self.edit_permissions
+                ),
+                "can_send_prisme": self.has_permissions(
+                    request=self.request, required_permissions=self.prisme_permissions
+                ),
+                "can_view_history": TF10HistoryListView.has_permissions(
+                    request=self.request
+                ),
+            }
+        )
+
+    def form_valid(self, form):
+        # Yderligere tjek for om brugeren må ændre noget.
+        # Vi kan have en situation hvor brugeren må se siden men ikke submitte formularen
+        response = self.check_permissions(self.edit_permissions)
+        if response:
+            return response
+        godkendt = form.cleaned_data["godkendt"]
+        anmeldelse_id = self.kwargs["id"]
+        try:
+            self.rest_client.afgiftanmeldelse.set_godkendt(anmeldelse_id, godkendt)
+            # Opret notat _efter_ den nye version af anmeldelsen, så vores historik-filtrering fungerer
+            notat = form.cleaned_data["notat"]
+            if notat:
+                self.rest_client.notat.create({"tekst": notat}, self.kwargs["id"])
+            return redirect(reverse("tf10_view", kwargs={"id": anmeldelse_id}))
+        except HTTPError as e:
+            if e.response.status_code == 404:
+                raise Http404("Afgiftsanmeldelse findes ikke")
+            raise
+
+    def get_object(self):
+        try:
+            anmeldelse = self.get_data("afgiftsanmeldelse", self.kwargs["id"])
+        except HTTPError as e:
+            if e.response.status_code == 404:
+                raise Http404("Afgiftsanmeldelse findes ikke")
+            raise
+        for key in ("afsender", "modtager", "fragtforsendelse", "postforsendelse"):
+            if anmeldelse[key] is not None:
+                anmeldelse[key] = self.get_data(key, anmeldelse[key])
+        anmeldelse["varelinjer"] = self.rest_client.varelinje.list(anmeldelse["id"])
+        for varelinje in anmeldelse["varelinjer"]:
+            sats_id = varelinje["vareafgiftssats"]
+            varelinje["vareafgiftssats"] = self.get_sats(sats_id)
+        anmeldelse["notater"] = self.rest_client.notat.list(anmeldelse["id"])
+        return anmeldelse
+
+
 class TF10ListView(common_views.TF10ListView):
     actions_template = "admin/blanket/tf10/link.html"
     extend_template = "admin/admin_layout.html"
@@ -181,13 +188,124 @@ class TF10ListView(common_views.TF10ListView):
 
 class TF10FormUpdateView(common_views.TF10FormUpdateView):
     extend_template = "admin/admin_layout.html"
+    template_name = "admin/blanket/tf10/form.html"
+    form_class = forms.TF10UpdateForm
     required_permissions = (
         "auth.admin",
         *common_views.TF10FormUpdateView.required_permissions,
     )
 
     def get_success_url(self):
-        return reverse("tf10_view", kwargs={"id": self.kwargs["id"]})
+        return reverse("tf10_list")
+
+    def form_valid(self, form, formset):
+        response = super().form_valid(form, formset)
+        # Opret notat _efter_ den nye version af anmeldelsen, så vores historik-filtrering fungerer
+        notat = form.cleaned_data["notat"]
+        if notat:
+            self.rest_client.notat.create({"tekst": notat}, self.kwargs["id"])
+        return response
+
+    def get_context_data(self, **context):
+        return super().get_context_data(
+            **{**context, "notater": self.rest_client.notat.list(self.kwargs["id"])}
+        )
+
+
+class TF10HistoryListView(
+    PermissionsRequiredMixin, HasRestClientMixin, common_views.ListView
+):
+    required_permissions = (
+        "aktør.view_afsender",
+        "aktør.view_modtager",
+        "forsendelse.view_postforsendelse",
+        "forsendelse.view_fragtforsendelse",
+        "anmeldelse.view_afgiftsanmeldelse",
+        "anmeldelse.view_varelinje",
+    )
+    template_name = "admin/blanket/tf10/history/list.html"
+    actions_template = "admin/blanket/tf10/history/actions.html"
+
+    def __init__(self, *args, **kwargs):
+        self.notater = {}
+        super().__init__(*args, **kwargs)
+
+    def get_context_data(self, **context):
+        return super().get_context_data(
+            **{
+                **context,
+                "id": self.kwargs["id"],
+                "actions_template": self.actions_template,
+                "can_view": TF10HistoryDetailView.has_permissions(request=self.request),
+            }
+        )
+
+    def get_items(self, search_data: Dict[str, Any]):
+        self.notater = {
+            item.index: item for item in self.rest_client.notat.list(self.kwargs["id"])
+        }
+        return self.rest_client.get(f"afgiftsanmeldelse/{self.kwargs['id']}/history")
+
+    def item_to_json_dict(
+        self, item: Dict[str, Any], context: Dict[str, Any], index: int
+    ) -> Dict[str, Any]:
+        return {
+            key: self.map_value(item, key, context, index)
+            for key in ("history_username", "history_date", "notat", "actions")
+        }
+
+    def map_value(self, item, key, context, index):
+        if key == "actions":
+            return loader.render_to_string(
+                self.actions_template,
+                {"item": item, "index": index, **context},
+                self.request,
+            )
+        if key == "notat":
+            if index in self.notater:
+                return self.notater[index].tekst
+            return ""
+        value = item[key]
+        if key == "history_date":
+            return (
+                datetime.fromisoformat(value).astimezone().strftime("%Y-%m-%d %H:%M:%S")
+            )
+        if value is None:
+            value = ""
+        return value
+
+
+class TF10HistoryDetailView(PermissionsRequiredMixin, TF10BaseView, TemplateView):
+    template_name = "admin/blanket/tf10/history/view.html"
+
+    def get_object(self):
+        anmeldelse = self.rest_client.get(
+            f"afgiftsanmeldelse/{self.kwargs['id']}/history/{self.kwargs['index']}"
+        )
+        anmeldelse["varelinjer"] = self.rest_client.get(
+            "varelinje",
+            {
+                "afgiftsanmeldelse": anmeldelse["id"],
+                "afgiftsanmeldelse_history_index": self.kwargs["index"],
+            },
+        )["items"]
+        for varelinje in anmeldelse["varelinjer"]:
+            sats_id = varelinje["vareafgiftssats"]
+            varelinje["vareafgiftssats"] = self.get_sats(sats_id)
+
+        anmeldelse["notater"] = self.rest_client.notat.list(
+            anmeldelse["id"], self.kwargs["index"]
+        )
+        return anmeldelse
+
+    def get_context_data(self, **context):
+        return super().get_context_data(
+            **{
+                **context,
+                "object": self.get_object(),
+                "index": self.kwargs["index"],
+            }
+        )
 
 
 class AfgiftstabelListView(PermissionsRequiredMixin, HasRestClientMixin, GetFormView):
@@ -337,9 +455,7 @@ class AfgiftstabelDetailView(PermissionsRequiredMixin, HasRestClientMixin, FormV
     @cached_property
     def item(self) -> Afgiftstabel:
         try:
-            afgiftstabel = Afgiftstabel.from_dict(
-                self.rest_client.get(f"afgiftstabel/{self.kwargs['id']}")
-            )
+            afgiftstabel = self.rest_client.afgiftstabel.get(self.kwargs["id"])
             afgiftstabel.vareafgiftssatser = self.get_satser()
         except HTTPError as e:
             if e.response.status_code == 404:
@@ -348,19 +464,7 @@ class AfgiftstabelDetailView(PermissionsRequiredMixin, HasRestClientMixin, FormV
         return afgiftstabel
 
     def get_satser(self):
-        satser = [
-            Vareafgiftssats.from_dict(result)
-            for result in self.rest_client.get(
-                "vareafgiftssats", {"afgiftstabel": self.kwargs["id"]}
-            )["items"]
-        ]
-        by_overordnet = defaultdict(list)
-        for sats in satser:
-            if sats.overordnet:
-                by_overordnet[sats.overordnet].append(sats)
-        for sats in satser:
-            sats.populate_subs(lambda id: by_overordnet.get(id))
-        return satser
+        return self.rest_client.vareafgiftssats.list(self.kwargs["id"])
 
 
 class AfgiftstabelDownloadView(PermissionsRequiredMixin, HasRestClientMixin, View):
@@ -399,7 +503,11 @@ class AfgiftstabelDownloadView(PermissionsRequiredMixin, HasRestClientMixin, Vie
 
         items_by_id = {item.id: item for item in items}
         rows = [
-            list(item.spreadsheet_row(self.headers, lambda id: items_by_id[id]))
+            list(
+                VareafgiftssatsSpreadsheetUtil.spreadsheet_row(
+                    item, self.headers, lambda id: items_by_id[id]
+                )
+            )
             for item in items
         ]
 
