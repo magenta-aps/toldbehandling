@@ -17,16 +17,16 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         # Med disse rettigheder på plads vil et forsøg på at køre en
         # REST-kommando, som man ikke har adgang til, resultere i en HTTP 403 fra API'et
-        indberettere = Group.objects.create(
+        indberettere = Group.objects.update_or_create(
             name="Indberettere",
         )
-        toldmedarbejdere = Group.objects.create(
+        toldmedarbejdere = Group.objects.update_or_create(
             name="Toldmedarbejdere",
         )
-        afstemmere_bogholdere = Group.objects.create(
+        afstemmere_bogholdere = Group.objects.update_or_create(
             name="Afstemmere/bogholdere",
         )
-        # dataansvarlige = Group.objects.create(
+        # dataansvarlige = Group.objects.update_or_create(
         #     name="Dataansvarlige",
         # )
 
@@ -57,29 +57,29 @@ class Command(BaseCommand):
 
         user_model = ContentType.objects.get_for_model(User, for_concrete_model=False)
 
-        send_til_prisme = Permission.objects.create(
+        send_til_prisme = Permission.objects.update_or_create(
             name="Kan sende afgiftsanmeldelser til Prisme",
             codename="prisme_afgiftsanmeldelse",
             content_type=afgiftsanmeldelse_model,
         )
-        se_alle_afgiftsanmeldelser = Permission.objects.create(
+        se_alle_afgiftsanmeldelser = Permission.objects.update_or_create(
             name="Kan se alle afgiftsanmeldelser, ikke kun egne",
             codename="view_all_anmeldelse",
             content_type=afgiftsanmeldelse_model,
         )
-        se_alle_fragtforsendelser = Permission.objects.create(
+        se_alle_fragtforsendelser = Permission.objects.update_or_create(
             name="Kan se alle fragtforsendeler, ikke kun egne",
             codename="view_all_fragtforsendelser",
             content_type=fragtforsendelse_model,
         )
-        se_alle_postforsendelser = Permission.objects.create(
+        se_alle_postforsendelser = Permission.objects.update_or_create(
             name="Kan se alle postforsendelser, ikke kun egne",
             codename="view_all_postforsendelser",
             content_type=postforsendelse_model,
         )
         # Brugere uden denne permission kan stadig lave REST-kald
         # som defineret af deres andre permissions
-        admin_site_access = Permission.objects.create(
+        admin_site_access = Permission.objects.update_or_create(
             name="Kan logge ind på admin-sitet",
             codename="admin",
             content_type=user_model,
