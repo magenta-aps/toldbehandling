@@ -4,6 +4,8 @@ stages:
   - test
   - coverage
   - release
+  - configure
+  - deploy
 
 include:
   - project: 'labs/salt-automation'
@@ -12,6 +14,7 @@ include:
       - '/gitlab-ci-templates/common/saltbert.v1.yml'
       - '/gitlab-ci-templates/common/docker-build-meta.v2.yml'
       - '/gitlab-ci-templates/common/docker-release-meta.v1.yml'
+      - '/gitlab-ci-templates/common/config-updater-meta.v1.yml'
 
 variables:
   # Project variables
@@ -342,3 +345,55 @@ Release Admin image:
       --dest-creds=${RELEASE_REGISTRY_USER}:${RELEASE_REGISTRY_PASSWORD}
       "docker://${ADMIN_IMAGE_SHA}"
       "docker://${ADMIN_IMAGE_TAG}"
+
+# Configure stage
+#################
+
+Configure Test:
+  stage: configure
+  extends:
+    - .rules:semver-all
+    - .config:endpoint-with-tag
+  needs: ["Release REST image", "Release UI image", "Release ER image", "Release Admin image"]
+  variables:
+    ENDPOINT: toldbehandling/salt/update-test
+
+Configure Production:
+  stage: configure
+  extends:
+    - .rules:semver-core
+    - .config:endpoint-with-tag
+  needs: ["Release REST image", "Release UI image", "Release ER image", "Release Admin image"]
+  variables:
+    ENDPOINT: toldbehandling/salt/update-production
+
+# Deploy stage
+##############
+
+Deploy to Test:
+  stage: deploy
+  extends: 
+    - .rules:semver-all
+    - .saltbert
+  needs: ["Release REST image", "Release UI image", "Release ER image", "Release Admin image"]
+  variables:
+    SALTBERT_ORCHESTRATION: groenland.toldbehandling.service-test
+    SALTBERT_URL: https://saltmaster.groenland.magentahosted.dk
+  when: manual
+  environment:
+    name: test
+    url: "https://test.toldbehandling.nanoq.gl"
+#
+#Deploy to Production:
+#  stage: deploy
+#  extends: 
+#    - .rules:semver-core
+#    - .saltbert
+#  needs: ["Release REST image", "Release UI image", "Release ER image", "Release Admin image"]
+#  variables:
+#    SALTBERT_ORCHESTRATION: groenland.toldbehandling.service-prod
+#    SALTBERT_URL: https://saltmaster.groenland.magentahosted.dk
+#  when: manual
+#  environment:
+#    name: production
+#    url: "https://toldbehandling.nanoq.gl"
