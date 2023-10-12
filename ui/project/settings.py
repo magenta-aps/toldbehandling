@@ -146,7 +146,3 @@ CACHES = {
 }
 
 from .login_settings import *  # noqa
-
-POPULATE_DUMMY_SESSION = bool(
-    strtobool(os.environ.get("POPULATE_DUMMY_SESSION", "False"))
-)

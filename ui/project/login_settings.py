@@ -27,6 +27,22 @@ SESSION_EXPIRE_SECONDS = int(os.environ.get("SESSION_EXPIRE_SECONDS") or 1800)
 SESSION_EXPIRE_AFTER_LAST_ACTIVITY = True
 LOGIN_BYPASS_ENABLED = bool(strtobool(os.environ.get("LOGIN_BYPASS_ENABLED", "False")))
 
+
+if LOGIN_BYPASS_ENABLED:
+
+    def POPULATE_DUMMY_SESSION():  # noqa
+        return {
+            "cpr": "1234567890",
+            "cvr": "12345678",
+            "firstname": "Dummybruger",
+            "lastname": "Testersen",
+            "email": "test@magenta.dk",
+        }
+
+else:
+    POPULATE_DUMMY_SESSION = False
+
+
 CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.db.DatabaseCache",
