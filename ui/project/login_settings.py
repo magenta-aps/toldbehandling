@@ -8,9 +8,8 @@ LOGIN_PROVIDER_CLASS = os.environ.get("LOGIN_PROVIDER_CLASS") or None
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"  # Where to go after logout
 LOGIN_URL = "/login/"
-LOGIN_NAMESPACE = (
-    "login"  # Must match namespace given to django_mitid_auth.urls in project/urls.py
-)
+LOGIN_NAMESPACE = "login"
+
 # Session keys to delete on logout
 LOGIN_SESSION_KEYS = ["user", "access_token", "refresh_token"]
 LOGIN_TIMEOUT_URL = reverse_lazy("login-timeout")
