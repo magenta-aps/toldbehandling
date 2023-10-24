@@ -256,6 +256,8 @@ class PaginateForm(Form):
     json = forms.BooleanField(required=False)
     offset = forms.IntegerField(required=False)
     limit = forms.IntegerField(required=False)
+    sort = forms.CharField(required=False)
+    order = forms.CharField(required=False)
 
 
 class TF10SearchForm(PaginateForm, BootstrapForm):
@@ -320,9 +322,6 @@ class TF10SearchForm(PaginateForm, BootstrapForm):
     dato_før = forms.DateField(required=False, widget=DateInput)
     htmx = forms.BooleanField(required=False)
     order_by = forms.CharField(required=False)
-
-    sort = forms.CharField(required=False)
-    order = forms.CharField(required=False)
 
     id = forms.IntegerField(required=False)
     afsender = forms.ChoiceField(required=False)

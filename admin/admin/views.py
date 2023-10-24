@@ -27,13 +27,12 @@ from django.http import (  # isort: skip
     HttpResponseBadRequest,
     JsonResponse,
 )
-
-
 from told_common.view_mixins import (  # isort: skip
     GetFormView,
     HasRestClientMixin,
     PermissionsRequiredMixin,
 )
+
 
 
 class IndexView(PermissionsRequiredMixin, HasRestClientMixin, TemplateView):
@@ -348,6 +347,8 @@ class AfgiftstabelListView(PermissionsRequiredMixin, HasRestClientMixin, GetForm
             search_data["offset"] = 0
         if search_data["limit"] < 1:
             search_data["limit"] = 1
+        # // = Python floor division
+        search_data["page_number"] = (search_data["offset"] // search_data["limit"]) + 1
         response = self.rest_client.get("afgiftstabel", search_data)
         total = response["count"]
         items = response["items"]
