@@ -13,8 +13,12 @@
     {% csrf_token %}
     <div class="mx-5">
         <h1>Afgiftsanmeldelse</h1>
-        <h4>For indførsel af afgiftspligtige varer i Grønland</h4>
-
+        <div class="row">
+            <h4 class="col-11">For indførsel af afgiftspligtige varer i Grønland</h4>
+            <div class="col-1" class="clearfix my-1">
+                <button type="submit" class="btn btn-success float-end">Gem</button>
+            </div>
+        </div>
         <div class="row">
             <div class="col-12">
                 {{form.non_field_errors}}
