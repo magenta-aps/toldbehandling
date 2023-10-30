@@ -34,7 +34,6 @@ from told_common.view_mixins import (  # isort: skip
 )
 
 
-
 class IndexView(PermissionsRequiredMixin, HasRestClientMixin, TemplateView):
     template_name = "admin/index.html"
     required_permissions = ("auth.admin",)
@@ -193,9 +192,6 @@ class TF10FormUpdateView(common_views.TF10FormUpdateView):
         "auth.admin",
         *common_views.TF10FormUpdateView.required_permissions,
     )
-
-    def get_success_url(self):
-        return reverse("tf10_list")
 
     def form_valid(self, form, formset):
         response = super().form_valid(form, formset)
@@ -498,7 +494,7 @@ class AfgiftstabelDownloadView(PermissionsRequiredMixin, HasRestClientMixin, Vie
         items = [
             Vareafgiftssats.from_dict(item)
             for item in self.rest_client.get(
-                f"vareafgiftssats", {"afgiftstabel": kwargs["id"]}
+                "vareafgiftssats", {"afgiftstabel": kwargs["id"]}
             )["items"]
         ]
 

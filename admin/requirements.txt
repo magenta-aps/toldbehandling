@@ -4,3 +4,4 @@ beautifulsoup4==4.12.2
 humanize==4.7.0
 beautifulsoup4==4.12.2
 openpyxl==3.1.2
+django-bootstrap-icons==0.8.6

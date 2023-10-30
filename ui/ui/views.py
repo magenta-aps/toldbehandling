@@ -38,8 +38,22 @@ class TF10FormCreateView(
         "sats.view_vareafgiftssats",
     )
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.anmeldelse_id = None
+
     def get_success_url(self):
-        return reverse("tf10_blanket_success")
+        """
+        Return to previous page. Make sure that the last form is displayed in the first
+        row and highlight it. Also show a success message.
+        """
+        return (
+            reverse("tf10_list")
+            + "?sort=id"
+            + "&order=desc"
+            + f"&highlight={self.anmeldelse_id}"
+            + "&msg=created"
+        )
 
     def form_valid(self, form, formset):
         afsender_id = self.rest_client.afsender.get_or_create(form.cleaned_data)
@@ -48,7 +62,7 @@ class TF10FormCreateView(
         fragtforsendelse_id = self.rest_client.fragtforsendelse.create(
             form.cleaned_data, self.request.FILES.get("fragtbrev", None)
         )
-        anmeldelse_id = self.rest_client.afgiftanmeldelse.create(
+        self.anmeldelse_id = self.rest_client.afgiftanmeldelse.create(
             form.cleaned_data,
             self.request.FILES["leverandørfaktura"],
             afsender_id,
@@ -58,7 +72,9 @@ class TF10FormCreateView(
         )
         for subform in formset:
             if subform.cleaned_data:
-                self.rest_client.varelinje.create(subform.cleaned_data, anmeldelse_id)
+                self.rest_client.varelinje.create(
+                    subform.cleaned_data, self.anmeldelse_id
+                )
         return super().form_valid(form, formset)
 
     def get_formset_kwargs(self) -> Dict[str, Any]:

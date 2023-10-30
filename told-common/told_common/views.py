@@ -103,8 +103,15 @@ class TF10FormUpdateView(
     template_name = "told_common/tf10/form.html"
     extend_template = "told_common/layout.html"
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.anmeldelse_id = None
+
     def get_success_url(self):
-        return reverse("tf10_list")
+        """
+        Return to previous page. Highlight the updated form and display a success msg.
+        """
+        return reverse("tf10_list") + f"?highlight={self.anmeldelse_id}&msg=updated"
 
     def form_valid(self, form, formset):
         afsender_id = self.rest_client.afsender.get_or_create(form.cleaned_data)
@@ -142,9 +149,9 @@ class TF10FormUpdateView(
                 form.cleaned_data, self.request.FILES.get("fragtbrev", None)
             )
 
-        anmeldelse_id = self.item["id"]
+        self.anmeldelse_id = self.item["id"]
         self.rest_client.afgiftanmeldelse.update(
-            anmeldelse_id,
+            self.anmeldelse_id,
             form.cleaned_data,
             self.request.FILES.get("leverandørfaktura", None),
             afsender_id,
@@ -173,11 +180,11 @@ class TF10FormUpdateView(
             for item in self.varelinjer
         }
         for item in new_items:
-            self.rest_client.varelinje.create(item, anmeldelse_id)
+            self.rest_client.varelinje.create(item, self.anmeldelse_id)
         for id, item in data_map.items():
             if id in existing_map.keys():
                 self.rest_client.varelinje.update(
-                    id, item, existing_map[id], anmeldelse_id
+                    id, item, existing_map[id], self.anmeldelse_id
                 )
         for id, item in existing_map.items():
             if id not in data_map:
