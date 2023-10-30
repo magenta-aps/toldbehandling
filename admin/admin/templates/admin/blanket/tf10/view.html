@@ -199,6 +199,20 @@
                         {% endif %}
                     </div>
                 </div>
+                {% if object.fragtforsendelse.forsendelsestype == "F" %}
+                <div class="row">
+                    <div class="col-4">
+                        <label>Betales af:</label>
+                    </div>
+                    <div class="col-8">
+                        {% if object.modtager_betaler %}
+                        Modtager
+                        {% else %}
+                        Afsender
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
                 <div class="row">
                     <div class="col-4">
                         {% if object.fragtforsendelse %}

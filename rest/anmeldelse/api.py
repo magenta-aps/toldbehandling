@@ -40,6 +40,7 @@ class AfgiftsanmeldelseIn(ModelSchema):
             "modtager_betaler",
             "indførselstilladelse",
             "betalt",
+            "modtager_betaler",
         ]
 
 
@@ -59,6 +60,7 @@ class PartialAfgiftsanmeldelseIn(ModelSchema):
             "indførselstilladelse",
             "betalt",
             "godkendt",
+            "modtager_betaler",
         ]
         model_fields_optional = "__all__"
 
@@ -80,6 +82,7 @@ class AfgiftsanmeldelseOut(ModelSchema):
             "betalt",
             "dato",
             "godkendt",
+            "modtager_betaler",
         ]
 
 

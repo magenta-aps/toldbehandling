@@ -188,6 +188,13 @@ class TF10Form(BootstrapForm):
     fragtbrevnr = forms.CharField(
         required=True,
     )
+    betales_af = forms.ChoiceField(
+        required=False,
+        choices=(
+            ("Modtager", _("Modtager")),
+            ("Afsender", _("Afsender")),
+        ),
+    )
 
     def clean(self):
         if (

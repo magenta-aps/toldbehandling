@@ -454,6 +454,7 @@ class BlanketTest(HasLogin, TestCase):
                         "Testtekst".encode("utf-8")
                     ).decode("ascii"),
                     "leverandørfaktura_navn": "leverandørfaktura.txt",
+                    "modtager_betaler": False,
                 }
             ],
         )
@@ -512,6 +513,7 @@ class BlanketTest(HasLogin, TestCase):
                         "Testtekst".encode("utf-8")
                     ).decode("ascii"),
                     "leverandørfaktura_navn": "leverandørfaktura.txt",
+                    "modtager_betaler": False,
                 }
             ],
         )
@@ -585,6 +587,7 @@ class BlanketTest(HasLogin, TestCase):
                         "Testtekst".encode("utf-8")
                     ).decode("ascii"),
                     "leverandørfaktura_navn": "leverandørfaktura.txt",
+                    "modtager_betaler": False,
                 }
             ],
         )
