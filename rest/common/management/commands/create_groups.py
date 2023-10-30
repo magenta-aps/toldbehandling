@@ -101,7 +101,12 @@ class Command(BaseCommand):
             ("add", postforsendelse_model),
             ("add", fragtforsendelse_model),
             # Ingen add på afgiftstabel og vareafgiftssats
-            # Ingen change
+            ("change", afsender_model),
+            ("change", modtager_model),
+            ("change", afgiftsanmeldelse_model),
+            ("change", varelinje_model),
+            ("change", postforsendelse_model),
+            ("change", fragtforsendelse_model),
             # Ingen delete
         ):
             indberettere.permissions.add(
