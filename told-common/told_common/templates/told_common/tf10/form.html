@@ -237,6 +237,15 @@
                         {{form.fragtbrevnr}}
                     </div>
                 </div>
+                <!-- Should ideally be hidden, unless Fragttype == Luftfragt -->
+                <div class="row">
+                    <div class="col-6">
+                        <label for="{{form.betales_af.name}}">Betales af (kun relevant for luftfragt)</label>
+                    </div>
+                    <div class="col-6">
+                        {{form.betales_af}}
+                    </div>
+                </div>
             </div>
         </div>
 

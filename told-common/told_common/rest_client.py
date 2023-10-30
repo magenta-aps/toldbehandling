@@ -254,6 +254,7 @@ class AfgiftanmeldelseRestClient(ModelRestClient):
             "leverandørfaktura_navn": leverandørfaktura.name
             if leverandørfaktura
             else None,
+            "modtager_betaler": data["betales_af"] == "Modtager",
         }
 
     def create(
