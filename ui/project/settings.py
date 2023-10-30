@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "told_common",
     "ui",
     "django_mitid_auth",
+    "django_bootstrap_icons",
 ]
 
 MIDDLEWARE = [

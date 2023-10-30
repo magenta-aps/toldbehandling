@@ -3,6 +3,7 @@
 {% load i18n %}
 {% load l10n %}
 {% load common_tags %}
+{% load bootstrap_icons %}
 
 {# Docs for bootstrap-table: https://bootstrap-table.com/docs/ #}
 {% block extra_headers %}
@@ -82,6 +83,35 @@
     </form>
     <hr/>
 
+    <div class="card" id="create_message" style="display:none">
+        <div class="card-body text-center">
+            {% bs_icon "check2-circle" size="2em" color="green" %}
+            <div>
+                <div style="display:inline-block">
+                    {% translate "Afgiftsanmeldelsen blev indregistreret. Blanket med nummer =" %}
+                </div>
+                <div style="display:inline-block" id="created_form_id"></div>
+                <div style="display:inline-block">
+                    {% translate "afventer nu godkendelse." %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card" id="update_message" style="display:none">
+        <div class="card-body text-center">
+            {% bs_icon "check2-circle" size="2em" color="green" %}
+            <div>
+                <div style="display:inline-block">
+                    {% translate "Afgiftsanmeldelsen med nummer =" %}
+                </div>
+                <div style="display:inline-block" id="updated_form_id"></div>
+                <div style="display:inline-block">
+                    {% translate "blev opdateret." %}
+                </div>
+            </div>
+        </div>
+    </div>
+
     <table class="table table-bordered table-striped"
            data-toggle="table"
            data-sticky-header="true"
@@ -99,6 +129,7 @@
            data-total-rows="{{total}}"
            data-silent-sort="true" {# vil vi vise en loading-boks? #}
            data-remember-order="true"
+           id="results_table"
     >
         <thead>
         <tr>
@@ -110,7 +141,7 @@
             <th data-field="actions">Handlinger</th>
         </tr>
         </thead>
-        <tbody>
+        <tbody id="table_body">
         {% for item in items %}
         <tr>
             <td>{{item.id}}</td>
@@ -142,11 +173,16 @@ function queryParams(params){  // Kaldes af bootstrap-table fordi vi peger på d
         params["offset"] = 0;
     }
     const search_data = JSON.parse($("#search_data").text());
+
+    // Bootstrap takes care of these parameters for us.
+    const keys_to_ignore = ["limit", "offset", "search", "sort", "order"];
+
     for (let key in search_data) {
-        if (key !== "offset" && key !== "limit") {
+        if (keys_to_ignore.includes(key) == false) {
             params[key] = search_data[key];
         }
     }
+
     return params;
 }
 function statusFormatter(value) {
@@ -165,5 +201,55 @@ function aktørFormatter(value) {
     }
     return value;
 }
+var getUrlParameter = function getUrlParameter(sParam) {
+    var sPageURL = window.location.search.substring(1),
+        sURLVariables = sPageURL.split('&'),
+        sParameterName,
+        i;
+
+    for (i = 0; i < sURLVariables.length; i++) {
+        sParameterName = sURLVariables[i].split('=');
+
+        if (sParameterName[0] === sParam) {
+            return sParameterName[1] === undefined ? true : decodeURIComponent(sParameterName[1]);
+        }
+    }
+    return false;
+};
+function highlight(id_to_highlight) {
+    // Get cells in first column
+    var allCells = $("#table_body tr").find("td:first").map(function(){
+         return $(this);
+    }).get();
+
+    // Loop over each of them and highlight if the ID equals id_to_highlight
+    $.each(allCells, function (index, child) {
+    	if (child.text() === id_to_highlight) {
+            $(child).parent().addClass("table-success");
+    	}
+    });
+}
+$(document).ready(function() {
+    var id_to_highlight = getUrlParameter("highlight");
+    var msg_to_display = getUrlParameter("msg");
+
+    highlight(id_to_highlight);
+
+    if (msg_to_display == "created"){
+        $("#created_form_id").text(id_to_highlight);
+        $("#create_message").show();
+    } else if (msg_to_display == "updated"){
+        $("#updated_form_id").text(id_to_highlight);
+        $("#update_message").show();
+    }
+});
+$("#results_table").on('sort.bs.table', function(e,name,order){
+    $("#results_table").on('post-body.bs.table', function(e,params){
+        // This code runs when the table is finished with sorting.
+        $('#mytableID').unbind("post-body.bs.table");
+            var id_to_highlight = getUrlParameter("highlight");
+            highlight(id_to_highlight);
+    });
+});
 </script>
 {% endblock %}
