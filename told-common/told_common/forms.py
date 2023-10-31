@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: 2023 Magenta ApS <info@magenta.dk>
 #
 # SPDX-License-Identifier: MPL-2.0
+from typing import Optional
 
 from django import forms
 from django.core.exceptions import ValidationError
@@ -51,6 +52,7 @@ class TF10Form(BootstrapForm):
         self,
         leverandørfaktura_required: bool = True,
         fragtbrev_required: bool = True,
+        varesatser: Optional[dict] = None,
         *args,
         **kwargs
     ):
@@ -59,6 +61,7 @@ class TF10Form(BootstrapForm):
             self.fields["leverandørfaktura"].required = False
         self.leverandørfaktura_required = leverandørfaktura_required
         self.fragtbrev_required = fragtbrev_required
+        self.varesatser = varesatser
 
     afsender_cvr = ButtonlessIntegerField(
         min_value=10000000,
@@ -214,7 +217,20 @@ class TF10Form(BootstrapForm):
 
     def clean_with_formset(self, formset):
         # Perform validation on form and formset together
-        pass
+        if not self.cleaned_data["modtager_indførselstilladelse"]:
+            # Hvis vi ikke har en indførselstilladelse, tjek om der er nogle varer der kræver det
+            for subform in formset:
+                if self.varesatser:
+                    varesats_id = subform.cleaned_data["vareafgiftssats"]
+                    vareafgiftssats = self.varesatser[int(varesats_id)]
+                    if vareafgiftssats["kræver_indførselstilladelse"]:
+                        self.add_error(
+                            "modtager_indførselstilladelse",
+                            _(
+                                "Indførselstilladelse er påkrævet med de angivne varearter"
+                            ),
+                        )
+                        break
 
 
 class TF10VareForm(BootstrapForm):
