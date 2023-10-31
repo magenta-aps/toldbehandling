@@ -225,10 +225,7 @@ class FormWithFormsetView(FormView):
         form.full_clean()
         formset.full_clean()
         if hasattr(form, "clean_with_formset"):
-            try:
-                form.clean_with_formset(formset)
-            except ValidationError as e:
-                form.add_error(None, e)
+            form.clean_with_formset(formset)
         if form.is_valid() and formset.is_valid():
             return self.form_valid(form, formset)
         else:

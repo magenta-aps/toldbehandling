@@ -192,26 +192,11 @@ class TF10FormUpdateView(
 
         return super().form_valid(form, formset)
 
-    @cached_property
-    def toplevel_varesatser(self):
-        return dict(
-            filter(
-                lambda pair: pair[1].get("overordnet", None) is None,
-                self.rest_client.varesatser.items(),
-            )
-        )
-
     def get_form_kwargs(self):
-        print("get_form_kwargs")
         kwargs = super().get_form_kwargs()
         kwargs.update(
-            {
-                "leverandørfaktura_required": False,
-                "fragtbrev_required": False,
-                "varesatser": self.toplevel_varesatser,
-            }
+            {"leverandørfaktura_required": False, "fragtbrev_required": False}
         )
-        print(kwargs)
         return kwargs
 
     def get_formset_kwargs(self) -> Dict[str, Any]:
@@ -220,7 +205,12 @@ class TF10FormUpdateView(
         if "form_kwargs" not in kwargs:
             kwargs["form_kwargs"] = {}
         # Will be picked up by TF10VareForm's constructor
-        kwargs["form_kwargs"]["varesatser"] = self.toplevel_varesatser
+        kwargs["form_kwargs"]["varesatser"] = dict(
+            filter(
+                lambda pair: pair[1].get("overordnet", None) is None,
+                self.rest_client.varesatser.items(),
+            )
+        )
         kwargs["initial"] = self.varelinjer
         return kwargs
 

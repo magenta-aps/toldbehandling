@@ -584,14 +584,11 @@ class RestClient:
             "afgiftstabel",
             {"gyldig_fra__lte": today, "gyldig_til__gte": today, "kladde": False},
         )
-        print("afgiftstabeller")
-        print(afgiftstabeller)
         if afgiftstabeller["count"] == 1:
             afgiftstabel = afgiftstabeller["items"][0]
-            x = self.get_all_items(
+            return self.get_all_items(
                 "vareafgiftssats", {"afgiftstabel": afgiftstabel["id"]}
             )
-            return x
         return {}
 
     @cached_property
