@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2023 Magenta ApS <info@magenta.dk>
 #
 # SPDX-License-Identifier: MPL-2.0
-
+from functools import cached_property
 from typing import Any, Dict
 
 from django.urls import reverse
@@ -76,6 +76,24 @@ class TF10FormCreateView(
                     subform.cleaned_data, self.anmeldelse_id
                 )
         return super().form_valid(form, formset)
+
+    @cached_property
+    def toplevel_varesatser(self):
+        return dict(
+            filter(
+                lambda pair: pair[1].get("overordnet", None) is None,
+                self.rest_client.varesatser.items(),
+            )
+        )
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs.update(
+            {
+                "varesatser": self.toplevel_varesatser,
+            }
+        )
+        return kwargs
 
     def get_formset_kwargs(self) -> Dict[str, Any]:
         kwargs = super().get_formset_kwargs()

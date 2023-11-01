@@ -144,10 +144,7 @@ class ModtagerIn(ModelSchema):
             "kreditordning",
             "indførselstilladelse",
         ]
-        model_fields_optional = [
-            "postbox",
-            "cvr",
-        ]
+        model_fields_optional = ["postbox", "cvr", "indførselstilladelse"]
 
 
 class PartialModtagerIn(ModelSchema):
