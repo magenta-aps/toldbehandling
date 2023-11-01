@@ -1,30 +1,93 @@
 $(function () {
     // Afsender/modtager opdatering
     // ----------------------------
+
+    const items = [];
+    const lastEdited = [];
+
+    const fillForm = function(i, item) {
+        const aktør = aktører[i];
+        const fields = aktør["fields"];
+        for (let name in fields) {
+            if (name !== lastEdited[i]) {
+                let jqElement = $(fields[name]);
+                jqElement.val(item[name] || "");
+            }
+        }
+    }
+
     for (let i = 0; i < aktører.length; i++) {
         const aktør = aktører[i];
         const fields = aktør["fields"];
         const api = aktør["api"];
-        for (let j = 0; j < aktør["searchfields"].length; j++) {
-            const searchfield = aktør["searchfields"][j];
-            fields[searchfield].on("change", function () {
+        const searchfields = aktør["searchfields"];
+        const multi_container = $(aktør["multi_container"]);
+        const labels = aktør["multi_label"];
+        const multi_select = multi_container.find("select");
+        items.push([]);
+        lastEdited.push(null);
+
+        multi_select.change(function () {
+            const value = $(this).val();
+            if (value === "") {
+                fillForm(i, {});
+            } else {
+                const item = items[i][value];
+                fillForm(i, item);
+            }
+        });
+
+        const updateChoices = function(fieldName, event) {
+            const filter = {};
+            filter[fieldName] = this.val();
+            if (filter[fieldName]) {
+                lastEdited[i] = fieldName;
                 $.ajax({
-                    "url": api + "?" + searchfield + "=" + this.value,
+                    "url": api,
+                    "data": filter,
                     "success": function (response_data) {
-                        if (response_data["count"] > 0) {
-                            const found_item = response_data["items"][0];
-                            for (let name in found_item) {
-                                if (name in fields) {
-                                    fields[name].val(found_item[name]);
-                                }
+                        const count = response_data["count"];
+                        if (count > 1) {
+                            items[i] = response_data["items"]
+                            multi_select.empty();
+                            multi_select.append('<option value=""></option>');
+                            for (let j = 0; j < items[i].length; j++) {
+                                let item = items[i][j];
+                                let text = [
+                                    item["navn"],
+                                    item["adresse"],
+                                    [item["postnummer"], item["by"]].filter((x) => x !== null && x !== undefined).join(" ")
+                                ].filter((x) => x !== null && x !== undefined).join(', ');
+                                multi_select.append('<option value="' + j + '">' + text + '</option>');
                             }
+                            for (let label in labels) {
+                                const element = $(labels[label]);
+                                element.toggle(label === fieldName);
+                            }
+
+
+                            multi_container.show();
+                        } else if (count === 1) {
+                            fillForm(i, response_data["items"][0]);
+                            multi_container.hide();
+                        } else {
+                            multi_container.hide();
                         }
                     }
                 });
-            });
+            }
+        };
+
+        for (let j = 0; j < aktør["searchfields"].length; j++) {
+            const searchfield = searchfields[j];
+            $(fields[searchfield]).on("change", updateChoices.bind($(fields[searchfield]), searchfield));
         }
     }
 });
+
+
+
+
 $(function () {
 
     // Vis afgiftssats og beregn afgiftsbeløb

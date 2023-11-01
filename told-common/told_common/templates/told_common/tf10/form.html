@@ -45,6 +45,31 @@
                         {{form.afsender_navn.errors}}
                     </div>
                 </div>
+                <div class="row" id="afsender_multi_container" style="display: none">
+                <div class="col-12">
+                    <div class="alert alert-warning">
+                        <label for="afsender_multi_select">
+                            <span data-multi="cvr">
+                            {% blocktranslate %}
+                            Der er flere end én registreret afsender for det angivne CVR-nummer.
+                            {% endblocktranslate %}
+                            </span>
+                            <span data-multi="navn">
+                            {% blocktranslate %}
+                            Der er flere end én registreret afsender for det angivne navn.
+                            {% endblocktranslate %}
+                            </span>
+                            {% blocktranslate %}
+                            Vælg én fra listen herunder, eller udfyld felterne med nye data.
+                            Hvis felterne ikke passer med en eksisterende afsender, vil en ny afsender blive oprettet.
+                            {% endblocktranslate %}
+                        </label>
+                        <p>
+                            <select id="afsender_multi_select" class="form-select">---</select>
+                        </p>
+                    </div>
+                </div>
+            </div>
                 <div class="row">
                     <div class="col-4">
                         <label for="{{form.afsender_adresse.id_for_label}}">{{form.afsender_adresse.label}}</label>
@@ -112,6 +137,31 @@
                         {{form.modtager_navn.errors}}
                     </div>
                 </div>
+                <div class="row" id="modtager_multi_container" style="display: none">
+                <div class="col-12">
+                    <div class="alert alert-warning">
+                        <label for="modtager_multi_select">
+                            <span data-multi="cvr">
+                            {% blocktranslate %}
+                            Der er flere end én registreret modtager for det angivne CVR-nummer.
+                            {% endblocktranslate %}
+                            </span>
+                            <span data-multi="navn">
+                            {% blocktranslate %}
+                            Der er flere end én registreret modtager for det angivne navn.
+                            {% endblocktranslate %}
+                            </span>
+                            {% blocktranslate %}
+                            Vælg én fra listen herunder, eller udfyld felterne med nye data.
+                            Hvis felterne ikke passer med en eksisterende modtager, vil en ny modtager blive oprettet.
+                            {% endblocktranslate %}
+                        </label>
+                        <p>
+                            <select id="modtager_multi_select" class="form-select">---</select>
+                        </p>
+                    </div>
+                </div>
+            </div>
                 <div class="row">
                     <div class="col-4">
                         <label for="{{form.modtager_adresse.id_for_label}}">{{form.modtager_adresse.label}}</label>
@@ -326,30 +376,40 @@
     const aktører = [
         {
             "fields": {
-                "cvr": $("[name={{form.afsender_cvr.name}}]"),
-                "navn": $("[name={{form.afsender_navn.name}}]"),
-                "adresse": $("[name={{form.afsender_adresse.name}}]"),
-                "postnummer": $("[name={{form.afsender_postnummer.name}}]"),
-                "by": $("[name={{form.afsender_by.name}}]"),
-                "postbox": $("[name={{form.afsender_postbox.name}}]"),
-                "telefon": $("[name={{form.afsender_telefon.name}}]"),
+                "cvr": "[name={{form.afsender_cvr.name}}]",
+                "navn": "[name={{form.afsender_navn.name}}]",
+                "adresse": "[name={{form.afsender_adresse.name}}]",
+                "postnummer": "[name={{form.afsender_postnummer.name}}]",
+                "by": "[name={{form.afsender_by.name}}]",
+                "postbox": "[name={{form.afsender_postbox.name}}]",
+                "telefon": "[name={{form.afsender_telefon.name}}]",
             },
             "searchfields": ["cvr", "navn"],  // Felter som initierer søgning
             "api": "{% url 'rest' path='afsender' %}",
+            "multi_container": "#afsender_multi_container",
+            "multi_label": {
+                "cvr": "#afsender_multi_container [data-multi=cvr]",
+                "navn": "#afsender_multi_container [data-multi=navn]"
+            }
         },
         {
             "fields": {
-                "cvr": $("[name={{form.modtager_cvr.name}}]"),
-                "navn": $("[name={{form.modtager_navn.name}}]"),
-                "adresse": $("[name={{form.modtager_adresse.name}}]"),
-                "postnummer": $("[name={{form.modtager_postnummer.name}}]"),
-                "by": $("[name={{form.modtager_by.name}}]"),
-                "postbox": $("[name={{form.modtager_postbox.name}}]"),
-                "telefon": $("[name={{form.modtager_telefon.name}}]"),
-                "indførselstilladelse": $("[name={{form.modtager_indførselstilladelse.name}}]"),
+                "cvr": "[name={{form.modtager_cvr.name}}]",
+                "navn": "[name={{form.modtager_navn.name}}]",
+                "adresse": "[name={{form.modtager_adresse.name}}]",
+                "postnummer": "[name={{form.modtager_postnummer.name}}]",
+                "by": "[name={{form.modtager_by.name}}]",
+                "postbox": "[name={{form.modtager_postbox.name}}]",
+                "telefon": "[name={{form.modtager_telefon.name}}]",
+                "indførselstilladelse": "[name={{form.modtager_indførselstilladelse.name}}]",
             },
             "searchfields": ["cvr", "navn"],
             "api": "{% url 'rest' path='modtager' %}",
+            "multi_container": "#modtager_multi_container",
+            "multi_label": {
+                "cvr": "#modtager_multi_container [data-multi=cvr]",
+                "navn": "#modtager_multi_container [data-multi=navn]"
+            }
         }
     ];
 </script>

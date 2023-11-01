@@ -42,7 +42,7 @@ class Aktør(models.Model):
             MinValueValidator(10000000),
             MaxValueValidator(99999999),
         ),
-        unique=True,
+        unique=False,
         null=True,
         blank=True,
         db_index=True,

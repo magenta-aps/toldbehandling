@@ -13,7 +13,7 @@ import requests
 from bs4 import BeautifulSoup
 from django.conf import settings
 from django.shortcuts import redirect
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 from requests import Response
 from told_common.forms import TF10Form, TF10VareForm
@@ -23,7 +23,6 @@ from django.core.files.uploadedfile import (  # isort: skip
     SimpleUploadedFile,
     TemporaryUploadedFile,
 )
-
 from told_common.tests import (  # isort: skip
     AnmeldelseListViewTest,
     FileViewTest,
@@ -115,6 +114,7 @@ class BlanketTest(HasLogin, TestCase):
         file.seek(0)
         self.assertEquals(RestClient._uploadfile_to_base64str(file), "dGVzdGRhdGE=")
 
+    @override_settings(LOGIN_BYPASS_ENABLED=False)
     def test_requires_login(self):
         url = str(reverse("tf10_create"))
         response = self.client.get(url)

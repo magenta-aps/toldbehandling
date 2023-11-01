@@ -14,6 +14,7 @@ import requests
 from bs4 import BeautifulSoup
 from django.conf import settings
 from django.contrib.auth.models import Permission
+from django.test import override_settings
 from django.urls import reverse
 from requests import Response
 from told_common.rest_client import RestClient
@@ -655,6 +656,7 @@ class AnmeldelseListViewTest(HasLogin):
         response.status_code = status_code or 404
         return response
 
+    @override_settings(LOGIN_BYPASS_ENABLED=False)
     def test_requires_login(self):
         url = self.list_url
         response = self.client.get(url)
