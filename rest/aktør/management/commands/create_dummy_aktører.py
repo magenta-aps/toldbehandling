@@ -63,3 +63,40 @@ class Command(BaseCommand):
                     telefon=str(random.randint(100000, 999999)),
                     cvr=str(random.randint(10000000, 99999999)),
                 )
+
+        Afsender.objects.create(
+            navn="Testfirma1",
+            adresse="Paradisæblevej 111",
+            postnummer=1234,
+            by="Andeby",
+            postbox=None,
+            telefon=str(random.randint(100000, 999999)),
+            cvr=10000000,
+        )
+        Afsender.objects.create(
+            navn="Testfirma1",
+            adresse="Hestebremsebakken 1",
+            postnummer=4321,
+            by="Gåserød",
+            postbox=None,
+            telefon=str(random.randint(100000, 999999)),
+            cvr=10000000,
+        )
+        Modtager.objects.create(
+            navn="Testfirma2",
+            adresse="Testvej 3",
+            postnummer=1234,
+            by="Testby",
+            postbox=None,
+            telefon=str(random.randint(100000, 999999)),
+            cvr=20000000,
+        )
+        Modtager.objects.create(
+            navn="Testfirma2",
+            adresse="Testvej 4",
+            postnummer=1234,
+            by="Testby",
+            postbox=None,
+            telefon=str(random.randint(100000, 999999)),
+            cvr=20000000,
+        )

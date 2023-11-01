@@ -31,7 +31,7 @@ class AfsenderTest(RestMixin, TestCase):
         "telefon": "654321",
         "cvr": 12345670,
     }
-    unique_fields = ["cvr"]
+    unique_fields = []
 
     @property
     def expected_object_data(self):
@@ -84,7 +84,7 @@ class ModtagerTest(RestMixin, TestCase):
         "cvr": ["a", 123456789, -1],
         "postnummer": ["a", -1, 0, 999, 10000],
     }
-    unique_fields = ["cvr"]
+    unique_fields = []
     valid_itemdata = {
         "navn": "Testfirma 3",
         "adresse": "Testvej 42b",

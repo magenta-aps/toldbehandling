@@ -19,6 +19,7 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.http import HttpRequest
 from requests import HTTPError, Session
 from told_common.data import Afgiftstabel, Notat, Vareafgiftssats
+from told_common.util import filter_dict_none
 
 
 @dataclass
@@ -59,53 +60,61 @@ class ModelRestClient:
 
 
 class AfsenderRestClient(ModelRestClient):
-    def get_or_create(self, data: dict) -> int:
-        afsender_cvr = data["afsender_cvr"]
-        if afsender_cvr:
-            afsender_response = self.rest.get("afsender", {"cvr": afsender_cvr})
+    def get_or_create(self, ident: dict, data: Optional[dict] = None) -> int:
+        if data is None:
+            data = ident
+        mapped = {
+            d: filter_dict_none(
+                {
+                    key: store.get("afsender_" + key, None) or store.get(key, None)
+                    for key in (
+                        "navn",
+                        "adresse",
+                        "postnummer",
+                        "by",
+                        "postbox",
+                        "telefon",
+                        "cvr",
+                    )
+                }
+            )
+            for d, store in (("ident", ident), ("data", data))
+        }
+        if mapped["ident"]:
+            afsender_response = self.rest.get("afsender", mapped["ident"])
             if afsender_response["count"] > 0:
                 return afsender_response["items"][0]["id"]
-        resp = self.rest.post(
-            "afsender",
-            {
-                key: data["afsender_" + key]
-                for key in (
-                    "navn",
-                    "adresse",
-                    "postnummer",
-                    "by",
-                    "postbox",
-                    "telefon",
-                    "cvr",
-                )
-            },
-        )
+        resp = self.rest.post("afsender", mapped["data"])
         return resp["id"]
 
 
 class ModtagerRestClient(ModelRestClient):
-    def get_or_create(self, data: dict) -> int:
-        modtager_cvr = data["modtager_cvr"]
-        if modtager_cvr:
-            modtager_response = self.rest.get("modtager", {"cvr": modtager_cvr})
+    def get_or_create(self, ident: dict, data: Optional[dict] = None) -> int:
+        if data is None:
+            data = ident
+        mapped = {
+            d: filter_dict_none(
+                {
+                    key: store.get("modtager_" + key, None) or store.get(key, None)
+                    for key in (
+                        "navn",
+                        "adresse",
+                        "postnummer",
+                        "by",
+                        "postbox",
+                        "telefon",
+                        "cvr",
+                        "indførselstilladelse",
+                    )
+                }
+            )
+            for d, store in (("ident", ident), ("data", data))
+        }
+        if mapped["ident"]:
+            modtager_response = self.rest.get("modtager", mapped["ident"])
             if modtager_response["count"] > 0:
                 return modtager_response["items"][0]["id"]
-        resp = self.rest.post(
-            "modtager",
-            {
-                key: data["modtager_" + key]
-                for key in (
-                    "navn",
-                    "adresse",
-                    "postnummer",
-                    "by",
-                    "postbox",
-                    "telefon",
-                    "cvr",
-                    "indførselstilladelse",
-                )
-            },
-        )
+        resp = self.rest.post("modtager", mapped["data"])
         return resp["id"]
 
 

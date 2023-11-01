@@ -114,8 +114,12 @@ class TF10FormUpdateView(
         return reverse("tf10_list") + f"?highlight={self.anmeldelse_id}&msg=updated"
 
     def form_valid(self, form, formset):
-        afsender_id = self.rest_client.afsender.get_or_create(form.cleaned_data)
-        modtager_id = self.rest_client.modtager.get_or_create(form.cleaned_data)
+        afsender_id = self.rest_client.afsender.get_or_create(
+            form.cleaned_data, form.cleaned_data
+        )
+        modtager_id = self.rest_client.modtager.get_or_create(
+            form.cleaned_data, form.cleaned_data
+        )
 
         postforsendelse_id = (
             self.item["postforsendelse"]["id"] if self.item["postforsendelse"] else None
