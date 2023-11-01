@@ -7,7 +7,7 @@
 set -e
 
 GENERATE_DB_DOCUMENTATION=${GENERATE_DB_DOCUMENTATION:=true}
-if [[ "$GENERATE_DB_DOCUMENTATION" = true ]]; then
+if [[ "${GENERATE_DB_DOCUMENTATION,,}" = true ]]; then
 
   RESULT=1
   while [[ $RESULT != "0" ]] ; do
