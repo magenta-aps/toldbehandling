@@ -4,6 +4,7 @@
 
 from django.contrib.auth.models import User
 from django.db import models
+from django.utils.datetime_safe import date
 from django.utils.translation import gettext_lazy as _
 
 
@@ -25,6 +26,7 @@ class Forsendelse(models.Model):
         on_delete=models.SET_NULL,  # Vi kan slette brugere & beholde deres forsendelser
         null=True,
     )
+    afgangsdato = models.DateField(null=False, blank=False, default=date.today)
 
     def save(self, *args, **kwargs):
         super().full_clean()

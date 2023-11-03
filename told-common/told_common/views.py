@@ -274,6 +274,7 @@ class TF10FormUpdateView(
                 )
                 initial["fragtbrevnr"] = fragtforsendelse["fragtbrevsnummer"]
                 initial["forbindelsesnr"] = fragtforsendelse["forbindelsesnr"]
+                initial["afgangsdato"] = fragtforsendelse["afgangsdato"]
             elif postforsendelse:
                 initial["fragttype"] = (
                     "skibspost"
@@ -282,6 +283,7 @@ class TF10FormUpdateView(
                 )
                 initial["fragtbrevnr"] = postforsendelse["postforsendelsesnummer"]
                 initial["forbindelsesnr"] = postforsendelse["afsenderbykode"]
+                initial["afgangsdato"] = postforsendelse["afgangsdato"]
         return initial
 
 

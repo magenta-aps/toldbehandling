@@ -18,6 +18,15 @@
         {% endif %}
         <h4>For indførsel af afgiftspligtige varer i Grønland</h4>
 
+        <div class="row">
+            <div class="col-2">
+                <label>Oprettelsesdato:</label>
+            </div>
+            <div class="col-10">
+                {{object.dato}}
+            </div>
+        </div>
+
         <hr/>
         {% localize off %}
         <div class="row">
@@ -243,6 +252,28 @@
                         {% elif object.postforsendelse %}
                         {{object.postforsendelse.postforsendelsesnummer}}
                         {% endif %}
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-4">
+                        Afgangsdato:
+                    </div>
+                    <div class="col-8">
+                        {% if object.fragtforsendelse %}
+                            {{object.fragtforsendelse.afgangsdato}}
+                        {% elif object.postforsendelse %}
+                            {{object.postforsendelse.afgangsdato}}
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-4">
+                        Beregnet faktureringsdato:
+                    </div>
+                    <div class="col-8">
+                        {{object.beregnet_faktureringsdato}}
                     </div>
                 </div>
             </div>

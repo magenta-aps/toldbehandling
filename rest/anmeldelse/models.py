@@ -1,8 +1,11 @@
 # SPDX-FileCopyrightText: 2023 Magenta ApS <info@magenta.dk>
 #
 # SPDX-License-Identifier: MPL-2.0
+from datetime import timedelta
 
 from aktør.models import Afsender, Modtager
+from common.models import Postnummer
+from common.util import dato_måned_slut
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
@@ -99,6 +102,18 @@ class Afgiftsanmeldelse(models.Model):
     def save(self, *args, **kwargs):
         super().full_clean()
         super().save(*args, **kwargs)
+
+    @property
+    def beregnet_faktureringsdato(self):
+        forsendelse = self.fragtforsendelse or self.postforsendelse
+        afgangsdato = forsendelse.afgangsdato
+        måned_slut = dato_måned_slut(afgangsdato)
+        postnummer = self.modtager.postnummer
+        try:
+            ekstra_dage = Postnummer.objects.get(postnummer=postnummer).dage
+        except Postnummer.DoesNotExist:
+            ekstra_dage = 0
+        return måned_slut + timedelta(days=ekstra_dage)
 
 
 class Varelinje(models.Model):

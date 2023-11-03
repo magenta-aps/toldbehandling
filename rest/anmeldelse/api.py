@@ -85,6 +85,12 @@ class AfgiftsanmeldelseOut(ModelSchema):
             "modtager_betaler",
         ]
 
+    beregnet_faktureringsdato: str
+
+    @staticmethod
+    def resolve_beregnet_faktureringsdato(obj: Afgiftsanmeldelse):
+        return obj.beregnet_faktureringsdato.isoformat()
+
 
 class AfgiftsanmeldelseFullOut(AfgiftsanmeldelseOut):
     afsender: AfsenderOut

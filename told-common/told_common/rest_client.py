@@ -127,6 +127,7 @@ class PostforsendelseRestClient(ModelRestClient):
                 "postforsendelsesnummer": data["fragtbrevnr"],
                 "afsenderbykode": data["forbindelsesnr"],
                 "forsendelsestype": "S" if fragttype == "skibspost" else "F",
+                "afgangsdato": data["afgangsdato"],
             }
         return None
 
@@ -136,7 +137,12 @@ class PostforsendelseRestClient(ModelRestClient):
         # med eksisterende data fra REST for at se om de stemmer overens.
         # False: data passer ikke, og der skal foretages en opdatering
         # True: data passer, og det er ikke nødvendigt at opdatere.
-        for x in ("forsendelsestype", "postforsendelsesnummer", "afsenderbykode"):
+        for x in (
+            "forsendelsestype",
+            "postforsendelsesnummer",
+            "afsenderbykode",
+            "afgangsdato",
+        ):
             if data[x] != existing[x]:
                 return False
         return True
@@ -170,10 +176,9 @@ class FragtforsendelseRestClient(ModelRestClient):
                 "fragtbrevsnummer": data["fragtbrevnr"],
                 "forsendelsestype": "S" if fragttype == "skibsfragt" else "F",
                 "forbindelsesnr": data["forbindelsesnr"],
-                "fragtbrev": RestClient._uploadfile_to_base64str(file)
-                if file
-                else None,
+                "fragtbrev": RestClient._uploadfile_to_base64str(file),
                 "fragtbrev_navn": file.name if file else None,
+                "afgangsdato": data["afgangsdato"],
             }
         return None
 
@@ -183,7 +188,12 @@ class FragtforsendelseRestClient(ModelRestClient):
         # med eksisterende data fra REST for at se om de stemmer overens.
         # False: data passer ikke, og der skal foretages en opdatering
         # True: data passer, og det er ikke nødvendigt at opdatere.
-        for x in ("forsendelsestype", "fragtbrevsnummer", "forbindelsesnr"):
+        for x in (
+            "forsendelsestype",
+            "fragtbrevsnummer",
+            "forbindelsesnr",
+            "afgangsdato",
+        ):
             if data[x] != existing[x]:
                 return False
         if data["fragtbrev"] is not None:
@@ -191,20 +201,9 @@ class FragtforsendelseRestClient(ModelRestClient):
         return True
 
     def create(self, data: dict, file: Union[UploadedFile, None]) -> Union[int, None]:
-        fragttype = data["fragttype"]
-        if fragttype in ("luftfragt", "skibsfragt"):
-            response = self.rest.post(
-                "fragtforsendelse",
-                {
-                    "fragtbrevsnummer": data["fragtbrevnr"],
-                    "forbindelsesnr": data["forbindelsesnr"],
-                    "forsendelsestype": "S" if fragttype == "skibsfragt" else "F",
-                    "fragtbrev": self.rest._uploadfile_to_base64str(file)
-                    if file
-                    else None,
-                    "fragtbrev_navn": file.name if file else None,
-                },
-            )
+        mapped = self.map(data, file)
+        if mapped:
+            response = self.rest.post("fragtforsendelse", mapped)
             return response["id"]
 
     def update(
@@ -257,9 +256,7 @@ class AfgiftanmeldelseRestClient(ModelRestClient):
             "modtager_id": modtager_id,
             "postforsendelse_id": postforsendelse_id,
             "fragtforsendelse_id": fragtforsendelse_id,
-            "leverandørfaktura": self.rest._uploadfile_to_base64str(leverandørfaktura)
-            if leverandørfaktura
-            else None,
+            "leverandørfaktura": self.rest._uploadfile_to_base64str(leverandørfaktura),
             "leverandørfaktura_navn": leverandørfaktura.name
             if leverandørfaktura
             else None,
@@ -552,7 +549,9 @@ class RestClient:
         return response.json()
 
     @staticmethod
-    def _uploadfile_to_base64str(file: UploadedFile) -> str:
+    def _uploadfile_to_base64str(file: Optional[UploadedFile]) -> Optional[str]:
+        if file is None:
+            return None
         if type(file) is InMemoryUploadedFile:
             # InmemoryUploadedFile giver alle data i første chunk
             file.file.seek(0)

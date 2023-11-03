@@ -51,5 +51,7 @@ if [ "${DUMMYDATA,,}" = true ]; then
   echo 'creating dummy anmeldelser'
   python manage.py create_dummy_anmeldelser
 fi
+echo 'creating postnumre'
+python manage.py create_postnumre
 
 exec "$@"
