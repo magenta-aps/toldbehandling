@@ -1,7 +1,6 @@
 # SPDX-FileCopyrightText: 2023 Magenta ApS <info@magenta.dk>
 #
 # SPDX-License-Identifier: MPL-2.0
-
 import base64
 import json
 from collections import defaultdict
@@ -197,7 +196,6 @@ class BlanketTest(HasLogin, TestCase):
                             "telefon": "123456",
                             "cvr": 12345678,
                             "kreditordning": True,
-                            "indførselstilladelse": 123,
                         }
                     ],
                 }
@@ -424,7 +422,6 @@ class BlanketTest(HasLogin, TestCase):
                     "postbox": "124",
                     "telefon": "123123",
                     "cvr": 12345679,
-                    "indførselstilladelse": "123",
                 }
             ],
         )
@@ -563,7 +560,6 @@ class BlanketTest(HasLogin, TestCase):
                     "postbox": "124",
                     "telefon": "123123",
                     "cvr": 12345679,
-                    "indførselstilladelse": "123",
                 }
             ],
         )

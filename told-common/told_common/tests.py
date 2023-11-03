@@ -311,9 +311,11 @@ class PermissionsTest(HasLogin):
         }
         self.login(self.userdata)
         mock_get.side_effect = self.mock_perm_get
-        for url, permissions in self.check_permissions:
+        for item in self.check_permissions:
+            url = item[0]
+            expected_status = item[2] if len(item) > 2 else 200
             response = self.client.get(url)
-            self.assertEquals(200, response.status_code)
+            self.assertEquals(expected_status, response.status_code)
 
     @patch.object(requests.sessions.Session, "get")
     def test_permissions_allowed(self, mock_get, *args):
@@ -325,16 +327,21 @@ class PermissionsTest(HasLogin):
             "is_superuser": False,
         }
         mock_get.side_effect = self.mock_perm_get
-        for url, permissions in self.check_permissions:
+        for item in self.check_permissions:
+            url = item[0]
+            permissions = item[1]
+            expected_status = item[2] if len(item) > 2 else 200
             self.userdata["permissions"] = permissions
             self.login(self.userdata)
             response = self.client.get(url)
-            self.assertEquals(200, response.status_code)
+            self.assertEquals(expected_status, response.status_code)
 
     @patch.object(requests.sessions.Session, "get")
     def test_permissions_disallowed(self, mock_get, *args):
         mock_get.side_effect = self.mock_perm_get
-        for url, permissions in self.check_permissions:
+        for item in self.check_permissions:
+            url = item[0]
+            permissions = item[1]
             self.userdata = {
                 "username": "disallowed_user",
                 "first_name": "disallowed",
@@ -351,6 +358,8 @@ class PermissionsTest(HasLogin):
 
 
 class AnmeldelseListViewTest(HasLogin):
+    can_select_multiple = False
+
     def list_url(self):
         raise NotImplementedError("Implement in subclasses")
 
@@ -677,43 +686,44 @@ class AnmeldelseListViewTest(HasLogin):
         response = self.client.get(url)
         self.assertEquals(response.status_code, 200)
         table_data = self.get_html_list(response.content)
-        self.assertEquals(
-            table_data,
-            [
-                {
-                    "Nummer": "1",
-                    "Dato": "2023-09-03",
-                    "Afsender": "Testfirma 5",
-                    "Modtager": "Testfirma 3",
-                    "Status": "Godkendt",
-                    "Handlinger": "Vis" if self.can_view else "",
-                },
-                {
-                    "Nummer": "2",
-                    "Dato": "2023-09-02",
-                    "Afsender": "Testfirma 4",
-                    "Modtager": "Testfirma 1",
-                    "Status": "Afvist",
-                    "Handlinger": "Vis" if self.can_view else "",
-                },
-                {
-                    "Nummer": "3",
-                    "Dato": "2023-09-01",
-                    "Afsender": "Testfirma 6",
-                    "Modtager": "Testfirma 2",
-                    "Status": "Ny",
-                    "Handlinger": " ".join(
-                        filter(
-                            None,
-                            [
-                                "Redigér" if self.can_edit else None,
-                                "Vis" if self.can_view else None,
-                            ],
-                        )
-                    ),
-                },
-            ],
-        )
+        expected = [
+            {
+                "Nummer": "1",
+                "Dato": "2023-09-03",
+                "Afsender": "Testfirma 5",
+                "Modtager": "Testfirma 3",
+                "Status": "Godkendt",
+                "Handlinger": "Vis" if self.can_view else "",
+            },
+            {
+                "Nummer": "2",
+                "Dato": "2023-09-02",
+                "Afsender": "Testfirma 4",
+                "Modtager": "Testfirma 1",
+                "Status": "Afvist",
+                "Handlinger": "Vis" if self.can_view else "",
+            },
+            {
+                "Nummer": "3",
+                "Dato": "2023-09-01",
+                "Afsender": "Testfirma 6",
+                "Modtager": "Testfirma 2",
+                "Status": "Ny",
+                "Handlinger": " ".join(
+                    filter(
+                        None,
+                        [
+                            "Redigér" if self.can_edit else None,
+                            "Vis" if self.can_view else None,
+                        ],
+                    )
+                ),
+            },
+        ]
+        if self.can_select_multiple:
+            expected = [{**item, "": ""} for item in expected]
+
+        self.assertEquals(table_data, expected)
 
         url = self.list_url + "?json=1"
         response = self.client.get(url)
@@ -735,106 +745,115 @@ class AnmeldelseListViewTest(HasLogin):
                 )
 
         self.maxDiff = None
-        self.assertEquals(
-            modify_values(data, (str,), lambda s: s.strip()),
-            {
-                "total": 3,
-                "items": [
-                    {
-                        "id": 1,
-                        "dato": "2023-09-03",
-                        "afsender": {
-                            "adresse": "Testvej 42",
-                            "by": "TestBy",
-                            "cvr": 12345678,
-                            "id": 20,
-                            "navn": "Testfirma 5",
-                            "postbox": "123",
-                            "postnummer": 1234,
-                            "telefon": "123456",
-                        },
-                        "modtager": {
-                            "adresse": "Testvej 42",
-                            "by": "TestBy",
-                            "cvr": 12345678,
-                            "id": 21,
-                            "indførselstilladelse": 123,
-                            "kreditordning": True,
-                            "navn": "Testfirma 3",
-                            "postbox": "123",
-                            "postnummer": 1234,
-                            "telefon": "123456",
-                        },
-                        "godkendt": True,
-                        "actions": _view_button(1) or "",
+
+        expected = {
+            "total": 3,
+            "items": [
+                {
+                    "select": "",
+                    "id": 1,
+                    "dato": "2023-09-03",
+                    "afsender": {
+                        "adresse": "Testvej 42",
+                        "by": "TestBy",
+                        "cvr": 12345678,
+                        "id": 20,
+                        "navn": "Testfirma 5",
+                        "postbox": "123",
+                        "postnummer": 1234,
+                        "telefon": "123456",
                     },
-                    {
-                        "id": 2,
-                        "dato": "2023-09-02",
-                        "afsender": {
-                            "adresse": "Testvej 42",
-                            "by": "TestBy",
-                            "cvr": 12345678,
-                            "id": 22,
-                            "navn": "Testfirma 4",
-                            "postbox": "123",
-                            "postnummer": 1234,
-                            "telefon": "123456",
-                        },
-                        "modtager": {
-                            "adresse": "Testvej 42",
-                            "by": "TestBy",
-                            "cvr": 12345678,
-                            "id": 23,
-                            "indførselstilladelse": 123,
-                            "kreditordning": True,
-                            "navn": "Testfirma 1",
-                            "postbox": "123",
-                            "postnummer": 1234,
-                            "telefon": "123456",
-                        },
-                        "godkendt": False,
-                        "actions": _view_button(2) or "",
+                    "modtager": {
+                        "adresse": "Testvej 42",
+                        "by": "TestBy",
+                        "cvr": 12345678,
+                        "id": 21,
+                        "indførselstilladelse": 123,
+                        "kreditordning": True,
+                        "navn": "Testfirma 3",
+                        "postbox": "123",
+                        "postnummer": 1234,
+                        "telefon": "123456",
                     },
-                    {
-                        "id": 3,
-                        "dato": "2023-09-01",
-                        "afsender": {
-                            "adresse": "Testvej 42",
-                            "by": "TestBy",
-                            "cvr": 12345678,
-                            "id": 24,
-                            "navn": "Testfirma 6",
-                            "postbox": "123",
-                            "postnummer": 1234,
-                            "telefon": "123456",
-                        },
-                        "modtager": {
-                            "adresse": "Testvej 42",
-                            "by": "TestBy",
-                            "cvr": 12345678,
-                            "id": 25,
-                            "indførselstilladelse": 123,
-                            "kreditordning": True,
-                            "navn": "Testfirma 2",
-                            "postbox": "123",
-                            "postnummer": 1234,
-                            "telefon": "123456",
-                        },
-                        "godkendt": None,
-                        "actions": "\n".join(
-                            filter(
-                                None,
-                                [
-                                    _edit_button(3),
-                                    _view_button(3),
-                                ],
-                            )
-                        ),
+                    "godkendt": True,
+                    "actions": _view_button(1) or "",
+                },
+                {
+                    "select": "",
+                    "id": 2,
+                    "dato": "2023-09-02",
+                    "afsender": {
+                        "adresse": "Testvej 42",
+                        "by": "TestBy",
+                        "cvr": 12345678,
+                        "id": 22,
+                        "navn": "Testfirma 4",
+                        "postbox": "123",
+                        "postnummer": 1234,
+                        "telefon": "123456",
                     },
-                ],
-            },
-        )
+                    "modtager": {
+                        "adresse": "Testvej 42",
+                        "by": "TestBy",
+                        "cvr": 12345678,
+                        "id": 23,
+                        "indførselstilladelse": 123,
+                        "kreditordning": True,
+                        "navn": "Testfirma 1",
+                        "postbox": "123",
+                        "postnummer": 1234,
+                        "telefon": "123456",
+                    },
+                    "godkendt": False,
+                    "actions": _view_button(2) or "",
+                },
+                {
+                    "select": "",
+                    "id": 3,
+                    "dato": "2023-09-01",
+                    "afsender": {
+                        "adresse": "Testvej 42",
+                        "by": "TestBy",
+                        "cvr": 12345678,
+                        "id": 24,
+                        "navn": "Testfirma 6",
+                        "postbox": "123",
+                        "postnummer": 1234,
+                        "telefon": "123456",
+                    },
+                    "modtager": {
+                        "adresse": "Testvej 42",
+                        "by": "TestBy",
+                        "cvr": 12345678,
+                        "id": 25,
+                        "indførselstilladelse": 123,
+                        "kreditordning": True,
+                        "navn": "Testfirma 2",
+                        "postbox": "123",
+                        "postnummer": 1234,
+                        "telefon": "123456",
+                    },
+                    "godkendt": None,
+                    "actions": "\n".join(
+                        filter(
+                            None,
+                            [
+                                _edit_button(3),
+                                _view_button(3),
+                            ],
+                        )
+                    ),
+                },
+            ],
+        }
+        if self.can_select_multiple:
+            for item in expected["items"]:
+                id = item["id"]
+                item[
+                    "select"
+                ] = f'<input type="checkbox" id="select_{id}" name="id" value="{id}"/>'
+
+        self.assertEquals(modify_values(data, (str,), lambda s: s.strip()), expected)
 
     @patch.object(requests.Session, "get")
     def test_list_sort(self, mock_get):

@@ -1,0 +1,4 @@
+{% load i18n %}
+{% if can_edit_multiple %}
+<input type="checkbox" id="select_{{item.id}}" name="id" value="{{item.id}}"/>
+{% endif %}

@@ -1,0 +1,56 @@
+{% extends "admin/admin_layout.html" %}
+{% load static %}
+{% load i18n %}
+{% load l10n %}
+{% load common_tags %}
+
+{% block extra_headers %}
+<script type="text/javascript" src="{% static 'toldbehandling/js/formset.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="mx-5">
+
+        <h2>Redigerer {{items|length}} afgiftsanmeldelser</h2>
+        <p>
+            Udfyld kun de relevante felter. Tomme felter i denne formular vil forblive uændrede på hver afgiftsanmeldelse
+        </p>
+
+        <div class="row">
+            <div class="col-12">
+                {{form.non_field_errors}}
+            </div>
+        </div>
+
+        <hr/>
+
+        {% if not fælles_fragttype %}
+        <div class="alert alert-warning">
+            Forbindelsesnummer og fragtbrevnummer kan kun redigeres hvis alle de redigerede afgiftsanmeldelser har samme fragttype.
+        </div>
+        {% endif %}
+
+        <div class="row">
+            <div class="col-3">
+                <label for="{{form.forbindelsesnr.name}}">{{form.forbindelsesnr.label}}</label>
+            </div>
+            <div class="col-3">
+                {{form.forbindelsesnr}}
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12 px-0">
+                {{form.notat}}
+            </div>
+        </div>
+
+        <div class="clearfix my-1">
+            <button type="submit" class="btn btn-success float-end">Gem</button>
+        </div>
+    </div>
+</form>
+
+{% endblock %}

@@ -29,6 +29,30 @@ class TF10UpdateForm(TF10Form):
     )
 
 
+class TF10UpdateMultipleForm(BootstrapForm):
+    forbindelsesnr = forms.CharField(
+        required=False,
+    )
+    fragtbrevnr = forms.CharField(
+        required=False,
+    )
+    notat = forms.CharField(
+        widget=forms.Textarea(attrs={"placeholder": _("Notat")}), required=False
+    )
+
+    def __init__(self, fragttype, **kwargs):
+        super().__init__(**kwargs)
+        if fragttype in ("skibsfragt", "luftfragt"):
+            self.fields["forbindelsesnr"].label = _("Forbindelsesnummer")
+            self.fields["fragtbrevnr"].label = _("Fragtbrevnr")
+        elif fragttype in ("skibspost", "luftpost"):
+            self.fields["forbindelsesnr"].label = _("Afsenderbykode")
+            self.fields["fragtbrevnr"].label = _("Postforsendelsesnummer")
+        else:
+            self.fields["forbindelsesnr"].disabled = True
+            self.fields["fragtbrevnr"].disabled = True
+
+
 class ListForm(forms.Form):
     json = forms.BooleanField(required=False)
     offset = forms.IntegerField(required=False)

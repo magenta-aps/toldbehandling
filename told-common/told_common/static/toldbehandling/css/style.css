@@ -46,3 +46,7 @@ table.scrollbody tbody {
 textarea {
     resize: none;
 }
+
+table tr td {
+    user-select: none;
+}

@@ -290,6 +290,7 @@ class TF10FormUpdateView(
 class ListView(FormView):
     list_size = 20
     form_class = forms.PaginateForm
+    select_template = None
 
     def get(self, request, *args, **kwargs):
         # Søgeform; viser formularen (med evt. fejl) når den er invalid,
@@ -306,7 +307,8 @@ class ListView(FormView):
     def item_to_json_dict(
         self, item: Dict[str, Any], context: Dict[str, Any], index: int
     ) -> Dict[str, Any]:
-        return item
+        print("upgrade item")
+        return {**item, "select": item["id"]}
 
     def form_valid(self, form):
         search_data = {"offset": 0, "limit": self.list_size}
@@ -331,6 +333,7 @@ class ListView(FormView):
             total=total,
             search_data=search_data,
             actions_template=self.actions_template,
+            select_template=self.select_template,
         )
         items = [
             self.item_to_json_dict(item, context, index)
@@ -371,6 +374,7 @@ class TF10ListView(
         "anmeldelse.view_afgiftsanmeldelse",
         "anmeldelse.view_varelinje",
     )
+    select_template = "told_common/tf10/select.html"
     template_name = "told_common/tf10/list.html"
     extend_template = "told_common/layout.html"
     form_class = forms.TF10SearchForm
@@ -393,6 +397,7 @@ class TF10ListView(
         return {
             key: self.map_value(item, key, context)
             for key in (
+                "select",
                 "id",
                 "dato",
                 "afsender",
@@ -406,6 +411,12 @@ class TF10ListView(
         if key == "actions":
             return loader.render_to_string(
                 self.actions_template,
+                {"item": item, **context},
+                self.request,
+            )
+        if key == "select":
+            return loader.render_to_string(
+                self.select_template,
                 {"item": item, **context},
                 self.request,
             )

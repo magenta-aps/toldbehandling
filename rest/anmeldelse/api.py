@@ -5,7 +5,7 @@
 import base64
 from datetime import date, datetime, timedelta
 from decimal import Decimal
-from typing import Optional, Tuple
+from typing import List, Optional, Tuple
 from uuid import uuid4
 
 from aktør.api import AfsenderOut, ModtagerOut
@@ -51,6 +51,7 @@ class PartialAfgiftsanmeldelseIn(ModelSchema):
     fragtforsendelse_id: int = None
     leverandørfaktura: str = None  # Base64
     leverandørfaktura_navn: str = None
+    modtager_betaler: bool = None
 
     class Config:
         model = Afgiftsanmeldelse
@@ -124,7 +125,7 @@ class AfgiftsanmeldelseHistoryFullOut(AfgiftsanmeldelseFullOut):
 
 
 class AfgiftsanmeldelseFilterSchema(FilterSchema):
-    id: Optional[int]
+    id: Optional[List[int]] = Field(q="id__in")
     afsender: Optional[int]
     modtager: Optional[int]
     fragtforsendelse: Optional[int]
