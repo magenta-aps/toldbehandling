@@ -17,6 +17,7 @@ class AfgiftsanmeldelseTest(RestMixin, TestCase):
     object_class = Afgiftsanmeldelse
     exclude_fields = ["oprettet_af"]
     object_restriction = True
+    calculated_fields = {"beregnet_faktureringsdato": "2023-11-30"}
 
     @property
     def list_full_function(self) -> str:
@@ -82,6 +83,7 @@ class AfgiftsanmeldelseTest(RestMixin, TestCase):
     def expected_full_object_data(self):
         if not hasattr(self, "_expected_full_object_data"):
             self._expected_full_object_data = deepcopy(self.expected_object_data)
+            self._expected_full_object_data.update(self.calculated_fields)
             self.nest_expected_data(self._expected_full_object_data)
         return self._expected_full_object_data
 
@@ -98,6 +100,7 @@ class AfgiftsanmeldelseTest(RestMixin, TestCase):
                     "fragtforsendelse": None,
                     "leverandørfaktura": f"/leverand%C3%B8rfakturaer/{self.afgiftsanmeldelse.id}/leverand%C3%B8rfaktura.pdf",
                     "godkendt": None,
+                    "beregnet_faktureringsdato": "2023-11-30",
                 }
             )
         return self._expected_list_response_dict

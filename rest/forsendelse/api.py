@@ -11,7 +11,7 @@ from django.core.files.base import ContentFile
 from django.db.models import QuerySet
 from django.shortcuts import get_object_or_404
 from forsendelse.models import Fragtforsendelse, Postforsendelse
-from ninja import FilterSchema, ModelSchema, Query
+from ninja import Field, FilterSchema, ModelSchema, Query
 from ninja_extra import api_controller, permissions, route
 from ninja_extra.exceptions import PermissionDenied
 from ninja_extra.pagination import paginate
@@ -37,13 +37,23 @@ from project.util import RestPermission
 class PostforsendelseIn(ModelSchema):
     class Config:
         model = Postforsendelse
-        model_fields = ["forsendelsestype", "postforsendelsesnummer", "afsenderbykode"]
+        model_fields = [
+            "forsendelsestype",
+            "postforsendelsesnummer",
+            "afsenderbykode",
+            "afgangsdato",
+        ]
 
 
 class PartialPostforsendelseIn(ModelSchema):
     class Config:
         model = Postforsendelse
-        model_fields = ["forsendelsestype", "postforsendelsesnummer", "afsenderbykode"]
+        model_fields = [
+            "forsendelsestype",
+            "postforsendelsesnummer",
+            "afsenderbykode",
+            "afgangsdato",
+        ]
         model_fields_optional = "__all__"
 
 
@@ -55,6 +65,7 @@ class PostforsendelseOut(ModelSchema):
             "forsendelsestype",
             "postforsendelsesnummer",
             "afsenderbykode",
+            "afgangsdato",
         ]
 
 
@@ -62,6 +73,9 @@ class PostforsendelseFilterSchema(FilterSchema):
     forsendelsestype: Optional[str]
     postforsendelsesnummer: Optional[str]
     afsenderbykode: Optional[str]
+    afgangsdato: Optional[str]
+    afgangsdato__før: Optional[str] = Field(q="afgangsdato__lt")
+    afgangsdato__efter: Optional[str] = Field(q="afgangsdato__gte")
 
 
 class PostforsendelsePermission(RestPermission):
@@ -146,7 +160,12 @@ class FragtforsendelseIn(ModelSchema):
 
     class Config:
         model = Fragtforsendelse
-        model_fields = ["forsendelsestype", "fragtbrevsnummer", "forbindelsesnr"]
+        model_fields = [
+            "forsendelsestype",
+            "fragtbrevsnummer",
+            "forbindelsesnr",
+            "afgangsdato",
+        ]
 
 
 class PartialFragtforsendelseIn(ModelSchema):
@@ -155,7 +174,12 @@ class PartialFragtforsendelseIn(ModelSchema):
 
     class Config:
         model = Fragtforsendelse
-        model_fields = ["forsendelsestype", "fragtbrevsnummer", "forbindelsesnr"]
+        model_fields = [
+            "forsendelsestype",
+            "fragtbrevsnummer",
+            "forbindelsesnr",
+            "afgangsdato",
+        ]
         model_fields_optional = "__all__"
 
 
@@ -168,6 +192,7 @@ class FragtforsendelseOut(ModelSchema):
             "fragtbrevsnummer",
             "fragtbrev",
             "forbindelsesnr",
+            "afgangsdato",
         ]
 
 
@@ -175,6 +200,9 @@ class FragtforsendelseFilterSchema(FilterSchema):
     forsendelsestype: Optional[str]
     fragtbrevsnummer: Optional[str]
     forbindelsesnr: Optional[str]
+    afgangsdato: Optional[str]
+    afgangsdato__før: Optional[str] = Field(q="afgangsdato__lt")
+    afgangsdato__efter: Optional[str] = Field(q="afgangsdato__gte")
 
 
 class FragtforsendelsePermission(RestPermission):

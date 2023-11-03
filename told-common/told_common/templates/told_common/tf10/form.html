@@ -287,8 +287,16 @@
                         {{form.fragtbrevnr}}
                     </div>
                 </div>
-                <!-- Should ideally be hidden, unless Fragttype == Luftfragt -->
                 <div class="row">
+                    <div class="col-6">
+                        <label for="{{form.afgangsdato.name}}">Afgangsdato</label>
+                    </div>
+                    <div class="col-6">
+                        {{form.afgangsdato}}
+                    </div>
+                </div>
+                <!-- Should ideally be hidden, unless Fragttype == Luftfragt -->
+                <div class="row" id="betales_af_row" {% if form.fragttype.value != 'luftfragt' %}style="display:none"{% endif %}>
                     <div class="col-6">
                         <label for="{{form.betales_af.name}}">Betales af (kun relevant for luftfragt)</label>
                     </div>
@@ -296,6 +304,7 @@
                         {{form.betales_af}}
                     </div>
                 </div>
+
             </div>
         </div>
 
@@ -414,4 +423,9 @@
     ];
 </script>
 <script src="{% static 'toldbehandling/js/blanket.js' %}"></script>
+<script>
+    $("[name={{form.fragttype.name}}]").on("change", function (){
+        $("#betales_af_row").toggle($(this).val() === "luftfragt");
+    });
+</script>
 {% endblock %}

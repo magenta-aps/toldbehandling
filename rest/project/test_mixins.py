@@ -6,7 +6,7 @@
 import json
 import os
 import re
-from datetime import date
+from datetime import date, timedelta
 from decimal import Decimal
 from enum import Enum
 from itertools import chain
@@ -35,6 +35,7 @@ class RestMixin:
     exclude_fields = []
     has_delete = False
     object_restriction = False
+    calculated_fields = {}
 
     @classmethod
     def make_user(
@@ -315,9 +316,12 @@ class RestMixin:
             f"Reach READ API endpoint with existing id, expect HTTP 200 for GET {url}",
         )
         self.compare_dicts(
-            self.filter_keys(
-                self.object_to_dict(self.precreated_item), self.exclude_fields
-            ),
+            {
+                **self.filter_keys(
+                    self.object_to_dict(self.precreated_item), self.exclude_fields
+                ),
+                **self.calculated_fields,
+            },
             response.json(),
             f"Querying READ API endpoint, expected data to match for url {url}",
         )
@@ -651,6 +655,11 @@ class RestMixin:
     def alter_value(cls, key: str, value: Any) -> Any:
         t = type(value)
         if t == str:
+            try:
+                d = date.fromisoformat(value)
+                return (d + timedelta(days=200)).isoformat()
+            except (TypeError, ValueError):
+                pass
             return f"{value}_nonexistent"
         if t == int:
             return value + 123456
@@ -809,11 +818,13 @@ class RestMixin:
             "forsendelsestype": Fragtforsendelse.Forsendelsestype.SKIB,
             "fragtbrevsnummer": "1234",
             "forbindelsesnr": "1337",
+            "afgangsdato": "2023-11-03",
         }
         self.postforsendelse_data = {
             "forsendelsestype": Postforsendelse.Forsendelsestype.SKIB,
             "postforsendelsesnummer": "1234",
             "afsenderbykode": "8200",
+            "afgangsdato": "2023-11-03",
         }
         self.afgiftsanmeldelse_data = {
             "leverandørfaktura_nummer": "12345",

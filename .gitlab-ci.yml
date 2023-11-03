@@ -216,7 +216,7 @@ Unittest REST:
     - coverage run manage.py test
     - coverage report --show-missing
     - mv .coverage "${CI_PROJECT_DIR}/coverage_output/.coverage.${CI_JOB_ID}"
-    - cp -r ./sats ./common ./forsendelse ./anmeldelse ./aktør ./project "${CI_PROJECT_DIR}/coverage_output/" 
+    - cp -r ./sats ./common ./forsendelse ./anmeldelse ./aktør ./common ./project "${CI_PROJECT_DIR}/coverage_output/"
 
 Unittest UI:
   <<: *test-ui
@@ -243,7 +243,7 @@ Django check REST:
   <<: *test-rest
   script:
     - cd /app
-    - python manage.py check aktør anmeldelse forsendelse sats
+    - python manage.py check aktør anmeldelse forsendelse sats common
 
 Django check UI:
   <<: *test-ui

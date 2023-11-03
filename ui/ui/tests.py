@@ -55,6 +55,7 @@ class BlanketTest(HasLogin, TestCase):
         "leverandørfaktura_nummer": "123",
         "fragttype": "skibsfragt",
         "fragtbrevnr": "123",
+        "afgangsdato": "2023-11-03",
         "form-TOTAL_FORMS": "1",
         "form-INITIAL_FORMS": "1",
         "form-0-vareafgiftssats": "1",
@@ -306,6 +307,7 @@ class BlanketTest(HasLogin, TestCase):
             "leverandørfaktura",
             "leverandørfaktura_nummer",
             "fragtbrev",
+            "afgangsdato",
             "form-0-vareafgiftssats",
             "form-0-antal",
             "form-0-mængde",
@@ -437,6 +439,7 @@ class BlanketTest(HasLogin, TestCase):
                         "ascii"
                     ),
                     "fragtbrev_navn": "fragtbrev.txt",
+                    "afgangsdato": "2023-11-03",
                 }
             ],
         )
@@ -496,6 +499,7 @@ class BlanketTest(HasLogin, TestCase):
                         "ascii"
                     ),
                     "fragtbrev_navn": "fragtbrev.txt",
+                    "afgangsdato": "2023-11-03",
                 }
             ],
         )
@@ -570,6 +574,7 @@ class BlanketTest(HasLogin, TestCase):
                     "postforsendelsesnummer": "123",
                     "forsendelsestype": "F",
                     "afsenderbykode": "1337",
+                    "afgangsdato": "2023-11-03",
                 }
             ],
         )

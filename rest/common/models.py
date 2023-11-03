@@ -22,3 +22,22 @@ class IndberetterProfile(models.Model):
         validators=[MinValueValidator(10000000), MaxValueValidator(99999999)],
         db_index=True,
     )
+
+
+class Postnummer(models.Model):
+    postnummer = models.PositiveSmallIntegerField(
+        db_index=True,
+        validators=(
+            MinValueValidator(1000),
+            MaxValueValidator(9999),
+        ),
+        null=False,
+    )
+    navn = models.CharField(
+        max_length=100,
+        null=False,
+    )
+    dage = models.PositiveSmallIntegerField(
+        null=False,
+        default=0,
+    )

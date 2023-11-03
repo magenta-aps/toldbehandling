@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: 2023 Magenta ApS <info@magenta.dk>
 #
 # SPDX-License-Identifier: MPL-2.0
+from datetime import date
 from typing import Optional
 
 from django import forms
@@ -198,6 +199,10 @@ class TF10Form(BootstrapForm):
             ("Afsender", _("Afsender")),
         ),
     )
+    afgangsdato = forms.DateField(
+        required=True,
+        widget=DateInput(attrs={"min": date.today().isoformat()}),
+    )
 
     def clean(self):
         if (
@@ -345,6 +350,8 @@ class TF10SearchForm(PaginateForm, BootstrapForm):
 
     dato_efter = forms.DateField(required=False, widget=DateInput)
     dato_før = forms.DateField(required=False, widget=DateInput)
+    afgangsdato_efter = forms.DateField(required=False, widget=DateInput)
+    afgangsdato_før = forms.DateField(required=False, widget=DateInput)
     htmx = forms.BooleanField(required=False)
     order_by = forms.CharField(required=False)
 

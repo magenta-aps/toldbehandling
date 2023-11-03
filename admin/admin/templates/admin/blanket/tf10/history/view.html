@@ -228,6 +228,16 @@
                     {% endif %}
                 </div>
             </div>
+            <div class="col-4">
+                Afgangsdato:
+            </div>
+            <div class="col-8">
+                {% if object.fragtforsendelse %}
+                {{object.fragtforsendelse.afgangsdato}}
+                {% elif object.postforsendelse %}
+                {{object.postforsendelse.afgangsdato}}
+                {% endif %}
+            </div>
         </div>
     </div>
 

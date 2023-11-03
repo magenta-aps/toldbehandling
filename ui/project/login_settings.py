@@ -1,7 +1,7 @@
 import os
 
 from django.urls import reverse_lazy
-from project.util import strtobool
+from told_common.util import strtobool
 
 LOGIN_SESSION_DATA_KEY = "saml_user"
 LOGIN_PROVIDER_CLASS = os.environ.get("LOGIN_PROVIDER_CLASS") or None

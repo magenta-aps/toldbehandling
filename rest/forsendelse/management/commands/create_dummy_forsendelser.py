@@ -3,10 +3,12 @@
 # SPDX-License-Identifier: MPL-2.0
 
 import random
+from datetime import timedelta
 
 from django.contrib.auth.models import Group, User
 from django.core.files.base import ContentFile
 from django.core.management.base import BaseCommand
+from django.utils.datetime_safe import date
 from forsendelse.models import Fragtforsendelse, Postforsendelse
 
 
@@ -35,6 +37,7 @@ class Command(BaseCommand):
                 fragtbrevsnummer=str(i),
                 forbindelsesnr=random.choice(["1337", "7331"]),
                 oprettet_af=users.order_by("?").first(),
+                afgangsdato=date.today() + timedelta(days=30),
             )
             fragtforsendelse.fragtbrev.save("fragtbrev.txt", ContentFile("testdata"))
 
@@ -43,4 +46,5 @@ class Command(BaseCommand):
                 postforsendelsesnummer=str(i) + "001",
                 afsenderbykode=random.choice(["8200", "1050"]),
                 oprettet_af=users.order_by("?").first(),
+                afgangsdato=date.today() + timedelta(days=30),
             )
