@@ -811,7 +811,6 @@ class RestMixin:
             "telefon": "123456",
             "cvr": 12345678,
             "kreditordning": True,
-            "indførselstilladelse": 123,
         }
 
         self.fragtforsendelse_data = {

@@ -270,7 +270,8 @@ class FragtforsendelseAPI:
         data = payload.dict()
         fragtbrev = data.pop("fragtbrev", None)
         for attr, value in data.items():
-            setattr(item, attr, value)
+            if value is not None:
+                setattr(item, attr, value)
         if fragtbrev is not None:
             item.fragtbrev = ContentFile(
                 base64.b64decode(fragtbrev), name=str(uuid4()) + ".pdf"

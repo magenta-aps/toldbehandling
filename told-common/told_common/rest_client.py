@@ -104,7 +104,6 @@ class ModtagerRestClient(ModelRestClient):
                         "postbox",
                         "telefon",
                         "cvr",
-                        "indførselstilladelse",
                     )
                 }
             )
@@ -120,7 +119,7 @@ class ModtagerRestClient(ModelRestClient):
 
 class PostforsendelseRestClient(ModelRestClient):
     @staticmethod
-    def map(data: dict) -> Union[dict, None]:
+    def map(data: dict) -> Optional[dict]:
         fragttype = data["fragttype"]
         if fragttype in ("luftpost", "skibspost"):
             return {
@@ -147,18 +146,20 @@ class PostforsendelseRestClient(ModelRestClient):
                 return False
         return True
 
-    def create(self, data: dict) -> Union[int, None]:
+    def create(self, data: dict) -> Optional[int]:
         mapped = self.map(data)
         if mapped:
             response = self.rest.post("postforsendelse", mapped)
             return response["id"]
 
-    def update(self, id: int, data: dict, existing: dict) -> Union[int, None]:
+    def update(
+        self, id: int, data: dict, existing: Optional[dict] = None
+    ) -> Optional[int]:
         mapped = self.map(data)
         if mapped is None:
             self.rest.delete(f"postforsendelse/{id}")
             return None
-        elif self.compare(mapped, existing):
+        elif existing is not None and self.compare(mapped, existing):
             # Data passer, spring opdatering over
             pass
         else:
@@ -166,20 +167,25 @@ class PostforsendelseRestClient(ModelRestClient):
             self.rest.patch(f"postforsendelse/{id}", mapped)
         return id
 
+    def get(self, id: int) -> dict:
+        return self.rest.get(f"postforsendelse/{id}")
+
 
 class FragtforsendelseRestClient(ModelRestClient):
     @staticmethod
-    def map(data: dict, file: Union[UploadedFile, None]) -> Union[dict, None]:
+    def map(data: dict, file: Optional[UploadedFile]) -> Optional[dict]:
         fragttype = data["fragttype"]
         if fragttype in ("luftfragt", "skibsfragt"):
-            return {
-                "fragtbrevsnummer": data["fragtbrevnr"],
-                "forsendelsestype": "S" if fragttype == "skibsfragt" else "F",
-                "forbindelsesnr": data["forbindelsesnr"],
-                "fragtbrev": RestClient._uploadfile_to_base64str(file),
-                "fragtbrev_navn": file.name if file else None,
-                "afgangsdato": data["afgangsdato"],
-            }
+            return filter_dict_none(
+                {
+                    "fragtbrevsnummer": data.get("fragtbrevnr", None),
+                    "forsendelsestype": "S" if fragttype == "skibsfragt" else "F",
+                    "forbindelsesnr": data.get("forbindelsesnr", None),
+                    "fragtbrev": RestClient._uploadfile_to_base64str(file),
+                    "fragtbrev_navn": file.name if file else None,
+                    "afgangsdato": data["afgangsdato"],
+                },
+            )
         return None
 
     @staticmethod
@@ -196,30 +202,37 @@ class FragtforsendelseRestClient(ModelRestClient):
         ):
             if data[x] != existing[x]:
                 return False
-        if data["fragtbrev"] is not None:
+        if data.get("fragtbrev", None) is not None:
             return False
         return True
 
-    def create(self, data: dict, file: Union[UploadedFile, None]) -> Union[int, None]:
+    def create(self, data: dict, file: Optional[UploadedFile]) -> Optional[int]:
         mapped = self.map(data, file)
         if mapped:
             response = self.rest.post("fragtforsendelse", mapped)
             return response["id"]
 
     def update(
-        self, id, data: dict, file: Union[UploadedFile, None], existing: dict
+        self,
+        id,
+        data: dict,
+        file: Optional[UploadedFile] = None,
+        existing: Optional[dict] = None,
     ) -> None:
         mapped = self.map(data, file)
         if mapped is None:
             self.rest.delete(f"fragtforsendelse/{id}")
             return None
-        elif self.compare(mapped, existing):
+        elif existing is not None and self.compare(mapped, existing):
             # Data passer med eksisterende, opdatér ikke
             pass
         else:
             # Håndterer opdatering af eksisterende
             self.rest.patch(f"fragtforsendelse/{id}", mapped)
         return id
+
+    def get(self, id: int) -> dict:
+        return self.rest.get(f"fragtforsendelse/{id}")
 
 
 class AfgiftanmeldelseRestClient(ModelRestClient):
@@ -229,9 +242,11 @@ class AfgiftanmeldelseRestClient(ModelRestClient):
         # med eksisterende data fra REST for at se om de stemmer overens.
         # False: data passer ikke, og der skal foretages en opdatering
         # True: data passer, og det er ikke nødvendigt at opdatere.
-        if data["leverandørfaktura"]:
+        if data.get("leverandørfaktura", None):
             return False
-        if data["leverandørfaktura_nummer"] != existing["leverandørfaktura_nummer"]:
+        if data.get("leverandørfaktura_nummer", None) != existing.get(
+            "leverandørfaktura_nummer", None
+        ):
             return False
         for key in ("afsender", "modtager", "postforsendelse", "fragtforsendelse"):
             existing_sub = existing.get(key, None)  # existing[key] kan være None
@@ -243,15 +258,15 @@ class AfgiftanmeldelseRestClient(ModelRestClient):
     def map(
         self,
         data: dict,
-        leverandørfaktura: Union[UploadedFile, None],
-        afsender_id: int,
-        modtager_id: int,
-        postforsendelse_id: Union[int, None],
-        fragtforsendelse_id: Union[int, None],
+        leverandørfaktura: Optional[UploadedFile],
+        afsender_id: Optional[int],
+        modtager_id: Optional[int],
+        postforsendelse_id: Optional[int],
+        fragtforsendelse_id: Optional[int],
     ) -> dict:
         return {
-            "leverandørfaktura_nummer": data["leverandørfaktura_nummer"],
-            "indførselstilladelse": data["modtager_indførselstilladelse"],
+            "leverandørfaktura_nummer": data.get("leverandørfaktura_nummer", None),
+            "indførselstilladelse": data.get("modtager_indførselstilladelse", None),
             "afsender_id": afsender_id,
             "modtager_id": modtager_id,
             "postforsendelse_id": postforsendelse_id,
@@ -260,7 +275,9 @@ class AfgiftanmeldelseRestClient(ModelRestClient):
             "leverandørfaktura_navn": leverandørfaktura.name
             if leverandørfaktura
             else None,
-            "modtager_betaler": data["betales_af"] == "Modtager",
+            "modtager_betaler": data["betales_af"] == "Modtager"
+            if "betales_af" in data
+            else None,
         }
 
     def create(
@@ -269,8 +286,8 @@ class AfgiftanmeldelseRestClient(ModelRestClient):
         leverandørfaktura: UploadedFile,
         afsender_id: int,
         modtager_id: int,
-        postforsendelse_id: Union[int, None],
-        fragtforsendelse_id: Union[int, None],
+        postforsendelse_id: Optional[int],
+        fragtforsendelse_id: Optional[int],
     ):
         mapped = self.map(
             data,
@@ -287,12 +304,12 @@ class AfgiftanmeldelseRestClient(ModelRestClient):
         self,
         id: int,
         data: dict,
-        leverandørfaktura: Union[UploadedFile, None],
-        afsender_id: int,
-        modtager_id: int,
-        postforsendelse_id: Union[int, None],
-        fragtforsendelse_id: Union[int, None],
-        existing: dict,
+        leverandørfaktura: Optional[UploadedFile] = None,
+        afsender_id: Optional[int] = None,
+        modtager_id: Optional[int] = None,
+        postforsendelse_id: Optional[int] = None,
+        fragtforsendelse_id: Optional[int] = None,
+        existing: Optional[dict] = None,
         force_write: bool = False,
     ):
         mapped = self.map(
@@ -309,6 +326,14 @@ class AfgiftanmeldelseRestClient(ModelRestClient):
 
     def set_godkendt(self, id: int, godkendt: bool):
         self.rest.patch(f"afgiftsanmeldelse/{id}", {"godkendt": godkendt})
+
+    def get(
+        self,
+        filter: Dict[
+            str, Union[str, int, float, bool, List[Union[str, int, float, bool]]]
+        ],
+    ) -> List[dict]:
+        return self.rest.get("afgiftsanmeldelse", filter)["items"]
 
 
 class VarelinjeRestClient(ModelRestClient):
@@ -389,11 +414,11 @@ class AfgiftstabelRestClient(ModelRestClient):
     def get(self, id: int) -> Afgiftstabel:
         return Afgiftstabel.from_dict(self.rest.get(f"afgiftstabel/{id}"))
 
-    def create(self, data: dict) -> Union[int, None]:
+    def create(self, data: dict) -> Optional[int]:
         response = self.rest.post("afgiftstabel", data)
         return response["id"]
 
-    def update(self, id: int, data: dict, existing: dict = None) -> Union[int, None]:
+    def update(self, id: int, data: dict, existing: dict = None) -> Optional[int]:
         if existing is not None and self.compare(data, existing):
             # Data passer, spring opdatering over
             pass
@@ -407,7 +432,7 @@ class AfgiftstabelRestClient(ModelRestClient):
 
 
 class VareafgiftssatsRestClient(ModelRestClient):
-    def create(self, data: dict) -> Union[int, None]:
+    def create(self, data: dict) -> Optional[int]:
         response = self.rest.post("vareafgiftssats", data)
         return response["id"]
 
@@ -515,7 +540,9 @@ class RestClient:
         ] = None,
     ) -> dict:
         self.check_access_token_age()
-        param_string = ("?" + urlencode(params)) if params is not None else ""
+        param_string = (
+            ("?" + urlencode(params, doseq=True)) if params is not None else ""
+        )
         response = self.session.get(f"{self.domain}/api/{path}{param_string}")
         response.raise_for_status()
         return response.json()

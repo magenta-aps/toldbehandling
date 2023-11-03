@@ -94,7 +94,6 @@ class ModtagerTest(RestMixin, TestCase):
         "telefon": "654321",
         "cvr": 12345670,
         "kreditordning": False,
-        "indførselstilladelse": 123,
     }
 
     @property
@@ -121,7 +120,6 @@ class ModtagerTest(RestMixin, TestCase):
                     "postbox": "123567",
                     "telefon": "112",
                     "cvr": 11111111,
-                    "indførselstilladelse": 124,
                 }
             )
         return self._update_object_data

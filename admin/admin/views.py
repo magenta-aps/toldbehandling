@@ -5,18 +5,20 @@
 import csv
 from datetime import date, datetime
 from functools import cached_property
-from typing import Any, Dict, Iterable, List, Union
+from typing import Any, Dict, Iterable, List, Optional, Set, Union
 from urllib.parse import unquote
 
+from django.core.exceptions import ValidationError
 from django.shortcuts import redirect
 from django.template import loader
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.views import View
 from django.views.generic import FormView, TemplateView
 from openpyxl import Workbook
 from requests import HTTPError
 from told_common import views as common_views
 from told_common.data import Afgiftstabel, Vareafgiftssats
+from told_common.util import filter_dict_values
 
 from admin import forms
 from admin.spreadsheet import VareafgiftssatsSpreadsheetUtil
@@ -181,6 +183,8 @@ class TF10ListView(common_views.TF10ListView):
         context["title"] = "Afgiftsanmeldelser"
         context["can_create"] = False
         context["can_view"] = TF10View.has_permissions(request=self.request)
+        context["can_edit_multiple"] = True
+        context["multiedit_url"] = reverse("tf10_edit_multiple")
         return context
 
 
@@ -301,6 +305,114 @@ class TF10HistoryDetailView(PermissionsRequiredMixin, TF10BaseView, TemplateView
                 "index": self.kwargs["index"],
             }
         )
+
+
+class TF10EditMultipleView(PermissionsRequiredMixin, HasRestClientMixin, FormView):
+    template_name = "admin/blanket/tf10/multi.html"
+    form_class = forms.TF10UpdateMultipleForm
+    success_url = reverse_lazy("tf10_list")
+    required_permissions = (
+        "auth.admin",
+        "forsendelse.change_postforsendelse",
+        "forsendelse.change_fragtforsendelse",
+        "anmeldelse.change_afgiftsanmeldelse",
+    )
+
+    def dispatch(self, request, *args, **kwargs):
+        try:
+            self.ids = [int(id) for id in self.request.GET.getlist("id")]
+        except ValueError as e:
+            return HttpResponseBadRequest("Invalid id value")
+        if not self.ids:
+            return HttpResponseBadRequest("Missing id value")
+        return super().dispatch(request, *args, **kwargs)
+
+    def get(self, request, *args, **kwargs):
+        if len(self.ids) == 1:
+            return redirect("tf10_edit", id=self.ids[0])
+        return super().get(request, *args, **kwargs)
+
+    @cached_property
+    def items(self) -> List[Dict]:
+        if self.ids:
+            return self.rest_client.afgiftanmeldelse.get({"id": self.ids})
+        return []
+
+    @cached_property
+    def fragttyper(self) -> Set[str]:
+        fragttyper = set()
+        for item in self.items:
+            if item["fragtforsendelse"]:
+                fragtforsendelse = self.rest_client.fragtforsendelse.get(
+                    item["fragtforsendelse"]
+                )
+                fragttyper.add(
+                    "skibsfragt"
+                    if fragtforsendelse["forsendelsestype"] == "S"
+                    else "luftfragt"
+                )
+            if item["postforsendelse"]:
+                fragtforsendelse = self.rest_client.postforsendelse.get(
+                    item["postforsendelse"]
+                )
+                fragttyper.add(
+                    "skibspost"
+                    if fragtforsendelse["forsendelsestype"] == "S"
+                    else "luftpost"
+                )
+        return fragttyper
+
+    @cached_property
+    def fælles_fragttype(self) -> Optional[str]:
+        if len(self.fragttyper) == 1:
+            return list(self.fragttyper)[0]
+        return None
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["fragttype"] = self.fælles_fragttype
+        return kwargs
+
+    def get_context_data(self, **context: Dict[str, Any]) -> Dict[str, Any]:
+        return super().get_context_data(
+            **{
+                **context,
+                "items": self.items,
+                "fælles_fragttype": self.fælles_fragttype,
+            }
+        )
+
+    def form_valid(self, form):
+        if self.fælles_fragttype:
+            fragt_update_data = filter_dict_values(
+                {
+                    field: form.cleaned_data.get(field)
+                    for field in ("forbindelsesnr")
+                },
+                (None, ""),
+            )
+            if self.fælles_fragttype in ("skibsfragt", "luftfragt"):
+                fragt_update_data["fragttype"] = self.fælles_fragttype
+                for item in self.items:
+                    self.rest_client.fragtforsendelse.update(
+                        item["fragtforsendelse"], fragt_update_data
+                    )
+            if self.fælles_fragttype in ("skibspost", "luftpost"):
+                fragt_update_data["fragttype"] = self.fælles_fragttype
+                for item in self.items:
+                    self.rest_client.postforsendelse.update(
+                        item["postforsendelse"], fragt_update_data
+                    )
+
+        notat = form.cleaned_data["notat"]
+        for id in self.ids:
+            # Dummy-opdatering indtil vi har noget rigtig data at opdatere med.
+            # Skal dog gøres for at vi har en ny version at putte et notat på
+            self.rest_client.afgiftanmeldelse.update(id, {}, None, force_write=True)
+            # Opret notat _efter_ den nye version af anmeldelsen, så vores historik-filtrering fungerer
+            if notat:
+                self.rest_client.notat.create({"tekst": notat}, id)
+        return super().form_valid(form)
 
 
 class AfgiftstabelListView(PermissionsRequiredMixin, HasRestClientMixin, GetFormView):

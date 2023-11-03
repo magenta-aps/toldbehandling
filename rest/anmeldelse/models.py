@@ -70,6 +70,8 @@ class Afgiftsanmeldelse(models.Model):
     indførselstilladelse = models.CharField(
         max_length=20,
         db_index=True,
+        null=True,
+        blank=True,
     )
     afgift_total = models.DecimalField(
         max_digits=16,

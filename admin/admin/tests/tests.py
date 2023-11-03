@@ -29,6 +29,8 @@ from told_common.data import Notat, Vareafgiftssats
 from told_common.rest_client import RestClient
 from told_common.views import FragtbrevView
 
+from admin.views import TF10EditMultipleView
+
 from admin.views import (  # isort: skip
     TF10FormUpdateView,
     TF10HistoryDetailView,
@@ -328,7 +330,6 @@ class TestGodkend(PermissionsTest, TestCase):
                 "telefon": "123456",
                 "cvr": 12345678,
                 "kreditordning": True,
-                "indførselstilladelse": 123,
             }
 
         elif path == expected_prefix + "afgiftsanmeldelse/1":
@@ -591,6 +592,7 @@ class AdminLoginTest(LoginTest, TestCase):
 class AdminAnmeldelseListViewTest(PermissionsTest, AnmeldelseListViewTest, TestCase):
     can_view = True
     can_edit = False
+    can_select_multiple = True
     view = TF10ListView
     check_permissions = ((reverse("tf10_list"), view.required_permissions),)
 
@@ -767,7 +769,6 @@ class AnmeldelseHistoryDetailViewTest(PermissionsTest, TestCase):
                     "telefon": "789012",
                     "cvr": 12345679,
                     "kreditordning": False,
-                    "indførselstilladelse": 0,
                 },
                 "fragtforsendelse": {
                     "id": 1,
@@ -867,7 +868,6 @@ class AnmeldelseHistoryDetailViewTest(PermissionsTest, TestCase):
                             "telefon": "789012",
                             "cvr": 12345679,
                             "kreditordning": False,
-                            "indførselstilladelse": 0,
                         },
                         "fragtforsendelse": {
                             "id": 1,
@@ -1044,7 +1044,6 @@ class AnmeldelseNotatTest(PermissionsTest, TestCase):
                 "telefon": "123456",
                 "cvr": 12345678,
                 "kreditordning": True,
-                "indførselstilladelse": 123,
             }
 
         elif path == expected_prefix + "modtager":
@@ -1061,7 +1060,6 @@ class AnmeldelseNotatTest(PermissionsTest, TestCase):
                         "telefon": "123456",
                         "cvr": 12345678,
                         "kreditordning": True,
-                        "indførselstilladelse": 123,
                     }
                 ],
             }
@@ -1110,7 +1108,6 @@ class AnmeldelseNotatTest(PermissionsTest, TestCase):
                     "telefon": "123456",
                     "cvr": 12345678,
                     "kreditordning": True,
-                    "indførselstilladelse": 123,
                 },
                 "postforsendelse": {
                     "id": 1,
@@ -1881,4 +1878,153 @@ class AfgiftstabelUploadXlsxTest(AfgiftstabelUploadTest, TestCase):
         return self.client.post(
             reverse("afgiftstabel_create"),
             {"fil": SimpleUploadedFile("test.xlsx", encoded, content_type)},
+        )
+
+
+class TF10EditMultipleViewTest(PermissionsTest, TestCase):
+    view = TF10EditMultipleView
+    check_permissions = (
+        (reverse("tf10_edit_multiple") + "?id=1", view.required_permissions, 302),
+        (reverse("tf10_edit_multiple") + "?id=1&id=2", view.required_permissions),
+    )
+
+    def mock_requests_get(self, path):
+        expected_prefix = "/api/"
+        p = urlparse(path)
+        path = p.path
+        query = parse_qs(p.query)
+        path = path.rstrip("/")
+        response = Response()
+        json_content = None
+        content = None
+        status_code = None
+        if path == expected_prefix + "afgiftsanmeldelse":
+            data = {
+                1: {
+                    "id": 1,
+                    "afsender": 1,
+                    "modtager": 1,
+                    "fragtforsendelse": 1,
+                    "postforsendelse": None,
+                    "leverandørfaktura_nummer": "1234",
+                    "leverandørfaktura": "/leverandørfakturaer/1/leverandørfaktura.txt",
+                    "modtager_betaler": False,
+                    "indførselstilladelse": "5678",
+                    "afgift_total": None,
+                    "betalt": False,
+                    "dato": "2023-08-22",
+                    "godkendt": False,
+                },
+                2: {
+                    "id": 2,
+                    "afsender": 1,
+                    "modtager": 1,
+                    "fragtforsendelse": 2,
+                    "postforsendelse": None,
+                    "leverandørfaktura_nummer": "1234",
+                    "leverandørfaktura": "/leverandørfakturaer/1/leverandørfaktura.txt",
+                    "modtager_betaler": False,
+                    "indførselstilladelse": "5678",
+                    "afgift_total": None,
+                    "betalt": False,
+                    "dato": "2023-08-22",
+                    "godkendt": False,
+                },
+                3: {
+                    "id": 3,
+                    "afsender": 1,
+                    "modtager": 1,
+                    "fragtforsendelse": 3,
+                    "postforsendelse": None,
+                    "leverandørfaktura_nummer": "1234",
+                    "leverandørfaktura": "/leverandørfakturaer/1/leverandørfaktura.txt",
+                    "modtager_betaler": False,
+                    "indførselstilladelse": "5678",
+                    "afgift_total": None,
+                    "betalt": False,
+                    "dato": "2023-08-22",
+                    "godkendt": False,
+                },
+            }
+            items = list(filter(None, [data.get(int(id), None) for id in query["id"]]))
+            json_content = {
+                "count": len(items),
+                "items": items,
+            }
+        elif path == expected_prefix + "fragtforsendelse/1":
+            json_content = {
+                "id": 1,
+                "forsendelsestype": "S",
+                "fragtbrevsnummer": 1,
+                "fragtbrev": "/leverandørfakturaer/1/leverandørfaktura.txt",
+            }
+        elif path == expected_prefix + "fragtforsendelse/2":
+            json_content = {
+                "id": 2,
+                "forsendelsestype": "F",
+                "fragtbrevsnummer": 1,
+                "fragtbrev": "/leverandørfakturaer/1/leverandørfaktura.txt",
+            }
+        elif path == expected_prefix + "fragtforsendelse/3":
+            json_content = {
+                "id": 3,
+                "forsendelsestype": "F",
+                "fragtbrevsnummer": 1,
+                "fragtbrev": "/leverandørfakturaer/1/leverandørfaktura.txt",
+            }
+        else:
+            print(f"Mock got unrecognized path: {path}")
+
+        if json_content:
+            content = json.dumps(json_content).encode("utf-8")
+        if content:
+            if not status_code:
+                status_code = 200
+            response._content = content
+        response.status_code = status_code or 404
+        return response
+
+    def analyze_html(self, html):
+        soup = BeautifulSoup(html, "html.parser")
+        return {
+            "fields": [x.attrs["name"] for x in soup.find_all("input")],
+            "disabled_fields": [
+                x.attrs["name"] for x in soup.find_all("input", disabled=True)
+            ],
+            "alerts": [x.text.strip() for x in soup.find_all(class_="alert")],
+        }
+
+    def test_get_redirect(self):
+        self.login()
+        response = self.client.get(reverse("tf10_edit_multiple") + "?id=1")
+        self.assertEquals(response.status_code, 302)
+        self.assertEquals(
+            response.headers["Location"], reverse("tf10_edit", kwargs={"id": 1})
+        )
+
+    @patch.object(requests.sessions.Session, "get")
+    def test_get_form_diff_fragttype(self, mock_get):
+        self.login()
+        mock_get.side_effect = self.mock_requests_get
+        response = self.client.get(reverse("tf10_edit_multiple") + "?id=1&id=2")
+        self.assertEquals(response.status_code, 200)
+        analysis = self.analyze_html(response.content)
+        self.assertIn("forbindelsesnr", analysis["disabled_fields"])
+        self.assertIn(
+            "Forbindelsesnummer og fragtbrevnummer kan kun redigeres hvis alle de redigerede afgiftsanmeldelser har samme fragttype.",
+            analysis["alerts"],
+        )
+
+    @patch.object(requests.sessions.Session, "get")
+    def test_get_form_same_fragttype(self, mock_get):
+        self.login()
+        mock_get.side_effect = self.mock_requests_get
+        response = self.client.get(reverse("tf10_edit_multiple") + "?id=2&id=3")
+        self.assertEquals(response.status_code, 200)
+        analysis = self.analyze_html(response.content)
+        self.assertNotIn("forbindelsesnr", analysis["disabled_fields"])
+        self.assertNotIn("fragtbrevnr", analysis["disabled_fields"])
+        self.assertNotIn(
+            "Forbindelsesnummer og fragtbrevnummer kan kun redigeres hvis alle de redigerede afgiftsanmeldelser har samme fragttype.",
+            analysis["alerts"],
         )
