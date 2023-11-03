@@ -2,7 +2,7 @@
 coverage==7.3.0
 beautifulsoup4==4.12.2
 humanize==4.7.0
-django_mitid_auth @ git+https://github.com/magenta-aps/gl-django-login.git@1.1.7
+django_mitid_auth @ git+https://github.com/magenta-aps/gl-django-login.git@1.1.10
 django-session-timeout==0.1.0
 pysaml2==7.4.2
 xmltodict==0.13.0
