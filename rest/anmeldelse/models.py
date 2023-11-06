@@ -131,10 +131,13 @@ class Varelinje(models.Model):
         Vareafgiftssats,
         on_delete=models.CASCADE,
     )
-    mængde = models.PositiveIntegerField(
+    mængde = models.DecimalField(
         null=True,
         blank=True,
-    )  # DecimalField?
+        validators=[MinValueValidator(0)],
+        decimal_places=2,
+        max_digits=12,
+    )
     antal = models.PositiveIntegerField(
         null=True,
         blank=True,

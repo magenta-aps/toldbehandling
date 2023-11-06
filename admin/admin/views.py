@@ -385,10 +385,7 @@ class TF10EditMultipleView(PermissionsRequiredMixin, HasRestClientMixin, FormVie
     def form_valid(self, form):
         if self.fælles_fragttype:
             fragt_update_data = filter_dict_values(
-                {
-                    field: form.cleaned_data.get(field)
-                    for field in ("forbindelsesnr")
-                },
+                {field: form.cleaned_data.get(field) for field in ("forbindelsesnr")},
                 (None, ""),
             )
             if self.fælles_fragttype in ("skibsfragt", "luftfragt"):

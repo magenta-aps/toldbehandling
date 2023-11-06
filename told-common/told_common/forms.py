@@ -250,7 +250,7 @@ class TF10VareForm(BootstrapForm):
 
     id = forms.IntegerField(min_value=1, required=False, widget=forms.HiddenInput)
     vareafgiftssats = forms.ChoiceField(choices=())
-    mængde = forms.IntegerField(min_value=1, required=False)
+    mængde = forms.DecimalField(min_value=0, required=False)
     antal = forms.IntegerField(min_value=1, required=False)
     fakturabeløb = forms.DecimalField(min_value=1, decimal_places=2)
 
