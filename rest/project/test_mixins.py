@@ -7,7 +7,7 @@ import json
 import os
 import re
 from datetime import date, timedelta
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 from enum import Enum
 from itertools import chain
 from typing import Any, Dict, List, Tuple, Union
@@ -660,6 +660,12 @@ class RestMixin:
                 return (d + timedelta(days=200)).isoformat()
             except (TypeError, ValueError):
                 pass
+            try:
+                d = Decimal(value)
+                if str(d) == value:
+                    return str(d + Decimal(17.5))
+            except InvalidOperation:
+                pass
             return f"{value}_nonexistent"
         if t == int:
             return value + 123456
@@ -832,7 +838,7 @@ class RestMixin:
             "betalt": False,
         }
         self.varelinje_data = {
-            "mængde": 15,
+            "mængde": "15.00",
             "antal": 1,
             "fakturabeløb": "1000.00",
             "afgiftsbeløb": "37.50",

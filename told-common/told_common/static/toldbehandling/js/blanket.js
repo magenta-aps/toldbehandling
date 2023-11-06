@@ -203,9 +203,9 @@ $(function () {
         const varesats = varesatser[vareafgiftssats.val()];
         const afgift = calcSubAfgift(
             varesats,
-            parseInt(subform.find("[name$=mængde]").val()),
-            parseInt(subform.find("[name$=antal]").val()),
-            parseInt(subform.find("[name$=fakturabeløb]").val()),
+            parseFloat(subform.find("[name$=mængde]").val()),
+            parseFloat(subform.find("[name$=antal]").val()),
+            parseFloat(subform.find("[name$=fakturabeløb]").val()),
         );
 
         subform.find("[data-value=afgiftsbeløb]").val(

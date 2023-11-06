@@ -386,7 +386,7 @@ class VarelinjeOut(ModelSchema):
 class VarelinjeFilterSchema(FilterSchema):
     afgiftsanmeldelse: Optional[int]
     vareafgiftssats: Optional[int]
-    mængde: Optional[int]
+    mængde: Optional[Decimal]
     antal: Optional[int]
     fakturabeløb: Optional[Decimal]
     afgiftsbeløb: Optional[Decimal]

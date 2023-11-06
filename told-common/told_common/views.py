@@ -307,7 +307,6 @@ class ListView(FormView):
     def item_to_json_dict(
         self, item: Dict[str, Any], context: Dict[str, Any], index: int
     ) -> Dict[str, Any]:
-        print("upgrade item")
         return {**item, "select": item["id"]}
 
     def form_valid(self, form):
