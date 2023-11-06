@@ -26,7 +26,7 @@ class Aktør(models.Model):
         ),
     )
     by = models.CharField(
-        max_length=20,
+        max_length=50,
         db_index=True,
     )
     postbox = models.CharField(

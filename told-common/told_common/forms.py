@@ -55,7 +55,7 @@ class TF10Form(BootstrapForm):
         fragtbrev_required: bool = True,
         varesatser: Optional[dict] = None,
         *args,
-        **kwargs
+        **kwargs,
     ):
         super().__init__(*args, **kwargs)
         if not leverandørfaktura_required:
