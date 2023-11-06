@@ -6,6 +6,7 @@ import random
 import string
 
 from aktør.models import Afsender, Modtager
+from common.models import Postnummer
 from django.core.management.base import BaseCommand
 
 # Source: Wikipedia
@@ -54,11 +55,19 @@ class Command(BaseCommand):
                     cvr=str(random.randint(10000000, 99999999)),
                 )
             else:
+                postnummer_object = Postnummer.objects.order_by("?").first()
+                if postnummer_object:
+                    postnummer = postnummer_object.postnummer
+                    by = postnummer_object.navn
+                else:
+                    postnummer = (random.randint(1000, 9999),)
+                    by = (random_char(5) + "by",)
+
                 Modtager.objects.create(
                     navn=company_name,
                     adresse=random_char(5) + "vej " + str(random.randint(0, 20)),
-                    postnummer=random.randint(1000, 9999),
-                    by=random_char(5) + "by",
+                    postnummer=postnummer,
+                    by=by,
                     postbox=None,
                     telefon=str(random.randint(100000, 999999)),
                     cvr=str(random.randint(10000000, 99999999)),

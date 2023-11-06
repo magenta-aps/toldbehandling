@@ -30,7 +30,10 @@ class Command(BaseCommand):
         anmeldelse.leverandørfaktura.save(
             "leverandørfaktura.txt", ContentFile("testdata")
         )
-        tabel = Afgiftstabel.objects.first()
+        today = date.today()
+        tabel = Afgiftstabel.objects.filter(
+            kladde=False, gyldig_fra__lt=today, gyldig_til__gt=today
+        ).first()
         Varelinje.objects.create(
             afgiftsanmeldelse=anmeldelse,
             vareafgiftssats=Vareafgiftssats.objects.filter(
