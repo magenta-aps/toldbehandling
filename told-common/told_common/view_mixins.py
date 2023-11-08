@@ -38,10 +38,11 @@ class LoginRequiredMixin:
                 return None
             else:
                 # Redirect to SAML login
-                return HttpResponseRedirect(
+                return redirect(
                     reverse("login:login") + "?back=" + quote_plus(request.path)
                 )
         else:
+            # Redirect to normal django login
             return redirect(reverse("login") + "?back=" + quote_plus(request.path))
 
     def login_check(self):
