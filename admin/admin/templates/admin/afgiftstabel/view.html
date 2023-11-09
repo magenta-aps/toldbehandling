@@ -7,13 +7,12 @@
 
 {# Docs for bootstrap-table: https://bootstrap-table.com/docs/ #}
 {% block extra_headers %}
-<link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.22.1/dist/bootstrap-table.min.css">
-<link rel="stylesheet"
-      href="https://unpkg.com/bootstrap-table@1.22.1/dist/extensions/sticky-header/bootstrap-table-sticky-header.min.css">
+<link rel="stylesheet" href="{% static 'bootstrap-table/bootstrap-table.min.css' %}">
+<link rel="stylesheet" href="{% static 'bootstrap-table/bootstrap-table-sticky-header.min.css' %}">
 {% endblock %}
 {% block extra_footers %}
-<script src="https://unpkg.com/bootstrap-table@1.22.1/dist/bootstrap-table.min.js"></script>
-<script src="https://unpkg.com/bootstrap-table@1.22.1/dist/extensions/sticky-header/bootstrap-table-sticky-header.min.js"></script>
+<script src="{% static 'bootstrap-table/bootstrap-table.min.js' %}"></script>
+<script src="{% static 'bootstrap-table/bootstrap-table-sticky-header.min.js' %}"></script>
 {% endblock %}
 
 {% block content %}
