@@ -107,7 +107,8 @@ class Command(BaseCommand):
             ("change", varelinje_model),
             ("change", postforsendelse_model),
             ("change", fragtforsendelse_model),
-            # Ingen delete
+            ("delete", postforsendelse_model),
+            ("delete", fragtforsendelse_model),
         ):
             indberettere.permissions.add(
                 Permission.objects.get(
