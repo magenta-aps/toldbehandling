@@ -1240,7 +1240,7 @@ class AnmeldelseNotatTest(PermissionsTest, TestCase):
                 "modtager_postnummer": ["3506"],
                 "modtager_by": "TestBy",
                 "modtager_telefon": "123456",
-                "modtager_indførselstilladelse": "123",
+                "indførselstilladelse": "123",
                 "leverandørfaktura_nummer": "5678",
                 "fragttype": "skibspost",
                 "forbindelsesnr": "2468",
