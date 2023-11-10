@@ -264,6 +264,7 @@ class TF10FormUpdateView(
                     {key + "_" + subkey: item[key][subkey] for subkey in item[key]}
                 )
             initial["leverandørfaktura_nummer"] = item["leverandørfaktura_nummer"]
+            initial["indførselstilladelse"] = item.get("indførselstilladelse", None)
             fragtforsendelse = item.get("fragtforsendelse", None)
             postforsendelse = item.get("postforsendelse", None)
             if fragtforsendelse:

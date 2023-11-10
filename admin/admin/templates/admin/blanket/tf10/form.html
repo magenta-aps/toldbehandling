@@ -163,11 +163,11 @@
                 </div>
                 <div class="row">
                     <div class="col-4">
-                        <label for="{{form.modtager_indførselstilladelse.id_for_label}}">{{form.modtager_indførselstilladelse.label}}</label>
+                        <label for="{{form.indførselstilladelse.id_for_label}}">{{form.indførselstilladelse.label}}</label>
                     </div>
                     <div class="col-8">
-                        {{form.modtager_indførselstilladelse}}
-                        {{form.modtager_indførselstilladelse.errors}}
+                        {{form.indførselstilladelse}}
+                        {{form.indførselstilladelse.errors}}
                     </div>
                 </div>
         </div>
@@ -388,7 +388,7 @@
                 "by": $("[name={{form.modtager_by.name}}]"),
                 "postbox": $("[name={{form.modtager_postbox.name}}]"),
                 "telefon": $("[name={{form.modtager_telefon.name}}]"),
-                "indførselstilladelse": $("[name={{form.modtager_indførselstilladelse.name}}]"),
+                "indførselstilladelse": $("[name={{form.indførselstilladelse.name}}]"),
             },
             "searchfields": ["cvr", "navn"],
             "api": "{% url 'rest' path='modtager' %}",
