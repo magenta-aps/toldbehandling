@@ -1,11 +1,11 @@
 services:
   toldbehandling-rest:
     environment:
-      - TEST=true
+      - TEST=false
 
   toldbehandling-ui:
     environment:
-      - TEST=true
+      - TEST=false
 
   toldbehandling-admin:
     environment:

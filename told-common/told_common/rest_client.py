@@ -10,16 +10,28 @@ from dataclasses import dataclass, field
 from datetime import date, timedelta
 from functools import cached_property
 from typing import Any, Dict, List, Optional, Tuple, Union
-from urllib.parse import urlencode
+from urllib.parse import unquote, urlencode
 
 import requests
 from django.conf import settings
+from django.core.files import File
 from django.core.files.uploadedfile import InMemoryUploadedFile, UploadedFile
 from django.core.serializers.json import DjangoJSONEncoder
 from django.http import HttpRequest
 from requests import HTTPError, Session
-from told_common.data import Afgiftstabel, Notat, Vareafgiftssats
 from told_common.util import filter_dict_none
+
+from told_common.data import (  # isort: skip
+    Afgiftsanmeldelse,
+    Afgiftstabel,
+    FragtForsendelse,
+    HistoricAfgiftsanmeldelse,
+    Notat,
+    PostForsendelse,
+    Vareafgiftssats,
+    Varelinje,
+    PrismeResponse,
+)
 
 
 @dataclass
@@ -57,6 +69,19 @@ class JwtTokenInfo:
 class ModelRestClient:
     def __init__(self, rest):
         self.rest = rest
+
+    @staticmethod
+    def set_file(data: dict, field: str):
+        try:
+            data[field] = File(
+                open(f"{settings.MEDIA_ROOT}{unquote(data[field])}", "rb")
+            )
+        except FileNotFoundError:
+            print(
+                f"Fil ikke fundet [id={data.get('id', None)}, felt={field}]: "
+                f"{settings.MEDIA_ROOT}{unquote(data[field])}"
+            )
+            data[field] = None
 
 
 class AfsenderRestClient(ModelRestClient):
@@ -167,8 +192,8 @@ class PostforsendelseRestClient(ModelRestClient):
             self.rest.patch(f"postforsendelse/{id}", mapped)
         return id
 
-    def get(self, id: int) -> dict:
-        return self.rest.get(f"postforsendelse/{id}")
+    def get(self, id: int) -> PostForsendelse:
+        return PostForsendelse.from_dict(self.rest.get(f"postforsendelse/{id}"))
 
 
 class FragtforsendelseRestClient(ModelRestClient):
@@ -183,7 +208,7 @@ class FragtforsendelseRestClient(ModelRestClient):
                     "forbindelsesnr": data.get("forbindelsesnr", None),
                     "fragtbrev": RestClient._uploadfile_to_base64str(file),
                     "fragtbrev_navn": file.name if file else None,
-                    "afgangsdato": data["afgangsdato"],
+                    "afgangsdato": data.get("afgangsdato", None),
                 },
             )
         return None
@@ -231,8 +256,10 @@ class FragtforsendelseRestClient(ModelRestClient):
             self.rest.patch(f"fragtforsendelse/{id}", mapped)
         return id
 
-    def get(self, id: int) -> dict:
-        return self.rest.get(f"fragtforsendelse/{id}")
+    def get(self, id: int) -> FragtForsendelse:
+        data = self.rest.get(f"fragtforsendelse/{id}")
+        self.set_file(data, "fragtbrev")
+        return FragtForsendelse.from_dict(data)
 
 
 class AfgiftanmeldelseRestClient(ModelRestClient):
@@ -327,13 +354,83 @@ class AfgiftanmeldelseRestClient(ModelRestClient):
     def set_godkendt(self, id: int, godkendt: bool):
         self.rest.patch(f"afgiftsanmeldelse/{id}", {"godkendt": godkendt})
 
+    def list(
+        self,
+        full=False,
+        include_varelinjer=False,
+        include_notater=False,
+        include_prismeresponses=False,
+        **filter: Union[str, int, float, bool, List[Union[str, int, float, bool]]],
+    ) -> Tuple[int, List[Afgiftsanmeldelse]]:
+        if full:
+            data = self.rest.get("afgiftsanmeldelse/full", filter)
+        else:
+            data = self.rest.get("afgiftsanmeldelse", filter)
+        for item in data["items"]:
+            item["varelinjer"] = None
+            item["notater"] = None
+            item["prismeresponses"] = None
+            if include_varelinjer:
+                item["varelinjer"] = self.rest.varelinje.list(
+                    afgiftsanmeldelse=item["id"]
+                )
+            if include_notater:
+                item["notater"] = self.rest.notat.list(afgiftsanmeldelse=item["id"])
+            if include_prismeresponses:
+                item["prismeresponses"] = self.rest.prismeresponse.list(
+                    afgiftsanmeldelse=item["id"]
+                )
+        for item in data["items"]:
+            self.set_file(item, "leverandørfaktura")
+        return data["count"], [
+            Afgiftsanmeldelse.from_dict(item) for item in data["items"]
+        ]
+
     def get(
         self,
-        filter: Dict[
-            str, Union[str, int, float, bool, List[Union[str, int, float, bool]]]
-        ],
-    ) -> List[dict]:
-        return self.rest.get("afgiftsanmeldelse", filter)["items"]
+        id: int,
+        full=False,
+        include_varelinjer=False,
+        include_notater=False,
+        include_prismeresponses=False,
+    ):
+        if full:
+            item = self.rest.get(f"afgiftsanmeldelse/{id}/full")
+        else:
+            item = self.rest.get(f"afgiftsanmeldelse/{id}")
+        self.set_file(item, "leverandørfaktura")
+        if item.get("fragtforsendelse", None):
+            self.set_file(item["fragtforsendelse"], "fragtbrev")
+        item["varelinjer"] = None
+        item["notater"] = None
+        item["prismeresponses"] = None
+        if include_varelinjer:
+            item["varelinjer"] = self.rest.varelinje.list(afgiftsanmeldelse=id)
+        if include_notater:
+            item["notater"] = self.rest.notat.list(id)
+        if include_prismeresponses:
+            item["prismeresponses"] = self.rest.prismeresponse.list(
+                afgiftsanmeldelse=item["id"]
+            )
+        return Afgiftsanmeldelse.from_dict(item)
+
+    def list_history(self, id: int) -> Tuple[int, List[HistoricAfgiftsanmeldelse]]:
+        data = self.rest.get(f"afgiftsanmeldelse/{id}/history")
+        return data["count"], [
+            HistoricAfgiftsanmeldelse.from_dict(
+                {**item, "varelinjer": [], "notater": [], "prismeresponses": []}
+            )
+            for item in data["items"]
+        ]
+
+    def get_history_item(self, id: int, history_index: int):
+        data = self.rest.get(f"afgiftsanmeldelse/{id}/history/{history_index}")
+        data["varelinjer"] = self.rest.varelinje.list(
+            afgiftsanmeldelse=id, afgiftsanmeldelse_history_index=history_index
+        )
+        data["notater"] = self.rest.notat.list(id, history_index)
+        data["prismeresponses"] = self.rest.prismeresponse.list(afgiftsanmeldelse=id)
+        return HistoricAfgiftsanmeldelse.from_dict(data)
 
 
 class VarelinjeRestClient(ModelRestClient):
@@ -368,10 +465,16 @@ class VarelinjeRestClient(ModelRestClient):
             self.rest.patch(f"varelinje/{id}", mapped)
         return id
 
-    def list(self, afgiftsanmeldelse_id: int):
-        return self.rest.get("varelinje", {"afgiftsanmeldelse": afgiftsanmeldelse_id})[
-            "items"
+    def list(
+        self, **filter: Union[str, int, float, bool, List[Union[str, int, float, bool]]]
+    ) -> List[Varelinje]:
+        data = [
+            Varelinje.from_dict(item)
+            for item in self.rest.get("varelinje", filter)["items"]
         ]
+        for item in data:
+            item.vareafgiftssats = self.rest.vareafgiftssats.get(item.vareafgiftssats)
+        return data
 
     def delete(self, id):
         self.rest.delete(f"varelinje/{id}")
@@ -399,6 +502,33 @@ class NotatRestClient(ModelRestClient):
         return [Notat.from_dict(x) for x in self.rest.get("notat", params)["items"]]
 
 
+class PrismeResponseRestClient(ModelRestClient):
+    @staticmethod
+    def map(data: PrismeResponse) -> dict:
+        return {
+            "afgiftsanmeldelse_id": data.afgiftsanmeldelse.id
+            if isinstance(data.afgiftsanmeldelse, Afgiftsanmeldelse)
+            else data.afgiftsanmeldelse,
+            "invoice_date": data.invoice_date,
+            "rec_id": data.rec_id,
+            "tax_notification_number": data.tax_notification_number,
+        }
+
+    def create(self, data: PrismeResponse):
+        response = self.rest.post("prismeresponse", self.map(data))
+        return response["id"]
+
+    def delete(self, id: int):
+        self.rest.delete(f"prismeresponse/{id}")
+
+    def list(self, afgiftsanmeldelse: int) -> List[PrismeResponse]:
+        params = {"afgiftsanmeldelse": afgiftsanmeldelse}
+        return [
+            PrismeResponse.from_dict(x)
+            for x in self.rest.get("prismeresponse", params)["items"]
+        ]
+
+
 class AfgiftstabelRestClient(ModelRestClient):
     @staticmethod
     def compare(data: dict, existing: dict) -> bool:
@@ -413,6 +543,14 @@ class AfgiftstabelRestClient(ModelRestClient):
 
     def get(self, id: int) -> Afgiftstabel:
         return Afgiftstabel.from_dict(self.rest.get(f"afgiftstabel/{id}"))
+
+    def list(
+        self, **filter: Union[str, int, float, bool, List[Union[str, int, float, bool]]]
+    ):
+        return [
+            Afgiftstabel.from_dict(item)
+            for item in self.rest.get("afgiftstabel", filter)
+        ]
 
     def create(self, data: dict) -> Optional[int]:
         response = self.rest.post("afgiftstabel", data)
@@ -436,12 +574,33 @@ class VareafgiftssatsRestClient(ModelRestClient):
         response = self.rest.post("vareafgiftssats", data)
         return response["id"]
 
-    def list(self, afgiftstabel: int) -> List[Vareafgiftssats]:
+    def get_subsatser(self, parent_id: int) -> List[Vareafgiftssats]:
+        response = self.list(overordnet=parent_id)
+        subsatser = []
+        cache = {}
+        for subsats in response["items"]:
+            subsats = Vareafgiftssats.from_dict(subsats)
+            if subsats.id not in cache:
+                cache[subsats.id] = subsats
+            subsatser.append(subsats)
+        return subsatser
+
+    def get(self, id: int) -> Vareafgiftssats:
+        sats = Vareafgiftssats.from_dict(self.rest.get(f"vareafgiftssats/{id}"))
+        if sats.enhed == Vareafgiftssats.Enhed.SAMMENSAT:
+            subs = self.list(overordnet=id)
+            sats.populate_subs(
+                lambda oid: [item for item in subs if item.overordnet == oid]
+            )
+        return sats
+
+    def list(
+        self,
+        **filter: Union[str, int, float, bool, List[Union[str, int, float, bool]]],
+    ) -> List[Vareafgiftssats]:
         satser = [
-            Vareafgiftssats.from_dict(result)
-            for result in self.rest.get(
-                "vareafgiftssats", {"afgiftstabel": afgiftstabel}
-            )["items"]
+            Vareafgiftssats.from_dict(item)
+            for item in self.rest.get("vareafgiftssats", filter)["items"]
         ]
         by_overordnet = defaultdict(list)
         for sats in satser:
@@ -468,6 +627,7 @@ class RestClient:
         self.afgiftstabel = AfgiftstabelRestClient(self)
         self.vareafgiftssats = VareafgiftssatsRestClient(self)
         self.notat = NotatRestClient(self)
+        self.prismeresponse = PrismeResponseRestClient(self)
 
     def check_access_token_age(self):
         max_age = getattr(settings, "NINJA_JWT", {}).get(

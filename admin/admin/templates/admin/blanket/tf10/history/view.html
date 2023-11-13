@@ -185,13 +185,13 @@
                     <label>Forsendelsesmåde:</label>
                 </div>
                 <div class="col-8">
-                    {% if object.fragtforsendelse.forsendelsestype == "S" %}
+                    {% if object.fragtforsendelse.forsendelsestype.name == "SKIB" %}
                     Skibsfragt
-                    {% elif object.fragtforsendelse.forsendelsestype == "F" %}
+                    {% elif object.fragtforsendelse.forsendelsestype.name == "FLY" %}
                     Luftfragt
-                    {% elif object.postforsendelse.forsendelsestype == "S" %}
+                    {% elif object.postforsendelse.forsendelsestype.name == "SKIB" %}
                     Skibspost
-                    {% elif object.postforsendelse.forsendelsestype == "F" %}
+                    {% elif object.postforsendelse.forsendelsestype.name == "FLY" %}
                     Luftpost
                     {% endif %}
                 </div>
@@ -228,15 +228,17 @@
                     {% endif %}
                 </div>
             </div>
-            <div class="col-4">
-                Afgangsdato:
-            </div>
-            <div class="col-8">
-                {% if object.fragtforsendelse %}
-                {{object.fragtforsendelse.afgangsdato}}
-                {% elif object.postforsendelse %}
-                {{object.postforsendelse.afgangsdato}}
-                {% endif %}
+            <div class="row">
+                <div class="col-4">
+                    Afgangsdato:
+                </div>
+                <div class="col-8">
+                    {% if object.fragtforsendelse %}
+                    {{object.fragtforsendelse.afgangsdato}}
+                    {% elif object.postforsendelse %}
+                    {{object.postforsendelse.afgangsdato}}
+                    {% endif %}
+                </div>
             </div>
         </div>
     </div>

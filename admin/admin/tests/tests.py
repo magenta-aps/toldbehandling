@@ -9,7 +9,7 @@ import time
 import traceback
 from collections import defaultdict
 from copy import deepcopy
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from io import BytesIO, StringIO
 from typing import Dict, List, Tuple
@@ -29,6 +29,7 @@ from told_common.data import Notat, Vareafgiftssats
 from told_common.rest_client import RestClient
 from told_common.views import FragtbrevView
 
+from admin.clients.prisme import CustomDutyResponse, PrismeClient
 from admin.views import TF10EditMultipleView
 
 from admin.views import (  # isort: skip
@@ -343,10 +344,54 @@ class TestGodkend(PermissionsTest, TestCase):
                 "leverandørfaktura": "/leverandørfakturaer/1/leverandørfaktura.txt",
                 "modtager_betaler": False,
                 "indførselstilladelse": "5678",
-                "afgift_total": None,
+                "afgift_total": "5000.00",
                 "betalt": False,
                 "dato": "2023-08-22",
                 "godkendt": False,
+                "beregnet_faktureringsdato": "2023-10-10",
+            }
+        elif path == expected_prefix + "afgiftsanmeldelse/1/full":
+            json_content = {
+                "id": 1,
+                "afsender": {
+                    "id": 1,
+                    "navn": "Testfirma 1",
+                    "adresse": "Testvej 42",
+                    "postnummer": 1234,
+                    "by": "TestBy",
+                    "postbox": "123",
+                    "telefon": "123456",
+                    "cvr": 12345678,
+                },
+                "modtager": {
+                    "id": 1,
+                    "navn": "Testfirma 1",
+                    "adresse": "Testvej 42",
+                    "postnummer": 1234,
+                    "by": "TestBy",
+                    "postbox": "123",
+                    "telefon": "123456",
+                    "cvr": 12345678,
+                    "kreditordning": True,
+                },
+                "fragtforsendelse": {
+                    "id": 1,
+                    "forsendelsestype": "S",
+                    "fragtbrevsnummer": 1,
+                    "fragtbrev": "/leverandørfakturaer/1/leverandørfaktura.txt",
+                    "forbindelsesnr": "123",
+                    "afgangsdato": "2023-10-01",
+                },
+                "postforsendelse": None,
+                "leverandørfaktura_nummer": "1234",
+                "leverandørfaktura": "/leverandørfakturaer/1/leverandørfaktura.txt",
+                "modtager_betaler": False,
+                "indførselstilladelse": "5678",
+                "afgift_total": "5000.00",
+                "betalt": False,
+                "dato": "2023-08-22",
+                "godkendt": False,
+                "beregnet_faktureringsdato": "2023-10-10",
             }
         elif path == expected_prefix + "fragtforsendelse/1":
             json_content = {
@@ -354,6 +399,8 @@ class TestGodkend(PermissionsTest, TestCase):
                 "forsendelsestype": "S",
                 "fragtbrevsnummer": 1,
                 "fragtbrev": "/leverandørfakturaer/1/leverandørfaktura.txt",
+                "forbindelsesnr": "123",
+                "afgangsdato": "2023-10-01",
             }
 
         elif path == expected_prefix + "varelinje":
@@ -365,6 +412,8 @@ class TestGodkend(PermissionsTest, TestCase):
                         "afgiftsanmeldelse": 1,
                         "vareafgiftssats": 1,
                         "antal": 5,
+                        "mængde": "1.00",
+                        "fakturabeløb": "25000.00",
                         "afgiftsbeløb": "5000.00",
                     }
                 ],
@@ -384,8 +433,21 @@ class TestGodkend(PermissionsTest, TestCase):
                     }
                 ],
             }
+        elif path == expected_prefix + "prismeresponse":
+            json_content = {
+                "count": 1,
+                "items": [
+                    {
+                        "id": 1,
+                        "afgiftsanmeldelse": 1,
+                        "rec_id": "5637147578",
+                        "tax_notification_number": "44668899",
+                        "invoice_date": "2023-04-07T00:00:00",
+                    }
+                ],
+            }
         else:
-            print(f"Mock got unrecognized path: {path}")
+            print(f"Mock {self.__class__.__name__} got unrecognized path: {path}")
         if json_content:
             content = json.dumps(json_content).encode("utf-8")
         if content:
@@ -438,6 +500,7 @@ class TestGodkend(PermissionsTest, TestCase):
         self.login()
         url = reverse("tf10_view", kwargs={"id": 1})
         mock_get.side_effect = self.mock_requests_get
+        print(url)
         response = self.client.get(url)
         self.assertEquals(response.status_code, 200)
 
@@ -517,6 +580,255 @@ class TestGodkend(PermissionsTest, TestCase):
         self.assertEquals(response.status_code, 500)
 
 
+class TestPrisme(PermissionsTest, TestCase):
+    view = TF10View
+
+    check_permissions = (
+        (reverse("tf10_view", kwargs={"id": 1}), view.required_permissions),
+    )
+
+    def setUp(self):
+        super().setUp()
+        self.posted: List[Tuple[str, str]] = []
+
+    def mock_requests_get(self, path):
+        expected_prefix = f"{settings.REST_DOMAIN}/api/"
+        path = path.split("?")[0]
+        path = path.rstrip("/")
+        response = Response()
+        json_content = None
+        content = None
+        status_code = None
+        if path == expected_prefix + "vareafgiftssats/1":
+            json_content = {
+                "id": 1,
+                "afgiftstabel": 1,
+                "vareart": "Båthorn",
+                "afgiftsgruppenummer": 1234567,
+                "enhed": "kg",
+                "afgiftssats": "1.00",
+            }
+
+        elif path == expected_prefix + "afsender/1":
+            json_content = {
+                "id": 1,
+                "navn": "Testfirma 1",
+                "adresse": "Testvej 42",
+                "postnummer": 1234,
+                "by": "TestBy",
+                "postbox": "123",
+                "telefon": "123456",
+                "cvr": 12345678,
+            }
+
+        elif path == expected_prefix + "modtager/1":
+            json_content = {
+                "id": 1,
+                "navn": "Testfirma 1",
+                "adresse": "Testvej 42",
+                "postnummer": 1234,
+                "by": "TestBy",
+                "postbox": "123",
+                "telefon": "123456",
+                "cvr": 12345678,
+                "kreditordning": True,
+            }
+
+        elif path == expected_prefix + "afgiftsanmeldelse/1":
+            json_content = {
+                "id": 1,
+                "afsender": 1,
+                "modtager": 1,
+                "fragtforsendelse": 1,
+                "postforsendelse": None,
+                "leverandørfaktura_nummer": "1234",
+                "leverandørfaktura": "/leverandørfakturaer/1/leverandørfaktura.txt",
+                "modtager_betaler": False,
+                "indførselstilladelse": "5678",
+                "afgift_total": "5000.00",
+                "betalt": False,
+                "dato": "2023-08-22",
+                "godkendt": False,
+                "beregnet_faktureringsdato": "2023-10-10",
+            }
+        elif path == expected_prefix + "afgiftsanmeldelse/1/full":
+            json_content = {
+                "id": 1,
+                "afsender": {
+                    "id": 1,
+                    "navn": "Testfirma 1",
+                    "adresse": "Testvej 42",
+                    "postnummer": 1234,
+                    "by": "TestBy",
+                    "postbox": "123",
+                    "telefon": "123456",
+                    "cvr": 12345678,
+                },
+                "modtager": {
+                    "id": 1,
+                    "navn": "Testfirma 1",
+                    "adresse": "Testvej 42",
+                    "postnummer": 1234,
+                    "by": "TestBy",
+                    "postbox": "123",
+                    "telefon": "123456",
+                    "cvr": 12345678,
+                    "kreditordning": True,
+                },
+                "fragtforsendelse": {
+                    "id": 1,
+                    "forsendelsestype": "S",
+                    "fragtbrevsnummer": 1,
+                    "fragtbrev": "/leverandørfakturaer/1/leverandørfaktura.txt",
+                    "forbindelsesnr": "123",
+                    "afgangsdato": "2023-10-01",
+                },
+                "postforsendelse": None,
+                "leverandørfaktura_nummer": "1234",
+                "leverandørfaktura": "/leverandørfakturaer/1/leverandørfaktura.txt",
+                "modtager_betaler": False,
+                "indførselstilladelse": "5678",
+                "afgift_total": "5000.00",
+                "betalt": False,
+                "dato": "2023-08-22",
+                "godkendt": False,
+                "beregnet_faktureringsdato": "2023-10-10",
+            }
+        elif path == expected_prefix + "fragtforsendelse/1":
+            json_content = {
+                "id": 1,
+                "forsendelsestype": "S",
+                "fragtbrevsnummer": 1,
+                "fragtbrev": "/leverandørfakturaer/1/leverandørfaktura.txt",
+                "forbindelsesnr": "123",
+                "afgangsdato": "2023-10-01",
+            }
+
+        elif path == expected_prefix + "varelinje":
+            json_content = {
+                "count": 1,
+                "items": [
+                    {
+                        "id": 1,
+                        "afgiftsanmeldelse": 1,
+                        "vareafgiftssats": 1,
+                        "antal": 5,
+                        "mængde": "1.00",
+                        "fakturabeløb": "25000.00",
+                        "afgiftsbeløb": "5000.00",
+                    }
+                ],
+            }
+
+        elif path == expected_prefix + "notat":
+            json_content = {
+                "count": 1,
+                "items": [
+                    {
+                        "id": 1,
+                        "afgiftsanmeldelse": 1,
+                        "tekst": "Hephey",
+                        "brugernavn": "tester",
+                        "oprettet": "2023-10-01T00:00:00.000000+00:00",
+                        "index": 0,
+                    }
+                ],
+            }
+        elif path == expected_prefix + "prismeresponse":
+            json_content = {
+                "count": 1,
+                "items": [
+                    {
+                        "id": 1,
+                        "afgiftsanmeldelse": 1,
+                        "rec_id": "5637147578",
+                        "tax_notification_number": "44668899",
+                        "invoice_date": "2023-04-07T00:00:00",
+                    }
+                ],
+            }
+        else:
+            print(f"Mock {self.__class__.__name__} got unrecognized path: {path}")
+        if json_content:
+            content = json.dumps(json_content).encode("utf-8")
+        if content:
+            if not status_code:
+                status_code = 200
+            response._content = content
+        response.status_code = status_code or 404
+        return response
+
+    def mock_requests_post(self, path, data, headers=None):
+        expected_prefix = f"{settings.REST_DOMAIN}/api/"
+        path = path.rstrip("/")
+        response = Response()
+        json_content = None
+        content = None
+        status_code = None
+        if path == expected_prefix + "prismeresponse":
+            json_content = {"id": 1}
+            self.posted.append((path, data))
+        if json_content:
+            content = json.dumps(json_content).encode("utf-8")
+        if content:
+            if not status_code:
+                status_code = 200
+            response._content = content
+        response.status_code = status_code or 404
+        return response
+
+    def mock_requests_error(self, path, *args, **kwargs):
+        response = Response()
+        response.status_code = 500
+        return response
+
+    def mock_requests_error_401(self, path, *args, **kwargs):
+        response = Response()
+        response.status_code = 401
+        return response
+
+    def mock_prisme_send(self, request_object):
+        return [
+            CustomDutyResponse(
+                request_object,
+                """
+                <CustomDutyHeader>
+                <RecId>5637147578</RecId>
+                <TaxNotificationNumber>44668899</TaxNotificationNumber>
+                <InvoiceDate>2023-04-07T00:00:00</InvoiceDate>
+                </CustomDutyHeader>
+            """,
+            )
+        ]
+
+    @patch.object(requests.sessions.Session, "get")
+    @patch.object(requests.sessions.Session, "post")
+    @patch.object(PrismeClient, "send")
+    def test_post_view_prisme(self, mock_send, mock_post, mock_get):
+        self.login()
+        view_url = reverse("tf10_view", kwargs={"id": 1})
+        mock_send.side_effect = self.mock_prisme_send
+        mock_post.side_effect = self.mock_requests_post
+        mock_get.side_effect = self.mock_requests_get
+        response = self.client.post(view_url, {"send_til_prisme": "true"})
+        self.assertEquals(response.status_code, 302)
+        prefix = f"{settings.REST_DOMAIN}/api/"
+        posted = defaultdict(list)
+        for url, data in self.posted:
+            posted[url].append(json.loads(data))
+        self.assertEquals(
+            posted[prefix + "prismeresponse"],
+            [
+                {
+                    "afgiftsanmeldelse_id": 1,
+                    "invoice_date": "2023-04-07T00:00:00",
+                    "rec_id": "5637147578",
+                    "tax_notification_number": "44668899",
+                }
+            ],
+        )
+
+
 class FileViewTest(PermissionsTest, TestCase):
     view = FragtbrevView
 
@@ -542,6 +854,8 @@ class FileViewTest(PermissionsTest, TestCase):
                 "forsendelsestype": "S",
                 "fragtbrevsnummer": 1,
                 "fragtbrev": "/fragtbreve/1/fragtbrev.txt",
+                "forbindelsesnr": "123",
+                "afgangsdato": "2023-10-01",
             }
         if json_content:
             content = json.dumps(json_content).encode("utf-8")
@@ -646,7 +960,8 @@ class AnmeldelseHistoryListViewTest(PermissionsTest, TestCase):
                 "modtager": 1,
                 "postforsendelse": 1,
                 "dato": "2023-09-03",
-                "afgift_total": None,
+                "beregnet_faktureringsdato": "2023-10-10",
+                "afgift_total": "0.00",
                 "fragtforsendelse": None,
                 "godkendt": False,
                 "history_username": "admin",
@@ -664,7 +979,8 @@ class AnmeldelseHistoryListViewTest(PermissionsTest, TestCase):
                 "modtager": 1,
                 "postforsendelse": 1,
                 "dato": "2023-09-03",
-                "afgift_total": None,
+                "beregnet_faktureringsdato": "2023-10-10",
+                "afgift_total": "0.00",
                 "fragtforsendelse": None,
                 "godkendt": True,
                 "history_username": "admin",
@@ -687,7 +1003,7 @@ class AnmeldelseHistoryListViewTest(PermissionsTest, TestCase):
         elif path == expected_prefix + "notat":
             json_content = {"count": 0, "items": []}
         else:
-            print(f"Mock got unrecognized path: {path}")
+            print(f"Mock {self.__class__.__name__} got unrecognized path: {path}")
         if json_content:
             content = json.dumps(json_content).encode("utf-8")
         if content:
@@ -776,15 +1092,17 @@ class AnmeldelseHistoryDetailViewTest(PermissionsTest, TestCase):
                     "fragtbrevsnummer": "0",
                     "fragtbrev": "/fragtbreve/1/fragtbrev.txt",
                     "forbindelsesnr": "7331",
+                    "afgangsdato": "2023-10-01",
                 },
                 "postforsendelse": None,
                 "leverandørfaktura_nummer": "1234",
                 "leverandørfaktura": "/leverandørfakturaer/1/leverandørfaktura.txt",
                 "modtager_betaler": False,
                 "indførselstilladelse": "5678",
-                "afgift_total": None,
+                "afgift_total": "5000.00",
                 "betalt": False,
                 "dato": "2023-10-06",
+                "beregnet_faktureringsdato": "2023-10-10",
                 "godkendt": None,
                 "history_username": "admin",
                 "history_date": "2023-10-01T00:00:00.000000+00:00",
@@ -798,6 +1116,8 @@ class AnmeldelseHistoryDetailViewTest(PermissionsTest, TestCase):
                         "afgiftsanmeldelse": 1,
                         "vareafgiftssats": 1,
                         "antal": 5,
+                        "mængde": "1.00",
+                        "fakturabeløb": "25000.00",
                         "afgiftsbeløb": "5000.00",
                     }
                 ],
@@ -824,8 +1144,21 @@ class AnmeldelseHistoryDetailViewTest(PermissionsTest, TestCase):
                     }
                 ],
             }
+        elif path == expected_prefix + "prismeresponse":
+            json_content = {
+                "count": 1,
+                "items": [
+                    {
+                        "id": 1,
+                        "afgiftsanmeldelse": 1,
+                        "rec_id": "5637147578",
+                        "tax_notification_number": "44668899",
+                        "invoice_date": "2023-04-07T00:00:00",
+                    }
+                ],
+            }
         else:
-            print(f"Mock got unrecognized path: {path}")
+            print(f"Mock {self.__class__.__name__} got unrecognized path: {path}")
         if json_content:
             content = json.dumps(json_content).encode("utf-8")
         if content:
@@ -875,15 +1208,17 @@ class AnmeldelseHistoryDetailViewTest(PermissionsTest, TestCase):
                             "fragtbrevsnummer": "0",
                             "fragtbrev": "/fragtbreve/1/fragtbrev.txt",
                             "forbindelsesnr": "7331",
+                            "afgangsdato": "2023-10-01",
                         },
                         "postforsendelse": None,
                         "leverandørfaktura_nummer": "1234",
                         "leverandørfaktura": "/leverandørfakturaer/1/leverandørfaktura.txt",
                         "modtager_betaler": False,
                         "indførselstilladelse": "5678",
-                        "afgift_total": None,
+                        "afgift_total": "5000.00",
                         "betalt": False,
                         "dato": "2023-10-06",
+                        "beregnet_faktureringsdato": "2023-10-10",
                         "godkendt": None,
                         "history_username": "admin",
                         "history_date": "2023-10-01T00:00:00.000000+00:00",
@@ -906,6 +1241,8 @@ class AnmeldelseHistoryDetailViewTest(PermissionsTest, TestCase):
                                     subsatser=None,
                                 ),
                                 "antal": 5,
+                                "mængde": "1.00",
+                                "fakturabeløb": "25000.00",
                                 "afgiftsbeløb": "5000.00",
                             }
                         ],
@@ -914,8 +1251,8 @@ class AnmeldelseHistoryDetailViewTest(PermissionsTest, TestCase):
                                 id=1,
                                 tekst="Test tekst",
                                 afgiftsanmeldelse=1,
-                                oprettet=datetime.datetime(
-                                    2023, 10, 1, 0, 0, tzinfo=datetime.timezone.utc
+                                oprettet=datetime(
+                                    2023, 10, 1, 0, 0, tzinfo=timezone.utc
                                 ),
                                 brugernavn=None,
                                 index=0,
@@ -1075,9 +1412,10 @@ class AnmeldelseNotatTest(PermissionsTest, TestCase):
                 "leverandørfaktura": "/leverandørfakturaer/1/leverandørfaktura.txt",
                 "modtager_betaler": False,
                 "indførselstilladelse": "5678",
-                "afgift_total": None,
+                "afgift_total": "5000.00",
                 "betalt": False,
                 "dato": "2023-08-22",
+                "beregnet_faktureringsdato": "2023-10-10",
                 "godkendt": False,
             }
         elif path == expected_prefix + "afgiftsanmeldelse/1/full":
@@ -1117,7 +1455,8 @@ class AnmeldelseNotatTest(PermissionsTest, TestCase):
                     "afgangsdato": "2023-11-03",
                 },
                 "dato": "2023-09-03",
-                "afgift_total": None,
+                "beregnet_faktureringsdato": "2023-10-10",
+                "afgift_total": "5000.00",
                 "fragtforsendelse": None,
                 "godkendt": False,
             }
@@ -1127,6 +1466,8 @@ class AnmeldelseNotatTest(PermissionsTest, TestCase):
                 "forsendelsestype": "S",
                 "fragtbrevsnummer": 1,
                 "fragtbrev": "/leverandørfakturaer/1/leverandørfaktura.txt",
+                "forbindelsesnr": "123",
+                "afgangsdato": "2023-10-01",
             }
 
         elif path == expected_prefix + "varelinje":
@@ -1172,7 +1513,7 @@ class AnmeldelseNotatTest(PermissionsTest, TestCase):
                 ],
             }
         else:
-            print(f"Mock got unrecognized path: {path}")
+            print(f"Mock {self.__class__.__name__} got unrecognized path: {path}")
             traceback.print_stack()
         if json_content:
             content = json.dumps(json_content).encode("utf-8")
@@ -1898,51 +2239,132 @@ class TF10EditMultipleViewTest(PermissionsTest, TestCase):
         json_content = None
         content = None
         status_code = None
-        if path == expected_prefix + "afgiftsanmeldelse":
+        if path == expected_prefix + "afgiftsanmeldelse/full":
             data = {
                 1: {
                     "id": 1,
-                    "afsender": 1,
-                    "modtager": 1,
-                    "fragtforsendelse": 1,
+                    "afsender": {
+                        "id": 20,
+                        "navn": "Testfirma 5",
+                        "adresse": "Testvej 42",
+                        "postnummer": 1234,
+                        "by": "TestBy",
+                        "postbox": "123",
+                        "telefon": "123456",
+                        "cvr": 12345678,
+                    },
+                    "modtager": {
+                        "id": 21,
+                        "navn": "Testfirma 3",
+                        "adresse": "Testvej 42",
+                        "postnummer": 1234,
+                        "by": "TestBy",
+                        "postbox": "123",
+                        "telefon": "123456",
+                        "cvr": 12345678,
+                        "kreditordning": True,
+                    },
+                    "fragtforsendelse": {
+                        "id": 1,
+                        "forsendelsestype": "S",
+                        "fragtbrevsnummer": 1,
+                        "fragtbrev": "/leverandørfakturaer/1/leverandørfaktura.txt",
+                        "forbindelsesnr": "123",
+                        "afgangsdato": "2023-10-01",
+                    },
                     "postforsendelse": None,
                     "leverandørfaktura_nummer": "1234",
                     "leverandørfaktura": "/leverandørfakturaer/1/leverandørfaktura.txt",
                     "modtager_betaler": False,
                     "indførselstilladelse": "5678",
-                    "afgift_total": None,
+                    "afgift_total": "5000.00",
                     "betalt": False,
                     "dato": "2023-08-22",
+                    "beregnet_faktureringsdato": "2023-10-10",
                     "godkendt": False,
                 },
                 2: {
                     "id": 2,
-                    "afsender": 1,
-                    "modtager": 1,
-                    "fragtforsendelse": 2,
+                    "afsender": {
+                        "id": 20,
+                        "navn": "Testfirma 5",
+                        "adresse": "Testvej 42",
+                        "postnummer": 1234,
+                        "by": "TestBy",
+                        "postbox": "123",
+                        "telefon": "123456",
+                        "cvr": 12345678,
+                    },
+                    "modtager": {
+                        "id": 21,
+                        "navn": "Testfirma 3",
+                        "adresse": "Testvej 42",
+                        "postnummer": 1234,
+                        "by": "TestBy",
+                        "postbox": "123",
+                        "telefon": "123456",
+                        "cvr": 12345678,
+                        "kreditordning": True,
+                    },
+                    "fragtforsendelse": {
+                        "id": 2,
+                        "forsendelsestype": "F",
+                        "fragtbrevsnummer": 1,
+                        "fragtbrev": "/leverandørfakturaer/1/leverandørfaktura.txt",
+                        "forbindelsesnr": "123",
+                        "afgangsdato": "2023-10-01",
+                    },
                     "postforsendelse": None,
                     "leverandørfaktura_nummer": "1234",
                     "leverandørfaktura": "/leverandørfakturaer/1/leverandørfaktura.txt",
                     "modtager_betaler": False,
                     "indførselstilladelse": "5678",
-                    "afgift_total": None,
+                    "afgift_total": "5000.00",
                     "betalt": False,
                     "dato": "2023-08-22",
+                    "beregnet_faktureringsdato": "2023-10-10",
                     "godkendt": False,
                 },
                 3: {
                     "id": 3,
-                    "afsender": 1,
-                    "modtager": 1,
-                    "fragtforsendelse": 3,
+                    "afsender": {
+                        "id": 20,
+                        "navn": "Testfirma 5",
+                        "adresse": "Testvej 42",
+                        "postnummer": 1234,
+                        "by": "TestBy",
+                        "postbox": "123",
+                        "telefon": "123456",
+                        "cvr": 12345678,
+                    },
+                    "modtager": {
+                        "id": 21,
+                        "navn": "Testfirma 3",
+                        "adresse": "Testvej 42",
+                        "postnummer": 1234,
+                        "by": "TestBy",
+                        "postbox": "123",
+                        "telefon": "123456",
+                        "cvr": 12345678,
+                        "kreditordning": True,
+                    },
+                    "fragtforsendelse": {
+                        "id": 3,
+                        "forsendelsestype": "F",
+                        "fragtbrevsnummer": 1,
+                        "fragtbrev": "/leverandørfakturaer/1/leverandørfaktura.txt",
+                        "forbindelsesnr": "123",
+                        "afgangsdato": "2023-10-01",
+                    },
                     "postforsendelse": None,
                     "leverandørfaktura_nummer": "1234",
                     "leverandørfaktura": "/leverandørfakturaer/1/leverandørfaktura.txt",
                     "modtager_betaler": False,
                     "indførselstilladelse": "5678",
-                    "afgift_total": None,
+                    "afgift_total": "5000.00",
                     "betalt": False,
                     "dato": "2023-08-22",
+                    "beregnet_faktureringsdato": "2023-10-10",
                     "godkendt": False,
                 },
             }
@@ -1957,6 +2379,8 @@ class TF10EditMultipleViewTest(PermissionsTest, TestCase):
                 "forsendelsestype": "S",
                 "fragtbrevsnummer": 1,
                 "fragtbrev": "/leverandørfakturaer/1/leverandørfaktura.txt",
+                "forbindelsesnr": "123",
+                "afgangsdato": "2023-10-01",
             }
         elif path == expected_prefix + "fragtforsendelse/2":
             json_content = {
@@ -1964,6 +2388,8 @@ class TF10EditMultipleViewTest(PermissionsTest, TestCase):
                 "forsendelsestype": "F",
                 "fragtbrevsnummer": 1,
                 "fragtbrev": "/leverandørfakturaer/1/leverandørfaktura.txt",
+                "forbindelsesnr": "123",
+                "afgangsdato": "2023-10-01",
             }
         elif path == expected_prefix + "fragtforsendelse/3":
             json_content = {
@@ -1971,9 +2397,11 @@ class TF10EditMultipleViewTest(PermissionsTest, TestCase):
                 "forsendelsestype": "F",
                 "fragtbrevsnummer": 1,
                 "fragtbrev": "/leverandørfakturaer/1/leverandørfaktura.txt",
+                "forbindelsesnr": "123",
+                "afgangsdato": "2023-10-01",
             }
         else:
-            print(f"Mock got unrecognized path: {path}")
+            print(f"Mock {self.__class__.__name__} got unrecognized path: {path}")
 
         if json_content:
             content = json.dumps(json_content).encode("utf-8")

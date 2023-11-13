@@ -301,6 +301,7 @@ class PermissionsTest(HasLogin):
             return self.mock_requests_get(url)
 
     @patch.object(requests.sessions.Session, "get")
+    @patch("builtins.open", mock_open(read_data=b"test_data"))
     def test_permissions_admin(self, mock_get, *args):
         self.userdata = {
             "username": "admin",
@@ -315,9 +316,15 @@ class PermissionsTest(HasLogin):
             url = item[0]
             expected_status = item[2] if len(item) > 2 else 200
             response = self.client.get(url)
-            self.assertEquals(expected_status, response.status_code)
+            self.assertEquals(
+                expected_status,
+                response.status_code,
+                f"Expected status {expected_status} "
+                f"for url {url}, got {response.status_code}",
+            )
 
     @patch.object(requests.sessions.Session, "get")
+    @patch("builtins.open", mock_open(read_data=b"test_data"))
     def test_permissions_allowed(self, mock_get, *args):
         self.userdata = {
             "username": "allowed_user",
@@ -334,7 +341,12 @@ class PermissionsTest(HasLogin):
             self.userdata["permissions"] = permissions
             self.login(self.userdata)
             response = self.client.get(url)
-            self.assertEquals(expected_status, response.status_code)
+            self.assertEquals(
+                expected_status,
+                response.status_code,
+                f"Expected status {expected_status} "
+                f"for url {url}, got {response.status_code}",
+            )
 
     @patch.object(requests.sessions.Session, "get")
     def test_permissions_disallowed(self, mock_get, *args):
@@ -354,7 +366,11 @@ class PermissionsTest(HasLogin):
                 self.userdata["permissions"] = reduced_permissions
                 self.login(self.userdata)
                 response = self.client.get(url)
-                self.assertEquals(403, response.status_code)
+                self.assertEquals(
+                    403,
+                    response.status_code,
+                    f"Expected status {403} for url {url}, got {response.status_code}",
+                )
 
 
 class AnmeldelseListViewTest(HasLogin):
@@ -417,8 +433,10 @@ class AnmeldelseListViewTest(HasLogin):
                     "postforsendelsesnummer": "1234",
                     "forsendelsestype": "S",
                     "afgangsdato": "2023-11-03",
+                    "afsenderbykode": "1234",
                 },
                 "dato": "2023-09-03",
+                "beregnet_faktureringsdato": "2023-11-10",
                 "afgift_total": None,
                 "fragtforsendelse": None,
                 "godkendt": True,
@@ -458,8 +476,10 @@ class AnmeldelseListViewTest(HasLogin):
                     "postforsendelsesnummer": "1234",
                     "forsendelsestype": "S",
                     "afgangsdato": "2023-11-03",
+                    "afsenderbykode": "1234",
                 },
                 "dato": "2023-09-02",
+                "beregnet_faktureringsdato": "2023-11-10",
                 "afgift_total": None,
                 "fragtforsendelse": None,
                 "godkendt": False,
@@ -499,8 +519,10 @@ class AnmeldelseListViewTest(HasLogin):
                     "postforsendelsesnummer": "1234",
                     "forsendelsestype": "S",
                     "afgangsdato": "2023-11-03",
+                    "afsenderbykode": "1234",
                 },
                 "dato": "2023-09-01",
+                "beregnet_faktureringsdato": "2023-11-10",
                 "afgift_total": None,
                 "fragtforsendelse": None,
                 "godkendt": None,
@@ -768,7 +790,6 @@ class AnmeldelseListViewTest(HasLogin):
                         "by": "TestBy",
                         "cvr": 12345678,
                         "id": 21,
-                        "indførselstilladelse": 123,
                         "kreditordning": True,
                         "navn": "Testfirma 3",
                         "postbox": "123",
@@ -797,7 +818,6 @@ class AnmeldelseListViewTest(HasLogin):
                         "by": "TestBy",
                         "cvr": 12345678,
                         "id": 23,
-                        "indførselstilladelse": 123,
                         "kreditordning": True,
                         "navn": "Testfirma 1",
                         "postbox": "123",
@@ -826,7 +846,6 @@ class AnmeldelseListViewTest(HasLogin):
                         "by": "TestBy",
                         "cvr": 12345678,
                         "id": 25,
-                        "indførselstilladelse": 123,
                         "kreditordning": True,
                         "navn": "Testfirma 2",
                         "postbox": "123",

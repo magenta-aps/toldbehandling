@@ -9,7 +9,6 @@ from typing import List, Optional, Tuple
 from uuid import uuid4
 
 from aktør.api import AfsenderOut, ModtagerOut
-from anmeldelse.models import Afgiftsanmeldelse, Notat, Varelinje
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.db.models import QuerySet
@@ -23,6 +22,13 @@ from ninja_extra.pagination import paginate
 from ninja_extra.schemas import NinjaPaginationResponseSchema
 from ninja_jwt.authentication import JWTAuth
 from project.util import RestPermission, json_dump
+
+from anmeldelse.models import (  # isort: skip
+    Afgiftsanmeldelse,
+    Notat,
+    PrismeResponse,
+    Varelinje,
+)
 
 
 class AfgiftsanmeldelseIn(ModelSchema):
@@ -90,7 +96,11 @@ class AfgiftsanmeldelseOut(ModelSchema):
 
     @staticmethod
     def resolve_beregnet_faktureringsdato(obj: Afgiftsanmeldelse):
-        return obj.beregnet_faktureringsdato.isoformat()
+        if hasattr(obj, "beregnet_faktureringsdato"):
+            beregnet_faktureringsdato = obj.beregnet_faktureringsdato
+        else:
+            beregnet_faktureringsdato = Afgiftsanmeldelse.beregn_faktureringsdato(obj)
+        return beregnet_faktureringsdato.isoformat()
 
 
 class AfgiftsanmeldelseFullOut(AfgiftsanmeldelseOut):
@@ -528,7 +538,7 @@ class NotatAPI:
             index=AfgiftsanmeldelseAPI.get_historical_count(
                 payload.afgiftsanmeldelse_id
             )
-            - 1
+            - 1,
         )
         return {"id": item.id}
 
@@ -591,3 +601,74 @@ class NotatAPI:
             or item.afgiftsanmeldelse.oprettet_af == user
         ):
             raise PermissionDenied
+
+
+class PrismeResponseIn(ModelSchema):
+    afgiftsanmeldelse_id: int = None
+
+    class Config:
+        model = PrismeResponse
+        model_fields = ["rec_id", "tax_notification_number", "invoice_date"]
+
+
+class PrismeResponseOut(ModelSchema):
+    class Config:
+        model = PrismeResponse
+        model_fields = [
+            "id",
+            "afgiftsanmeldelse",
+            "rec_id",
+            "tax_notification_number",
+            "invoice_date",
+        ]
+
+
+class PrismeResponseFilterSchema(FilterSchema):
+    afgiftsanmeldelse: Optional[int]
+
+
+class PrismeResponsePermission(RestPermission):
+    appname = "anmeldelse"
+    modelname = "prismeresponse"
+
+
+@api_controller(
+    "/prismeresponse",
+    tags=["PrismeResponse"],
+    permissions=[permissions.IsAuthenticated],
+)
+class PrismeResponseAPI:
+    @route.post("", auth=JWTAuth(), url_name="prismeresponse_create")
+    def create_prismeresponse(self, payload: PrismeResponseIn):
+        item = PrismeResponse.objects.create(
+            **payload.dict(),
+        )
+        return {"id": item.id}
+
+    @route.get(
+        "/{id}",
+        response=PrismeResponseOut,
+        auth=JWTAuth(),
+        url_name="prismeresponse_get",
+    )
+    def get_prismeresponse(self, id: int):
+        item = get_object_or_404(PrismeResponse, id=id)
+        return item
+
+    @route.get(
+        "",
+        response=NinjaPaginationResponseSchema[PrismeResponseOut],
+        auth=JWTAuth(),
+        url_name="prismeresponse_list",
+    )
+    @paginate()  # https://eadwincode.github.io/django-ninja-extra/tutorial/pagination/
+    def list_prismeresponse(
+        self,
+        filters: PrismeResponseFilterSchema = Query(...),
+    ):
+        # https://django-ninja.rest-framework.com/guides/input/filtering/
+        # Inkluderer evt. filtrering på anmeldelse-id
+        qs = PrismeResponse.objects.filter(filters.get_filter_expression()).order_by(
+            "invoice_date"
+        )
+        return list(qs)

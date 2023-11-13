@@ -10,15 +10,17 @@ RUN mkdir /app && \
 groupadd -g 75130 -r toldbehandling && \
 groupadd -g 75100 -r certificate_exporter && \
 useradd -u 75130 --no-log-init -r -g toldbehandling -G certificate_exporter toldbehandling
+
+# hadolint ignore=DL3008
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends gettext python3-distutils libxmlsec1-dev xmlsec1 && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
 COPY admin/requirements.txt /app/requirements.txt
 # Include & install told-common package
 COPY --chown=toldbehandling:toldbehandling ./told-common /app/told-common
 RUN pushd /app/told-common && pip wheel -w dist . && popd || exit
 RUN pip install --no-cache-dir -r /app/requirements.txt
-# hadolint ignore=DL3008
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends gettext python3-distutils && \
-    apt-get clean && rm -rf /var/lib/apt/lists/*
 
 USER toldbehandling
 COPY ./docker/entrypoint_admin.sh /entrypoint.sh

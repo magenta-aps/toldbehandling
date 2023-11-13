@@ -6,13 +6,18 @@ import os
 from typing import Union
 from urllib import parse
 
+from django.core.files import File
 from django.template.defaultfilters import register
 from django.utils.translation import gettext_lazy as _
 
 
 @register.filter
-def file_basename(item: str) -> str:
-    return os.path.basename(item)
+def file_basename(item: Union[str, File]) -> str:
+    if isinstance(item, File):
+        item = item.name
+    if isinstance(item, str):
+        return unquote(os.path.basename(item))
+    return ""
 
 
 @register.filter

@@ -7,7 +7,7 @@ from datetime import date, timedelta
 from decimal import Decimal
 
 from aktør.models import Afsender, Modtager
-from anmeldelse.models import Afgiftsanmeldelse, Varelinje
+from anmeldelse.models import Afgiftsanmeldelse, PrismeResponse, Varelinje
 from django.core.files.base import ContentFile
 from django.core.management.base import BaseCommand
 from forsendelse.models import Fragtforsendelse, Postforsendelse
@@ -86,3 +86,11 @@ class Command(BaseCommand):
                 antal=random.randint(1, 400),
                 fakturabeløb=Decimal(random.randint(400, 40000)),
             )
+            if anmeldelse.godkendt:
+                if random.choice([False, True]):
+                    PrismeResponse.objects.create(
+                        afgiftsanmeldelse=anmeldelse,
+                        rec_id=random.randint(1000000000, 9999999999),
+                        tax_notification_number=random.randint(10000000, 99999999),
+                        invoice_date=date.today(),
+                    )

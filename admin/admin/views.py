@@ -6,9 +6,8 @@ import csv
 from datetime import date, datetime
 from functools import cached_property
 from typing import Any, Dict, Iterable, List, Optional, Set, Union
-from urllib.parse import unquote
 
-from django.core.exceptions import ValidationError
+from django.contrib import messages
 from django.shortcuts import redirect
 from django.template import loader
 from django.urls import reverse, reverse_lazy
@@ -17,10 +16,10 @@ from django.views.generic import FormView, TemplateView
 from openpyxl import Workbook
 from requests import HTTPError
 from told_common import views as common_views
-from told_common.data import Afgiftstabel, Vareafgiftssats
 from told_common.util import filter_dict_values
 
 from admin import forms
+from admin.clients.prisme import PrismeException, send_afgiftsanmeldelse
 from admin.spreadsheet import VareafgiftssatsSpreadsheetUtil
 
 from django.http import (  # isort: skip
@@ -28,6 +27,12 @@ from django.http import (  # isort: skip
     HttpResponse,
     HttpResponseBadRequest,
     JsonResponse,
+)
+from told_common.data import (  # isort: skip
+    Afgiftstabel,
+    Forsendelsestype,
+    Vareafgiftssats,
+    PrismeResponse,
 )
 from told_common.view_mixins import (  # isort: skip
     GetFormView,
@@ -66,36 +71,8 @@ class IndexView(PermissionsRequiredMixin, HasRestClientMixin, TemplateView):
 
 
 class TF10BaseView(HasRestClientMixin):
-    def get_data(self, api, id) -> Union[dict, None]:
-        # Filfelter som indeholder en sti der er urlquotet af Django Ninja
-        unquote_keys = (
-            ("afgiftsanmeldelse", "leverandørfaktura"),
-            ("fragtforsendelse", "fragtbrev"),
-        )
-        data = self.rest_client.get(f"{api}/{id}")
-        for key_api, key_field in unquote_keys:
-            if api == key_api and data.get(key_field, None):
-                data[key_field] = unquote(data[key_field])
-        return data
-
-    _satser = {}
-
-    def get_sats(self, sats_id: int) -> Vareafgiftssats:
-        if sats_id not in self._satser:
-            sats = Vareafgiftssats.from_dict(self.get_data("vareafgiftssats", sats_id))
-            sats.populate_subs(self.get_subsatser)
-            self._satser[sats_id] = sats
-        return self._satser[sats_id]
-
     def get_subsatser(self, parent_id: int) -> List[Vareafgiftssats]:
-        response = self.rest_client.get("vareafgiftssats", {"overordnet": parent_id})
-        subsatser = []
-        for subsats in response["items"]:
-            subsats = Vareafgiftssats.from_dict(subsats)
-            if subsats.id not in self._satser:
-                self._satser[subsats.id] = subsats
-            subsatser.append(subsats)
-        return subsatser
+        return self.rest_client.vareafgiftssats.list(overordnet=parent_id)
 
 
 class TF10View(PermissionsRequiredMixin, TF10BaseView, FormView):
@@ -113,7 +90,7 @@ class TF10View(PermissionsRequiredMixin, TF10BaseView, FormView):
     prisme_permissions = ("anmeldelse.prisme_afgiftsanmeldelse",)
 
     template_name = "admin/blanket/tf10/view.html"
-    form_class = forms.TF10GodkendForm
+    form_class = forms.TF10ViewForm
 
     def get_context_data(self, **kwargs):
         return super().get_context_data(
@@ -133,40 +110,74 @@ class TF10View(PermissionsRequiredMixin, TF10BaseView, FormView):
         )
 
     def form_valid(self, form):
-        # Yderligere tjek for om brugeren må ændre noget.
-        # Vi kan have en situation hvor brugeren må se siden men ikke submitte formularen
-        response = self.check_permissions(self.edit_permissions)
-        if response:
-            return response
-        godkendt = form.cleaned_data["godkendt"]
         anmeldelse_id = self.kwargs["id"]
+        send_til_prisme = form.cleaned_data["send_til_prisme"]
+        godkendt = form.cleaned_data["godkendt"]
         try:
-            self.rest_client.afgiftanmeldelse.set_godkendt(anmeldelse_id, godkendt)
+            if send_til_prisme:
+                # Yderligere tjek for om brugeren må ændre noget.
+                # Vi kan have en situation hvor brugeren må se siden men ikke submitte formularen
+                response = self.check_permissions(self.prisme_permissions)
+                if response:
+                    return response
+                anmeldelse = self.rest_client.afgiftanmeldelse.get(
+                    anmeldelse_id, full=True, include_varelinjer=True
+                )
+                try:
+                    responses = send_afgiftsanmeldelse(anmeldelse)
+                    # Gem data
+                    for response in responses:
+                        self.rest_client.prismeresponse.create(
+                            PrismeResponse(
+                                id=None,
+                                afgiftsanmeldelse=anmeldelse,
+                                rec_id=response.record_id,
+                                tax_notification_number=response.tax_notification_number,
+                                invoice_date=datetime.fromisoformat(
+                                    response.invoice_date
+                                ),
+                            )
+                        )
+                except PrismeException as e:
+                    messages.add_message(
+                        self.request,
+                        messages.ERROR,
+                        f"Besked ikke sendt til Prisme; {e.message}",
+                    )
+
+            elif godkendt is not None:
+                # Yderligere tjek for om brugeren må ændre noget.
+                # Vi kan have en situation hvor brugeren må se siden men ikke submitte formularen
+                response = self.check_permissions(self.edit_permissions)
+                if response:
+                    return response
+                self.rest_client.afgiftanmeldelse.set_godkendt(anmeldelse_id, godkendt)
+
             # Opret notat _efter_ den nye version af anmeldelsen, så vores historik-filtrering fungerer
             notat = form.cleaned_data["notat"]
             if notat:
                 self.rest_client.notat.create({"tekst": notat}, self.kwargs["id"])
-            return redirect(reverse("tf10_view", kwargs={"id": anmeldelse_id}))
+
         except HTTPError as e:
             if e.response.status_code == 404:
                 raise Http404("Afgiftsanmeldelse findes ikke")
             raise
+        return redirect(reverse("tf10_view", kwargs={"id": anmeldelse_id}))
 
     def get_object(self):
+        id = self.kwargs["id"]
         try:
-            anmeldelse = self.get_data("afgiftsanmeldelse", self.kwargs["id"])
+            anmeldelse = self.rest_client.afgiftanmeldelse.get(
+                id,
+                full=True,
+                include_notater=True,
+                include_varelinjer=True,
+                include_prismeresponses=True,
+            )
         except HTTPError as e:
             if e.response.status_code == 404:
                 raise Http404("Afgiftsanmeldelse findes ikke")
             raise
-        for key in ("afsender", "modtager", "fragtforsendelse", "postforsendelse"):
-            if anmeldelse[key] is not None:
-                anmeldelse[key] = self.get_data(key, anmeldelse[key])
-        anmeldelse["varelinjer"] = self.rest_client.varelinje.list(anmeldelse["id"])
-        for varelinje in anmeldelse["varelinjer"]:
-            sats_id = varelinje["vareafgiftssats"]
-            varelinje["vareafgiftssats"] = self.get_sats(sats_id)
-        anmeldelse["notater"] = self.rest_client.notat.list(anmeldelse["id"])
         return anmeldelse
 
 
@@ -240,10 +251,10 @@ class TF10HistoryListView(
         )
 
     def get_items(self, search_data: Dict[str, Any]):
-        self.notater = {
-            item.index: item for item in self.rest_client.notat.list(self.kwargs["id"])
-        }
-        return self.rest_client.get(f"afgiftsanmeldelse/{self.kwargs['id']}/history")
+        id = self.kwargs["id"]
+        self.notater = {item.index: item for item in self.rest_client.notat.list(id)}
+        count, items = self.rest_client.afgiftanmeldelse.list_history(id)
+        return {"count": count, "items": items}
 
     def item_to_json_dict(
         self, item: Dict[str, Any], context: Dict[str, Any], index: int
@@ -264,7 +275,7 @@ class TF10HistoryListView(
             if index in self.notater:
                 return self.notater[index].tekst
             return ""
-        value = item[key]
+        value = getattr(item, key)
         if key == "history_date":
             return (
                 datetime.fromisoformat(value).astimezone().strftime("%Y-%m-%d %H:%M:%S")
@@ -278,24 +289,9 @@ class TF10HistoryDetailView(PermissionsRequiredMixin, TF10BaseView, TemplateView
     template_name = "admin/blanket/tf10/history/view.html"
 
     def get_object(self):
-        anmeldelse = self.rest_client.get(
-            f"afgiftsanmeldelse/{self.kwargs['id']}/history/{self.kwargs['index']}"
+        return self.rest_client.afgiftanmeldelse.get_history_item(
+            self.kwargs["id"], self.kwargs["index"]
         )
-        anmeldelse["varelinjer"] = self.rest_client.get(
-            "varelinje",
-            {
-                "afgiftsanmeldelse": anmeldelse["id"],
-                "afgiftsanmeldelse_history_index": self.kwargs["index"],
-            },
-        )["items"]
-        for varelinje in anmeldelse["varelinjer"]:
-            sats_id = varelinje["vareafgiftssats"]
-            varelinje["vareafgiftssats"] = self.get_sats(sats_id)
-
-        anmeldelse["notater"] = self.rest_client.notat.list(
-            anmeldelse["id"], self.kwargs["index"]
-        )
-        return anmeldelse
 
     def get_context_data(self, **context):
         return super().get_context_data(
@@ -335,29 +331,26 @@ class TF10EditMultipleView(PermissionsRequiredMixin, HasRestClientMixin, FormVie
     @cached_property
     def items(self) -> List[Dict]:
         if self.ids:
-            return self.rest_client.afgiftanmeldelse.get({"id": self.ids})
+            count, items = self.rest_client.afgiftanmeldelse.list(
+                id=self.ids, full=True
+            )
+            return items
         return []
 
     @cached_property
     def fragttyper(self) -> Set[str]:
         fragttyper = set()
         for item in self.items:
-            if item["fragtforsendelse"]:
-                fragtforsendelse = self.rest_client.fragtforsendelse.get(
-                    item["fragtforsendelse"]
-                )
+            if item.fragtforsendelse:
                 fragttyper.add(
                     "skibsfragt"
-                    if fragtforsendelse["forsendelsestype"] == "S"
+                    if item.fragtforsendelse.forsendelsestype == Forsendelsestype.SKIB
                     else "luftfragt"
                 )
-            if item["postforsendelse"]:
-                fragtforsendelse = self.rest_client.postforsendelse.get(
-                    item["postforsendelse"]
-                )
+            if item.postforsendelse:
                 fragttyper.add(
                     "skibspost"
-                    if fragtforsendelse["forsendelsestype"] == "S"
+                    if item.postforsendelse.forsendelsestype == Forsendelsestype.SKIB
                     else "luftpost"
                 )
         return fragttyper
@@ -392,13 +385,13 @@ class TF10EditMultipleView(PermissionsRequiredMixin, HasRestClientMixin, FormVie
                 fragt_update_data["fragttype"] = self.fælles_fragttype
                 for item in self.items:
                     self.rest_client.fragtforsendelse.update(
-                        item["fragtforsendelse"], fragt_update_data
+                        item.fragtforsendelse.id, fragt_update_data
                     )
             if self.fælles_fragttype in ("skibspost", "luftpost"):
                 fragt_update_data["fragttype"] = self.fælles_fragttype
                 for item in self.items:
                     self.rest_client.postforsendelse.update(
-                        item["postforsendelse"], fragt_update_data
+                        item.postforsendelse.id, fragt_update_data
                     )
 
         notat = form.cleaned_data["notat"]
@@ -570,7 +563,7 @@ class AfgiftstabelDetailView(PermissionsRequiredMixin, HasRestClientMixin, FormV
         return afgiftstabel
 
     def get_satser(self):
-        return self.rest_client.vareafgiftssats.list(self.kwargs["id"])
+        return self.rest_client.vareafgiftssats.list(afgiftstabel=self.kwargs["id"])
 
 
 class AfgiftstabelDownloadView(PermissionsRequiredMixin, HasRestClientMixin, View):
@@ -599,13 +592,9 @@ class AfgiftstabelDownloadView(PermissionsRequiredMixin, HasRestClientMixin, Vie
                 f"Ugyldigt format {format}. Gyldige formater: {', '.join(self.valid_formats)}"
             )
 
-        afgiftstabel = self.rest_client.get(f"afgiftstabel/{kwargs['id']}")
-        items = [
-            Vareafgiftssats.from_dict(item)
-            for item in self.rest_client.get(
-                "vareafgiftssats", {"afgiftstabel": kwargs["id"]}
-            )["items"]
-        ]
+        id = kwargs["id"]
+        afgiftstabel = self.rest_client.afgiftstabel.get(id)
+        items = self.rest_client.vareafgiftssats.list(afgiftstabel=id)
 
         items_by_id = {item.id: item for item in items}
         rows = [
@@ -617,13 +606,13 @@ class AfgiftstabelDownloadView(PermissionsRequiredMixin, HasRestClientMixin, Vie
             for item in items
         ]
 
-        if afgiftstabel["kladde"]:
+        if afgiftstabel.kladde:
             filename = f"Afgiftstabel_kladde.{format}"
         else:
             filename = (
                 f"Afgiftstabel_"
-                f"{afgiftstabel['gyldig_fra']}_"
-                f"{afgiftstabel['gyldig_til'] if afgiftstabel['gyldig_til'] else 'altid'}."
+                f"{afgiftstabel.gyldig_fra}_"
+                f"{afgiftstabel.gyldig_til if afgiftstabel.gyldig_til else 'altid'}."
                 f"{format}"
             )
 
