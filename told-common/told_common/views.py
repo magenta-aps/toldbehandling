@@ -16,6 +16,7 @@ from django.views import View
 from django.views.generic import FormView, RedirectView
 from told_common import forms
 from told_common.rest_client import RestClient
+from told_common.util import JSONEncoder
 
 from told_common.view_mixins import (  # isort: skip
     CustomLayoutMixin,
@@ -345,7 +346,8 @@ class ListView(FormView):
                 {
                     "total": total,
                     "items": items,
-                }
+                },
+                encoder=JSONEncoder,
             )
         return self.render_to_response(context)
 
@@ -381,7 +383,9 @@ class TF10ListView(
     list_size = 20
 
     def get_items(self, search_data: Dict[str, Any]):
-        return self.rest_client.get("afgiftsanmeldelse/full", search_data)
+        # return self.rest_client.get("afgiftsanmeldelse/full", search_data)
+        count, items = self.rest_client.afgiftanmeldelse.list(full=True, **search_data)
+        return {"count": count, "items": items}
 
     def get_context_data(self, **context: Dict[str, Any]) -> Dict[str, Any]:
         return super().get_context_data(
@@ -420,7 +424,7 @@ class TF10ListView(
                 {"item": item, **context},
                 self.request,
             )
-        value = item[key]
+        value = getattr(item, key)
         return value
 
     def get_form_kwargs(self) -> Dict[str, Any]:

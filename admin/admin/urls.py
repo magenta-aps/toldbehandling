@@ -81,9 +81,4 @@ urlpatterns = [
         views.TF10EditMultipleView.as_view(),
         name="tf10_edit_multiple",
     ),
-    path(
-        "faktura",
-        TemplateView.as_view(template_name="admin/faktura/form.html"),
-        name="faktura_create",
-    ),
 ]

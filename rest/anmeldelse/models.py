@@ -107,10 +107,17 @@ class Afgiftsanmeldelse(models.Model):
 
     @property
     def beregnet_faktureringsdato(self):
-        forsendelse = self.fragtforsendelse or self.postforsendelse
+        return self.beregn_faktureringsdato(self)
+
+    @staticmethod
+    def beregn_faktureringsdato(afgiftsanmeldelse):
+        # Splittet fordi historisk model ikke har ovenstående property
+        forsendelse = (
+            afgiftsanmeldelse.fragtforsendelse or afgiftsanmeldelse.postforsendelse
+        )
         afgangsdato = forsendelse.afgangsdato
         måned_slut = dato_måned_slut(afgangsdato)
-        postnummer = self.modtager.postnummer
+        postnummer = afgiftsanmeldelse.modtager.postnummer
         try:
             ekstra_dage = Postnummer.objects.get(postnummer=postnummer).dage
         except Postnummer.DoesNotExist:
@@ -188,3 +195,14 @@ class Notat(models.Model):
 
 # Vis alle gældende notater i view
 # Historisk: vis ikke fremtidige notater
+
+
+class PrismeResponse(models.Model):
+    afgiftsanmeldelse = models.ForeignKey(
+        Afgiftsanmeldelse,
+        on_delete=models.CASCADE,
+        null=False,
+    )
+    rec_id = models.BigIntegerField(null=False)
+    tax_notification_number = models.BigIntegerField(null=False)
+    invoice_date = models.DateTimeField(null=False)

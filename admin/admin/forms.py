@@ -16,11 +16,12 @@ from admin.spreadsheet import (  # isort: skip
 )
 
 
-class TF10GodkendForm(BootstrapForm):
+class TF10ViewForm(BootstrapForm):
     godkendt = forms.BooleanField(required=False)
     notat = forms.CharField(
         widget=forms.Textarea(attrs={"placeholder": _("Notat")}), required=False
     )
+    send_til_prisme = forms.BooleanField(required=False)
 
 
 class TF10UpdateForm(TF10Form):
@@ -123,3 +124,7 @@ class AfgiftstabelCreateForm(BootstrapForm):
             raise ValidationError(e)
         self.parsed_satser = satser
         return data
+
+
+class TF10PrismeSendForm(forms.Form):
+    afgiftsanmeldelse = forms.IntegerField(widget=forms.HiddenInput())

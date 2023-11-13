@@ -12,6 +12,7 @@ from functools import cached_property
 from typing import Callable, List, Optional, Union
 
 from dataclasses_json import config, dataclass_json
+from django.core.files import File
 from django.template.defaultfilters import floatformat
 from django.utils.translation import gettext_lazy as _
 from marshmallow import fields
@@ -194,3 +195,112 @@ class Notat:
         default=None,
     )
     brugernavn: str = None
+
+
+@dataclass_json
+@dataclass
+class Aktør:
+    id: int
+    navn: str
+    adresse: str
+    postnummer: int
+    by: str
+    postbox: Optional[str]
+    telefon: str
+    cvr: Optional[int]
+
+
+@dataclass_json
+@dataclass
+class Afsender(Aktør):
+    pass
+
+
+@dataclass_json
+@dataclass
+class Modtager(Aktør):
+    kreditordning: bool
+
+
+class Forsendelsestype(Enum):
+    SKIB = "S"
+    FLY = "F"
+
+
+@dataclass_json
+@dataclass
+class PostForsendelse:
+    id: int
+    forsendelsestype: Forsendelsestype
+    postforsendelsesnummer: str
+    afsenderbykode: str
+    afgangsdato: date
+
+
+@dataclass_json
+@dataclass
+class FragtForsendelse:
+    id: int
+    forsendelsestype: Forsendelsestype
+    fragtbrevsnummer: str
+    fragtbrev: File
+    forbindelsesnr: str
+    afgangsdato: date
+
+
+@dataclass_json
+@dataclass
+class Varelinje:
+    id: int
+    afgiftsanmeldelse: int
+    vareafgiftssats: int
+    mængde: Decimal
+    antal: int
+    fakturabeløb: Decimal
+    afgiftsbeløb: Decimal
+
+
+@dataclass_json
+@dataclass
+class Afgiftsanmeldelse:
+    id: int
+    afsender: Union[int, Afsender]
+    modtager: Union[int, Modtager]
+    fragtforsendelse: Union[int, FragtForsendelse, None]
+    postforsendelse: Union[int, PostForsendelse, None]
+    leverandørfaktura_nummer: str
+    leverandørfaktura: File
+    modtager_betaler: bool
+    indførselstilladelse: str
+    afgift_total: Decimal
+    betalt: bool
+    dato: date
+    godkendt: bool
+    varelinjer: List[Varelinje]
+    beregnet_faktureringsdato: date
+    notater: Optional[List[Notat]]
+    prismeresponses: Optional[List[PrismeResponse]]
+
+
+@dataclass_json
+@dataclass
+class HistoricAfgiftsanmeldelse(Afgiftsanmeldelse):
+    history_username: Optional[str]
+    history_date: fields.DateTime(format="iso")  # noqa
+
+
+@dataclass_json
+@dataclass
+class PrismeResponse:
+    id: Optional[int]
+    afgiftsanmeldelse: Union[int, Afgiftsanmeldelse]
+    invoice_date: datetime = field(
+        metadata=config(
+            encoder=encode_optional_isoformat,
+            decoder=datetime.fromisoformat,
+            mm_field=fields.DateTime(format="iso"),
+        ),
+        default=None,
+    )
+    rec_id: int = None
+    tax_notification_number: int = None

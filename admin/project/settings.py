@@ -138,3 +138,17 @@ REST_DOMAIN = os.environ["REST_DOMAIN"]
 NINJA_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(seconds=20),
 }
+
+PRISME = {
+    "wsdl_file": os.environ.get("PRISME_WSDL", ""),
+    "auth": {
+        "basic": {
+            "username": os.environ.get("PRISME_USERNAME", ""),
+            "domain": os.environ.get("PRISME_DOMAIN", ""),
+            "password": os.environ.get("PRISME_PASSWORD", ""),
+        }
+    },
+    "area": os.environ.get("PRISME_AREA", ""),
+}
+if "PRISME_SOCKS_PROXY" in os.environ:
+    PRISME["proxy"] = {"socks": os.environ["PRISME_SOCKS_PROXY"]}

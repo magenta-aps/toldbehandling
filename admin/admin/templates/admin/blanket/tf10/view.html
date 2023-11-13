@@ -16,6 +16,13 @@
         {% else %}
         <span class="badge bg-secondary">Ny</span>
         {% endif %}
+
+        {% if object.prismeresponses %}
+        <span class="badge bg-success">Sendt til Prisme</span>
+        {% else %}
+        <span class="badge bg-secondary">Ikke sendt til Prisme</span>
+        {% endif %}
+
         <h4>For indførsel af afgiftspligtige varer i Grønland</h4>
 
         <div class="row">
@@ -197,18 +204,18 @@
                         <label>Forsendelsesmåde:</label>
                     </div>
                     <div class="col-8">
-                        {% if object.fragtforsendelse.forsendelsestype == "S" %}
+                        {% if object.fragtforsendelse.forsendelsestype.name == "SKIB" %}
                         Skibsfragt
-                        {% elif object.fragtforsendelse.forsendelsestype == "F" %}
+                        {% elif object.fragtforsendelse.forsendelsestype.name == "FLY" %}
                         Luftfragt
-                        {% elif object.postforsendelse.forsendelsestype == "S" %}
+                        {% elif object.postforsendelse.forsendelsestype.name == "SKIB" %}
                         Skibspost
-                        {% elif object.postforsendelse.forsendelsestype == "F" %}
+                        {% elif object.postforsendelse.forsendelsestype.name == "FLY" %}
                         Luftpost
                         {% endif %}
                     </div>
                 </div>
-                {% if object.fragtforsendelse.forsendelsestype == "F" %}
+                {% if object.fragtforsendelse.forsendelsestype.name == "FLY" %}
                 <div class="row">
                     <div class="col-4">
                         <label>Betales af:</label>
@@ -391,8 +398,17 @@
                 {% endif %}
 
                 {% if object.godkendt is True and can_send_prisme %}
-                <a href="{% url 'faktura_create' %}" class="btn btn-primary">Send til Prisme</a>
+                    {% if object.prismeresponses %}
+                    <button type="button" class="btn btn-success disabled">
+                        Send til Prisme
+                    </button>
+                    {% else %}
+                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#prisme_modal">
+                        Send til Prisme
+                    </button>
+                    {% endif %}
                 {% endif %}
+
                 {% if can_view_history %}
                     <a href="{% url 'tf10_history' id=object.id %}" class="btn btn-primary">Historik</a>
                 {% endif %}
@@ -437,6 +453,51 @@
             </div>
         </div>
     </div>
+
+    <div class="modal" id="prisme_modal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Send afgiftsanmeldelse til Prisme</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Er du sikker på at du vil sende afgiftsanmeldelsen til Prisme?</p>
+                    {{form.notat}}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Nej</button>
+                    <button type="submit" name="{{form.send_til_prisme.name}}" value="true" class="btn btn-success">Ja</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if messages %}
+    <div class="modal" id="message_modal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Returstatus</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    {% for message in messages %}
+                    {{ message|linebreaks }}
+                    {% endfor %}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        const modal = new bootstrap.Modal('#message_modal', {});
+        modal.show();
+    </script>
+
+    {% endif %}
 
 </form>
 
