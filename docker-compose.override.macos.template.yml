@@ -1,0 +1,48 @@
+# Docker compose override file for running the application locally on MacOS
+# 
+# DESCRIPTION:
+# The reason for MacOS to have its own override template file, is that macos runs docker in a VM.
+# This means that services are unable to run on "network_mode: host" and must instead use "network_mode: bridge"
+# Because we use the bridge network, ports must also be exposed to the host machine, so we can access the services
+# on "localhost:8000" etc. in our local browser.
+# It is now IMPORTANT to remember our "localhost" is not the dockers "localhost", since it runs in a VM.
+# Because of this, we need to change "localhost" to "host.docker.internal" in our services, in order for them
+# to communicate with each other.
+
+services:
+  toldbehandling-rest:
+    network_mode: "bridge"
+    ports:
+      - "7000:7000"
+    environment:
+      - TEST=false
+      - POSTGRES_HOST=host.docker.internal
+
+  toldbehandling-ui:
+    network_mode: "bridge"
+    ports:
+      - "8000:8000"
+    environment:
+      - TEST=false
+      - REST_DOMAIN=http://host.docker.internal:7000
+      - SAML_IDP_ENTITY_ID=http://host.docker.internal:8080/simplesaml/saml2/idp/metadata.php
+      - SAML_IDP_LOGIN_URI=http://host.docker.internal:8080/simplesaml/saml2/idp/SSOService.php
+      - SAML_IDP_LOGOUT_URI=http://host.docker.internal:8080/simplesaml/saml2/idp/SingleLogoutService.php
+      - SAML_IDP_METADATA=http://host.docker.internal:8080/simplesaml/saml2/idp/metadata.php
+
+  toldbehandling-admin:
+    network_mode: "bridge"
+    ports:
+      - "8001:8001"
+    environment:
+      - TEST=true
+
+  toldbehandling-db:
+    network_mode: "bridge"
+    ports:
+      - "5432:5432"
+  
+  toldbehandling-test-idp:
+    network_mode: "bridge"
+    ports:
+      - "8080:8080"
