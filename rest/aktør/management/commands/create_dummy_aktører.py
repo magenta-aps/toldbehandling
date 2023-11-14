@@ -60,8 +60,8 @@ class Command(BaseCommand):
                     postnummer = postnummer_object.postnummer
                     by = postnummer_object.navn
                 else:
-                    postnummer = (random.randint(1000, 9999),)
-                    by = (random_char(5) + "by",)
+                    postnummer = random.randint(1000, 9999)
+                    by = random_char(5) + "by"
 
                 Modtager.objects.create(
                     navn=company_name,

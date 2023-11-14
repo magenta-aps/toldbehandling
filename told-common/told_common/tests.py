@@ -237,7 +237,7 @@ class LoginTest:
         self.assertEquals(response.status_code, 302)
         self.assertEquals(
             response.headers["Location"],
-            "/login?back=" + quote_plus(self.restricted_url),
+            "/admin/login?back=" + quote_plus(self.restricted_url),
         )
         mock_get.return_value = self.create_response(500, "")
         response = self.client.get(self.restricted_url)

@@ -264,7 +264,7 @@ class TestLogin(TestCase):
         self.client.cookies[session_cookie] = session.session_key
         cookie_data = {
             "max-age": None,
-            "path": "/",
+            "path": "/admin/",
             "domain": settings.SESSION_COOKIE_DOMAIN,
             "secure": settings.SESSION_COOKIE_SECURE or None,
             "expires": None,
@@ -275,7 +275,7 @@ class TestLogin(TestCase):
         self.assertEquals(response.status_code, 302)
         self.assertEquals(
             response.headers["Location"],
-            "/login?back=" + quote_plus(reverse("index")),
+            "/admin/login?back=" + quote_plus(reverse("index")),
         )
 
 

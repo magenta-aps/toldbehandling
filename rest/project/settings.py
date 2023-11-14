@@ -13,7 +13,7 @@ https://docs.djangoproject.com/en/4.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
-
+import json
 import os
 from pathlib import Path
 
@@ -26,7 +26,7 @@ SECRET_KEY = os.environ["DJANGO_SECRET_KEY"]
 
 DEBUG = bool(strtobool(os.environ.get("DJANGO_DEBUG", "False")))
 
-ALLOWED_HOSTS = ["toldbehandling-rest", "localhost"]
+ALLOWED_HOSTS = json.loads(os.environ.get("ALLOWED_HOSTS", "[]"))
 
 
 # Application definition
