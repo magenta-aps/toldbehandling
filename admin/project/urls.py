@@ -7,7 +7,7 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.urls import include, path
 
 urlpatterns = [
-    path("", include("admin.urls")),
+    path("admin/", include("admin.urls")),
 ]
 
 if settings.DEBUG:

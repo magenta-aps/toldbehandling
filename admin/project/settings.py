@@ -29,6 +29,8 @@ DEBUG = bool(strtobool(os.environ.get("DJANGO_DEBUG", "False")))
 
 ALLOWED_HOSTS = ["*"]
 
+if os.environ.get("HOST_DOMAIN", False):
+    CSRF_TRUSTED_ORIGINS = [os.environ["HOST_DOMAIN"]]
 
 # Application definition
 
