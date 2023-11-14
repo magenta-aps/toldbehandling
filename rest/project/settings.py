@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     "ninja_extra",
     "ninja_jwt",
     "simple_history",
+    "betaling",
 ]
 
 MIDDLEWARE = [
@@ -147,4 +148,14 @@ DATA_UPLOAD_MAX_MEMORY_SIZE = 20 * 1024 * 1024
 
 GRAPH_MODELS = {
     "app_labels": ["aktør", "anmeldelse", "forsendelse", "sats"],
+}
+
+# Django payments
+# https://django-payments.readthedocs.io/en/v2.0.0/install.html
+
+PAYMENT_HOST = 'localhost:7000'
+PAYMENT_USES_SSL = False
+PAYMENT_MODEL = 'betaling.Payment'
+PAYMENT_VARIANTS = {
+    'default': ('payments.dummy.DummyProvider', {})
 }

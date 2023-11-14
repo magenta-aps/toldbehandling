@@ -10,3 +10,4 @@ django-ninja-jwt==5.2.5
 orjson==3.9.1
 six==1.16.0
 django-simple-history==3.4.0
+django-payments==2.0.0
