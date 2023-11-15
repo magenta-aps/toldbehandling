@@ -7,7 +7,6 @@ from typing import Iterable
 
 from payments import PurchasedItem
 from payments.models import BasePayment
-
 from project import settings as project_settings
 
 

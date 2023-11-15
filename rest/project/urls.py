@@ -9,7 +9,8 @@ from django.urls import include, path
 from project.api import api
 
 urlpatterns = [
-    path("admin/", admin.site.urls), path("api/", api.urls),
+    path("admin/", admin.site.urls),
+    path("api/", api.urls),
     path("payments/", include("betaling.urls")),
 ]
 

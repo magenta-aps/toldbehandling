@@ -153,9 +153,7 @@ GRAPH_MODELS = {
 # Django payments
 # https://django-payments.readthedocs.io/en/v2.0.0/install.html
 
-PAYMENT_HOST = 'localhost:7000'
+PAYMENT_HOST = "localhost:7000"
 PAYMENT_USES_SSL = False
-PAYMENT_MODEL = 'betaling.Payment'
-PAYMENT_VARIANTS = {
-    'default': ('payments.dummy.DummyProvider', {})
-}
+PAYMENT_MODEL = "betaling.Payment"
+PAYMENT_VARIANTS = {"default": ("payments.dummy.DummyProvider", {})}

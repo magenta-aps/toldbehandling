@@ -2,10 +2,8 @@
 #
 # SPDX-License-Identifier: MPL-2.0
 
-from django.urls import include, path
-
 from betaling import views
-
+from django.urls import include, path
 
 urlpatterns = [
     path("", include("payments.urls")),
