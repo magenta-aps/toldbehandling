@@ -1,10 +1,11 @@
 # SPDX-FileCopyrightText: 2023 Magenta ApS <info@magenta.dk>
 #
 # SPDX-License-Identifier: MPL-2.0
-
+from datetime import date
 from decimal import Decimal
 from typing import Optional
 
+from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from ninja import FilterSchema, ModelSchema, Query
 from ninja_extra import api_controller, permissions, route
@@ -44,6 +45,26 @@ class AfgiftstabelFilterSchema(FilterSchema):
     gyldig_til__gte: Optional[str]
     gyldig_til__lte: Optional[str]
     kladde: Optional[bool]
+
+    def filter_gyldig_fra__lt(self, value: str) -> Q:
+        if value is None:
+            return Q()
+        return Q(gyldig_fra__lt=date.fromisoformat(value)) | Q(gyldig_fra__isnull=True)
+
+    def filter_gyldig_fra__lte(self, value: str) -> Q:
+        if value is None:
+            return Q()
+        return Q(gyldig_fra__lte=date.fromisoformat(value)) | Q(gyldig_fra__isnull=True)
+
+    def filter_gyldig_til__gt(self, value: str) -> Q:
+        if value is None:
+            return Q()
+        return Q(gyldig_til__gt=date.fromisoformat(value)) | Q(gyldig_til__isnull=True)
+
+    def filter_gyldig_til__gte(self, value: str) -> Q:
+        if value is None:
+            return Q()
+        return Q(gyldig_til__gte=date.fromisoformat(value)) | Q(gyldig_til__isnull=True)
 
 
 class AfgiftstabelPermission(RestPermission):

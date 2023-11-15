@@ -4,6 +4,7 @@
 
 from __future__ import annotations
 
+import dataclasses
 from dataclasses import dataclass, field
 from datetime import date, datetime
 from decimal import Context, Decimal
@@ -38,9 +39,15 @@ def format_int(decimal: Union[Decimal, str]) -> int:
     return int(str(decimal).split(".")[0])
 
 
+class ToldDataClass:
+    def items(self):
+        for itemfield in dataclasses.fields(self):
+            yield itemfield.name, getattr(self, itemfield.name)
+
+
 @dataclass_json
 @dataclass
-class Vareafgiftssats:
+class Vareafgiftssats(ToldDataClass):
     class Enhed(Enum):
         SAMMENSAT = "sam"
         LITER = "l"
@@ -157,7 +164,7 @@ def encode_optional_isoformat(d):
 
 @dataclass_json
 @dataclass
-class Afgiftstabel:
+class Afgiftstabel(ToldDataClass):
     id: int
     kladde: bool
     gyldig_fra: Optional[date] = field(
@@ -181,7 +188,7 @@ class Afgiftstabel:
 
 @dataclass_json
 @dataclass
-class Notat:
+class Notat(ToldDataClass):
     id: int
     tekst: str
     afgiftsanmeldelse: int
@@ -199,7 +206,7 @@ class Notat:
 
 @dataclass_json
 @dataclass
-class Aktør:
+class Aktør(ToldDataClass):
     id: int
     navn: str
     adresse: str
@@ -229,28 +236,40 @@ class Forsendelsestype(Enum):
 
 @dataclass_json
 @dataclass
-class PostForsendelse:
+class PostForsendelse(ToldDataClass):
     id: int
     forsendelsestype: Forsendelsestype
     postforsendelsesnummer: str
     afsenderbykode: str
-    afgangsdato: date
+    afgangsdato: date = field(
+        metadata=config(
+            encoder=date.isoformat,
+            decoder=date.fromisoformat,
+            mm_field=fields.Date(format="iso"),
+        ),
+    )
 
 
 @dataclass_json
 @dataclass
-class FragtForsendelse:
+class FragtForsendelse(ToldDataClass):
     id: int
     forsendelsestype: Forsendelsestype
     fragtbrevsnummer: str
     fragtbrev: File
     forbindelsesnr: str
-    afgangsdato: date
+    afgangsdato: date = field(
+        metadata=config(
+            encoder=date.isoformat,
+            decoder=date.fromisoformat,
+            mm_field=fields.Date(format="iso"),
+        ),
+    )
 
 
 @dataclass_json
 @dataclass
-class Varelinje:
+class Varelinje(ToldDataClass):
     id: int
     afgiftsanmeldelse: int
     vareafgiftssats: int
@@ -262,7 +281,7 @@ class Varelinje:
 
 @dataclass_json
 @dataclass
-class Afgiftsanmeldelse:
+class Afgiftsanmeldelse(ToldDataClass):
     id: int
     afsender: Union[int, Afsender]
     modtager: Union[int, Modtager]
@@ -274,10 +293,22 @@ class Afgiftsanmeldelse:
     indførselstilladelse: str
     afgift_total: Decimal
     betalt: bool
-    dato: date
+    dato: date = field(
+        metadata=config(
+            encoder=date.isoformat,
+            decoder=date.fromisoformat,
+            mm_field=fields.Date(format="iso"),
+        ),
+    )
     godkendt: bool
     varelinjer: List[Varelinje]
-    beregnet_faktureringsdato: date
+    beregnet_faktureringsdato: date = field(
+        metadata=config(
+            encoder=date.isoformat,
+            decoder=date.fromisoformat,
+            mm_field=fields.Date(format="iso"),
+        ),
+    )
     notater: Optional[List[Notat]]
     prismeresponses: Optional[List[PrismeResponse]]
 
@@ -286,12 +317,19 @@ class Afgiftsanmeldelse:
 @dataclass
 class HistoricAfgiftsanmeldelse(Afgiftsanmeldelse):
     history_username: Optional[str]
-    history_date: fields.DateTime(format="iso")  # noqa
+    history_date: datetime = field(
+        metadata=config(
+            encoder=datetime.isoformat,
+            decoder=datetime.fromisoformat,
+            mm_field=fields.DateTime(format="iso"),
+        ),
+        default=None,
+    )
 
 
 @dataclass_json
 @dataclass
-class PrismeResponse:
+class PrismeResponse(ToldDataClass):
     id: Optional[int]
     afgiftsanmeldelse: Union[int, Afgiftsanmeldelse]
     invoice_date: datetime = field(

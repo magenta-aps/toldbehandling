@@ -277,9 +277,10 @@ class TF10HistoryListView(
             return ""
         value = getattr(item, key)
         if key == "history_date":
-            return (
-                datetime.fromisoformat(value).astimezone().strftime("%Y-%m-%d %H:%M:%S")
-            )
+            if type(value) is str:
+                value = datetime.fromisoformat(value)
+            return value.astimezone().strftime("%Y-%m-%d %H:%M:%S")
+
         if value is None:
             value = ""
         return value
