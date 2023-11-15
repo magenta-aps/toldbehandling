@@ -1,7 +1,6 @@
 # SPDX-FileCopyrightText: 2023 Magenta ApS <info@magenta.dk>
 #
 # SPDX-License-Identifier: MPL-2.0
-
 import json
 import time
 from base64 import b64encode
@@ -156,7 +155,7 @@ class PostforsendelseRestClient(ModelRestClient):
         return None
 
     @staticmethod
-    def compare(data: dict, existing: dict) -> bool:
+    def compare(data: dict, existing: Union[dict, PostForsendelse]) -> bool:
         # Sammenligner output fra map_postforsendelse (input fra form)
         # med eksisterende data fra REST for at se om de stemmer overens.
         # False: data passer ikke, og der skal foretages en opdatering
@@ -167,7 +166,7 @@ class PostforsendelseRestClient(ModelRestClient):
             "afsenderbykode",
             "afgangsdato",
         ):
-            if data[x] != existing[x]:
+            if data[x] != getattr(existing, x) if hasattr(existing, x) else existing[x]:
                 return False
         return True
 
@@ -178,7 +177,7 @@ class PostforsendelseRestClient(ModelRestClient):
             return response["id"]
 
     def update(
-        self, id: int, data: dict, existing: Optional[dict] = None
+        self, id: int, data: dict, existing: Union[dict, PostForsendelse, None] = None
     ) -> Optional[int]:
         mapped = self.map(data)
         if mapped is None:
@@ -214,7 +213,7 @@ class FragtforsendelseRestClient(ModelRestClient):
         return None
 
     @staticmethod
-    def compare(data: dict, existing: dict) -> bool:
+    def compare(data: dict, existing: Union[dict, FragtForsendelse]) -> bool:
         # Sammenligner output fra map_fragtforsendelse (input fra form)
         # med eksisterende data fra REST for at se om de stemmer overens.
         # False: data passer ikke, og der skal foretages en opdatering
@@ -225,7 +224,7 @@ class FragtforsendelseRestClient(ModelRestClient):
             "forbindelsesnr",
             "afgangsdato",
         ):
-            if data[x] != existing[x]:
+            if data[x] != getattr(existing, x) if hasattr(existing, x) else existing[x]:
                 return False
         if data.get("fragtbrev", None) is not None:
             return False
@@ -242,7 +241,7 @@ class FragtforsendelseRestClient(ModelRestClient):
         id,
         data: dict,
         file: Optional[UploadedFile] = None,
-        existing: Optional[dict] = None,
+        existing: Union[dict, FragtForsendelse, None] = None,
     ) -> None:
         mapped = self.map(data, file)
         if mapped is None:
@@ -774,11 +773,19 @@ class RestClient:
 
     @cached_property
     def varesatser(self) -> Dict[int, dict]:
-        today = date.today().isoformat()
+        return self.varesatser_fra(date.today())
+
+    def varesatser_fra(self, at: date) -> Dict[int, dict]:
+        datestring = at.isoformat()
         afgiftstabeller = self.get(
             "afgiftstabel",
-            {"gyldig_fra__lte": today, "gyldig_til__gte": today, "kladde": False},
+            {
+                "gyldig_fra__lte": datestring,
+                "gyldig_til__gte": datestring,
+                "kladde": False,
+            },
         )
+        # Det bør ikke kunne lade sig gøre med mere end 1
         if afgiftstabeller["count"] == 1:
             afgiftstabel = afgiftstabeller["items"][0]
             return self.get_all_items(

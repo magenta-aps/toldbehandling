@@ -170,7 +170,7 @@
             </td>
             {% endif %}
             <td>{{item.id}}</td>
-            <td>{{item.dato}}</td>
+            <td>{{item.dato|date:"Y-m-d"}}</td>
             <td>{{item.afsender.navn}}</td>
             <td>{{item.modtager.navn}}</td>
             <td>{{item.godkendt|godkendt}}</td>

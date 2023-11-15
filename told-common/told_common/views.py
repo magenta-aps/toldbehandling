@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2023 Magenta ApS <info@magenta.dk>
 #
 # SPDX-License-Identifier: MPL-2.0
-
+import dataclasses
 import os
 from datetime import date
 from functools import cached_property
@@ -15,6 +15,7 @@ from django.urls import reverse
 from django.views import View
 from django.views.generic import FormView, RedirectView
 from told_common import forms
+from told_common.data import Afgiftsanmeldelse, Forsendelsestype
 from told_common.rest_client import RestClient
 from told_common.util import JSONEncoder
 
@@ -123,12 +124,12 @@ class TF10FormUpdateView(
         )
 
         postforsendelse_id = (
-            self.item["postforsendelse"]["id"] if self.item["postforsendelse"] else None
+            self.item.postforsendelse.id if self.item.postforsendelse else None
         )
         if postforsendelse_id:
             # Håndterer opdatering og sletning af eksisterende
             postforsendelse_id = self.rest_client.postforsendelse.update(
-                postforsendelse_id, form.cleaned_data, self.item["postforsendelse"]
+                postforsendelse_id, form.cleaned_data, self.item.postforsendelse
             )
         else:
             # Håndterer oprettelse af ny
@@ -137,16 +138,14 @@ class TF10FormUpdateView(
             )
 
         fragtforsendelse_id = (
-            self.item["fragtforsendelse"]["id"]
-            if self.item["fragtforsendelse"]
-            else None
+            self.item.fragtforsendelse.id if self.item.fragtforsendelse else None
         )
         if fragtforsendelse_id:
             fragtforsendelse_id = self.rest_client.fragtforsendelse.update(
                 fragtforsendelse_id,
                 form.cleaned_data,
                 self.request.FILES.get("fragtbrev", None),
-                self.item["fragtforsendelse"],
+                self.item.fragtforsendelse,
             )
         else:
             # Håndterer oprettelse af ny
@@ -154,7 +153,7 @@ class TF10FormUpdateView(
                 form.cleaned_data, self.request.FILES.get("fragtbrev", None)
             )
 
-        self.anmeldelse_id = self.item["id"]
+        self.anmeldelse_id = self.item.id
         self.rest_client.afgiftanmeldelse.update(
             self.anmeldelse_id,
             form.cleaned_data,
@@ -178,11 +177,11 @@ class TF10FormUpdateView(
             if not subform.cleaned_data["id"]
         ]
         existing_map = {
-            item["id"]: {
+            item.id: {
                 f"{key}_id" if key == "vareafgiftssats" else key: value
                 for key, value in item.items()
             }
-            for item in self.varelinjer
+            for item in self.item.varelinjer
         }
         for item in new_items:
             self.rest_client.varelinje.create(item, self.anmeldelse_id)
@@ -202,7 +201,7 @@ class TF10FormUpdateView(
         return dict(
             filter(
                 lambda pair: pair[1].get("overordnet", None) is None,
-                self.rest_client.varesatser.items(),
+                self.rest_client.varesatser_fra(self.item.dato).items(),
             )
         )
 
@@ -224,68 +223,62 @@ class TF10FormUpdateView(
             kwargs["form_kwargs"] = {}
         # Will be picked up by TF10VareForm's constructor
         kwargs["form_kwargs"]["varesatser"] = self.toplevel_varesatser
-        kwargs["initial"] = self.varelinjer
+        kwargs["initial"] = [dataclasses.asdict(item) for item in self.item.varelinjer]
         return kwargs
 
     def get_context_data(self, **context: Dict[str, Any]) -> Dict[str, Any]:
         return super().get_context_data(
             **{
                 **context,
-                "varesatser": self.rest_client.varesatser,
+                "varesatser": self.rest_client.varesatser_fra(self.item.dato),
                 "item": self.item,
             }
         )
 
     @cached_property
-    def item(self):
-        return self.rest_client.get(f"afgiftsanmeldelse/{self.kwargs['id']}/full")
-
-    @cached_property
-    def varelinjer(self):
-        response = self.rest_client.get(
-            "varelinje", {"afgiftsanmeldelse": self.kwargs["id"]}
+    def item(self) -> Afgiftsanmeldelse:
+        return self.rest_client.afgiftanmeldelse.get(
+            self.kwargs["id"],
+            full=True,
+            include_varelinjer=True,
+            include_notater=False,
+            include_prismeresponses=False,
         )
-        return [
-            {
-                "id": item["id"],
-                "vareafgiftssats": item["vareafgiftssats"],
-                "mængde": item["mængde"],
-                "antal": item["antal"],
-                "fakturabeløb": item["fakturabeløb"],
-            }
-            for item in response["items"]
-        ]
 
     def get_initial(self):
         initial = {}
         item = self.item
         if item:
             for key in ("afsender", "modtager"):
+                aktør = getattr(item, key)
                 initial.update(
-                    {key + "_" + subkey: item[key][subkey] for subkey in item[key]}
+                    {
+                        key + "_" + field.name: getattr(aktør, field.name)
+                        for field in dataclasses.fields(aktør)
+                    }
                 )
-            initial["leverandørfaktura_nummer"] = item["leverandørfaktura_nummer"]
-            initial["indførselstilladelse"] = item.get("indførselstilladelse", None)
-            fragtforsendelse = item.get("fragtforsendelse", None)
-            postforsendelse = item.get("postforsendelse", None)
+            initial["leverandørfaktura_nummer"] = item.leverandørfaktura_nummer
+            initial["indførselstilladelse"] = item.indførselstilladelse
+            fragtforsendelse = item.fragtforsendelse
+            postforsendelse = item.postforsendelse
             if fragtforsendelse:
                 initial["fragttype"] = (
                     "skibsfragt"
-                    if fragtforsendelse["forsendelsestype"] == "S"
+                    if fragtforsendelse.forsendelsestype == Forsendelsestype.SKIB
                     else "luftfragt"
                 )
-                initial["fragtbrevnr"] = fragtforsendelse["fragtbrevsnummer"]
-                initial["forbindelsesnr"] = fragtforsendelse["forbindelsesnr"]
-                initial["afgangsdato"] = fragtforsendelse["afgangsdato"]
+                initial["fragtbrevnr"] = fragtforsendelse.fragtbrevsnummer
+                initial["forbindelsesnr"] = fragtforsendelse.forbindelsesnr
+                initial["afgangsdato"] = fragtforsendelse.afgangsdato
             elif postforsendelse:
                 initial["fragttype"] = (
                     "skibspost"
-                    if postforsendelse["forsendelsestype"] == "S"
+                    if postforsendelse.forsendelsestype == Forsendelsestype.SKIB
                     else "luftpost"
                 )
-                initial["fragtbrevnr"] = postforsendelse["postforsendelsesnummer"]
-                initial["forbindelsesnr"] = postforsendelse["afsenderbykode"]
-                initial["afgangsdato"] = postforsendelse["afgangsdato"]
+                initial["fragtbrevnr"] = postforsendelse.postforsendelsesnummer
+                initial["forbindelsesnr"] = postforsendelse.afsenderbykode
+                initial["afgangsdato"] = postforsendelse.afgangsdato
         return initial
 
 

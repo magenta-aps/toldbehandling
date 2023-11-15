@@ -500,7 +500,6 @@ class TestGodkend(PermissionsTest, TestCase):
         self.login()
         url = reverse("tf10_view", kwargs={"id": 1})
         mock_get.side_effect = self.mock_requests_get
-        print(url)
         response = self.client.get(url)
         self.assertEquals(response.status_code, 200)
 
