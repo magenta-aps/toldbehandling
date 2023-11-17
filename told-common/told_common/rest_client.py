@@ -111,6 +111,22 @@ class AfsenderRestClient(ModelRestClient):
         resp = self.rest.post("afsender", mapped["data"])
         return resp["id"]
 
+    def update(self, id: int, data: dict) -> int:
+        mapped = {
+            key: data.get("afsender_" + key, None) or data.get(key, None)
+            for key in (
+                "navn",
+                "adresse",
+                "postnummer",
+                "by",
+                "postbox",
+                "telefon",
+                "cvr",
+            )
+        }
+        self.rest.patch(f"afsender/{id}", mapped)
+        return id
+
 
 class ModtagerRestClient(ModelRestClient):
     def get_or_create(self, ident: dict, data: Optional[dict] = None) -> int:
@@ -139,6 +155,22 @@ class ModtagerRestClient(ModelRestClient):
                 return modtager_response["items"][0]["id"]
         resp = self.rest.post("modtager", mapped["data"])
         return resp["id"]
+
+    def update(self, id: int, data: dict) -> int:
+        mapped = {
+            key: data.get("modtager_" + key, None) or data.get(key, None)
+            for key in (
+                "navn",
+                "adresse",
+                "postnummer",
+                "by",
+                "postbox",
+                "telefon",
+                "cvr",
+            )
+        }
+        self.rest.patch(f"modtager/{id}", mapped)
+        return id
 
 
 class PostforsendelseRestClient(ModelRestClient):

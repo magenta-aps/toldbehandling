@@ -15,7 +15,7 @@
         <h1>Afgiftsanmeldelse</h1>
         <div class="row">
             <h4 class="col-11">For indførsel af afgiftspligtige varer i Grønland</h4>
-            <div class="col-1" class="clearfix my-1">
+            <div class="col-1 clearfix my-1">
                 <button type="submit" class="btn btn-success float-end">Gem</button>
             </div>
         </div>
@@ -49,6 +49,41 @@
                         {{form.afsender_navn.errors}}
                     </div>
                 </div>
+
+                <div class="row" id="afsender_adresse_container" >
+                    <div class="col-12">
+                        <div class="alert alert-warning multiple" style="display: none">
+                            <label for="{{form.afsender_existing_id.id_for_label}}">
+                                <span data-multi="cvr">
+                                {% blocktranslate %}
+                                Der er mere end én registreret afsender for det angivne CVR-nummer.
+                                {% endblocktranslate %}
+                                </span>
+                                <span data-multi="navn">
+                                {% blocktranslate %}
+                                Der er mere end én registreret afsender for det angivne navn.
+                                {% endblocktranslate %}
+                                </span>
+                                {% blocktranslate %}
+                                Vælg én fra listen herunder, eller udfyld felterne med nye data.
+                                {% endblocktranslate %}
+                            </label>
+                            <p>
+                                {{form.afsender_existing_id}}
+                            </p>
+                        </div>
+                        <input style="display: none" type="hidden" name="{{form.afsender_existing_id.name}}"/>
+                        <div class="alert alert-warning changed" style="display: none">
+                            <div>
+                                {% blocktranslate %}
+                                Afsenderoplysninger er ændrede i forhold til den afsender der allerede er registreret.
+                                {% endblocktranslate %}
+                            </div>
+                            {{form.afsender_change_existing}}
+                        </div>
+                    </div>
+                </div>
+
                 <div class="row">
                     <div class="col-4">
                         <label for="{{form.afsender_adresse.id_for_label}}">{{form.afsender_adresse.label}}</label>
@@ -116,6 +151,41 @@
                         {{form.modtager_navn.errors}}
                     </div>
                 </div>
+
+                <div class="row" id="modtager_adresse_container" >
+                    <div class="col-12">
+                        <div class="alert alert-warning multiple" style="display: none">
+                            <label for="{{form.modtager_existing_id.id_for_label}}">
+                                <span data-multi="cvr">
+                                {% blocktranslate %}
+                                Der er mere end én registreret modtager for det angivne CVR-nummer.
+                                {% endblocktranslate %}
+                                </span>
+                                <span data-multi="navn">
+                                {% blocktranslate %}
+                                Der er mere end én registreret modtager for det angivne navn.
+                                {% endblocktranslate %}
+                                </span>
+                                {% blocktranslate %}
+                                Vælg en fra listen herunder, eller udfyld felterne med nye data.
+                                {% endblocktranslate %}
+                            </label>
+                            <p>
+                                {{form.modtager_existing_id}}
+                            </p>
+                        </div>
+                        <input style="display: none" type="hidden" name="{{form.modtager_existing_id.name}}"/>
+                        <div class="alert alert-warning changed" style="display: none">
+                            <div>
+                                {% blocktranslate %}
+                                Modtageroplysninger er ændrede i forhold til den modtager der allerede er registreret.
+                                {% endblocktranslate %}
+                            </div>
+                            {{form.modtager_change_existing}}
+                        </div>
+                    </div>
+                </div>
+
                 <div class="row">
                     <div class="col-4">
                         <label for="{{form.modtager_adresse.id_for_label}}">{{form.modtager_adresse.label}}</label>
@@ -170,7 +240,7 @@
                         {{form.indførselstilladelse.errors}}
                     </div>
                 </div>
-        </div>
+            </div>
         </div>
 
         <hr/>
@@ -378,6 +448,13 @@
             },
             "searchfields": ["cvr", "navn"],  // Felter som initierer søgning
             "api": "{% url 'rest' path='afsender' %}",
+            "multi_container": "#afsender_adresse_container",
+            "multi_label": {
+                "cvr": "#afsender_adresse_container [data-multi=cvr]",
+                "navn": "#afsender_adresse_container [data-multi=navn]"
+            },
+            "multi_changed_container": "#afsender_address_changed",
+            "preselected_id": {{afsender_existing_id|default:"null"}},
         },
         {
             "fields": {
@@ -388,10 +465,16 @@
                 "by": $("[name={{form.modtager_by.name}}]"),
                 "postbox": $("[name={{form.modtager_postbox.name}}]"),
                 "telefon": $("[name={{form.modtager_telefon.name}}]"),
-                "indførselstilladelse": $("[name={{form.indførselstilladelse.name}}]"),
             },
             "searchfields": ["cvr", "navn"],
             "api": "{% url 'rest' path='modtager' %}",
+            "multi_container": "#modtager_adresse_container",
+            "multi_label": {
+                "cvr": "#modtager_adresse_container [data-multi=cvr]",
+                "navn": "#modtager_adresse_container [data-multi=navn]"
+            },
+            "multi_changed_container": "#modtager_address_changed",
+            "preselected_id": {{modtager_existing_id|default:"null"}},
         }
     ];
 </script>

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-09-15 09:19+0200\n"
+"POT-Creation-Date: 2023-11-16 12:39+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,3 +17,36 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: ui/templates/ui/error/error.html
+msgid "Tilbage"
+msgstr ""
+
+#: ui/templates/ui/error/error.html ui/templates/ui/layout.html
+msgid "Log ud"
+msgstr ""
+
+#: ui/templates/ui/error/error.html
+msgid "Log ind"
+msgstr ""
+
+#: ui/templates/ui/error/login_repeat.html
+#: ui/templates/ui/error/login_timeout.html
+msgid "Adgang nægtet"
+msgstr ""
+
+#: ui/templates/ui/error/login_repeat.html
+msgid "Det anvendte login er allerede anvendt. Prøv at logge ind igen."
+msgstr ""
+
+#: ui/templates/ui/error/login_timeout.html
+msgid "Det anvendte login er udløbet. Prøv at logge ind igen."
+msgstr ""
+
+#: ui/templates/ui/layout.html
+msgid "Er du sikker på at du vil logge ud?"
+msgstr ""
+
+#: ui/templates/ui/tf10/actions.html
+msgid "Redigér"
+msgstr ""

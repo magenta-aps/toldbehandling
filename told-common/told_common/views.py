@@ -232,6 +232,8 @@ class TF10FormUpdateView(
                 **context,
                 "varesatser": self.rest_client.varesatser_fra(self.item.dato),
                 "item": self.item,
+                "afsender_existing_id": self.item.afsender.id,
+                "modtager_existing_id": self.item.modtager.id,
             }
         )
 
@@ -257,6 +259,7 @@ class TF10FormUpdateView(
                         for field in dataclasses.fields(aktør)
                     }
                 )
+                initial[key + "_change_existing"] = False
             initial["leverandørfaktura_nummer"] = item.leverandørfaktura_nummer
             initial["indførselstilladelse"] = item.indførselstilladelse
             fragtforsendelse = item.fragtforsendelse
