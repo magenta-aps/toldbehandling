@@ -56,8 +56,18 @@ class TF10FormCreateView(
         )
 
     def form_valid(self, form, formset):
-        afsender_id = self.rest_client.afsender.get_or_create(form.cleaned_data)
-        modtager_id = self.rest_client.modtager.get_or_create(form.cleaned_data)
+        if form.cleaned_data["afsender_change_existing"]:
+            afsender_id = self.rest_client.afsender.update(
+                form.cleaned_data["afsender_existing_id"], form.cleaned_data
+            )
+        else:
+            afsender_id = self.rest_client.afsender.get_or_create(form.cleaned_data)
+        if form.cleaned_data["modtager_change_existing"]:
+            modtager_id = self.rest_client.modtager.update(
+                form.cleaned_data["modtager_existing_id"], form.cleaned_data
+            )
+        else:
+            modtager_id = self.rest_client.modtager.get_or_create(form.cleaned_data)
         postforsendelse_id = self.rest_client.postforsendelse.create(form.cleaned_data)
         fragtforsendelse_id = self.rest_client.fragtforsendelse.create(
             form.cleaned_data, self.request.FILES.get("fragtbrev", None)
@@ -91,6 +101,10 @@ class TF10FormCreateView(
         kwargs.update(
             {
                 "varesatser": self.toplevel_varesatser,
+                "initial": {
+                    "afsender_change_existing": False,
+                    "modtager_change_existing": False,
+                },
             }
         )
         return kwargs
@@ -110,13 +124,26 @@ class TF10FormCreateView(
         return kwargs
 
     def get_context_data(self, **context: Dict[str, Any]) -> Dict[str, Any]:
-        return super().get_context_data(
+        context = super().get_context_data(
             **{
                 **context,
                 "varesatser": self.rest_client.varesatser,
                 "extend_template": self.extend_template,
             }
         )
+        form = context["form"]
+        if hasattr(form, "cleaned_data"):
+            context.update(
+                {
+                    "afsender_existing_id": form.cleaned_data.get(
+                        "afsender_existing_id", None
+                    ),
+                    "modtager_existing_id": form.cleaned_data.get(
+                        "modtager_existing_id", None
+                    ),
+                }
+            )
+        return context
 
 
 class TF10ListView(common_views.TF10ListView):

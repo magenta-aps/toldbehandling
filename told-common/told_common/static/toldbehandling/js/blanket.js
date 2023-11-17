@@ -20,67 +20,120 @@ $(function () {
         const aktør = aktører[i];
         const fields = aktør["fields"];
         const api = aktør["api"];
-        const searchfields = aktør["searchfields"];
         const multi_container = $(aktør["multi_container"]);
         const labels = aktør["multi_label"];
         const multi_select = multi_container.find("select");
+        const update_warning = $(aktør["multi_changed_container"]);
+        const preselected_id = aktør["preselected_id"];
         items.push([]);
         lastEdited.push(null);
 
         multi_select.change(function () {
-            const value = $(this).val();
-            if (value === "") {
+            const id = $(this).val();
+            if (id === "") {
                 fillForm(i, {});
             } else {
-                const item = items[i][value];
+                const item = items[i][id];
                 fillForm(i, item);
             }
+            updateChangeWarning();
         });
 
-        const updateChoices = function(fieldName, event) {
+        const updateChoices = function(fieldName, event, callback) {
             const filter = {};
             filter[fieldName] = this.val();
             if (filter[fieldName]) {
                 lastEdited[i] = fieldName;
+                const warning = multi_container.find(".multiple");
+                const hiddenfield = multi_container.find("[type=hidden]");
                 $.ajax({
                     "url": api,
                     "data": filter,
                     "success": function (response_data) {
                         const count = response_data["count"];
+                        const response_items = response_data["items"];
+                        items[i] = {}
+                        for (let item of response_items) {
+                            items[i][item["id"]] = item;
+                        }
                         if (count > 1) {
-                            items[i] = response_data["items"]
                             multi_select.empty();
                             multi_select.append('<option value=""></option>');
-                            for (let j = 0; j < items[i].length; j++) {
-                                let item = items[i][j];
+                            for (let id in items[i]) {
+                                const item = items[i][id];
                                 let text = [
                                     item["navn"],
                                     item["adresse"],
                                     [item["postnummer"], item["by"]].filter((x) => x !== null && x !== undefined).join(" ")
                                 ].filter((x) => x !== null && x !== undefined).join(', ');
-                                multi_select.append('<option value="' + j + '">' + text + '</option>');
+                                multi_select.append('<option value="' + id + '">' + text + '</option>');
                             }
                             for (let label in labels) {
                                 const element = $(labels[label]);
                                 element.toggle(label === fieldName);
                             }
-
-
-                            multi_container.show();
+                            warning.show();
+                            hiddenfield.hide();
                         } else if (count === 1) {
-                            fillForm(i, response_data["items"][0]);
-                            multi_container.hide();
+                            const item = response_items[0];
+                            fillForm(i, item);
+                            hiddenfield.val(item["id"]);
+                            hiddenfield.show();
+                            warning.hide();
                         } else {
-                            multi_container.hide();
+                            warning.hide();
+                            hiddenfield.hide();
+                        }
+                        if (callback) {
+                            callback();
                         }
                     }
                 });
             }
         };
-
-        for (let j = 0; j < aktør["searchfields"].length; j++) {
-            const searchfield = searchfields[j];
+        for (let searchfield of aktør["searchfields"]) {
             $(fields[searchfield]).on("change", updateChoices.bind($(fields[searchfield]), searchfield));
+        }
+
+        const searchfield = aktør["searchfields"][0];
+        updateChoices.call($(fields[searchfield]), searchfield, null, function () {
+            if (preselected_id) {
+                multi_select.val(preselected_id);
+                updateChangeWarning();
+            }
+        });
+        lastEdited[i] = null;
+
+        const updateChangeWarning = function () {
+            const items_count = Object.keys(items[i]).length;
+            let id;
+            if (items_count === 0) {
+                multi_container.find(".changed").hide();
+                return;
+            } else if (items_count === 1) {
+                id = Object.keys(items[i])[0];
+            } else {
+                id = multi_select.val();
+            }
+            let anyChanged = false;
+            if (id !== null) {
+                const existing = items[i][id];
+                if (existing) {
+                    for (let fieldname in aktør["fields"]) {
+                        const newValue = $(aktør["fields"][fieldname]).val();
+                        const oldValue = existing[fieldname] === null ? "" : existing[fieldname].toString();
+                        if (newValue !== oldValue) {
+                            anyChanged = true;
+                            break;
+                        }
+                    }
+                }
+            }
+            multi_container.find(".changed").toggle(anyChanged);
+        };
+        for (let fieldname in aktør["fields"]) {
+            const field = $(aktør["fields"][fieldname]);
+            field.change(updateChangeWarning);
         }
     }
 });

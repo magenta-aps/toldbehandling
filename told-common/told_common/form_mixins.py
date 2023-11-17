@@ -30,13 +30,12 @@ class BootstrapForm(forms.Form):
     def set_field_classes(self, name, field, check_for_errors=False):
         classes = self.split_class(field.widget.attrs.get("class"))
         classes.append("mr-2")
-        # if isinstance(field.widget, (forms.CheckboxInput, forms.RadioSelect)):
-        #    if "not-form-check-input" not in classes:
-        #        classes.append("form-check-input")
-        # else:
-        classes.append("form-control")
-        if isinstance(field.widget, forms.Select):
-            classes.append("form-select")
+        if isinstance(field.widget, (forms.CheckboxInput, forms.RadioSelect)):
+            pass
+        else:
+            classes.append("form-control")
+            if isinstance(field.widget, forms.Select):
+                classes.append("form-select")
 
         if check_for_errors:
             if self.has_error(name) is True:

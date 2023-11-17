@@ -111,6 +111,17 @@ class TF10Form(BootstrapForm):
         required=True,
         label=_("Tlf."),
     )
+    afsender_existing_id = forms.IntegerField(required=False, widget=forms.Select)
+    afsender_change_existing = forms.BooleanField(
+        required=False,
+        widget=forms.RadioSelect(
+            choices=(
+                (False, _("Opret en ny afsender med de indtastede oplysninger")),
+                (True, _("Opdatér den valgte afsender med de indtastede oplysinger")),
+            )
+        ),
+    )
+
     modtager_cvr = ButtonlessIntegerField(
         min_value=10000000,
         max_value=99999999,
@@ -159,6 +170,16 @@ class TF10Form(BootstrapForm):
         required=True,
         label=_("Tlf."),
     )
+    modtager_existing_id = forms.IntegerField(required=False, widget=forms.Select)
+    modtager_change_existing = forms.BooleanField(
+        required=False,
+        widget=forms.RadioSelect(
+            choices=(
+                (False, _("Opret en ny modtager med de indtastede oplysninger")),
+                (True, _("Opdatér den valgte modtager med de indtastede oplysinger")),
+            )
+        ),
+    )
     indførselstilladelse = forms.CharField(
         max_length=12, required=False, label=_("Indførsels­tilladelse nr.")
     )
@@ -187,7 +208,7 @@ class TF10Form(BootstrapForm):
         ),
     )
     forbindelsesnr = forms.CharField(
-        required=False,
+        required=True,
     )
     fragtbrevnr = forms.CharField(
         required=True,
