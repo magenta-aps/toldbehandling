@@ -76,7 +76,10 @@ class Vareafgiftssats(models.Model):
         ordering = ["afgiftsgruppenummer"]
         constraints = (
             models.UniqueConstraint(
-                fields=("afgiftstabel", "vareart"), name="vareart_constraint"
+                fields=("afgiftstabel", "vareart_da"), name="vareart_constraint_da"
+            ),
+            models.UniqueConstraint(
+                fields=("afgiftstabel", "vareart_kl"), name="vareart_constraint_kl"
             ),
         )
 
@@ -103,8 +106,13 @@ class Vareafgiftssats(models.Model):
         Afgiftstabel,
         on_delete=models.CASCADE,
     )
-    vareart = models.CharField(
+    vareart_da = models.CharField(
         max_length=300,
+    )
+    vareart_kl = models.CharField(
+        max_length=300,
+        default="",  # Hvis vi merger migrations, skal disse to linjer fjernes
+        blank=True,
     )
     afgiftsgruppenummer = models.PositiveIntegerField()
     enhed = models.CharField(

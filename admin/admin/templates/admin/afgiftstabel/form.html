@@ -3,6 +3,11 @@
 {% load i18n %}
 {% load l10n %}
 
+{% block extra_headers %}
+<script type="text/javascript" src="{% static 'toldbehandling/js/formfile.js' %}"></script>
+<link rel="stylesheet" type="text/css" href="{% static 'toldbehandling/css/formfile.css' %}"/>
+{% endblock %}
+
 {% block content %}
 
 <div class="mx-5">

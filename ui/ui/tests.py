@@ -156,7 +156,8 @@ class BlanketTest(TestMixin, HasLogin, TestCase):
                         {
                             "id": 1,
                             "afgiftstabel": 1,
-                            "vareart": "Båthorn",
+                            "vareart_da": "Båthorn",
+                            "vareart_kl": "Båthorn",
                             "afgiftsgruppenummer": 1234567,
                             "enhed": "kg",
                             "afgiftssats": "1.00",
@@ -329,7 +330,8 @@ class BlanketTest(TestMixin, HasLogin, TestCase):
             1: {
                 "id": 1,
                 "afgiftstabel": 1,
-                "vareart": "Båthorn",
+                "vareart_da": "Båthorn",
+                "vareart_kl": "Båthorn",
                 "afgiftsgruppenummer": 12345678,
                 "enhed": "kg",
                 "afgiftssats": "1.00",
@@ -337,7 +339,8 @@ class BlanketTest(TestMixin, HasLogin, TestCase):
             2: {
                 "id": 2,
                 "afgiftstabel": 1,
-                "vareart": "Klovnesko",
+                "vareart_da": "Klovnesko",
+                "vareart_kl": "Klovnesko",
                 "afgiftsgruppenummer": 87654321,
                 "enhed": "ant",
                 "afgiftssats": "1.00",

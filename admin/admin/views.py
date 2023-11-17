@@ -575,15 +575,16 @@ class AfgiftstabelDownloadView(PermissionsRequiredMixin, HasRestClientMixin, Vie
     )
     valid_formats = ("xlsx", "csv")
     headers = (
-        "afgiftsgruppenummer",
-        "overordnet",
-        "vareart",
-        "enhed",
-        "afgiftssats",
-        "kræver_indførselstilladelse",
-        "minimumsbeløb",
-        "segment_nedre",
-        "segment_øvre",
+        ("afgiftsgruppenummer", "Afgiftsgruppenummer"),
+        ("overordnet", "Overordnet"),
+        ("vareart_da", "Vareart (da)"),
+        ("vareart_kl", "Vareart (kl)"),
+        ("enhed", "Enhed"),
+        ("afgiftssats", "Afgiftssats"),
+        ("kræver_indførselstilladelse", "Kræver indførselstilladelse"),
+        ("minimumsbeløb", "Minimumsbeløb"),
+        ("segment_nedre", "Segment nedre"),
+        ("segment_øvre", "Segment øvre"),
     )
 
     def get(self, request, *args, **kwargs):
@@ -601,7 +602,9 @@ class AfgiftstabelDownloadView(PermissionsRequiredMixin, HasRestClientMixin, Vie
         rows = [
             list(
                 VareafgiftssatsSpreadsheetUtil.spreadsheet_row(
-                    item, self.headers, lambda id: items_by_id[id]
+                    item,
+                    [header[0] for header in self.headers],
+                    lambda id: items_by_id[id],
                 )
             )
             for item in items
@@ -616,15 +619,11 @@ class AfgiftstabelDownloadView(PermissionsRequiredMixin, HasRestClientMixin, Vie
                 f"{afgiftstabel.gyldig_til if afgiftstabel.gyldig_til else 'altid'}."
                 f"{format}"
             )
-
+        headers_pretty = [header[1] for header in self.headers]
         if format == "xlsx":
-            return self.render_xlsx(self.headers_pretty, rows, filename)
+            return self.render_xlsx(headers_pretty, rows, filename)
         if format == "csv":
-            return self.render_csv(self.headers_pretty, rows, filename)
-
-    @cached_property
-    def headers_pretty(self):
-        return [header.replace("_", " ").capitalize() for header in self.headers]
+            return self.render_csv(headers_pretty, rows, filename)
 
     def render_xlsx(
         self,

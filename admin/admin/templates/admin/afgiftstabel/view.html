@@ -99,7 +99,8 @@
             <thead>
             <tr>
                 <th class="col-1">{% translate "Afgifts­gruppe­nummer" %}</th>
-                <th class="col-5">{% translate "Vareart" %}</th>
+                <th class="col-2">{% translate "Vareart (da)" %}</th>
+                <th class="col-2">{% translate "Vareart (kl)" %}</th>
                 <th class="col-1">{% translate "Enhed" %}</th>
                 <th class="col-1">{% translate "Kræver indførsels­tilladelse" %}</th>
                 <th class="col-1">{% translate "Minimumsbeløb" %}</th>
@@ -116,7 +117,8 @@
                 <td rowspan="{{vareafgiftssats.subsatser|length|add:1}}">
                     {% localize off %}{{vareafgiftssats.afgiftsgruppenummer}}{% endlocalize %}
                 </td>
-                <td>{{vareafgiftssats.vareart}}</td>
+                <td>{{vareafgiftssats.vareart_da}}</td>
+                <td>{{vareafgiftssats.vareart_kl}}</td>
                 <td>{{vareafgiftssats.enhed|enhedsnavn}}</td>
                 <td>{{vareafgiftssats.kræver_indførselstilladelse|yesno}}</td>
                 <td colspan="4"></td>
@@ -124,7 +126,8 @@
                 <td>
                     {% localize off %}{{vareafgiftssats.afgiftsgruppenummer}}{% endlocalize %}
                 </td>
-                <td>{{vareafgiftssats.vareart}}</td>
+                <td>{{vareafgiftssats.vareart_da}}</td>
+                <td>{{vareafgiftssats.vareart_kl}}</td>
                 <td>{{vareafgiftssats.enhed|enhedsnavn}}</td>
                 <td></td>
                 <td>{{vareafgiftssats.minimumsbeløb|default_if_none:""}}</td>
@@ -135,7 +138,8 @@
             </tr>
             {% for subsats in vareafgiftssats.subsatser %}
             <tr>
-                <td>{{subsats.vareart}}</td>
+                <td>{{subsats.vareart_da}}</td>
+                <td>{{subsats.vareart_kl}}</td>
                 <td>{{subsats.enhed|enhedsnavn}}</td>
                 <td></td>
                 <td>{{vareafgiftssats.minimumsbeløb|default_if_none:""}}</td>

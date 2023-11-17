@@ -77,7 +77,10 @@ class VareafgiftssatsSpreadsheetUtil:
 
     @staticmethod
     def headers_unpretty(headers: Iterable[str]):
-        return [header.replace(" ", "_").lower() for header in headers]
+        return [
+            header.replace(" ", "_").replace("(", "").replace(")", "").lower()
+            for header in headers
+        ]
 
     @staticmethod
     def load_csv(data: UploadedFile) -> List[Dict[str, Union[str, int, bool]]]:
@@ -114,7 +117,8 @@ class VareafgiftssatsSpreadsheetUtil:
         for expected_header in (
             "Afgiftsgruppenummer",
             "Overordnet",
-            "Vareart",
+            "Vareart (da)",
+            "Vareart (kl)",
             "Enhed",
             "Afgiftssats",
             "Kræver indførselstilladelse",
@@ -135,7 +139,8 @@ class VareafgiftssatsSpreadsheetUtil:
         # Tjek at felter har gyldige værdier
         required = (
             "Afgiftsgruppenummer",
-            "Vareart",
+            "Vareart (da)",
+            "Vareart (kl)",
             "Enhed",
             "Kræver indførselstilladelse",
         )

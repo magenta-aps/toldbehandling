@@ -57,7 +57,8 @@ class Vareafgiftssats(ToldDataClass):
 
     id: int
     afgiftstabel: int
-    vareart: str
+    vareart_da: str
+    vareart_kl: str
     afgiftsgruppenummer: int
     enhed: Enhed
     afgiftssats: Decimal
