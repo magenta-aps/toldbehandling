@@ -70,7 +70,7 @@ class LoginRequiredMixin:
             print(dict(request.session))
             print(dict(self.request.session))
             print(self.request.user)
-        except:
+        except AttributeError:
             pass
         redir = self.login_check() or self.check()
         print(f"redir: {redir}")
