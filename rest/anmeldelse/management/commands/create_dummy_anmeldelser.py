@@ -17,6 +17,9 @@ from sats.models import Afgiftstabel, Vareafgiftssats
 
 class Command(BaseCommand):
     def handle(self, *args, **kwargs):
+        if Afgiftsanmeldelse.objects.exists():
+            # Already created data or dummy data, don't do it again
+            return
         anmeldelse = Afgiftsanmeldelse.objects.create(
             afsender=Afsender.objects.order_by("?").first(),
             modtager=Modtager.objects.order_by("?").first(),
