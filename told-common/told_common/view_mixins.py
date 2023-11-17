@@ -67,7 +67,8 @@ class LoginRequiredMixin:
     def dispatch(self, request, *args, **kwargs):
         # self.request = request  klares af superklassen View
         try:
-            print(dict(request.session))
+            session_key = request.COOKIES.get(settings.SESSION_COOKIE_NAME)
+            print(session_key)
             print(dict(self.request.session))
             print(self.request.user)
         except AttributeError:

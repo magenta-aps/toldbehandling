@@ -130,7 +130,7 @@ DECIMAL_SEPARATOR = ","
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = "/static/"
+STATIC_URL = "/admin/static/"
 STATIC_ROOT = "/static"
 MEDIA_ROOT = "/upload"
 
@@ -157,3 +157,7 @@ PRISME = {
 }
 if "PRISME_SOCKS_PROXY" in os.environ:
     PRISME["proxy"] = {"socks": os.environ["PRISME_SOCKS_PROXY"]}
+
+SESSION_COOKIE_PATH = "/admin"
+SESSION_COOKIE_SAMESITE = "Strict"
+SESSION_COOKIE_SECURE = True
