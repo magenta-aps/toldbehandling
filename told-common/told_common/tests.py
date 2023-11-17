@@ -21,6 +21,33 @@ from told_common.rest_client import RestClient
 from told_common.templatetags.common_tags import file_basename, zfill
 
 
+class TestMixin:
+    @staticmethod
+    def get_errors(html: str):
+        soup = BeautifulSoup(html, "html.parser")
+        error_fields = {}
+        for element in soup.find_all(class_="is-invalid"):
+            name = element.get("name", None) or element.get("data-fileinput", None)
+            if name:
+                el = element
+                for i in range(1, 3):
+                    el = el.parent
+                    errorlist = el.find(class_="errorlist")
+                    if errorlist:
+                        error_fields[name] = [
+                            li.text for li in errorlist.find_all(name="li")
+                        ]
+                        break
+        all_errors = soup.find(
+            lambda tag: tag.has_attr("class")
+            and "errorlist" in tag["class"]
+            and "nonfield" in tag["class"]
+        )
+        if all_errors:
+            error_fields["__all__"] = [li.text for li in all_errors.find_all(name="li")]
+        return error_fields
+
+
 class TemplateTagsTest:
     def test_file_basename(self):
         self.assertEquals(file_basename("/path/to/file.txt"), "file.txt")
@@ -29,7 +56,7 @@ class TemplateTagsTest:
         self.assertEquals(zfill("444", 10), "0000000444")
 
 
-class LoginTest:
+class LoginTest(TestMixin):
     def restricted_url(self):
         raise NotImplementedError("Implement in subclasses")
 
@@ -68,29 +95,6 @@ class LoginTest:
             response._content = content
         response.status_code = status_code or 404
         return response
-
-    @staticmethod
-    def get_errors(html: str):
-        soup = BeautifulSoup(html, "html.parser")
-        error_fields = {}
-        for element in soup.find_all(class_="is-invalid"):
-            el = element
-            for i in range(1, 3):
-                el = el.parent
-                errorlist = el.find(class_="errorlist")
-                if errorlist:
-                    error_fields[element["name"]] = [
-                        li.text for li in errorlist.find_all(name="li")
-                    ]
-                    break
-        all_errors = soup.find(
-            lambda tag: tag.has_attr("class")
-            and "errorlist" in tag["class"]
-            and "nonfield" in tag["class"]
-        )
-        if all_errors:
-            error_fields["__all__"] = [li.text for li in all_errors.find_all(name="li")]
-        return error_fields
 
     def submit_get_errors(self, url, data):
         return self.get_errors(self.client.post(url, data=data).content)

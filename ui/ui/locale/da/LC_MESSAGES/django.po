@@ -44,9 +44,20 @@ msgid "Det anvendte login er udløbet. Prøv at logge ind igen."
 msgstr ""
 
 #: ui/templates/ui/layout.html
+msgid "Toldbehandling"
+msgstr ""
+
+#: ui/templates/ui/layout.html
 msgid "Er du sikker på at du vil logge ud?"
 msgstr ""
 
 #: ui/templates/ui/tf10/actions.html
 msgid "Redigér"
+msgstr ""
+
+#: ui/views.py
+#, python-brace-format
+msgid ""
+"Afgiftsanmeldelsen blev indregistreret. Blanket med nummer {id} afventer nu "
+"godkendelse."
 msgstr ""

@@ -10,6 +10,7 @@ from aktør.models import Afsender, Modtager
 from anmeldelse.models import Afgiftsanmeldelse, PrismeResponse, Varelinje
 from django.core.files.base import ContentFile
 from django.core.management.base import BaseCommand
+from django.db.models import Q
 from forsendelse.models import Fragtforsendelse, Postforsendelse
 from sats.models import Afgiftstabel, Vareafgiftssats
 
@@ -73,14 +74,28 @@ class Command(BaseCommand):
                 oprettet_af=(fragtforsendelse or postforsendelse).oprettet_af,
             )
             anmeldelse.dato = date.today() - timedelta(days=random.randint(0, 1000))
+            earliest_tabel = (
+                Afgiftstabel.objects.filter(kladde=False)
+                .order_by("gyldig_fra")
+                .first()
+                .gyldig_fra
+            )
+            if anmeldelse.dato < earliest_tabel:
+                anmeldelse.dato = earliest_tabel
             anmeldelse.save(update_fields=["dato"])
             anmeldelse.leverandørfaktura.save(
                 "leverandørfaktura.txt", ContentFile("testdata")
             )
+            tabel = Afgiftstabel.objects.filter(
+                Q(gyldig_til__gte=anmeldelse.dato) | Q(gyldig_til__isnull=True),
+                gyldig_fra__lte=anmeldelse.dato,
+                kladde=False,
+            )
             Varelinje.objects.create(
                 afgiftsanmeldelse=anmeldelse,
                 vareafgiftssats=Vareafgiftssats.objects.filter(
-                    overordnet__isnull=True
+                    overordnet__isnull=True,
+                    afgiftstabel__in=tabel,
                 ).order_by("?")[0],
                 mængde=random.randint(1, 400),
                 antal=random.randint(1, 400),

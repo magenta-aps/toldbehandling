@@ -1,3 +1,8 @@
-<div class="col custom-file">
-    <input type="file" name="{{widget.name}}" {% if widget.value != None %} value="{{ widget.value|stringformat:'s' }}"{% endif %} {% include "django/forms/widgets/attrs.html" %}/>
+{% load i18n %}
+<div class="file-input">
+<input type="file" name="{{widget.name}}" tabindex="-1" {% include "django/forms/widgets/attrs.html" %}>
+<div class="input-group">
+    <span class="input-group-text file-input-button" data-fileinput="{{widget.name}}">{% translate "Gennemse..." %}</span>
+    <input type="text" data-fileinput="{{widget.name}}" readonly placeholder="{% translate 'Ingen fil valgt' %}" autocomplete="off" {% include "django/forms/widgets/attrs.html" %}>
+</div>
 </div>

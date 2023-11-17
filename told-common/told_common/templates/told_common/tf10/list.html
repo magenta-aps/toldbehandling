@@ -26,105 +26,87 @@
 
     <form method="get" action="{% url 'tf10_list' %}">
         <div class="row">
-            <div class="col-4"><label for="{{form.godkendt.name}}" class="form-label">Status</label></div>
+            <div class="col-4"><label for="{{form.godkendt.name}}" class="form-label">{% translate "Status" %}</label></div>
             <div class="col-8">
                 {{form.godkendt}}
             </div>
         </div>
         <div class="row">
-            <div class="col-4">Oprettelsesdato mellem</div>
+            <div class="col-4">{% translate "Oprettelsesdato mellem" %}</div>
             <div class="col-4">{{form.dato_efter}}</div>
             <div class="col-4">{{form.dato_før}}</div>
         </div>
         <div class="row">
-            <div class="col-4">Afgangsdato mellem</div>
+            <div class="col-4">{% translate "Afgangsdato mellem" %}</div>
             <div class="col-4">{{form.afgangsdato_efter}}</div>
             <div class="col-4">{{form.afgangsdato_før}}</div>
         </div>
         <div class="row">
-            <div class="col-4"><label for="{{form.afsender.name}}" class="form-label">Afsender</label></div>
+            <div class="col-4"><label for="{{form.afsender.name}}" class="form-label">{% translate "Afsender" %}</label></div>
             <div class="col-8">
                 {{form.afsender}}
             </div>
         </div>
         <div class="row">
-            <div class="col-4"><label for="{{form.modtager.name}}" class="form-label">Modtager</label></div>
+            <div class="col-4"><label for="{{form.modtager.name}}" class="form-label">{% translate "Modtager" %}</label></div>
             <div class="col-8">
                 {{form.modtager}}
             </div>
         </div>
         <div class="row">
-            <div class="col-4"><label for="{{form.vareart.name}}" class="form-label">Varetype</label></div>
+            <div class="col-4"><label for="{{form.vareart.name}}" class="form-label">{% translate "Varetype" %}</label></div>
             <div class="col-8">
                 {{form.vareart}}
             </div>
         </div>
         <div class="row">
-            <div class="col-4"><label for="{{form.id.name}}" class="form-label">Anmeldelsesnummer</label></div>
+            <div class="col-4"><label for="{{form.id.name}}" class="form-label">{% translate "Anmeldelsesnummer" %}</label></div>
             <div class="col-8">
                 {{form.id}}
             </div>
         </div>
         <div class="row">
-            <div class="col-4"><label for="{{form.afsenderbykode_or_forbindelsesnr.name}}" class="form-label">Afsender bykode/forbindelsesnummer</label></div>
+            <div class="col-4"><label for="{{form.afsenderbykode_or_forbindelsesnr.name}}" class="form-label">{% translate "Afsender bykode/forbindelsesnummer" %}</label></div>
             <div class="col-8">
                 {{form.afsenderbykode_or_forbindelsesnr}}
             </div>
         </div>
         <div class="row">
-            <div class="col-4"><label for="{{form.postforsendelsesnummer_or_fragtbrevsnummer.name}}" class="form-label">Postforsendelsesnummer/fragtbrevsnummer</label></div>
+            <div class="col-4"><label for="{{form.postforsendelsesnummer_or_fragtbrevsnummer.name}}" class="form-label">{% translate "Postforsendelsesnummer/fragtbrevsnummer" %}</label></div>
             <div class="col-8">
                 {{form.postforsendelsesnummer_or_fragtbrevsnummer}}
             </div>
         </div>
         <div class="row">
             <div class="col-12 cleafix">
-                <button type="submit" class="btn btn-primary float-end">Søg</button>
+                <button type="submit" class="btn btn-primary float-end">{% translate "Søg" %}</button>
                 {% if can_create %}
-                <a href="{% url 'tf10_create' %}" class="btn btn-primary float-end">Opret ny</a>
+                <a href="{% url 'tf10_create' %}" class="btn btn-primary float-end">{% translate "Opret ny" %}</a>
                 {% endif %}
                 {% if can_edit_multiple %}
-                <a id="edit_button" class="btn btn-secondary float-end" href="#">Redigér</a>
+                <a id="edit_button" class="btn btn-secondary float-end" href="#">{% translate "Redigér" %}</a>
                 {% endif %}
             </div>
         </div>
     </form>
     <hr/>
 
-    <div class="card" id="create_message" style="display:none">
+    {% if messages %}
+    {% for message in messages %}
+    <div class="card">
         <div class="card-body text-center">
             {% bs_icon "check2-circle" size="2em" color="green" %}
-            <div>
-                <div style="display:inline-block">
-                    {% translate "Afgiftsanmeldelsen blev indregistreret. Blanket med nummer =" %}
-                </div>
-                <div style="display:inline-block" id="created_form_id"></div>
-                <div style="display:inline-block">
-                    {% translate "afventer nu godkendelse." %}
-                </div>
-            </div>
+            <div id="message_content">{{message}}</div>
         </div>
     </div>
-    <div class="card" id="update_message" style="display:none">
-        <div class="card-body text-center">
-            {% bs_icon "check2-circle" size="2em" color="green" %}
-            <div>
-                <div style="display:inline-block">
-                    {% translate "Afgiftsanmeldelsen med nummer =" %}
-                </div>
-                <div style="display:inline-block" id="updated_form_id"></div>
-                <div style="display:inline-block">
-                    {% translate "blev opdateret." %}
-                </div>
-            </div>
-        </div>
-    </div>
+    {% endfor %}
+    {% endif %}
 
     {% if can_edit_multiple %}
     <div class="alert alert-warning">
-        Der kan markeres flere linjer på én gang. Tryk på en linje for at markere den. Tryk igen for at fjerne markering.<br/>
+        {% translate 'Der kan markeres flere linjer på én gang. Tryk på en linje for at markere den. Tryk igen for at fjerne markering.<br/>
         Hold Shift nede og tryk på en anden linje for at markere/afmarkere alle de mellemliggende linjer.<br/>
-        De markerede linjer kan redigeres sammen ved at klikke på knappen "Redigér".
+        De markerede linjer kan redigeres sammen ved at klikke på knappen "Redigér"' %}
     </div>
     {% endif %}
 
@@ -153,12 +135,12 @@
             {% if can_edit_multiple %}
             <th data-field="select"><input type="checkbox" id="select_all"/></th>
             {% endif %}
-            <th data-sortable="true" data-field="id">Nummer</th>
-            <th data-sortable="true" data-field="dato">Dato</th>
-            <th data-sortable="true" data-field="afsender" data-formatter="aktørFormatter">Afsender</th>
-            <th data-sortable="true" data-field="modtager" data-formatter="aktørFormatter">Modtager</th>
-            <th data-sortable="true" data-field="godkendt" data-formatter="statusFormatter">Status</th>
-            <th data-field="actions">Handlinger</th>
+            <th data-sortable="true" data-field="id">{% translate "Nummer" %}</th>
+            <th data-sortable="true" data-field="dato">{% translate "Dato" %}</th>
+            <th data-sortable="true" data-field="afsender" data-formatter="aktørFormatter">{% translate "Afsender" %}</th>
+            <th data-sortable="true" data-field="modtager" data-formatter="aktørFormatter">{% translate "Modtager" %}</th>
+            <th data-sortable="true" data-field="godkendt" data-formatter="statusFormatter">{% translate "Status" %}</th>
+            <th data-field="actions">{% translate "Handlinger" %}</th>
         </tr>
         </thead>
         <tbody id="table_body">
@@ -194,8 +176,9 @@
 {% if multiedit_url %}
 {{multiedit_url|json_script:"multiedit_url"}}
 {% endif %}
-
+{{highlight|json_script:"highlight_id"}}
 <script>
+const highlight_id = JSON.parse($("#highlight_id").text());
 function queryParams(params){  // Kaldes af bootstrap-table fordi vi peger på den med data-query-params
     if (params["offset"] < 0) {
         params["offset"] = 0;
@@ -215,11 +198,11 @@ function queryParams(params){  // Kaldes af bootstrap-table fordi vi peger på d
 }
 function statusFormatter(value) {
     if (value === true) {
-        return "Godkendt";
+        return "{% translate 'Godkendt' %}";
     } else if (value === false) {
-        return "Afvist";
+        return "{% translate 'Afvist' %}";
     } else if (value === null) {
-        return "Ny"
+        return "{% translate 'Ny' %}"
     }
     return value;
 }
@@ -229,22 +212,11 @@ function aktørFormatter(value) {
     }
     return value;
 }
-var getUrlParameter = function getUrlParameter(sParam) {
-    var sPageURL = window.location.search.substring(1),
-        sURLVariables = sPageURL.split('&'),
-        sParameterName,
-        i;
-
-    for (i = 0; i < sURLVariables.length; i++) {
-        sParameterName = sURLVariables[i].split('=');
-
-        if (sParameterName[0] === sParam) {
-            return sParameterName[1] === undefined ? true : decodeURIComponent(sParameterName[1]);
-        }
-    }
-}
 function trAttributter(data, index) {
-    return {"data-id": data.id};
+    return {
+        "class": (String(data.id)===highlight_id) ? "table-success" : "",
+        "data-id": data.id
+    };
 }
 </script>
 

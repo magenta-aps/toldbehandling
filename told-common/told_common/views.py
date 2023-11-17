@@ -9,9 +9,11 @@ from typing import Any, Dict
 from urllib.parse import unquote
 
 from django.conf import settings
+from django.contrib import messages
 from django.http import FileResponse, JsonResponse
 from django.template import loader
 from django.urls import reverse
+from django.utils.translation import gettext_lazy as _
 from django.views import View
 from django.views.generic import FormView, RedirectView
 from told_common import forms
@@ -113,7 +115,7 @@ class TF10FormUpdateView(
         """
         Return to previous page. Highlight the updated form and display a success msg.
         """
-        return reverse("tf10_list") + f"?highlight={self.anmeldelse_id}&msg=updated"
+        return reverse("tf10_list") + f"?highlight={self.anmeldelse_id}"
 
     def form_valid(self, form, formset):
         afsender_id = self.rest_client.afsender.get_or_create(
@@ -194,6 +196,13 @@ class TF10FormUpdateView(
             if id not in data_map:
                 self.rest_client.varelinje.delete(id)
 
+        messages.add_message(
+            self.request,
+            messages.INFO,
+            _("Afgiftsanmeldelsen med nummer {id} blev opdateret").format(
+                id=self.anmeldelse_id
+            ),
+        )
         return super().form_valid(form, formset)
 
     @cached_property
@@ -210,7 +219,9 @@ class TF10FormUpdateView(
         kwargs.update(
             {
                 "leverandørfaktura_required": False,
-                "fragtbrev_required": False,
+                # Hvis vi allerede har en fragtforsendelse, har vi også et
+                # fragtbrev, og det er ikke påkrævet at formularen indeholder ét
+                "fragtbrev_required": self.item.fragtforsendelse is None,
                 "varesatser": self.toplevel_varesatser,
             }
         )
@@ -387,7 +398,8 @@ class TF10ListView(
         return super().get_context_data(
             **{
                 **context,
-                "title": "Mine afgiftsanmeldelser",
+                "title": _("Mine afgiftsanmeldelser"),
+                "highlight": self.request.GET.get("highlight", None),
             }
         )
 

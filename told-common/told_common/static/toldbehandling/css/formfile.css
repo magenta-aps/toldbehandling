@@ -1,0 +1,12 @@
+.file-input span, .file-input input[type=text] {
+    cursor: pointer;
+    caret-color: transparent;
+}
+.file-input span:hover {
+    background-color: var(--bs-secondary-bg);
+}
+.file-input input[type=file] {
+    opacity: 0;
+    height: 0;
+    border: 0;
+}
