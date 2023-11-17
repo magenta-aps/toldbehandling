@@ -66,9 +66,12 @@ class LoginRequiredMixin:
 
     def dispatch(self, request, *args, **kwargs):
         # self.request = request  klares af superklassen View
-        print(dict(request.session))
-        print(dict(self.request.session))
-        print(self.request.user)
+        try:
+            print(dict(request.session))
+            print(dict(self.request.session))
+            print(self.request.user)
+        except:
+            pass
         redir = self.login_check() or self.check()
         print(f"redir: {redir}")
         if redir is not None:
