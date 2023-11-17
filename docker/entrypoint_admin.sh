@@ -12,6 +12,17 @@ MAKEMESSAGES=${MAKEMESSAGES:=false}
 COMPILEMESSAGES=${COMPILEMESSAGES:=false}
 DJANGO_DEBUG=${DJANGO_DEBUG:=false}
 
+python manage.py wait_for_db
+
+if [ "${MAKE_MIGRATIONS,,}" = true ]; then
+  echo 'generating migrations'
+  python manage.py makemigrations --no-input
+fi
+if [ "${MIGRATE,,}" = true ]; then
+  echo 'running migrations'
+  python manage.py migrate
+fi
+
 if [ "${MAKE_MIGRATIONS,,}" = true ]; then
   echo 'generating migrations'
   python manage.py makemigrations --no-input

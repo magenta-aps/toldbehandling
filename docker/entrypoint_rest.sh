@@ -15,9 +15,7 @@ DJANGO_DEBUG=${DJANGO_DEBUG:=false}
 MAKEMESSAGES=${MAKEMESSAGES:=true}
 COMPILEMESSAGES=${COMPILEMESSAGES:=true}
 
-if [ "${MAKE_MIGRATIONS,,}" = true ] || [ "${MIGRATE,,}" = true ] || [ "${TEST,,}" = true ] || [ "${CREATE_USERS,,}" = true ] || [ "${CREATE_DUMMY_USERS,,}" = true ] || [ "${DUMMYDATA,,}" = true ] || [ "${MAKEMESSAGES,,}" == true ] || [ "${COMPILEMESSAGES,,}" == true ]; then
-  python manage.py wait_for_db
-fi
+python manage.py wait_for_db
 
 if [ "${MAKE_MIGRATIONS,,}" = true ]; then
   echo 'generating migrations'

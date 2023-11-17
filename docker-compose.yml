@@ -40,6 +40,7 @@ services:
       - ./dev-environment/ui.env
     depends_on:
       - toldbehandling-rest
+      - toldbehandling-db
     volumes:
       - ./ui/:/app
       - ./told-common/told_common/:/app/told_common
@@ -64,6 +65,7 @@ services:
       - ./dev-environment/admin.env
     depends_on:
       - toldbehandling-ui
+      - toldbehandling-db
     volumes:
       - ./admin/:/app
       - ./told-common/told_common/:/app/told_common
@@ -84,6 +86,7 @@ services:
     env_file:
       - ./dev-environment/rest.env
     volumes:
+      - ./dev-environment/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
       - postgres-data:/var/lib/postgresql/data
     network_mode: "host"
 
