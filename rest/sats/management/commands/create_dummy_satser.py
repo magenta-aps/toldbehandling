@@ -11,6 +11,9 @@ from sats.models import Afgiftstabel, Vareafgiftssats
 
 class Command(BaseCommand):
     def handle(self, *args, **kwargs):
+        if Afgiftstabel.objects.exists() or Vareafgiftssats.objects.exists():
+            # Don't create dummy data more than once
+            return
         tabel1 = Afgiftstabel.objects.create(
             gyldig_fra=date(date.today().year, 1, 1),
             gyldig_til=date(date.today().year, 12, 31),

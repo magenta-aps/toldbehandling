@@ -43,6 +43,9 @@ def random_char(y):
 
 class Command(BaseCommand):
     def handle(self, *args, **kwargs):
+        if Afsender.objects.exists() or Modtager.objects.exists():
+            # Already created dummy data, return
+            return
         for company_name in company_names:
             if company_names.index(company_name) % 2 == 0:
                 Afsender.objects.create(

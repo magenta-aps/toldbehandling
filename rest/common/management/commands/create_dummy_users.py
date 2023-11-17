@@ -15,6 +15,9 @@ class Command(BaseCommand):
     help = "Creates dummy users"
 
     def handle(self, *args, **options):
+        if IndberetterProfile.objects.exists():
+            # Already contains data or dummy data
+            return
         if settings.ENVIRONMENT in ("production", "staging"):
             raise Exception(f"Will not create dummy users in {settings.ENVIRONMENT}")
         try:

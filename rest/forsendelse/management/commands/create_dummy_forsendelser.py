@@ -14,6 +14,9 @@ from forsendelse.models import Fragtforsendelse, Postforsendelse
 
 class Command(BaseCommand):
     def handle(self, *args, **kwargs):
+        if Fragtforsendelse.objects.exists() or Postforsendelse.objects.exists():
+            # Already contains dummy data
+            return
         indberetter_group = Group.objects.get(name="Indberettere")
         users = User.objects.filter(groups=indberetter_group)
         if users.count() == 0:
