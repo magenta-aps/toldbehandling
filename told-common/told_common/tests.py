@@ -624,7 +624,8 @@ class AnmeldelseListViewTest(HasLogin):
                     {
                         "id": 1,
                         "afgiftstabel": 1,
-                        "vareart": "Båthorn",
+                        "vareart_da": "Båthorn",
+                        "vareart_kl": "Båthorn",
                         "afgiftsgruppenummer": 1234567,
                         "enhed": "kg",
                         "afgiftssats": "1.00",
@@ -977,7 +978,7 @@ class AnmeldelseListViewTest(HasLogin):
             for value in values:
                 url = self.list_url + f"?json=1&{field}={value}"
                 response = self.client.get(url)
-                self.assertEquals(response.status_code, 400)
+                self.assertEquals(response.status_code, 400, f"{url}")
                 data = response.json()
                 self.assertTrue("error" in data)
                 self.assertTrue(field in data["error"])

@@ -147,7 +147,8 @@ class VareafgiftssatsTest(RestMixin, TestCase):
         return super().alter_value(key, value)
 
     invalid_itemdata = {
-        "vareart": [-1, 9001],
+        "vareart_da": [-1, 9001],
+        "vareart_kl": [-1, 9001],
         "afgiftsgruppenummer": [-1],
         "enhed": ["A", 4],
         "afgiftssats": [9001],

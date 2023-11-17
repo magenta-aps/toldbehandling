@@ -153,7 +153,7 @@ class AfgiftsanmeldelseFilterSchema(FilterSchema):
     )
     dato_efter: Optional[date] = Field(q="dato__gte")
     dato_før: Optional[date] = Field(q="dato__lt")
-    vareart: Optional[str] = Field(q="varelinje__vareafgiftssats__vareart")
+    vareart: Optional[str] = Field(q="varelinje__vareafgiftssats__vareart_da")
     afsenderbykode_or_forbindelsesnr: Optional[str] = Field(
         q=[
             "postforsendelse__afsenderbykode",

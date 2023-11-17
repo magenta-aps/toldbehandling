@@ -143,7 +143,8 @@ class VareafgiftssatsIn(ModelSchema):
     class Config:
         model = Vareafgiftssats
         model_fields = [
-            "vareart",
+            "vareart_da",
+            "vareart_kl",
             "afgiftsgruppenummer",
             "enhed",
             "afgiftssats",
@@ -167,7 +168,8 @@ class PartialVareafgiftssatsIn(ModelSchema):
     class Config:
         model = Vareafgiftssats
         model_fields = [
-            "vareart",
+            "vareart_da",
+            "vareart_kl",
             "afgiftsgruppenummer",
             "enhed",
             "afgiftssats",
@@ -185,7 +187,8 @@ class VareafgiftssatsOut(ModelSchema):
         model_fields = [
             "id",
             "afgiftstabel",
-            "vareart",
+            "vareart_da",
+            "vareart_kl",
             "afgiftsgruppenummer",
             "enhed",
             "afgiftssats",
@@ -199,7 +202,8 @@ class VareafgiftssatsOut(ModelSchema):
 
 class VareafgiftssatsFilterSchema(FilterSchema):
     afgiftstabel: Optional[int]
-    vareart: Optional[str]
+    vareart_da: Optional[str]
+    vareart_kl: Optional[str]
     afgiftsgruppenummer: Optional[int]
     enhed: Optional[str]
     afgiftssats: Optional[Decimal]

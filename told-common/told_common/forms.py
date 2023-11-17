@@ -7,6 +7,7 @@ from typing import Optional
 from django import forms
 from django.core.exceptions import ValidationError
 from django.forms import Form, formset_factory
+from django.utils import translation
 from django.utils.translation import gettext_lazy as _
 from requests import HTTPError
 from told_common.rest_client import RestClient
@@ -265,8 +266,11 @@ class TF10VareForm(BootstrapForm):
     def __init__(self, *args, **kwargs):
         self.varesatser = kwargs.pop("varesatser", {})
         super().__init__(*args, **kwargs)
+        vareart_key = (
+            "vareart_kl" if translation.get_language() == "kl" else "vareart_da"
+        )
         self.fields["vareafgiftssats"].choices = tuple(
-            (id, item["vareart"]) for id, item in self.varesatser.items()
+            (id, item[vareart_key]) for id, item in self.varesatser.items()
         )
 
     id = forms.IntegerField(min_value=1, required=False, widget=forms.HiddenInput)
@@ -320,12 +324,15 @@ class TF10SearchForm(PaginateForm, BootstrapForm):
 
         # We use 'set' here, because one 'vareafgiftssats' can exist in many
         # different tables
+        vareart_key = (
+            "vareart_kl" if translation.get_language() == "kl" else "vareart_da"
+        )
         self.fields["vareart"].choices = tuple(
             [(None, "------")]
             + sorted(
                 set(
                     [
-                        (item["vareart"], item["vareart"].lower().capitalize())
+                        (item[vareart_key], item[vareart_key].lower().capitalize())
                         for item in self.varesatser.values()
                     ]
                 ),

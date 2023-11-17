@@ -844,7 +844,8 @@ class RestMixin:
             "afgiftsbeløb": "37.50",
         }
         self.vareafgiftssats_data = {
-            "vareart": "Kaffe",
+            "vareart_da": "Kaffe",
+            "vareart_kl": "Kaffe",
             "afgiftsgruppenummer": 1234,
             "enhed": Vareafgiftssats.Enhed.KILOGRAM,
             "afgiftssats": "2.50",

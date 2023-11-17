@@ -68,7 +68,8 @@ class PrismeTest(TestCase):
                     vareafgiftssats=Vareafgiftssats(
                         id=1,
                         afgiftstabel=1,
-                        vareart="Testvarer1",
+                        vareart_da="Testvarer1",
+                        vareart_kl="Testvarer1",
                         afgiftsgruppenummer=2,
                         enhed=Vareafgiftssats.Enhed.ANTAL,
                         afgiftssats=Decimal("20.00"),
@@ -90,7 +91,8 @@ class PrismeTest(TestCase):
                     vareafgiftssats=Vareafgiftssats(
                         id=2,
                         afgiftstabel=1,
-                        vareart="Testvarer2",
+                        vareart_da="Testvarer2",
+                        vareart_kl="Testvarer2",
                         afgiftsgruppenummer=2,
                         enhed=Vareafgiftssats.Enhed.ANTAL,
                         afgiftssats=Decimal("120.00"),
