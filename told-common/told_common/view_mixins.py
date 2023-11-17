@@ -27,6 +27,7 @@ from django.http import (  # isort: skip
 
 class LoginRequiredMixin:
     def needs_login(self, request):
+        print("needs_login")
         if getattr(settings, "LOGIN_PROVIDER_CLASS", None):
             saml_data = request.session.get(settings.LOGIN_SESSION_DATA_KEY, None)
             if saml_data:
@@ -49,10 +50,13 @@ class LoginRequiredMixin:
         if not self.request.session.get("access_token") or not self.request.session.get(
             "refresh_token"
         ):
+            print("access_token not found or refresh_token not found")
             return self.needs_login(self.request)
         refresh_token_timestamp = self.request.session.get("refresh_token_timestamp")
         if (int(time.time() - float(refresh_token_timestamp))) > 24 * 3600:
+            print("refresh_token too old")
             return self.needs_login(self.request)
+        print("login_check is ok")
         return None
 
     def check(self) -> Optional[HttpResponse]:
@@ -63,11 +67,13 @@ class LoginRequiredMixin:
     def dispatch(self, request, *args, **kwargs):
         # self.request = request  klares af superklassen View
         redir = self.login_check() or self.check()
+        print(f"redir: {redir}")
         if redir is not None:
             return redir
         try:
             return super().dispatch(request, *args, **kwargs)
         except HTTPError as e:
+            print(f"got {e.response.status_code} from REST")
             if e.response.status_code == 401:
                 # Refresh failed, must re-login
                 return self.needs_login(request)
