@@ -51,8 +51,6 @@ class LoginRequiredMixin:
             "refresh_token"
         ):
             print("access_token not found or refresh_token not found")
-            print(dict(self.request.session))
-            print(self.request.user)
             return self.needs_login(self.request)
         refresh_token_timestamp = self.request.session.get("refresh_token_timestamp")
         if (int(time.time() - float(refresh_token_timestamp))) > 24 * 3600:
@@ -68,6 +66,9 @@ class LoginRequiredMixin:
 
     def dispatch(self, request, *args, **kwargs):
         # self.request = request  klares af superklassen View
+        print(dict(request.session))
+        print(dict(self.request.session))
+        print(self.request.user)
         redir = self.login_check() or self.check()
         print(f"redir: {redir}")
         if redir is not None:
