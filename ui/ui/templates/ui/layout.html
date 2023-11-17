@@ -1,5 +1,7 @@
 {% load static %}
 {% load i18n %}
+{% get_current_language as LANGUAGE_CODE %}
+{% load common_tags %}
 <!doctype html>
 <html lang="da">
 <head>
@@ -9,7 +11,7 @@
     <link rel="stylesheet" href="{% static 'toldbehandling/css/style.css' %}" >
     <script src="{% static 'jquery/jquery-3.5.1.min.js' %}"></script>
     <script src="{% static 'bootstrap/bootstrap.bundle.min.js' %}"></script>
-    <title>Toldbehandling</title>
+    <title>{% translate 'Toldbehandling' %}</title>
     {% block extra_headers %}
     {% endblock %}
 </head>
@@ -17,10 +19,27 @@
 {% block header %}
 <header>
     <nav class="nav flex-column flex-sm-row p-1">
-        <span class="p-2 ms-auto">
+
+        <span class="locale-changer navbar-text ms-auto">
+            <form action="{% url 'set_language' %}" method="post">
+                {% csrf_token %}
+                {% get_current_language as current_language %}
+                {% get_available_languages as languages %}
+                {% get_language_info_list for languages as languages %}
+                <select class="form-control form-select" name="language">
+                {% for language in languages %}
+                    <option value="{{ language.code }}"{% if language.code == current_language %} selected{% endif %}>
+                        {{ language.name_local|capfirst }}
+                    </option>
+                {% endfor %}
+                </select>
+            </form>
+        </span>
+
+        <span class="m-2 pt-2">
             {{user.first_name}} {{user.last_name}}
         </span>
-        <a href="{% url 'login:logout' %}" class="m-1 btn btn-sm btn-primary" id="logout-link">{% translate "Log ud" %}</a>
+        <a href="{% url 'login:logout' %}" class="mx-1 my-2 btn btn-primary" id="logout-link">{% translate "Log ud" %}</a>
     </nav>
     <hr class="p-0 m-0"/>
 </header>
@@ -32,6 +51,9 @@
 <script>
     $("#logout-link").on('click', function () {
         return confirm("{% translate 'Er du sikker på at du vil logge ud?' %}");
+    });
+    $("[name=language]").on("change", function (){
+        this.form.submit();
     });
 </script>
 </body>

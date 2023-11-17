@@ -4,7 +4,9 @@
 from functools import cached_property
 from typing import Any, Dict
 
+from django.contrib import messages
 from django.urls import reverse
+from django.utils.translation import gettext_lazy as _
 from told_common import forms as common_forms
 from told_common import views as common_views
 
@@ -52,7 +54,6 @@ class TF10FormCreateView(
             + "?sort=id"
             + "&order=desc"
             + f"&highlight={self.anmeldelse_id}"
-            + "&msg=created"
         )
 
     def form_valid(self, form, formset):
@@ -85,6 +86,14 @@ class TF10FormCreateView(
                 self.rest_client.varelinje.create(
                     subform.cleaned_data, self.anmeldelse_id
                 )
+        messages.add_message(
+            self.request,
+            messages.INFO,
+            _(
+                "Afgiftsanmeldelsen blev indregistreret. "
+                "Blanket med nummer {id} afventer nu godkendelse."
+            ).format(id=self.anmeldelse_id),
+        )
         return super().form_valid(form, formset)
 
     @cached_property
@@ -129,6 +138,7 @@ class TF10FormCreateView(
                 **context,
                 "varesatser": self.rest_client.varesatser,
                 "extend_template": self.extend_template,
+                "highlight": self.request.GET.get("highlight", None),
             }
         )
         form = context["form"]

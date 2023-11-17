@@ -185,6 +185,7 @@ Build ER image:
     LOGIN_PROVIDER_CLASS: django_mitid_auth.saml.oiosaml.OIOSaml
     LOGIN_BYPASS_ENABLED: 'False'
     MITID_TEST_ENABLED: 'True'
+    LANGUAGE_COOKIE_DOMAIN: localhost
 
   before_script:
     - mkdir "${CI_PROJECT_DIR}/coverage_output"

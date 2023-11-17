@@ -3,8 +3,8 @@
 # SPDX-License-Identifier: MPL-2.0
 
 import told_common.views as common_views
-from django.urls import path
-from django.views.generic import RedirectView, TemplateView
+from django.urls import include, path
+from django.views.generic import RedirectView
 from django_mitid_auth.saml.views import AccessDeniedView
 
 from ui import views
@@ -29,11 +29,6 @@ urlpatterns = [
         name="tf10_edit",
     ),
     path(
-        "blanket/tf10/success",
-        TemplateView.as_view(template_name="ui/tf10/success.html"),
-        name="tf10_blanket_success",
-    ),
-    path(
         "blanket/tf10",
         views.TF10ListView.as_view(),
         name="tf10_list",
@@ -48,4 +43,5 @@ urlpatterns = [
         AccessDeniedView.as_view(template_name="ui/error/login_repeat.html"),
         name="login-repeat",
     ),
+    path("i18n/", include("django.conf.urls.i18n")),
 ]

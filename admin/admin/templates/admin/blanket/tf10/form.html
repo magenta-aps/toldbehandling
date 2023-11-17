@@ -6,6 +6,8 @@
 
 {% block extra_headers %}
 <script type="text/javascript" src="{% static 'toldbehandling/js/formset.js' %}"></script>
+<script type="text/javascript" src="{% static 'toldbehandling/js/formfile.js' %}"></script>
+<link rel="stylesheet" type="text/css" href="{% static 'toldbehandling/css/formfile.css' %}"/>
 {% endblock %}
 
 {% block content %}
@@ -55,18 +57,12 @@
                         <div class="alert alert-warning multiple" style="display: none">
                             <label for="{{form.afsender_existing_id.id_for_label}}">
                                 <span data-multi="cvr">
-                                {% blocktranslate %}
-                                Der er mere end én registreret afsender for det angivne CVR-nummer.
-                                {% endblocktranslate %}
+                                {% translate "Der er mere end én registreret afsender for det angivne CVR-nummer." %}
                                 </span>
                                 <span data-multi="navn">
-                                {% blocktranslate %}
-                                Der er mere end én registreret afsender for det angivne navn.
-                                {% endblocktranslate %}
+                                {% translate "Der er mere end én registreret afsender for det angivne navn." %}
                                 </span>
-                                {% blocktranslate %}
-                                Vælg én fra listen herunder, eller udfyld felterne med nye data.
-                                {% endblocktranslate %}
+                                {% translate "Vælg én fra listen herunder, eller udfyld felterne med nye data." %}
                             </label>
                             <p>
                                 {{form.afsender_existing_id}}
@@ -75,9 +71,7 @@
                         <input style="display: none" type="hidden" name="{{form.afsender_existing_id.name}}"/>
                         <div class="alert alert-warning changed" style="display: none">
                             <div>
-                                {% blocktranslate %}
-                                Afsenderoplysninger er ændrede i forhold til den afsender der allerede er registreret.
-                                {% endblocktranslate %}
+                                {% translate "Afsenderoplysninger er ændrede i forhold til den afsender der allerede er registreret." %}
                             </div>
                             {{form.afsender_change_existing}}
                         </div>
@@ -157,18 +151,12 @@
                         <div class="alert alert-warning multiple" style="display: none">
                             <label for="{{form.modtager_existing_id.id_for_label}}">
                                 <span data-multi="cvr">
-                                {% blocktranslate %}
-                                Der er mere end én registreret modtager for det angivne CVR-nummer.
-                                {% endblocktranslate %}
+                                {% translate "Der er mere end én registreret modtager for det angivne CVR-nummer." %}
                                 </span>
                                 <span data-multi="navn">
-                                {% blocktranslate %}
-                                Der er mere end én registreret modtager for det angivne navn.
-                                {% endblocktranslate %}
+                                {% translate "Der er mere end én registreret modtager for det angivne navn." %}
                                 </span>
-                                {% blocktranslate %}
-                                Vælg en fra listen herunder, eller udfyld felterne med nye data.
-                                {% endblocktranslate %}
+                                {% translate "Vælg en fra listen herunder, eller udfyld felterne med nye data." %}
                             </label>
                             <p>
                                 {{form.modtager_existing_id}}
@@ -177,9 +165,7 @@
                         <input style="display: none" type="hidden" name="{{form.modtager_existing_id.name}}"/>
                         <div class="alert alert-warning changed" style="display: none">
                             <div>
-                                {% blocktranslate %}
-                                Modtageroplysninger er ændrede i forhold til den modtager der allerede er registreret.
-                                {% endblocktranslate %}
+                                {% translate "Modtageroplysninger er ændrede i forhold til den modtager der allerede er registreret." %}
                             </div>
                             {{form.modtager_change_existing}}
                         </div>

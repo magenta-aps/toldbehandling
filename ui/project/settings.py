@@ -18,6 +18,7 @@ import os
 from datetime import timedelta
 from pathlib import Path
 
+import django.conf.locale
 from told_common.util import strtobool
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -50,6 +51,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django_mitid_auth.middleware.LoginManager",
+    "django.middleware.locale.LocaleMiddleware",
     # "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
@@ -108,19 +110,31 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
-LANGUAGE_CODE = "da-DK"
+LANGUAGE_CODE = "da"
 LANGUAGES = [
     ("da", "Dansk"),
     ("kl", "Kalaallisut"),
 ]
+LANGUAGE_COOKIE_NAME = "Sullissivik.Portal.Lang"
+LANGUAGE_COOKIE_DOMAIN = os.environ["LANGUAGE_COOKIE_DOMAIN"]
 LOCALE_PATHS = [os.path.join(BASE_DIR, "locale")]
-LOCALE_MAP = {"da": "da-DK", "kl": "kl-GL"}
+# LOCALE_MAP = {"da": "da-DK", "kl": "kl-GL"}
+
+# Add custom languages not provided by Django
+django.conf.locale.LANG_INFO["kl"] = {
+    "bidi": False,
+    "code": "kl",
+    "name": "Greenlandic",
+    "name_local": "Kalaallisut",
+}
 
 TIME_ZONE = "UTC"
 USE_I18N = True
 USE_L10N = True
 USE_TZ = True
 USE_THOUSAND_SEPARATOR = True
+DECIMAL_SEPARATOR = ","
+THOUSAND_SEPARATOR = "."
 
 
 # Static files (CSS, JavaScript, Images)

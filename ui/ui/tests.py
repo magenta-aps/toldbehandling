@@ -17,6 +17,7 @@ from django.urls import reverse
 from requests import Response
 from told_common.forms import TF10Form, TF10VareForm
 from told_common.rest_client import RestClient
+from told_common.tests import TestMixin
 
 from django.core.files.uploadedfile import (  # isort: skip
     SimpleUploadedFile,
@@ -30,7 +31,7 @@ from told_common.tests import (  # isort: skip
 )
 
 
-class BlanketTest(HasLogin, TestCase):
+class BlanketTest(TestMixin, HasLogin, TestCase):
     @property
     def login_url(self):
         return str(reverse("login:login"))
@@ -242,29 +243,6 @@ class BlanketTest(HasLogin, TestCase):
             response._content = content
         response.status_code = status_code or 404
         return response
-
-    @staticmethod
-    def get_errors(html: str):
-        soup = BeautifulSoup(html, "html.parser")
-        error_fields = {}
-        for element in soup.find_all(class_="is-invalid"):
-            el = element
-            for i in range(1, 3):
-                el = el.parent
-                errorlist = el.find(class_="errorlist")
-                if errorlist:
-                    error_fields[element["name"]] = [
-                        li.text for li in errorlist.find_all(name="li")
-                    ]
-                    break
-        all_errors = soup.find(
-            lambda tag: tag.has_attr("class")
-            and "errorlist" in tag["class"]
-            and "nonfield" in tag["class"]
-        )
-        if all_errors:
-            error_fields["__all__"] = [li.text for li in all_errors.find_all(name="li")]
-        return error_fields
 
     def submit_get_errors(self, url, data):
         return self.get_errors(self.client.post(url, data=data).content)
