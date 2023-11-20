@@ -7,6 +7,7 @@ from common.api import UserAPI
 from forsendelse.api import FragtforsendelseAPI, PostforsendelseAPI
 from ninja_extra import NinjaExtraAPI
 from ninja_jwt.controller import NinjaJWTDefaultController
+from payment.api import PaymentAPI
 from project.util import ORJSONRenderer
 from sats.api import AfgiftstabelAPI, VareafgiftssatsAPI
 
@@ -26,3 +27,4 @@ api.register_controllers(
 api.register_controllers(PostforsendelseAPI, FragtforsendelseAPI)
 api.register_controllers(AfgiftstabelAPI, VareafgiftssatsAPI)
 api.register_controllers(UserAPI)
+api.register_controllers(PaymentAPI)
