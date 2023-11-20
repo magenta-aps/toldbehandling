@@ -3,11 +3,12 @@
 # SPDX-License-Identifier: MPL-2.0
 
 import told_common.views as common_views
-from django.urls import path
+from django.urls import include, path
 from django.views.generic import RedirectView, TemplateView
 from django_mitid_auth.saml.views import AccessDeniedView
 
 from ui import views
+from betaling import views as betaling_views
 
 urlpatterns = [
     path("", RedirectView.as_view(pattern_name="tf10_list")),
@@ -47,5 +48,17 @@ urlpatterns = [
         "error/login-repeat/",
         AccessDeniedView.as_view(template_name="ui/error/login_repeat.html"),
         name="login-repeat",
+    ),
+    # payments
+    path("payments/", include("payments.urls")),
+    path(
+        "betaling/test",
+        betaling_views.PaymentTestView.as_view(),
+        name="payments-create",
+    ),
+    path(
+        "betaling/detaljer/<int:payment_id>",
+        betaling_views.PaymentDetailsView.as_view(),
+        name="payments-details",
     ),
 ]

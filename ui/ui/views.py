@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: MPL-2.0
 from functools import cached_property
 from typing import Any, Dict
-
 from django.urls import reverse
 from told_common import forms as common_forms
 from told_common import views as common_views

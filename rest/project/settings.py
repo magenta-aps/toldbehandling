@@ -153,7 +153,15 @@ GRAPH_MODELS = {
 # Django payments
 # https://django-payments.readthedocs.io/en/v2.0.0/install.html
 
+# general django_payments settings
 PAYMENT_HOST = "localhost:7000"
 PAYMENT_USES_SSL = False
 PAYMENT_MODEL = "betaling.Payment"
 PAYMENT_VARIANTS = {"default": ("payments.dummy.DummyProvider", {})}
+
+# Nets payment provider
+PAYMENT_PROVIDER_NETS_HOST = os.environ.get("PAYMENT_PROVIDER_NETS_HOST", "	https://api.dibspayment.eu")
+PAYMENT_PROVIDER_NETS_SECRET = os.environ.get("PAYMENT_PROVIDER_NETS_SECRET", "your_nets_secret_key_here")
+PAYMENT_PROVIDER_NETS_CHECKOUT_KEY = os.environ.get(
+    "PAYMENT_PROVIDER_NETS_CHECKOUT_KEY", "your_nets_checkout_key_here"
+)

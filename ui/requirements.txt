@@ -1,4 +1,5 @@
 /app/told-common/dist/told_common-0.0.1-py3-none-any.whl
+# ../told-common/dist/told_common-0.0.1.tar.gz
 coverage==7.3.0
 beautifulsoup4==4.12.2
 humanize==4.7.0
@@ -6,5 +7,6 @@ django_mitid_auth @ git+https://github.com/magenta-aps/gl-django-login.git@1.1.1
 django-session-timeout==0.1.0
 pysaml2==7.4.2
 xmltodict==0.13.0
-psycopg2==2.9.6
+psycopg2-binary==2.9.9
 django-bootstrap-icons==0.8.6
+django-payments==2.0.0

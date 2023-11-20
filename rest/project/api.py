@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: MPL-2.0
 
 from aktør.api import AfsenderAPI, ModtagerAPI
+from betaling.api import BetalingApiController
 from common.api import UserAPI
 from forsendelse.api import FragtforsendelseAPI, PostforsendelseAPI
 from ninja_extra import NinjaExtraAPI
@@ -26,3 +27,4 @@ api.register_controllers(
 api.register_controllers(PostforsendelseAPI, FragtforsendelseAPI)
 api.register_controllers(AfgiftstabelAPI, VareafgiftssatsAPI)
 api.register_controllers(UserAPI)
+api.register_controllers(BetalingApiController)

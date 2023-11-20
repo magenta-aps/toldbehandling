@@ -42,6 +42,10 @@ INSTALLED_APPS = [
     "ui",
     "django_mitid_auth",
     "django_bootstrap_icons",
+
+    # Payments
+    "payments",
+    "betaling",
 ]
 
 MIDDLEWARE = [
@@ -148,3 +152,20 @@ CACHES = {
 }
 
 from .login_settings import *  # noqa
+
+# Django payments
+# https://django-payments.readthedocs.io/en/latest/install.html#additional-django-settings
+
+
+PAYMENT_HOST = "localhost:8000"
+PAYMENT_USES_SSL = False
+PAYMENT_MODEL = "betaling.Payment"
+PAYMENT_VARIANTS = {
+    "default": (
+        "betaling.providers.NetsPaymentProvider", {
+            "host": os.environ.get("PAYMENT_PROVIDER_NETS_HOST", "https://api.dibspayment.eu"),
+            "secret_key": os.environ.get("PAYMENT_PROVIDER_NETS_SECRET_KEY", "your_nets_secret_key_here"),
+            "checkout_key": os.environ.get("PAYMENT_PROVIDER_NETS_CHECKOUT_KEY", "your_nets_checkout_key_here"),
+        }
+    )
+}
