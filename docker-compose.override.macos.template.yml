@@ -1,0 +1,47 @@
+# SPDX-FileCopyrightText: 2023 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: MPL-2.0
+
+services:
+  toldbehandling-rest:
+    network_mode: "bridge"
+    ports:
+      - "7000:7000"
+    environment:
+      - TEST=false
+      - POSTGRES_HOST=host.docker.internal
+      - PAYMENT_PROVIDER_NETS_HOST=https://test.api.dibspayment.eu
+      - PAYMENT_PROVIDER_NETS_SECRET_KEY=test-ecret-key-506a8ebc1b2e405ab044d25b8f457c2e
+      - PAYMENT_PROVIDER_NETS_CHECKOUT_KEY=test-checkout-key-2b04e51b4cb74ea5843977bd302c2e7e
+
+  toldbehandling-ui:
+    network_mode: "bridge"
+    ports:
+      - "8000:8000"
+    environment:
+      - TEST=false
+      - REST_DOMAIN=http://host.docker.internal:7000
+      - SAML_IDP_ENTITY_ID=http://host.docker.internal:8080/simplesaml/saml2/idp/metadata.php
+      - SAML_IDP_LOGIN_URI=http://host.docker.internal:8080/simplesaml/saml2/idp/SSOService.php
+      - SAML_IDP_LOGOUT_URI=http://host.docker.internal:8080/simplesaml/saml2/idp/SingleLogoutService.php
+      - SAML_IDP_METADATA=http://host.docker.internal:8080/simplesaml/saml2/idp/metadata.php
+      - POSTGRES_HOST=host.docker.internal
+
+  toldbehandling-admin:
+    network_mode: "bridge"
+    ports:
+      - "8001:8001"
+    environment:
+      - TEST=false
+      - POSTGRES_HOST=host.docker.internal
+
+  toldbehandling-db:
+    network_mode: "bridge"
+    ports:
+      - "5432:5432"
+    command: ["postgres", "-c", "log_statement=all"]
+  
+  toldbehandling-test-idp:
+    network_mode: "bridge"
+    ports:
+      - "8080:8080"
