@@ -736,7 +736,8 @@ class RestClient:
         )
         response = self.session.get(f"{self.domain}/api/{path}{param_string}")
         print(
-            f"{self.domain}/api/{path}{param_string}  {self.token.access_token}  {response.status_code}"
+            f"{self.domain}/api/{path}{param_string}  "
+            f"{self.token.access_token}  {response.status_code}"
         )
         response.raise_for_status()
         return response.json()
