@@ -424,13 +424,13 @@
     const aktører = [
         {
             "fields": {
-                "cvr": $("[name={{form.afsender_cvr.name}}]"),
-                "navn": $("[name={{form.afsender_navn.name}}]"),
-                "adresse": $("[name={{form.afsender_adresse.name}}]"),
-                "postnummer": $("[name={{form.afsender_postnummer.name}}]"),
-                "by": $("[name={{form.afsender_by.name}}]"),
-                "postbox": $("[name={{form.afsender_postbox.name}}]"),
-                "telefon": $("[name={{form.afsender_telefon.name}}]"),
+                "cvr": "[name={{form.afsender_cvr.name}}]",
+                "navn": "[name={{form.afsender_navn.name}}]",
+                "adresse": "[name={{form.afsender_adresse.name}}]",
+                "postnummer": "[name={{form.afsender_postnummer.name}}]",
+                "by": "[name={{form.afsender_by.name}}]",
+                "postbox": "[name={{form.afsender_postbox.name}}]",
+                "telefon": "[name={{form.afsender_telefon.name}}]",
             },
             "searchfields": ["cvr", "navn"],  // Felter som initierer søgning
             "api": "{% url 'rest' path='afsender' %}",
@@ -444,13 +444,13 @@
         },
         {
             "fields": {
-                "cvr": $("[name={{form.modtager_cvr.name}}]"),
-                "navn": $("[name={{form.modtager_navn.name}}]"),
-                "adresse": $("[name={{form.modtager_adresse.name}}]"),
-                "postnummer": $("[name={{form.modtager_postnummer.name}}]"),
-                "by": $("[name={{form.modtager_by.name}}]"),
-                "postbox": $("[name={{form.modtager_postbox.name}}]"),
-                "telefon": $("[name={{form.modtager_telefon.name}}]"),
+                "cvr": "[name={{form.modtager_cvr.name}}]",
+                "navn": "[name={{form.modtager_navn.name}}]",
+                "adresse": "[name={{form.modtager_adresse.name}}]",
+                "postnummer": "[name={{form.modtager_postnummer.name}}]",
+                "by": "[name={{form.modtager_by.name}}]",
+                "postbox": "[name={{form.modtager_postbox.name}}]",
+                "telefon": "[name={{form.modtager_telefon.name}}]",
             },
             "searchfields": ["cvr", "navn"],
             "api": "{% url 'rest' path='modtager' %}",

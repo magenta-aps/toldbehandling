@@ -72,7 +72,7 @@ class UserOutWithTokens(Schema):
     username: str
     first_name: str
     last_name: str
-    email: str
+    email: Optional[str]
     is_superuser: bool
     groups: List[str]
     permissions: List[str]
