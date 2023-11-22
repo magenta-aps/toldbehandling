@@ -13,3 +13,8 @@ urlpatterns = [
 
 if settings.DEBUG:
     urlpatterns += staticfiles_urlpatterns()
+
+if settings.MITID_TEST_ENABLED:
+    urlpatterns.append(
+        path("mitid_test/", include("mitid_test.urls", namespace="mitid_test"))
+    )

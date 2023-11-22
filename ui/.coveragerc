@@ -11,3 +11,4 @@ omit =
     */migrations/*
     */management/*
     */tests/*
+    */mitid_test/*
