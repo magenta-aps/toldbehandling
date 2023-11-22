@@ -9,7 +9,7 @@ $(function(){
             event.preventDefault();
         }
     });
-    $(".file-input-field").change(function () {
+    $(".file-input input[type=file]").change(function () {
         $(".file-input [type=text][data-fileinput="+this.name+"]").val(this.value.replace(/C:\\fakepath\\/i, ""));
     });
 });
