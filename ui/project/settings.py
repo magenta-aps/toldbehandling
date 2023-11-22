@@ -167,4 +167,6 @@ CACHES = {
     },
 }
 
+SESSION_COOKIE_SAMESITE = "None"
+
 from .login_settings import *  # noqa

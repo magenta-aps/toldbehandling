@@ -24,7 +24,6 @@ LOGIN_WHITELISTED_URLS = [
 ]
 MITID_TEST_ENABLED = bool(strtobool(os.environ.get("MITID_TEST_ENABLED", "False")))
 SESSION_EXPIRE_SECONDS = int(os.environ.get("SESSION_EXPIRE_SECONDS") or 1800)
-SESSION_EXPIRE_AFTER_LAST_ACTIVITY = True
 LOGIN_BYPASS_ENABLED = bool(strtobool(os.environ.get("LOGIN_BYPASS_ENABLED", "False")))
 
 
