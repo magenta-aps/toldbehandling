@@ -25,6 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ["DJANGO_SECRET_KEY"]
 
 DEBUG = bool(strtobool(os.environ.get("DJANGO_DEBUG", "False")))
+ENVIRONMENT = os.environ.get("ENVIRONMENT", "development")
 
 ALLOWED_HOSTS = json.loads(os.environ.get("ALLOWED_HOSTS", "[]"))
 
@@ -137,9 +138,6 @@ STATIC_ROOT = "/static"
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-
-
-ENVIRONMENT = os.environ.get("ENVIRONMENT", "development")
 
 # Uploaded files
 MEDIA_ROOT = "/upload/"
