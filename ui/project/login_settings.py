@@ -6,7 +6,7 @@ from told_common.util import strtobool
 LOGIN_SESSION_DATA_KEY = "saml_user"
 LOGIN_PROVIDER_CLASS = os.environ.get("LOGIN_PROVIDER_CLASS") or None
 LOGIN_REDIRECT_URL = "/"
-LOGOUT_REDIRECT_URL = "/"  # Where to go after logout
+LOGOUT_REDIRECT_URL = reverse_lazy("logged-out")  # Where to go after logout
 LOGIN_URL = "/login/"
 LOGIN_NAMESPACE = "login"
 
@@ -20,6 +20,7 @@ LOGIN_WHITELISTED_URLS = [
     "/_ht/",
     LOGIN_TIMEOUT_URL,
     LOGIN_REPEATED_URL,
+    LOGOUT_REDIRECT_URL,
 ]
 MITID_TEST_ENABLED = bool(strtobool(os.environ.get("MITID_TEST_ENABLED", "False")))
 SESSION_EXPIRE_SECONDS = int(os.environ.get("SESSION_EXPIRE_SECONDS") or 1800)

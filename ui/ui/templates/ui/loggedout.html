@@ -1,0 +1,14 @@
+{% extends "ui/layout.html" %}
+{% load i18n %}
+{% block content %}
+<div class="justify-content-md-center d-flex align-items-center vh-100">
+<div class="card" style="width: 40rem;">
+    <h5 class="card-header">{% translate "Logget ud" %}</h5>
+    <div class="card-body">
+        <p>
+            {% translate "Du er nu logget ud. Det anbefales at du lukker denne browser-tab for at fjerne resterende data" %}
+        </p>
+        <a href="{% url 'login:login' %}" class="btn btn-primary">{% translate "Log ind igen" %}</a>
+    </div>
+</div></div>
+{% endblock %}

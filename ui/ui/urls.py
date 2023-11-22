@@ -4,7 +4,7 @@
 
 import told_common.views as common_views
 from django.urls import include, path
-from django.views.generic import RedirectView
+from django.views.generic import RedirectView, TemplateView
 from django_mitid_auth.saml.views import AccessDeniedView
 
 from ui import views
@@ -42,6 +42,11 @@ urlpatterns = [
         "error/login-repeat/",
         AccessDeniedView.as_view(template_name="ui/error/login_repeat.html"),
         name="login-repeat",
+    ),
+    path(
+        "logged-out/",
+        TemplateView.as_view(template_name="ui/loggedout.html"),
+        name="logged-out",
     ),
     path("i18n/", include("django.conf.urls.i18n")),
 ]
