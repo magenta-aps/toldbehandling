@@ -710,7 +710,7 @@ class RestClient:
                         "username": " / ".join(filter(None, [cpr, cvr])),
                         "first_name": saml_data["firstname"],
                         "last_name": saml_data["lastname"],
-                        "email": saml_data.get("email", None),
+                        "email": saml_data.get("email", None) or "",
                         "is_superuser": False,
                         "groups": ["Indberettere"],
                     },
