@@ -86,6 +86,7 @@ SAML = {
                 ],
             },
             "required_attributes": [
+                "https://data.gov.dk/model/core/eid/professional/orgName",
                 "https://data.gov.dk/model/core/specVersion",
                 "https://data.gov.dk/concept/core/nsis/loa",
                 "https://data.gov.dk/model/core/eid/cprNumber",
