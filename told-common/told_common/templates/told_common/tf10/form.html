@@ -399,11 +399,13 @@
             },
             "searchfields": ["cvr", "navn"],  // Felter som initierer søgning
             "api": "{% url 'rest' path='afsender' %}",
-            "multi_container": "#afsender_multi_container",
+            "multi_container": "#afsender_adresse_container",
             "multi_label": {
-                "cvr": "#afsender_multi_container [data-multi=cvr]",
-                "navn": "#afsender_multi_container [data-multi=navn]"
-            }
+                "cvr": "#afsender_adresse_container [data-multi=cvr]",
+                "navn": "#afsender_adresse_container [data-multi=navn]"
+            },
+            "multi_changed_container": "#afsender_address_changed",
+            "preselected_id": {{afsender_existing_id|default:"null"}},
         },
         {
             "fields": {
@@ -414,15 +416,16 @@
                 "by": "[name={{form.modtager_by.name}}]",
                 "postbox": "[name={{form.modtager_postbox.name}}]",
                 "telefon": "[name={{form.modtager_telefon.name}}]",
-                "indførselstilladelse": "[name={{form.indførselstilladelse.name}}]",
             },
             "searchfields": ["cvr", "navn"],
             "api": "{% url 'rest' path='modtager' %}",
-            "multi_container": "#modtager_multi_container",
+            "multi_container": "#modtager_adresse_container",
             "multi_label": {
-                "cvr": "#modtager_multi_container [data-multi=cvr]",
-                "navn": "#modtager_multi_container [data-multi=navn]"
-            }
+                "cvr": "#modtager_adresse_container [data-multi=cvr]",
+                "navn": "#modtager_adresse_container [data-multi=navn]"
+            },
+            "multi_changed_container": "#modtager_address_changed",
+            "preselected_id": {{modtager_existing_id|default:"null"}},
         }
     ];
 </script>
