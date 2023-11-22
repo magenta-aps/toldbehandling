@@ -16,8 +16,8 @@ LOGIN_TIMEOUT_URL = reverse_lazy("login-timeout")
 LOGIN_REPEATED_URL = reverse_lazy("login-repeat")
 LOGIN_WHITELISTED_URLS = [
     "/favicon.ico",
-    LOGIN_URL,
     "/_ht/",
+    LOGIN_URL,
     LOGIN_TIMEOUT_URL,
     LOGIN_REPEATED_URL,
     LOGOUT_REDIRECT_URL,
