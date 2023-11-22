@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     "ui",
     "django_mitid_auth",
     "django_bootstrap_icons",
+    "mitid_test",
 ]
 
 MIDDLEWARE = [
