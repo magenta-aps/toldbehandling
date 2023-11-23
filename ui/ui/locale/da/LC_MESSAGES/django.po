@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-11-16 12:39+0000\n"
+"POT-Creation-Date: 2023-11-22 15:12+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -49,6 +49,20 @@ msgstr ""
 
 #: ui/templates/ui/layout.html
 msgid "Er du sikker på at du vil logge ud?"
+msgstr ""
+
+#: ui/templates/ui/loggedout.html
+msgid "Logget ud"
+msgstr ""
+
+#: ui/templates/ui/loggedout.html
+msgid ""
+"Du er nu logget ud. Det anbefales at du lukker denne browser-tab for at "
+"fjerne resterende data"
+msgstr ""
+
+#: ui/templates/ui/loggedout.html
+msgid "Log ind igen"
 msgstr ""
 
 #: ui/templates/ui/tf10/actions.html
