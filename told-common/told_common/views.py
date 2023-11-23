@@ -234,7 +234,13 @@ class TF10FormUpdateView(
             kwargs["form_kwargs"] = {}
         # Will be picked up by TF10VareForm's constructor
         kwargs["form_kwargs"]["varesatser"] = self.toplevel_varesatser
-        kwargs["initial"] = [dataclasses.asdict(item) for item in self.item.varelinjer]
+        initial = []
+        for item in self.item.varelinjer:
+            itemdict = dataclasses.asdict(item)
+            # Dropdown skal bruge id'er, ikke objekter
+            itemdict["vareafgiftssats"] = itemdict["vareafgiftssats"]["id"]
+            initial.append(itemdict)
+        kwargs["initial"] = initial
         return kwargs
 
     def get_context_data(self, **context: Dict[str, Any]) -> Dict[str, Any]:
