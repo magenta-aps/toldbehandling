@@ -167,4 +167,8 @@ CACHES = {
     },
 }
 
+# Når SAML-IdP'en POSTer til os, skal vi modtage vores session-cookie fra browseren
+# https://docs.djangoproject.com/en/4.2/ref/settings/#session-cookie-samesite
+SESSION_COOKIE_SAMESITE = "None"
+
 from .login_settings import *  # noqa
