@@ -44,4 +44,9 @@ urlpatterns = [
         name="login-repeat",
     ),
     path("i18n/", include("django.conf.urls.i18n")),
+    path(
+        "payment/checkout/<int:anmeldelse_id>",
+        views.PaymentCheckoutView.as_view(),
+        name="payment_checkout",
+    ),
 ]

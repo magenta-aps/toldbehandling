@@ -1,0 +1,112 @@
+{% load static %}
+{% load i18n %}
+{% load l10n %}
+{% load common_tags %}
+
+<!doctype html>
+<html lang="da">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Checkout</title>
+    <link rel="stylesheet" href="{% static 'bootstrap/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'toldbehandling/css/style.css' %}">
+    <script src="{% static 'jquery/jquery-3.5.1.min.js' %}"></script>
+    <script src="{% static 'bootstrap/bootstrap.bundle.min.js' %}"></script>
+    <script src="https://test.checkout.dibspayment.eu/v1/checkout.js?v=1"></script>
+</head>
+
+<body>
+    <div class="container-fluid">
+        <h1>Betal <a href="{% url 'tf10_edit' id=anmeldelse_id %}">#{{ anmeldelse_id }}</a></h1>
+
+        <!-- Customs Declaration items -->
+        <div class="row">
+            <div class="col-6 p-4 bg-light">
+                <h2>{% translate 'Varelinjer' %}</h2>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Vareart</th>
+                            <th>Varekode</th>
+                            <th>kg | lister i alt</th>
+                            <th>Antal</th>
+                            <th>Fakturabeløb</th>
+                            <th>Afgiftssats</th>
+                            <th>Afgiftsbeløb</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in anmeldelse.varelinjer %}
+                        <tr>
+                            <td>{{ item.vareafgiftssats.vareart_da }}</td>
+                            <td>{{ item.vareafgiftssats.afgiftsgruppenummer|stringformat:"09d" }}</td>
+                            <td>{{ item.mængde }}</td>
+                            <td>{{ item.antal }}</td>
+                            <td>{{ item.fakturabeløb }}</td>
+                            <td>{{ item.vareafgiftssats.text }}</td>
+                            <td>{{ item.afgiftsbeløb }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6">
+                                {% translate "Ingen søgeresultater" %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="6" class="text-right">{% translate 'Total' %}</td>
+                            <td>{{ anmeldelse_total_afgift }}</td>
+                        </tr>
+                    </tfoot>
+                </table>
+
+                <h2>{% translate 'Detaljer' %}</h2>
+                <div class="row">
+                    <div class="col-6">
+                        <div><strong>{% translate 'Afsender' %}</strong></div>
+                        <div>
+                            <p class="mb-0">{{ anmeldelse.afsender.cvr|unlocalize }}</p>
+                            <p class="mb-0">{{ anmeldelse.afsender.navn }}</p>
+                            <p class="mb-0">{{ anmeldelse.afsender.adresse }}</p>
+                            <p class="mb-0">{{ anmeldelse.afsender.postnummer|unlocalize }}, {{ anmeldelse.afsender.by }}</p>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div><strong>{% translate 'Modtager' %}</strong></div>
+                        <div>
+                            <p class="mb-0">{{ anmeldelse.modtager.cvr|unlocalize }}</p>
+                            <p class="mb-0">{{ anmeldelse.modtager.navn }}</p>
+                            <p class="mb-0">{{ anmeldelse.modtager.adresse }}</p>
+                            <p class="mb-0">{{ anmeldelse.modtager.postnummer|unlocalize }}, {{ anmeldelse.modtager.by }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 p-2">
+                <h2>{% translate 'Betaling' %}</h2>
+                <div id="payment-checkout-embeded"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        console.log("mangeta-test")
+        var checkoutOptions = {
+            checkoutKey: "test-checkout-key-2b04e51b4cb74ea5843977bd302c2e7e",
+            paymentId: "02090000655e234d7767f7b0bcac1631",
+            containerId: "payment-checkout-embeded",
+            language: "da-DK",
+            theme: {
+                buttonRadius: "5px"
+            }
+        };
+        var checkout = new Dibs.Checkout(checkoutOptions);
+        console.log(checkout)
+    </script>
+</body>
+
+</html>

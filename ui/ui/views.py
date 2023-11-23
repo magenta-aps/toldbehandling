@@ -7,6 +7,7 @@ from typing import Any, Dict
 from django.contrib import messages
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
+from django.views.generic import TemplateView
 from told_common import forms as common_forms
 from told_common import views as common_views
 
@@ -49,6 +50,15 @@ class TF10FormCreateView(
         Return to previous page. Make sure that the last form is displayed in the first
         row and highlight it. Also show a success message.
         """
+        # TODO: Check for payment, if so, redirect to payment checkout page
+        requires_payment = True
+        if requires_payment:
+            # TODO: Create a payment
+
+            return reverse(
+                "payment_checkout", kwargs={"anmeldelse_id": self.anmeldelse_id}
+            )
+
         return (
             reverse("tf10_list")
             + "?sort=id"
@@ -166,3 +176,27 @@ class TF10ListView(common_views.TF10ListView):
 
 class TF10FormUpdateView(common_views.TF10FormUpdateView):
     extend_template = "ui/layout.html"
+
+
+# Payment views
+
+
+class PaymentCheckoutView(HasRestClientMixin, TemplateView):
+    template_name = "ui/payment/checkout.html"
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # Fetch "anmeldelse" detailss
+        anmeldelse_id = self.kwargs["anmeldelse_id"]
+        context["anmeldelse"] = self.rest_client.afgiftanmeldelse.get(
+            anmeldelse_id, full=True, include_varelinjer=True
+        )
+        context["anmeldelse_total_afgift"] = sum(
+            varelinje.afgiftsbeløb for varelinje in context["anmeldelse"].varelinjer
+        )
+
+        return context
