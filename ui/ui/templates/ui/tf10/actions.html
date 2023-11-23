@@ -2,3 +2,7 @@
 {% if item.godkendt is None %}
 <a class="btn btn-primary btn-sm" href="{% url 'tf10_edit' id=item.id %}">{% translate 'Redigér' %}</a>
 {% endif %}
+
+{% if item.godkendt is None %}
+<a class="btn btn-primary btn-sm" href="{% url 'payment_checkout' anmeldelse_id=item.id %}">{% translate 'Betal' %}</a>
+{% endif %}
