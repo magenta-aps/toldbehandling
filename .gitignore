@@ -5,7 +5,6 @@ env/
 docker-compose.override.yml
 data/er/*
 !data/er/.gitkeep
-/.pre-commit-config.yaml
 rest/rest/static/doc/*
 *.sqlite3
 **/.coverage
