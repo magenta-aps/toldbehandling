@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-11-23 12:39+0000\n"
+"POT-Creation-Date: 2023-11-24 07:43+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -297,6 +297,10 @@ msgid ""
 msgstr ""
 
 #: told_common/templates/told_common/tf10/form.html
+msgid "Oplysninger om fragt"
+msgstr ""
+
+#: told_common/templates/told_common/tf10/form.html
 msgid "Fragttype"
 msgstr ""
 
@@ -314,6 +318,10 @@ msgstr ""
 
 #: told_common/templates/told_common/tf10/form.html
 msgid "Betales af (kun relevant for luftfragt)"
+msgstr ""
+
+#: told_common/templates/told_common/tf10/form.html
+msgid "Afgifter"
 msgstr ""
 
 #: told_common/templates/told_common/tf10/form.html
