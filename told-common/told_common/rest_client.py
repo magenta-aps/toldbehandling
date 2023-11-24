@@ -77,7 +77,7 @@ class ModelRestClient:
             )
         except FileNotFoundError:
             print(
-                f"Fil ikke fundet [id={data.get('id', None)}, felt={field}]: "
+                f"Fil ikke fundet [id={data.get('id')}, felt={field}]: "
                 f"{settings.MEDIA_ROOT}{unquote(data[field])}"
             )
             data[field] = None
@@ -90,7 +90,7 @@ class AfsenderRestClient(ModelRestClient):
         mapped = {
             d: filter_dict_none(
                 {
-                    key: store.get("afsender_" + key, None) or store.get(key, None)
+                    key: store.get("afsender_" + key) or store.get(key)
                     for key in (
                         "navn",
                         "adresse",
@@ -113,7 +113,7 @@ class AfsenderRestClient(ModelRestClient):
 
     def update(self, id: int, data: dict) -> int:
         mapped = {
-            key: data.get("afsender_" + key, None) or data.get(key, None)
+            key: data.get("afsender_" + key) or data.get(key)
             for key in (
                 "navn",
                 "adresse",
@@ -135,7 +135,7 @@ class ModtagerRestClient(ModelRestClient):
         mapped = {
             d: filter_dict_none(
                 {
-                    key: store.get("modtager_" + key, None) or store.get(key, None)
+                    key: store.get("modtager_" + key) or store.get(key)
                     for key in (
                         "navn",
                         "adresse",
@@ -158,7 +158,7 @@ class ModtagerRestClient(ModelRestClient):
 
     def update(self, id: int, data: dict) -> int:
         mapped = {
-            key: data.get("modtager_" + key, None) or data.get(key, None)
+            key: data.get("modtager_" + key) or data.get(key)
             for key in (
                 "navn",
                 "adresse",
@@ -234,12 +234,12 @@ class FragtforsendelseRestClient(ModelRestClient):
         if fragttype in ("luftfragt", "skibsfragt"):
             return filter_dict_none(
                 {
-                    "fragtbrevsnummer": data.get("fragtbrevnr", None),
+                    "fragtbrevsnummer": data.get("fragtbrevnr"),
                     "forsendelsestype": "S" if fragttype == "skibsfragt" else "F",
-                    "forbindelsesnr": data.get("forbindelsesnr", None),
+                    "forbindelsesnr": data.get("forbindelsesnr"),
                     "fragtbrev": RestClient._uploadfile_to_base64str(file),
                     "fragtbrev_navn": file.name if file else None,
-                    "afgangsdato": data.get("afgangsdato", None),
+                    "afgangsdato": data.get("afgangsdato"),
                 },
             )
         return None
@@ -258,7 +258,7 @@ class FragtforsendelseRestClient(ModelRestClient):
         ):
             if data[x] != getattr(existing, x) if hasattr(existing, x) else existing[x]:
                 return False
-        if data.get("fragtbrev", None) is not None:
+        if data.get("fragtbrev") is not None:
             return False
         return True
 
@@ -300,14 +300,14 @@ class AfgiftanmeldelseRestClient(ModelRestClient):
         # med eksisterende data fra REST for at se om de stemmer overens.
         # False: data passer ikke, og der skal foretages en opdatering
         # True: data passer, og det er ikke nødvendigt at opdatere.
-        if data.get("leverandørfaktura", None):
+        if data.get("leverandørfaktura"):
             return False
-        if data.get("leverandørfaktura_nummer", None) != existing.get(
-            "leverandørfaktura_nummer", None
+        if data.get("leverandørfaktura_nummer") != existing.get(
+            "leverandørfaktura_nummer"
         ):
             return False
         for key in ("afsender", "modtager", "postforsendelse", "fragtforsendelse"):
-            existing_sub = existing.get(key, None)  # existing[key] kan være None
+            existing_sub = existing.get(key)  # existing[key] kan være None
             existing_id = existing_sub["id"] if existing_sub is not None else None
             if data[f"{key}_id"] != existing_id:
                 return False
@@ -323,8 +323,8 @@ class AfgiftanmeldelseRestClient(ModelRestClient):
         fragtforsendelse_id: Optional[int],
     ) -> dict:
         return {
-            "leverandørfaktura_nummer": data.get("leverandørfaktura_nummer", None),
-            "indførselstilladelse": data.get("indførselstilladelse", None),
+            "leverandørfaktura_nummer": data.get("leverandørfaktura_nummer"),
+            "indførselstilladelse": data.get("indførselstilladelse"),
             "afsender_id": afsender_id,
             "modtager_id": modtager_id,
             "postforsendelse_id": postforsendelse_id,
@@ -432,7 +432,7 @@ class AfgiftanmeldelseRestClient(ModelRestClient):
         else:
             item = self.rest.get(f"afgiftsanmeldelse/{id}")
         self.set_file(item, "leverandørfaktura")
-        if item.get("fragtforsendelse", None):
+        if item.get("fragtforsendelse"):
             self.set_file(item["fragtforsendelse"], "fragtbrev")
         item["varelinjer"] = None
         item["notater"] = None
@@ -699,7 +699,7 @@ class RestClient:
     @classmethod
     def login_saml_user(cls, saml_data: dict) -> Tuple[Dict, JwtTokenInfo]:
         cpr = saml_data["cpr"]
-        cvr = saml_data.get("cvr", None)
+        cvr = saml_data.get("cvr")
         client = RestClient(RestClient.login("admin", "admin"))
         try:
             user = client.get(f"user/cpr/{int(cpr)}")
@@ -712,7 +712,7 @@ class RestClient:
                         "username": " / ".join(filter(None, [cpr, cvr])),
                         "first_name": saml_data["firstname"],
                         "last_name": saml_data["lastname"],
-                        "email": saml_data.get("email", None) or "",
+                        "email": saml_data.get("email") or "",
                         "is_superuser": False,
                         "groups": ["Indberettere"],
                     },

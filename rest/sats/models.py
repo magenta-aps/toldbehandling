@@ -52,7 +52,7 @@ class Afgiftstabel(models.Model):
         # (tidl. prev, ny prev, tabellen selv)
         # Det er nemmest og sikrest at loope over hele banden,
         # så vi er sikre på at ramme alle
-        update_fields = kwargs.get("update_fields", None)
+        update_fields = kwargs.get("update_fields")
         if not update_fields or "gyldig_fra" in update_fields:
             gyldig_til = None
             for item in Afgiftstabel.objects.filter(kladde=False).order_by(

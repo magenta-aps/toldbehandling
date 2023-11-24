@@ -479,7 +479,7 @@ class AfgiftstabelListView(PermissionsRequiredMixin, HasRestClientMixin, GetForm
         return self.render_to_response(context)
 
     def map_value(self, item, key):
-        value = item.get(key, None)
+        value = item.get(key)
         if key == "actions":
             return loader.render_to_string(
                 self.actions_template,

@@ -71,7 +71,7 @@ class AfgiftsanmeldelseTest(RestMixin, TestCase):
 
     def nest_expected_data(self, item):
         for key, value in self.data_map.items():
-            if item.get(key, None) or item.get(key + "_id"):
+            if item.get(key) or item.get(key + "_id"):
                 if key + "_id" in item:
                     del item[key + "_id"]
                 item[key] = {

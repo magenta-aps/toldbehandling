@@ -28,7 +28,7 @@ from django.http import (  # isort: skip
 class LoginRequiredMixin:
     def needs_login(self, request):
         if getattr(settings, "LOGIN_PROVIDER_CLASS", None):
-            saml_data = request.session.get(settings.LOGIN_SESSION_DATA_KEY, None)
+            saml_data = request.session.get(settings.LOGIN_SESSION_DATA_KEY)
             if saml_data:
                 # Get or create django User, obtain REST token
                 user, token = RestClient.login_saml_user(saml_data)
