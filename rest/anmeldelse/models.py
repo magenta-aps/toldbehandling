@@ -150,7 +150,11 @@ class Varelinje(models.Model):
         blank=True,
     )  # DecimalField?
     fakturabeløb = models.DecimalField(
-        max_digits=16, decimal_places=2, validators=[MinValueValidator(0)]
+        max_digits=16,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(0)],
     )
     afgiftsbeløb = models.DecimalField(
         max_digits=16,

@@ -345,24 +345,36 @@ class BlanketTest(TestMixin, HasLogin, TestCase):
                 "enhed": "ant",
                 "afgiftssats": "1.00",
             },
+            3: {
+                "id": 3,
+                "afgiftstabel": 1,
+                "vareart_da": "Ethjulede cykler",
+                "vareart_kl": "Ethjulede cykler",
+                "afgiftsgruppenummer": 22446688,
+                "enhed": "pct",
+                "afgiftssats": "0.50",
+            },
         }
 
-        for required_field in (
-            "vareafgiftssats",
-            "fakturabeløb",
-        ):
+        for required_field in ("vareafgiftssats",):
             data = {**self.subformdata1}
             del data[required_field]
             form = TF10VareForm(data=data, varesatser=varesatser)
             self.assertTrue(required_field in form.errors)
             self.assertEquals(form.errors[required_field], ["Dette felt er påkrævet."])
 
-        for required_field, vareart in (("mængde", 1), ("antal", 2)):
+        for required_field, vareart in (
+            ("mængde", 1),
+            ("antal", 2),
+            ("fakturabeløb", 3),
+        ):
             data = {**self.subformdata1, "vareafgiftssats": vareart}
             del data[required_field]
             form = TF10VareForm(data=data, varesatser=varesatser)
-            self.assertTrue(required_field in form.errors)
-            self.assertEquals(form.errors[required_field], ["Dette felt er påkrævet."])
+            self.assertTrue(required_field in form.errors, required_field)
+            self.assertEquals(
+                form.errors[required_field], ["Dette felt er påkrævet."], required_field
+            )
 
     @patch.object(requests.Session, "get")
     @patch.object(

@@ -35,3 +35,7 @@ class JSONEncoder(DjangoJSONEncoder):
         if dataclasses.is_dataclass(o):
             return dataclasses.asdict(o)
         return super().default(o)
+
+
+def cast_or_none(dest_class, value):
+    return dest_class(value) if value is not None else None
