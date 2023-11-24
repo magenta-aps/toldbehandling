@@ -356,7 +356,7 @@ class AfgiftsanmeldelseAPI:
 
 
 class VarelinjeIn(ModelSchema):
-    fakturabeløb: str
+    fakturabeløb: str = None
     afgiftsanmeldelse_id: int = None
     vareafgiftssats_id: int = None
 

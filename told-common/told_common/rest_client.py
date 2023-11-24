@@ -18,7 +18,7 @@ from django.core.files.uploadedfile import InMemoryUploadedFile, UploadedFile
 from django.core.serializers.json import DjangoJSONEncoder
 from django.http import HttpRequest
 from requests import HTTPError, Session
-from told_common.util import filter_dict_none
+from told_common.util import cast_or_none, filter_dict_none
 
 from told_common.data import (  # isort: skip
     Afgiftsanmeldelse,
@@ -469,7 +469,7 @@ class VarelinjeRestClient(ModelRestClient):
     def map(data: dict, afgiftsanmeldelse_id: int) -> dict:
         return {
             "afgiftsanmeldelse_id": afgiftsanmeldelse_id,
-            "fakturabeløb": str(data["fakturabeløb"]),
+            "fakturabeløb": cast_or_none(str, data["fakturabeløb"]),
             "vareafgiftssats_id": int(data["vareafgiftssats"]),
             "antal": data["antal"],
             "mængde": data["mængde"],

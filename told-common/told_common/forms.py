@@ -2,6 +2,7 @@
 #
 # SPDX-License-Identifier: MPL-2.0
 from datetime import date
+from decimal import Decimal
 from typing import Optional
 
 from django import forms
@@ -10,7 +11,9 @@ from django.forms import Form, formset_factory
 from django.utils import translation
 from django.utils.translation import gettext_lazy as _
 from requests import HTTPError
+from told_common.data import Vareafgiftssats
 from told_common.rest_client import RestClient
+from told_common.util import cast_or_none
 
 from told_common.form_mixins import (  # isort: skip
     BootstrapForm,
@@ -277,7 +280,7 @@ class TF10VareForm(BootstrapForm):
     vareafgiftssats = forms.ChoiceField(choices=())
     mængde = forms.DecimalField(min_value=0, required=False)
     antal = forms.IntegerField(min_value=1, required=False)
-    fakturabeløb = forms.DecimalField(min_value=1, decimal_places=2)
+    fakturabeløb = forms.DecimalField(min_value=1, decimal_places=2, required=False)
 
     def clean_mængde(self) -> int:
         mængde = self.cleaned_data["mængde"]
@@ -285,7 +288,10 @@ class TF10VareForm(BootstrapForm):
             "vareafgiftssats" in self.cleaned_data
         ):  # If not, it will fail validation elsewhere
             varesats = self.varesatser[int(self.cleaned_data["vareafgiftssats"])]
-            if not mængde and varesats["enhed"] in ("kg", "l"):
+            if not mængde and varesats["enhed"] in (
+                Vareafgiftssats.Enhed.KILOGRAM.value,
+                Vareafgiftssats.Enhed.LITER.value,
+            ):
                 raise ValidationError(
                     self.fields["mængde"].error_messages["required"], code="required"
                 )
@@ -297,11 +303,27 @@ class TF10VareForm(BootstrapForm):
             "vareafgiftssats" in self.cleaned_data
         ):  # If not, it will fail validation elsewhere
             varesats = self.varesatser[int(self.cleaned_data["vareafgiftssats"])]
-            if not antal and varesats["enhed"] == "ant":
+            if not antal and varesats["enhed"] == Vareafgiftssats.Enhed.ANTAL.value:
                 raise ValidationError(
                     self.fields["antal"].error_messages["required"], code="required"
                 )
         return antal
+
+    def clean_fakturabeløb(self) -> Optional[Decimal]:
+        fakturabeløb = self.cleaned_data["fakturabeløb"]
+        if (
+            "vareafgiftssats" in self.cleaned_data
+        ):  # If not, it will fail validation elsewhere
+            varesats = self.varesatser[int(self.cleaned_data["vareafgiftssats"])]
+            if not fakturabeløb and varesats["enhed"] in (
+                Vareafgiftssats.Enhed.PROCENT.value,
+                Vareafgiftssats.Enhed.SAMMENSAT.value,
+            ):
+                raise ValidationError(
+                    self.fields["fakturabeløb"].error_messages["required"],
+                    code="required",
+                )
+        return cast_or_none(Decimal, fakturabeløb)
 
 
 TF10VareFormSet = formset_factory(TF10VareForm, min_num=1, extra=0)
