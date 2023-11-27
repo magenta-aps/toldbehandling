@@ -7,11 +7,14 @@
 {% block content %}
 <div class="mx-5">
     <h1>Afgiftsanmeldelse {{object.id}} (version {{index}})</h1>
-    {% if object.godkendt == True %}
+
+    {% if object.status == "afsluttet" %}
+    <span class="badge bg-success">Sendt til Prisme</span>
+    {% elif object.status == "godkendt" %}
     <span class="badge bg-success">Godkendt</span>
-    {% elif object.godkendt == False %}
+    {% elif object.status == "afvist" %}
     <span class="badge bg-danger">Afvist</span>
-    {% else %}
+    {% elif object.status == "ny" %}
     <span class="badge bg-secondary">Ny</span>
     {% endif %}
 

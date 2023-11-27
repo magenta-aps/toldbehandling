@@ -10,6 +10,8 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator
 from django.db import models
+from django.db.models.signals import post_delete, post_save
+from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
 from forsendelse.models import Fragtforsendelse, Postforsendelse
 from sats.models import Vareafgiftssats
@@ -86,10 +88,14 @@ class Afgiftsanmeldelse(models.Model):
         auto_now_add=True,
         db_index=True,
     )
-    godkendt = models.BooleanField(
-        null=True,
-        blank=True,
-        default=None,
+    status = models.CharField(
+        choices=(
+            ("ny", "ny"),
+            ("afvist", "afvist"),
+            ("godkendt", "godkendt"),
+            ("afsluttet", "afsluttet"),
+        ),
+        default="ny",
     )
 
     def clean(self):
@@ -210,3 +216,19 @@ class PrismeResponse(models.Model):
     rec_id = models.BigIntegerField(null=False)
     tax_notification_number = models.BigIntegerField(null=False)
     invoice_date = models.DateTimeField(null=False)
+
+
+@receiver(post_save, sender=PrismeResponse, dispatch_uid="on_add_prismeresponse")
+def on_add_prismeresponse(
+    sender, instance, created, raw, using, update_fields, **kwargs
+):
+    if created:
+        instance.afgiftsanmeldelse.status = "afsluttet"
+        instance.afgiftsanmeldelse.save()
+
+
+@receiver(post_delete, sender=PrismeResponse, dispatch_uid="on_delete_prismeresponse")
+def on_delete_prismeresponse(sender, instance, **kwargs):
+    if not instance.afgiftsanmeldelse.prismeresponse_set.exists():
+        instance.afgiftsanmeldelse.status = "godkendt"
+        instance.afgiftsanmeldelse.save()

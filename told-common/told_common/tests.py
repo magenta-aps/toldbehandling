@@ -443,7 +443,7 @@ class AnmeldelseListViewTest(HasLogin):
                 "beregnet_faktureringsdato": "2023-11-10",
                 "afgift_total": None,
                 "fragtforsendelse": None,
-                "godkendt": True,
+                "status": "godkendt",
             },
             {
                 "id": 2,
@@ -486,7 +486,7 @@ class AnmeldelseListViewTest(HasLogin):
                 "beregnet_faktureringsdato": "2023-11-10",
                 "afgift_total": None,
                 "fragtforsendelse": None,
-                "godkendt": False,
+                "status": "afvist",
             },
             {
                 "id": 3,
@@ -529,7 +529,7 @@ class AnmeldelseListViewTest(HasLogin):
                 "beregnet_faktureringsdato": "2023-11-10",
                 "afgift_total": None,
                 "fragtforsendelse": None,
-                "godkendt": None,
+                "status": "ny",
             },
         ]
 
@@ -543,7 +543,6 @@ class AnmeldelseListViewTest(HasLogin):
         json_content = None
         content = None
         status_code = None
-        true_false_dict = {"True": True, "False": False}
         if path == expected_prefix + "user":
             json_content = {
                 "username": "admin",
@@ -560,18 +559,10 @@ class AnmeldelseListViewTest(HasLogin):
                 items = list(
                     filter(lambda i: i["dato"] >= query["dato_efter"][0], items)
                 )
-            if "godkendt" in query:
+            if "status" in query:
                 items = list(
                     filter(
-                        lambda i: i["godkendt"]
-                        == true_false_dict[query["godkendt"][0]],
-                        items,
-                    )
-                )
-            if "godkendt_is_null" in query:
-                items = list(
-                    filter(
-                        lambda i: i["godkendt"] is None,
+                        lambda i: i["status"] == query["status"][0],
                         items,
                     )
                 )
@@ -610,9 +601,9 @@ class AnmeldelseListViewTest(HasLogin):
                 items.sort(key=lambda x: x["modtager"]["navn"], reverse=reverse)
             elif sort == ["dato"]:
                 items.sort(key=lambda x: x["dato"], reverse=reverse)
-            elif sort == ["godkendt"]:
+            elif sort == ["status"]:
                 items.sort(
-                    key=lambda x: (x["godkendt"] is None, x["godkendt"]),
+                    key=lambda x: x["status"],
                     reverse=reverse,
                 )
 
@@ -728,7 +719,15 @@ class AnmeldelseListViewTest(HasLogin):
                 "Afsender": "Testfirma 4",
                 "Modtager": "Testfirma 1",
                 "Status": "Afvist",
-                "Handlinger": "Vis" if self.can_view else "",
+                "Handlinger": " ".join(
+                    filter(
+                        None,
+                        [
+                            "Redigér" if self.can_edit else None,
+                            "Vis" if self.can_view else None,
+                        ],
+                    )
+                ),
             },
             {
                 "Nummer": "3",
@@ -801,7 +800,7 @@ class AnmeldelseListViewTest(HasLogin):
                         "postnummer": 1234,
                         "telefon": "123456",
                     },
-                    "godkendt": True,
+                    "status": "Godkendt",
                     "actions": _view_button(1) or "",
                 },
                 {
@@ -829,8 +828,16 @@ class AnmeldelseListViewTest(HasLogin):
                         "postnummer": 1234,
                         "telefon": "123456",
                     },
-                    "godkendt": False,
-                    "actions": _view_button(2) or "",
+                    "status": "Afvist",
+                    "actions": "\n".join(
+                        filter(
+                            None,
+                            [
+                                _edit_button(2),
+                                _view_button(2),
+                            ],
+                        )
+                    ),
                 },
                 {
                     "select": "",
@@ -857,7 +864,7 @@ class AnmeldelseListViewTest(HasLogin):
                         "postnummer": 1234,
                         "telefon": "123456",
                     },
-                    "godkendt": None,
+                    "status": "Ny",
                     "actions": "\n".join(
                         filter(
                             None,
@@ -893,9 +900,9 @@ class AnmeldelseListViewTest(HasLogin):
             ("dato", "", [3, 2, 1]),
             ("dato", "asc", [3, 2, 1]),
             ("dato", "desc", [1, 2, 3]),
-            ("godkendt", "", [2, 1, 3]),
-            ("godkendt", "asc", [2, 1, 3]),
-            ("godkendt", "desc", [3, 1, 2]),
+            ("status", "", [2, 1, 3]),
+            ("status", "asc", [2, 1, 3]),
+            ("status", "desc", [3, 1, 2]),
         ]
         for test in sort_tests:
             url = self.list_url + f"?json=1&sort={test[0]}&order={test[1]}"
@@ -917,10 +924,10 @@ class AnmeldelseListViewTest(HasLogin):
             ("dato_efter", "2023-09-02", {1, 2}),
             ("dato_efter", "2023-09-03", {1}),
             ("dato_efter", "2023-09-04", set()),
-            ("godkendt", "True", {1}),
-            ("godkendt", "False", {2}),
-            ("godkendt", "", {1, 2, 3}),
-            ("godkendt", "explicitly_none", {3}),
+            ("status", "godkendt", {1}),
+            ("status", "afvist", {2}),
+            ("status", "", {1, 2, 3}),
+            ("status", "ny", {3}),
             ("id", "1", {1}),
             ("id", "2", {2}),
             ("afsender", "20", {1}),

@@ -327,7 +327,7 @@ class ListView(FormView):
     def form_valid(self, form):
         search_data = {"offset": 0, "limit": self.list_size}
         for key, value in form.cleaned_data.items():
-            if key not in ("json",) and value not in ("", None, "explicitly_none"):
+            if key not in ("json",) and value not in ("", None):
                 if type(value) is date:
                     value = value.isoformat()
                 elif key in ("offset", "limit"):
@@ -420,7 +420,7 @@ class TF10ListView(
                 "dato",
                 "afsender",
                 "modtager",
-                "godkendt",
+                "status",
                 "actions",
             )
         }
@@ -439,15 +439,14 @@ class TF10ListView(
                 self.request,
             )
         value = getattr(item, key)
+        if key == "status":
+            return _(value.capitalize())
         return value
 
     def get_form_kwargs(self) -> Dict[str, Any]:
         kwargs = super().get_form_kwargs()
-        query_dict = self.request.GET.copy()
 
-        if query_dict.get("godkendt", "") == "explicitly_none":
-            query_dict["godkendt_is_null"] = "True"
-        kwargs["data"] = query_dict
+        kwargs["data"] = self.request.GET.copy()
 
         # Will be picked up by TF10SearchForm's constructor
         kwargs["varesatser"] = dict(
