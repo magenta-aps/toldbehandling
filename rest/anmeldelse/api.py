@@ -88,7 +88,6 @@ class AfgiftsanmeldelseOut(ModelSchema):
             "afgift_total",
             "betalt",
             "dato",
-            "status",
             "modtager_betaler",
         ]
 
@@ -102,12 +101,20 @@ class AfgiftsanmeldelseOut(ModelSchema):
             beregnet_faktureringsdato = Afgiftsanmeldelse.beregn_faktureringsdato(obj)
         return beregnet_faktureringsdato.isoformat()
 
+    @staticmethod
+    def resolve_status(obj: Afgiftsanmeldelse) -> str:
+        return Afgiftsanmeldelse.Blanketstatus(obj.status).label
+
 
 class AfgiftsanmeldelseFullOut(AfgiftsanmeldelseOut):
     afsender: AfsenderOut
     modtager: ModtagerOut
     fragtforsendelse: Optional[FragtforsendelseOut]
     postforsendelse: Optional[PostforsendelseOut]
+
+    @staticmethod
+    def resolve_status(obj: Afgiftsanmeldelse) -> str:
+        return Afgiftsanmeldelse.Blanketstatus(obj.status).label
 
 
 class AfgiftsanmeldelseHistoryOut(AfgiftsanmeldelseOut):

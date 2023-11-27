@@ -24,7 +24,7 @@ def afgiftsanmeldelse_upload_to(instance, filename):
 
 class Afgiftsanmeldelse(models.Model):
     class Meta:
-        ordering = ["id"]
+        ordering = ["status", "dato"]
 
     history = HistoricalRecords()
     oprettet_af = models.ForeignKey(
@@ -88,14 +88,17 @@ class Afgiftsanmeldelse(models.Model):
         auto_now_add=True,
         db_index=True,
     )
-    status = models.CharField(
-        choices=(
-            ("ny", "ny"),
-            ("afvist", "afvist"),
-            ("godkendt", "godkendt"),
-            ("afsluttet", "afsluttet"),
-        ),
-        default="ny",
+
+    class Blanketstatus(models.IntegerChoices):
+        # Choices for status field
+        ny = 1, _("ny")
+        afvist = 2, _("afvist")
+        godkendt = 3, _("godkendt")
+        afsluttet = 4, _("afsluttet")
+
+    status = models.PositiveSmallIntegerField(
+        choices=Blanketstatus.choices,
+        default=Blanketstatus.ny,
     )
 
     def clean(self):
@@ -223,7 +226,7 @@ def on_add_prismeresponse(
     sender, instance, created, raw, using, update_fields, **kwargs
 ):
     if created:
-        instance.afgiftsanmeldelse.status = "afsluttet"
+        instance.afgiftsanmeldelse.status = Afgiftsanmeldelse.Blanketstatus.ny
         instance.afgiftsanmeldelse.save()
 
 
