@@ -66,7 +66,7 @@ class PartialAfgiftsanmeldelseIn(ModelSchema):
             "modtager_betaler",
             "indførselstilladelse",
             "betalt",
-            "godkendt",
+            "status",
             "modtager_betaler",
         ]
         model_fields_optional = "__all__"
@@ -88,7 +88,7 @@ class AfgiftsanmeldelseOut(ModelSchema):
             "afgift_total",
             "betalt",
             "dato",
-            "godkendt",
+            "status",
             "modtager_betaler",
         ]
 
@@ -147,10 +147,7 @@ class AfgiftsanmeldelseFilterSchema(FilterSchema):
     modtager_betaler: Optional[bool]
     indførselstilladelse: Optional[str]
     betalt: Optional[bool]
-    godkendt: Optional[bool]
-    godkendt_is_null: Optional[bool] = Field(
-        q="godkendt__isnull",
-    )
+    status: Optional[str]
     dato_efter: Optional[date] = Field(q="dato__gte")
     dato_før: Optional[date] = Field(q="dato__lt")
     vareart: Optional[str] = Field(q="varelinje__vareafgiftssats__vareart_da")

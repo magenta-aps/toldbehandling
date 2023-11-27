@@ -26,9 +26,9 @@
 
     <form method="get" action="{% url 'tf10_list' %}">
         <div class="row">
-            <div class="col-4"><label for="{{form.godkendt.name}}" class="form-label">{% translate "Status" %}</label></div>
+            <div class="col-4"><label for="{{form.status.name}}" class="form-label">{% translate "Status" %}</label></div>
             <div class="col-8">
-                {{form.godkendt}}
+                {{form.status}}
             </div>
         </div>
         <div class="row">
@@ -137,7 +137,7 @@
             <th data-sortable="true" data-field="dato">{% translate "Dato" %}</th>
             <th data-sortable="true" data-field="afsender" data-formatter="aktørFormatter">{% translate "Afsender" %}</th>
             <th data-sortable="true" data-field="modtager" data-formatter="aktørFormatter">{% translate "Modtager" %}</th>
-            <th data-sortable="true" data-field="godkendt" data-formatter="statusFormatter">{% translate "Status" %}</th>
+            <th data-sortable="true" data-field="status" data-formatter="statusFormatter">{% translate "Status" %}</th>
             <th data-field="actions">{% translate "Handlinger" %}</th>
         </tr>
         </thead>
@@ -153,14 +153,18 @@
             <td>{{item.dato|date:"Y-m-d"}}</td>
             <td>{{item.afsender.navn}}</td>
             <td>{{item.modtager.navn}}</td>
-            <td>{{item.godkendt|godkendt}}</td>
+            <td>{% translate item.status|capfirst %}</td>
             <td>
-                {% include actions_template with item=item %}
+                {{item.actions}}
             </td>
         </tr>
         {% empty %}
         <tr>
+            {% if can_edit_multiple %}
+            <td colspan="7">
+                {% else %}
             <td colspan="6">
+            {% endif %}
                 {% translate "Ingen søgeresultater" %}
             </td>
         </tr>
@@ -206,6 +210,7 @@ function queryParams(params){  // Kaldes af bootstrap-table fordi vi peger på d
     return params;
 }
 function statusFormatter(value) {
+    console.log(value, this, arguments)
     if (value === true) {
         return "{% translate 'Godkendt' %}";
     } else if (value === false) {
@@ -218,6 +223,15 @@ function statusFormatter(value) {
 function aktørFormatter(value) {
     if (typeof(value) === "object") {
         return value["navn"];
+    }
+    return value;
+}
+function janejFormatter(value) {
+    if (value === true) {
+        return "{% translate 'Ja' %}"
+    }
+    if (value === false) {
+        return "{% translate 'Nej' %}"
     }
     return value;
 }

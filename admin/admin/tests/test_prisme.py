@@ -59,7 +59,7 @@ class PrismeTest(TestCase):
             modtager_betaler=False,
             indførselstilladelse="1234",
             betalt=True,
-            godkendt=True,
+            status="godkendt",
             dato=date(2023, 11, 13),
             varelinjer=[
                 Varelinje(

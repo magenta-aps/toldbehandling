@@ -294,6 +294,7 @@ class Afgiftsanmeldelse(ToldDataClass):
     indførselstilladelse: str
     afgift_total: Decimal
     betalt: bool
+    status: str
     dato: date = field(
         metadata=config(
             encoder=date.isoformat,
@@ -301,7 +302,6 @@ class Afgiftsanmeldelse(ToldDataClass):
             mm_field=fields.Date(format="iso"),
         ),
     )
-    godkendt: bool
     varelinjer: List[Varelinje]
     beregnet_faktureringsdato: date = field(
         metadata=config(

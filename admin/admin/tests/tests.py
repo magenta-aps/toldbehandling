@@ -326,7 +326,7 @@ class TestGodkend(PermissionsTest, TestCase):
                 "afgift_total": "5000.00",
                 "betalt": False,
                 "dato": "2023-08-22",
-                "godkendt": False,
+                "status": "afvist",
                 "beregnet_faktureringsdato": "2023-10-10",
             }
         elif path == expected_prefix + "afgiftsanmeldelse/1/full":
@@ -369,7 +369,7 @@ class TestGodkend(PermissionsTest, TestCase):
                 "afgift_total": "5000.00",
                 "betalt": False,
                 "dato": "2023-08-22",
-                "godkendt": False,
+                "status": "afvist",
                 "beregnet_faktureringsdato": "2023-10-10",
             }
         elif path == expected_prefix + "fragtforsendelse/1":
@@ -502,7 +502,7 @@ class TestGodkend(PermissionsTest, TestCase):
         for url, data in self.patched:
             patched_map[url].append(json.loads(data))
         self.assertEquals(
-            patched_map[prefix + "afgiftsanmeldelse/1"], [{"godkendt": True}]
+            patched_map[prefix + "afgiftsanmeldelse/1"], [{"status": "godkendt"}]
         )
 
     @patch.object(requests.sessions.Session, "patch")
@@ -517,7 +517,7 @@ class TestGodkend(PermissionsTest, TestCase):
         for url, data in self.patched:
             patched_map[url].append(json.loads(data))
         self.assertEquals(
-            patched_map[prefix + "afgiftsanmeldelse/1"], [{"godkendt": False}]
+            patched_map[prefix + "afgiftsanmeldelse/1"], [{"status": "afvist"}]
         )
 
     @patch.object(requests.sessions.Session, "patch")
@@ -627,7 +627,7 @@ class TestPrisme(PermissionsTest, TestCase):
                 "afgift_total": "5000.00",
                 "betalt": False,
                 "dato": "2023-08-22",
-                "godkendt": False,
+                "status": "afvist",
                 "beregnet_faktureringsdato": "2023-10-10",
             }
         elif path == expected_prefix + "afgiftsanmeldelse/1/full":
@@ -670,7 +670,7 @@ class TestPrisme(PermissionsTest, TestCase):
                 "afgift_total": "5000.00",
                 "betalt": False,
                 "dato": "2023-08-22",
-                "godkendt": False,
+                "status": "afvist",
                 "beregnet_faktureringsdato": "2023-10-10",
             }
         elif path == expected_prefix + "fragtforsendelse/1":
@@ -942,7 +942,7 @@ class AnmeldelseHistoryListViewTest(PermissionsTest, TestCase):
                 "beregnet_faktureringsdato": "2023-10-10",
                 "afgift_total": "0.00",
                 "fragtforsendelse": None,
-                "godkendt": False,
+                "status": "afvist",
                 "history_username": "admin",
                 "history_date": "2023-10-01",
             },
@@ -961,7 +961,7 @@ class AnmeldelseHistoryListViewTest(PermissionsTest, TestCase):
                 "beregnet_faktureringsdato": "2023-10-10",
                 "afgift_total": "0.00",
                 "fragtforsendelse": None,
-                "godkendt": True,
+                "status": "godkendt",
                 "history_username": "admin",
                 "history_date": "2023-10-02",
             },
@@ -1082,7 +1082,7 @@ class AnmeldelseHistoryDetailViewTest(PermissionsTest, TestCase):
                 "betalt": False,
                 "dato": "2023-10-06",
                 "beregnet_faktureringsdato": "2023-10-10",
-                "godkendt": None,
+                "status": "ny",
                 "history_username": "admin",
                 "history_date": "2023-10-01T00:00:00.000000+00:00",
             }
@@ -1199,7 +1199,7 @@ class AnmeldelseHistoryDetailViewTest(PermissionsTest, TestCase):
                         "betalt": False,
                         "dato": "2023-10-06",
                         "beregnet_faktureringsdato": "2023-10-10",
-                        "godkendt": None,
+                        "status": "ny",
                         "history_username": "admin",
                         "history_date": "2023-10-01T00:00:00.000000+00:00",
                         "varelinjer": [
@@ -1399,7 +1399,7 @@ class AnmeldelseNotatTest(PermissionsTest, TestCase):
                 "betalt": False,
                 "dato": "2023-08-22",
                 "beregnet_faktureringsdato": "2023-10-10",
-                "godkendt": False,
+                "status": "afvist",
             }
         elif path == expected_prefix + "afgiftsanmeldelse/1/full":
             json_content = {
@@ -1441,7 +1441,7 @@ class AnmeldelseNotatTest(PermissionsTest, TestCase):
                 "beregnet_faktureringsdato": "2023-10-10",
                 "afgift_total": "5000.00",
                 "fragtforsendelse": None,
-                "godkendt": False,
+                "status": "afvist",
             }
         elif path == expected_prefix + "fragtforsendelse/1":
             json_content = {
@@ -2283,7 +2283,7 @@ class TF10EditMultipleViewTest(PermissionsTest, TestCase):
                     "betalt": False,
                     "dato": "2023-08-22",
                     "beregnet_faktureringsdato": "2023-10-10",
-                    "godkendt": False,
+                    "status": "afvist",
                 },
                 2: {
                     "id": 2,
@@ -2325,7 +2325,7 @@ class TF10EditMultipleViewTest(PermissionsTest, TestCase):
                     "betalt": False,
                     "dato": "2023-08-22",
                     "beregnet_faktureringsdato": "2023-10-10",
-                    "godkendt": False,
+                    "status": "afvist",
                 },
                 3: {
                     "id": 3,
@@ -2367,7 +2367,7 @@ class TF10EditMultipleViewTest(PermissionsTest, TestCase):
                     "betalt": False,
                     "dato": "2023-08-22",
                     "beregnet_faktureringsdato": "2023-10-10",
-                    "godkendt": False,
+                    "status": "afvist",
                 },
             }
             items = list(filter(None, [data.get(int(id), None) for id in query["id"]]))

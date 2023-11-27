@@ -383,7 +383,9 @@ class AfgiftanmeldelseRestClient(ModelRestClient):
         return id
 
     def set_godkendt(self, id: int, godkendt: bool):
-        self.rest.patch(f"afgiftsanmeldelse/{id}", {"godkendt": godkendt})
+        self.rest.patch(
+            f"afgiftsanmeldelse/{id}", {"status": "godkendt" if godkendt else "afvist"}
+        )
 
     def list(
         self,

@@ -73,7 +73,7 @@ class Command(BaseCommand):
                 modtager_betaler=False,
                 indførselstilladelse="1234",
                 betalt=random.choice([False, True]),
-                godkendt=random.choice([None, False, True]),
+                status=random.choice(["ny", "afvist", "godkendt"]),
                 oprettet_af=(fragtforsendelse or postforsendelse).oprettet_af,
             )
             anmeldelse.dato = date.today() - timedelta(days=random.randint(0, 1000))
@@ -104,7 +104,7 @@ class Command(BaseCommand):
                 antal=random.randint(1, 400),
                 fakturabeløb=Decimal(random.randint(400, 40000)),
             )
-            if anmeldelse.godkendt:
+            if anmeldelse.status == "godkendt":
                 if random.choice([False, True]):
                     PrismeResponse.objects.create(
                         afgiftsanmeldelse=anmeldelse,

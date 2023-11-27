@@ -214,30 +214,19 @@ msgid "Alle"
 msgstr ""
 
 #: told_common/forms.py told_common/templates/told_common/tf10/list.html
-#: told_common/templatetags/common_tags.py
-msgid "Godkendt"
+msgid "Ny"
 msgstr ""
 
 #: told_common/forms.py told_common/templates/told_common/tf10/list.html
-#: told_common/templatetags/common_tags.py
 msgid "Afvist"
 msgstr ""
 
 #: told_common/forms.py told_common/templates/told_common/tf10/list.html
-#: told_common/templatetags/common_tags.py
-msgid "Ny"
+msgid "Godkendt"
 msgstr ""
 
 #: told_common/forms.py
-msgid "------"
-msgstr ""
-
-#: told_common/forms.py
-msgid "Ja"
-msgstr ""
-
-#: told_common/forms.py
-msgid "Nej"
+msgid "Afsluttet"
 msgstr ""
 
 #: told_common/templates/told_common/access_denied.html
@@ -456,6 +445,14 @@ msgstr ""
 
 #: told_common/templates/told_common/tf10/list.html
 msgid "Ingen søgeresultater"
+msgstr ""
+
+#: told_common/templates/told_common/tf10/list.html
+msgid "Ja"
+msgstr ""
+
+#: told_common/templates/told_common/tf10/list.html
+msgid "Nej"
 msgstr ""
 
 #: told_common/templates/told_common/widgets/file.html

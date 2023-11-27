@@ -9,18 +9,15 @@
     {% csrf_token %}
     <div class="mx-5">
         <h1>Afgiftsanmeldelse {{object.id}}</h1>
-        {% if object.godkendt == True %}
-        <span class="badge bg-success">Godkendt</span>
-        {% elif object.godkendt == False %}
-        <span class="badge bg-danger">Afvist</span>
-        {% else %}
-        <span class="badge bg-secondary">Ny</span>
-        {% endif %}
 
-        {% if object.prismeresponses %}
+        {% if object.status == "afsluttet" %}
         <span class="badge bg-success">Sendt til Prisme</span>
-        {% else %}
-        <span class="badge bg-secondary">Ikke sendt til Prisme</span>
+        {% elif object.status == "godkendt" %}
+        <span class="badge bg-success">Godkendt</span>
+        {% elif object.status == "afvist" %}
+        <span class="badge bg-danger">Afvist</span>
+        {% elif object.status == "ny" %}
+        <span class="badge bg-secondary">Ny</span>
         {% endif %}
 
         <h4>For indførsel af afgiftspligtige varer i Grønland</h4>
@@ -388,23 +385,24 @@
         <div class="form-row">
             <div class="ml-auto">
                 {% if can_edit %}
-                    {% if object.godkendt is not True %}
+                    {% if object.status == "ny" or object.status == "afvist" %}
                     <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#godkend_modal">
                         Godkend
                     </button>
                     {% endif %}
-                    {% if object.godkendt is None %}
+                    {% if object.status == "ny" %}
                     <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#afvis_modal">
                         Afvis
                     </button>
                     {% endif %}
-                    {% if object.godkendt is not True %}
+                    {% if object.status == "ny" or object.status == "afvist" %}
                     <a href="{% url 'tf10_edit' id=object.id %}" class="btn btn-primary">Redigér</a>
                     {% endif %}
                 {% endif %}
 
-                {% if object.godkendt is True and can_send_prisme %}
-                    {% if object.prismeresponses %}
+                {% if can_send_prisme %}
+                {% if object.status == "godkendt" or object.status == "afsluttet" %}
+                    {% if object.status == "afsluttet" %}
                     <button type="button" class="btn btn-success disabled">
                         Send til Prisme
                     </button>
@@ -413,6 +411,7 @@
                         Send til Prisme
                     </button>
                     {% endif %}
+                {% endif %}
                 {% endif %}
 
                 {% if can_view_history %}

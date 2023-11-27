@@ -400,23 +400,16 @@ class TF10SearchForm(PaginateForm, BootstrapForm):
         )
 
     vareart = forms.ChoiceField(choices=(), required=False)
-    godkendt = forms.ChoiceField(
+    status = forms.ChoiceField(
         choices=(
             (None, _("Alle")),
-            (True, _("Godkendt")),
-            (False, _("Afvist")),
-            ("explicitly_none", _("Ny")),
+            ("ny", _("Ny")),
+            ("afvist", _("Afvist")),
+            ("godkendt", _("Godkendt")),
+            ("afsluttet", _("Afsluttet")),
         ),
         required=False,
         widget=forms.Select(attrs={"onchange": "form.submit();"}),
-    )
-    godkendt_is_null = forms.ChoiceField(
-        choices=(
-            (None, _("------")),
-            (True, _("Ja")),
-            (False, _("Nej")),
-        ),
-        required=False,
     )
 
     dato_efter = forms.DateField(required=False, widget=DateInput)

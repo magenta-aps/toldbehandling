@@ -51,14 +51,14 @@ class AfgiftsanmeldelseTest(RestMixin, TestCase):
                     "fragtforsendelse": None,
                     "afsender": self.afsender.id,
                     "modtager": self.modtager.id,
-                    "godkendt": None,
+                    "status": "ny",
                 }
             )
         return self._expected_object_data
 
     @property
     def sort_fields(self):
-        return ("afsender", "modtager", "dato", "godkendt")
+        return ("afsender", "modtager", "dato", "status")
 
     @property
     def data_map(self):
@@ -99,7 +99,7 @@ class AfgiftsanmeldelseTest(RestMixin, TestCase):
                     "afgift_total": None,
                     "fragtforsendelse": None,
                     "leverandørfaktura": f"/leverand%C3%B8rfakturaer/{self.afgiftsanmeldelse.id}/leverand%C3%B8rfaktura.pdf",
-                    "godkendt": None,
+                    "status": "ny",
                     "beregnet_faktureringsdato": "2023-11-30",
                 }
             )
