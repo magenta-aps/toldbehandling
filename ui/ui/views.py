@@ -71,7 +71,7 @@ class TF10FormCreateView(
             modtager_id = self.rest_client.modtager.get_or_create(form.cleaned_data)
         postforsendelse_id = self.rest_client.postforsendelse.create(form.cleaned_data)
         fragtforsendelse_id = self.rest_client.fragtforsendelse.create(
-            form.cleaned_data, self.request.FILES.get("fragtbrev", None)
+            form.cleaned_data, self.request.FILES.get("fragtbrev")
         )
         self.anmeldelse_id = self.rest_client.afgiftanmeldelse.create(
             form.cleaned_data,
@@ -100,7 +100,7 @@ class TF10FormCreateView(
     def toplevel_varesatser(self):
         return dict(
             filter(
-                lambda pair: pair[1].get("overordnet", None) is None,
+                lambda pair: pair[1].get("overordnet") is None,
                 self.rest_client.varesatser.items(),
             )
         )
@@ -126,7 +126,7 @@ class TF10FormCreateView(
         # Will be picked up by TF10VareForm's constructor
         kwargs["form_kwargs"]["varesatser"] = dict(
             filter(
-                lambda pair: pair[1].get("overordnet", None) is None,
+                lambda pair: pair[1].get("overordnet") is None,
                 self.rest_client.varesatser.items(),
             )
         )
@@ -138,7 +138,7 @@ class TF10FormCreateView(
                 **context,
                 "varesatser": self.rest_client.varesatser,
                 "extend_template": self.extend_template,
-                "highlight": self.request.GET.get("highlight", None),
+                "highlight": self.request.GET.get("highlight"),
             }
         )
         form = context["form"]

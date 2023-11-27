@@ -35,7 +35,7 @@ class LoginView(FormView):
     template_name = "told_common/login.html"
 
     def get_success_url(self):
-        next = self.request.GET.get("back", None)
+        next = self.request.GET.get("back")
         if next:
             return next
 
@@ -146,20 +146,20 @@ class TF10FormUpdateView(
             fragtforsendelse_id = self.rest_client.fragtforsendelse.update(
                 fragtforsendelse_id,
                 form.cleaned_data,
-                self.request.FILES.get("fragtbrev", None),
+                self.request.FILES.get("fragtbrev"),
                 self.item.fragtforsendelse,
             )
         else:
             # Håndterer oprettelse af ny
             fragtforsendelse_id = self.rest_client.fragtforsendelse.create(
-                form.cleaned_data, self.request.FILES.get("fragtbrev", None)
+                form.cleaned_data, self.request.FILES.get("fragtbrev")
             )
 
         self.anmeldelse_id = self.item.id
         self.rest_client.afgiftanmeldelse.update(
             self.anmeldelse_id,
             form.cleaned_data,
-            self.request.FILES.get("leverandørfaktura", None),
+            self.request.FILES.get("leverandørfaktura"),
             afsender_id,
             modtager_id,
             postforsendelse_id,
@@ -209,7 +209,7 @@ class TF10FormUpdateView(
     def toplevel_varesatser(self):
         return dict(
             filter(
-                lambda pair: pair[1].get("overordnet", None) is None,
+                lambda pair: pair[1].get("overordnet") is None,
                 self.rest_client.varesatser_fra(self.item.dato).items(),
             )
         )
@@ -405,7 +405,7 @@ class TF10ListView(
             **{
                 **context,
                 "title": _("Mine afgiftsanmeldelser"),
-                "highlight": self.request.GET.get("highlight", None),
+                "highlight": self.request.GET.get("highlight"),
             }
         )
 
@@ -451,7 +451,7 @@ class TF10ListView(
         # Will be picked up by TF10SearchForm's constructor
         kwargs["varesatser"] = dict(
             filter(
-                lambda pair: pair[1].get("overordnet", None) is None,
+                lambda pair: pair[1].get("overordnet") is None,
                 self.rest_client.varesatser.items(),
             )
         )

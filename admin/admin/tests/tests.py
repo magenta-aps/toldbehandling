@@ -2370,7 +2370,7 @@ class TF10EditMultipleViewTest(PermissionsTest, TestCase):
                     "status": "afvist",
                 },
             }
-            items = list(filter(None, [data.get(int(id), None) for id in query["id"]]))
+            items = list(filter(None, [data.get(int(id)) for id in query["id"]]))
             json_content = {
                 "count": len(items),
                 "items": items,

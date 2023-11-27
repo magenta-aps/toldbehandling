@@ -27,7 +27,7 @@ class TestMixin:
         soup = BeautifulSoup(html, "html.parser")
         error_fields = {}
         for element in soup.find_all(class_="is-invalid"):
-            name = element.get("name", None) or element.get("data-fileinput", None)
+            name = element.get("name") or element.get("data-fileinput")
             if name:
                 el = element
                 for i in range(1, 3):

@@ -78,9 +78,9 @@ class AfgiftstabelUpdateForm(BootstrapForm):
 
     def clean(self, *args, **kwargs):
         data = self.cleaned_data
-        if not data.get("delete", None):
+        if not data.get("delete"):
             for required_field in ("kladde", "gyldig_fra"):
-                if not data.get(required_field, None):
+                if not data.get(required_field):
                     self.add_error(
                         required_field,
                         ValidationError(
@@ -91,7 +91,7 @@ class AfgiftstabelUpdateForm(BootstrapForm):
         return data
 
     def clean_gyldig_fra(self):
-        value = self.cleaned_data.get("gyldig_fra", None)
+        value = self.cleaned_data.get("gyldig_fra")
         if value is not None and value <= date.today():
             raise ValidationError(_("Dato skal være efter i dag"))
         return value
