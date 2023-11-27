@@ -87,11 +87,13 @@ class MaxSizeFileField(ErrorMessagesFieldMixin, FileField):
         "max_size": "data-validity-sizeoverflow",
     }
 
-    def __init__(self, *args, max_size=0, **kwargs):
+    def __init__(self, *args, max_size=0, widget_attrs=None, **kwargs):
         self.max_size = max_size
         self.max_size_natural = str(naturalsize(max_size))
         super().__init__(*args, **kwargs)
         self.widget.attrs["max_size"] = max_size
+        if widget_attrs:
+            self.widget.attrs.update(widget_attrs)
 
     def clean(self, *args, **kwargs):
         data = super().clean(*args, **kwargs)
