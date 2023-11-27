@@ -346,3 +346,54 @@ $(function () {
         return false;
     });
 });
+$(function (){
+    $("[data-required-field]").each(function () {
+        const $this = $(this);
+        const labels = $("label[for="+$this.attr("name")+"], label[for="+this.id+"]");
+        const fieldExpr = $this.data("required-field");  // f.eks. "[name=foobar]"
+        // Liste af værdier som gør at vi nu er required
+        // Hvis bare ét felt som matcher `fieldExpr` har en af disse værdier, er feltet `this` required
+        const values = $this.data("required-values").split(",");
+
+        const updateRequired = function () {
+            const fields = $(fieldExpr);
+            const fieldValues = new Set();
+            fields.each(function () {
+                if (document.contains(this)) {
+                    // Hent feltets værdi hvis det er i DOM
+                    fieldValues.add($(this).val());
+                }
+            })
+            // Tjek om der er sammenfald mellem values of fieldValues
+            let found = false;
+            for (let value of values) {
+                if (fieldValues.has(value)) {
+                    found = true;
+                    break;
+                }
+            }
+            // Sæt required-attribut og asterisk
+            if (found) {
+                $this.attr("required", "required");
+            } else {
+                $this.removeAttr("required");
+            }
+            labels.each(function () {
+                const label = $(this);
+                let text = label.text();
+                // Erstat [0..n] trailing asterisks med asterisk eller ingenting
+                text = text.replace(/\**$/, found ? "*":"");
+                label.text(text);
+            })
+        }
+        $(fieldExpr).on("change", updateRequired);
+        updateRequired();
+        const formset = $("#formset");
+        // Revidér når der fjernes en række
+        formset.on("subform.post_remove", updateRequired);
+        // Tilføj change-listener på felter i tilføjede rækker
+        formset.on("subform.post_add", function(event, row) {
+            $(row).find(fieldExpr).on("change", updateRequired);
+        });
+    });
+});

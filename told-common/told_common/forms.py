@@ -67,6 +67,19 @@ class TF10Form(BootstrapForm):
         self.leverandørfaktura_required = leverandørfaktura_required
         self.fragtbrev_required = fragtbrev_required
         self.varesatser = varesatser
+        if varesatser:
+            self.fields["indførselstilladelse"].widget.attrs.update(
+                {
+                    "data-required-field": "[name$=vareafgiftssats]",
+                    "data-required-values": ",".join(
+                        [
+                            str(id)
+                            for id, sats in varesatser.items()
+                            if sats.get("kræver_indførselstilladelse")
+                        ]
+                    ),
+                }
+            )
 
     afsender_cvr = ButtonlessIntegerField(
         min_value=10000000,
@@ -185,22 +198,30 @@ class TF10Form(BootstrapForm):
         ),
     )
     indførselstilladelse = forms.CharField(
-        max_length=12, required=False, label=_("Indførsels­tilladelse nr.")
+        max_length=12,
+        required=False,
+        label=_("Indførsels­tilladelse nr."),
     )
     leverandørfaktura_nummer = forms.CharField(
         label=_("Leverandør­faktura nr."),
         max_length=20,
+        required=True,
     )
     leverandørfaktura = MaxSizeFileField(
         allow_empty_file=False,
         label=_("Leverandør­faktura"),
         max_size=10000000,
+        required=True,
     )
     fragtbrev = MaxSizeFileField(
         allow_empty_file=False,
         label=_("Fragtbrev"),
         max_size=10000000,
         required=False,
+        widget_attrs={
+            "data-required-field": "[name=fragttype]",
+            "data-required-values": "skibsfragt,luftfragt",
+        },
     )
     fragttype = forms.ChoiceField(
         required=True,

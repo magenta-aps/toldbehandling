@@ -40,7 +40,7 @@
                 </div>
                 <div class="row">
                     <div class="col-4">
-                        <label for="{{form.afsender_navn.id_for_label}}">{{form.afsender_navn.label}}</label>
+                        <label for="{{form.afsender_navn.id_for_label}}">{{form.afsender_navn.label}}*</label>
                     </div>
                     <div class="col-8">
                         {{form.afsender_navn}}
@@ -74,7 +74,7 @@
             </div>
                 <div class="row">
                     <div class="col-4">
-                        <label for="{{form.afsender_adresse.id_for_label}}">{{form.afsender_adresse.label}}</label>
+                        <label for="{{form.afsender_adresse.id_for_label}}">{{form.afsender_adresse.label}}*</label>
                     </div>
                     <div class="col-8">
                         {{form.afsender_adresse}}
@@ -92,7 +92,7 @@
                 </div>
                 <div class="row">
                     <div class="col-4">
-                        <label for="{{form.afsender_postnummer.id_for_label}}">{{form.afsender_postnummer.label}}</label>
+                        <label for="{{form.afsender_postnummer.id_for_label}}">{{form.afsender_postnummer.label}}*</label>
                     </div>
                     <div class="col-8">
                         {{form.afsender_postnummer}}
@@ -101,7 +101,7 @@
                 </div>
                 <div class="row">
                     <div class="col-4">
-                        <label for="{{form.afsender_by.id_for_label}}">{{form.afsender_by.label}}</label>
+                        <label for="{{form.afsender_by.id_for_label}}">{{form.afsender_by.label}}*</label>
                     </div>
                     <div class="col-8">
                         {{form.afsender_by}}
@@ -110,7 +110,7 @@
                 </div>
                 <div class="row">
                     <div class="col-4">
-                        <label for="{{form.afsender_telefon.id_for_label}}">{{form.afsender_telefon.label}}</label>
+                        <label for="{{form.afsender_telefon.id_for_label}}">{{form.afsender_telefon.label}}*</label>
                     </div>
                     <div class="col-8">
                         {{form.afsender_telefon}}
@@ -132,7 +132,7 @@
                 </div>
                 <div class="row">
                     <div class="col-4">
-                        <label for="{{form.modtager_navn.id_for_label}}">{{form.modtager_navn.label}}</label>
+                        <label for="{{form.modtager_navn.id_for_label}}">{{form.modtager_navn.label}}*</label>
                     </div>
                     <div class="col-8">
                         {{form.modtager_navn}}
@@ -168,7 +168,7 @@
             </div>
                 <div class="row">
                     <div class="col-4">
-                        <label for="{{form.modtager_adresse.id_for_label}}">{{form.modtager_adresse.label}}</label>
+                        <label for="{{form.modtager_adresse.id_for_label}}">{{form.modtager_adresse.label}}*</label>
                     </div>
                     <div class="col-8">
                         {{form.modtager_adresse}}
@@ -186,7 +186,7 @@
                 </div>
                 <div class="row">
                     <div class="col-4">
-                        <label for="{{form.modtager_postnummer.id_for_label}}">{{form.modtager_postnummer.label}}</label>
+                        <label for="{{form.modtager_postnummer.id_for_label}}">{{form.modtager_postnummer.label}}*</label>
                     </div>
                     <div class="col-8">
                         {{form.modtager_postnummer}}
@@ -195,7 +195,7 @@
                 </div>
                 <div class="row">
                     <div class="col-4">
-                        <label for="{{form.modtager_by.id_for_label}}">{{form.modtager_by.label}}</label>
+                        <label for="{{form.modtager_by.id_for_label}}">{{form.modtager_by.label}}*</label>
                     </div>
                     <div class="col-8">
                         {{form.modtager_by}}
@@ -204,7 +204,7 @@
                 </div>
                 <div class="row">
                     <div class="col-4">
-                        <label for="{{form.modtager_telefon.id_for_label}}">{{form.modtager_telefon.label}}</label>
+                        <label for="{{form.modtager_telefon.id_for_label}}">{{form.modtager_telefon.label}}*</label>
                     </div>
                     <div class="col-8">
                         {{form.modtager_telefon}}
@@ -230,7 +230,7 @@
             <div class="col-6">
                 <div class="row">
                     <div class="col-4">
-                        <label for="{{form.leverandørfaktura_nummer.id_for_label}}">{{form.leverandørfaktura_nummer.label}}</label>
+                        <label for="{{form.leverandørfaktura_nummer.id_for_label}}">{{form.leverandørfaktura_nummer.label}}*</label>
                     </div>
                     <div class="col-8">
                         {{form.leverandørfaktura_nummer}}
@@ -239,7 +239,7 @@
                 </div>
                 <div class="row">
                     <div class="col-4">
-                        <label for="{{form.leverandørfaktura.id_for_label}}">{{form.leverandørfaktura.label}}</label>
+                        <label for="{{form.leverandørfaktura.id_for_label}}">{{form.leverandørfaktura.label}}*</label>
                     </div>
                     <div class="col-8">
                         {{form.leverandørfaktura}}
@@ -253,7 +253,7 @@
                 </div>
                 <div class="row">
                     <div class="col-4">
-                        <label>{% translate "Fragtbrev" %}</label>
+                        <label for="{{form.fragtbrev.id_for_label}}">{% translate "Fragtbrev" %}</label>
                     </div>
                     <div class="col-8">
                         {{form.fragtbrev}}
@@ -270,7 +270,7 @@
             <div class="col-6">
                 <div class="row">
                     <div class="col-6">
-                        <label for="{{form.fragttype.name}}">{% translate "Fragttype" %}</label>
+                        <label for="{{form.fragttype.id_for_label}}">{% translate "Fragttype" %}*</label>
                     </div>
                     <div class="col-6">
                         {{form.fragttype}}
@@ -278,7 +278,7 @@
                 </div>
                 <div class="row">
                     <div class="col-6">
-                        <label for="{{form.forbindelsesnr.name}}">{% translate "Forbindelsesnr/afsenderbykode" %}</label>
+                        <label for="{{form.forbindelsesnr.id_for_label}}">{% translate "Forbindelsesnr/afsenderbykode" %}*</label>
                     </div>
                     <div class="col-6">
                         {{form.forbindelsesnr}}
@@ -286,7 +286,7 @@
                 </div>
                 <div class="row">
                     <div class="col-6">
-                        <label for="{{form.fragtbrevnr.name}}">{% translate "Fragtbrevnr/postforsendelsesnummer" %}</label>
+                        <label for="{{form.fragtbrevnr.id_for_label}}">{% translate "Fragtbrevnr/postforsendelsesnummer" %}*</label>
                     </div>
                     <div class="col-6">
                         {{form.fragtbrevnr}}
@@ -294,7 +294,7 @@
                 </div>
                 <div class="row">
                     <div class="col-6">
-                        <label for="{{form.afgangsdato.name}}">{% translate "Afgangsdato" %}</label>
+                        <label for="{{form.afgangsdato.id_for_label}}">{% translate "Afgangsdato" %}*</label>
                     </div>
                     <div class="col-6">
                         {{form.afgangsdato}}
@@ -303,7 +303,7 @@
                 <!-- Should ideally be hidden, unless Fragttype == Luftfragt -->
                 <div class="row" id="betales_af_row" {% if form.fragttype.value != 'luftfragt' %}style="display:none"{% endif %}>
                     <div class="col-6">
-                        <label for="{{form.betales_af.name}}">{% translate "Betales af (kun relevant for luftfragt)" %}</label>
+                        <label for="{{form.betales_af.id_for_label}}">{% translate "Betales af (kun relevant for luftfragt)" %}*</label>
                     </div>
                     <div class="col-6">
                         {{form.betales_af}}
@@ -320,7 +320,7 @@
         </p>
         <div class="row">
             <div class="col-2 px-0">
-                <label>{% translate "Vareart" %}</label>
+                <label>{% translate "Vareart" %}*</label>
             </div>
             <div class="col-1 px-0">
                 <label>{% translate "Vare­kode" %}</label>

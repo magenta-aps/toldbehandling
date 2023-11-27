@@ -22,7 +22,9 @@ $(function(){
                         this.attributes[i].nodeValue = this.attributes[i].nodeValue.replace('__prefix__', nextId);
                     }
                 });
+                formContainer.trigger("subform.pre_add", form);
                 formContainer.append(form);
+                formContainer.trigger("subform.post_add", form);
                 if (update !== false) {
                     updateTotal();
                 }
@@ -31,10 +33,13 @@ $(function(){
 
             const removeForm = function(form, update) {
                 if (form.parent().first().is(formContainer)) {
+                    const parent = form.parent();
+                    form.trigger("subform.pre_remove");
                     form.remove();
                     if (update !== false) {
                         updateTotal();
                     }
+                    parent.trigger("subform.post_remove", form);
                 }
             };
 
