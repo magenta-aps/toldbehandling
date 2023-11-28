@@ -29,8 +29,34 @@ services:
     network_mode: "host"
     command: gunicorn -b 0.0.0.0:7000 project.wsgi:application --reload -w 1 --access-logfile - --error-logfile - --capture-output # reload on code changes
 
+  toldbehandling-rest-cron:
+    user: "75130:1000"  # Override in docker-compose.override.yml if your local user is different
+    # user: "1000:1000"
+    container_name: toldbehandling-rest-cron
+    image: toldbehandling-rest:latest
+    build:
+      context: .
+      dockerfile: docker/Dockerfile_rest
+    env_file:
+      - ./dev-environment/rest.env
+    volumes:
+      - ./rest/:/app
+      - ./dev-environment/rest.crontab:/crontab
+    depends_on:
+      - toldbehandling-db
+    environment:
+      - MAKE_MIGRATIONS=false
+      - MIGRATE=false
+      - CREATE_USERS=false
+      - CREATE_GROUPS=false
+      - CREATE_POSTNUMRE=false
+      - TEST=false
+      - DUMMYDATA=false
+    network_mode: "host"
+    command: [ "supercronic", "/crontab" ]
+
   toldbehandling-ui:
-    user: "1000:1000"  # Override in docker-compose.override.yml if your local user is different
+    user: "75130:1000"  # Override in docker-compose.override.yml if your local user is different
     container_name: toldbehandling-ui
     image: toldbehandling-ui:latest
     build:
@@ -55,7 +81,7 @@ services:
     command: gunicorn -b 0.0.0.0:8000 project.wsgi:application --reload -w 1 --access-logfile - --error-logfile - --capture-output # reload on code changes
 
   toldbehandling-admin:
-    user: "75060:1000"  # Override in docker-compose.override.yml if your local user is different
+    user: "75130:1000"  # Override in docker-compose.override.yml if your local user is different
     container_name: toldbehandling-admin
     image: toldbehandling-admin:latest
     build:

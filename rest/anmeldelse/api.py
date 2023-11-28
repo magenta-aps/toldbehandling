@@ -9,6 +9,7 @@ from typing import List, Optional, Tuple
 from uuid import uuid4
 
 from aktør.api import AfsenderOut, ModtagerOut
+from common.api import UserOut
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.db.models import QuerySet
@@ -73,6 +74,8 @@ class PartialAfgiftsanmeldelseIn(ModelSchema):
 
 
 class AfgiftsanmeldelseOut(ModelSchema):
+    oprettet_af: Optional[UserOut]
+
     class Config:
         model = Afgiftsanmeldelse
         model_fields = [
@@ -90,6 +93,7 @@ class AfgiftsanmeldelseOut(ModelSchema):
             "dato",
             "status",
             "modtager_betaler",
+            "oprettet_af",
         ]
 
     beregnet_faktureringsdato: str

@@ -312,6 +312,7 @@ class Afgiftsanmeldelse(ToldDataClass):
     )
     notater: Optional[List[Notat]]
     prismeresponses: Optional[List[PrismeResponse]]
+    oprettet_af: Optional[dict] = None
 
     @property
     def afgift_sum(self):
@@ -321,7 +322,7 @@ class Afgiftsanmeldelse(ToldDataClass):
 @dataclass_json
 @dataclass
 class HistoricAfgiftsanmeldelse(Afgiftsanmeldelse):
-    history_username: Optional[str]
+    history_username: Optional[str] = None
     history_date: datetime = field(
         metadata=config(
             encoder=datetime.isoformat,

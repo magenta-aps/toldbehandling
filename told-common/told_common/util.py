@@ -1,9 +1,12 @@
 import base64
 import dataclasses
-from typing import Any, Dict, Iterable
+from typing import Any, Callable, Dict, Iterable, Optional
 
 from django.core.files import File
 from django.core.serializers.json import DjangoJSONEncoder
+from django.template.loader import render_to_string
+from weasyprint import HTML
+from weasyprint.text.fonts import FontConfiguration
 
 
 def filter_dict_values(data: Dict[Any, Any], values_to_trim: Iterable):
@@ -39,3 +42,13 @@ class JSONEncoder(DjangoJSONEncoder):
 
 def cast_or_none(dest_class, value):
     return dest_class(value) if value is not None else None
+
+
+def render_pdf(
+    template_name: str, context: dict, html_modifier: Optional[Callable] = None
+) -> bytes:
+    html = render_to_string(template_name, context)
+    if callable(html_modifier):
+        html = html_modifier(html)
+    font_config = FontConfiguration()
+    return HTML(string=html).write_pdf(font_config=font_config)
