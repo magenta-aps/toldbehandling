@@ -313,6 +313,10 @@ class Afgiftsanmeldelse(ToldDataClass):
     notater: Optional[List[Notat]]
     prismeresponses: Optional[List[PrismeResponse]]
 
+    @property
+    def afgift_sum(self):
+        return sum([varelinje.afgiftsbeløb for varelinje in self.varelinjer or []])
+
 
 @dataclass_json
 @dataclass
