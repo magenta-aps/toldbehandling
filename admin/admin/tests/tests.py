@@ -2440,8 +2440,9 @@ class TF10EditMultipleViewTest(PermissionsTest, TestCase):
         self.assertEquals(response.status_code, 200)
         analysis = self.analyze_html(response.content)
         self.assertIn("forbindelsesnr", analysis["disabled_fields"])
+        self.assertIn("afgangsdato", analysis["disabled_fields"])
         self.assertIn(
-            "Forbindelsesnummer og fragtbrevnummer kan kun redigeres hvis alle de redigerede afgiftsanmeldelser har samme fragttype.",
+            "Forbindelsesnummer og afgangsdato kan kun redigeres hvis alle de redigerede afgiftsanmeldelser har samme fragttype.",
             analysis["alerts"],
         )
 
@@ -2454,7 +2455,8 @@ class TF10EditMultipleViewTest(PermissionsTest, TestCase):
         analysis = self.analyze_html(response.content)
         self.assertNotIn("forbindelsesnr", analysis["disabled_fields"])
         self.assertNotIn("fragtbrevnr", analysis["disabled_fields"])
+        self.assertNotIn("afgangsdato", analysis["disabled_fields"])
         self.assertNotIn(
-            "Forbindelsesnummer og fragtbrevnummer kan kun redigeres hvis alle de redigerede afgiftsanmeldelser har samme fragttype.",
+            "Forbindelsesnummer og afgangsdato kan kun redigeres hvis alle de redigerede afgiftsanmeldelser har samme fragttype.",
             analysis["alerts"],
         )

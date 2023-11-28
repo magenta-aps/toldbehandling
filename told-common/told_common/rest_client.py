@@ -178,12 +178,14 @@ class PostforsendelseRestClient(ModelRestClient):
     def map(data: dict) -> Optional[dict]:
         fragttype = data["fragttype"]
         if fragttype in ("luftpost", "skibspost"):
-            return {
-                "postforsendelsesnummer": data["fragtbrevnr"],
-                "afsenderbykode": data["forbindelsesnr"],
-                "forsendelsestype": "S" if fragttype == "skibspost" else "F",
-                "afgangsdato": data["afgangsdato"],
-            }
+            return filter_dict_none(
+                {
+                    "postforsendelsesnummer": data.get("fragtbrevnr", None),
+                    "afsenderbykode": data.get("forbindelsesnr", None),
+                    "forsendelsestype": "S" if fragttype == "skibspost" else "F",
+                    "afgangsdato": data.get("afgangsdato", None),
+                },
+            )
         return None
 
     @staticmethod
@@ -209,7 +211,10 @@ class PostforsendelseRestClient(ModelRestClient):
             return response["id"]
 
     def update(
-        self, id: int, data: dict, existing: Union[dict, PostForsendelse, None] = None
+        self,
+        id: int,
+        data: dict,
+        existing: Union[dict, PostForsendelse, None] = None,
     ) -> Optional[int]:
         mapped = self.map(data)
         if mapped is None:

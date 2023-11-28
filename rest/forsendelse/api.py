@@ -128,7 +128,8 @@ class PostforsendelseAPI:
         item = get_object_or_404(Postforsendelse, id=id)
         self.check_user(item)
         for attr, value in payload.dict().items():
-            setattr(item, attr, value)
+            if value is not None:
+                setattr(item, attr, value)
         item.save()
         return {"success": True}
 
