@@ -18,7 +18,14 @@ from admin.spreadsheet import (  # isort: skip
 
 class TF10ViewForm(BootstrapForm):
     godkendt = forms.BooleanField(required=False)
-    notat = forms.CharField(
+    # For at vi kan have tre formfelter i hver sin modal
+    notat1 = forms.CharField(
+        widget=forms.Textarea(attrs={"placeholder": _("Notat")}), required=False
+    )
+    notat2 = forms.CharField(
+        widget=forms.Textarea(attrs={"placeholder": _("Notat")}), required=False
+    )
+    notat3 = forms.CharField(
         widget=forms.Textarea(attrs={"placeholder": _("Notat")}), required=False
     )
     send_til_prisme = forms.BooleanField(required=False)

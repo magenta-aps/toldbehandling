@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: 2023 Magenta ApS <info@magenta.dk>
 #
 # SPDX-License-Identifier: MPL-2.0
+import base64
 import json
 import time
 from base64 import b64encode
@@ -649,6 +650,13 @@ class VareafgiftssatsRestClient(ModelRestClient):
         return satser
 
 
+class EboksBeskedRestClient(ModelRestClient):
+    def create(self, data: dict) -> Optional[int]:
+        data["pdf"] = base64.b64encode(data["pdf"]).decode("ASCII")
+        response = self.rest.post("eboks", data)
+        return response["id"]
+
+
 class RestClient:
     domain = settings.REST_DOMAIN
 
@@ -666,6 +674,7 @@ class RestClient:
         self.vareafgiftssats = VareafgiftssatsRestClient(self)
         self.notat = NotatRestClient(self)
         self.prismeresponse = PrismeResponseRestClient(self)
+        self.eboks = EboksBeskedRestClient(self)
 
     def check_access_token_age(self):
         max_age = getattr(settings, "NINJA_JWT", {}).get(

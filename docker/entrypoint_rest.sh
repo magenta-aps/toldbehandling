@@ -14,6 +14,7 @@ DUMMYDATA=${DUMMYDATA:=false}
 DJANGO_DEBUG=${DJANGO_DEBUG:=false}
 MAKEMESSAGES=${MAKEMESSAGES:=true}
 COMPILEMESSAGES=${COMPILEMESSAGES:=true}
+CREATE_POSTNUMRE=${CREATE_POSTNUMRE:=true}
 
 python manage.py wait_for_db
 
@@ -35,8 +36,10 @@ if [ "${CREATE_USERS,,}" = true ]; then
   echo 'create users'
   python manage.py create_dummy_users
 fi
-echo 'creating postnumre'
-python manage.py create_postnumre
+if [ "${CREATE_POSTNUMRE,,}" = true ]; then
+  echo 'creating postnumre'
+  python manage.py create_postnumre
+fi
 if [ "${TEST,,}" = true ]; then
   echo 'running tests!'
   python manage.py test

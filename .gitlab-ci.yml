@@ -159,6 +159,7 @@ Build ER image:
     # Simulate development environment while running tests so we use mockup data
     DJANGO_SECRET_KEY: e$s6@0(hs5ja79-&!l7vt^onoe4h^*bv_e4hj&wt5^8*&x76-$
     DJANGO_TIMEZONE: Europe/Copenhagen
+    HOST_DOMAIN: http://localhost
     POSTGRES_USER: toldbehandling
     POSTGRES_PASSWORD: toldbehandling
     POSTGRES_DB: toldbehandling
@@ -186,6 +187,7 @@ Build ER image:
     LOGIN_BYPASS_ENABLED: 'False'
     MITID_TEST_ENABLED: 'True'
     LANGUAGE_COOKIE_DOMAIN: localhost
+    EBOKS_MOCK: 'True'
 
   before_script:
     - mkdir "${CI_PROJECT_DIR}/coverage_output"

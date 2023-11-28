@@ -1,0 +1,11 @@
+<html>
+    <body>
+    <p>Din afgiftsanmeldelse (TF10) er blevet afvist.</p>
+
+    {% if notat %}
+    <p>Begrundelse: {{notat}}</p>
+    {% endif %}
+
+    Du kan redigere anmeldelsen her: <a href="{{link}}">{{link}}</a>.
+    </body>
+</html>

@@ -7,6 +7,7 @@ from datetime import date, datetime
 from functools import cached_property
 from typing import Any, Dict, Iterable, List, Optional, Set, Union
 
+from django.conf import settings
 from django.contrib import messages
 from django.shortcuts import redirect
 from django.template import loader
@@ -16,7 +17,7 @@ from django.views.generic import FormView, TemplateView
 from openpyxl import Workbook
 from requests import HTTPError
 from told_common import views as common_views
-from told_common.util import filter_dict_values
+from told_common.util import filter_dict_values, render_pdf
 
 from admin import forms
 from admin.clients.prisme import PrismeException, send_afgiftsanmeldelse
@@ -113,6 +114,12 @@ class TF10View(PermissionsRequiredMixin, TF10BaseView, FormView):
         anmeldelse_id = self.kwargs["id"]
         send_til_prisme = form.cleaned_data["send_til_prisme"]
         godkendt = form.cleaned_data["godkendt"]
+        notat = (
+            form.cleaned_data["notat1"]
+            or form.cleaned_data["notat2"]
+            or form.cleaned_data["notat3"]
+        )
+        print(form.cleaned_data)
         try:
             if send_til_prisme:
                 # Yderligere tjek for om brugeren må ændre noget.
@@ -153,8 +160,31 @@ class TF10View(PermissionsRequiredMixin, TF10BaseView, FormView):
                     return response
                 self.rest_client.afgiftanmeldelse.set_godkendt(anmeldelse_id, godkendt)
 
+                if godkendt == False:
+                    anmeldelse = self.rest_client.afgiftanmeldelse.get(
+                        anmeldelse_id, full=True, include_varelinjer=True
+                    )
+                    indberetter_data = anmeldelse.oprettet_af["indberetter_data"]
+                    domain = settings.HOST_DOMAIN or "http://localhost"
+                    pdf = render_pdf(
+                        "admin/blanket/tf10/afvist.html",
+                        {
+                            "link": f"{domain}/blanket/tf10/{anmeldelse_id}",
+                            "notat": notat,
+                        },
+                    )
+                    self.rest_client.eboks.create(
+                        {
+                            "cpr": indberetter_data.get("cpr"),
+                            "cvr": indberetter_data.get("cvr"),
+                            "titel": "Din afgiftsanmeldelse (TF10) er afvist",
+                            "pdf": pdf,
+                        }
+                    )
+                    # For at inspicere pdf'en
+                    # return HttpResponse(content=pdf, content_type="application/pdf")
+
             # Opret notat _efter_ den nye version af anmeldelsen, så vores historik-filtrering fungerer
-            notat = form.cleaned_data["notat"]
             if notat:
                 self.rest_client.notat.create({"tekst": notat}, self.kwargs["id"])
 
@@ -485,7 +515,7 @@ class AfgiftstabelListView(PermissionsRequiredMixin, HasRestClientMixin, GetForm
         return self.render_to_response(context)
 
     def map_value(self, item, key):
-        value = item.get(key)
+        value = item.get(key, None)
         if key == "actions":
             return loader.render_to_string(
                 self.actions_template,

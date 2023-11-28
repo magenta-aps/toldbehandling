@@ -17,6 +17,7 @@ setuptools.setup(
         "gunicorn==20.1.0",
         "requests==2.31.0",
         "dataclasses-json==0.6.0",
+        "WeasyPrint==60.1",
     ],
     classifiers=[
         "Programming Language :: Python :: 3",

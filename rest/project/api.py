@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: MPL-2.0
 
 from aktør.api import AfsenderAPI, ModtagerAPI
-from common.api import UserAPI
+from common.api import EboksBeskedAPI, UserAPI
 from forsendelse.api import FragtforsendelseAPI, PostforsendelseAPI
 from ninja_extra import NinjaExtraAPI
 from ninja_jwt.controller import NinjaJWTDefaultController
@@ -25,4 +25,4 @@ api.register_controllers(
 )
 api.register_controllers(PostforsendelseAPI, FragtforsendelseAPI)
 api.register_controllers(AfgiftstabelAPI, VareafgiftssatsAPI)
-api.register_controllers(UserAPI)
+api.register_controllers(UserAPI, EboksBeskedAPI)

@@ -17,7 +17,27 @@ class AfgiftsanmeldelseTest(RestMixin, TestCase):
     object_class = Afgiftsanmeldelse
     exclude_fields = ["oprettet_af"]
     object_restriction = True
-    calculated_fields = {"beregnet_faktureringsdato": "2023-11-30"}
+    calculated_fields = {
+        "beregnet_faktureringsdato": "2023-11-30",
+        "oprettet_af": {
+            "username": "testuser1",
+            "first_name": "",
+            "last_name": "",
+            "email": "",
+            "is_superuser": False,
+            "groups": [],
+            "permissions": [
+                "anmeldelse.add_afgiftsanmeldelse",
+                "anmeldelse.change_afgiftsanmeldelse",
+                "anmeldelse.delete_afgiftsanmeldelse",
+                "anmeldelse.view_afgiftsanmeldelse",
+                "anmeldelse.view_all_anmeldelse",
+                "forsendelse.view_all_fragtforsendelser",
+                "forsendelse.view_all_postforsendelser",
+            ],
+            "indberetter_data": None,
+        },
+    }
 
     @property
     def list_full_function(self) -> str:
@@ -100,7 +120,7 @@ class AfgiftsanmeldelseTest(RestMixin, TestCase):
                     "fragtforsendelse": None,
                     "leverandørfaktura": f"/leverand%C3%B8rfakturaer/{self.afgiftsanmeldelse.id}/leverand%C3%B8rfaktura.pdf",
                     "status": "ny",
-                    "beregnet_faktureringsdato": "2023-11-30",
+                    **self.calculated_fields,
                 }
             )
         return self._expected_list_response_dict

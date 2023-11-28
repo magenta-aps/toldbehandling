@@ -267,6 +267,7 @@ class TestGodkend(PermissionsTest, TestCase):
     def setUp(self):
         super().setUp()
         self.patched: List[Tuple[str, str]] = []
+        self.posted: List[Tuple[str, str]] = []
 
     def mock_requests_get(self, path):
         expected_prefix = f"{settings.REST_DOMAIN}/api/"
@@ -371,6 +372,27 @@ class TestGodkend(PermissionsTest, TestCase):
                 "dato": "2023-08-22",
                 "status": "afvist",
                 "beregnet_faktureringsdato": "2023-10-10",
+                "oprettet_af": {
+                    "username": "testuser1",
+                    "first_name": "",
+                    "last_name": "",
+                    "email": "",
+                    "is_superuser": False,
+                    "groups": [],
+                    "permissions": [
+                        "anmeldelse.add_afgiftsanmeldelse",
+                        "anmeldelse.change_afgiftsanmeldelse",
+                        "anmeldelse.delete_afgiftsanmeldelse",
+                        "anmeldelse.view_afgiftsanmeldelse",
+                        "anmeldelse.view_all_anmeldelse",
+                        "forsendelse.view_all_fragtforsendelser",
+                        "forsendelse.view_all_postforsendelser",
+                    ],
+                    "indberetter_data": {
+                        "cpr": 1234567890,
+                        "cvr": 12345678,
+                    },
+                },
             }
         elif path == expected_prefix + "fragtforsendelse/1":
             json_content = {
@@ -426,7 +448,7 @@ class TestGodkend(PermissionsTest, TestCase):
                 ],
             }
         else:
-            print(f"Mock {self.__class__.__name__} got unrecognized path: {path}")
+            print(f"Mock {self.__class__.__name__} got unrecognized path: GET {path}")
         if json_content:
             content = json.dumps(json_content).encode("utf-8")
         if content:
@@ -446,6 +468,29 @@ class TestGodkend(PermissionsTest, TestCase):
         if path == expected_prefix + "afgiftsanmeldelse/1":
             json_content = {"id": 1}
             self.patched.append((path, data))
+        else:
+            print(f"Mock {self.__class__.__name__} got unrecognized path: PATCH {path}")
+        if json_content:
+            content = json.dumps(json_content).encode("utf-8")
+        if content:
+            if not status_code:
+                status_code = 200
+            response._content = content
+        response.status_code = status_code or 404
+        return response
+
+    def mock_requests_post(self, path, data, headers=None):
+        expected_prefix = f"{settings.REST_DOMAIN}/api/"
+        path = path.rstrip("/")
+        response = Response()
+        json_content = None
+        content = None
+        status_code = None
+        if path == expected_prefix + "eboks":
+            json_content = {"id": 1}
+            self.posted.append((path, data))
+        else:
+            print(f"Mock {self.__class__.__name__} got unrecognized path: POST {path}")
         if json_content:
             content = json.dumps(json_content).encode("utf-8")
         if content:
@@ -505,11 +550,15 @@ class TestGodkend(PermissionsTest, TestCase):
             patched_map[prefix + "afgiftsanmeldelse/1"], [{"status": "godkendt"}]
         )
 
+    @patch.object(requests.sessions.Session, "get")
+    @patch.object(requests.sessions.Session, "post")
     @patch.object(requests.sessions.Session, "patch")
-    def test_post_view_afvis(self, mock_patch):
+    def test_post_view_afvis(self, mock_patch, mock_post, mock_get):
         self.login()
         view_url = reverse("tf10_view", kwargs={"id": 1})
         mock_patch.side_effect = self.mock_requests_patch
+        mock_post.side_effect = self.mock_requests_post
+        mock_get.side_effect = self.mock_requests_get
         response = self.client.post(view_url, {"godkendt": "false"})
         self.assertEquals(response.status_code, 302)
         prefix = f"{settings.REST_DOMAIN}/api/"

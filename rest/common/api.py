@@ -1,11 +1,12 @@
 # SPDX-FileCopyrightText: 2023 Magenta ApS <info@magenta.dk>
 #
 # SPDX-License-Identifier: MPL-2.0
-
+import base64
 from typing import Dict, List, Optional
 
-from common.models import IndberetterProfile
+from common.models import EboksBesked, IndberetterProfile
 from django.contrib.auth.models import Group, User
+from django.http import HttpResponseBadRequest
 from django.shortcuts import get_object_or_404
 from ninja import Field, ModelSchema
 from ninja.errors import ValidationError
@@ -13,6 +14,7 @@ from ninja.schema import Schema
 from ninja_extra import api_controller, permissions, route
 from ninja_jwt.authentication import JWTAuth
 from ninja_jwt.tokens import RefreshToken
+from project.util import json_dump
 
 # Django-ninja har endnu ikke understøttelse for PATCH med filer i multipart/form-data
 # Se https://github.com/vitalik/django-ninja/pull/397
@@ -58,7 +60,7 @@ class UserOut(ModelSchema):
 
     @staticmethod
     def resolve_permissions(user: User):
-        return user.get_all_permissions()
+        return sorted(user.get_all_permissions())
 
     @staticmethod
     # https://github.com/vitalik/django-ninja/issues/350
@@ -92,7 +94,7 @@ class UserOutWithTokens(Schema):
             "email": user.email,
             "is_superuser": user.is_superuser,
             "groups": [group.name for group in user.groups.all()],
-            "permissions": user.get_all_permissions(),
+            "permissions": user.get_all_permissions().sort(),
             "indberetter_data": user.indberetter_data,
             "access_token": str(refresh_token.access_token),
             "refresh_token": str(refresh_token),
@@ -153,3 +155,31 @@ class UserAPI:
             cvr=payload.indberetter_data.cvr,
         )
         return UserOutWithTokens.user_to_dict(user)
+
+
+class EboksBeskedIn(ModelSchema):
+    afgiftsanmeldelse_id: int = None
+    pdf: str  # base64
+
+    class Config:
+        model = EboksBesked
+        model_fields = ["titel", "cpr", "cvr"]
+
+
+@api_controller(
+    "/eboks",
+    tags=["Eboks"],
+    permissions=[permissions.IsAuthenticated],
+)
+class EboksBeskedAPI:
+    @route.post("", auth=JWTAuth(), url_name="eboksbesked_create")
+    def create_eboksbesked(self, payload: EboksBeskedIn):
+        try:
+            data = payload.dict()
+            data["pdf"] = base64.b64decode(payload.pdf)
+            item = EboksBesked.objects.create(**data)
+            return {"id": item.id}
+        except ValidationError as e:
+            return HttpResponseBadRequest(
+                json_dump(e.message_dict), content_type="application/json"
+            )
