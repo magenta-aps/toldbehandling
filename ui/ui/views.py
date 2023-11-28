@@ -11,6 +11,8 @@ from django.views.generic import TemplateView
 from told_common import forms as common_forms
 from told_common import views as common_views
 
+from ui.payment import PaymentRestClient
+
 from told_common.view_mixins import (  # isort: skip
     FormWithFormsetView,
     HasRestClientMixin,
@@ -181,7 +183,7 @@ class TF10FormUpdateView(common_views.TF10FormUpdateView):
 # Payment views
 
 
-class PaymentCheckoutView(HasRestClientMixin, TemplateView):
+class PaymentCheckoutView(TemplateView, HasRestClientMixin):
     template_name = "ui/payment/checkout.html"
 
     def __init__(self, *args, **kwargs):
@@ -190,13 +192,32 @@ class PaymentCheckoutView(HasRestClientMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
-        # Fetch "anmeldelse" detailss
-        anmeldelse_id = self.kwargs["anmeldelse_id"]
-        context["anmeldelse"] = self.rest_client.afgiftanmeldelse.get(
-            anmeldelse_id, full=True, include_varelinjer=True
+        # TODO: Remove this when PaymentRestClient have been moved to told_common
+        self.rest_client.payment = PaymentRestClient(self.rest_client)
+
+        # Get the tax declaration
+        declaration_id = self.kwargs["anmeldelse_id"]
+        declaration = self.rest_client.afgiftanmeldelse.get(
+            declaration_id, full=True, include_varelinjer=True
         )
+
+        # Create / get payment for the declaration
+        payment = self.rest_client.payment.get(declaration_id)
+        if not payment:
+            payment = self.rest_client.create(declaration_id)
+
+        # Configure view context
+        context["anmeldelse"] = declaration
         context["anmeldelse_total_afgift"] = sum(
-            varelinje.afgiftsbeløb for varelinje in context["anmeldelse"].varelinjer
+            varelinje.afgiftsbeløb for varelinje in declaration.varelinjer
         )
 
         return context
+
+        # context["anmeldelse"] = self.rest_client.afgiftanmeldelse.get(
+        #     anmeldelse_id, full=True, include_varelinjer=True
+        # )
+        # context["anmeldelse_total_afgift"] = sum(
+        #     varelinje.afgiftsbeløb for varelinje in context["anmeldelse"].varelinjer
+        # )
+        # return context

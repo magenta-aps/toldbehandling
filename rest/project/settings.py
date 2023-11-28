@@ -143,6 +143,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 ENVIRONMENT = os.environ.get("ENVIRONMENT", "development")
 
 # Uploaded files
+
 MEDIA_ROOT = "/upload/"
 DATA_UPLOAD_MAX_MEMORY_SIZE = 20 * 1024 * 1024
 
@@ -157,11 +158,14 @@ PAYMENT_PROVIDER_NETS_HOST = os.environ.get(
     "PAYMENT_PROVIDER_NETS_HOST", "https://api.dibspayment.eu"
 )
 PAYMENT_PROVIDER_NETS_SECRET_KEY = os.environ.get(
-    "PAYMENT_PROVIDER_NETS_SECRET_KEY", "secret"
+    "PAYMENT_PROVIDER_NETS_SECRET_KEY", "secret_key"
 )
 PAYMENT_PROVIDER_NETS_CHECKOUT_KEY = os.environ.get(
-    "PAYMENT_PROVIDER_NETS_CHECKOUT_KEY", "checkout"
+    "PAYMENT_PROVIDER_NETS_CHECKOUT_KEY", "checkout_key"
 )
 PAYMENT_PROVIDER_NETS_TERMS_URL = os.environ.get(
     "PAYMENT_PROVIDER_NETS_TERMS_URL", "https://groendland.dk/terms"
 )
+
+# TEMP stuff
+HOST_DOMAIN = os.environ.get("HOST_DOMAIN", "http://akitsuut.aka.gl")
