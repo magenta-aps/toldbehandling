@@ -37,6 +37,11 @@ class TF10UpdateMultipleForm(BootstrapForm):
     fragtbrevnr = forms.CharField(
         required=False,
     )
+    afgangsdato = forms.DateField(
+        required=False,
+        widget=DateInput,
+        label=_("Afgangsdato"),
+    )
     notat = forms.CharField(
         widget=forms.Textarea(attrs={"placeholder": _("Notat")}), required=False
     )
@@ -48,10 +53,12 @@ class TF10UpdateMultipleForm(BootstrapForm):
             self.fields["fragtbrevnr"].label = _("Fragtbrevnr")
         elif fragttype in ("skibspost", "luftpost"):
             self.fields["forbindelsesnr"].label = _("Afsenderbykode")
+            self.fields["forbindelsesnr"].disabled = True
             self.fields["fragtbrevnr"].label = _("Postforsendelsesnummer")
         else:
             self.fields["forbindelsesnr"].disabled = True
             self.fields["fragtbrevnr"].disabled = True
+            self.fields["afgangsdato"].disabled = True
 
 
 class ListForm(forms.Form):
