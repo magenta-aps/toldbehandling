@@ -101,8 +101,6 @@ class EboksClient(object):
             self.url_with_prefix,
             f"3/dispatchsystem/{self.system_id}/dispatches/{message_id}",
         )
-        print(message_id)
-        print(len(message_id))
         dispatch = EboksDispatch.objects.get_or_create(
             message_id=message_id,
             defaults={
