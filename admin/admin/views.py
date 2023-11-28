@@ -119,7 +119,6 @@ class TF10View(PermissionsRequiredMixin, TF10BaseView, FormView):
             or form.cleaned_data["notat2"]
             or form.cleaned_data["notat3"]
         )
-        print(form.cleaned_data)
         try:
             if send_til_prisme:
                 # Yderligere tjek for om brugeren må ændre noget.
