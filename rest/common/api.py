@@ -94,7 +94,7 @@ class UserOutWithTokens(Schema):
             "email": user.email,
             "is_superuser": user.is_superuser,
             "groups": [group.name for group in user.groups.all()],
-            "permissions": user.get_all_permissions().sort(),
+            "permissions": sorted(user.get_all_permissions()),
             "indberetter_data": user.indberetter_data,
             "access_token": str(refresh_token.access_token),
             "refresh_token": str(refresh_token),
