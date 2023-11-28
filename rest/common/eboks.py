@@ -101,7 +101,7 @@ class EboksClient(object):
             self.url_with_prefix,
             f"3/dispatchsystem/{self.system_id}/dispatches/{message_id}",
         )
-        dispatch = EboksDispatch.objects.get_or_create(
+        dispatch, created = EboksDispatch.objects.get_or_create(
             message_id=message_id,
             defaults={
                 "besked": besked,
@@ -120,6 +120,8 @@ class EboksClient(object):
         except HTTPError as e:
             if hasattr(e, "response"):
                 dispatch.status_code = e.response.status_code
+                print(e.response.status_code)
+                print(e.response.content)
             besked.save(update_fields=("forsøg",))
             dispatch.save(update_fields=("status_code",))
 
