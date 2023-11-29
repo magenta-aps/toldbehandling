@@ -325,6 +325,7 @@ function trAttributter(data, index) {
             const checked = $(this).is(":checked");
             $("[name=id]").prop("checked", checked);
             $("table tbody tr").toggleClass(activeClass, checked);
+            onUpdateSelected();
         });
     };
 
