@@ -280,6 +280,12 @@ class Varelinje(ToldDataClass):
     afgiftsbeløb: Decimal
 
 
+class Status(Enum):
+    NY = 1
+    AFVIST = 2
+    GODKENDT = 3
+    AFSLUTTET = 4
+
 @dataclass_json
 @dataclass
 class Afgiftsanmeldelse(ToldDataClass):

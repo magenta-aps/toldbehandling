@@ -292,8 +292,14 @@ class FragtforsendelseRestClient(ModelRestClient):
         self.set_file(data, "fragtbrev")
         return FragtForsendelse.from_dict(data)
 
+status_to_str = {
+    1: "afsluttet", 2: "afvist", 3: "godkendt", 4: "afsluttet",
+}
+str_to_status = { k: v for v, k in status_to_str.items()}
 
 class AfgiftanmeldelseRestClient(ModelRestClient):
+
+
     @staticmethod
     def compare(data: dict, existing: dict) -> bool:
         # Sammenligner output fra map_anmeldelse (input fra form)
@@ -384,7 +390,10 @@ class AfgiftanmeldelseRestClient(ModelRestClient):
 
     def set_godkendt(self, id: int, godkendt: bool):
         self.rest.patch(
-            f"afgiftsanmeldelse/{id}", {"status": "godkendt" if godkendt else "afvist"}
+            f"afgiftsanmeldelse/{id}", {
+                "status": str_to_status["godkendt"] if
+                godkendt else str_to_status["afvist"]
+            }
         )
 
     def list(
@@ -413,6 +422,8 @@ class AfgiftanmeldelseRestClient(ModelRestClient):
                 item["prismeresponses"] = self.rest.prismeresponse.list(
                     afgiftsanmeldelse=item["id"]
                 )
+            if item["status"]:
+                item["status"] = status_to_str[items["status"]]
         for item in data["items"]:
             self.set_file(item, "leverandørfaktura")
         return data["count"], [
@@ -445,6 +456,9 @@ class AfgiftanmeldelseRestClient(ModelRestClient):
             item["prismeresponses"] = self.rest.prismeresponse.list(
                 afgiftsanmeldelse=item["id"]
             )
+        if item["status"]:
+            item["status"] = status_to_str[items["status"]]
+
         return Afgiftsanmeldelse.from_dict(item)
 
     def list_history(self, id: int) -> Tuple[int, List[HistoricAfgiftsanmeldelse]]:
