@@ -80,6 +80,13 @@ class TF10Form(BootstrapForm):
                     ),
                 }
             )
+        if fragtbrev_required:
+            self.fields["fragtbrev"].widget.attrs.update(
+                {
+                    "data-required-field": "[name=fragttype]",
+                    "data-required-values": "skibsfragt,luftfragt",
+                }
+            )
 
     afsender_cvr = ButtonlessIntegerField(
         min_value=10000000,
@@ -218,10 +225,6 @@ class TF10Form(BootstrapForm):
         label=_("Fragtbrev"),
         max_size=10000000,
         required=False,
-        widget_attrs={
-            "data-required-field": "[name=fragttype]",
-            "data-required-values": "skibsfragt,luftfragt",
-        },
     )
     fragttype = forms.ChoiceField(
         required=True,
