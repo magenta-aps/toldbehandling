@@ -165,6 +165,7 @@ if "PRISME_SOCKS_PROXY" in os.environ:
 SESSION_COOKIE_PATH = "/admin"
 SESSION_COOKIE_SAMESITE = "Strict"
 SESSION_COOKIE_SECURE = True
+SESSION_COOKIE_NAME = "admin_sessionid"
 
 STORAGES = {
     "staticfiles": {
