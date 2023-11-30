@@ -12,9 +12,9 @@ if [[ "${GENERATE_DB_DOCUMENTATION,,}" = true ]]; then
   RESULT=1
   while [[ $RESULT != "0" ]] ; do
     if [[ "$ENVIRONMENT" == "development" ]]; then
-    RESULT=$(bash -c 'exec 3<> /dev/tcp/localhost/8000; echo $?' 2>/dev/null);
+    RESULT=$(bash -c 'exec 3<> /dev/tcp/localhost/7000; echo $?' 2>/dev/null);
     else
-    RESULT=$(bash -c 'exec 3<> /dev/tcp/web/443; echo $?' 2>/dev/null);
+    RESULT=$(bash -c 'exec 3<> /dev/tcp/toldbehandling-rest/7000; echo $?' 2>/dev/null);
     fi
     sleep 1
   done

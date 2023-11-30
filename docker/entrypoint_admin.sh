@@ -31,21 +31,21 @@ if [ "${MIGRATE,,}" = true ]; then
   echo 'running migrations'
   python manage.py migrate
 fi
+
+echo 'collecting static files'
+./manage.py collectstatic --no-input --clear
+
 if [ "${TEST,,}" = true ]; then
   echo 'running tests'
   python manage.py test
 fi
 if [ "${MAKEMESSAGES,,}" = true ]; then
   echo 'making messages'
-  python manage.py makemessages --all --no-obsolete --add-location file
+  python manage.py makemessages --all --no-obsolete --ignore=/app/told_common/* --add-location file
 fi
 if [ "${COMPILEMESSAGES,,}" = true ]; then
   echo 'compiling messages'
   python manage.py compilemessages
-fi
-if [ "${DJANGO_DEBUG,,}" = false ]; then
-  echo 'collecting static files'
-  ./manage.py collectstatic --no-input --clear
 fi
 
 exec "$@"

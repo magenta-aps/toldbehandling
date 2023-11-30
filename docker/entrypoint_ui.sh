@@ -28,6 +28,10 @@ python manage.py createcachetable
 if [ "${SKIP_IDP_METADATA,,}" = false ]; then
   python manage.py update_mitid_idp_metadata
 fi
+
+echo 'collecting static files'
+./manage.py collectstatic --no-input
+
 if [ "${TEST,,}" = true ]; then
   echo 'running tests'
   python manage.py test
@@ -39,10 +43,6 @@ fi
 if [ "${COMPILEMESSAGES,,}" = true ]; then
   echo 'compiling messages'
   python manage.py compilemessages
-fi
-if [ "${DJANGO_DEBUG,,}" = false ]; then
-  echo 'collecting static files'
-  ./manage.py collectstatic --no-input
 fi
 
 exec "$@"

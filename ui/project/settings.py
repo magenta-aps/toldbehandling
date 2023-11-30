@@ -62,6 +62,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django_session_timeout.middleware.SessionTimeoutMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
 ]
 
 ROOT_URLCONF = "project.urls"
@@ -195,6 +196,13 @@ CACHES = {
         "LOCATION": "default_cache",
     },
 }
+
+STORAGES = {
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
+
 
 # Når SAML-IdP'en POSTer til os, skal vi modtage vores session-cookie fra browseren
 # https://docs.djangoproject.com/en/4.2/ref/settings/#session-cookie-samesite
