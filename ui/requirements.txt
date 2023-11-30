@@ -9,3 +9,4 @@ xmltodict==0.13.0
 psycopg2==2.9.6
 django-bootstrap-icons==0.8.6
 psycopg2==2.9.6
+whitenoise==6.0.0

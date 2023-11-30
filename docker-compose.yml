@@ -70,7 +70,6 @@ services:
     volumes:
       - ./ui/:/app
       - ./told-common/told_common/:/app/told_common
-      - ./data/er:/static/er:ro
       - file-data:/upload  # rw for at kunne teste; bør være ro i deployments
       - ./dev-environment/cert:/ssl:ro
     environment:
@@ -95,7 +94,6 @@ services:
     volumes:
       - ./admin/:/app
       - ./told-common/told_common/:/app/told_common
-      - ./data/er:/static/er:ro
       - file-data:/upload  # rw for at kunne teste; bør være ro i deployments
     environment:
       - MAKE_MIGRATIONS=true
@@ -103,7 +101,6 @@ services:
       - TEST=false
     network_mode: "host"
     command: gunicorn -b 0.0.0.0:8001 project.wsgi:application --reload -w 1 --access-logfile - --error-logfile - --capture-output # reload on code changes
-
 
   toldbehandling-db:
     # Do not set `user` here
@@ -129,6 +126,18 @@ services:
       - ./dev-environment/rest.env
     volumes:
       - ./data/er:/doc
+    network_mode: "host"
+
+  toldbehandling-er-web:
+    container_name: toldbehandling-er-web
+    user: "1000:1000"
+    image: halverneus/static-file-server:latest
+    environment:
+      - PORT=8002
+      - URL_PREFIX=/er
+    volumes:
+      - ./data/er:/web:ro
+    network_mode: "host"
 
   toldbehandling-test-idp:
     user: "1000:1000"  # Override in docker-compose.override.yml if your local user is different

@@ -226,6 +226,7 @@ Unittest UI:
   script:
     - cd /app
     - cp -r ./told-common/told_common .
+    - python manage.py collectstatic
     - coverage run manage.py test
     - coverage report --show-missing
     - mv .coverage "${CI_PROJECT_DIR}/coverage_output/.coverage.${CI_JOB_ID}"
@@ -236,6 +237,7 @@ Unittest Admin:
   script:
     - cd /app
     - cp -r ./told-common/told_common .
+    - python manage.py collectstatic
     - coverage run manage.py test
     - coverage report --show-missing
     - mv .coverage "${CI_PROJECT_DIR}/coverage_output/.coverage.${CI_JOB_ID}"
