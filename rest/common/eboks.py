@@ -120,10 +120,11 @@ class EboksClient(object):
         except HTTPError as e:
             if hasattr(e, "response"):
                 dispatch.status_code = e.response.status_code
+                dispatch.status_message = e.response.content
             besked.save(update_fields=("forsøg",))
-            dispatch.save(update_fields=("status_code",))
+            dispatch.save(update_fields=("status_code", "status_message"))
 
-            if retries > 0:
+            if retries > 0 and dispatch.status_code != 400:
                 if hasattr(e, "response"):
                     if e.response.status_code == 409:
                         # message_id allerede brugt

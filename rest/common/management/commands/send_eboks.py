@@ -6,7 +6,11 @@ from requests import HTTPError
 
 class Command(BaseCommand):
     def handle(self, *args, **kwargs):
-        beskeder = EboksBesked.objects.filter(sendt=False).order_by("opdateret")
+        beskeder = (
+            EboksBesked.objects.filter(sendt=False)
+            .exclude(eboksdispatch__status_code=400)
+            .order_by("opdateret")
+        )
         if beskeder.exists():
             print(f"{len(beskeder)} der skal sendes")
             client = EboksClient.from_settings()
