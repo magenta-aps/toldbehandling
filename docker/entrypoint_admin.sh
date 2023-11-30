@@ -23,15 +23,6 @@ if [ "${MIGRATE,,}" = true ]; then
   python manage.py migrate
 fi
 
-if [ "${MAKE_MIGRATIONS,,}" = true ]; then
-  echo 'generating migrations'
-  python manage.py makemigrations --no-input
-fi
-if [ "${MIGRATE,,}" = true ]; then
-  echo 'running migrations'
-  python manage.py migrate
-fi
-
 echo 'collecting static files'
 ./manage.py collectstatic --no-input --clear
 
