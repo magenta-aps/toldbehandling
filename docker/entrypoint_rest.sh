@@ -36,6 +36,10 @@ if [ "${CREATE_USERS,,}" = true ]; then
   echo 'create users'
   python manage.py create_dummy_users
 fi
+
+echo 'create system user'
+python manage.py create_system_user
+
 if [ "${CREATE_POSTNUMRE,,}" = true ]; then
   echo 'creating postnumre'
   python manage.py create_postnumre

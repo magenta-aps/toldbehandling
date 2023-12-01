@@ -142,6 +142,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+SYSTEM_USER_PASSWORD = os.environ["SYSTEM_USER_PASSWORD"]
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/

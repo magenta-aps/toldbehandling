@@ -525,7 +525,7 @@ class AfgiftstabelListView(PermissionsRequiredMixin, HasRestClientMixin, GetForm
             today = date.today().isoformat()
             value = (
                 not item["kladde"]
-                and item["gyldig_fra"] < today
+                and item["gyldig_fra"] <= today
                 and (item["gyldig_til"] is None or today < item["gyldig_til"])
             )
         return value

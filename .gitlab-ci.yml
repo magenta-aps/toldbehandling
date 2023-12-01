@@ -188,6 +188,7 @@ Build ER image:
     MITID_TEST_ENABLED: 'True'
     LANGUAGE_COOKIE_DOMAIN: localhost
     EBOKS_MOCK: 'True'
+    SYSTEM_USER_PASSWORD: system
 
   before_script:
     - mkdir "${CI_PROJECT_DIR}/coverage_output"

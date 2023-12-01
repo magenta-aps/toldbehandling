@@ -18,12 +18,9 @@ class Command(BaseCommand):
         if IndberetterProfile.objects.exists():
             # Already contains data or dummy data
             return
-        if settings.ENVIRONMENT in ("production", "staging"):
-            raise Exception(f"Will not create dummy users in {settings.ENVIRONMENT}")
-        try:
-            indberetter_group = Group.objects.get(name="Indberettere")
-        except Group.DoesNotExist:
-            indberetter_group = None
+        if settings.ENVIRONMENT in ("production",):
+            print(f"Will not create dummy users in {settings.ENVIRONMENT}")
+            return
         try:
             toldmedarbejder_group = Group.objects.get(name="Toldmedarbejdere")
         except Group.DoesNotExist:
@@ -46,43 +43,6 @@ class Command(BaseCommand):
                 "is_superuser": True,
             },
             username="admin",
-        )
-        indberetter, created = User.objects.update_or_create(
-            defaults={
-                "first_name": "Indberetter",
-                "last_name": "",
-                "email": "",
-                "password": make_password(
-                    os.environ.get("INDBERETTER_PASSWORD", "indberetter")
-                ),
-                "is_active": True,
-                "is_staff": False,
-                "is_superuser": False,
-            },
-            username="indberetter",
-        )
-        indberetter.groups.add(indberetter_group)
-        IndberetterProfile.objects.update_or_create(
-            defaults={"cpr": 1111111111}, user=indberetter
-        )
-
-        indberetter2, created = User.objects.update_or_create(
-            defaults={
-                "first_name": "Indberetter2",
-                "last_name": "",
-                "email": "",
-                "password": make_password(
-                    os.environ.get("INDBERETTER_PASSWORD", "indberetter2")
-                ),
-                "is_active": True,
-                "is_staff": False,
-                "is_superuser": False,
-            },
-            username="indberetter2",
-        )
-        indberetter2.groups.add(indberetter_group)
-        IndberetterProfile.objects.update_or_create(
-            defaults={"cpr": 1111111112}, user=indberetter2
         )
 
         toldmedarbejder, created = User.objects.update_or_create(
