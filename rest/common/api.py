@@ -107,7 +107,7 @@ class UserIn(ModelSchema):
 
     class Config:
         model = User
-        model_fields = ["username", "first_name", "last_name", "email", "is_superuser"]
+        model_fields = ["username", "first_name", "last_name", "email"]
 
 
 @api_controller(
@@ -146,7 +146,7 @@ class UserAPI:
             first_name=payload.first_name,
             last_name=payload.last_name,
             email=payload.email,
-            is_superuser=payload.is_superuser,
+            is_superuser=False,
         )
         user.groups.set(groups)
         IndberetterProfile.objects.create(

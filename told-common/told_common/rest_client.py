@@ -714,7 +714,7 @@ class RestClient:
     def login_saml_user(cls, saml_data: dict) -> Tuple[Dict, JwtTokenInfo]:
         cpr = saml_data["cpr"]
         cvr = saml_data.get("cvr")
-        client = RestClient(RestClient.login("admin", "admin"))
+        client = RestClient(RestClient.login("system", settings.SYSTEM_USER_PASSWORD))
         try:
             user = client.get(f"user/cpr/{int(cpr)}")
         except HTTPError as e:
