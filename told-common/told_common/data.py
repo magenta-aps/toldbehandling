@@ -30,9 +30,21 @@ def format_decimal(decimal: Decimal) -> str:
 def unformat_decimal(string: str) -> Optional[Decimal]:
     if string in (None, ""):
         return None
-    return Decimal(
-        str(string).replace(".", "").replace(",", "."), context=Context(prec=2)
-    )
+    string = str(string)
+
+    if "." not in string:
+        # Der er ingen punktum. Fortolk komma som decimalseparator
+        return Decimal(string.replace(",", "."), context=Context(prec=2))
+
+    elif "," not in string:
+        # Der er ingen komma. Fortolk punktum som decimalseparator
+        return Decimal(string, context=Context(prec=2))
+
+    else:
+        # Der er både punktum og komma. Fortolk komma som decimalseparator
+        return Decimal(
+            string.replace(".", "").replace(",", "."), context=Context(prec=2)
+        )
 
 
 def format_int(decimal: Union[Decimal, str]) -> int:

@@ -6,7 +6,9 @@ import json
 import time
 from copy import deepcopy
 from datetime import datetime, timedelta
+from decimal import Decimal
 from typing import Any, Callable, Tuple
+from unittest import TestCase
 from unittest.mock import mock_open, patch
 from urllib.parse import parse_qs, quote, quote_plus, urlparse
 
@@ -17,6 +19,7 @@ from django.contrib.auth.models import Permission
 from django.test import override_settings
 from django.urls import reverse
 from requests import Response
+from told_common.data import unformat_decimal
 from told_common.rest_client import RestClient
 from told_common.templatetags.common_tags import file_basename, zfill
 
@@ -1049,3 +1052,11 @@ def modify_values(item: Any, types: Tuple, action: Callable) -> Any:
     if t in types:
         return action(item)
     return item
+
+
+class TestData(TestCase):
+    def test_unformat_decimal(self):
+        self.assertEquals(unformat_decimal("1,0"), Decimal("1.0"))
+        self.assertEquals(unformat_decimal("1.0"), Decimal("1.0"))
+        self.assertEquals(unformat_decimal("1"), Decimal("1"))
+        self.assertEquals(unformat_decimal("1.000,00"), Decimal("1000.00"))
