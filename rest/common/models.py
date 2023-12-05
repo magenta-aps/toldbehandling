@@ -12,7 +12,7 @@ class IndberetterProfile(models.Model):
     user = models.OneToOneField(
         User, on_delete=models.CASCADE, null=False, related_name="indberetter_data"
     )
-    cpr = models.PositiveIntegerField(
+    cpr = models.BigIntegerField(
         null=True,
         blank=True,
         validators=[
@@ -50,7 +50,7 @@ class Postnummer(models.Model):
 
 class EboksBesked(models.Model):
     titel = models.CharField(max_length=500)
-    cpr = models.PositiveIntegerField(
+    cpr = models.BigIntegerField(
         null=True,
         blank=True,
         validators=[
