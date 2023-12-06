@@ -31,6 +31,10 @@ class Command(BaseCommand):
             )
         except Group.DoesNotExist:
             afstemmere_bogholdere_group = None
+        try:
+            dataansvarlige_group = Group.objects.get(name="Dataansvarlige")
+        except Group.DoesNotExist:
+            dataansvarlige_group = None
 
         admin, created = User.objects.update_or_create(
             defaults={
@@ -76,3 +80,19 @@ class Command(BaseCommand):
             username="afstemmer",
         )
         afstemmer.groups.add(afstemmere_bogholdere_group)
+
+        dataansvarlig, created = User.objects.update_or_create(
+            defaults={
+                "first_name": "Dataansvarlig",
+                "last_name": "",
+                "email": "",
+                "password": make_password(
+                    os.environ.get("DATAANSVARLIG_PASSWORD", "dataansvarlig")
+                ),
+                "is_active": True,
+                "is_staff": False,
+                "is_superuser": False,
+            },
+            username="dataansvarlig",
+        )
+        dataansvarlig.groups.add(dataansvarlige_group)

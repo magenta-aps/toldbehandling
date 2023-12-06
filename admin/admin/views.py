@@ -445,7 +445,6 @@ class AfgiftstabelListView(PermissionsRequiredMixin, HasRestClientMixin, GetForm
     required_permissions = (
         "auth.admin",
         "sats.view_afgiftstabel",
-        "common.admin_site_access",
     )
     template_name = "admin/afgiftstabel/list.html"
     form_class = forms.AfgiftstabelSearchForm
