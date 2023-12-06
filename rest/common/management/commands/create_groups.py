@@ -26,9 +26,9 @@ class Command(BaseCommand):
         afstemmere_bogholdere, _ = Group.objects.update_or_create(
             name="Afstemmere/bogholdere",
         )
-        # dataansvarlige, _ = Group.objects.update_or_create(
-        #     name="Dataansvarlige",
-        # )
+        dataansvarlige, _ = Group.objects.update_or_create(
+            name="Dataansvarlige",
+        )
 
         afsender_model = ContentType.objects.get_for_model(
             Afsender, for_concrete_model=False
@@ -169,3 +169,18 @@ class Command(BaseCommand):
         afstemmere_bogholdere.permissions.add(se_alle_afgiftsanmeldelser)
         afstemmere_bogholdere.permissions.add(se_alle_fragtforsendelser)
         afstemmere_bogholdere.permissions.add(se_alle_postforsendelser)
+
+        for action, model in (
+            ("view", afgiftstabel_model),
+            ("view", vareafgiftssats_model),
+            ("add", afgiftstabel_model),
+            ("add", vareafgiftssats_model),
+            ("change", afgiftstabel_model),
+            ("change", vareafgiftssats_model),
+        ):
+            dataansvarlige.permissions.add(
+                Permission.objects.get(
+                    codename=f"{action}_{model.name}", content_type=model
+                )
+            )
+        dataansvarlige.permissions.add(admin_site_access)
