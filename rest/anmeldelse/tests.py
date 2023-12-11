@@ -225,6 +225,7 @@ class VarelinjeTest(RestMixin, TestCase):
         self.varelinje_data.update(
             {
                 "afgiftsanmeldelse_id": self.afgiftsanmeldelse.id,
+                "privatafgiftsanmeldelse_id": None,
                 "vareafgiftssats_id": self.vareafgiftssats.id,
             }
         )

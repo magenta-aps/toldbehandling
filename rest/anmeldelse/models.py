@@ -8,8 +8,9 @@ from common.models import Postnummer
 from common.util import dato_måned_slut
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
-from django.core.validators import MinValueValidator
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+from django.db.models import CheckConstraint, Q
 from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
@@ -20,6 +21,10 @@ from simple_history.models import HistoricalRecords, HistoricForeignKey
 
 def afgiftsanmeldelse_upload_to(instance, filename):
     return f"leverandørfakturaer/{instance.pk}/{filename}"
+
+
+def privatafgiftsanmeldelse_upload_to(instance, filename):
+    return f"privatfakturaer/{instance.pk}/{filename}"
 
 
 class Afgiftsanmeldelse(models.Model):
@@ -131,14 +136,114 @@ class Afgiftsanmeldelse(models.Model):
         return måned_slut + timedelta(days=ekstra_dage)
 
 
+class PrivatAfgiftsanmeldelse(models.Model):
+    oprettet = models.DateTimeField(auto_now_add=True)
+
+    cpr = models.BigIntegerField(
+        verbose_name=_("CPR-nummer"),
+        db_index=True,
+        validators=(
+            MinValueValidator(101000000),
+            MaxValueValidator(3112999999),
+        ),
+        null=False,
+        blank=False,
+    )
+    anonym = models.BooleanField(
+        default=False,
+        db_index=True,
+    )
+    navn = models.CharField(
+        max_length=100,
+        db_index=True,
+        null=False,
+        blank=False,
+    )
+    adresse = models.CharField(
+        max_length=100,
+        null=False,
+        blank=False,
+    )
+    postnummer = models.PositiveSmallIntegerField(
+        db_index=True,
+        validators=(
+            MinValueValidator(1000),
+            MaxValueValidator(9999),
+        ),
+        null=False,
+        blank=False,
+    )
+    by = models.CharField(
+        max_length=50,
+        db_index=True,
+        null=False,
+        blank=False,
+    )
+    postbox = models.CharField(
+        max_length=10,
+        null=True,
+        blank=True,
+    )
+    telefon = models.CharField(
+        max_length=12,
+        null=False,
+        blank=False,
+    )
+
+    bookingnummer = models.CharField(
+        max_length=20,
+        verbose_name=_("Bookingnummer udstedt af speditør"),
+        null=False,
+        blank=False,
+    )
+    varefakturanummer = models.CharField(
+        max_length=20,
+        verbose_name=_("Varefakturanummer udstedt af forhandler"),
+        null=False,
+        blank=False,
+    )
+    tilladelsesnummer = models.CharField(
+        max_length=20,
+        verbose_name=_("Nummer på senest udstedte indførselstilladelse"),
+        null=False,
+        blank=False,
+    )
+    leveringsdato = models.DateField()
+    faktura = models.FileField(
+        upload_to=privatafgiftsanmeldelse_upload_to,
+        null=True,
+        blank=True,
+    )
+
+
 class Varelinje(models.Model):
     class Meta:
         ordering = ["vareafgiftssats"]
+        constraints = [
+            CheckConstraint(
+                check=Q(afgiftsanmeldelse__isnull=False)
+                | Q(privatafgiftsanmeldelse__isnull=False),
+                name="afgiftsanmeldelse_has_one",
+            ),
+            CheckConstraint(
+                check=Q(afgiftsanmeldelse__isnull=True)
+                | Q(privatafgiftsanmeldelse__isnull=True),
+                name="afgiftsanmeldelse_only_one",
+            ),
+        ]
 
     history = HistoricalRecords()
     afgiftsanmeldelse = HistoricForeignKey(
         Afgiftsanmeldelse,
         on_delete=models.CASCADE,
+        null=True,
+    )
+    privatafgiftsanmeldelse = HistoricForeignKey(
+        PrivatAfgiftsanmeldelse,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        default=None,
     )
     vareafgiftssats = models.ForeignKey(
         Vareafgiftssats,
