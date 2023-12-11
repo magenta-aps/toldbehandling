@@ -409,6 +409,8 @@ class RestMixin:
     def test_list_filter(self):
         self.create_items()
         for key, value in self.filter_data.items():
+            if value is None:
+                continue
             # attribute_model_class = getattr(self.object_class, key)
             # if isinstance(attribute_model_class, ForwardManyToOneDescriptor):
             #     key = f"{key}__id"
@@ -439,7 +441,7 @@ class RestMixin:
     def test_list_filter_negative(self):
         self.create_items()
         for key, value in self.filter_data.items():
-            if isinstance(value, File):
+            if isinstance(value, File) or value is None:
                 continue
             altered_value = self.alter_value(key, value)
             url = (
@@ -534,6 +536,9 @@ class RestMixin:
         for key, values in self.invalid_itemdata.items():
             for value in values:
                 invalid_data = {**self.creation_data, key: value}
+                invalid_data = dict(
+                    filter(lambda x: x[1] is not None, invalid_data.items())
+                )
                 response = self.client.post(
                     url,
                     invalid_data,
@@ -850,6 +855,7 @@ class RestMixin:
             "enhed": Vareafgiftssats.Enhed.KILOGRAM,
             "afgiftssats": "2.50",
             "kræver_indførselstilladelse": False,
+            "synlig_privat": False,
         }
         self.afgiftstabel_data = {"gyldig_fra": date.today().isoformat()}
 

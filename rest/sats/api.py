@@ -152,12 +152,14 @@ class VareafgiftssatsIn(ModelSchema):
             "minimumsbeløb",
             "segment_nedre",
             "segment_øvre",
+            "synlig_privat",
         ]
         model_fields_optional = [
             "kræver_indførselstilladelse",
             "minimumsbeløb",
             "segment_nedre",
             "segment_øvre",
+            "synlig_privat",
         ]
 
 
@@ -177,6 +179,7 @@ class PartialVareafgiftssatsIn(ModelSchema):
             "minimumsbeløb",
             "segment_nedre",
             "segment_øvre",
+            "synlig_privat",
         ]
         model_fields_optional = "__all__"
 
@@ -197,6 +200,7 @@ class VareafgiftssatsOut(ModelSchema):
             "overordnet",
             "segment_nedre",
             "segment_øvre",
+            "synlig_privat",
         ]
 
 
@@ -212,6 +216,7 @@ class VareafgiftssatsFilterSchema(FilterSchema):
     overordnet: Optional[int]
     segment_nedre: Optional[Decimal]
     segment_øvre: Optional[Decimal]
+    synlig_privat: Optional[bool]
 
 
 class VareafgiftssatsPermission(RestPermission):
