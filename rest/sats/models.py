@@ -170,6 +170,10 @@ class Vareafgiftssats(models.Model):
         decimal_places=2,
         verbose_name="Øvre grænse for mængden der skal beregnes afgift ud fra",
     )
+    synlig_privat = models.BooleanField(
+        default=False,
+        verbose_name="Vareafgiftssatsen kan bruges af private",
+    )
 
     def __str__(self):
         nummer = self.afgiftsgruppenummer

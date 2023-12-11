@@ -83,6 +83,7 @@ class Command(BaseCommand):
                 minimumsbeløb=False,
                 afgiftssats=Decimal("3.50"),
                 kræver_indførselstilladelse=True,
+                synlig_privat=True,
             )
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
@@ -95,6 +96,7 @@ class Command(BaseCommand):
                 minimumsbeløb=False,
                 afgiftssats=Decimal("8.00"),
                 kræver_indførselstilladelse=True,
+                synlig_privat=True,
             )
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
@@ -107,6 +109,7 @@ class Command(BaseCommand):
                 minimumsbeløb=False,
                 afgiftssats=Decimal("21.00"),
                 kræver_indførselstilladelse=True,
+                synlig_privat=True,
             )
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
@@ -119,6 +122,7 @@ class Command(BaseCommand):
                 minimumsbeløb=False,
                 afgiftssats=Decimal("30.00"),
                 kræver_indførselstilladelse=True,
+                synlig_privat=True,
             )
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
@@ -131,6 +135,7 @@ class Command(BaseCommand):
                 minimumsbeløb=False,
                 afgiftssats=Decimal("43.00"),
                 kræver_indførselstilladelse=True,
+                synlig_privat=True,
             )
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
@@ -143,6 +148,7 @@ class Command(BaseCommand):
                 minimumsbeløb=False,
                 afgiftssats=Decimal("56.00"),
                 kræver_indførselstilladelse=True,
+                synlig_privat=True,
             )
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
@@ -155,6 +161,7 @@ class Command(BaseCommand):
                 minimumsbeløb=False,
                 afgiftssats=Decimal("66.00"),
                 kræver_indførselstilladelse=True,
+                synlig_privat=True,
             )
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
@@ -167,6 +174,7 @@ class Command(BaseCommand):
                 minimumsbeløb=False,
                 afgiftssats=Decimal("92.00"),
                 kræver_indførselstilladelse=True,
+                synlig_privat=True,
             )
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
@@ -179,6 +187,7 @@ class Command(BaseCommand):
                 minimumsbeløb=False,
                 afgiftssats=Decimal("114.00"),
                 kræver_indførselstilladelse=True,
+                synlig_privat=True,
             )
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
@@ -191,6 +200,7 @@ class Command(BaseCommand):
                 minimumsbeløb=False,
                 afgiftssats=Decimal("147.00"),
                 kræver_indførselstilladelse=True,
+                synlig_privat=True,
             )
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
@@ -203,6 +213,7 @@ class Command(BaseCommand):
                 minimumsbeløb=False,
                 afgiftssats=Decimal("187.00"),
                 kræver_indførselstilladelse=True,
+                synlig_privat=True,
             )
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
@@ -215,6 +226,7 @@ class Command(BaseCommand):
                 minimumsbeløb=False,
                 afgiftssats=Decimal("230.00"),
                 kræver_indførselstilladelse=True,
+                synlig_privat=True,
             )
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
@@ -227,6 +239,7 @@ class Command(BaseCommand):
                 minimumsbeløb=False,
                 afgiftssats=Decimal("280.00"),
                 kræver_indførselstilladelse=True,
+                synlig_privat=True,
             )
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
@@ -239,6 +252,7 @@ class Command(BaseCommand):
                 minimumsbeløb=False,
                 afgiftssats=Decimal("361.00"),
                 kræver_indførselstilladelse=True,
+                synlig_privat=True,
             )
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
@@ -251,6 +265,7 @@ class Command(BaseCommand):
                 minimumsbeløb=False,
                 afgiftssats=Decimal("495.00"),
                 kræver_indførselstilladelse=True,
+                synlig_privat=True,
             )
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
@@ -263,6 +278,7 @@ class Command(BaseCommand):
                 minimumsbeløb=None,
                 afgiftssats=Decimal("591.00"),
                 kræver_indførselstilladelse=True,
+                synlig_privat=True,
             )
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
@@ -273,6 +289,7 @@ class Command(BaseCommand):
                 minimumsbeløb=None,
                 afgiftssats=Decimal("7.50"),
                 kræver_indførselstilladelse=False,
+                synlig_privat=True,
             )
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
@@ -287,6 +304,7 @@ class Command(BaseCommand):
                 minimumsbeløb=None,
                 afgiftssats=Decimal("5.75"),
                 kræver_indførselstilladelse=False,
+                synlig_privat=True,
             )
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
@@ -313,6 +331,7 @@ class Command(BaseCommand):
                 minimumsbeløb=False,
                 afgiftssats=Decimal("2.00"),
                 kræver_indførselstilladelse=False,
+                synlig_privat=True,
             )
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
@@ -327,6 +346,7 @@ class Command(BaseCommand):
                 minimumsbeløb=False,
                 afgiftssats=Decimal("3.50"),
                 kræver_indførselstilladelse=False,
+                synlig_privat=True,
             )
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,

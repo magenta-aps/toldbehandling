@@ -359,6 +359,7 @@ class AfgiftsanmeldelseAPI:
 class VarelinjeIn(ModelSchema):
     fakturabeløb: str = None
     afgiftsanmeldelse_id: int = None
+    privatafgiftsanmeldelse_id: int = None
     vareafgiftssats_id: int = None
 
     class Config:
@@ -386,6 +387,7 @@ class VarelinjeOut(ModelSchema):
         model_fields = [
             "id",
             "afgiftsanmeldelse",
+            "privatafgiftsanmeldelse",
             "vareafgiftssats",
             "mængde",
             "antal",
@@ -396,6 +398,7 @@ class VarelinjeOut(ModelSchema):
 
 class VarelinjeFilterSchema(FilterSchema):
     afgiftsanmeldelse: Optional[int]
+    privatafgiftsanmeldelse: Optional[int]
     vareafgiftssats: Optional[int]
     mængde: Optional[Decimal]
     antal: Optional[int]
