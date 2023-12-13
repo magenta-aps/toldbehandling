@@ -1,4 +1,5 @@
 import base64
+import uuid
 
 from django.conf import settings
 from django.contrib.auth.models import User
@@ -27,6 +28,7 @@ class IndberetterProfile(models.Model):
         validators=[MinValueValidator(10000000), MaxValueValidator(99999999)],
         db_index=True,
     )
+    api_key = models.UUIDField(default=uuid.uuid4, editable=False)
 
 
 class Postnummer(models.Model):
