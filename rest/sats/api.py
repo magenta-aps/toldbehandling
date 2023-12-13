@@ -5,13 +5,13 @@ from datetime import date
 from decimal import Decimal
 from typing import Optional
 
+from common.api import get_auth_methods
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from ninja import FilterSchema, ModelSchema, Query
 from ninja_extra import api_controller, permissions, route
 from ninja_extra.pagination import paginate
 from ninja_extra.schemas import NinjaPaginationResponseSchema
-from ninja_jwt.authentication import JWTAuth
 from project.util import RestPermission
 from sats.models import Afgiftstabel, Vareafgiftssats
 
@@ -78,13 +78,16 @@ class AfgiftstabelPermission(RestPermission):
     permissions=[permissions.IsAuthenticated & AfgiftstabelPermission],
 )
 class AfgiftstabelAPI:
-    @route.post("", auth=JWTAuth(), url_name="afgiftstabel_create")
+    @route.post("", auth=get_auth_methods(), url_name="afgiftstabel_create")
     def create_afgiftstabel(self, payload: AfgiftstabelIn):
         item = Afgiftstabel.objects.create(**payload.dict())
         return {"id": item.id}
 
     @route.get(
-        "/{id}", response=AfgiftstabelOut, auth=JWTAuth(), url_name="afgiftstabel_get"
+        "/{id}",
+        response=AfgiftstabelOut,
+        auth=get_auth_methods(),
+        url_name="afgiftstabel_get",
     )
     def get_afgiftstabel(self, id: int):
         return get_object_or_404(Afgiftstabel, id=id)
@@ -92,7 +95,7 @@ class AfgiftstabelAPI:
     @route.get(
         "",
         response=NinjaPaginationResponseSchema[AfgiftstabelOut],
-        auth=JWTAuth(),
+        auth=get_auth_methods(),
         url_name="afgiftstabel_list",
     )
     @paginate()  # https://eadwincode.github.io/django-ninja-extra/tutorial/pagination/
@@ -121,7 +124,7 @@ class AfgiftstabelAPI:
                 return ("-" if order == "desc" else "") + sort
         return None
 
-    @route.patch("/{id}", auth=JWTAuth(), url_name="afgiftstabel_update")
+    @route.patch("/{id}", auth=get_auth_methods(), url_name="afgiftstabel_update")
     def update_afgiftstabel(self, id: int, payload: PartialAfgiftstabelIn):
         item = get_object_or_404(Afgiftstabel, id=id)
         for attr, value in payload.dict().items():
@@ -129,7 +132,7 @@ class AfgiftstabelAPI:
         item.save()
         return {"success": True}
 
-    @route.delete("/{id}", auth=JWTAuth(), url_name="afgiftstabel_delete")
+    @route.delete("/{id}", auth=get_auth_methods(), url_name="afgiftstabel_delete")
     def delete_afgiftstabel(self, id: int):
         item = get_object_or_404(Afgiftstabel, id=id)
         item.delete()
@@ -230,7 +233,7 @@ class VareafgiftssatsPermission(RestPermission):
     permissions=[permissions.IsAuthenticated & VareafgiftssatsPermission],
 )
 class VareafgiftssatsAPI:
-    @route.post("", auth=JWTAuth(), url_name="vareafgiftssats_create")
+    @route.post("", auth=get_auth_methods(), url_name="vareafgiftssats_create")
     def create_vareafgiftssats(self, payload: VareafgiftssatsIn):
         item = Vareafgiftssats.objects.create(**payload.dict())
         return {"id": item.id}
@@ -238,7 +241,7 @@ class VareafgiftssatsAPI:
     @route.get(
         "/{id}",
         response=VareafgiftssatsOut,
-        auth=JWTAuth(),
+        auth=get_auth_methods(),
         url_name="vareafgiftssats_get",
     )
     def get_vareafgiftssats(self, id: int):
@@ -247,7 +250,7 @@ class VareafgiftssatsAPI:
     @route.get(
         "",
         response=NinjaPaginationResponseSchema[VareafgiftssatsOut],
-        auth=JWTAuth(),
+        auth=get_auth_methods(),
         url_name="vareafgiftssats_list",
     )
     @paginate()  # https://eadwincode.github.io/django-ninja-extra/tutorial/pagination/
@@ -260,7 +263,7 @@ class VareafgiftssatsAPI:
         ))
         """
 
-    @route.patch("/{id}", auth=JWTAuth(), url_name="vareafgiftssats_update")
+    @route.patch("/{id}", auth=get_auth_methods(), url_name="vareafgiftssats_update")
     def update_vareafgiftssats(self, id: int, payload: PartialVareafgiftssatsIn):
         item = get_object_or_404(Vareafgiftssats, id=id)
         for attr, value in payload.dict().items():
