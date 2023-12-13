@@ -7,6 +7,7 @@ from typing import Optional
 from uuid import uuid4
 
 from anmeldelse.models import Varelinje
+from common.api import get_auth_methods
 from django.core.files.base import ContentFile
 from django.db.models import QuerySet
 from django.shortcuts import get_object_or_404
@@ -16,7 +17,6 @@ from ninja_extra import api_controller, permissions, route
 from ninja_extra.exceptions import PermissionDenied
 from ninja_extra.pagination import paginate
 from ninja_extra.schemas import NinjaPaginationResponseSchema
-from ninja_jwt.authentication import JWTAuth
 from project.util import RestPermission
 
 # Django-ninja har endnu ikke understøttelse for PATCH med filer i multipart/form-data
@@ -28,7 +28,7 @@ from project.util import RestPermission
 # In-skemaerne ændres til ikke at have filfeltet med, og metoderne der
 # håndterer post og patch skal modtage filen som et File(...) argument:
 #
-# @foo_router.post("/", auth=JWTAuth())
+# @foo_router.post("/", auth=get_auth_methods())
 # def create_foo(self, payload: FooIn, filfeltnavn: ninja.File(...)):
 #     item = Foo.objects.create(**payload.dict(), filfeltnavn=filfeltnavn)
 #
@@ -89,7 +89,7 @@ class PostforsendelsePermission(RestPermission):
     permissions=[permissions.IsAuthenticated & PostforsendelsePermission],
 )
 class PostforsendelseAPI:
-    @route.post("", auth=JWTAuth(), url_name="postforsendelse_create")
+    @route.post("", auth=get_auth_methods(), url_name="postforsendelse_create")
     def create_postforsendelse(self, payload: PostforsendelseIn):
         item = Postforsendelse.objects.create(
             **payload.dict(), oprettet_af=self.context.request.user
@@ -99,7 +99,7 @@ class PostforsendelseAPI:
     @route.get(
         "/{id}",
         response=PostforsendelseOut,
-        auth=JWTAuth(),
+        auth=get_auth_methods(),
         url_name="postforsendelse_get",
     )
     def get_postforsendelse(self, id: int):
@@ -110,7 +110,7 @@ class PostforsendelseAPI:
     @route.get(
         "",
         response=NinjaPaginationResponseSchema[PostforsendelseOut],
-        auth=JWTAuth(),
+        auth=get_auth_methods(),
         url_name="postforsendelse_list",
     )
     @paginate()  # https://eadwincode.github.io/django-ninja-extra/tutorial/pagination/
@@ -123,7 +123,7 @@ class PostforsendelseAPI:
         ))
         """
 
-    @route.patch("/{id}", auth=JWTAuth(), url_name="postforsendelse_update")
+    @route.patch("/{id}", auth=get_auth_methods(), url_name="postforsendelse_update")
     def update_postforsendelse(self, id: int, payload: PartialPostforsendelseIn):
         item = get_object_or_404(Postforsendelse, id=id)
         self.check_user(item)
@@ -133,7 +133,7 @@ class PostforsendelseAPI:
         item.save()
         return {"success": True}
 
-    @route.delete("/{id}", auth=JWTAuth(), url_name="postforsendelse_delete")
+    @route.delete("/{id}", auth=get_auth_methods(), url_name="postforsendelse_delete")
     def delete_postforsendelse(self, id):
         item = get_object_or_404(Postforsendelse, id=id)
         self.check_user(item)
@@ -217,7 +217,7 @@ class FragtforsendelsePermission(RestPermission):
     permissions=[permissions.IsAuthenticated & FragtforsendelsePermission],
 )
 class FragtforsendelseAPI:
-    @route.post("", auth=JWTAuth(), url_name="fragtforsendelse_create")
+    @route.post("", auth=get_auth_methods(), url_name="fragtforsendelse_create")
     def create_fragtforsendelse(
         self,
         payload: FragtforsendelseIn,
@@ -238,7 +238,7 @@ class FragtforsendelseAPI:
     @route.get(
         "/{id}",
         response=FragtforsendelseOut,
-        auth=JWTAuth(),
+        auth=get_auth_methods(),
         url_name="fragtforsendelse_get",
     )
     def get_fragtforsendelse(self, id: int):
@@ -249,7 +249,7 @@ class FragtforsendelseAPI:
     @route.get(
         "",
         response=NinjaPaginationResponseSchema[FragtforsendelseOut],
-        auth=JWTAuth(),
+        auth=get_auth_methods(),
         url_name="fragtforsendelse_list",
     )
     @paginate()  # https://eadwincode.github.io/django-ninja-extra/tutorial/pagination/
@@ -264,7 +264,7 @@ class FragtforsendelseAPI:
         ))
         """
 
-    @route.patch("/{id}", auth=JWTAuth(), url_name="fragtforsendelse_update")
+    @route.patch("/{id}", auth=get_auth_methods(), url_name="fragtforsendelse_update")
     def update_fragtforsendelse(self, id: int, payload: PartialFragtforsendelseIn):
         item = get_object_or_404(Fragtforsendelse, id=id)
         self.check_user(item)
@@ -280,7 +280,7 @@ class FragtforsendelseAPI:
         item.save()
         return {"success": True}
 
-    @route.delete("/{id}", auth=JWTAuth(), url_name="fragtforsendelse_delete")
+    @route.delete("/{id}", auth=get_auth_methods(), url_name="fragtforsendelse_delete")
     def delete_fragtforsendelse(self, id):
         item = get_object_or_404(Fragtforsendelse, id=id)
         self.check_user(item)

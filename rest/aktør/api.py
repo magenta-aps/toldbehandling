@@ -5,6 +5,7 @@
 from typing import Optional
 
 from aktør.models import Afsender, Modtager
+from common.api import get_auth_methods
 from django.core.exceptions import ValidationError
 from django.http import HttpResponseBadRequest
 from django.shortcuts import get_object_or_404
@@ -12,7 +13,6 @@ from ninja import Field, FilterSchema, ModelSchema, Query
 from ninja_extra import api_controller, permissions, route
 from ninja_extra.pagination import paginate
 from ninja_extra.schemas import NinjaPaginationResponseSchema
-from ninja_jwt.authentication import JWTAuth
 from project.util import RestPermission, json_dump
 
 
@@ -85,7 +85,7 @@ class AfsenderPermission(RestPermission):
     permissions=[permissions.IsAuthenticated & AfsenderPermission],
 )
 class AfsenderAPI:
-    @route.post("", auth=JWTAuth(), url_name="afsender_create")
+    @route.post("", auth=get_auth_methods(), url_name="afsender_create")
     def create_afsender(self, payload: AfsenderIn):
         try:
             item = Afsender.objects.create(**payload.dict())
@@ -95,14 +95,19 @@ class AfsenderAPI:
                 json_dump(e.message_dict), content_type="application/json"
             )
 
-    @route.get("/{id}", response=AfsenderOut, auth=JWTAuth(), url_name="afsender_get")
+    @route.get(
+        "/{id}",
+        response=AfsenderOut,
+        auth=get_auth_methods(),
+        url_name="afsender_get",
+    )
     def get_afsender(self, id: int):
         return get_object_or_404(Afsender, id=id)
 
     @route.get(
         "",
         response=NinjaPaginationResponseSchema[AfsenderOut],
-        auth=JWTAuth(),
+        auth=get_auth_methods(),
         url_name="afsender_list",
     )
     @paginate()  # https://eadwincode.github.io/django-ninja-extra/tutorial/pagination/
@@ -115,7 +120,7 @@ class AfsenderAPI:
         ))
         """
 
-    @route.patch("/{id}", auth=JWTAuth(), url_name="afsender_update")
+    @route.patch("/{id}", auth=get_auth_methods(), url_name="afsender_update")
     def update_afsender(
         self,
         id: int,
@@ -200,7 +205,7 @@ class ModtagerPermission(RestPermission):
     permissions=[permissions.IsAuthenticated & ModtagerPermission],
 )
 class ModtagerAPI:
-    @route.post("", auth=JWTAuth(), url_name="modtager_create")
+    @route.post("", auth=get_auth_methods(), url_name="modtager_create")
     def create_modtager(self, payload: ModtagerIn):
         try:
             item = Modtager.objects.create(**payload.dict())
@@ -210,14 +215,19 @@ class ModtagerAPI:
                 json_dump(e.message_dict), content_type="application/json"
             )
 
-    @route.get("/{id}", response=ModtagerOut, auth=JWTAuth(), url_name="modtager_get")
+    @route.get(
+        "/{id}",
+        response=ModtagerOut,
+        auth=get_auth_methods(),
+        url_name="modtager_get",
+    )
     def get_modtager(self, id: int):
         return get_object_or_404(Modtager, id=id)
 
     @route.get(
         "",
         response=NinjaPaginationResponseSchema[ModtagerOut],
-        auth=JWTAuth(),
+        auth=get_auth_methods(),
         url_name="modtager_list",
     )
     @paginate()
@@ -230,7 +240,7 @@ class ModtagerAPI:
         ))
         """
 
-    @route.patch("/{id}", auth=JWTAuth(), url_name="modtager_update")
+    @route.patch("/{id}", auth=get_auth_methods(), url_name="modtager_update")
     def update_modtager(
         self,
         id: int,

@@ -9,7 +9,7 @@ from typing import List, Optional, Tuple
 from uuid import uuid4
 
 from aktør.api import AfsenderOut, ModtagerOut
-from common.api import UserOut
+from common.api import UserOut, get_auth_methods
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.db.models import QuerySet
@@ -21,7 +21,6 @@ from ninja_extra import api_controller, permissions, route
 from ninja_extra.exceptions import PermissionDenied
 from ninja_extra.pagination import paginate
 from ninja_extra.schemas import NinjaPaginationResponseSchema
-from ninja_jwt.authentication import JWTAuth
 from project.util import RestPermission, json_dump
 
 from anmeldelse.models import (  # isort: skip
@@ -180,7 +179,7 @@ class AfgiftsanmeldelsePermission(RestPermission):
     permissions=[permissions.IsAuthenticated & AfgiftsanmeldelsePermission],
 )
 class AfgiftsanmeldelseAPI:
-    @route.post("", auth=JWTAuth(), url_name="afgiftsanmeldelse_create")
+    @route.post("", auth=get_auth_methods(), url_name="afgiftsanmeldelse_create")
     def create_afgiftsanmeldelse(
         self,
         payload: AfgiftsanmeldelseIn,
@@ -209,7 +208,7 @@ class AfgiftsanmeldelseAPI:
     @route.get(
         "",
         response=NinjaPaginationResponseSchema[AfgiftsanmeldelseOut],
-        auth=JWTAuth(),
+        auth=get_auth_methods(),
         url_name="afgiftsanmeldelse_list",
     )
     @paginate()  # https://eadwincode.github.io/django-ninja-extra/tutorial/pagination/
@@ -231,7 +230,7 @@ class AfgiftsanmeldelseAPI:
     @route.get(
         "full",
         response=NinjaPaginationResponseSchema[AfgiftsanmeldelseFullOut],
-        auth=JWTAuth(),
+        auth=get_auth_methods(),
         url_name="afgiftsanmeldelse_list_full",
     )
     @paginate()  # https://eadwincode.github.io/django-ninja-extra/tutorial/pagination/
@@ -252,7 +251,7 @@ class AfgiftsanmeldelseAPI:
     @route.get(
         "/{id}",
         response=AfgiftsanmeldelseOut,
-        auth=JWTAuth(),
+        auth=get_auth_methods(),
         url_name="afgiftsanmeldelse_get",
     )
     def get_afgiftsanmeldelse(self, id: int):
@@ -263,7 +262,7 @@ class AfgiftsanmeldelseAPI:
     @route.get(
         "/{id}/full",
         response=AfgiftsanmeldelseFullOut,
-        auth=JWTAuth(),
+        auth=get_auth_methods(),
         url_name="afgiftsanmeldelse_get_full",
     )
     def get_afgiftsanmeldelse_full(self, id: int):
@@ -274,7 +273,7 @@ class AfgiftsanmeldelseAPI:
     @route.get(
         "/{id}/history",
         response=NinjaPaginationResponseSchema[AfgiftsanmeldelseHistoryOut],
-        auth=JWTAuth(),
+        auth=get_auth_methods(),
         url_name="afgiftsanmeldelse_get_history",
     )
     @paginate()  # https://eadwincode.github.io/django-ninja-extra/tutorial/pagination/
@@ -286,7 +285,7 @@ class AfgiftsanmeldelseAPI:
     @route.get(
         "/{id}/history/{index}",
         response=AfgiftsanmeldelseHistoryFullOut,
-        auth=JWTAuth(),
+        auth=get_auth_methods(),
         url_name="afgiftsanmeldelse_get_history_item",
     )
     def get_afgiftsanmeldelse_history_item(self, id: int, index: int):
@@ -303,7 +302,7 @@ class AfgiftsanmeldelseAPI:
                 return ("-" if order == "desc" else "") + sort
         return None
 
-    @route.patch("/{id}", auth=JWTAuth(), url_name="afgiftsanmeldelse_update")
+    @route.patch("/{id}", auth=get_auth_methods(), url_name="afgiftsanmeldelse_update")
     def update_afgiftsanmeldelse(
         self,
         id: int,
@@ -417,12 +416,17 @@ class VarelinjePermission(RestPermission):
     permissions=[permissions.IsAuthenticated & VarelinjePermission],
 )
 class VarelinjeAPI:
-    @route.post("", auth=JWTAuth(), url_name="varelinje_create")
+    @route.post("", auth=get_auth_methods(), url_name="varelinje_create")
     def create_varelinje(self, payload: VarelinjeIn):
         item = Varelinje.objects.create(**payload.dict())
         return {"id": item.id}
 
-    @route.get("/{id}", response=VarelinjeOut, auth=JWTAuth(), url_name="varelinje_get")
+    @route.get(
+        "/{id}",
+        response=VarelinjeOut,
+        auth=get_auth_methods(),
+        url_name="varelinje_get",
+    )
     def get_varelinje(self, id: int):
         item = get_object_or_404(Varelinje, id=id)
         self.check_user(item)
@@ -431,7 +435,7 @@ class VarelinjeAPI:
     @route.get(
         "",
         response=NinjaPaginationResponseSchema[VarelinjeOut],
-        auth=JWTAuth(),
+        auth=get_auth_methods(),
         url_name="varelinje_list",
     )
     @paginate()  # https://eadwincode.github.io/django-ninja-extra/tutorial/pagination/
@@ -459,7 +463,7 @@ class VarelinjeAPI:
         )  # Inkluderer evt. filtrering på anmeldelse-id
         return list(qs)
 
-    @route.patch("/{id}", auth=JWTAuth(), url_name="varelinje_update")
+    @route.patch("/{id}", auth=get_auth_methods(), url_name="varelinje_update")
     def update_varelinje(self, id: int, payload: PartialVarelinjeIn):
         item = get_object_or_404(Varelinje, id=id)
         self.check_user(item)
@@ -469,7 +473,7 @@ class VarelinjeAPI:
         item.save()
         return {"success": True}
 
-    @route.delete("/{id}", auth=JWTAuth(), url_name="varelinje_delete")
+    @route.delete("/{id}", auth=get_auth_methods(), url_name="varelinje_delete")
     def delete_varelinje(self, id):
         item = get_object_or_404(Varelinje, id=id)
         self.check_user(item)
@@ -534,7 +538,7 @@ class NotatPermission(RestPermission):
     permissions=[permissions.IsAuthenticated & NotatPermission],
 )
 class NotatAPI:
-    @route.post("", auth=JWTAuth(), url_name="notat_create")
+    @route.post("", auth=get_auth_methods(), url_name="notat_create")
     def create_notat(self, payload: NotatIn):
         item = Notat.objects.create(
             **payload.dict(),
@@ -546,7 +550,9 @@ class NotatAPI:
         )
         return {"id": item.id}
 
-    @route.get("/{id}", response=NotatOut, auth=JWTAuth(), url_name="notat_get")
+    @route.get(
+        "/{id}", response=NotatOut, auth=get_auth_methods(), url_name="notat_get"
+    )
     def get_notat(self, id: int):
         item = get_object_or_404(Notat, id=id)
         self.check_user(item)
@@ -555,7 +561,7 @@ class NotatAPI:
     @route.get(
         "",
         response=NinjaPaginationResponseSchema[NotatOut],
-        auth=JWTAuth(),
+        auth=get_auth_methods(),
         url_name="notat_list",
     )
     @paginate()  # https://eadwincode.github.io/django-ninja-extra/tutorial/pagination/
@@ -584,7 +590,7 @@ class NotatAPI:
         qs = qs.filter(filters.get_filter_expression())
         return list(qs)
 
-    @route.delete("/{id}", auth=JWTAuth(), url_name="notat_delete")
+    @route.delete("/{id}", auth=get_auth_methods(), url_name="notat_delete")
     def delete_notat(self, id):
         item = get_object_or_404(Notat, id=id)
         self.check_user(item)
@@ -642,7 +648,7 @@ class PrismeResponsePermission(RestPermission):
     permissions=[permissions.IsAuthenticated],
 )
 class PrismeResponseAPI:
-    @route.post("", auth=JWTAuth(), url_name="prismeresponse_create")
+    @route.post("", auth=get_auth_methods(), url_name="prismeresponse_create")
     def create_prismeresponse(self, payload: PrismeResponseIn):
         item = PrismeResponse.objects.create(
             **payload.dict(),
@@ -652,7 +658,7 @@ class PrismeResponseAPI:
     @route.get(
         "/{id}",
         response=PrismeResponseOut,
-        auth=JWTAuth(),
+        auth=get_auth_methods(),
         url_name="prismeresponse_get",
     )
     def get_prismeresponse(self, id: int):
@@ -662,7 +668,7 @@ class PrismeResponseAPI:
     @route.get(
         "",
         response=NinjaPaginationResponseSchema[PrismeResponseOut],
-        auth=JWTAuth(),
+        auth=get_auth_methods(),
         url_name="prismeresponse_list",
     )
     @paginate()  # https://eadwincode.github.io/django-ninja-extra/tutorial/pagination/

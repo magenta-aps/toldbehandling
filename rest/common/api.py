@@ -11,6 +11,7 @@ from django.shortcuts import get_object_or_404
 from ninja import Field, ModelSchema
 from ninja.errors import ValidationError
 from ninja.schema import Schema
+from ninja.security import APIKeyHeader
 from ninja_extra import api_controller, permissions, route
 from ninja_jwt.authentication import JWTAuth
 from ninja_jwt.tokens import RefreshToken
@@ -25,16 +26,33 @@ from project.util import json_dump
 # In-skemaerne ændres til ikke at have filfeltet med, og metoderne der
 # håndterer post og patch skal modtage filen som et File(...) argument:
 #
-# @foo_router.post("/", auth=JWTAuth())
+# @foo_router.post("/", auth=get_auth_methods())
 # def create_foo(self, payload: FooIn, filfeltnavn: ninja.File(...)):
 #     item = Foo.objects.create(**payload.dict(), filfeltnavn=filfeltnavn)
 #
 
 
+class APIKeyAuth(APIKeyHeader):
+    param_name = "X-API-Key"
+
+    def authenticate(self, request, key):
+        try:
+            ib = IndberetterProfile.objects.get(api_key=key)
+            request.user = ib.user
+            return ib.user
+        except IndberetterProfile.DoesNotExist:
+            return None
+
+
+def get_auth_methods():
+    """This function defines the authentication methods available for this API."""
+    return (JWTAuth(), APIKeyAuth())
+
+
 class IndberetterProfileOut(ModelSchema):
     class Config:
         model = IndberetterProfile
-        model_fields = ["cpr", "cvr"]
+        model_fields = ["cpr", "cvr", "api_key"]
 
 
 class IndberetterProfileIn(ModelSchema):
@@ -119,7 +137,7 @@ class UserAPI:
     @route.get(
         "",
         response=UserOut,
-        auth=JWTAuth(),
+        auth=get_auth_methods(),
         url_name="user_view",
     )
     def get_user(self, request):
@@ -128,14 +146,16 @@ class UserAPI:
     @route.get(
         "/cpr/{cpr}",
         response=UserOutWithTokens,
-        auth=JWTAuth(),
+        auth=get_auth_methods(),
         url_name="user_cpr_get",
     )
     def get_user_cpr(self, cpr: int):
         user = get_object_or_404(User, indberetter_data__cpr=cpr)
         return UserOutWithTokens.user_to_dict(user)
 
-    @route.post("", response=UserOutWithTokens, auth=JWTAuth(), url_name="user_create")
+    @route.post(
+        "", response=UserOutWithTokens, auth=get_auth_methods(), url_name="user_create"
+    )
     def create_user(self, payload: UserIn):
         try:
             groups = [Group.objects.get(name=g) for g in payload.groups]
@@ -172,7 +192,7 @@ class EboksBeskedIn(ModelSchema):
     permissions=[permissions.IsAuthenticated],
 )
 class EboksBeskedAPI:
-    @route.post("", auth=JWTAuth(), url_name="eboksbesked_create")
+    @route.post("", auth=get_auth_methods(), url_name="eboksbesked_create")
     def create_eboksbesked(self, payload: EboksBeskedIn):
         try:
             data = payload.dict()
