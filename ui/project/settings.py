@@ -210,4 +210,8 @@ STORAGES = {
 SESSION_COOKIE_SAMESITE = "None"
 SESSION_COOKIE_SECURE = True
 
+
+TILLÆGSAFGIFT_FAKTOR = 0.5
+EKSPEDITIONSGEBYR = 250
+
 from .login_settings import *  # noqa

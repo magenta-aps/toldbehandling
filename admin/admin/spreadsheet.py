@@ -33,17 +33,25 @@ class VareafgiftssatsSpreadsheetUtil:
                     "segment_nedre",
                 ):
                     value = format_decimal(value)
-                elif header == "kræver_indførselstilladelse":
+                elif header in (
+                    "kræver_indførselstilladelse",
+                    "har_privat_tillægsafgift_alkohol",
+                ):
                     value = "ja" if value else "nej"
                 elif header == "enhed":
                     value = value.name.lower()
             row.append(value)
         return row
 
+    @staticmethod
+    def parse_bool(value):
+        return value.lower() in ("ja", "aap", "yes", "true", "1")
+
     header_map_in = {
         "overordnet": int,
         "afgiftsgruppenummer": int,
-        "kræver_indførselstilladelse": lambda value: value.lower() in ("ja", "aap"),
+        "kræver_indførselstilladelse": parse_bool,
+        "har_privat_tillægsafgift_alkohol": parse_bool,
         "afgiftssats": unformat_decimal,
         "minimumsbeløb": unformat_decimal,
         "segment_øvre": unformat_decimal,
@@ -122,6 +130,7 @@ class VareafgiftssatsSpreadsheetUtil:
             "Enhed",
             "Afgiftssats",
             "Kræver indførselstilladelse",
+            "Har privat tillægsafgift alkohol",
             "Minimumsbeløb",
             "Segment nedre",
             "Segment øvre",
@@ -143,6 +152,7 @@ class VareafgiftssatsSpreadsheetUtil:
             "Vareart (kl)",
             "Enhed",
             "Kræver indførselstilladelse",
+            "Har privat tillægsafgift alkohol",
         )
         for linje, vareafgiftssats in enumerate(satser, 2):
             for pretty, raw in zip(

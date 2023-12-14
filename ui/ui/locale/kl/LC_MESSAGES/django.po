@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-12-13 07:27+0000\n"
+"POT-Creation-Date: 2023-12-14 13:35+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,6 +17,62 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: ui/forms.py
+msgid "CPR"
+msgstr ""
+
+#: ui/forms.py
+msgid "CPR-nummer skal være på 10 cifre"
+msgstr ""
+
+#: ui/forms.py
+msgid "Navn"
+msgstr ""
+
+#: ui/forms.py
+msgid "Vej og husnummer"
+msgstr ""
+
+#: ui/forms.py
+msgid "Postnr."
+msgstr ""
+
+#: ui/forms.py
+msgid "Postnummer skal være på 4 cifre og må ikke begynde med 0"
+msgstr ""
+
+#: ui/forms.py
+msgid "By"
+msgstr ""
+
+#: ui/forms.py
+msgid "Telefon"
+msgstr ""
+
+#: ui/forms.py
+msgid "Bookingnummer"
+msgstr ""
+
+#: ui/forms.py
+msgid "Varefakturanummer"
+msgstr ""
+
+#: ui/forms.py
+msgid "Vare­faktura"
+msgstr ""
+
+#: ui/forms.py
+msgid "Varefaktura"
+msgstr ""
+
+#: ui/forms.py
+msgid "Vedhæftning af varefaktura"
+msgstr ""
+
+#: ui/forms.py
+msgid "Dato for indlevering til forsendelse"
+msgstr ""
 
 #: ui/templates/ui/error/error.html
 msgid "Tilbage"
@@ -67,4 +123,15 @@ msgstr ""
 
 #: ui/templates/ui/tf10/actions.html
 msgid "Redigér"
+msgstr ""
+
+#: ui/views.py
+#, python-brace-format
+msgid ""
+"Afgiftsanmeldelsen blev indregistreret. Blanket med nummer {id} afventer nu "
+"godkendelse."
+msgstr ""
+
+#: ui/views.py
+msgid "Mine indførselstilladelser"
 msgstr ""

@@ -1,7 +1,10 @@
 import base64
 import dataclasses
+from datetime import date, timedelta
 from typing import Any, Callable, Dict, Iterable, Optional, Union
 
+import holidays
+from django.core.cache import cache
 from django.core.files import File
 from django.core.serializers.json import DjangoJSONEncoder
 from django.template.loader import render_to_string
@@ -60,3 +63,23 @@ def join_words(words: Optional[str], separator: str = " "):
 
 def opt_int(data: Union[str, int, None]):
     return int(data) if data is not None else None
+
+
+def opt_str(data: Union[str, int, None]):
+    return str(data) if data is not None else None
+
+
+def date_next_workdays(from_date: date, add_days: int):
+    key = f"{from_date.isoformat()}|{add_days}"
+    if key in cache:
+        return cache.get(key)
+    business_days_to_add = add_days
+    current_date = from_date
+    holiday_list = holidays.country_holidays("DK")
+    while business_days_to_add > 0:
+        current_date += timedelta(days=1)
+        if current_date.weekday() >= 5 or current_date in holiday_list:
+            continue
+        business_days_to_add -= 1
+    cache.set(key, current_date, 24 * 60 * 60)
+    return current_date

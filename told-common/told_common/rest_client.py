@@ -25,6 +25,7 @@ from told_common.data import (  # isort: skip
     Afgiftsanmeldelse,
     Afgiftstabel,
     FragtForsendelse,
+    PrivatAfgiftsanmeldelse,
     HistoricAfgiftsanmeldelse,
     Notat,
     PostForsendelse,
@@ -478,6 +479,164 @@ class AfgiftanmeldelseRestClient(ModelRestClient):
         return HistoricAfgiftsanmeldelse.from_dict(data)
 
 
+class PrivatAfgiftanmeldelseRestClient(ModelRestClient):
+    @staticmethod
+    def compare(data: dict, existing: dict) -> bool:
+        # Sammenligner output fra map_anmeldelse (input fra form)
+        # med eksisterende data fra REST for at se om de stemmer overens.
+        # False: data passer ikke, og der skal foretages en opdatering
+        # True: data passer, og det er ikke nødvendigt at opdatere.
+        if data.get("leverandørfaktura"):
+            return False
+        if data.get("leverandørfaktura_nummer") != existing.get(
+            "leverandørfaktura_nummer"
+        ):
+            return False
+        return True
+
+    def map(
+        self,
+        data: dict,
+        leverandørfaktura: Optional[UploadedFile],
+    ) -> dict:
+        mapped = {
+            key: data.get(key)
+            for key in (
+                "cpr",
+                "navn",
+                "adresse",
+                "postnummer",
+                "by",
+                "telefon",
+                "bookingnummer",
+                "indleveringsdato",
+                "leverandørfaktura_nummer",
+                "indførselstilladelse",
+                "anonym",
+            )
+        }
+        mapped.update(
+            {
+                "leverandørfaktura": self.rest._uploadfile_to_base64str(
+                    leverandørfaktura
+                ),
+                "leverandørfaktura_navn": leverandørfaktura.name
+                if leverandørfaktura
+                else None,
+            }
+        )
+        return mapped
+
+    def create(
+        self,
+        data: dict,
+        leverandørfaktura: UploadedFile,
+    ):
+        mapped = self.map(
+            data,
+            leverandørfaktura,
+        )
+        print(f"mapped: {mapped}")
+        response = self.rest.post("privat_afgiftsanmeldelse", mapped)
+        return response["id"]
+
+    def update(
+        self,
+        id: int,
+        data: dict,
+        leverandørfaktura: Optional[UploadedFile] = None,
+        existing: Optional[dict] = None,
+        force_write: bool = False,
+    ):
+        mapped = self.map(
+            data,
+            leverandørfaktura,
+        )
+        if force_write or not self.compare(mapped, existing):
+            self.rest.patch(f"privat_afgiftsanmeldelse/{id}", mapped)
+        return id
+
+    def list(
+        self,
+        include_varelinjer=False,
+        include_notater=False,
+        include_prismeresponses=False,
+        **filter: Union[str, int, float, bool, List[Union[str, int, float, bool]]],
+    ) -> Tuple[int, List[Afgiftsanmeldelse]]:
+        data = self.rest.get("privat_afgiftsanmeldelse", filter)
+        for item in data["items"]:
+            item["varelinjer"] = None
+            item["notater"] = None
+            item["prismeresponses"] = None
+            if include_varelinjer:
+                item["varelinjer"] = self.rest.varelinje.list(
+                    afgiftsanmeldelse=item["id"]
+                )
+            if include_notater:
+                item["notater"] = self.rest.notat.list(afgiftsanmeldelse=item["id"])
+            if include_prismeresponses:
+                item["prismeresponses"] = self.rest.prismeresponse.list(
+                    afgiftsanmeldelse=item["id"]
+                )
+        for item in data["items"]:
+            if item.get("leverandørfaktura"):
+                self.set_file(item, "leverandørfaktura")
+        return data["count"], [
+            PrivatAfgiftsanmeldelse.from_dict(item) for item in data["items"]
+        ]
+
+    def get(
+        self,
+        id: int,
+        full=False,
+        include_varelinjer=False,
+        include_notater=False,
+        include_prismeresponses=False,
+    ):
+        if full:
+            item = self.rest.get(f"privat_afgiftsanmeldelse/{id}/full")
+        else:
+            item = self.rest.get(f"privat_afgiftsanmeldelse/{id}")
+        if item.get("leverandørfaktura"):
+            self.set_file(item, "leverandørfaktura")
+        item["varelinjer"] = None
+        item["notater"] = None
+        item["prismeresponses"] = None
+        if include_varelinjer:
+            item["varelinjer"] = self.rest.varelinje.list(afgiftsanmeldelse=id)
+        if include_notater:
+            item["notater"] = self.rest.notat.list(id)
+        if include_prismeresponses:
+            item["prismeresponses"] = self.rest.prismeresponse.list(
+                afgiftsanmeldelse=item["id"]
+            )
+        return PrivatAfgiftsanmeldelse.from_dict(item)
+
+    def seneste_indførselstilladelse(self, cpr):
+        return self.rest.get(
+            f"privat_afgiftsanmeldelse/seneste_indførselstilladelse/{cpr}"
+        )
+
+    # def list_history(self, id: int) -> Tuple[int, List[HistoricAfgiftsanmeldelse]]:
+    #     data = self.rest.get(f"afgiftsanmeldelse/{id}/history")
+    #     return data["count"], [
+    #         HistoricAfgiftsanmeldelse.from_dict(
+    #             {**item, "varelinjer": [], "notater": [], "prismeresponses": []}
+    #         )
+    #         for item in data["items"]
+    #     ]
+    #
+    # def get_history_item(self, id: int, history_index: int):
+    #     data = self.rest.get(f"afgiftsanmeldelse/{id}/history/{history_index}")
+    #     data["varelinjer"] = self.rest.varelinje.list(
+    #         afgiftsanmeldelse=id, afgiftsanmeldelse_history_index=history_index
+    #     )
+    #     data["notater"] = self.rest.notat.list(id, history_index)
+    #     data["prismeresponses"] = self.rest.prismeresponse.list(afgiftsanmeldelse=id)
+    #     return HistoricAfgiftsanmeldelse.from_dict(data)
+    #
+
+
 class VarelinjeRestClient(ModelRestClient):
     @staticmethod
     def map(data: dict, afgiftsanmeldelse_id: int) -> dict:
@@ -687,6 +846,7 @@ class RestClient:
         self.postforsendelse = PostforsendelseRestClient(self)
         self.fragtforsendelse = FragtforsendelseRestClient(self)
         self.afgiftanmeldelse = AfgiftanmeldelseRestClient(self)
+        self.privat_afgiftsanmeldelse = PrivatAfgiftanmeldelseRestClient(self)
         self.varelinje = VarelinjeRestClient(self)
         self.afgiftstabel = AfgiftstabelRestClient(self)
         self.vareafgiftssats = VareafgiftssatsRestClient(self)
@@ -842,7 +1002,11 @@ class RestClient:
     def varesatser(self) -> Dict[int, dict]:
         return self.varesatser_fra(date.today())
 
-    def varesatser_fra(self, at: date) -> Dict[int, dict]:
+    @cached_property
+    def varesatser_privat(self) -> Dict[int, dict]:
+        return self.varesatser_fra(date.today(), synlig_privat=True)
+
+    def varesatser_fra(self, at: date, **filter) -> Dict[int, dict]:
         datestring = at.isoformat()
         afgiftstabeller = self.get(
             "afgiftstabel",
@@ -856,7 +1020,7 @@ class RestClient:
         if afgiftstabeller["count"] == 1:
             afgiftstabel = afgiftstabeller["items"][0]
             return self.get_all_items(
-                "vareafgiftssats", {"afgiftstabel": afgiftstabel["id"]}
+                "vareafgiftssats", {"afgiftstabel": afgiftstabel["id"], **filter}
             )
         return {}
 

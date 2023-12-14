@@ -15,4 +15,9 @@ class Migration(migrations.Migration):
             name='synlig_privat',
             field=models.BooleanField(default=False, verbose_name='Vareafgiftssatsen kan bruges af private'),
         ),
+        migrations.AddField(
+            model_name='vareafgiftssats',
+            name='har_privat_tillægsafgift_alkohol',
+            field=models.BooleanField(default=False),
+        ),
     ]

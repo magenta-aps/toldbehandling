@@ -20,6 +20,7 @@ class VareafgiftsSatsTest(TestCase):
             minimumsbeløb=False,
             afgiftssats=Decimal("6.00"),
             kræver_indførselstilladelse=False,
+            har_privat_tillægsafgift_alkohol=False,
         )
         sats1a = Vareafgiftssats(
             id=1,
@@ -31,6 +32,7 @@ class VareafgiftsSatsTest(TestCase):
             minimumsbeløb=False,
             afgiftssats=Decimal("6.00"),
             kræver_indførselstilladelse=False,
+            har_privat_tillægsafgift_alkohol=False,
             segment_nedre=Decimal(200),
         )
         sats1b = Vareafgiftssats(
@@ -43,6 +45,7 @@ class VareafgiftsSatsTest(TestCase):
             minimumsbeløb=False,
             afgiftssats=Decimal("6.00"),
             kræver_indførselstilladelse=False,
+            har_privat_tillægsafgift_alkohol=False,
             segment_øvre=Decimal(400),
         )
         sats1c = Vareafgiftssats(
@@ -55,6 +58,7 @@ class VareafgiftsSatsTest(TestCase):
             minimumsbeløb=False,
             afgiftssats=Decimal("6.00"),
             kræver_indførselstilladelse=False,
+            har_privat_tillægsafgift_alkohol=False,
             segment_nedre=Decimal(200),
             segment_øvre=Decimal(400),
         )
@@ -69,6 +73,7 @@ class VareafgiftsSatsTest(TestCase):
             minimumsbeløb=False,
             afgiftssats=Decimal("3.5"),
             kræver_indførselstilladelse=False,
+            har_privat_tillægsafgift_alkohol=True,
         )
         sats2a = Vareafgiftssats(
             id=1,
@@ -80,6 +85,7 @@ class VareafgiftsSatsTest(TestCase):
             minimumsbeløb=False,
             afgiftssats=Decimal("3.5"),
             kræver_indførselstilladelse=False,
+            har_privat_tillægsafgift_alkohol=True,
             segment_nedre=Decimal(200),
         )
         sats2b = Vareafgiftssats(
@@ -92,6 +98,7 @@ class VareafgiftsSatsTest(TestCase):
             minimumsbeløb=False,
             afgiftssats=Decimal("3.5"),
             kræver_indførselstilladelse=False,
+            har_privat_tillægsafgift_alkohol=True,
             segment_øvre=Decimal(400),
         )
         sats2c = Vareafgiftssats(
@@ -104,6 +111,7 @@ class VareafgiftsSatsTest(TestCase):
             minimumsbeløb=False,
             afgiftssats=Decimal("3.5"),
             kræver_indførselstilladelse=False,
+            har_privat_tillægsafgift_alkohol=True,
             segment_nedre=Decimal(200),
             segment_øvre=Decimal(400),
         )
@@ -118,6 +126,7 @@ class VareafgiftsSatsTest(TestCase):
             minimumsbeløb=False,
             afgiftssats=Decimal(2530),
             kræver_indførselstilladelse=False,
+            har_privat_tillægsafgift_alkohol=False,
         )
         sats3a = Vareafgiftssats(
             id=1,
@@ -129,6 +138,7 @@ class VareafgiftsSatsTest(TestCase):
             minimumsbeløb=False,
             afgiftssats=Decimal(2530),
             kræver_indførselstilladelse=False,
+            har_privat_tillægsafgift_alkohol=False,
             segment_nedre=Decimal(200),
         )
         sats3b = Vareafgiftssats(
@@ -141,6 +151,7 @@ class VareafgiftsSatsTest(TestCase):
             minimumsbeløb=False,
             afgiftssats=Decimal(2530),
             kræver_indførselstilladelse=False,
+            har_privat_tillægsafgift_alkohol=False,
             segment_øvre=Decimal(400),
         )
         sats3c = Vareafgiftssats(
@@ -153,6 +164,7 @@ class VareafgiftsSatsTest(TestCase):
             minimumsbeløb=False,
             afgiftssats=Decimal(2530),
             kræver_indførselstilladelse=False,
+            har_privat_tillægsafgift_alkohol=False,
             segment_nedre=Decimal(200),
             segment_øvre=Decimal(400),
         )
@@ -167,6 +179,7 @@ class VareafgiftsSatsTest(TestCase):
             minimumsbeløb=False,
             afgiftssats=Decimal(100),
             kræver_indførselstilladelse=False,
+            har_privat_tillægsafgift_alkohol=False,
         )
         sats4a = Vareafgiftssats(
             id=1,
@@ -178,6 +191,7 @@ class VareafgiftsSatsTest(TestCase):
             minimumsbeløb=False,
             afgiftssats=Decimal(100),
             kræver_indførselstilladelse=False,
+            har_privat_tillægsafgift_alkohol=False,
             segment_nedre=Decimal(200),
         )
         sats4b = Vareafgiftssats(
@@ -190,6 +204,7 @@ class VareafgiftsSatsTest(TestCase):
             minimumsbeløb=False,
             afgiftssats=Decimal(100),
             kræver_indførselstilladelse=False,
+            har_privat_tillægsafgift_alkohol=False,
             segment_øvre=Decimal(400),
         )
         sats4c = Vareafgiftssats(
@@ -202,6 +217,7 @@ class VareafgiftsSatsTest(TestCase):
             minimumsbeløb=False,
             afgiftssats=Decimal(100),
             kræver_indførselstilladelse=False,
+            har_privat_tillægsafgift_alkohol=False,
             segment_nedre=Decimal(200),
             segment_øvre=Decimal(400),
         )
@@ -217,6 +233,7 @@ class VareafgiftsSatsTest(TestCase):
             minimumsbeløb=None,
             afgiftssats=Decimal(50_000),
             kræver_indførselstilladelse=False,
+            har_privat_tillægsafgift_alkohol=False,
         )
         sats7202 = Vareafgiftssats(
             id=3,
@@ -231,6 +248,7 @@ class VareafgiftsSatsTest(TestCase):
             minimumsbeløb=None,
             afgiftssats=Decimal(100),
             kræver_indførselstilladelse=False,
+            har_privat_tillægsafgift_alkohol=False,
         )
         sats7203 = Vareafgiftssats(
             id=4,
@@ -244,6 +262,7 @@ class VareafgiftsSatsTest(TestCase):
             minimumsbeløb=None,
             afgiftssats=Decimal(150),
             kræver_indførselstilladelse=False,
+            har_privat_tillægsafgift_alkohol=False,
         )
         sats72 = Vareafgiftssats(
             id=1,
@@ -255,6 +274,7 @@ class VareafgiftsSatsTest(TestCase):
             minimumsbeløb=None,
             afgiftssats=Decimal(0),
             kræver_indførselstilladelse=False,
+            har_privat_tillægsafgift_alkohol=False,
             subsatser=[sats7201, sats7202, sats7203],
         )
 

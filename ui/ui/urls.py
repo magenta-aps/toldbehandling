@@ -34,6 +34,12 @@ urlpatterns = [
         name="tf10_list",
     ),
     path(
+        "blanket/tf5/create",
+        views.TF5FormCreateView.as_view(),
+        name="tf5_create",
+    ),
+    path("blanket/tf5", views.TF5ListView.as_view(), name="tf5_list"),
+    path(
         "error/login-timeout/",
         AccessDeniedView.as_view(template_name="ui/error/login_timeout.html"),
         name="login-timeout",
