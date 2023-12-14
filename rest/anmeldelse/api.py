@@ -12,7 +12,7 @@ from aktør.api import AfsenderOut, ModtagerOut
 from common.api import UserOut, get_auth_methods
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
-from django.db.models import QuerySet
+from django.db.models import Q, QuerySet
 from django.http import Http404, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404
 from forsendelse.api import FragtforsendelseOut, PostforsendelseOut
@@ -38,6 +38,7 @@ class AfgiftsanmeldelseIn(ModelSchema):
     fragtforsendelse_id: int = None
     leverandørfaktura: str = None  # Base64
     leverandørfaktura_navn: str = None
+    oprettet_på_vegne_af_id: int = None
 
     class Config:
         model = Afgiftsanmeldelse
@@ -93,6 +94,7 @@ class AfgiftsanmeldelseOut(ModelSchema):
             "status",
             "modtager_betaler",
             "oprettet_af",
+            "oprettet_på_vegne_af",
         ]
 
     beregnet_faktureringsdato: str
@@ -325,13 +327,15 @@ class AfgiftsanmeldelseAPI:
     def filter_user(self, qs: QuerySet) -> QuerySet:
         user = self.context.request.user
         if not user.has_perm("anmeldelse.view_all_anmeldelse"):
-            qs = qs.filter(oprettet_af=user)
+            qs = qs.filter(Q(oprettet_af=user) | Q(oprettet_på_vegne_af=user))
         return qs
 
     def check_user(self, item: Afgiftsanmeldelse):
         user = self.context.request.user
         if not (
-            user.has_perm("anmeldelse.view_all_anmeldelse") or item.oprettet_af == user
+            user.has_perm("anmeldelse.view_all_anmeldelse")
+            or item.oprettet_af == user
+            or item.oprettet_på_vegne_af == user
         ):
             raise PermissionDenied
 
@@ -483,7 +487,7 @@ class VarelinjeAPI:
     def filter_user(self, qs: QuerySet) -> QuerySet:
         user = self.context.request.user
         if not user.has_perm("anmeldelse.view_all_anmeldelse"):
-            qs = qs.filter(afgiftsanmeldelse__oprettet_af=user)
+            qs = qs.filter(Q(oprettet_af=user) | Q(oprettet_på_vegne_af=user))
         return qs
 
     def check_user(self, item: Varelinje):
@@ -492,6 +496,7 @@ class VarelinjeAPI:
             user.has_perm("anmeldelse.view_all_anmeldelse")
             or item.afgiftsanmeldelse is None
             or item.afgiftsanmeldelse.oprettet_af == user
+            or item.afgiftsanmeldelse.oprettet_på_vegne_af == user
         ):
             raise PermissionDenied
 
@@ -600,7 +605,7 @@ class NotatAPI:
     def filter_user(self, qs: QuerySet) -> QuerySet:
         user = self.context.request.user
         if not user.has_perm("anmeldelse.view_all_anmeldelse"):
-            qs = qs.filter(afgiftsanmeldelse__oprettet_af=user)
+            qs = qs.filter(Q(oprettet_af=user) | Q(oprettet_på_vegne_af=user))
         return qs
 
     def check_user(self, item: Notat):
@@ -609,6 +614,7 @@ class NotatAPI:
             user.has_perm("anmeldelse.view_all_anmeldelse")
             or item.afgiftsanmeldelse is None
             or item.afgiftsanmeldelse.oprettet_af == user
+            or item.afgiftsanmeldelse.oprettet_på_vegne_af == user
         ):
             raise PermissionDenied
 

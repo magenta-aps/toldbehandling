@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-12-06 09:39+0000\n"
+"POT-Creation-Date: 2023-12-13 09:12+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -246,13 +246,15 @@ msgid "Login"
 msgstr ""
 
 #: told_common/templates/told_common/tf10/form.html
-#: told_common/templates/told_common/tf10a/form.html
 msgid "Afgiftsanmeldelse"
 msgstr ""
 
 #: told_common/templates/told_common/tf10/form.html
-#: told_common/templates/told_common/tf10a/form.html
 msgid "For indførsel af afgiftspligtige varer i Grønland"
+msgstr ""
+
+#: told_common/templates/told_common/tf10/form.html
+msgid "Gem"
 msgstr ""
 
 #: told_common/templates/told_common/tf10/form.html
@@ -312,92 +314,75 @@ msgid "Betales af (kun relevant for luftfragt)"
 msgstr ""
 
 #: told_common/templates/told_common/tf10/form.html
-#: told_common/templates/told_common/tf10a/form.html
-msgid "Afgifter"
+msgid "Varelinjer med afgifter"
 msgstr ""
 
 #: told_common/templates/told_common/tf10/form.html
-#: told_common/templates/told_common/tf10a/form.html
 msgid ""
 "I henhold til gældende grønlandske afgiftsbestemmelser anmeldes følgende "
 "varer til afgiftsberigtigelse overfor den grønlandske landskasse"
 msgstr ""
 
 #: told_common/templates/told_common/tf10/form.html
-#: told_common/templates/told_common/tf10a/form.html
 msgid "Vareart"
 msgstr ""
 
 #: told_common/templates/told_common/tf10/form.html
-#: told_common/templates/told_common/tf10a/form.html
 msgid "Vare­kode"
 msgstr ""
 
 #: told_common/templates/told_common/tf10/form.html
-#: told_common/templates/told_common/tf10a/form.html
 msgid "kg | liter i alt"
 msgstr ""
 
 #: told_common/templates/told_common/tf10/form.html
-#: told_common/templates/told_common/tf10a/form.html
 msgid "Antal"
 msgstr ""
 
 #: told_common/templates/told_common/tf10/form.html
-#: told_common/templates/told_common/tf10a/form.html
 msgid "Fakturabeløb"
 msgstr ""
 
 #: told_common/templates/told_common/tf10/form.html
-#: told_common/templates/told_common/tf10a/form.html
 msgid "Afgiftssats"
 msgstr ""
 
 #: told_common/templates/told_common/tf10/form.html
-#: told_common/templates/told_common/tf10a/form.html
 msgid "Afgiftsbeløb"
 msgstr ""
 
 #: told_common/templates/told_common/tf10/form.html
-#: told_common/templates/told_common/tf10a/form.html
 msgid "Slet"
 msgstr ""
 
 #: told_common/templates/told_common/tf10/form.html
-#: told_common/templates/told_common/tf10a/form.html
 msgid "Afgift i alt"
 msgstr ""
 
 #: told_common/templates/told_common/tf10/form.html
-#: told_common/templates/told_common/tf10a/form.html
 msgid "Opdatér"
 msgstr ""
 
 #: told_common/templates/told_common/tf10/form.html
-#: told_common/templates/told_common/tf10a/form.html
 msgid "Indsend"
 msgstr ""
 
 #: told_common/templates/told_common/tf10/form.html
-#: told_common/templates/told_common/tf10a/form.html
 #, python-format
 msgid "%%f kr/kg"
 msgstr ""
 
 #: told_common/templates/told_common/tf10/form.html
-#: told_common/templates/told_common/tf10a/form.html
 #, python-format
 msgid "%%f kr/l"
 msgstr ""
 
 #: told_common/templates/told_common/tf10/form.html
-#: told_common/templates/told_common/tf10a/form.html
 #, python-format
 msgid "%%f kr/stk"
 msgstr ""
 
 #: told_common/templates/told_common/tf10/form.html
-#: told_common/templates/told_common/tf10a/form.html
 #, python-format
 msgid "%%f %%"
 msgstr ""
@@ -480,6 +465,13 @@ msgstr ""
 
 #: told_common/templates/told_common/widgets/file.html
 msgid "Ingen fil valgt"
+msgstr ""
+
+#: told_common/views.py
+#, python-brace-format
+msgid ""
+"Afgiftsanmeldelsen blev indregistreret. Blanket med nummer {id} afventer nu "
+"godkendelse."
 msgstr ""
 
 #: told_common/views.py

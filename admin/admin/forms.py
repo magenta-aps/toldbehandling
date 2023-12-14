@@ -3,17 +3,26 @@
 # SPDX-License-Identifier: MPL-2.0
 
 from datetime import date, timedelta
+from typing import List
 
 from django import forms
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
+from told_common import forms as common_forms
 from told_common.form_mixins import BootstrapForm, DateInput, MaxSizeFileField
-from told_common.forms import TF10Form
 
 from admin.spreadsheet import (  # isort: skip
     SpreadsheetImportException,
     VareafgiftssatsSpreadsheetUtil,
 )
+
+
+class TF10CreateForm(common_forms.TF10Form):
+    oprettet_på_vegne_af = forms.ChoiceField(label=_("Opret på vegne af"))
+
+    def __init__(self, oprettet_på_vegne_af_choices: List[dict], **kwargs):
+        super().__init__(**kwargs)
+        self.fields["oprettet_på_vegne_af"].choices = oprettet_på_vegne_af_choices
 
 
 class TF10ViewForm(BootstrapForm):
@@ -31,7 +40,7 @@ class TF10ViewForm(BootstrapForm):
     send_til_prisme = forms.BooleanField(required=False)
 
 
-class TF10UpdateForm(TF10Form):
+class TF10UpdateForm(common_forms.TF10Form):
     notat = forms.CharField(
         widget=forms.Textarea(attrs={"placeholder": _("Notat")}), required=False
     )

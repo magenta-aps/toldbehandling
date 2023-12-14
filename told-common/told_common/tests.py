@@ -3,10 +3,12 @@
 # SPDX-License-Identifier: MPL-2.0
 
 import json
+import os
 import time
 from copy import deepcopy
 from datetime import datetime, timedelta
 from decimal import Decimal
+from io import StringIO
 from typing import Any, Callable, Tuple
 from unittest import TestCase
 from unittest.mock import mock_open, patch
@@ -16,12 +18,14 @@ import requests
 from bs4 import BeautifulSoup
 from django.conf import settings
 from django.contrib.auth.models import Permission
+from django.http import FileResponse
 from django.test import override_settings
 from django.urls import reverse
 from requests import Response
 from told_common.data import unformat_decimal
 from told_common.rest_client import RestClient
 from told_common.templatetags.common_tags import file_basename, zfill
+from told_common.views import FileView
 
 
 class TestMixin:
@@ -308,8 +312,8 @@ class PermissionsTest(HasLogin):
             return self.mock_requests_get(url)
 
     @patch.object(requests.sessions.Session, "get")
-    @patch("builtins.open", mock_open(read_data=b"test_data"))
-    def test_permissions_admin(self, mock_get, *args):
+    @patch.object(FileView, "get")
+    def test_permissions_admin(self, mock_fileview, mock_get, *args):
         self.userdata = {
             "username": "admin",
             "first_name": "Administrator",
@@ -319,6 +323,7 @@ class PermissionsTest(HasLogin):
         }
         self.login(self.userdata)
         mock_get.side_effect = self.mock_perm_get
+        mock_fileview.return_value = FileResponse(StringIO("test_data"))
         for item in self.check_permissions:
             url = item[0]
             expected_status = item[2] if len(item) > 2 else 200
@@ -331,8 +336,8 @@ class PermissionsTest(HasLogin):
             )
 
     @patch.object(requests.sessions.Session, "get")
-    @patch("builtins.open", mock_open(read_data=b"test_data"))
-    def test_permissions_allowed(self, mock_get, *args):
+    @patch.object(FileView, "get")
+    def test_permissions_allowed(self, mock_fileview, mock_get, *args):
         self.userdata = {
             "username": "allowed_user",
             "first_name": "Allowed",
@@ -341,6 +346,7 @@ class PermissionsTest(HasLogin):
             "is_superuser": False,
         }
         mock_get.side_effect = self.mock_perm_get
+        mock_fileview.return_value = FileResponse(StringIO("test_data"))
         for item in self.check_permissions:
             url = item[0]
             permissions = item[1]
@@ -1032,15 +1038,17 @@ class FileViewTest(HasLogin):
         return response
 
     @patch.object(requests.Session, "get")
-    @patch("builtins.open", mock_open(read_data=b"test_data"))
-    def test_fileview(self, mock_get):
-        self.login()
-        url = self.file_view_url
-        mock_get.side_effect = self.mock_requests_get
-        response = self.client.get(url)
-        self.assertEquals(response.status_code, 200)
-        content = list(response.streaming_content)[0]
-        self.assertEquals(content, b"test_data")
+    @patch.object(os.path, "exists")
+    def test_fileview(self, mock_exists, mock_get):
+        with patch("builtins.open", mock_open(read_data=b"test_data")):
+            self.login()
+            url = self.file_view_url
+            mock_get.side_effect = self.mock_requests_get
+            mock_exists.return_value = True
+            response = self.client.get(url)
+            self.assertEquals(response.status_code, 200)
+            content = list(response.streaming_content)[0]
+            self.assertEquals(content, b"test_data")
 
 
 def modify_values(item: Any, types: Tuple, action: Callable) -> Any:

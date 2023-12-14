@@ -360,3 +360,34 @@ class PrismeResponse(ToldDataClass):
     )
     rec_id: int = None
     tax_notification_number: int = None
+
+
+@dataclass_json
+@dataclass
+class Indberetter(ToldDataClass):
+    cpr: int
+    cvr: int
+
+
+@dataclass_json
+@dataclass
+class User(ToldDataClass):
+    id: int
+    username: str
+    first_name: str
+    last_name: str
+    email: str
+    is_superuser: bool
+    groups: List[str]
+    permissions: List[str]
+    indberetter_data: Optional[Indberetter]
+
+    @property
+    def cpr(self):
+        if self.indberetter_data:
+            return self.indberetter_data.cpr
+
+    @property
+    def cvr(self):
+        if self.indberetter_data:
+            return self.indberetter_data.cvr
