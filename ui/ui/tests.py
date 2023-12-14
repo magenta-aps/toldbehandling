@@ -19,6 +19,8 @@ from told_common.forms import TF10Form, TF10VareForm
 from told_common.rest_client import RestClient
 from told_common.tests import TestMixin
 
+from ui.forms import TF5Form
+
 from django.core.files.uploadedfile import (  # isort: skip
     SimpleUploadedFile,
     TemporaryUploadedFile,
@@ -31,7 +33,7 @@ from told_common.tests import (  # isort: skip
 )
 
 
-class TF10Test(TestMixin, HasLogin, TestCase):
+class TF10BlanketTest(TestMixin, HasLogin, TestCase):
     @property
     def login_url(self):
         return str(reverse("login:login"))
@@ -161,6 +163,8 @@ class TF10Test(TestMixin, HasLogin, TestCase):
                             "afgiftsgruppenummer": 1234567,
                             "enhed": "kg",
                             "afgiftssats": "1.00",
+                            "kræver_indførselstilladelse": False,
+                            "har_privat_tillægsafgift_alkohol": False,
                         }
                     ],
                 }
@@ -304,7 +308,7 @@ class TF10Test(TestMixin, HasLogin, TestCase):
         self.login()
         url = reverse("tf10_create")
         mock_get.side_effect = self.mock_requests_get
-        mock_form_valid.return_value = redirect(reverse("tf10_create"))
+        mock_form_valid.return_value = redirect(url)
         for required_field in (
             "afsender_navn",
             "modtager_navn",
@@ -335,6 +339,8 @@ class TF10Test(TestMixin, HasLogin, TestCase):
                 "afgiftsgruppenummer": 12345678,
                 "enhed": "kg",
                 "afgiftssats": "1.00",
+                "kræver_indførselstilladelse": False,
+                "har_privat_tillægsafgift_alkohol": False,
             },
             2: {
                 "id": 2,
@@ -344,6 +350,8 @@ class TF10Test(TestMixin, HasLogin, TestCase):
                 "afgiftsgruppenummer": 87654321,
                 "enhed": "ant",
                 "afgiftssats": "1.00",
+                "kræver_indførselstilladelse": False,
+                "har_privat_tillægsafgift_alkohol": False,
             },
             3: {
                 "id": 3,
@@ -353,6 +361,8 @@ class TF10Test(TestMixin, HasLogin, TestCase):
                 "afgiftsgruppenummer": 22446688,
                 "enhed": "pct",
                 "afgiftssats": "0.50",
+                "kræver_indførselstilladelse": False,
+                "har_privat_tillægsafgift_alkohol": False,
             },
         }
 
@@ -600,7 +610,7 @@ class TF10Test(TestMixin, HasLogin, TestCase):
         self.login()
         url = reverse("tf10_create")
         mock_get.side_effect = self.mock_requests_get
-        mock_form_valid.return_value = redirect(reverse("tf10_create"))
+        mock_form_valid.return_value = redirect(url)
         data = {**self.formdata1}
         files = {
             "fragtbrev": SimpleUploadedFile("fragtbrev.txt", b"\x00" * 11000000),
@@ -654,3 +664,332 @@ class UiFileViewTest(FileViewTest, TestCase):
     @property
     def file_view_url(self):
         return str(reverse("fragtbrev_view", kwargs={"id": 1}))
+
+
+class TF5BlanketTest(TestMixin, HasLogin, TestCase):
+    @property
+    def login_url(self):
+        return str(reverse("login:login"))
+
+    formdata1 = {
+        "cpr": "1234567890",
+        "navn": "TestPerson1",
+        "adresse": "Testvej 42",
+        "postnummer": "1234",
+        "by": "TestBy",
+        "telefon": "123456",
+        "bookingnummer": "123",
+        "indførselstilladelse": "123",
+        "leverandørfaktura_nummer": "123",
+        "indleveringsdato": "2023-11-03",
+        "form-TOTAL_FORMS": "1",
+        "form-INITIAL_FORMS": "1",
+        "form-0-vareafgiftssats": "1",
+        "form-0-mængde": "3",
+        "form-0-antal": "6",
+        "form-0-fakturabeløb": "100.00",
+    }
+
+    _formfiles1 = {
+        "leverandørfaktura": SimpleUploadedFile(
+            "leverandørfaktura.txt", "Testtekst".encode("utf-8")
+        ),
+    }
+    subformdata1 = {
+        "vareafgiftssats": "1",
+        "mængde": "3",
+        "antal": "6",
+        "fakturabeløb": "100,00",
+    }
+
+    @property
+    def formfiles1(self):
+        for file in self._formfiles1.values():
+            file.seek(0)
+        return self._formfiles1
+
+    def setUp(self):
+        super().setUp()
+        self.posted: List[Tuple[str, str]] = []
+
+    @override_settings(LOGIN_BYPASS_ENABLED=False)
+    def test_requires_login(self):
+        url = str(reverse("tf5_create"))
+        response = self.client.get(url)
+        self.assertEquals(response.status_code, 302)
+        self.assertEquals(
+            response.headers["Location"],
+            reverse("login:login") + "?back=" + quote(url, safe=""),
+        )
+
+    def mock_requests_get(self, path):
+        expected_prefix = f"{settings.REST_DOMAIN}/api/"
+        path = path.split("?")[0]
+        path = path.rstrip("/")
+        response = Response()
+        json_content = None
+        content = None
+        status_code = None
+        empty = {"count": 0, "items": []}
+        if path == expected_prefix + "afgiftstabel":
+            json_content = {
+                "count": 1,
+                "items": [
+                    {
+                        "id": 1,
+                        "gyldig_fra": "2023-01-01",
+                        "gyldig_til": None,
+                        "kladde": False,
+                    }
+                ],
+            }
+        elif path == expected_prefix + "vareafgiftssats":
+            json_content = {
+                "count": 1,
+                "items": [
+                    {
+                        "id": 1,
+                        "afgiftstabel": 1,
+                        "vareart_da": "Båthorn",
+                        "vareart_kl": "Båthorn",
+                        "afgiftsgruppenummer": 1234567,
+                        "enhed": "kg",
+                        "afgiftssats": "1.00",
+                        "kræver_indførselstilladelse": False,
+                        "har_privat_tillægsafgift_alkohol": False,
+                    }
+                ],
+            }
+        else:
+            print(f"Mock got unrecognized path: {path}")
+        if json_content:
+            content = json.dumps(json_content).encode("utf-8")
+        if content:
+            if not status_code:
+                status_code = 200
+            response._content = content
+        response.status_code = status_code or 404
+        return response
+
+    def mock_requests_post(self, path, data, headers=None):
+        expected_prefix = f"{settings.REST_DOMAIN}/api/"
+        path = path.rstrip("/")
+        response = Response()
+        json_content = None
+        content = None
+        status_code = None
+        self.posted.append((path, data))
+        if path in (
+            expected_prefix + x
+            for x in (
+                "privat_afgiftsanmeldelse",
+                "varelinje",
+            )
+        ):
+            json_content = {"id": 1}
+        else:
+            print(f"Mock got unrecognized path: {path}")
+        if json_content:
+            content = json.dumps(json_content).encode("utf-8")
+        if content:
+            if not status_code:
+                status_code = 200
+            response._content = content
+        response.status_code = status_code or 404
+        return response
+
+    def submit_get_errors(self, url, data):
+        return self.get_errors(self.client.post(url, data=data).content)
+
+    @patch.object(requests.Session, "get")
+    def test_get_form(self, mock_get):
+        self.login()
+        url = reverse("tf5_create")
+        mock_get.side_effect = self.mock_requests_get
+        response = self.client.get(url)
+        self.assertEquals(response.status_code, 200)
+        soup = BeautifulSoup(response.content, "html.parser")
+        input_field_names = set(
+            [
+                input_field["name"]
+                for input_field in soup.find_all(name=["input", "select"])
+                if input_field.has_attr("name")
+            ]
+        )
+        for field_name in (
+            "csrfmiddlewaretoken",
+            "cpr",
+            "navn",
+            "adresse",
+            "postnummer",
+            "by",
+            "telefon",
+            "bookingnummer",
+            "leverandørfaktura",
+            "leverandørfaktura_nummer",
+            "indleveringsdato",
+            "form-0-vareafgiftssats",
+            "form-0-antal",
+            "form-0-mængde",
+            "form-0-fakturabeløb",
+            "form-INITIAL_FORMS",
+            "form-TOTAL_FORMS",
+            "form-MIN_NUM_FORMS",
+            "form-MAX_NUM_FORMS",
+        ):
+            self.assertIn(field_name, input_field_names, f"Missing {field_name}")
+
+    @patch.object(requests.Session, "get")
+    @patch("ui.views.TF5FormCreateView.form_valid")
+    def test_form_required_fields(self, mock_form_valid, mock_get):
+        self.login()
+        url = reverse("tf5_create")
+        mock_get.side_effect = self.mock_requests_get
+        mock_form_valid.return_value = redirect(url)
+        for required_field in (
+            "cpr",
+            "navn",
+            "adresse",
+            "postnummer",
+            "by",
+            "telefon",
+            "bookingnummer",
+            "leverandørfaktura_nummer",
+            "leverandørfaktura",
+            "indleveringsdato",
+        ):
+            data = {**self.formdata1}
+            files = {**self.formfiles1}
+            if required_field in data:
+                del data[required_field]
+            if required_field in files:
+                del files[required_field]
+            form = TF5Form(data=data, files=files)
+            self.assertTrue(required_field in form.errors)
+            self.assertEquals(form.errors[required_field], ["Dette felt er påkrævet."])
+            html_errors = self.submit_get_errors(url, data)
+            self.assertTrue(required_field in html_errors)
+            self.assertEquals(html_errors[required_field], ["Dette felt er påkrævet."])
+
+    def test_vareform_required_fields(self):
+        varesatser = {
+            1: {
+                "id": 1,
+                "afgiftstabel": 1,
+                "vareart_da": "Båthorn",
+                "vareart_kl": "Båthorn",
+                "afgiftsgruppenummer": 12345678,
+                "enhed": "kg",
+                "afgiftssats": "1.00",
+                "kræver_indførselstilladelse": False,
+                "har_privat_tillægsafgift_alkohol": False,
+            },
+            2: {
+                "id": 2,
+                "afgiftstabel": 1,
+                "vareart_da": "Klovnesko",
+                "vareart_kl": "Klovnesko",
+                "afgiftsgruppenummer": 87654321,
+                "enhed": "ant",
+                "afgiftssats": "1.00",
+                "kræver_indførselstilladelse": False,
+                "har_privat_tillægsafgift_alkohol": False,
+            },
+            3: {
+                "id": 3,
+                "afgiftstabel": 1,
+                "vareart_da": "Ethjulede cykler",
+                "vareart_kl": "Ethjulede cykler",
+                "afgiftsgruppenummer": 22446688,
+                "enhed": "pct",
+                "afgiftssats": "0.50",
+                "kræver_indførselstilladelse": False,
+                "har_privat_tillægsafgift_alkohol": False,
+            },
+        }
+
+        for required_field in ("vareafgiftssats",):
+            data = {**self.subformdata1}
+            del data[required_field]
+            form = TF10VareForm(data=data, varesatser=varesatser)
+            self.assertTrue(required_field in form.errors)
+            self.assertEquals(form.errors[required_field], ["Dette felt er påkrævet."])
+
+        for required_field, vareart in (
+            ("mængde", 1),
+            ("antal", 2),
+            ("fakturabeløb", 3),
+        ):
+            data = {**self.subformdata1, "vareafgiftssats": vareart}
+            del data[required_field]
+            form = TF10VareForm(data=data, varesatser=varesatser)
+            self.assertTrue(required_field in form.errors, required_field)
+            self.assertEquals(
+                form.errors[required_field], ["Dette felt er påkrævet."], required_field
+            )
+
+    @patch.object(requests.Session, "get")
+    @patch.object(
+        requests.Session,
+        "post",
+    )
+    def test_form_successful(self, mock_post, mock_get):
+        self.login()
+        url = reverse("tf5_create")
+        mock_get.side_effect = self.mock_requests_get
+        mock_post.side_effect = self.mock_requests_post
+        response = self.client.post(url, data={**self.formdata1, **self.formfiles1})
+        self.assertEquals(response.status_code, 302, self.get_errors(response.content))
+        prefix = f"{settings.REST_DOMAIN}/api/"
+        posted_map = defaultdict(list)
+        for url, data in self.posted:
+            posted_map[url].append(json.loads(data))
+        self.assertEquals(
+            posted_map[prefix + "privat_afgiftsanmeldelse"],
+            [
+                {
+                    "anonym": False,
+                    "cpr": "1234567890",
+                    "navn": "TestPerson1",
+                    "adresse": "Testvej 42",
+                    "postnummer": 1234,
+                    "by": "TestBy",
+                    "telefon": "123456",
+                    "bookingnummer": "123",
+                    "indleveringsdato": "2023-11-03",
+                    "leverandørfaktura_nummer": "123",
+                    "indførselstilladelse": None,
+                    "leverandørfaktura_navn": "leverandørfaktura.txt",
+                    "leverandørfaktura": base64.b64encode(
+                        "Testtekst".encode("utf-8")
+                    ).decode("ascii"),
+                }
+            ],
+        )
+
+    @patch.object(requests.Session, "get")
+    @patch("ui.views.TF5FormCreateView.form_valid")
+    def test_form_filefields_size(self, mock_form_valid, mock_get):
+        self.login()
+        url = reverse("tf5_create")
+        mock_get.side_effect = self.mock_requests_get
+        mock_form_valid.return_value = redirect(url)
+        data = {**self.formdata1}
+        files = {
+            "leverandørfaktura": SimpleUploadedFile(
+                "leverandørfaktura.txt", b"\x00" * 11000000
+            ),
+        }
+        for v in files.values():
+            v.seek(0)
+        form = TF5Form(data=data, files=files)
+        html_errors = self.submit_get_errors(url, {**data, **files})
+        for file_field in ("leverandørfaktura",):
+            self.assertTrue(file_field in form.errors)
+            self.assertEquals(
+                form.errors[file_field], ["Filen er for stor; den må max. være 10.0 MB"]
+            )
+            self.assertTrue(file_field in html_errors)
+            self.assertEquals(
+                html_errors[file_field], ["Filen er for stor; den må max. være 10.0 MB"]
+            )

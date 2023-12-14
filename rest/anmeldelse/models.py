@@ -151,7 +151,12 @@ class Afgiftsanmeldelse(models.Model):
 
 class PrivatAfgiftsanmeldelse(models.Model):
     oprettet = models.DateTimeField(auto_now_add=True)
-
+    oprettet_af = models.ForeignKey(
+        User,
+        related_name="private_afgiftsanmeldelser",
+        on_delete=models.SET_NULL,  # Vi kan slette brugere og beholde deres anmeldelser
+        null=True,
+    )
     cpr = models.BigIntegerField(
         verbose_name=_("CPR-nummer"),
         db_index=True,
@@ -192,11 +197,6 @@ class PrivatAfgiftsanmeldelse(models.Model):
         null=False,
         blank=False,
     )
-    postbox = models.CharField(
-        max_length=10,
-        null=True,
-        blank=True,
-    )
     telefon = models.CharField(
         max_length=12,
         null=False,
@@ -204,28 +204,37 @@ class PrivatAfgiftsanmeldelse(models.Model):
     )
 
     bookingnummer = models.CharField(
-        max_length=20,
+        max_length=128,
         verbose_name=_("Bookingnummer udstedt af speditør"),
         null=False,
         blank=False,
     )
-    varefakturanummer = models.CharField(
+    leverandørfaktura_nummer = models.CharField(
         max_length=20,
         verbose_name=_("Varefakturanummer udstedt af forhandler"),
         null=False,
         blank=False,
     )
-    tilladelsesnummer = models.CharField(
+    indførselstilladelse = models.CharField(
         max_length=20,
         verbose_name=_("Nummer på senest udstedte indførselstilladelse"),
-        null=False,
-        blank=False,
+        null=True,
+        blank=True,
     )
-    leveringsdato = models.DateField()
-    faktura = models.FileField(
+    indleveringsdato = models.DateField()
+    leverandørfaktura = models.FileField(
         upload_to=privatafgiftsanmeldelse_upload_to,
         null=True,
         blank=True,
+    )
+    status = models.CharField(
+        choices=(
+            ("ny", "ny"),
+            ("afvist", "afvist"),
+            ("godkendt", "godkendt"),
+            ("afsluttet", "afsluttet"),
+        ),
+        default="ny",
     )
 
 

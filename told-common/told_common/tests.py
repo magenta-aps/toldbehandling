@@ -629,6 +629,8 @@ class AnmeldelseListViewTest(HasLogin):
                         "afgiftsgruppenummer": 1234567,
                         "enhed": "kg",
                         "afgiftssats": "1.00",
+                        "kræver_indførselstilladelse": False,
+                        "har_privat_tillægsafgift_alkohol": False,
                     }
                 ],
             }

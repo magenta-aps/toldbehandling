@@ -50,3 +50,7 @@ textarea {
 table tr td {
     user-select: none;
 }
+
+.helptext {
+    /*margin-left: auto;*/
+}

@@ -18,6 +18,7 @@ setuptools.setup(
         "requests==2.31.0",
         "dataclasses-json==0.6.0",
         "WeasyPrint==60.1",
+        "holidays==0.38",
     ],
     classifiers=[
         "Programming Language :: Python :: 3",

@@ -4,6 +4,10 @@ $(function () {
 
     const items = [];
     const lastEdited = [];
+    const aktører = window.aktører;
+    if (!aktører) {
+        return;
+    }
 
     const fillForm = function(i, item) {
         const aktør = aktører[i];
@@ -23,7 +27,6 @@ $(function () {
         const multi_container = $(aktør["multi_container"]);
         const labels = aktør["multi_label"];
         const multi_select = multi_container.find("select");
-        const update_warning = $(aktør["multi_changed_container"]);
         const preselected_id = aktør["preselected_id"];
         items.push([]);
         lastEdited.push(null);
@@ -146,6 +149,9 @@ $(function () {
     // Vis afgiftssats og beregn afgiftsbeløb
     // --------------------------------------
     const varesatser = JSON.parse($('#varesatser').text());
+    const konstanter = JSON.parse($('#konstanter').text());
+    const tillægsafgift_faktor = konstanter["tillægsafgift_faktor"] || 0;
+    const ekspeditionsgebyr = konstanter["ekspeditionsgebyr"] || 0;
     const decimal_fields = ["afgiftssats", "segment_nedre", "segment_øvre"];
     for (key in varesatser) {
         const varesats = varesatser[key];
@@ -269,13 +275,24 @@ $(function () {
     };
     const calcAfgiftSum = function() {
         let totalAfgift = 0;
+        let tillægsafgift = 0;
         container.find(".row").each(function () {
-            const afgift = $(this).data("afgift");
+            const subform = $(this);
+            const vareafgiftssats = subform.find("[name$=vareafgiftssats]");
+            const varesats = varesatser[vareafgiftssats.val()];
+            const afgift = subform.data("afgift");
             if (afgift !== null) {
                 totalAfgift += afgift;
             }
+            console.log(varesats);
+            if (varesats["har_privat_tillægsafgift_alkohol"]) {
+                tillægsafgift += tillægsafgift_faktor * afgift;
+            }
         });
         $("[data-value=sum-afgiftsbeløb]").val(formatMoney(totalAfgift));
+        $("[data-value=sum-tillægsafgift]").val(formatMoney(tillægsafgift));
+        $("[data-value=ekspeditionsgebyr]").val(formatMoney(ekspeditionsgebyr));
+        $("[data-value=sum-total]").val(formatMoney(totalAfgift + tillægsafgift + ekspeditionsgebyr));
     };
 
     // Formset
@@ -290,16 +307,34 @@ $(function () {
         subform.find("input,select").on("change", calcAfgift.bind(subform, subform));
         updateVareart(subform);
         calcAfgift(subform);
+        const addButton = subform.find(".add-row");
+        addButton.click(addForm);
+        subformsUpdated();
     };
     const subformRemoved = function(subform) {
         calcAfgiftSum();
-        container.find(".row").each(function (index, element) {
+        const rows = container.find(".row");
+        rows.each(function (index, element) {
             $(this).find("input[name],select[name]").each(function (){
                 this.id = this.id.replace(/-\d+-/, "-"+index+"-");
                 this.name = this.name.replace(/-\d+-/, "-"+index+"-");
             });
         });
+        subformsUpdated();
     };
+    const subformsUpdated = function () {
+        const rows = container.find(".row");
+        const lastRow = rows.last();
+        lastRow.find(".add-row").show();
+        console.log("lastRow", lastRow);
+        console.log("rows.not(lastRow)", rows.not(lastRow));
+        if (rows.length === 1) {
+            lastRow.find(".remove-row").hide();
+        } else {
+            rows.find(".remove-row").show();
+            rows.not(lastRow).find(".add-row").hide();
+        }
+    }
 
     const addForm = function () {
         const newForm = formset.addForm();
@@ -309,7 +344,6 @@ $(function () {
         formset.removeForm(subform, true);
         subformRemoved(subform);
     };
-    $("#formset_add").click(addForm);
     container.find(".row").each(function (){subformAdded(this)});
 
     // Filefield

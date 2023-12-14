@@ -152,6 +152,7 @@ class VareafgiftssatsIn(ModelSchema):
             "enhed",
             "afgiftssats",
             "kræver_indførselstilladelse",
+            "har_privat_tillægsafgift_alkohol",
             "minimumsbeløb",
             "segment_nedre",
             "segment_øvre",
@@ -159,6 +160,7 @@ class VareafgiftssatsIn(ModelSchema):
         ]
         model_fields_optional = [
             "kræver_indførselstilladelse",
+            "har_privat_tillægsafgift_alkohol",
             "minimumsbeløb",
             "segment_nedre",
             "segment_øvre",
@@ -179,6 +181,7 @@ class PartialVareafgiftssatsIn(ModelSchema):
             "enhed",
             "afgiftssats",
             "kræver_indførselstilladelse",
+            "har_privat_tillægsafgift_alkohol",
             "minimumsbeløb",
             "segment_nedre",
             "segment_øvre",
@@ -199,6 +202,7 @@ class VareafgiftssatsOut(ModelSchema):
             "enhed",
             "afgiftssats",
             "kræver_indførselstilladelse",
+            "har_privat_tillægsafgift_alkohol",
             "minimumsbeløb",
             "overordnet",
             "segment_nedre",
@@ -215,6 +219,7 @@ class VareafgiftssatsFilterSchema(FilterSchema):
     enhed: Optional[str]
     afgiftssats: Optional[Decimal]
     kræver_indførselstilladelse: Optional[bool]
+    har_privat_tillægsafgift_alkohol: Optional[bool]
     minimumsbeløb: Optional[Decimal]
     overordnet: Optional[int]
     segment_nedre: Optional[Decimal]

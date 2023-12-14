@@ -135,6 +135,7 @@ class Vareafgiftssats(models.Model):
         max_digits=10,
         decimal_places=2,
     )
+    har_privat_tillægsafgift_alkohol = models.BooleanField(default=False)
 
     # Ved sammensatte afgifter kan disse felter benyttes til at lave forskellig
     # afgift på forskellige dele af importen

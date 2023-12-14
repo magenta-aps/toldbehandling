@@ -428,3 +428,50 @@ class TF10SearchForm(PaginateForm, BootstrapForm):
 
     afsenderbykode_or_forbindelsesnr = forms.CharField(required=False)
     postforsendelsesnummer_or_fragtbrevsnummer = forms.CharField(required=False)
+
+
+class TF5SearchForm(PaginateForm, BootstrapForm):
+    def __init__(self, *args, **kwargs):
+        self.varesatser = kwargs.pop("varesatser", {})
+        super().__init__(*args, **kwargs)
+
+        # We use 'set' here, because one 'vareafgiftssats' can exist in many
+        # different tables
+        vareart_key = (
+            "vareart_kl" if translation.get_language() == "kl" else "vareart_da"
+        )
+        self.fields["vareart"].choices = tuple(
+            [(None, "------")]
+            + sorted(
+                set(
+                    [
+                        (item[vareart_key], item[vareart_key].lower().capitalize())
+                        for item in self.varesatser.values()
+                    ]
+                ),
+                key=lambda items: items[1],
+            )
+        )
+
+    vareart = forms.ChoiceField(choices=(), required=False)
+    # status = forms.ChoiceField(
+    #     choices=(
+    #         (None, _("Alle")),
+    #         ("ny", _("Ny")),
+    #         ("afvist", _("Afvist")),
+    #         ("godkendt", _("Godkendt")),
+    #         ("afsluttet", _("Afsluttet")),
+    #     ),
+    #     required=False,
+    #     widget=forms.Select(attrs={"onchange": "form.submit();"}),
+    # )
+    leverandørfaktura_nummer = forms.CharField(required=False)
+
+    afgangsdato_efter = forms.DateField(required=False, widget=DateInput)
+    afgangsdato_før = forms.DateField(required=False, widget=DateInput)
+    oprettet_efter = forms.DateField(required=False, widget=DateInput)
+    oprettet_før = forms.DateField(required=False, widget=DateInput)
+
+    order_by = forms.CharField(required=False)
+
+    id = forms.IntegerField(required=False)

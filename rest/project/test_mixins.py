@@ -855,6 +855,7 @@ class RestMixin:
             "enhed": Vareafgiftssats.Enhed.KILOGRAM,
             "afgiftssats": "2.50",
             "kræver_indførselstilladelse": False,
+            "har_privat_tillægsafgift_alkohol": False,
             "synlig_privat": False,
         }
         self.afgiftstabel_data = {"gyldig_fra": date.today().isoformat()}

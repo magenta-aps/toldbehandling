@@ -1,8 +1,20 @@
 {% load i18n %}
+{% load common_tags %}
 <div class="file-input">
-<input type="file" name="{{widget.name}}" tabindex="-1" {% include "django/forms/widgets/attrs.html" %}>
-<div class="input-group">
-    <span class="input-group-text file-input-button" data-fileinput="{{widget.name}}">{% translate "Gennemse..." %}</span>
-    <input type="text" data-fileinput="{{widget.name}}" readonly placeholder="{% translate 'Ingen fil valgt' %}" autocomplete="off" {% include "django/forms/widgets/attrs.html" %}>
-</div>
+    <input type="file" name="{{widget.name}}" tabindex="-1" {% include "django/forms/widgets/attrs.html" %}/>
+    <div class="input-group">
+        <span class="input-group-text file-input-button" data-fileinput="{{widget.name}}">{% translate "Gennemse..." %}</span>
+        <input type="text" data-fileinput="{{widget.name}}" readonly placeholder="{% translate 'Ingen fil valgt' %}" autocomplete="off" {% include "django/forms/widgets/attrs.html" %}/>
+
+        {% with title=widget.attrs|get:"data-tooltip-title" content=widget.attrs|get:"data-tooltip-content" %}
+            {% if title or content %}
+            <span class="input-group-text p-2"
+                  data-bs-toggle="popover"
+                  {% if title %}data-bs-title="{{title}}"{% endif %}
+                  {% if content %}data-bs-content="{{content}}"{% endif %}
+                  data-bs-trigger="hover"
+            ><i class="fa fa-info-circle"></i></span>
+            {% endif %}
+        {% endwith %}
+    </div>
 </div>

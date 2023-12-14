@@ -8,6 +8,7 @@
 <script type="text/javascript" src="{% static 'toldbehandling/js/formset.js' %}"></script>
 <script type="text/javascript" src="{% static 'toldbehandling/js/formfile.js' %}"></script>
 <link rel="stylesheet" type="text/css" href="{% static 'toldbehandling/css/formfile.css' %}"/>
+<link rel="stylesheet" href="{% static 'font-awesome/css/all.min.css' %}" >
 {% endblock %}
 
 {% block content %}
@@ -48,7 +49,7 @@
 
             <div class="col-6">
                 <h5>{% translate "Afsender" %}</h5>
-                <div class="row">
+                <div class="row align-items-center">
                     <div class="col-4">
                         <label for="{{form.afsender_cvr.id_for_label}}">{{form.afsender_cvr.label}}</label>
                     </div>
@@ -57,7 +58,7 @@
                         {{form.afsender_cvr.errors}}
                     </div>
                 </div>
-                <div class="row">
+                <div class="row align-items-center">
                     <div class="col-4">
                         <label for="{{form.afsender_navn.id_for_label}}">{{form.afsender_navn.label}}*</label>
                     </div>
@@ -91,7 +92,7 @@
                     </div>
                 </div>
             </div>
-                <div class="row">
+                <div class="row align-items-center">
                     <div class="col-4">
                         <label for="{{form.afsender_adresse.id_for_label}}">{{form.afsender_adresse.label}}*</label>
                     </div>
@@ -100,7 +101,7 @@
                         {{form.afsender_adresse.errors}}
                     </div>
                 </div>
-                <div class="row">
+                <div class="row align-items-center">
                     <div class="col-4">
                         <label for="{{form.afsender_postbox.id_for_label}}">{{form.afsender_postbox.label}}</label>
                     </div>
@@ -109,7 +110,7 @@
                         {{form.afsender_postbox.errors}}
                     </div>
                 </div>
-                <div class="row">
+                <div class="row align-items-center">
                     <div class="col-4">
                         <label for="{{form.afsender_postnummer.id_for_label}}">{{form.afsender_postnummer.label}}*</label>
                     </div>
@@ -118,7 +119,7 @@
                         {{form.afsender_postnummer.errors}}
                     </div>
                 </div>
-                <div class="row">
+                <div class="row align-items-center">
                     <div class="col-4">
                         <label for="{{form.afsender_by.id_for_label}}">{{form.afsender_by.label}}*</label>
                     </div>
@@ -127,7 +128,7 @@
                         {{form.afsender_by.errors}}
                     </div>
                 </div>
-                <div class="row">
+                <div class="row align-items-center">
                     <div class="col-4">
                         <label for="{{form.afsender_telefon.id_for_label}}">{{form.afsender_telefon.label}}*</label>
                     </div>
@@ -140,7 +141,7 @@
 
             <div class="col-6">
                 <h5>{% translate "Modtager" %}</h5>
-                <div class="row">
+                <div class="row align-items-center">
                     <div class="col-4">
                         <label for="{{form.modtager_cvr.id_for_label}}">{{form.modtager_cvr.label}}</label>
                     </div>
@@ -149,7 +150,7 @@
                         {{form.modtager_cvr.errors}}
                     </div>
                 </div>
-                <div class="row">
+                <div class="row align-items-center">
                     <div class="col-4">
                         <label for="{{form.modtager_navn.id_for_label}}">{{form.modtager_navn.label}}*</label>
                     </div>
@@ -185,7 +186,7 @@
                     </div>
                 </div>
             </div>
-                <div class="row">
+                <div class="row align-items-center">
                     <div class="col-4">
                         <label for="{{form.modtager_adresse.id_for_label}}">{{form.modtager_adresse.label}}*</label>
                     </div>
@@ -194,7 +195,7 @@
                         {{form.modtager_adresse.errors}}
                     </div>
                 </div>
-                <div class="row">
+                <div class="row align-items-center">
                     <div class="col-4">
                         <label for="{{form.modtager_postbox.id_for_label}}">{{form.modtager_postbox.label}}</label>
                     </div>
@@ -203,7 +204,7 @@
                         {{form.modtager_postbox.errors}}
                     </div>
                 </div>
-                <div class="row">
+                <div class="row align-items-center">
                     <div class="col-4">
                         <label for="{{form.modtager_postnummer.id_for_label}}">{{form.modtager_postnummer.label}}*</label>
                     </div>
@@ -212,7 +213,7 @@
                         {{form.modtager_postnummer.errors}}
                     </div>
                 </div>
-                <div class="row">
+                <div class="row align-items-center">
                     <div class="col-4">
                         <label for="{{form.modtager_by.id_for_label}}">{{form.modtager_by.label}}*</label>
                     </div>
@@ -221,7 +222,7 @@
                         {{form.modtager_by.errors}}
                     </div>
                 </div>
-                <div class="row">
+                <div class="row align-items-center">
                     <div class="col-4">
                         <label for="{{form.modtager_telefon.id_for_label}}">{{form.modtager_telefon.label}}*</label>
                     </div>
@@ -230,7 +231,7 @@
                         {{form.modtager_telefon.errors}}
                     </div>
                 </div>
-                <div class="row">
+                <div class="row align-items-center">
                     <div class="col-4">
                         <label for="{{form.indførselstilladelse.id_for_label}}">{{form.indførselstilladelse.label}}</label>
                     </div>
@@ -247,7 +248,7 @@
 
         <div class="row">
             <div class="col-6">
-                <div class="row">
+                <div class="row align-items-center">
                     <div class="col-4">
                         <label for="{{form.leverandørfaktura_nummer.id_for_label}}">{{form.leverandørfaktura_nummer.label}}*</label>
                     </div>
@@ -256,7 +257,7 @@
                         {{form.leverandørfaktura_nummer.errors}}
                     </div>
                 </div>
-                <div class="row">
+                <div class="row align-items-center">
                     <div class="col-4">
                         <label for="{{form.leverandørfaktura.id_for_label}}">{{form.leverandørfaktura.label}}*</label>
                     </div>
@@ -270,7 +271,7 @@
                         {% endif %}
                     </div>
                 </div>
-                <div class="row">
+                <div class="row align-items-center">
                     <div class="col-4">
                         <label for="{{form.fragtbrev.id_for_label}}">{% translate "Fragtbrev" %}</label>
                     </div>
@@ -287,7 +288,7 @@
             </div>
 
             <div class="col-6">
-                <div class="row">
+                <div class="row align-items-center">
                     <div class="col-6">
                         <label for="{{form.fragttype.id_for_label}}">{% translate "Fragttype" %}*</label>
                     </div>
@@ -295,7 +296,7 @@
                         {{form.fragttype}}
                     </div>
                 </div>
-                <div class="row">
+                <div class="row align-items-center">
                     <div class="col-6">
                         <label for="{{form.forbindelsesnr.id_for_label}}">{% translate "Forbindelsesnr/afsenderbykode" %}*</label>
                     </div>
@@ -303,7 +304,7 @@
                         {{form.forbindelsesnr}}
                     </div>
                 </div>
-                <div class="row">
+                <div class="row align-items-center">
                     <div class="col-6">
                         <label for="{{form.fragtbrevnr.id_for_label}}">{% translate "Fragtbrevnr/postforsendelsesnummer" %}*</label>
                     </div>
@@ -311,7 +312,7 @@
                         {{form.fragtbrevnr}}
                     </div>
                 </div>
-                <div class="row">
+                <div class="row align-items-center">
                     <div class="col-6">
                         <label for="{{form.afgangsdato.id_for_label}}">{% translate "Afgangsdato" %}*</label>
                     </div>
@@ -320,7 +321,7 @@
                     </div>
                 </div>
                 <!-- Should ideally be hidden, unless Fragttype == Luftfragt -->
-                <div class="row" id="betales_af_row" {% if form.fragttype.value != 'luftfragt' %}style="display:none"{% endif %}>
+                <div class="row align-items-center" id="betales_af_row" {% if form.fragttype.value != 'luftfragt' %}style="display:none"{% endif %}>
                     <div class="col-6">
                         <label for="{{form.betales_af.id_for_label}}">{% translate "Betales af (kun relevant for luftfragt)" %}*</label>
                     </div>
@@ -333,10 +334,13 @@
         </div>
 
         <hr/>
-        <h5>{% translate "Afgifter" %}</h5>
+
+        <h5>{% translate "Varelinjer med afgifter" %}</h5>
+		{% if not admin %}
         <p>
             {% translate "I henhold til gældende grønlandske afgiftsbestemmelser anmeldes følgende varer til afgiftsberigtigelse overfor den grønlandske landskasse" %}
         </p>
+		{% endif %}
         <div class="row">
             <div class="col-2 px-0">
                 <label>{% translate "Vareart" %}*</label>
@@ -372,15 +376,15 @@
             {% endfor %}
             </div>
         </div>
+
         <div id="formset_prototype" style="display: none">
             {% include "told_common/tf10/subform.html" with subform=formset.empty_form %}
         </div>
 
-        <div class="row">
-            <div class="col-7 px-0">
-                <button type="button" class="btn btn-primary" id="formset_add">+</button>
-            </div>
-            <div class="col-2 px-0">
+        <hr/>
+
+        <div class="row align-items-center">
+            <div class="col-2 px-0 offset-7">
                 {% translate "Afgift i alt" %}
             </div>
             <div class="col-3 px-0">
@@ -442,6 +446,7 @@
 </form>
 
 {{ varesatser|json_script:"varesatser" }}
+{{ konstanter|json_script:"konstanter" }}
 <script>
     const satsTekster = {
         "kg": "{% translate '%f kr/kg' %}",

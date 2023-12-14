@@ -209,4 +209,8 @@ STORAGES = {
 # https://docs.djangoproject.com/en/4.2/ref/settings/#session-cookie-samesite
 SESSION_COOKIE_SAMESITE = "None"
 
+
+TILLÆGSAFGIFT_FAKTOR = 0.5
+EKSPEDITIONSGEBYR = 250
+
 from .login_settings import *  # noqa
