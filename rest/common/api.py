@@ -10,9 +10,12 @@ from django.http import HttpResponseBadRequest
 from django.shortcuts import get_object_or_404
 from ninja import Field, ModelSchema
 from ninja.errors import ValidationError
+from ninja.filter_schema import FilterSchema
+from ninja.params import Query
 from ninja.schema import Schema
 from ninja.security import APIKeyHeader
-from ninja_extra import api_controller, permissions, route
+from ninja_extra import api_controller, paginate, permissions, route
+from ninja_extra.schemas import NinjaPaginationResponseSchema
 from ninja_jwt.authentication import JWTAuth
 from ninja_jwt.tokens import RefreshToken
 from project.util import json_dump
@@ -70,7 +73,14 @@ class UserOut(ModelSchema):
 
     class Config:
         model = User
-        model_fields = ["username", "first_name", "last_name", "email", "is_superuser"]
+        model_fields = [
+            "id",
+            "username",
+            "first_name",
+            "last_name",
+            "email",
+            "is_superuser",
+        ]
 
     @staticmethod
     def resolve_groups(user: User):
@@ -128,6 +138,15 @@ class UserIn(ModelSchema):
         model_fields = ["username", "first_name", "last_name", "email"]
 
 
+class UserFilterSchema(FilterSchema):
+    username: Optional[str] = Field(q="username__icontains")
+    first_name: Optional[str] = Field(q="first_name__icontains")
+    last_name: Optional[str] = Field(q="last_name__icontains")
+    email: Optional[str] = Field(q="email__icontains")
+    is_superuser: Optional[bool]
+    group: Optional[str] = Field(q="groups__name__icontains")
+
+
 @api_controller(
     "/user",
     tags=["User"],
@@ -135,7 +154,7 @@ class UserIn(ModelSchema):
 )
 class UserAPI:
     @route.get(
-        "",
+        "/this",
         response=UserOut,
         auth=get_auth_methods(),
         url_name="user_view",
@@ -146,7 +165,7 @@ class UserAPI:
     @route.get(
         "/cpr/{cpr}",
         response=UserOutWithTokens,
-        auth=get_auth_methods(),
+        auth=JWTAuth(),
         url_name="user_cpr_get",
     )
     def get_user_cpr(self, cpr: int):
@@ -175,6 +194,16 @@ class UserAPI:
             cvr=payload.indberetter_data.cvr,
         )
         return UserOutWithTokens.user_to_dict(user)
+
+    @route.get(
+        "",
+        response=NinjaPaginationResponseSchema[UserOut],
+        auth=get_auth_methods(),
+        url_name="user_list",
+    )
+    @paginate()  # https://eadwincode.github.io/django-ninja-extra/tutorial/pagination/
+    def list(self, filters: UserFilterSchema = Query(...)):
+        return list(filters.filter(User.objects.all()))
 
 
 class EboksBeskedIn(ModelSchema):

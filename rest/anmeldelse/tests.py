@@ -20,6 +20,7 @@ class AfgiftsanmeldelseTest(RestMixin, TestCase):
     calculated_fields = {
         "beregnet_faktureringsdato": "2023-11-30",
         "oprettet_af": {
+            "id": 9,
             "username": "testuser1",
             "first_name": "",
             "last_name": "",
@@ -37,6 +38,7 @@ class AfgiftsanmeldelseTest(RestMixin, TestCase):
             ],
             "indberetter_data": None,
         },
+        "oprettet_på_vegne_af": None,
     }
 
     @property
@@ -72,6 +74,7 @@ class AfgiftsanmeldelseTest(RestMixin, TestCase):
                     "afsender": self.afsender.id,
                     "modtager": self.modtager.id,
                     "status": "ny",
+                    "oprettet_på_vegne_af": None,
                 }
             )
         return self._expected_object_data

@@ -15,8 +15,27 @@
     {% csrf_token %}
     <div class="container-lg">
         <h1>{% translate "Afgiftsanmeldelse" %}</h1>
-        <h4>{% translate "For indførsel af afgiftspligtige varer i Grønland" %}</h4>
-
+        <div class="row">
+            <h4 class="col-6">{% translate "For indførsel af afgiftspligtige varer i Grønland" %}</h4>
+            {% if form.oprettet_på_vegne_af %}
+            <div class="col-6">
+                <div class="row align-items-center">
+                    <div class="col-4">
+                        <label for="{{form.oprettet_på_vegne_af.id_for_label}}">{{form.oprettet_på_vegne_af.label}}*</label>
+                    </div>
+                    <div class="col-8">
+                        {{form.oprettet_på_vegne_af}}
+                        {{form.oprettet_på_vegne_af.errors}}
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+			{% if gem_top %}
+            <div class="col-6 clearfix my-1">
+                <button type="submit" class="btn btn-success float-end">{% translate "Gem" %}</button>
+            </div>
+			{% endif %}
+        </div>
         <div class="row">
             <div class="col-12">
                 {{form.non_field_errors}}
@@ -314,10 +333,13 @@
         </div>
 
         <hr/>
-        <h5>{% translate "Afgifter" %}</h5>
+
+        <h5>{% translate "Varelinjer med afgifter" %}</h5>
+		{% if not admin %}
         <p>
             {% translate "I henhold til gældende grønlandske afgiftsbestemmelser anmeldes følgende varer til afgiftsberigtigelse overfor den grønlandske landskasse" %}
         </p>
+		{% endif %}
         <div class="row">
             <div class="col-2 px-0">
                 <label>{% translate "Vareart" %}*</label>
@@ -370,11 +392,45 @@
         </div>
 
         <hr/>
-            <div class="clearfix">
-                <button type="submit" class="btn btn-success float-end">
-                    {% if item %}{% translate "Opdatér" %}{% else %}{% translate "Indsend" %}{% endif %}
-                </button>
+
+		{% if vis_notater %}
+
+        <h5>Notater</h5>
+
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th class="col-2">Bruger</th>
+                <th class="col-2">Tidspunkt</th>
+                <th class="col-8">Notat</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for notat in notater %}
+            <tr>
+                <td>{{notat.brugernavn}}</td>
+                <td>{{notat.oprettet}}</td>
+                <td>{{notat.tekst}}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="3" class="text-center">Ingen notater</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="row">
+            <div class="col-12 px-0">
+                {{form.notat}}
             </div>
+        </div>
+		{% endif %}
+
+        <div class="clearfix">
+            <button type="submit" class="btn btn-success float-end">
+                {% if item %}{% translate "Opdatér" %}{% else %}{% translate "Indsend" %}{% endif %}
+            </button>
         </div>
     </div>
 </form>

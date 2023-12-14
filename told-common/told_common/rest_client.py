@@ -19,7 +19,7 @@ from django.core.files.uploadedfile import InMemoryUploadedFile, UploadedFile
 from django.core.serializers.json import DjangoJSONEncoder
 from django.http import HttpRequest
 from requests import HTTPError, Session
-from told_common.util import cast_or_none, filter_dict_none
+from told_common.util import cast_or_none, filter_dict_none, opt_int
 
 from told_common.data import (  # isort: skip
     Afgiftsanmeldelse,
@@ -31,6 +31,7 @@ from told_common.data import (  # isort: skip
     Vareafgiftssats,
     Varelinje,
     PrismeResponse,
+    User,
 )
 
 
@@ -342,6 +343,7 @@ class AfgiftanmeldelseRestClient(ModelRestClient):
             "modtager_betaler": data["betales_af"] == "Modtager"
             if "betales_af" in data
             else None,
+            "oprettet_på_vegne_af_id": opt_int(data.get("oprettet_på_vegne_af")),
         }
 
     def create(
@@ -657,6 +659,18 @@ class EboksBeskedRestClient(ModelRestClient):
         return response["id"]
 
 
+class UserRestClient(ModelRestClient):
+    def this(self):
+        return self.rest.get("user/this")
+
+    def list(
+        self,
+        **filter: Union[str, int, float, bool, List[Union[str, int, float, bool]]],
+    ) -> Tuple[int, List[User]]:
+        data = self.rest.get("user", filter)
+        return data["count"], [User.from_dict(item) for item in data["items"]]
+
+
 class RestClient:
     domain = settings.REST_DOMAIN
 
@@ -675,6 +689,7 @@ class RestClient:
         self.notat = NotatRestClient(self)
         self.prismeresponse = PrismeResponseRestClient(self)
         self.eboks = EboksBeskedRestClient(self)
+        self.user = UserRestClient(self)
 
     def check_access_token_age(self):
         max_age = getattr(settings, "NINJA_JWT", {}).get(

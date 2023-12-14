@@ -55,6 +55,7 @@ urlpatterns = [
         views.AfgiftstabelDownloadView.as_view(),
         name="afgiftstabel_download",
     ),
+    path("blanket/tf10/create", views.TF10FormCreateView.as_view(), name="tf10_create"),
     path(
         "blanket/tf10",
         views.TF10ListView.as_view(),
