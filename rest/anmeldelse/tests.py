@@ -75,6 +75,7 @@ class AfgiftsanmeldelseTest(RestMixin, TestCase):
                     "modtager": self.modtager.id,
                     "status": "ny",
                     "oprettet_på_vegne_af": None,
+                    "toldkategori": None,
                 }
             )
         return self._expected_object_data
@@ -123,6 +124,7 @@ class AfgiftsanmeldelseTest(RestMixin, TestCase):
                     "fragtforsendelse": None,
                     "leverandørfaktura": f"/leverand%C3%B8rfakturaer/{self.afgiftsanmeldelse.id}/leverand%C3%B8rfaktura.pdf",
                     "status": "ny",
+                    "toldkategori": None,
                     **self.calculated_fields,
                 }
             )

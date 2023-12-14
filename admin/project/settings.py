@@ -13,7 +13,7 @@ https://docs.djangoproject.com/en/4.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
-
+import json
 import os
 from datetime import timedelta
 from pathlib import Path
@@ -172,3 +172,21 @@ STORAGES = {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
 }
+
+# TODO: Smid dette i en model og lav rest-interface til det.
+CVR_TOLDKATEGORI_MAP = [
+    {"kategori": "70", "navn": "RAL Royal Arctic Line A/S", "cvr": []},
+    {"kategori": "71", "navn": "Forudbetalt indførselsafgift", "cvr": []},
+    {
+        "kategori": "73A",
+        "navn": "Kreditkunder Nan,Qaq,Nar,Kali,Qas,Nuu,Man,Sis,Nars",
+        "cvr": [12345678],
+    },
+    {"kategori": "73B", "navn": "Kreditkunder Kangaa,Aas,Qas,Ilu,Qeq", "cvr": []},
+    {"kategori": "73C", "navn": "Kreditkunder Uum,Uper", "cvr": []},
+    {"kategori": "73D", "navn": "Kreditkunder Tasiilaq,Kangerlussuaq", "cvr": []},
+    {"kategori": "73E", "navn": "Kreditkunder Ittoqqortoormiit,Qaanaq", "cvr": []},
+    {"kategori": "76", "navn": "Fra Tusass A/S", "cvr": []},
+    {"kategori": "77", "navn": "Fra Skattestyrelsen", "cvr": []},
+    {"kategori": "79", "navn": "Refusion", "cvr": []},
+]

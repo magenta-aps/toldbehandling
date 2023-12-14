@@ -109,6 +109,12 @@ class Afgiftsanmeldelse(models.Model):
         ),
         default="ny",
     )
+    toldkategori = models.CharField(
+        max_length=3,
+        verbose_name=_("Toldkategori"),
+        null=True,
+        blank=True,
+    )
 
     def clean(self):
         if self.fragtforsendelse is None and self.postforsendelse is None:
@@ -327,7 +333,7 @@ class PrismeResponse(models.Model):
     )
     rec_id = models.BigIntegerField(null=False)
     tax_notification_number = models.BigIntegerField(null=False)
-    invoice_date = models.DateTimeField(null=False)
+    delivery_date = models.DateTimeField(null=False)
 
 
 @receiver(post_save, sender=PrismeResponse, dispatch_uid="on_add_prismeresponse")

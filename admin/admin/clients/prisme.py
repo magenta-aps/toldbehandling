@@ -1,5 +1,4 @@
 import logging
-import os
 from datetime import date, datetime
 from os.path import basename
 from typing import List, Optional, Union
@@ -10,11 +9,15 @@ from django.conf import settings
 from requests import Session
 from requests.auth import HTTPBasicAuth
 from requests_ntlm import HttpNtlmAuth
-from told_common.data import Afgiftsanmeldelse, Forsendelsestype
 from told_common.util import get_file_base64
 from xmltodict import parse as xml_to_dict
-from zeep import Settings
 from zeep.transports import Transport
+
+from told_common.data import (  # isort: skip
+    Afgiftsanmeldelse,
+    Forsendelsestype,
+    Vareafgiftssats,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -67,6 +70,10 @@ class CustomDutyRequest(PrismeRequestObject):
     method = "createCustomDuty"
 
     @property
+    def reply_class(self):
+        return CustomDutyResponse
+
+    @property
     def leveringsmåde(self):
         if self.afgiftsanmeldelse.postforsendelse:
             return 50  # POST
@@ -93,8 +100,8 @@ class CustomDutyRequest(PrismeRequestObject):
     @property
     def betaler(self):
         if self.afgiftsanmeldelse.modtager_betaler:
-            return "0"
-        return "1"
+            return "Consignee"
+        return "Consigner"
 
     @property
     def forsendelsesnummer(self):
@@ -112,6 +119,15 @@ class CustomDutyRequest(PrismeRequestObject):
     def toldkategori(self):
         return "73A"
 
+    def qty(self, varelinje):
+        if varelinje.vareafgiftssats.enhed in (
+            Vareafgiftssats.Enhed.LITER,
+            Vareafgiftssats.Enhed.KILOGRAM,
+        ):
+            return varelinje.mængde
+        else:
+            return varelinje.antal
+
     @property
     def xml(self):
         data = {
@@ -128,13 +144,15 @@ class CustomDutyRequest(PrismeRequestObject):
             "DeliveryDate": self.forsendelse.afgangsdato,
             "ImportAuthorizationNumber": self.afgiftsanmeldelse.indførselstilladelse,
             "VendInvoiceNumber": self.afgiftsanmeldelse.leverandørfaktura_nummer,
-            "Duedate": self.afgiftsanmeldelse.beregnet_faktureringsdato,
+            "WebDuedate": self.afgiftsanmeldelse.beregnet_faktureringsdato,
             "CustomDutyHeaderLines": [
                 {
                     "CustomDutyHeaderLine": {
                         "LineNum": str(i).zfill(3),
-                        "TaxGroupNumber": varelinje.vareafgiftssats.afgiftsgruppenummer,
-                        "Qty": varelinje.antal or varelinje.mængde,
+                        "TaxGroupNumber": str(
+                            varelinje.vareafgiftssats.afgiftsgruppenummer
+                        ).zfill(3),
+                        "Qty": self.qty(varelinje),
                         "BillAmount": str(varelinje.fakturabeløb),
                         "LineAmount": str(varelinje.afgiftsbeløb),
                     }
@@ -170,10 +188,10 @@ class CustomDutyRequest(PrismeRequestObject):
 class CustomDutyResponse(PrismeResponseObject):
     def __init__(self, request, xml):
         super().__init__(request, xml)
-        data = xml_to_dict(xml)["CustomDutyHeader"]
+        data = xml_to_dict(xml)["CustomDutyTableFUJ"]
         self.record_id = data["RecId"]
         self.tax_notification_number = data["TaxNotificationNumber"]
-        self.invoice_date = data["InvoiceDate"]
+        self.delivery_date = data["DeliveryDate"]
 
 
 class PrismeClient:
