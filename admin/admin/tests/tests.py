@@ -446,7 +446,7 @@ class TestGodkend(PermissionsTest, TestCase):
                         "afgiftsanmeldelse": 1,
                         "rec_id": "5637147578",
                         "tax_notification_number": "44668899",
-                        "invoice_date": "2023-04-07T00:00:00",
+                        "delivery_date": "2023-04-07T00:00:00",
                     }
                 ],
             }
@@ -539,10 +539,12 @@ class TestGodkend(PermissionsTest, TestCase):
         self.assertEquals(response.status_code, 404)
 
     @patch.object(requests.sessions.Session, "patch")
-    def test_post_view_godkend(self, mock_patch):
+    @patch.object(requests.sessions.Session, "get")
+    def test_post_view_godkend(self, mock_get, mock_patch):
         self.login()
         view_url = reverse("tf10_view", kwargs={"id": 1})
         mock_patch.side_effect = self.mock_requests_patch
+        mock_get.side_effect = self.mock_requests_get
         response = self.client.post(view_url, {"godkendt": "true"})
         self.assertEquals(response.status_code, 302)
         prefix = f"{settings.REST_DOMAIN}/api/"
@@ -573,10 +575,12 @@ class TestGodkend(PermissionsTest, TestCase):
         )
 
     @patch.object(requests.sessions.Session, "patch")
-    def test_post_view_not_found(self, mock_patch):
+    @patch.object(requests.sessions.Session, "get")
+    def test_post_view_not_found(self, mock_get, mock_patch):
         self.login()
         view_url = reverse("tf10_view", kwargs={"id": 2})
         mock_patch.side_effect = self.mock_requests_patch
+        mock_get.side_effect = self.mock_requests_get
         response = self.client.post(view_url, {"godkendt": "true"})
         self.assertEquals(response.status_code, 404)
         prefix = f"{settings.REST_DOMAIN}/api/"
@@ -602,9 +606,11 @@ class TestGodkend(PermissionsTest, TestCase):
         self.assertEquals(response.status_code, 302)
 
     @patch.object(requests.sessions.Session, "patch")
-    def test_post_view_rest_error(self, mock_patch):
+    @patch.object(requests.sessions.Session, "get")
+    def test_post_view_rest_error(self, mock_get, mock_patch):
         self.login()
         view_url = reverse("tf10_view", kwargs={"id": 1})
+        mock_get.side_effect = self.mock_requests_get
         mock_patch.side_effect = self.mock_requests_error
         response = self.client.post(view_url, {"godkendt": "true"})
         self.assertEquals(response.status_code, 500)
@@ -774,7 +780,7 @@ class TestPrisme(PermissionsTest, TestCase):
                         "afgiftsanmeldelse": 1,
                         "rec_id": "5637147578",
                         "tax_notification_number": "44668899",
-                        "invoice_date": "2023-04-07T00:00:00",
+                        "delivery_date": "2023-04-07T00:00:00",
                     }
                 ],
             }
@@ -823,11 +829,11 @@ class TestPrisme(PermissionsTest, TestCase):
             CustomDutyResponse(
                 request_object,
                 """
-                <CustomDutyHeader>
+                <CustomDutyTableFUJ>
                 <RecId>5637147578</RecId>
                 <TaxNotificationNumber>44668899</TaxNotificationNumber>
-                <InvoiceDate>2023-04-07T00:00:00</InvoiceDate>
-                </CustomDutyHeader>
+                <DeliveryDate>2023-04-07T00:00:00</DeliveryDate>
+                </CustomDutyTableFUJ>
             """,
             )
         ]
@@ -852,7 +858,7 @@ class TestPrisme(PermissionsTest, TestCase):
             [
                 {
                     "afgiftsanmeldelse_id": 1,
-                    "invoice_date": "2023-04-07T00:00:00",
+                    "delivery_date": "2023-04-07T00:00:00",
                     "rec_id": "5637147578",
                     "tax_notification_number": "44668899",
                 }
@@ -1159,7 +1165,7 @@ class AnmeldelseHistoryDetailViewTest(PermissionsTest, TestCase):
                         "afgiftsanmeldelse": 1,
                         "rec_id": "5637147578",
                         "tax_notification_number": "44668899",
-                        "invoice_date": "2023-04-07T00:00:00",
+                        "delivery_date": "2023-04-07T00:00:00",
                     }
                 ],
             }
@@ -2750,14 +2756,12 @@ class TF10CreateTest(TestMixin, HasLogin, TestCase):
 
     @patch.object(requests.Session, "get")
     def test_get_form(self, mock_get):
-        print("test_get_form")
         self.login()
         url = reverse("tf10_create")
         mock_get.side_effect = self.mock_requests_get
 
         response = self.client.get(url)
         self.assertEquals(response.status_code, 200)
-        print(f"response.content: {response.content}")
 
         soup = BeautifulSoup(response.content, "html.parser")
         input_field_names = set(
@@ -2956,6 +2960,7 @@ class TF10CreateTest(TestMixin, HasLogin, TestCase):
                     "leverandørfaktura_navn": "leverandørfaktura.txt",
                     "modtager_betaler": False,
                     "oprettet_på_vegne_af_id": 1,
+                    "toldkategori": None,
                 }
             ],
         )
@@ -3014,6 +3019,7 @@ class TF10CreateTest(TestMixin, HasLogin, TestCase):
                     "leverandørfaktura_navn": "leverandørfaktura.txt",
                     "modtager_betaler": False,
                     "oprettet_på_vegne_af_id": 1,
+                    "toldkategori": None,
                 }
             ],
         )
@@ -3086,6 +3092,7 @@ class TF10CreateTest(TestMixin, HasLogin, TestCase):
                     "leverandørfaktura_navn": "leverandørfaktura.txt",
                     "modtager_betaler": False,
                     "oprettet_på_vegne_af_id": 1,
+                    "toldkategori": None,
                 }
             ],
         )

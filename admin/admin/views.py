@@ -97,7 +97,7 @@ class TF10View(PermissionsRequiredMixin, TF10BaseView, FormView):
         return super().get_context_data(
             **{
                 **kwargs,
-                "object": self.get_object(),
+                "object": self.object,
                 "can_edit": self.has_permissions(
                     request=self.request, required_permissions=self.edit_permissions
                 ),
@@ -110,6 +110,22 @@ class TF10View(PermissionsRequiredMixin, TF10BaseView, FormView):
             }
         )
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["initial"] = {}
+        # indberetter = self.object.oprettet_på_vegne_af or self.object.oprettet_af
+        indberetter = self.object.oprettet_af
+        if indberetter and "indberetter_data" in indberetter:
+            cvr = indberetter["indberetter_data"]["cvr"]
+            kategorier = [
+                item["kategori"]
+                for item in settings.CVR_TOLDKATEGORI_MAP
+                if cvr in item["cvr"]
+            ]
+            if kategorier:
+                kwargs["initial"]["toldkategori"] = kategorier[0]
+        return kwargs
+
     def form_valid(self, form):
         anmeldelse_id = self.kwargs["id"]
         send_til_prisme = form.cleaned_data["send_til_prisme"]
@@ -119,6 +135,12 @@ class TF10View(PermissionsRequiredMixin, TF10BaseView, FormView):
             or form.cleaned_data["notat2"]
             or form.cleaned_data["notat3"]
         )
+        toldkategori = form.cleaned_data["toldkategori"]
+        if toldkategori and toldkategori != self.object.toldkategori:
+            self.rest_client.afgiftanmeldelse.set_toldkategori(
+                anmeldelse_id, toldkategori
+            )
+
         try:
             if send_til_prisme:
                 # Yderligere tjek for om brugeren må ændre noget.
@@ -139,8 +161,8 @@ class TF10View(PermissionsRequiredMixin, TF10BaseView, FormView):
                                 afgiftsanmeldelse=anmeldelse,
                                 rec_id=response.record_id,
                                 tax_notification_number=response.tax_notification_number,
-                                invoice_date=datetime.fromisoformat(
-                                    response.invoice_date
+                                delivery_date=datetime.fromisoformat(
+                                    response.delivery_date
                                 ),
                             )
                         )
@@ -193,7 +215,8 @@ class TF10View(PermissionsRequiredMixin, TF10BaseView, FormView):
             raise
         return redirect(reverse("tf10_view", kwargs={"id": anmeldelse_id}))
 
-    def get_object(self):
+    @cached_property
+    def object(self):
         id = self.kwargs["id"]
         try:
             anmeldelse = self.rest_client.afgiftanmeldelse.get(

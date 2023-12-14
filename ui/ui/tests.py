@@ -451,6 +451,7 @@ class TF10Test(TestMixin, HasLogin, TestCase):
                     "leverandørfaktura_navn": "leverandørfaktura.txt",
                     "modtager_betaler": False,
                     "oprettet_på_vegne_af_id": None,
+                    "toldkategori": None,
                 }
             ],
         )
@@ -512,6 +513,7 @@ class TF10Test(TestMixin, HasLogin, TestCase):
                     "leverandørfaktura_navn": "leverandørfaktura.txt",
                     "modtager_betaler": False,
                     "oprettet_på_vegne_af_id": None,
+                    "toldkategori": None,
                 }
             ],
         )
@@ -587,6 +589,7 @@ class TF10Test(TestMixin, HasLogin, TestCase):
                     "leverandørfaktura_navn": "leverandørfaktura.txt",
                     "modtager_betaler": False,
                     "oprettet_på_vegne_af_id": None,
+                    "toldkategori": None,
                 }
             ],
         )

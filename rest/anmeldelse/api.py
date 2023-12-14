@@ -48,6 +48,7 @@ class AfgiftsanmeldelseIn(ModelSchema):
             "indførselstilladelse",
             "betalt",
             "modtager_betaler",
+            "toldkategori",
         ]
 
 
@@ -59,6 +60,7 @@ class PartialAfgiftsanmeldelseIn(ModelSchema):
     leverandørfaktura: str = None  # Base64
     leverandørfaktura_navn: str = None
     modtager_betaler: bool = None
+    toldkategori: str = None
 
     class Config:
         model = Afgiftsanmeldelse
@@ -69,6 +71,7 @@ class PartialAfgiftsanmeldelseIn(ModelSchema):
             "betalt",
             "status",
             "modtager_betaler",
+            "toldkategori",
         ]
         model_fields_optional = "__all__"
 
@@ -95,6 +98,7 @@ class AfgiftsanmeldelseOut(ModelSchema):
             "modtager_betaler",
             "oprettet_af",
             "oprettet_på_vegne_af",
+            "toldkategori",
         ]
 
     beregnet_faktureringsdato: str
@@ -312,7 +316,7 @@ class AfgiftsanmeldelseAPI:
     ):
         item = get_object_or_404(Afgiftsanmeldelse, id=id)
         self.check_user(item)
-        data = payload.dict()
+        data = payload.dict(exclude_unset=True)
         leverandørfaktura = data.pop("leverandørfaktura", None)
         for attr, value in data.items():
             if value is not None:
@@ -471,7 +475,7 @@ class VarelinjeAPI:
     def update_varelinje(self, id: int, payload: PartialVarelinjeIn):
         item = get_object_or_404(Varelinje, id=id)
         self.check_user(item)
-        for attr, value in payload.dict().items():
+        for attr, value in payload.dict(exclude_unset=True).items():
             if value is not None:
                 setattr(item, attr, value)
         item.save()
@@ -487,7 +491,10 @@ class VarelinjeAPI:
     def filter_user(self, qs: QuerySet) -> QuerySet:
         user = self.context.request.user
         if not user.has_perm("anmeldelse.view_all_anmeldelse"):
-            qs = qs.filter(Q(oprettet_af=user) | Q(oprettet_på_vegne_af=user))
+            qs = qs.filter(
+                Q(afgiftsanmeldelse__oprettet_af=user)
+                | Q(afgiftsanmeldelse__oprettet_på_vegne_af=user)
+            )
         return qs
 
     def check_user(self, item: Varelinje):
@@ -605,7 +612,10 @@ class NotatAPI:
     def filter_user(self, qs: QuerySet) -> QuerySet:
         user = self.context.request.user
         if not user.has_perm("anmeldelse.view_all_anmeldelse"):
-            qs = qs.filter(Q(oprettet_af=user) | Q(oprettet_på_vegne_af=user))
+            qs = qs.filter(
+                Q(afgiftsanmeldelse__oprettet_af=user)
+                | Q(afgiftsanmeldelse__oprettet_på_vegne_af=user)
+            )
         return qs
 
     def check_user(self, item: Notat):
@@ -624,7 +634,7 @@ class PrismeResponseIn(ModelSchema):
 
     class Config:
         model = PrismeResponse
-        model_fields = ["rec_id", "tax_notification_number", "invoice_date"]
+        model_fields = ["rec_id", "tax_notification_number", "delivery_date"]
 
 
 class PrismeResponseOut(ModelSchema):
@@ -635,7 +645,7 @@ class PrismeResponseOut(ModelSchema):
             "afgiftsanmeldelse",
             "rec_id",
             "tax_notification_number",
-            "invoice_date",
+            "delivery_date",
         ]
 
 
@@ -685,6 +695,6 @@ class PrismeResponseAPI:
         # https://django-ninja.rest-framework.com/guides/input/filtering/
         # Inkluderer evt. filtrering på anmeldelse-id
         qs = PrismeResponse.objects.filter(filters.get_filter_expression()).order_by(
-            "invoice_date"
+            "delivery_date"
         )
         return list(qs)

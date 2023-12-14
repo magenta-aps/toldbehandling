@@ -139,7 +139,7 @@ class PrismeTest(TestCase):
                   <LineAmount>20.00</LineAmount>
                   <LineNum>001</LineNum>
                   <Qty>1</Qty>
-                  <TaxGroupNumber>2</TaxGroupNumber>
+                  <TaxGroupNumber>002</TaxGroupNumber>
                 </CustomDutyHeaderLine>
               </CustomDutyHeaderLines>
               <CustomDutyHeaderLines>
@@ -148,7 +148,7 @@ class PrismeTest(TestCase):
                   <LineAmount>120.00</LineAmount>
                   <LineNum>002</LineNum>
                   <Qty>1</Qty>
-                  <TaxGroupNumber>2</TaxGroupNumber>
+                  <TaxGroupNumber>002</TaxGroupNumber>
                 </CustomDutyHeaderLine>
               </CustomDutyHeaderLines>
               <CustomsCategory>73A</CustomsCategory>
@@ -156,13 +156,13 @@ class PrismeTest(TestCase):
               <CvrConsigner>12345678</CvrConsigner>
               <DeliveryDate>2023-10-01</DeliveryDate>
               <DlvModeId>10</DlvModeId>
-              <Duedate>2024-01-01</Duedate>
               <ImportAuthorizationNumber>1234</ImportAuthorizationNumber>
               <LocationCode>None</LocationCode>
-              <PaymentParty>1</PaymentParty>
+              <PaymentParty>Consigner</PaymentParty>
               <TaxNotificationNumber>1</TaxNotificationNumber>
               <Type>TF10</Type>
               <VendInvoiceNumber>5678</VendInvoiceNumber>
+              <WebDuedate>2024-01-01</WebDuedate>
               <files>
                 <file>
                   <Content>{base64.b64encode("Testdata (leverandørfaktura)".encode("utf-8")).decode("ascii")}</Content>
@@ -176,4 +176,4 @@ class PrismeTest(TestCase):
             </CustomDutyHeader>
         """
         )
-        self.assertEquals(self.strip_xml_whitespace(request.xml), expected)
+        self.assertEquals(self.strip_xml_whitespace(request.xml), expected, request.xml)

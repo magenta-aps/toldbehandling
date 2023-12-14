@@ -336,6 +336,7 @@ class AfgiftanmeldelseRestClient(ModelRestClient):
             "modtager_id": modtager_id,
             "postforsendelse_id": postforsendelse_id,
             "fragtforsendelse_id": fragtforsendelse_id,
+            "toldkategori": data.get("toldkategori"),
             "leverandørfaktura": self.rest._uploadfile_to_base64str(leverandørfaktura),
             "leverandørfaktura_navn": leverandørfaktura.name
             if leverandørfaktura
@@ -394,6 +395,9 @@ class AfgiftanmeldelseRestClient(ModelRestClient):
         self.rest.patch(
             f"afgiftsanmeldelse/{id}", {"status": "godkendt" if godkendt else "afvist"}
         )
+
+    def set_toldkategori(self, id: int, toldkategori: str):
+        self.rest.patch(f"afgiftsanmeldelse/{id}", {"toldkategori": toldkategori})
 
     def list(
         self,
@@ -550,7 +554,7 @@ class PrismeResponseRestClient(ModelRestClient):
             "afgiftsanmeldelse_id": data.afgiftsanmeldelse.id
             if isinstance(data.afgiftsanmeldelse, Afgiftsanmeldelse)
             else data.afgiftsanmeldelse,
-            "invoice_date": data.invoice_date,
+            "delivery_date": data.delivery_date,
             "rec_id": data.rec_id,
             "tax_notification_number": data.tax_notification_number,
         }

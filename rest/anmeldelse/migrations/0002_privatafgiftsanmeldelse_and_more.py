@@ -57,4 +57,9 @@ class Migration(migrations.Migration):
             model_name='varelinje',
             constraint=models.CheckConstraint(check=models.Q(('afgiftsanmeldelse__isnull', True), ('privatafgiftsanmeldelse__isnull', True), _connector='OR'), name='afgiftsanmeldelse_only_one'),
         ),
+        migrations.RenameField(
+            model_name='prismeresponse',
+            old_name='invoice_date',
+            new_name='delivery_date'
+        ),
     ]

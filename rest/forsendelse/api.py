@@ -127,7 +127,7 @@ class PostforsendelseAPI:
     def update_postforsendelse(self, id: int, payload: PartialPostforsendelseIn):
         item = get_object_or_404(Postforsendelse, id=id)
         self.check_user(item)
-        for attr, value in payload.dict().items():
+        for attr, value in payload.dict(exclude_unset=True).items():
             if value is not None:
                 setattr(item, attr, value)
         item.save()
@@ -268,7 +268,7 @@ class FragtforsendelseAPI:
     def update_fragtforsendelse(self, id: int, payload: PartialFragtforsendelseIn):
         item = get_object_or_404(Fragtforsendelse, id=id)
         self.check_user(item)
-        data = payload.dict()
+        data = payload.dict(exclude_unset=True)
         fragtbrev = data.pop("fragtbrev", None)
         for attr, value in data.items():
             if value is not None:

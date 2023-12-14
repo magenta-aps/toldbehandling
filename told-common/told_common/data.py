@@ -325,6 +325,7 @@ class Afgiftsanmeldelse(ToldDataClass):
     notater: Optional[List[Notat]]
     prismeresponses: Optional[List[PrismeResponse]]
     oprettet_af: Optional[dict] = None
+    toldkategori: Optional[str] = None
 
     @property
     def afgift_sum(self):
@@ -350,7 +351,7 @@ class HistoricAfgiftsanmeldelse(Afgiftsanmeldelse):
 class PrismeResponse(ToldDataClass):
     id: Optional[int]
     afgiftsanmeldelse: Union[int, Afgiftsanmeldelse]
-    invoice_date: datetime = field(
+    delivery_date: datetime = field(
         metadata=config(
             encoder=encode_optional_isoformat,
             decoder=datetime.fromisoformat,
