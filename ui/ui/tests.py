@@ -31,7 +31,7 @@ from told_common.tests import (  # isort: skip
 )
 
 
-class BlanketTest(TestMixin, HasLogin, TestCase):
+class TF10Test(TestMixin, HasLogin, TestCase):
     @property
     def login_url(self):
         return str(reverse("login:login"))
@@ -450,6 +450,7 @@ class BlanketTest(TestMixin, HasLogin, TestCase):
                     ).decode("ascii"),
                     "leverandørfaktura_navn": "leverandørfaktura.txt",
                     "modtager_betaler": False,
+                    "oprettet_på_vegne_af_id": None,
                 }
             ],
         )
@@ -510,6 +511,7 @@ class BlanketTest(TestMixin, HasLogin, TestCase):
                     ).decode("ascii"),
                     "leverandørfaktura_navn": "leverandørfaktura.txt",
                     "modtager_betaler": False,
+                    "oprettet_på_vegne_af_id": None,
                 }
             ],
         )
@@ -584,6 +586,7 @@ class BlanketTest(TestMixin, HasLogin, TestCase):
                     ).decode("ascii"),
                     "leverandørfaktura_navn": "leverandørfaktura.txt",
                     "modtager_betaler": False,
+                    "oprettet_på_vegne_af_id": None,
                 }
             ],
         )

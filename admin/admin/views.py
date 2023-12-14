@@ -17,7 +17,7 @@ from django.views.generic import FormView, TemplateView
 from openpyxl import Workbook
 from requests import HTTPError
 from told_common import views as common_views
-from told_common.util import filter_dict_values, render_pdf
+from told_common.util import filter_dict_values, join_words, render_pdf
 
 from admin import forms
 from admin.clients.prisme import PrismeException, send_afgiftsanmeldelse
@@ -221,16 +221,47 @@ class TF10ListView(common_views.TF10ListView):
     def get_context_data(self, **kwargs):
         context = super(TF10ListView, self).get_context_data(**kwargs)
         context["title"] = "Afgiftsanmeldelser"
-        context["can_create"] = False
+        context["can_create"] = True
         context["can_view"] = TF10View.has_permissions(request=self.request)
         context["can_edit_multiple"] = True
         context["multiedit_url"] = reverse("tf10_edit_multiple")
         return context
 
 
+class TF10FormCreateView(common_views.TF10FormCreateView):
+    extend_template = "admin/admin_layout.html"
+    required_permissions = (
+        "auth.admin",
+        *common_views.TF10FormCreateView.required_permissions,
+    )
+    form_class = forms.TF10CreateForm
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        count, users = self.rest_client.user.list(group="Indberettere", limit=100000)
+        kwargs["oprettet_på_vegne_af_choices"] = tuple(
+            (
+                user.id,
+                join_words(
+                    [
+                        user.first_name,
+                        user.last_name,
+                        f"(CVR: {user.cvr})" if user.cvr else None,
+                    ]
+                ),
+            )
+            for user in users
+        )
+        return kwargs
+
+    def get_context_data(self, **context):
+        return super().get_context_data(
+            **{**context, "vis_notater": False, "admin": True, "gem_top": False}
+        )
+
+
 class TF10FormUpdateView(common_views.TF10FormUpdateView):
     extend_template = "admin/admin_layout.html"
-    template_name = "admin/blanket/tf10/form.html"
     form_class = forms.TF10UpdateForm
     required_permissions = (
         "auth.admin",
@@ -247,7 +278,13 @@ class TF10FormUpdateView(common_views.TF10FormUpdateView):
 
     def get_context_data(self, **context):
         return super().get_context_data(
-            **{**context, "notater": self.rest_client.notat.list(self.kwargs["id"])}
+            **{
+                **context,
+                "vis_notater": True,
+                "admin": True,
+                "gem_top": True,
+                "notater": self.rest_client.notat.list(self.kwargs["id"]),
+            }
         )
 
 

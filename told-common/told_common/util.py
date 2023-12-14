@@ -1,6 +1,6 @@
 import base64
 import dataclasses
-from typing import Any, Callable, Dict, Iterable, Optional
+from typing import Any, Callable, Dict, Iterable, Optional, Union
 
 from django.core.files import File
 from django.core.serializers.json import DjangoJSONEncoder
@@ -52,3 +52,11 @@ def render_pdf(
         html = html_modifier(html)
     font_config = FontConfiguration()
     return HTML(string=html).write_pdf(font_config=font_config)
+
+
+def join_words(words: Optional[str], separator: str = " "):
+    return separator.join(filter(lambda word: word, words))
+
+
+def opt_int(data: Union[str, int, None]):
+    return int(data) if data is not None else None
