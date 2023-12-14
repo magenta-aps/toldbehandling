@@ -3,12 +3,17 @@
 # SPDX-License-Identifier: MPL-2.0
 
 from aktør.models import Afsender, Modtager
-from anmeldelse.models import Afgiftsanmeldelse, Varelinje
 from django.contrib.auth.models import Group, Permission, User
 from django.contrib.contenttypes.models import ContentType
 from django.core.management.base import BaseCommand
 from forsendelse.models import Fragtforsendelse, Postforsendelse
 from sats.models import Afgiftstabel, Vareafgiftssats
+
+from anmeldelse.models import (  # isort: skip
+    Afgiftsanmeldelse,
+    PrivatAfgiftsanmeldelse,
+    Varelinje,
+)
 
 
 class Command(BaseCommand):
@@ -39,6 +44,9 @@ class Command(BaseCommand):
         afgiftsanmeldelse_model = ContentType.objects.get_for_model(
             Afgiftsanmeldelse, for_concrete_model=False
         )
+        privatafgiftsanmeldelse_model = ContentType.objects.get_for_model(
+            PrivatAfgiftsanmeldelse, for_concrete_model=False
+        )
         varelinje_model = ContentType.objects.get_for_model(
             Varelinje, for_concrete_model=False
         )
@@ -67,6 +75,11 @@ class Command(BaseCommand):
             codename="view_all_anmeldelse",
             content_type=afgiftsanmeldelse_model,
         )
+        se_alle_private_afgiftsanmeldelser, _ = Permission.objects.update_or_create(
+            name="Kan se alle private afgiftsanmeldelser, ikke kun egne",
+            codename="view_all_privatafgiftsanmeldelse",
+            content_type=privatafgiftsanmeldelse_model,
+        )
         se_alle_fragtforsendelser, _ = Permission.objects.update_or_create(
             name="Kan se alle fragtforsendeler, ikke kun egne",
             codename="view_all_fragtforsendelser",
@@ -89,6 +102,7 @@ class Command(BaseCommand):
             ("view", afsender_model),
             ("view", modtager_model),
             ("view", afgiftsanmeldelse_model),
+            ("view", privatafgiftsanmeldelse_model),
             ("view", varelinje_model),
             ("view", postforsendelse_model),
             ("view", fragtforsendelse_model),
@@ -97,6 +111,7 @@ class Command(BaseCommand):
             ("add", afsender_model),
             ("add", modtager_model),
             ("add", afgiftsanmeldelse_model),
+            ("add", privatafgiftsanmeldelse_model),
             ("add", varelinje_model),
             ("add", postforsendelse_model),
             ("add", fragtforsendelse_model),
@@ -112,7 +127,7 @@ class Command(BaseCommand):
         ):
             indberettere.permissions.add(
                 Permission.objects.get(
-                    codename=f"{action}_{model.name}", content_type=model
+                    codename=f"{action}_{model.model}", content_type=model
                 )
             )
 
@@ -120,6 +135,7 @@ class Command(BaseCommand):
             ("view", afsender_model),
             ("view", modtager_model),
             ("view", afgiftsanmeldelse_model),
+            ("view", privatafgiftsanmeldelse_model),
             ("view", varelinje_model),
             ("view", postforsendelse_model),
             ("view", fragtforsendelse_model),
@@ -138,7 +154,7 @@ class Command(BaseCommand):
         ):
             toldmedarbejdere.permissions.add(
                 Permission.objects.get(
-                    codename=f"{action}_{model.name}", content_type=model
+                    codename=f"{action}_{model.model}", content_type=model
                 )
             )
         toldmedarbejdere.permissions.add(send_til_prisme)
@@ -162,7 +178,7 @@ class Command(BaseCommand):
         ):
             afstemmere_bogholdere.permissions.add(
                 Permission.objects.get(
-                    codename=f"{action}_{model.name}", content_type=model
+                    codename=f"{action}_{model.model}", content_type=model
                 )
             )
         afstemmere_bogholdere.permissions.add(admin_site_access)

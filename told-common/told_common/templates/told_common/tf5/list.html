@@ -1,0 +1,324 @@
+{% extends extend_template %}
+{% load static %}
+{% load i18n %}
+{% load l10n %}
+{% load common_tags %}
+{% load bootstrap_icons %}
+
+{# Docs for bootstrap-table: https://bootstrap-table.com/docs/ #}
+{% block extra_headers %}
+<link rel="stylesheet" href="{% static 'bootstrap-table/bootstrap-table.min.css' %}">
+<link rel="stylesheet" href="{% static 'bootstrap-table/bootstrap-table-sticky-header.min.css' %}">
+{% endblock %}
+{% block extra_footers %}
+<script src="{% static 'bootstrap-table/bootstrap-table.min.js' %}"></script>
+<script src="{% static 'bootstrap-table/bootstrap-table-sticky-header.min.js' %}"></script>
+<script src="{% static 'bootstrap-table/bootstrap-table-defer-url.min.js' %}"></script>
+{% endblock %}
+
+{% block content %}
+
+<div class="mx-5">
+
+    <h1>{{ title }}</h1>
+
+    {{form.errors}}
+
+    <form method="get" action="{% url 'tf5_list' %}">
+        <!--
+        <div class="row">
+            <div class="col-4"><label for="{{form.status.name}}" class="form-label">{% translate "Status" %}</label></div>
+            <div class="col-8">
+                {{form.status}}
+            </div>
+        </div>
+        -->
+        <div class="row">
+            <div class="col-4">{% translate "Oprettelsesdato mellem" %}</div>
+            <div class="col-4">{{form.oprettet_efter}}</div>
+            <div class="col-4">{{form.oprettet_før}}</div>
+        </div>
+        <div class="row">
+            <div class="col-4">{% translate "Afgangsdato mellem" %}</div>
+            <div class="col-4">{{form.afgangsdato_efter}}</div>
+            <div class="col-4">{{form.afgangsdato_før}}</div>
+        </div>
+
+        <!--
+        <div class="row">
+            <div class="col-4"><label for="{{form.afsender.name}}" class="form-label">{% translate "Afsender" %}</label></div>
+            <div class="col-8">
+                {{form.afsender}}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-4"><label for="{{form.modtager.name}}" class="form-label">{% translate "Modtager" %}</label></div>
+            <div class="col-8">
+                {{form.modtager}}
+            </div>
+        </div>
+        -->
+        <div class="row">
+            <div class="col-4"><label for="{{form.leverandørfaktura_nummer.name}}" class="form-label">{% translate "Leverandørfakturanummer" %}</label></div>
+            <div class="col-8">
+                {{form.leverandørfaktura_nummer}}
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-4"><label for="{{form.vareart.name}}" class="form-label">{% translate "Varetype" %}</label></div>
+            <div class="col-8">
+                {{form.vareart}}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-4"><label for="{{form.id.name}}" class="form-label">{% translate "Anmeldelsesnummer" %}</label></div>
+            <div class="col-8">
+                {{form.id}}
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12 cleafix">
+                <button type="submit" class="btn btn-primary float-end">{% translate "Søg" %}</button>
+                {% if can_create %}
+                <a href="{% url 'tf5_create' %}" class="btn btn-primary float-end">{% translate "Opret ny" %}</a>
+                {% endif %}
+                {% if can_edit_multiple %}
+                <a class="edit_button btn btn-secondary float-end" href="#">{% translate "Redigér" %}</a>
+                {% endif %}
+            </div>
+        </div>
+    </form>
+    <hr/>
+
+    {% if messages %}
+    {% for message in messages %}
+    <div class="card">
+        <div class="card-body text-center">
+            {% bs_icon "check2-circle" size="2em" color="green" %}
+            <div id="message_content">{{message}}</div>
+        </div>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    {% if can_edit_multiple %}
+    <div class="alert alert-info">
+        {% translate 'Der kan markeres flere linjer på én gang. Tryk på en linje for at markere den. Tryk igen for at fjerne markering.<br/> Hold Shift nede og tryk på en anden linje for at markere/afmarkere alle de mellemliggende linjer.<br/> De markerede linjer kan redigeres sammen ved at klikke på knappen "Redigér".' %}
+    </div>
+    {% endif %}
+
+    <table class="table table-bordered"
+           data-toggle="table"
+           data-sticky-header="true"
+           data-classes="table"
+           data-data-field="items"
+           data-sortable="true"
+           data-pagination="true"
+           data-pagination-parts="['pageList']"
+           data-page-size="{{search_data.limit}}"
+           data-page-number="{{search_data.page_number}}"
+           data-side-pagination="server"
+           data-pagination-loop="false"
+           data-defer-url="{% url 'tf10_list' %}?json=1"
+           data-query-params="queryParams"
+           data-total-rows="{{total}}"
+           data-silent-sort="true" {# vil vi vise en loading-boks? #}
+           data-remember-order="true"
+           data-row-attributes="trAttributter"
+           id="results_table"
+    >
+        <thead>
+        <tr>
+            {% if can_edit_multiple %}
+            <th data-field="select"><input type="checkbox" id="select_all"/></th>
+            {% endif %}
+            <th data-sortable="true" data-field="id">{% translate "Nummer" %}</th>
+            <th data-sortable="true" data-field="afgangsdato">{% translate "Afgangsdato" %}</th>
+            <th data-sortable="true" data-field="leverandørfaktura_nummer">{% translate "Leverandørfakturanummer" %}</th>
+            <th data-sortable="true" data-field="status" data-formatter="statusFormatter">{% translate "Status" %}</th>
+            <th data-field="actions">{% translate "Handlinger" %}</th>
+        </tr>
+        </thead>
+        <tbody id="table_body">
+        {% for item in items %}
+        <tr>
+            {% if can_edit_multiple %}
+            <td>
+                {% include select_template with item=item %}
+            </td>
+            {% endif %}
+            <td>{{item.id}}</td>
+            <td>{{item.afgangsdato|date:"Y-m-d"}}</td>
+            <td>{{item.leverandørfaktura_nummer}}</td>
+            <td>{% translate item.status|capfirst %}</td>
+            <td>
+                {{item.actions}}
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            {% if can_edit_multiple %}
+            <td colspan="6">
+                {% else %}
+            <td colspan="5">
+            {% endif %}
+                {% translate "Ingen søgeresultater" %}
+            </td>
+        </tr>
+        {% endfor %}
+
+        </tbody>
+    </table>
+
+    <div class="row">
+        <div class="col-12 cleafix">
+            {% if can_create %}
+            <a href="{% url 'tf5_create' %}" class="btn btn-primary float-end">{% translate "Opret ny" %}</a>
+            {% endif %}
+            {% if can_edit_multiple %}
+            <a class="edit_button btn btn-secondary float-end" href="#">{% translate "Redigér" %}</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{{search_data|json_script:"search_data"}}
+{% if multiedit_url %}
+{{multiedit_url|json_script:"multiedit_url"}}
+{% endif %}
+{{highlight|json_script:"highlight_id"}}
+<script>
+const highlight_id = JSON.parse($("#highlight_id").text());
+function queryParams(params){  // Kaldes af bootstrap-table fordi vi peger på den med data-query-params
+    if (params["offset"] < 0) {
+        params["offset"] = 0;
+    }
+    const search_data = JSON.parse($("#search_data").text());
+
+    // Bootstrap takes care of these parameters for us.
+    const keys_to_ignore = ["limit", "offset", "search", "sort", "order"];
+
+    for (let key in search_data) {
+        if (!keys_to_ignore.includes(key)) {
+            params[key] = search_data[key];
+        }
+    }
+
+    return params;
+}
+function statusFormatter(value) {
+    console.log(value, this, arguments)
+    if (value === true) {
+        return "{% translate 'Godkendt' %}";
+    } else if (value === false) {
+        return "{% translate 'Afvist' %}";
+    } else if (value === null) {
+        return "{% translate 'Ny' %}"
+    }
+    return value;
+}
+function trAttributter(data, index) {
+    return {
+        "class": (String(data.id)===highlight_id) ? "table-success" : "",
+        "data-id": data.id
+    };
+}
+</script>
+
+{% if can_edit_multiple %}
+<script>
+    const editUrl = JSON.parse($("#multiedit_url").text());
+    let shiftPressed = false;
+    $(document).on("keydown", function (event){
+        if (event.originalEvent.key === "Shift") {
+            shiftPressed = true;
+        }
+    });
+    $(document).on("keyup", function (event){
+        if (event.originalEvent.key === "Shift") {
+            shiftPressed = false;
+        }
+    });
+
+    let latestClicked;
+    let latestRange;
+    const activeClass = "table-active";
+    const editButton = $(".edit_button");
+
+    const onUpdateSelected = function () {
+        const selectedRows = $("table tr."+activeClass);
+        editButton.toggleClass("btn-primary", selectedRows.length > 0);
+        editButton.toggleClass("btn-secondary", selectedRows.length === 0);
+        const rowIds = []
+        selectedRows.each(function (){
+            rowIds.push($(this).data("id"));
+        });
+        if (rowIds.length) {
+            editButton.attr("href", editUrl + "?id=" + rowIds.join("&id="));
+        } else {
+            editButton.removeAttr("href");
+        }
+    };
+
+    {# Klikbare rækker efter følgende regler: #}
+    {#   Klik på en række aktiverer / deaktiverer #}
+    {#   Klik på række A, hold shift nede og klik på række B: aktiverer / deaktiverer alle rækker mellem A og B, så de får samme tilstand som A #}
+    $("table").on("click-row.bs.table", function (event, data, row, field) {
+        if (shiftPressed && latestClicked) {
+            const index1 = row.index();
+            const index2 = latestClicked.index();
+            const range = row.siblings().slice(Math.min(index1, index2), Math.max(index1, index2)).add(row);
+            const firstActive = latestClicked.hasClass(activeClass);
+            if (latestRange) {
+                // Hvis vi lige har valgt en range og vælger en ny, skal den første range flippes
+                if (firstActive) {
+                    latestRange.removeClass(activeClass);
+                    latestRange.find("[name=id]").prop("checked", false);
+                } else {
+                    latestRange.addClass(activeClass);
+                    latestRange.find("[name=id]").prop("checked", true);
+                }
+            }
+            // Sæt ny range's aktiv ud fra startpunktets aktivitet
+            if (firstActive) {
+                range.addClass(activeClass);
+                range.find("[name=id]").prop("checked", true);
+            } else {
+                range.removeClass(activeClass);
+                range.find("[name=id]").prop("checked", false);
+            }
+            latestRange = range;
+        } else {
+            const checkbox = row.find("[name=id]");
+            const activate = !row.hasClass(activeClass);//!checkbox.is(":checked");
+            latestClicked = row;
+            latestRange = null;
+            row.toggleClass(activeClass, activate);
+            checkbox.prop("checked", activate);
+        }
+        onUpdateSelected();
+    });
+
+    const setListeners = function () {
+        $("table a").on("click", function (event) {
+            event.stopPropagation();
+        });
+        $("#select_all").on("change", function () {
+            const checked = $(this).is(":checked");
+            $("[name=id]").prop("checked", checked);
+            $("table tbody tr").toggleClass(activeClass, checked);
+            onUpdateSelected();
+        });
+    };
+
+    $("table").on("reset-view.bs.table", function () {
+        setListeners();
+        onUpdateSelected();
+    });
+    setListeners();
+
+</script>
+{% endif %}
+{% endblock %}

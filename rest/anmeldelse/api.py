@@ -9,6 +9,7 @@ from typing import List, Optional, Tuple
 from uuid import uuid4
 
 from aktør.api import AfsenderOut, ModtagerOut
+from anmeldelse.models import PrivatAfgiftsanmeldelse
 from common.api import UserOut, get_auth_methods
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
@@ -21,6 +22,7 @@ from ninja_extra import api_controller, permissions, route
 from ninja_extra.exceptions import PermissionDenied
 from ninja_extra.pagination import paginate
 from ninja_extra.schemas import NinjaPaginationResponseSchema
+from ninja_jwt.authentication import JWTAuth
 from project.util import RestPermission, json_dump
 
 from anmeldelse.models import (  # isort: skip
@@ -361,6 +363,180 @@ class AfgiftsanmeldelseAPI:
     def get_historical_count(id: int):
         anmeldelse = Afgiftsanmeldelse.objects.get(id=id)
         return anmeldelse.history.count()
+
+
+class PrivatAfgiftsanmeldelseIn(ModelSchema):
+    leverandørfaktura: str = None  # Base64
+    leverandørfaktura_navn: str = None
+
+    class Config:
+        model = PrivatAfgiftsanmeldelse
+        model_fields = [
+            "cpr",
+            "navn",
+            "adresse",
+            "postnummer",
+            "by",
+            "telefon",
+            "bookingnummer",
+            "indleveringsdato",
+            "leverandørfaktura_nummer",
+            "indførselstilladelse",
+            "anonym",
+        ]
+
+
+class PartialPrivatAfgiftsanmeldelseIn(ModelSchema):
+    leverandørfaktura: str = None  # Base64
+    leverandørfaktura_navn: str = None
+
+    class Config:
+        model = PrivatAfgiftsanmeldelse
+        model_fields = [
+            "cpr",
+            "navn",
+            "adresse",
+            "postnummer",
+            "by",
+            "telefon",
+            "bookingnummer",
+            "indleveringsdato",
+            "leverandørfaktura_nummer",
+            "indførselstilladelse",
+            "anonym",
+        ]
+        model_fields_optional = "__all__"
+
+
+class PrivatAfgiftsanmeldelseOut(ModelSchema):
+    oprettet_af: Optional[UserOut]
+
+    class Config:
+        model = PrivatAfgiftsanmeldelse
+        model_fields = [
+            "id",
+            "cpr",
+            "navn",
+            "adresse",
+            "postnummer",
+            "by",
+            "telefon",
+            "bookingnummer",
+            "indleveringsdato",
+            "leverandørfaktura_nummer",
+            "indførselstilladelse",
+            "leverandørfaktura",
+            "oprettet",
+            "oprettet_af",
+            "status",
+            "anonym",
+        ]
+
+
+class PrivatAfgiftsanmeldelseFilterSchema(FilterSchema):
+    id: Optional[List[int]] = Field(q="id__in")
+    cpr: Optional[int]
+    navn: Optional[str] = Field(q="navn__icontains")
+    adresse: Optional[str] = Field(q="adresse__icontains")
+    postnummer: Optional[int]
+    by: Optional[str] = Field(q="by__icontains")
+    telefon: Optional[str] = Field(q="telefon__icontains")
+    leverandørfaktura_nummer: Optional[str] = Field(
+        q="leverandørfaktura_nummer__icontains"
+    )
+    indførselstilladelse: Optional[str] = Field(q="indførselstilladelse__icontains")
+    indleveringsdato_efter: Optional[date] = Field(q="indleveringsdato__gte")
+    indleveringsdato_før: Optional[date] = Field(q="indleveringsdato__lt")
+    oprettet_efter: Optional[date] = Field(q="oprettet__gte")
+    oprettet_før: Optional[date] = Field(q="oprettet__lt")
+    vareart: Optional[str] = Field(q="varelinje__vareafgiftssats__vareart_da")
+    status: Optional[str]
+    anonym: Optional[bool]
+
+
+class PrivatAfgiftsanmeldelsePermission(RestPermission):
+    appname = "anmeldelse"
+    modelname = "privatafgiftsanmeldelse"
+
+
+@api_controller(
+    "/privat_afgiftsanmeldelse",
+    tags=["PrivatAfgiftsanmeldelse"],
+    permissions=[permissions.IsAuthenticated & PrivatAfgiftsanmeldelsePermission],
+)
+class PrivatAfgiftsanmeldelseAPI:
+    @route.post("", auth=JWTAuth(), url_name="privat_afgiftsanmeldelse_create")
+    def create(
+        self,
+        payload: PrivatAfgiftsanmeldelseIn,
+    ):
+        try:
+            data = payload.dict()
+            leverandørfaktura = data.pop("leverandørfaktura")
+            leverandørfaktura_navn = data.pop("leverandørfaktura_navn", None) or (
+                str(uuid4()) + ".pdf"
+            )
+            item = PrivatAfgiftsanmeldelse.objects.create(
+                **data, oprettet_af=self.context.request.user
+            )
+
+            item.leverandørfaktura = ContentFile(
+                base64.b64decode(leverandørfaktura), name=leverandørfaktura_navn
+            )
+            item.save()
+            return {"id": item.id}
+        except ValidationError as e:
+            return HttpResponseBadRequest(
+                json_dump(e.message_dict), content_type="application/json"
+            )
+
+    @route.get(
+        "",
+        response=NinjaPaginationResponseSchema[PrivatAfgiftsanmeldelseOut],
+        auth=JWTAuth(),
+        url_name="privat_afgiftsanmeldelse_list",
+    )
+    @paginate()  # https://eadwincode.github.io/django-ninja-extra/tutorial/pagination/
+    def list_afgiftsanmeldelser(
+        self,
+        filters: PrivatAfgiftsanmeldelseFilterSchema = Query(...),
+        sort: str = None,
+        order: str = None,
+    ):
+        qs = self.filter_user(PrivatAfgiftsanmeldelse.objects.all())
+        # https://django-ninja.rest-framework.com/guides/input/filtering/
+        qs = filters.filter(qs)
+        order_by = self.map_sort(sort, order)
+        if order_by:
+            qs = qs.order_by(order_by, "id")
+        return list(qs)
+
+    def filter_user(self, qs: QuerySet) -> QuerySet:
+        user = self.context.request.user
+        if not user.has_perm("anmeldelse.view_all_anmeldelse"):
+            qs = qs.filter(oprettet_af=user)
+        return qs
+
+    @staticmethod
+    def map_sort(sort, order):
+        if sort is not None:
+            if hasattr(PrivatAfgiftsanmeldelse, sort):
+                return ("-" if order == "desc" else "") + sort
+        return None
+
+    @route.get(
+        "seneste_indførselstilladelse/{cpr}",
+        auth=JWTAuth(),
+    )
+    def get_seneste_indførselstilladelse(self, cpr: int):
+        anmeldelse = (
+            PrivatAfgiftsanmeldelse.objects.filter(cpr=cpr)
+            .order_by("-oprettet")
+            .first()
+        )
+        if anmeldelse:
+            return anmeldelse.pk
+        return None
 
 
 class VarelinjeIn(ModelSchema):

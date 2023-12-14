@@ -12,6 +12,7 @@ from sats.api import AfgiftstabelAPI, VareafgiftssatsAPI
 
 from anmeldelse.api import (  # isort: skip
     AfgiftsanmeldelseAPI,
+    PrivatAfgiftsanmeldelseAPI,
     NotatAPI,
     PrismeResponseAPI,
     VarelinjeAPI,
@@ -21,7 +22,11 @@ api = NinjaExtraAPI(title="Toldbehandling", renderer=ORJSONRenderer(), csrf=Fals
 api.register_controllers(NinjaJWTDefaultController)
 api.register_controllers(AfsenderAPI, ModtagerAPI)
 api.register_controllers(
-    AfgiftsanmeldelseAPI, VarelinjeAPI, NotatAPI, PrismeResponseAPI
+    AfgiftsanmeldelseAPI,
+    PrivatAfgiftsanmeldelseAPI,
+    VarelinjeAPI,
+    NotatAPI,
+    PrismeResponseAPI,
 )
 api.register_controllers(PostforsendelseAPI, FragtforsendelseAPI)
 api.register_controllers(AfgiftstabelAPI, VareafgiftssatsAPI)

@@ -289,6 +289,8 @@ class TestGodkend(PermissionsTest, TestCase):
                 "afgiftsgruppenummer": 1234567,
                 "enhed": "kg",
                 "afgiftssats": "1.00",
+                "kræver_indførselstilladelse": False,
+                "har_privat_tillægsafgift_alkohol": False,
             }
 
         elif path == expected_prefix + "afsender/1":
@@ -644,6 +646,8 @@ class TestPrisme(PermissionsTest, TestCase):
                 "afgiftsgruppenummer": 1234567,
                 "enhed": "kg",
                 "afgiftssats": "1.00",
+                "kræver_indførselstilladelse": False,
+                "har_privat_tillægsafgift_alkohol": False,
             }
 
         elif path == expected_prefix + "afsender/1":
@@ -1142,6 +1146,8 @@ class AnmeldelseHistoryDetailViewTest(PermissionsTest, TestCase):
                 "afgiftsgruppenummer": 1234567,
                 "enhed": "kg",
                 "afgiftssats": "1.00",
+                "kræver_indførselstilladelse": False,
+                "har_privat_tillægsafgift_alkohol": False,
             }
         elif path == expected_prefix + "notat":
             json_content = {
@@ -1343,6 +1349,8 @@ class AnmeldelseNotatTest(PermissionsTest, TestCase):
                         "afgiftsgruppenummer": 1234567,
                         "enhed": "kg",
                         "afgiftssats": "1.00",
+                        "kræver_indførselstilladelse": False,
+                        "har_privat_tillægsafgift_alkohol": False,
                     }
                 ],
             }
@@ -1355,6 +1363,8 @@ class AnmeldelseNotatTest(PermissionsTest, TestCase):
                 "afgiftsgruppenummer": 1234567,
                 "enhed": "kg",
                 "afgiftssats": "1.00",
+                "kræver_indførselstilladelse": False,
+                "har_privat_tillægsafgift_alkohol": False,
             }
 
         elif path == expected_prefix + "afsender/1":
@@ -1903,6 +1913,7 @@ class AfgiftstabelDownloadTest(PermissionsTest, TestCase):
                 "minimumsbeløb": False,
                 "afgiftssats": "100.00",
                 "kræver_indførselstilladelse": False,
+                "har_privat_tillægsafgift_alkohol": False,
             },
             {
                 "id": 2,
@@ -1914,6 +1925,7 @@ class AfgiftstabelDownloadTest(PermissionsTest, TestCase):
                 "minimumsbeløb": False,
                 "afgiftssats": "2530.00",
                 "kræver_indførselstilladelse": False,
+                "har_privat_tillægsafgift_alkohol": False,
             },
         ]
 
@@ -1968,6 +1980,7 @@ class AfgiftstabelDownloadTest(PermissionsTest, TestCase):
                     "Enhed",
                     "Afgiftssats",
                     "Kræver indførselstilladelse",
+                    "Har privat tillægsafgift alkohol",
                     "Minimumsbeløb",
                     "Segment nedre",
                     "Segment øvre",
@@ -1980,6 +1993,7 @@ class AfgiftstabelDownloadTest(PermissionsTest, TestCase):
                     "procent",
                     "100,00",
                     "nej",
+                    "nej",
                     "0,00",
                     None,
                     None,
@@ -1991,6 +2005,7 @@ class AfgiftstabelDownloadTest(PermissionsTest, TestCase):
                     "KNALLERTER",
                     "antal",
                     "2.530,00",
+                    "nej",
                     "nej",
                     "0,00",
                     None,
@@ -2021,6 +2036,7 @@ class AfgiftstabelDownloadTest(PermissionsTest, TestCase):
                     "Enhed",
                     "Afgiftssats",
                     "Kræver indførselstilladelse",
+                    "Har privat tillægsafgift alkohol",
                     "Minimumsbeløb",
                     "Segment nedre",
                     "Segment øvre",
@@ -2033,6 +2049,7 @@ class AfgiftstabelDownloadTest(PermissionsTest, TestCase):
                     "procent",
                     "100,00",
                     "nej",
+                    "nej",
                     "0,00",
                     "",
                     "",
@@ -2044,6 +2061,7 @@ class AfgiftstabelDownloadTest(PermissionsTest, TestCase):
                     "KNALLERTER",
                     "antal",
                     "2.530,00",
+                    "nej",
                     "nej",
                     "0,00",
                     "",
@@ -2072,6 +2090,7 @@ class AfgiftstabelUploadTest(TestMixin, HasLogin):
                 "Enhed",
                 "Afgiftssats",
                 "Kræver indførselstilladelse",
+                "Har privat tillægsafgift alkohol",
                 "Minimumsbeløb",
                 "Segment nedre",
                 "Segment øvre",
@@ -2083,6 +2102,7 @@ class AfgiftstabelUploadTest(TestMixin, HasLogin):
                 "SUKKER og sirup",
                 "kilogram",
                 "6,00",
+                "nej",
                 "nej",
                 "0,00",
                 "",
@@ -2096,6 +2116,7 @@ class AfgiftstabelUploadTest(TestMixin, HasLogin):
                 "kilogram",
                 "6,00",
                 "nej",
+                "nej",
                 "0,00",
                 "",
                 "",
@@ -2107,6 +2128,7 @@ class AfgiftstabelUploadTest(TestMixin, HasLogin):
                 "THE, pulver The, koncentrater",
                 "kilogram",
                 "6,60",
+                "nej",
                 "nej",
                 "0,00",
                 "",

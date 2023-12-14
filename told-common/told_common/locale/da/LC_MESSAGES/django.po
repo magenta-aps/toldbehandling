@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-12-14 11:59+0000\n"
+"POT-Creation-Date: 2023-12-14 13:32+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -193,11 +193,13 @@ msgstr ""
 
 #: told_common/forms.py told_common/templates/told_common/tf10/form.html
 #: told_common/templates/told_common/tf10/list.html
+#: told_common/templates/told_common/tf5/list.html
 msgid "Modtager"
 msgstr ""
 
 #: told_common/forms.py told_common/templates/told_common/tf10/form.html
 #: told_common/templates/told_common/tf10/list.html
+#: told_common/templates/told_common/tf5/list.html
 msgid "Afsender"
 msgstr ""
 
@@ -214,14 +216,17 @@ msgid "Alle"
 msgstr ""
 
 #: told_common/forms.py told_common/templates/told_common/tf10/list.html
+#: told_common/templates/told_common/tf5/list.html
 msgid "Ny"
 msgstr ""
 
 #: told_common/forms.py told_common/templates/told_common/tf10/list.html
+#: told_common/templates/told_common/tf5/list.html
 msgid "Afvist"
 msgstr ""
 
 #: told_common/forms.py told_common/templates/told_common/tf10/list.html
+#: told_common/templates/told_common/tf5/list.html
 msgid "Godkendt"
 msgstr ""
 
@@ -306,6 +311,7 @@ msgid "Fragtbrevnr/postforsendelsesnummer"
 msgstr ""
 
 #: told_common/templates/told_common/tf10/form.html
+#: told_common/templates/told_common/tf5/list.html
 msgid "Afgangsdato"
 msgstr ""
 
@@ -314,40 +320,48 @@ msgid "Betales af (kun relevant for luftfragt)"
 msgstr ""
 
 #: told_common/templates/told_common/tf10/form.html
-msgid "Afgifter"
+msgid "Varelinjer med afgifter"
 msgstr ""
 
 #: told_common/templates/told_common/tf10/form.html
+#: told_common/templates/told_common/tf5/form.html
 msgid ""
 "I henhold til gældende grønlandske afgiftsbestemmelser anmeldes følgende "
 "varer til afgiftsberigtigelse overfor den grønlandske landskasse"
 msgstr ""
 
 #: told_common/templates/told_common/tf10/form.html
+#: told_common/templates/told_common/tf5/form.html
 msgid "Vareart"
 msgstr ""
 
 #: told_common/templates/told_common/tf10/form.html
+#: told_common/templates/told_common/tf5/form.html
 msgid "Vare­kode"
 msgstr ""
 
 #: told_common/templates/told_common/tf10/form.html
+#: told_common/templates/told_common/tf5/form.html
 msgid "kg | liter i alt"
 msgstr ""
 
 #: told_common/templates/told_common/tf10/form.html
+#: told_common/templates/told_common/tf5/form.html
 msgid "Antal"
 msgstr ""
 
 #: told_common/templates/told_common/tf10/form.html
+#: told_common/templates/told_common/tf5/form.html
 msgid "Fakturabeløb"
 msgstr ""
 
 #: told_common/templates/told_common/tf10/form.html
+#: told_common/templates/told_common/tf5/form.html
 msgid "Afgiftssats"
 msgstr ""
 
 #: told_common/templates/told_common/tf10/form.html
+#: told_common/templates/told_common/tf5/form.html
 msgid "Afgiftsbeløb"
 msgstr ""
 
@@ -356,54 +370,66 @@ msgid "Slet"
 msgstr ""
 
 #: told_common/templates/told_common/tf10/form.html
+#: told_common/templates/told_common/tf5/form.html
 msgid "Afgift i alt"
 msgstr ""
 
 #: told_common/templates/told_common/tf10/form.html
+#: told_common/templates/told_common/tf5/form.html
 msgid "Opdatér"
 msgstr ""
 
 #: told_common/templates/told_common/tf10/form.html
+#: told_common/templates/told_common/tf5/form.html
 msgid "Indsend"
 msgstr ""
 
 #: told_common/templates/told_common/tf10/form.html
+#: told_common/templates/told_common/tf5/form.html
 #, python-format
 msgid "%%f kr/kg"
 msgstr ""
 
 #: told_common/templates/told_common/tf10/form.html
+#: told_common/templates/told_common/tf5/form.html
 #, python-format
 msgid "%%f kr/l"
 msgstr ""
 
 #: told_common/templates/told_common/tf10/form.html
+#: told_common/templates/told_common/tf5/form.html
 #, python-format
 msgid "%%f kr/stk"
 msgstr ""
 
 #: told_common/templates/told_common/tf10/form.html
+#: told_common/templates/told_common/tf5/form.html
 #, python-format
 msgid "%%f %%"
 msgstr ""
 
 #: told_common/templates/told_common/tf10/list.html
+#: told_common/templates/told_common/tf5/list.html
 msgid "Status"
 msgstr ""
 
 #: told_common/templates/told_common/tf10/list.html
+#: told_common/templates/told_common/tf5/list.html
 msgid "Oprettelsesdato mellem"
 msgstr ""
 
 #: told_common/templates/told_common/tf10/list.html
+#: told_common/templates/told_common/tf5/list.html
 msgid "Afgangsdato mellem"
 msgstr ""
 
 #: told_common/templates/told_common/tf10/list.html
+#: told_common/templates/told_common/tf5/list.html
 msgid "Varetype"
 msgstr ""
 
 #: told_common/templates/told_common/tf10/list.html
+#: told_common/templates/told_common/tf5/list.html
 msgid "Anmeldelsesnummer"
 msgstr ""
 
@@ -416,18 +442,22 @@ msgid "Postforsendelsesnummer/fragtbrevsnummer"
 msgstr ""
 
 #: told_common/templates/told_common/tf10/list.html
+#: told_common/templates/told_common/tf5/list.html
 msgid "Søg"
 msgstr ""
 
 #: told_common/templates/told_common/tf10/list.html
+#: told_common/templates/told_common/tf5/list.html
 msgid "Opret ny"
 msgstr ""
 
 #: told_common/templates/told_common/tf10/list.html
+#: told_common/templates/told_common/tf5/list.html
 msgid "Redigér"
 msgstr ""
 
 #: told_common/templates/told_common/tf10/list.html
+#: told_common/templates/told_common/tf5/list.html
 msgid ""
 "Der kan markeres flere linjer på én gang. Tryk på en linje for at markere "
 "den. Tryk igen for at fjerne markering.<br/> Hold Shift nede og tryk på en "
@@ -436,6 +466,7 @@ msgid ""
 msgstr ""
 
 #: told_common/templates/told_common/tf10/list.html
+#: told_common/templates/told_common/tf5/list.html
 msgid "Nummer"
 msgstr ""
 
@@ -444,10 +475,12 @@ msgid "Dato"
 msgstr ""
 
 #: told_common/templates/told_common/tf10/list.html
+#: told_common/templates/told_common/tf5/list.html
 msgid "Handlinger"
 msgstr ""
 
 #: told_common/templates/told_common/tf10/list.html
+#: told_common/templates/told_common/tf5/list.html
 msgid "Ingen søgeresultater"
 msgstr ""
 
@@ -457,6 +490,98 @@ msgstr ""
 
 #: told_common/templates/told_common/tf10/list.html
 msgid "Nej"
+msgstr ""
+
+#: told_common/templates/told_common/tf5/form.html
+msgid ""
+"Ansøgning om engangstilladelse til privat indførsel af øl, vin og spiritus"
+msgstr ""
+
+#: told_common/templates/told_common/tf5/form.html
+msgid ""
+"Navn på den borger der importerer varerne. Det vil oftest være dig selv."
+msgstr ""
+
+#: told_common/templates/told_common/tf5/form.html
+msgid ""
+"Personnummer på den borger der importerer varerne. Det vil oftest være dig "
+"selv."
+msgstr ""
+
+#: told_common/templates/told_common/tf5/form.html
+msgid "Adresse for den borger der importerer varerne."
+msgstr ""
+
+#: told_common/templates/told_common/tf5/form.html
+msgid "Postnummer for den borger der importerer varerne."
+msgstr ""
+
+#: told_common/templates/told_common/tf5/form.html
+msgid "By for den borger der importerer varerne."
+msgstr ""
+
+#: told_common/templates/told_common/tf5/form.html
+msgid "Telefonnummer for den borger der importerer varerne."
+msgstr ""
+
+#: told_common/templates/told_common/tf5/form.html
+msgid "Bookingnummer for forsendelsen"
+msgstr ""
+
+#: told_common/templates/told_common/tf5/form.html
+msgid "Indførselstilladelse"
+msgstr ""
+
+#: told_common/templates/told_common/tf5/form.html
+msgid "Ingen"
+msgstr ""
+
+#: told_common/templates/told_common/tf5/form.html
+msgid "Fakturanummer fra leverandøren (hvor varerne er købt)"
+msgstr ""
+
+#: told_common/templates/told_common/tf5/form.html
+msgid "Forventet dato for afgang til Grønland"
+msgstr ""
+
+#: told_common/templates/told_common/tf5/form.html
+msgid "Vedhæftning af varefaktura"
+msgstr ""
+
+#: told_common/templates/told_common/tf5/form.html
+msgid "Afgifter"
+msgstr ""
+
+#: told_common/templates/told_common/tf5/form.html
+msgid "Indførselsafgift"
+msgstr ""
+
+#: told_common/templates/told_common/tf5/form.html
+msgid "Tillægsafgift alkohol"
+msgstr ""
+
+#: told_common/templates/told_common/tf5/form.html
+msgid "Ekspeditionsgebyr"
+msgstr ""
+
+#: told_common/templates/told_common/tf5/list.html
+msgid "Leverandørfakturanummer"
+msgstr ""
+
+#: told_common/templates/told_common/tf5/subform.html
+msgid "Type af vare der importeres"
+msgstr ""
+
+#: told_common/templates/told_common/tf5/subform.html
+msgid "Mængde der importeres"
+msgstr ""
+
+#: told_common/templates/told_common/tf5/subform.html
+msgid "Antal der importeres"
+msgstr ""
+
+#: told_common/templates/told_common/tf5/subform.html
+msgid "Fakturabeløb inkl. moms."
 msgstr ""
 
 #: told_common/templates/told_common/widgets/file.html

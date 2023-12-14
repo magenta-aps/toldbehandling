@@ -74,6 +74,7 @@ class Vareafgiftssats(ToldDataClass):
     afgiftsgruppenummer: int
     enhed: Enhed
     afgiftssats: Decimal
+    har_privat_tillægsafgift_alkohol: bool
     kræver_indførselstilladelse: Optional[bool] = False
     minimumsbeløb: Optional[Decimal] = None
     overordnet: Optional[int] = None
@@ -361,6 +362,46 @@ class PrismeResponse(ToldDataClass):
     )
     rec_id: int = None
     tax_notification_number: int = None
+
+
+@dataclass_json
+@dataclass
+class PrivatAfgiftsanmeldelse(ToldDataClass):
+    id: int
+    cpr: int
+    anonym: bool
+    navn: str
+    adresse: str
+    postnummer: int
+    by: str
+    telefon: str
+    leverandørfaktura_nummer: str
+    leverandørfaktura: File
+    bookingnummer: str
+    indførselstilladelse: str
+    status: str
+    indleveringsdato: date = field(
+        metadata=config(
+            encoder=date.isoformat,
+            decoder=date.fromisoformat,
+            mm_field=fields.Date(format="iso"),
+        ),
+    )
+    varelinjer: List[Varelinje]
+    # notater: Optional[List[Notat]]
+    # prismeresponses: Optional[List[PrismeResponse]]
+    oprettet: datetime = field(
+        metadata=config(
+            encoder=datetime.isoformat,
+            decoder=datetime.fromisoformat,
+            mm_field=fields.DateTime(format="iso"),
+        ),
+    )
+    oprettet_af: dict
+
+    @property
+    def afgift_sum(self):
+        return sum([varelinje.afgiftsbeløb for varelinje in self.varelinjer or []])
 
 
 @dataclass_json

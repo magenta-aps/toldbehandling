@@ -39,6 +39,7 @@ class Command(BaseCommand):
                 minimumsbeløb=False,
                 afgiftssats=Decimal("6.00"),
                 kræver_indførselstilladelse=False,
+                har_privat_tillægsafgift_alkohol=False,
             )
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
@@ -49,6 +50,7 @@ class Command(BaseCommand):
                 minimumsbeløb=False,
                 afgiftssats=Decimal("6.00"),
                 kræver_indførselstilladelse=False,
+                har_privat_tillægsafgift_alkohol=False,
             )
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
@@ -59,6 +61,7 @@ class Command(BaseCommand):
                 minimumsbeløb=False,
                 afgiftssats=Decimal("6.60"),
                 kræver_indførselstilladelse=False,
+                har_privat_tillægsafgift_alkohol=False,
             )
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
@@ -69,6 +72,7 @@ class Command(BaseCommand):
                 minimumsbeløb=False,
                 afgiftssats=Decimal("58.00"),
                 kræver_indførselstilladelse=False,
+                har_privat_tillægsafgift_alkohol=False,
             )
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
@@ -83,6 +87,7 @@ class Command(BaseCommand):
                 minimumsbeløb=False,
                 afgiftssats=Decimal("3.50"),
                 kræver_indførselstilladelse=True,
+                har_privat_tillægsafgift_alkohol=True,
                 synlig_privat=True,
             )
             Vareafgiftssats.objects.create(
@@ -96,6 +101,7 @@ class Command(BaseCommand):
                 minimumsbeløb=False,
                 afgiftssats=Decimal("8.00"),
                 kræver_indførselstilladelse=True,
+                har_privat_tillægsafgift_alkohol=True,
                 synlig_privat=True,
             )
             Vareafgiftssats.objects.create(
@@ -109,6 +115,7 @@ class Command(BaseCommand):
                 minimumsbeløb=False,
                 afgiftssats=Decimal("21.00"),
                 kræver_indførselstilladelse=True,
+                har_privat_tillægsafgift_alkohol=True,
                 synlig_privat=True,
             )
             Vareafgiftssats.objects.create(
@@ -122,6 +129,7 @@ class Command(BaseCommand):
                 minimumsbeløb=False,
                 afgiftssats=Decimal("30.00"),
                 kræver_indførselstilladelse=True,
+                har_privat_tillægsafgift_alkohol=True,
                 synlig_privat=True,
             )
             Vareafgiftssats.objects.create(
@@ -135,6 +143,7 @@ class Command(BaseCommand):
                 minimumsbeløb=False,
                 afgiftssats=Decimal("43.00"),
                 kræver_indførselstilladelse=True,
+                har_privat_tillægsafgift_alkohol=True,
                 synlig_privat=True,
             )
             Vareafgiftssats.objects.create(
@@ -148,6 +157,7 @@ class Command(BaseCommand):
                 minimumsbeløb=False,
                 afgiftssats=Decimal("56.00"),
                 kræver_indførselstilladelse=True,
+                har_privat_tillægsafgift_alkohol=True,
                 synlig_privat=True,
             )
             Vareafgiftssats.objects.create(
@@ -161,6 +171,7 @@ class Command(BaseCommand):
                 minimumsbeløb=False,
                 afgiftssats=Decimal("66.00"),
                 kræver_indførselstilladelse=True,
+                har_privat_tillægsafgift_alkohol=True,
                 synlig_privat=True,
             )
             Vareafgiftssats.objects.create(
@@ -174,6 +185,7 @@ class Command(BaseCommand):
                 minimumsbeløb=False,
                 afgiftssats=Decimal("92.00"),
                 kræver_indførselstilladelse=True,
+                har_privat_tillægsafgift_alkohol=True,
                 synlig_privat=True,
             )
             Vareafgiftssats.objects.create(
@@ -187,6 +199,7 @@ class Command(BaseCommand):
                 minimumsbeløb=False,
                 afgiftssats=Decimal("114.00"),
                 kræver_indførselstilladelse=True,
+                har_privat_tillægsafgift_alkohol=True,
                 synlig_privat=True,
             )
             Vareafgiftssats.objects.create(
@@ -200,6 +213,7 @@ class Command(BaseCommand):
                 minimumsbeløb=False,
                 afgiftssats=Decimal("147.00"),
                 kræver_indførselstilladelse=True,
+                har_privat_tillægsafgift_alkohol=True,
                 synlig_privat=True,
             )
             Vareafgiftssats.objects.create(
@@ -213,6 +227,7 @@ class Command(BaseCommand):
                 minimumsbeløb=False,
                 afgiftssats=Decimal("187.00"),
                 kræver_indførselstilladelse=True,
+                har_privat_tillægsafgift_alkohol=True,
                 synlig_privat=True,
             )
             Vareafgiftssats.objects.create(
@@ -226,6 +241,7 @@ class Command(BaseCommand):
                 minimumsbeløb=False,
                 afgiftssats=Decimal("230.00"),
                 kræver_indførselstilladelse=True,
+                har_privat_tillægsafgift_alkohol=True,
                 synlig_privat=True,
             )
             Vareafgiftssats.objects.create(
@@ -239,6 +255,7 @@ class Command(BaseCommand):
                 minimumsbeløb=False,
                 afgiftssats=Decimal("280.00"),
                 kræver_indførselstilladelse=True,
+                har_privat_tillægsafgift_alkohol=True,
                 synlig_privat=True,
             )
             Vareafgiftssats.objects.create(
@@ -252,6 +269,7 @@ class Command(BaseCommand):
                 minimumsbeløb=False,
                 afgiftssats=Decimal("361.00"),
                 kræver_indførselstilladelse=True,
+                har_privat_tillægsafgift_alkohol=True,
                 synlig_privat=True,
             )
             Vareafgiftssats.objects.create(
@@ -265,6 +283,7 @@ class Command(BaseCommand):
                 minimumsbeløb=False,
                 afgiftssats=Decimal("495.00"),
                 kræver_indførselstilladelse=True,
+                har_privat_tillægsafgift_alkohol=True,
                 synlig_privat=True,
             )
             Vareafgiftssats.objects.create(
@@ -278,6 +297,7 @@ class Command(BaseCommand):
                 minimumsbeløb=None,
                 afgiftssats=Decimal("591.00"),
                 kræver_indførselstilladelse=True,
+                har_privat_tillægsafgift_alkohol=True,
                 synlig_privat=True,
             )
             Vareafgiftssats.objects.create(
@@ -289,7 +309,8 @@ class Command(BaseCommand):
                 minimumsbeløb=None,
                 afgiftssats=Decimal("7.50"),
                 kræver_indførselstilladelse=False,
-                synlig_privat=True,
+                har_privat_tillægsafgift_alkohol=False,
+                synlig_privat=False,
             )
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
@@ -304,7 +325,8 @@ class Command(BaseCommand):
                 minimumsbeløb=None,
                 afgiftssats=Decimal("5.75"),
                 kræver_indførselstilladelse=False,
-                synlig_privat=True,
+                har_privat_tillægsafgift_alkohol=False,
+                synlig_privat=False,
             )
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
@@ -317,6 +339,7 @@ class Command(BaseCommand):
                 minimumsbeløb=False,
                 afgiftssats=Decimal("46.30"),
                 kræver_indførselstilladelse=False,
+                har_privat_tillægsafgift_alkohol=False,
             )
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
@@ -331,6 +354,7 @@ class Command(BaseCommand):
                 minimumsbeløb=False,
                 afgiftssats=Decimal("2.00"),
                 kræver_indførselstilladelse=False,
+                har_privat_tillægsafgift_alkohol=False,
                 synlig_privat=True,
             )
             Vareafgiftssats.objects.create(
@@ -346,6 +370,7 @@ class Command(BaseCommand):
                 minimumsbeløb=False,
                 afgiftssats=Decimal("3.50"),
                 kræver_indførselstilladelse=False,
+                har_privat_tillægsafgift_alkohol=False,
                 synlig_privat=True,
             )
             Vareafgiftssats.objects.create(
@@ -357,6 +382,7 @@ class Command(BaseCommand):
                 minimumsbeløb=False,
                 afgiftssats=Decimal("1.30"),
                 kræver_indførselstilladelse=True,
+                har_privat_tillægsafgift_alkohol=False,
             )
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
@@ -367,6 +393,7 @@ class Command(BaseCommand):
                 minimumsbeløb=False,
                 afgiftssats=Decimal("1.58"),
                 kræver_indførselstilladelse=True,
+                har_privat_tillægsafgift_alkohol=False,
             )
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
@@ -377,6 +404,7 @@ class Command(BaseCommand):
                 minimumsbeløb=False,
                 afgiftssats=Decimal("2.23"),
                 kræver_indførselstilladelse=True,
+                har_privat_tillægsafgift_alkohol=False,
             )
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
@@ -387,6 +415,7 @@ class Command(BaseCommand):
                 minimumsbeløb=False,
                 afgiftssats=Decimal("0.48"),
                 kræver_indførselstilladelse=True,
+                har_privat_tillægsafgift_alkohol=False,
             )
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
@@ -399,6 +428,7 @@ class Command(BaseCommand):
                 minimumsbeløb=False,
                 afgiftssats=Decimal("492.00"),
                 kræver_indførselstilladelse=True,
+                har_privat_tillægsafgift_alkohol=False,
             )
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
@@ -409,6 +439,7 @@ class Command(BaseCommand):
                 minimumsbeløb=False,
                 afgiftssats=Decimal("1165.00"),
                 kræver_indførselstilladelse=True,
+                har_privat_tillægsafgift_alkohol=False,
             )
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
@@ -419,6 +450,7 @@ class Command(BaseCommand):
                 minimumsbeløb=False,
                 afgiftssats=Decimal("300.00"),
                 kræver_indførselstilladelse=True,
+                har_privat_tillægsafgift_alkohol=False,
             )
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
@@ -429,6 +461,7 @@ class Command(BaseCommand):
                 minimumsbeløb=False,
                 afgiftssats=Decimal("25.00"),
                 kræver_indførselstilladelse=False,
+                har_privat_tillægsafgift_alkohol=False,
             )
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
@@ -439,6 +472,7 @@ class Command(BaseCommand):
                 minimumsbeløb=False,
                 afgiftssats=Decimal("10.00"),
                 kræver_indførselstilladelse=False,
+                har_privat_tillægsafgift_alkohol=False,
             )
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
@@ -449,6 +483,7 @@ class Command(BaseCommand):
                 minimumsbeløb=False,
                 afgiftssats=Decimal("6.75"),
                 kræver_indførselstilladelse=False,
+                har_privat_tillægsafgift_alkohol=False,
             )
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
@@ -459,6 +494,7 @@ class Command(BaseCommand):
                 minimumsbeløb=False,
                 afgiftssats=Decimal("2.25"),
                 kræver_indførselstilladelse=False,
+                har_privat_tillægsafgift_alkohol=False,
             )
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
@@ -471,6 +507,7 @@ class Command(BaseCommand):
                 minimumsbeløb=False,
                 afgiftssats=Decimal("3.25"),
                 kræver_indførselstilladelse=False,
+                har_privat_tillægsafgift_alkohol=False,
             )
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
@@ -481,6 +518,7 @@ class Command(BaseCommand):
                 minimumsbeløb=False,
                 afgiftssats=Decimal("3.50"),
                 kræver_indførselstilladelse=False,
+                har_privat_tillægsafgift_alkohol=False,
             )
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
@@ -491,6 +529,7 @@ class Command(BaseCommand):
                 minimumsbeløb=False,
                 afgiftssats=Decimal("25.00"),
                 kræver_indførselstilladelse=False,
+                har_privat_tillægsafgift_alkohol=False,
             )
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
@@ -501,6 +540,7 @@ class Command(BaseCommand):
                 minimumsbeløb=False,
                 afgiftssats=Decimal("4.00"),
                 kræver_indførselstilladelse=False,
+                har_privat_tillægsafgift_alkohol=False,
             )
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
@@ -511,6 +551,7 @@ class Command(BaseCommand):
                 minimumsbeløb=False,
                 afgiftssats=Decimal("2.00"),
                 kræver_indførselstilladelse=False,
+                har_privat_tillægsafgift_alkohol=False,
             )
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
@@ -521,6 +562,7 @@ class Command(BaseCommand):
                 minimumsbeløb=False,
                 afgiftssats=Decimal("3.00"),
                 kræver_indførselstilladelse=False,
+                har_privat_tillægsafgift_alkohol=False,
             )
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
@@ -531,6 +573,7 @@ class Command(BaseCommand):
                 minimumsbeløb=False,
                 afgiftssats=Decimal("2.50"),
                 kræver_indførselstilladelse=False,
+                har_privat_tillægsafgift_alkohol=False,
             )
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
@@ -541,6 +584,7 @@ class Command(BaseCommand):
                 minimumsbeløb=False,
                 afgiftssats=Decimal("3.50"),
                 kræver_indførselstilladelse=False,
+                har_privat_tillægsafgift_alkohol=False,
             )
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
@@ -551,6 +595,7 @@ class Command(BaseCommand):
                 minimumsbeløb=False,
                 afgiftssats=Decimal(100),
                 kræver_indførselstilladelse=False,
+                har_privat_tillægsafgift_alkohol=False,
             )
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
@@ -561,6 +606,7 @@ class Command(BaseCommand):
                 minimumsbeløb=False,
                 afgiftssats=Decimal("2530.0"),
                 kræver_indførselstilladelse=False,
+                har_privat_tillægsafgift_alkohol=False,
             )
 
             personbiler = Vareafgiftssats.objects.create(
@@ -576,6 +622,7 @@ class Command(BaseCommand):
                 minimumsbeløb=None,
                 afgiftssats=Decimal(0),
                 kræver_indførselstilladelse=False,
+                har_privat_tillægsafgift_alkohol=False,
             )
             Vareafgiftssats.objects.create(
                 overordnet=personbiler,
@@ -587,6 +634,7 @@ class Command(BaseCommand):
                 minimumsbeløb=None,
                 afgiftssats=Decimal(50_000),
                 kræver_indførselstilladelse=False,
+                har_privat_tillægsafgift_alkohol=False,
             )
             Vareafgiftssats.objects.create(
                 overordnet=personbiler,
@@ -602,6 +650,7 @@ class Command(BaseCommand):
                 minimumsbeløb=None,
                 afgiftssats=Decimal(100),
                 kræver_indførselstilladelse=False,
+                har_privat_tillægsafgift_alkohol=False,
             )
             Vareafgiftssats.objects.create(
                 overordnet=personbiler,
@@ -614,6 +663,7 @@ class Command(BaseCommand):
                 minimumsbeløb=None,
                 afgiftssats=Decimal(150),
                 kræver_indførselstilladelse=False,
+                har_privat_tillægsafgift_alkohol=False,
             )
 
             varebiler = Vareafgiftssats.objects.create(
@@ -629,6 +679,7 @@ class Command(BaseCommand):
                 minimumsbeløb=None,
                 afgiftssats=Decimal(0),
                 kræver_indførselstilladelse=False,
+                har_privat_tillægsafgift_alkohol=False,
             )
             Vareafgiftssats.objects.create(
                 overordnet=varebiler,
@@ -640,6 +691,7 @@ class Command(BaseCommand):
                 minimumsbeløb=None,
                 afgiftssats=Decimal(50_000),
                 kræver_indførselstilladelse=False,
+                har_privat_tillægsafgift_alkohol=False,
             )
             Vareafgiftssats.objects.create(
                 overordnet=varebiler,
@@ -654,6 +706,7 @@ class Command(BaseCommand):
                 minimumsbeløb=None,
                 afgiftssats=Decimal(50),
                 kræver_indførselstilladelse=False,
+                har_privat_tillægsafgift_alkohol=False,
             )
 
             Vareafgiftssats.objects.create(
@@ -665,6 +718,7 @@ class Command(BaseCommand):
                 minimumsbeløb=None,
                 afgiftssats=Decimal("50000.00"),
                 kræver_indførselstilladelse=False,
+                har_privat_tillægsafgift_alkohol=False,
             )
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
@@ -675,6 +729,7 @@ class Command(BaseCommand):
                 minimumsbeløb=None,
                 afgiftssats=Decimal("22000.00"),
                 kræver_indførselstilladelse=False,
+                har_privat_tillægsafgift_alkohol=False,
             )
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
@@ -685,6 +740,7 @@ class Command(BaseCommand):
                 minimumsbeløb=None,
                 afgiftssats=Decimal("30000.00"),
                 kræver_indførselstilladelse=False,
+                har_privat_tillægsafgift_alkohol=False,
             )
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
@@ -699,6 +755,7 @@ class Command(BaseCommand):
                 minimumsbeløb=None,
                 afgiftssats=Decimal(38),
                 kræver_indførselstilladelse=False,
+                har_privat_tillægsafgift_alkohol=False,
             )
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
@@ -711,6 +768,7 @@ class Command(BaseCommand):
                 minimumsbeløb=None,
                 afgiftssats=Decimal(50),
                 kræver_indførselstilladelse=False,
+                har_privat_tillægsafgift_alkohol=False,
             )
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
@@ -721,4 +779,5 @@ class Command(BaseCommand):
                 minimumsbeløb=None,
                 afgiftssats=Decimal("5000.0"),
                 kræver_indførselstilladelse=False,
+                har_privat_tillægsafgift_alkohol=False,
             )
