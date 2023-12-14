@@ -333,13 +333,10 @@
         </div>
 
         <hr/>
-
-        <h5>{% translate "Varelinjer med afgifter" %}</h5>
-		{% if not admin %}
+        <h5>{% translate "Afgifter" %}</h5>
         <p>
             {% translate "I henhold til gældende grønlandske afgiftsbestemmelser anmeldes følgende varer til afgiftsberigtigelse overfor den grønlandske landskasse" %}
         </p>
-		{% endif %}
         <div class="row">
             <div class="col-2 px-0">
                 <label>{% translate "Vareart" %}*</label>
@@ -426,6 +423,15 @@
             </div>
         </div>
 		{% endif %}
+
+        <hr/>
+
+        {% if form.toldkategori %}
+        <div class="row align-items-center">
+            <div class="col-2"><label for="{{form.toldkategori.id_for_label}}">{{form.toldkategori.label}}</label></div>
+            <div class="col-4">{{form.toldkategori}}</div>
+        </div>
+        {% endif %}
 
         <div class="clearfix">
             <button type="submit" class="btn btn-success float-end">

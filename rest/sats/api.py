@@ -127,7 +127,7 @@ class AfgiftstabelAPI:
     @route.patch("/{id}", auth=get_auth_methods(), url_name="afgiftstabel_update")
     def update_afgiftstabel(self, id: int, payload: PartialAfgiftstabelIn):
         item = get_object_or_404(Afgiftstabel, id=id)
-        for attr, value in payload.dict().items():
+        for attr, value in payload.dict(exclude_unset=True).items():
             setattr(item, attr, value)
         item.save()
         return {"success": True}
@@ -266,7 +266,7 @@ class VareafgiftssatsAPI:
     @route.patch("/{id}", auth=get_auth_methods(), url_name="vareafgiftssats_update")
     def update_vareafgiftssats(self, id: int, payload: PartialVareafgiftssatsIn):
         item = get_object_or_404(Vareafgiftssats, id=id)
-        for attr, value in payload.dict().items():
+        for attr, value in payload.dict(exclude_unset=True).items():
             setattr(item, attr, value)
         item.save()
         return {"success": True}

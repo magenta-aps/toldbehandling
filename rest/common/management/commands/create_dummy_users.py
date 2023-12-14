@@ -36,6 +36,11 @@ class Command(BaseCommand):
         except Group.DoesNotExist:
             dataansvarlige_group = None
 
+        try:
+            indberettere_group = Group.objects.get(name="Indberettere")
+        except Group.DoesNotExist:
+            indberettere_group = None
+
         admin, created = User.objects.update_or_create(
             defaults={
                 "first_name": "Admin",
@@ -96,3 +101,23 @@ class Command(BaseCommand):
             username="dataansvarlig",
         )
         dataansvarlig.groups.add(dataansvarlige_group)
+
+        indberetter, created = User.objects.update_or_create(
+            defaults={
+                "first_name": "Anders",
+                "last_name": "And",
+                "email": "anders@andeby.dk",
+                "password": make_password(
+                    os.environ.get("DATAANSVARLIG_PASSWORD", "indberetter")
+                ),
+                "is_active": True,
+                "is_staff": False,
+                "is_superuser": False,
+            },
+            username="indberetter",
+        )
+        indberetter.groups.add(indberettere_group)
+
+        IndberetterProfile.objects.create(
+            cpr=1111111111, cvr=12345678, user=indberetter
+        )

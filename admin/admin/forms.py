@@ -6,6 +6,7 @@ from datetime import date, timedelta
 from typing import List
 
 from django import forms
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 from told_common import forms as common_forms
@@ -29,20 +30,51 @@ class TF10ViewForm(BootstrapForm):
     godkendt = forms.BooleanField(required=False)
     # For at vi kan have tre formfelter i hver sin modal
     notat1 = forms.CharField(
-        widget=forms.Textarea(attrs={"placeholder": _("Notat")}), required=False
+        widget=forms.Textarea(
+            attrs={"placeholder": _("Notat"), "disabled": "disabled"}
+        ),
+        required=False,
     )
     notat2 = forms.CharField(
-        widget=forms.Textarea(attrs={"placeholder": _("Notat")}), required=False
+        widget=forms.Textarea(
+            attrs={"placeholder": _("Notat"), "disabled": "disabled"}
+        ),
+        required=False,
     )
     notat3 = forms.CharField(
-        widget=forms.Textarea(attrs={"placeholder": _("Notat")}), required=False
+        widget=forms.Textarea(
+            attrs={"placeholder": _("Notat"), "disabled": "disabled"}
+        ),
+        required=False,
     )
     send_til_prisme = forms.BooleanField(required=False)
+    toldkategori = forms.ChoiceField(
+        required=False,
+        choices=[
+            (item["kategori"], f"{item['kategori']} - {item['navn']}")
+            for item in settings.CVR_TOLDKATEGORI_MAP
+        ],
+        widget=forms.Select(attrs={"disabled": "disabled"}),
+    )
+
+    def clean(self):
+        if (
+            "send_til_prisme" in self.cleaned_data
+            and "toldkategori" not in self.cleaned_data
+        ):
+            raise ValidationError(
+                "Skal vælge en toldkategori når der sendes til Prisme"
+            )
 
 
 class TF10UpdateForm(common_forms.TF10Form):
     notat = forms.CharField(
         widget=forms.Textarea(attrs={"placeholder": _("Notat")}), required=False
+    )
+    toldkategori = forms.ChoiceField(
+        required=False,
+        choices=[(None, "---------")]
+        + [(item["kategori"], item["navn"]) for item in settings.CVR_TOLDKATEGORI_MAP],
     )
 
 

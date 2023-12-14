@@ -7,6 +7,7 @@
 {% block content %}
 <form method="post">
     {% csrf_token %}
+    {{form.errors}}
     <div class="mx-5">
         <h1>Afgiftsanmeldelse {{object.id}}</h1>
 
@@ -390,6 +391,18 @@
             </tbody>
         </table>
 
+        <hr/>
+
+        <h5>Betaling</h5>
+
+        <div class="row align-items-center">
+            <div class="col-2">{% translate "Toldkategori" %}:</div>
+            {% translate "Ikke angivet" as ikke_angivet %}
+            <div class="col-4">{{object.toldkategori|default:ikke_angivet}}</div>
+        </div>
+
+        <hr/>
+
         <div class="form-row">
             <div class="ml-auto">
                 {% if can_edit %}
@@ -429,7 +442,7 @@
         </div>
     </div>
 
-    <div class="modal" id="godkend_modal" tabindex="-1">
+    <div class="modal" id="godkend_modal" tabindex="-1" style="display: none">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -448,7 +461,7 @@
         </div>
     </div>
 
-    <div class="modal" id="afvis_modal" tabindex="-1">
+    <div class="modal" id="afvis_modal" tabindex="-1" style="display: none">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -467,7 +480,7 @@
         </div>
     </div>
 
-    <div class="modal" id="prisme_modal" tabindex="-1">
+    <div class="modal" id="prisme_modal" tabindex="-1" style="display: none">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -477,6 +490,15 @@
                 <div class="modal-body">
                     <p>Er du sikker på at du vil sende afgiftsanmeldelsen til Prisme?</p>
                     {{form.notat3}}
+
+                    <div class="row align-items-center">
+                        <div class="col-4">
+                            <label for="{{form.toldkategori.id_for_label}}">{{form.toldkategori.label}}</label>
+                        </div>
+                        <div class="col-8">
+                            {{form.toldkategori}}
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Nej</button>
@@ -513,5 +535,14 @@
     {% endif %}
 
 </form>
-
+<script>
+    $(".modal").on("show.bs.modal", function () {
+        console.log(this);
+        $(this).find("input,select,textarea").removeAttr("disabled");
+    });
+    $(".modal").on("hide.bs.modal", function () {
+        console.log(this);
+        $(this).find("input,select,textarea").attr("disabled", "disabled");
+    });
+</script>
 {% endblock %}

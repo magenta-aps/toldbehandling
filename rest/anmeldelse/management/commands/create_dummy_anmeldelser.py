@@ -110,5 +110,5 @@ class Command(BaseCommand):
                         afgiftsanmeldelse=anmeldelse,
                         rec_id=random.randint(1000000000, 9999999999),
                         tax_notification_number=random.randint(10000000, 99999999),
-                        invoice_date=date.today(),
+                        delivery_date=date.today(),
                     )

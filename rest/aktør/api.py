@@ -127,7 +127,7 @@ class AfsenderAPI:
         payload: PartialAfsenderIn,
     ):
         item = get_object_or_404(Afsender, id=id)
-        data = payload.dict()
+        data = payload.dict(exclude_unset=True)
         for attr, value in data.items():
             if value is not None:
                 setattr(item, attr, value)
@@ -247,7 +247,7 @@ class ModtagerAPI:
         payload: PartialModtagerIn,
     ):
         item = get_object_or_404(Modtager, id=id)
-        data = payload.dict()
+        data = payload.dict(exclude_unset=True)
         for attr, value in data.items():
             if value is not None:
                 setattr(item, attr, value)
