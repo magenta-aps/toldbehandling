@@ -32,6 +32,7 @@
         </div>
         {% endif %}
 
+        {% if fælles_fragttype != "skibspost" and fælles_fragttype != "luftpost" %}
         <div class="row">
             <div class="col-3">
                 <label for="{{form.forbindelsesnr.name}}">{{form.forbindelsesnr.label}}</label>
@@ -40,6 +41,7 @@
                 {{form.forbindelsesnr}}
             </div>
         </div>
+        {% endif %}
         <div class="row">
             <div class="col-3">
                 <label for="{{form.afgangsdato.name}}">{{form.afgangsdato.label}}</label>
