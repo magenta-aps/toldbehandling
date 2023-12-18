@@ -448,14 +448,14 @@
 {{ varesatser|json_script:"varesatser" }}
 {{ konstanter|json_script:"konstanter" }}
 <script>
-    const satsTekster = {
+    window.satsTekster = {
         "kg": "{% translate '%f kr/kg' %}",
         "l": "{% translate '%f kr/l' %}",
         "ant": "{% translate '%f kr/stk' %}",
         "pct": "{% translate '%f %' %}",
         "sam": "",
     };
-    const aktører = [
+    window.aktører = [
         {
             "fields": {
                 "cvr": "[name={{form.afsender_cvr.name}}]",

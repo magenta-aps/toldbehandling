@@ -157,6 +157,13 @@ class PrivatAfgiftsanmeldelse(models.Model):
         on_delete=models.SET_NULL,  # Vi kan slette brugere og beholde deres anmeldelser
         null=True,
     )
+    oprettet_på_vegne_af = models.ForeignKey(
+        User,
+        related_name="private_afgiftsanmeldelser_på_vegne_af",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+    )
     cpr = models.BigIntegerField(
         verbose_name=_("CPR-nummer"),
         db_index=True,
@@ -230,6 +237,7 @@ class PrivatAfgiftsanmeldelse(models.Model):
     status = models.CharField(
         choices=(
             ("ny", "ny"),
+            ("annulleret", "annulleret"),  # Borger har self annulleret
             ("afvist", "afvist"),
             ("godkendt", "godkendt"),
             ("afsluttet", "afsluttet"),
@@ -259,6 +267,8 @@ class Varelinje(models.Model):
         Afgiftsanmeldelse,
         on_delete=models.CASCADE,
         null=True,
+        blank=True,
+        default=None,
     )
     privatafgiftsanmeldelse = HistoricForeignKey(
         PrivatAfgiftsanmeldelse,

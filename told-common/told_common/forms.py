@@ -75,7 +75,7 @@ class TF10Form(BootstrapForm):
                         [
                             str(id)
                             for id, sats in varesatser.items()
-                            if sats.get("kræver_indførselstilladelse")
+                            if sats.kræver_indførselstilladelse
                         ]
                     ),
                 }
@@ -278,7 +278,7 @@ class TF10Form(BootstrapForm):
                 if self.varesatser:
                     varesats_id = subform.cleaned_data["vareafgiftssats"]
                     vareafgiftssats = self.varesatser[int(varesats_id)]
-                    if vareafgiftssats["kræver_indførselstilladelse"]:
+                    if vareafgiftssats.kræver_indførselstilladelse:
                         self.add_error(
                             "indførselstilladelse",
                             _(
@@ -297,7 +297,7 @@ class TF10VareForm(BootstrapForm):
             "vareart_kl" if translation.get_language() == "kl" else "vareart_da"
         )
         self.fields["vareafgiftssats"].choices = tuple(
-            (id, item[vareart_key]) for id, item in self.varesatser.items()
+            (id, getattr(item, vareart_key)) for id, item in self.varesatser.items()
         )
 
     id = forms.IntegerField(min_value=1, required=False, widget=forms.HiddenInput)
@@ -312,9 +312,9 @@ class TF10VareForm(BootstrapForm):
             "vareafgiftssats" in self.cleaned_data
         ):  # If not, it will fail validation elsewhere
             varesats = self.varesatser[int(self.cleaned_data["vareafgiftssats"])]
-            if not mængde and varesats["enhed"] in (
-                Vareafgiftssats.Enhed.KILOGRAM.value,
-                Vareafgiftssats.Enhed.LITER.value,
+            if not mængde and varesats.enhed in (
+                Vareafgiftssats.Enhed.KILOGRAM,
+                Vareafgiftssats.Enhed.LITER,
             ):
                 raise ValidationError(
                     self.fields["mængde"].error_messages["required"], code="required"
@@ -327,7 +327,7 @@ class TF10VareForm(BootstrapForm):
             "vareafgiftssats" in self.cleaned_data
         ):  # If not, it will fail validation elsewhere
             varesats = self.varesatser[int(self.cleaned_data["vareafgiftssats"])]
-            if not antal and varesats["enhed"] == Vareafgiftssats.Enhed.ANTAL.value:
+            if not antal and varesats.enhed == Vareafgiftssats.Enhed.ANTAL:
                 raise ValidationError(
                     self.fields["antal"].error_messages["required"], code="required"
                 )
@@ -339,9 +339,9 @@ class TF10VareForm(BootstrapForm):
             "vareafgiftssats" in self.cleaned_data
         ):  # If not, it will fail validation elsewhere
             varesats = self.varesatser[int(self.cleaned_data["vareafgiftssats"])]
-            if not fakturabeløb and varesats["enhed"] in (
-                Vareafgiftssats.Enhed.PROCENT.value,
-                Vareafgiftssats.Enhed.SAMMENSAT.value,
+            if not fakturabeløb and varesats.enhed in (
+                Vareafgiftssats.Enhed.PROCENT,
+                Vareafgiftssats.Enhed.SAMMENSAT,
             ):
                 raise ValidationError(
                     self.fields["fakturabeløb"].error_messages["required"],
@@ -378,7 +378,10 @@ class TF10SearchForm(PaginateForm, BootstrapForm):
             + sorted(
                 set(
                     [
-                        (item[vareart_key], item[vareart_key].lower().capitalize())
+                        (
+                            getattr(item, vareart_key),
+                            getattr(item, vareart_key).lower().capitalize(),
+                        )
                         for item in self.varesatser.values()
                     ]
                 ),
@@ -445,7 +448,10 @@ class TF5SearchForm(PaginateForm, BootstrapForm):
             + sorted(
                 set(
                     [
-                        (item[vareart_key], item[vareart_key].lower().capitalize())
+                        (
+                            getattr(item, vareart_key),
+                            getattr(item, vareart_key).lower().capitalize(),
+                        )
                         for item in self.varesatser.values()
                     ]
                 ),
@@ -475,3 +481,14 @@ class TF5SearchForm(PaginateForm, BootstrapForm):
     order_by = forms.CharField(required=False)
 
     id = forms.IntegerField(required=False)
+
+
+class TF5ViewForm(BootstrapForm):
+    annulleret = forms.BooleanField(required=False)
+    # For at vi kan have tre formfelter i hver sin modal
+    notat1 = forms.CharField(
+        widget=forms.Textarea(
+            attrs={"placeholder": _("Notat"), "disabled": "disabled"}
+        ),
+        required=False,
+    )

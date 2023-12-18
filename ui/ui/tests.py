@@ -15,6 +15,7 @@ from django.shortcuts import redirect
 from django.test import TestCase, override_settings
 from django.urls import reverse
 from requests import Response
+from told_common.data import Vareafgiftssats
 from told_common.forms import TF10Form, TF10VareForm
 from told_common.rest_client import RestClient
 from told_common.tests import TestMixin
@@ -331,39 +332,39 @@ class TF10BlanketTest(TestMixin, HasLogin, TestCase):
 
     def test_vareform_required_fields(self):
         varesatser = {
-            1: {
-                "id": 1,
-                "afgiftstabel": 1,
-                "vareart_da": "Båthorn",
-                "vareart_kl": "Båthorn",
-                "afgiftsgruppenummer": 12345678,
-                "enhed": "kg",
-                "afgiftssats": "1.00",
-                "kræver_indførselstilladelse": False,
-                "har_privat_tillægsafgift_alkohol": False,
-            },
-            2: {
-                "id": 2,
-                "afgiftstabel": 1,
-                "vareart_da": "Klovnesko",
-                "vareart_kl": "Klovnesko",
-                "afgiftsgruppenummer": 87654321,
-                "enhed": "ant",
-                "afgiftssats": "1.00",
-                "kræver_indførselstilladelse": False,
-                "har_privat_tillægsafgift_alkohol": False,
-            },
-            3: {
-                "id": 3,
-                "afgiftstabel": 1,
-                "vareart_da": "Ethjulede cykler",
-                "vareart_kl": "Ethjulede cykler",
-                "afgiftsgruppenummer": 22446688,
-                "enhed": "pct",
-                "afgiftssats": "0.50",
-                "kræver_indførselstilladelse": False,
-                "har_privat_tillægsafgift_alkohol": False,
-            },
+            1: Vareafgiftssats(
+                id=1,
+                afgiftstabel=1,
+                vareart_da="Båthorn",
+                vareart_kl="Båthorn",
+                afgiftsgruppenummer=12345678,
+                enhed=Vareafgiftssats.Enhed.KILOGRAM,
+                afgiftssats="1.00",
+                kræver_indførselstilladelse=False,
+                har_privat_tillægsafgift_alkohol=False,
+            ),
+            2: Vareafgiftssats(
+                id=2,
+                afgiftstabel=1,
+                vareart_da="Klovnesko",
+                vareart_kl="Klovnesko",
+                afgiftsgruppenummer=87654321,
+                enhed=Vareafgiftssats.Enhed.ANTAL,
+                afgiftssats="1.00",
+                kræver_indførselstilladelse=False,
+                har_privat_tillægsafgift_alkohol=False,
+            ),
+            3: Vareafgiftssats(
+                id=3,
+                afgiftstabel=1,
+                vareart_da="Ethjulede cykler",
+                vareart_kl="Ethjulede cykler",
+                afgiftsgruppenummer=22446688,
+                enhed=Vareafgiftssats.Enhed.PROCENT,
+                afgiftssats="0.50",
+                kræver_indførselstilladelse=False,
+                har_privat_tillægsafgift_alkohol=False,
+            ),
         }
 
         for required_field in ("vareafgiftssats",):
@@ -873,39 +874,39 @@ class TF5BlanketTest(TestMixin, HasLogin, TestCase):
 
     def test_vareform_required_fields(self):
         varesatser = {
-            1: {
-                "id": 1,
-                "afgiftstabel": 1,
-                "vareart_da": "Båthorn",
-                "vareart_kl": "Båthorn",
-                "afgiftsgruppenummer": 12345678,
-                "enhed": "kg",
-                "afgiftssats": "1.00",
-                "kræver_indførselstilladelse": False,
-                "har_privat_tillægsafgift_alkohol": False,
-            },
-            2: {
-                "id": 2,
-                "afgiftstabel": 1,
-                "vareart_da": "Klovnesko",
-                "vareart_kl": "Klovnesko",
-                "afgiftsgruppenummer": 87654321,
-                "enhed": "ant",
-                "afgiftssats": "1.00",
-                "kræver_indførselstilladelse": False,
-                "har_privat_tillægsafgift_alkohol": False,
-            },
-            3: {
-                "id": 3,
-                "afgiftstabel": 1,
-                "vareart_da": "Ethjulede cykler",
-                "vareart_kl": "Ethjulede cykler",
-                "afgiftsgruppenummer": 22446688,
-                "enhed": "pct",
-                "afgiftssats": "0.50",
-                "kræver_indførselstilladelse": False,
-                "har_privat_tillægsafgift_alkohol": False,
-            },
+            1: Vareafgiftssats(
+                id=1,
+                afgiftstabel=1,
+                vareart_da="Båthorn",
+                vareart_kl="Båthorn",
+                afgiftsgruppenummer=12345678,
+                enhed=Vareafgiftssats.Enhed.KILOGRAM,
+                afgiftssats="1.00",
+                kræver_indførselstilladelse=False,
+                har_privat_tillægsafgift_alkohol=False,
+            ),
+            2: Vareafgiftssats(
+                id=2,
+                afgiftstabel=1,
+                vareart_da="Klovnesko",
+                vareart_kl="Klovnesko",
+                afgiftsgruppenummer=87654321,
+                enhed=Vareafgiftssats.Enhed.ANTAL,
+                afgiftssats="1.00",
+                kræver_indførselstilladelse=False,
+                har_privat_tillægsafgift_alkohol=False,
+            ),
+            3: Vareafgiftssats(
+                id=3,
+                afgiftstabel=1,
+                vareart_da="Ethjulede cykler",
+                vareart_kl="Ethjulede cykler",
+                afgiftsgruppenummer=22446688,
+                enhed=Vareafgiftssats.Enhed.PROCENT,
+                afgiftssats="0.50",
+                kræver_indførselstilladelse=False,
+                har_privat_tillægsafgift_alkohol=False,
+            ),
         }
 
         for required_field in ("vareafgiftssats",):
