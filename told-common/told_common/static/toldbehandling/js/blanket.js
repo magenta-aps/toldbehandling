@@ -22,6 +22,7 @@ $(function () {
 
     for (let i = 0; i < aktører.length; i++) {
         const aktør = aktører[i];
+        console.log("aktør",aktør);
         const fields = aktør["fields"];
         const api = aktør["api"];
         const multi_container = $(aktør["multi_container"]);
@@ -43,6 +44,7 @@ $(function () {
         });
 
         const updateChoices = function(fieldName, event, callback) {
+            console.log("updateChoices");
             const filter = {};
             filter[fieldName] = this.val();
             if (filter[fieldName]) {

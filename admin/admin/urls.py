@@ -82,4 +82,20 @@ urlpatterns = [
         views.TF10EditMultipleView.as_view(),
         name="tf10_edit_multiple",
     ),
+    path("blanket/tf5", views.TF5ListView.as_view(), name="tf5_list"),
+    path(
+        "blanket/tf5/<int:id>",
+        views.TF5View.as_view(),
+        name="tf5_view",
+    ),
+    path(
+        "blanket/tf5/<int:id>/edit",
+        views.TF5UpdateView.as_view(),
+        name="tf5_edit",
+    ),
+    path(
+        "blanket/tf5/<int:id>/leverandørfaktura",
+        views.TF5LeverandørFakturaView.as_view(),
+        name="tf5_leverandørfaktura",
+    ),
 ]
