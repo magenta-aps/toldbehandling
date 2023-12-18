@@ -51,7 +51,7 @@ urlpatterns = [
     ),
     path(
         "blanket/tf5/<int:id>/edit",
-        views.TF5FormUpdateView.as_view(),
+        views.TF5UpdateView.as_view(),
         name="tf5_edit",
     ),
     path(

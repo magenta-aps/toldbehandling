@@ -12,6 +12,7 @@ from django.contrib import messages
 from django.shortcuts import redirect
 from django.template import loader
 from django.urls import reverse, reverse_lazy
+from django.utils.translation import gettext_lazy as _
 from django.views import View
 from django.views.generic import FormView, TemplateView
 from openpyxl import Workbook
@@ -800,3 +801,58 @@ class AfgiftstabelCreateView(PermissionsRequiredMixin, HasRestClientMixin, FormV
         for vareafgiftssats in satser:
             save_one(vareafgiftssats)
         return tabel_id
+
+
+class TF5ListView(common_views.TF5ListView):
+    extend_template = "admin/admin_layout.html"
+    actions_template = "admin/blanket/tf5/actions.html"
+
+    def get_context_data(self, **context: Dict[str, Any]) -> Dict[str, Any]:
+        return super().get_context_data(
+            **{
+                **context,
+                "title": _("Private indførselstilladelser"),
+                "can_create": False,
+                "can_cancel": False,
+            }
+        )
+
+
+class TF5View(common_views.TF5View):
+    extend_template = "admin/admin_layout.html"
+    required_permissions = (
+        "auth.admin",
+        "anmeldelse.view_privatafgiftsanmeldelse",
+    )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        can_edit = (
+            self.object.status == "ny"
+            and self.object.indleveringsdato > date.today()
+            and self.has_permissions(
+                request=self.request, required_permissions=self.edit_permissions
+            )
+        )
+        context.update(
+            {
+                "object": self.object,
+                "can_edit": can_edit,
+                "can_cancel": False,
+                "tillægsafgift": self.object.tillægsafgift,
+            }
+        )
+        return context
+
+
+class TF5UpdateView(common_views.TF5UpdateView):
+    extend_template = "admin/admin_layout.html"
+
+
+class TF5LeverandørFakturaView(common_views.LeverandørFakturaView):
+    required_permissions = (
+        "auth.admin",
+        "anmeldelse.view_privatafgiftsanmeldelse",
+    )
+    api = "privat_afgiftsanmeldelse"
+    key = "leverandørfaktura"
