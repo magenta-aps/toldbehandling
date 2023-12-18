@@ -222,10 +222,14 @@
             <div class="ml-auto">
                 {% if can_edit %}
                 <a class="btn btn-primary" href="{% url 'tf5_edit' object.id %}">{% translate "Redigér" %}</a>
+                {% endif %}
+
+                {% if can_cancel %}
                 <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#annuller_modal">
                     Annullér
                 </button>
                 {% endif %}
+
             </div>
         </div>
     </div>

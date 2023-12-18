@@ -16,11 +16,9 @@ from django.test import TestCase, override_settings
 from django.urls import reverse
 from requests import Response
 from told_common.data import Vareafgiftssats
-from told_common.forms import TF10Form, TF10VareForm
+from told_common.forms import TF5Form, TF10Form, TF10VareForm
 from told_common.rest_client import RestClient
 from told_common.tests import TestMixin
-
-from ui.forms import TF5Form
 
 from django.core.files.uploadedfile import (  # isort: skip
     SimpleUploadedFile,
