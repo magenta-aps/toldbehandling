@@ -173,7 +173,7 @@
     </table>
 
     <div class="row">
-        <div class="col-12 cleafix">
+        <div class="col-12 clearfix">
             {% if can_create %}
             <a href="{% url 'tf5_create' %}" class="btn btn-primary float-end">{% translate "Opret ny" %}</a>
             {% endif %}
@@ -183,6 +183,26 @@
         </div>
     </div>
 </div>
+
+{% if can_cancel %}
+<div id="cancel_modal" class="modal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Annullér indførselstilladelse</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Luk"></button>
+            </div>
+            <div class="modal-body">
+                <p>Er du sikker på at du vil annullere denne indførselstilladelse?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Nej</button>
+                <button type="submit" class="btn btn-danger" name="{{form.annuller.name}}" value="1">Ja</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
 
 {{search_data|json_script:"search_data"}}
 {% if multiedit_url %}

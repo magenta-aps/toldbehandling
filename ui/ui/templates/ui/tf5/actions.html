@@ -1,4 +1,2 @@
 {% load i18n %}
-{% if item.status == "ny" or item.status == "afvist" %}
-{# <a class="btn btn-primary btn-sm" href="{% url 'tf10_edit' id=item.id %}">{% translate 'Redigér' %}</a> #}
-{% endif %}
+<a class="btn btn-primary btn-sm" href="{% url 'tf5_view' id=item.id %}">{% translate 'Vis' %}</a>

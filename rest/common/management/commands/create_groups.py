@@ -119,6 +119,7 @@ class Command(BaseCommand):
             ("change", afsender_model),
             ("change", modtager_model),
             ("change", afgiftsanmeldelse_model),
+            ("change", privatafgiftsanmeldelse_model),
             ("change", varelinje_model),
             ("change", postforsendelse_model),
             ("change", fragtforsendelse_model),

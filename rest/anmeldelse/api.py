@@ -22,7 +22,6 @@ from ninja_extra import api_controller, permissions, route
 from ninja_extra.exceptions import PermissionDenied
 from ninja_extra.pagination import paginate
 from ninja_extra.schemas import NinjaPaginationResponseSchema
-from ninja_jwt.authentication import JWTAuth
 from project.util import RestPermission, json_dump
 
 from anmeldelse.models import (  # isort: skip
@@ -188,7 +187,7 @@ class AfgiftsanmeldelsePermission(RestPermission):
 )
 class AfgiftsanmeldelseAPI:
     @route.post("", auth=get_auth_methods(), url_name="afgiftsanmeldelse_create")
-    def create_afgiftsanmeldelse(
+    def create(
         self,
         payload: AfgiftsanmeldelseIn,
     ):
@@ -220,7 +219,7 @@ class AfgiftsanmeldelseAPI:
         url_name="afgiftsanmeldelse_list",
     )
     @paginate()  # https://eadwincode.github.io/django-ninja-extra/tutorial/pagination/
-    def list_afgiftsanmeldelser(
+    def list(
         self,
         filters: AfgiftsanmeldelseFilterSchema = Query(...),
         sort: str = None,
@@ -242,7 +241,7 @@ class AfgiftsanmeldelseAPI:
         url_name="afgiftsanmeldelse_list_full",
     )
     @paginate()  # https://eadwincode.github.io/django-ninja-extra/tutorial/pagination/
-    def list_afgiftsanmeldelser_full(
+    def list_full(
         self,
         filters: AfgiftsanmeldelseFilterSchema = Query(...),
         sort: str = None,
@@ -262,7 +261,7 @@ class AfgiftsanmeldelseAPI:
         auth=get_auth_methods(),
         url_name="afgiftsanmeldelse_get",
     )
-    def get_afgiftsanmeldelse(self, id: int):
+    def get(self, id: int):
         item = get_object_or_404(Afgiftsanmeldelse, id=id)
         self.check_user(item)
         return item
@@ -273,7 +272,7 @@ class AfgiftsanmeldelseAPI:
         auth=get_auth_methods(),
         url_name="afgiftsanmeldelse_get_full",
     )
-    def get_afgiftsanmeldelse_full(self, id: int):
+    def get_full(self, id: int):
         item = get_object_or_404(Afgiftsanmeldelse, id=id)
         self.check_user(item)
         return item
@@ -285,7 +284,7 @@ class AfgiftsanmeldelseAPI:
         url_name="afgiftsanmeldelse_get_history",
     )
     @paginate()  # https://eadwincode.github.io/django-ninja-extra/tutorial/pagination/
-    def get_afgiftsanmeldelse_history(self, id: int):
+    def get_history(self, id: int):
         item = get_object_or_404(Afgiftsanmeldelse, id=id)
         self.check_user(item)
         return list(item.history.order_by("history_date"))
@@ -311,7 +310,7 @@ class AfgiftsanmeldelseAPI:
         return None
 
     @route.patch("/{id}", auth=get_auth_methods(), url_name="afgiftsanmeldelse_update")
-    def update_afgiftsanmeldelse(
+    def update(
         self,
         id: int,
         payload: PartialAfgiftsanmeldelseIn,
@@ -404,6 +403,7 @@ class PartialPrivatAfgiftsanmeldelseIn(ModelSchema):
             "leverandørfaktura_nummer",
             "indførselstilladelse",
             "anonym",
+            "status",
         ]
         model_fields_optional = "__all__"
 
@@ -465,7 +465,7 @@ class PrivatAfgiftsanmeldelsePermission(RestPermission):
     permissions=[permissions.IsAuthenticated & PrivatAfgiftsanmeldelsePermission],
 )
 class PrivatAfgiftsanmeldelseAPI:
-    @route.post("", auth=JWTAuth(), url_name="privat_afgiftsanmeldelse_create")
+    @route.post("", auth=get_auth_methods(), url_name="privat_afgiftsanmeldelse_create")
     def create(
         self,
         payload: PrivatAfgiftsanmeldelseIn,
@@ -491,13 +491,24 @@ class PrivatAfgiftsanmeldelseAPI:
             )
 
     @route.get(
+        "/{id}",
+        response=PrivatAfgiftsanmeldelseOut,
+        auth=get_auth_methods(),
+        url_name="privat_afgiftsanmeldelse_get",
+    )
+    def get(self, id: int):
+        item = get_object_or_404(PrivatAfgiftsanmeldelse, id=id)
+        self.check_user(item)
+        return item
+
+    @route.get(
         "",
         response=NinjaPaginationResponseSchema[PrivatAfgiftsanmeldelseOut],
-        auth=JWTAuth(),
+        auth=get_auth_methods(),
         url_name="privat_afgiftsanmeldelse_list",
     )
     @paginate()  # https://eadwincode.github.io/django-ninja-extra/tutorial/pagination/
-    def list_afgiftsanmeldelser(
+    def list(
         self,
         filters: PrivatAfgiftsanmeldelseFilterSchema = Query(...),
         sort: str = None,
@@ -514,8 +525,17 @@ class PrivatAfgiftsanmeldelseAPI:
     def filter_user(self, qs: QuerySet) -> QuerySet:
         user = self.context.request.user
         if not user.has_perm("anmeldelse.view_all_anmeldelse"):
-            qs = qs.filter(oprettet_af=user)
+            qs = qs.filter(Q(oprettet_af=user) | Q(oprettet_på_vegne_af=user))
         return qs
+
+    def check_user(self, item: PrivatAfgiftsanmeldelse):
+        user = self.context.request.user
+        if not (
+            user.has_perm("anmeldelse.view_all_anmeldelse")
+            or item.oprettet_af == user
+            or item.oprettet_på_vegne_af == user
+        ):
+            raise PermissionDenied
 
     @staticmethod
     def map_sort(sort, order):
@@ -526,9 +546,9 @@ class PrivatAfgiftsanmeldelseAPI:
 
     @route.get(
         "seneste_indførselstilladelse/{cpr}",
-        auth=JWTAuth(),
+        auth=get_auth_methods(),
     )
-    def get_seneste_indførselstilladelse(self, cpr: int):
+    def get_latest(self, cpr: int):
         anmeldelse = (
             PrivatAfgiftsanmeldelse.objects.filter(cpr=cpr)
             .order_by("-oprettet")
@@ -537,6 +557,28 @@ class PrivatAfgiftsanmeldelseAPI:
         if anmeldelse:
             return anmeldelse.pk
         return None
+
+    @route.patch(
+        "/{id}", auth=get_auth_methods(), url_name="privatafgiftsanmeldelse_update"
+    )
+    def update(
+        self,
+        id: int,
+        payload: PartialPrivatAfgiftsanmeldelseIn,
+    ):
+        item = get_object_or_404(PrivatAfgiftsanmeldelse, id=id)
+        self.check_user(item)
+        data = payload.dict(exclude_unset=True)
+        leverandørfaktura = data.pop("leverandørfaktura", None)
+        for attr, value in data.items():
+            if value is not None:
+                setattr(item, attr, value)
+        if leverandørfaktura is not None:
+            item.leverandørfaktura = ContentFile(
+                base64.b64decode(leverandørfaktura), name=str(uuid4()) + ".pdf"
+            )
+        item.save()
+        return {"success": True}
 
 
 class VarelinjeIn(ModelSchema):
@@ -601,7 +643,7 @@ class VarelinjePermission(RestPermission):
 )
 class VarelinjeAPI:
     @route.post("", auth=get_auth_methods(), url_name="varelinje_create")
-    def create_varelinje(self, payload: VarelinjeIn):
+    def create(self, payload: VarelinjeIn):
         item = Varelinje.objects.create(**payload.dict())
         return {"id": item.id}
 
@@ -611,7 +653,7 @@ class VarelinjeAPI:
         auth=get_auth_methods(),
         url_name="varelinje_get",
     )
-    def get_varelinje(self, id: int):
+    def get(self, id: int):
         item = get_object_or_404(Varelinje, id=id)
         self.check_user(item)
         return item
@@ -623,7 +665,7 @@ class VarelinjeAPI:
         url_name="varelinje_list",
     )
     @paginate()  # https://eadwincode.github.io/django-ninja-extra/tutorial/pagination/
-    def list_varelinjer(
+    def list(
         self,
         filters: VarelinjeFilterSchema = Query(...),
         afgiftsanmeldelse_history_index: Optional[int] = None,
@@ -648,7 +690,7 @@ class VarelinjeAPI:
         return list(qs)
 
     @route.patch("/{id}", auth=get_auth_methods(), url_name="varelinje_update")
-    def update_varelinje(self, id: int, payload: PartialVarelinjeIn):
+    def update(self, id: int, payload: PartialVarelinjeIn):
         item = get_object_or_404(Varelinje, id=id)
         self.check_user(item)
         for attr, value in payload.dict(exclude_unset=True).items():
@@ -658,7 +700,7 @@ class VarelinjeAPI:
         return {"success": True}
 
     @route.delete("/{id}", auth=get_auth_methods(), url_name="varelinje_delete")
-    def delete_varelinje(self, id):
+    def delete(self, id):
         item = get_object_or_404(Varelinje, id=id)
         self.check_user(item)
         item.delete()

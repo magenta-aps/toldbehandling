@@ -13,10 +13,12 @@ from functools import cached_property
 from typing import Callable, List, Optional, Union
 
 from dataclasses_json import config, dataclass_json
+from django.conf import settings
 from django.core.files import File
 from django.template.defaultfilters import floatformat
 from django.utils.translation import gettext_lazy as _
 from marshmallow import fields
+from told_common.util import round_decimal
 
 
 def format_decimal(decimal: Decimal) -> str:
@@ -74,7 +76,7 @@ class Vareafgiftssats(ToldDataClass):
     afgiftsgruppenummer: int
     enhed: Enhed
     afgiftssats: Decimal
-    har_privat_tillægsafgift_alkohol: bool
+    har_privat_tillægsafgift_alkohol: bool = False
     kræver_indførselstilladelse: Optional[bool] = False
     minimumsbeløb: Optional[Decimal] = None
     overordnet: Optional[int] = None
@@ -401,7 +403,30 @@ class PrivatAfgiftsanmeldelse(ToldDataClass):
 
     @property
     def afgift_sum(self):
-        return sum([varelinje.afgiftsbeløb for varelinje in self.varelinjer or []])
+        return round_decimal(
+            sum([varelinje.afgiftsbeløb for varelinje in self.varelinjer or []])
+        )
+
+    @property
+    def tillægsafgift(self):
+        return round_decimal(
+            Decimal(settings.TILLÆGSAFGIFT_FAKTOR)
+            * sum(
+                [
+                    varelinje.afgiftsbeløb
+                    for varelinje in self.varelinjer or []
+                    if varelinje.vareafgiftssats.har_privat_tillægsafgift_alkohol
+                ]
+            )
+        )
+
+    @property
+    def ekspeditionsgebyr(self):
+        return round_decimal(Decimal(settings.EKSPEDITIONSGEBYR))
+
+    @property
+    def afgift_total(self):
+        return self.afgift_sum + self.tillægsafgift + self.ekspeditionsgebyr
 
 
 @dataclass_json

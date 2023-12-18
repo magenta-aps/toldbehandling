@@ -413,18 +413,17 @@ class AfgiftanmeldelseRestClient(ModelRestClient):
         else:
             data = self.rest.get("afgiftsanmeldelse", filter)
         for item in data["items"]:
+            id = item["id"]
             item["varelinjer"] = None
             item["notater"] = None
             item["prismeresponses"] = None
             if include_varelinjer:
-                item["varelinjer"] = self.rest.varelinje.list(
-                    afgiftsanmeldelse=item["id"]
-                )
+                item["varelinjer"] = self.rest.varelinje.list(afgiftsanmeldelse=id)
             if include_notater:
-                item["notater"] = self.rest.notat.list(afgiftsanmeldelse=item["id"])
+                item["notater"] = self.rest.notat.list(afgiftsanmeldelse=id)
             if include_prismeresponses:
                 item["prismeresponses"] = self.rest.prismeresponse.list(
-                    afgiftsanmeldelse=item["id"]
+                    afgiftsanmeldelse=id
                 )
         for item in data["items"]:
             self.set_file(item, "leverandørfaktura")
@@ -453,7 +452,7 @@ class AfgiftanmeldelseRestClient(ModelRestClient):
         if include_varelinjer:
             item["varelinjer"] = self.rest.varelinje.list(afgiftsanmeldelse=id)
         if include_notater:
-            item["notater"] = self.rest.notat.list(id)
+            item["notater"] = self.rest.notat.list(afgiftsanmeldelse=id)
         if include_prismeresponses:
             item["prismeresponses"] = self.rest.prismeresponse.list(
                 afgiftsanmeldelse=item["id"]
@@ -474,7 +473,9 @@ class AfgiftanmeldelseRestClient(ModelRestClient):
         data["varelinjer"] = self.rest.varelinje.list(
             afgiftsanmeldelse=id, afgiftsanmeldelse_history_index=history_index
         )
-        data["notater"] = self.rest.notat.list(id, history_index)
+        data["notater"] = self.rest.notat.list(
+            afgiftsanmeldelse=id, afgiftsanmeldelse_history_index=history_index
+        )
         data["prismeresponses"] = self.rest.prismeresponse.list(afgiftsanmeldelse=id)
         return HistoricAfgiftsanmeldelse.from_dict(data)
 
@@ -536,7 +537,6 @@ class PrivatAfgiftanmeldelseRestClient(ModelRestClient):
             data,
             leverandørfaktura,
         )
-        print(f"mapped: {mapped}")
         response = self.rest.post("privat_afgiftsanmeldelse", mapped)
         return response["id"]
 
@@ -560,24 +560,19 @@ class PrivatAfgiftanmeldelseRestClient(ModelRestClient):
         self,
         include_varelinjer=False,
         include_notater=False,
-        include_prismeresponses=False,
         **filter: Union[str, int, float, bool, List[Union[str, int, float, bool]]],
     ) -> Tuple[int, List[Afgiftsanmeldelse]]:
         data = self.rest.get("privat_afgiftsanmeldelse", filter)
         for item in data["items"]:
+            id = item["id"]
             item["varelinjer"] = None
             item["notater"] = None
             item["prismeresponses"] = None
             if include_varelinjer:
-                item["varelinjer"] = self.rest.varelinje.list(
-                    afgiftsanmeldelse=item["id"]
-                )
+                item["varelinjer"] = self.rest.varelinje.list(afgiftsanmeldelse=id)
             if include_notater:
-                item["notater"] = self.rest.notat.list(afgiftsanmeldelse=item["id"])
-            if include_prismeresponses:
-                item["prismeresponses"] = self.rest.prismeresponse.list(
-                    afgiftsanmeldelse=item["id"]
-                )
+                item["notater"] = self.rest.notat.list(afgiftsanmeldelse=id)
+
         for item in data["items"]:
             if item.get("leverandørfaktura"):
                 self.set_file(item, "leverandørfaktura")
@@ -588,34 +583,27 @@ class PrivatAfgiftanmeldelseRestClient(ModelRestClient):
     def get(
         self,
         id: int,
-        full=False,
         include_varelinjer=False,
         include_notater=False,
-        include_prismeresponses=False,
     ):
-        if full:
-            item = self.rest.get(f"privat_afgiftsanmeldelse/{id}/full")
-        else:
-            item = self.rest.get(f"privat_afgiftsanmeldelse/{id}")
+        item = self.rest.get(f"privat_afgiftsanmeldelse/{id}")
         if item.get("leverandørfaktura"):
             self.set_file(item, "leverandørfaktura")
         item["varelinjer"] = None
         item["notater"] = None
-        item["prismeresponses"] = None
         if include_varelinjer:
-            item["varelinjer"] = self.rest.varelinje.list(afgiftsanmeldelse=id)
+            item["varelinjer"] = self.rest.varelinje.list(privatafgiftsanmeldelse=id)
         if include_notater:
-            item["notater"] = self.rest.notat.list(id)
-        if include_prismeresponses:
-            item["prismeresponses"] = self.rest.prismeresponse.list(
-                afgiftsanmeldelse=item["id"]
-            )
+            item["notater"] = self.rest.notat.list(afgiftsanmeldelse=id)
         return PrivatAfgiftsanmeldelse.from_dict(item)
 
     def seneste_indførselstilladelse(self, cpr):
         return self.rest.get(
             f"privat_afgiftsanmeldelse/seneste_indførselstilladelse/{cpr}"
         )
+
+    def annuller(self, id: int):
+        self.rest.patch(f"privat_afgiftsanmeldelse/{id}", {"status": "annulleret"})
 
     # def list_history(self, id: int) -> Tuple[int, List[HistoricAfgiftsanmeldelse]]:
     #     data = self.rest.get(f"afgiftsanmeldelse/{id}/history")
@@ -639,9 +627,14 @@ class PrivatAfgiftanmeldelseRestClient(ModelRestClient):
 
 class VarelinjeRestClient(ModelRestClient):
     @staticmethod
-    def map(data: dict, afgiftsanmeldelse_id: int) -> dict:
+    def map(
+        data: dict,
+        afgiftsanmeldelse_id: Optional[int] = None,
+        privatafgiftsanmeldelse_id: Optional[int] = None,
+    ) -> dict:
         return {
             "afgiftsanmeldelse_id": afgiftsanmeldelse_id,
+            "privatafgiftsanmeldelse_id": privatafgiftsanmeldelse_id,
             "fakturabeløb": cast_or_none(str, data["fakturabeløb"]),
             "vareafgiftssats_id": int(data["vareafgiftssats"]),
             "antal": data["antal"],
@@ -659,12 +652,27 @@ class VarelinjeRestClient(ModelRestClient):
                 return False
         return True
 
-    def create(self, data: dict, afgiftsanmeldelse_id: int):
-        response = self.rest.post("varelinje", self.map(data, afgiftsanmeldelse_id))
+    def create(
+        self,
+        data: dict,
+        afgiftsanmeldelse_id: Optional[int] = None,
+        privatafgiftsanmeldelse_id: Optional[int] = None,
+    ):
+        response = self.rest.post(
+            "varelinje",
+            self.map(data, afgiftsanmeldelse_id, privatafgiftsanmeldelse_id),
+        )
         return response["id"]
 
-    def update(self, id: int, data: dict, existing: dict, afgiftsanmeldelse_id: int):
-        mapped = self.map(data, afgiftsanmeldelse_id)
+    def update(
+        self,
+        id: int,
+        data: dict,
+        existing: dict,
+        afgiftsanmeldelse_id: Optional[int] = None,
+        privatafgiftsanmeldelse_id: Optional[int] = None,
+    ):
+        mapped = self.map(data, afgiftsanmeldelse_id, privatafgiftsanmeldelse_id)
         if not self.compare(mapped, existing):
             self.rest.patch(f"varelinje/{id}", mapped)
         return id
@@ -699,11 +707,10 @@ class NotatRestClient(ModelRestClient):
     def delete(self, id):
         self.rest.delete(f"notat/{id}")
 
-    def list(self, afgiftsanmeldelse_id, afgiftsanmeldelse_history_index=None):
-        params = {"afgiftsanmeldelse": afgiftsanmeldelse_id}
-        if afgiftsanmeldelse_history_index is not None:
-            params["afgiftsanmeldelse_history_index"] = afgiftsanmeldelse_history_index
-        return [Notat.from_dict(x) for x in self.rest.get("notat", params)["items"]]
+    def list(
+        self, **filter: Union[str, int, float, bool, List[Union[str, int, float, bool]]]
+    ):
+        return [Notat.from_dict(x) for x in self.rest.get("notat", filter)["items"]]
 
 
 class PrismeResponseRestClient(ModelRestClient):
@@ -999,14 +1006,14 @@ class RestClient:
         return {item["id"]: item for item in items}
 
     @cached_property
-    def varesatser(self) -> Dict[int, dict]:
+    def varesatser(self) -> Dict[int, Vareafgiftssats]:
         return self.varesatser_fra(date.today())
 
     @cached_property
-    def varesatser_privat(self) -> Dict[int, dict]:
+    def varesatser_privat(self) -> Dict[int, Vareafgiftssats]:
         return self.varesatser_fra(date.today(), synlig_privat=True)
 
-    def varesatser_fra(self, at: date, **filter) -> Dict[int, dict]:
+    def varesatser_fra(self, at: date, **filter) -> Dict[int, Vareafgiftssats]:
         datestring = at.isoformat()
         afgiftstabeller = self.get(
             "afgiftstabel",
@@ -1019,9 +1026,12 @@ class RestClient:
         # Det bør ikke kunne lade sig gøre med mere end 1
         if afgiftstabeller["count"] == 1:
             afgiftstabel = afgiftstabeller["items"][0]
-            return self.get_all_items(
-                "vareafgiftssats", {"afgiftstabel": afgiftstabel["id"], **filter}
-            )
+            return {
+                key: Vareafgiftssats.from_dict(value)
+                for key, value in self.get_all_items(
+                    "vareafgiftssats", {"afgiftstabel": afgiftstabel["id"], **filter}
+                ).items()
+            }
         return {}
 
     @cached_property

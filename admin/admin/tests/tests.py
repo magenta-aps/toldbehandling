@@ -2861,33 +2861,33 @@ class TF10CreateTest(TestMixin, HasLogin, TestCase):
 
     def test_vareform_required_fields(self):
         varesatser = {
-            1: {
-                "id": 1,
-                "afgiftstabel": 1,
-                "vareart_da": "Båthorn",
-                "vareart_kl": "Båthorn",
-                "afgiftsgruppenummer": 12345678,
-                "enhed": "kg",
-                "afgiftssats": "1.00",
-            },
-            2: {
-                "id": 2,
-                "afgiftstabel": 1,
-                "vareart_da": "Klovnesko",
-                "vareart_kl": "Klovnesko",
-                "afgiftsgruppenummer": 87654321,
-                "enhed": "ant",
-                "afgiftssats": "1.00",
-            },
-            3: {
-                "id": 3,
-                "afgiftstabel": 1,
-                "vareart_da": "Ethjulede cykler",
-                "vareart_kl": "Ethjulede cykler",
-                "afgiftsgruppenummer": 22446688,
-                "enhed": "pct",
-                "afgiftssats": "0.50",
-            },
+            1: Vareafgiftssats(
+                id=1,
+                afgiftstabel=1,
+                vareart_da="Båthorn",
+                vareart_kl="Båthorn",
+                afgiftsgruppenummer=12345678,
+                enhed=Vareafgiftssats.Enhed.KILOGRAM,
+                afgiftssats="1.00",
+            ),
+            2: Vareafgiftssats(
+                id=2,
+                afgiftstabel=1,
+                vareart_da="Klovnesko",
+                vareart_kl="Klovnesko",
+                afgiftsgruppenummer=87654321,
+                enhed=Vareafgiftssats.Enhed.ANTAL,
+                afgiftssats="1.00",
+            ),
+            3: Vareafgiftssats(
+                id=3,
+                afgiftstabel=1,
+                vareart_da="Ethjulede cykler",
+                vareart_kl="Ethjulede cykler",
+                afgiftsgruppenummer=22446688,
+                enhed=Vareafgiftssats.Enhed.PROCENT,
+                afgiftssats="0.50",
+            ),
         }
 
         for required_field in ("vareafgiftssats",):
@@ -2907,7 +2907,9 @@ class TF10CreateTest(TestMixin, HasLogin, TestCase):
             form = TF10VareForm(data=data, varesatser=varesatser)
             self.assertTrue(required_field in form.errors, required_field)
             self.assertEquals(
-                form.errors[required_field], ["Dette felt er påkrævet."], required_field
+                form.errors[required_field],
+                ["Dette felt er påkrævet."],
+                required_field,
             )
 
     @patch.object(requests.Session, "get")
