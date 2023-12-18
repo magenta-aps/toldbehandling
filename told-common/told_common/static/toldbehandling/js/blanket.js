@@ -192,7 +192,7 @@ $(function () {
             }
             return tekster.join(" + ");
         }*/
-        return satsTekster[enhed].replace("%f", formatMoney(varesats["afgiftssats"]))
+        return window.satsTekster[enhed].replace("%f", formatMoney(varesats["afgiftssats"]))
     }
 
     const formatMoney = function(value) {
@@ -284,7 +284,6 @@ $(function () {
             if (afgift !== null) {
                 totalAfgift += afgift;
             }
-            console.log(varesats);
             if (varesats["har_privat_tillægsafgift_alkohol"]) {
                 tillægsafgift += tillægsafgift_faktor * afgift;
             }
@@ -326,8 +325,6 @@ $(function () {
         const rows = container.find(".row");
         const lastRow = rows.last();
         lastRow.find(".add-row").show();
-        console.log("lastRow", lastRow);
-        console.log("rows.not(lastRow)", rows.not(lastRow));
         if (rows.length === 1) {
             lastRow.find(".remove-row").hide();
         } else {

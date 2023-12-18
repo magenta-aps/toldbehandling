@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-12-14 13:32+0000\n"
+"POT-Creation-Date: 2023-12-15 11:03+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -115,7 +115,7 @@ msgstr ""
 msgid "CVR-nummer skal være på 8 cifre og må ikke begynde med 0"
 msgstr ""
 
-#: told_common/forms.py
+#: told_common/forms.py told_common/templates/told_common/tf5/view.html
 msgid "Navn"
 msgstr ""
 
@@ -234,6 +234,10 @@ msgstr ""
 msgid "Afsluttet"
 msgstr ""
 
+#: told_common/forms.py
+msgid "Notat"
+msgstr ""
+
 #: told_common/templates/told_common/access_denied.html
 msgid "Ingen adgang"
 msgstr ""
@@ -332,6 +336,7 @@ msgstr ""
 
 #: told_common/templates/told_common/tf10/form.html
 #: told_common/templates/told_common/tf5/form.html
+#: told_common/templates/told_common/tf5/view.html
 msgid "Vareart"
 msgstr ""
 
@@ -347,21 +352,25 @@ msgstr ""
 
 #: told_common/templates/told_common/tf10/form.html
 #: told_common/templates/told_common/tf5/form.html
+#: told_common/templates/told_common/tf5/view.html
 msgid "Antal"
 msgstr ""
 
 #: told_common/templates/told_common/tf10/form.html
 #: told_common/templates/told_common/tf5/form.html
+#: told_common/templates/told_common/tf5/view.html
 msgid "Fakturabeløb"
 msgstr ""
 
 #: told_common/templates/told_common/tf10/form.html
 #: told_common/templates/told_common/tf5/form.html
+#: told_common/templates/told_common/tf5/view.html
 msgid "Afgiftssats"
 msgstr ""
 
 #: told_common/templates/told_common/tf10/form.html
 #: told_common/templates/told_common/tf5/form.html
+#: told_common/templates/told_common/tf5/view.html
 msgid "Afgiftsbeløb"
 msgstr ""
 
@@ -371,6 +380,7 @@ msgstr ""
 
 #: told_common/templates/told_common/tf10/form.html
 #: told_common/templates/told_common/tf5/form.html
+#: told_common/templates/told_common/tf5/view.html
 msgid "Afgift i alt"
 msgstr ""
 
@@ -453,6 +463,7 @@ msgstr ""
 
 #: told_common/templates/told_common/tf10/list.html
 #: told_common/templates/told_common/tf5/list.html
+#: told_common/templates/told_common/tf5/view.html
 msgid "Redigér"
 msgstr ""
 
@@ -493,6 +504,7 @@ msgid "Nej"
 msgstr ""
 
 #: told_common/templates/told_common/tf5/form.html
+#: told_common/templates/told_common/tf5/view.html
 msgid ""
 "Ansøgning om engangstilladelse til privat indførsel af øl, vin og spiritus"
 msgstr ""
@@ -529,10 +541,12 @@ msgid "Bookingnummer for forsendelsen"
 msgstr ""
 
 #: told_common/templates/told_common/tf5/form.html
+#: told_common/templates/told_common/tf5/view.html
 msgid "Indførselstilladelse"
 msgstr ""
 
 #: told_common/templates/told_common/tf5/form.html
+#: told_common/templates/told_common/tf5/view.html
 msgid "Ingen"
 msgstr ""
 
@@ -549,18 +563,22 @@ msgid "Vedhæftning af varefaktura"
 msgstr ""
 
 #: told_common/templates/told_common/tf5/form.html
+#: told_common/templates/told_common/tf5/view.html
 msgid "Afgifter"
 msgstr ""
 
 #: told_common/templates/told_common/tf5/form.html
+#: told_common/templates/told_common/tf5/view.html
 msgid "Indførselsafgift"
 msgstr ""
 
 #: told_common/templates/told_common/tf5/form.html
+#: told_common/templates/told_common/tf5/view.html
 msgid "Tillægsafgift alkohol"
 msgstr ""
 
 #: told_common/templates/told_common/tf5/form.html
+#: told_common/templates/told_common/tf5/view.html
 msgid "Ekspeditionsgebyr"
 msgstr ""
 
@@ -582,6 +600,46 @@ msgstr ""
 
 #: told_common/templates/told_common/tf5/subform.html
 msgid "Fakturabeløb inkl. moms."
+msgstr ""
+
+#: told_common/templates/told_common/tf5/view.html
+msgid "CPR"
+msgstr ""
+
+#: told_common/templates/told_common/tf5/view.html
+msgid "Adresse"
+msgstr ""
+
+#: told_common/templates/told_common/tf5/view.html
+msgid "Postnr/by"
+msgstr ""
+
+#: told_common/templates/told_common/tf5/view.html
+msgid "Telefon"
+msgstr ""
+
+#: told_common/templates/told_common/tf5/view.html
+msgid "Bookingnummer"
+msgstr ""
+
+#: told_common/templates/told_common/tf5/view.html
+msgid "Fakturanummer"
+msgstr ""
+
+#: told_common/templates/told_common/tf5/view.html
+msgid "indleveringsdato"
+msgstr ""
+
+#: told_common/templates/told_common/tf5/view.html
+msgid "Varefaktura"
+msgstr ""
+
+#: told_common/templates/told_common/tf5/view.html
+msgid "Varekode"
+msgstr ""
+
+#: told_common/templates/told_common/tf5/view.html
+msgid "kg | liter"
 msgstr ""
 
 #: told_common/templates/told_common/widgets/file.html

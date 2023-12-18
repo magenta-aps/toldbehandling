@@ -306,7 +306,9 @@ class TF10FormUpdateView(common_views.TF10FormUpdateView):
                 "vis_notater": True,
                 "admin": True,
                 "gem_top": True,
-                "notater": self.rest_client.notat.list(self.kwargs["id"]),
+                "notater": self.rest_client.notat.list(
+                    afgiftsanmeldelse=self.kwargs["id"]
+                ),
             }
         )
 
@@ -341,7 +343,10 @@ class TF10HistoryListView(
 
     def get_items(self, search_data: Dict[str, Any]):
         id = self.kwargs["id"]
-        self.notater = {item.index: item for item in self.rest_client.notat.list(id)}
+        self.notater = {
+            item.index: item
+            for item in self.rest_client.notat.list(afgiftsanmeldelse=id)
+        }
         count, items = self.rest_client.afgiftanmeldelse.list_history(id)
         return {"count": count, "items": items}
 

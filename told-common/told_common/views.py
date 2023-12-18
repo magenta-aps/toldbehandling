@@ -5,21 +5,28 @@ import dataclasses
 import os
 from datetime import date
 from functools import cached_property
-from typing import Any, Dict
+from typing import Any, Dict, List
 from urllib.parse import unquote
 
 from django.conf import settings
 from django.contrib import messages
 from django.http import FileResponse, Http404, JsonResponse
+from django.shortcuts import redirect
 from django.template import loader
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from django.views import View
 from django.views.generic import FormView, RedirectView
+from requests import HTTPError
 from told_common import forms
-from told_common.data import Afgiftsanmeldelse, Forsendelsestype
 from told_common.rest_client import RestClient
-from told_common.util import JSONEncoder
+from told_common.util import JSONEncoder, dataclass_map_to_dict
+
+from told_common.data import (  # isort: skip
+    Afgiftsanmeldelse,
+    Forsendelsestype,
+    Vareafgiftssats,
+)
 
 from told_common.view_mixins import (  # isort: skip
     CustomLayoutMixin,
@@ -170,7 +177,7 @@ class TF10FormCreateView(
     def toplevel_varesatser(self):
         return dict(
             filter(
-                lambda pair: pair[1].get("overordnet") is None,
+                lambda pair: pair[1].overordnet is None,
                 self.rest_client.varesatser.items(),
             )
         )
@@ -196,7 +203,7 @@ class TF10FormCreateView(
         # Will be picked up by TF10VareForm's constructor
         kwargs["form_kwargs"]["varesatser"] = dict(
             filter(
-                lambda pair: pair[1].get("overordnet") is None,
+                lambda pair: pair[1].overordnet is None,
                 self.rest_client.varesatser.items(),
             )
         )
@@ -206,7 +213,7 @@ class TF10FormCreateView(
         context = super().get_context_data(
             **{
                 **context,
-                "varesatser": self.rest_client.varesatser,
+                "varesatser": dataclass_map_to_dict(self.rest_client.varesatser),
                 "extend_template": self.extend_template,
                 "highlight": self.request.GET.get("highlight"),
             }
@@ -350,7 +357,7 @@ class TF10FormUpdateView(
     def toplevel_varesatser(self):
         return dict(
             filter(
-                lambda pair: pair[1].get("overordnet") is None,
+                lambda pair: pair[1].overordnet is None,
                 self.rest_client.varesatser_fra(self.item.dato).items(),
             )
         )
@@ -388,7 +395,9 @@ class TF10FormUpdateView(
         return super().get_context_data(
             **{
                 **context,
-                "varesatser": self.rest_client.varesatser_fra(self.item.dato),
+                "varesatser": dataclass_map_to_dict(
+                    self.rest_client.varesatser_fra(self.item.dato)
+                ),
                 "item": self.item,
                 "afsender_existing_id": self.item.afsender.id,
                 "modtager_existing_id": self.item.modtager.id,
@@ -592,7 +601,7 @@ class TF10ListView(
         # Will be picked up by TF10SearchForm's constructor
         kwargs["varesatser"] = dict(
             filter(
-                lambda pair: pair[1].get("overordnet") is None,
+                lambda pair: pair[1].overordnet is None,
                 self.rest_client.varesatser.items(),
             )
         )
@@ -603,3 +612,77 @@ class TF10ListView(
             item[1]["id"]: item[1] for item in self.rest_client.modtagere.items()
         }
         return kwargs
+
+
+class TF5View(PermissionsRequiredMixin, HasRestClientMixin, FormView):
+    required_permissions = (
+        "anmeldelse.view_privatafgiftsanmeldelse",
+        "anmeldelse.view_varelinje",
+        "sats.view_vareafgiftssats",
+    )
+    edit_permissions = ("anmeldelse.change_privatafgiftsanmeldelse",)
+
+    template_name = "told_common/tf5/view.html"
+    form_class = forms.TF5ViewForm
+    show_notater = False
+
+    def get_subsatser(self, parent_id: int) -> List[Vareafgiftssats]:
+        return self.rest_client.vareafgiftssats.list(overordnet=parent_id)
+
+    def get_context_data(self, **kwargs):
+        can_edit = (
+            self.object.status == "ny"
+            and self.object.indleveringsdato > date.today()
+            and self.has_permissions(
+                request=self.request, required_permissions=self.edit_permissions
+            )
+        )
+        return super().get_context_data(
+            **{
+                **kwargs,
+                "object": self.object,
+                "can_edit": can_edit,
+                "tillægsafgift": self.object.tillægsafgift,
+            }
+        )
+
+    def form_valid(self, form):
+        anmeldelse_id = self.kwargs["id"]
+        annulleret = form.cleaned_data["annulleret"]
+        notat = form.cleaned_data["notat1"]
+
+        try:
+            if annulleret is not None:
+                # Yderligere tjek for om brugeren må ændre noget.
+                # Vi kan have en situation hvor brugeren må se siden
+                # men ikke submitte formularen
+                response = self.check_permissions(self.edit_permissions)
+                if response:
+                    return response
+                self.rest_client.privat_afgiftsanmeldelse.annuller(anmeldelse_id)
+
+            # Opret notat _efter_ den nye version af anmeldelsen,
+            # så vores historik-filtrering fungerer
+            if notat:
+                self.rest_client.notat.create({"tekst": notat}, self.kwargs["id"])
+
+        except HTTPError as e:
+            if e.response.status_code == 404:
+                raise Http404("Afgiftsanmeldelse findes ikke")
+            raise
+        return redirect(reverse("tf5_view", kwargs={"id": anmeldelse_id}))
+
+    @cached_property
+    def object(self):
+        id = self.kwargs["id"]
+        try:
+            anmeldelse = self.rest_client.privat_afgiftsanmeldelse.get(
+                id,
+                include_notater=self.show_notater,
+                include_varelinjer=True,
+            )
+        except HTTPError as e:
+            if e.response.status_code == 404:
+                raise Http404("Afgiftsanmeldelse findes ikke")
+            raise
+        return anmeldelse

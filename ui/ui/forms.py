@@ -21,11 +21,15 @@ from told_common.form_mixins import (  # isort: skip
 class TF5Form(BootstrapForm):
     def __init__(
         self,
+        leverandørfaktura_required: bool = True,
         varesatser: Optional[dict] = None,
         *args,
         **kwargs,
     ):
         super().__init__(*args, **kwargs)
+        if not leverandørfaktura_required:
+            self.fields["leverandørfaktura"].required = False
+        self.leverandørfaktura_required = leverandørfaktura_required
         self.varesatser = varesatser
         self.fields["indleveringsdato"].widget.attrs.update(
             {"min": date_next_workdays(date.today(), 6)}

@@ -190,3 +190,6 @@ CVR_TOLDKATEGORI_MAP = [
     {"kategori": "77", "navn": "Fra Skattestyrelsen", "cvr": []},
     {"kategori": "79", "navn": "Refusion", "cvr": []},
 ]
+
+TILLÆGSAFGIFT_FAKTOR = 0.5
+EKSPEDITIONSGEBYR = 250

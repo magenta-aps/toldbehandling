@@ -34,11 +34,31 @@ urlpatterns = [
         name="tf10_list",
     ),
     path(
+        "blanket/tf10/<int:id>/leverandørfaktura",
+        views.TF10LeverandørFakturaView.as_view(),
+        name="tf10_leverandørfaktura",
+    ),
+    path(
         "blanket/tf5/create",
         views.TF5FormCreateView.as_view(),
         name="tf5_create",
     ),
     path("blanket/tf5", views.TF5ListView.as_view(), name="tf5_list"),
+    path(
+        "blanket/tf5/<int:id>",
+        views.TF5View.as_view(),
+        name="tf5_view",
+    ),
+    path(
+        "blanket/tf5/<int:id>/edit",
+        views.TF5FormUpdateView.as_view(),
+        name="tf5_edit",
+    ),
+    path(
+        "blanket/tf5/<int:id>/leverandørfaktura",
+        views.TF5LeverandørFakturaView.as_view(),
+        name="tf5_leverandørfaktura",
+    ),
     path(
         "error/login-timeout/",
         AccessDeniedView.as_view(template_name="ui/error/login_timeout.html"),

@@ -1,6 +1,8 @@
 import base64
 import dataclasses
 from datetime import date, timedelta
+from decimal import ROUND_HALF_EVEN, Decimal
+from enum import Enum
 from typing import Any, Callable, Dict, Iterable, Optional, Union
 
 import holidays
@@ -83,3 +85,23 @@ def date_next_workdays(from_date: date, add_days: int):
         business_days_to_add -= 1
     cache.set(key, current_date, 24 * 60 * 60)
     return current_date
+
+
+def round_decimal(d: Decimal, rounding: str = ROUND_HALF_EVEN):
+    return Decimal(d.quantize(Decimal(".01"), rounding=rounding))
+
+
+def _asdict_factory(data):
+    def convert_value(obj):
+        if isinstance(obj, Enum):
+            return obj.value
+        return obj
+
+    return dict((k, convert_value(v)) for k, v in data)
+
+
+def dataclass_map_to_dict(data: Dict):
+    return {
+        key: dataclasses.asdict(value, dict_factory=_asdict_factory)
+        for key, value in data.items()
+    }
