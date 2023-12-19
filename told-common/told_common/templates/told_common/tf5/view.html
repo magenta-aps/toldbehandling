@@ -226,12 +226,22 @@
 
                 {% if can_cancel %}
                 <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#annuller_modal">
-                    Annullér
+                    {% translate "Annullér" %}
                 </button>
                 {% endif %}
 
+                {% if can_create_tilladelse or can_send_tilladelse %}
+                {% csrf_token %}
                 {% if can_create_tilladelse %}
-                <button formaction="{% url 'tf5_tilladelse' object.id %}?next={% url 'tf5_tilladelse' object.id %}" class="btn btn-success">Opret tilladelse</button>
+                <button name="opret" value="true" formaction="{% url 'tf5_tilladelse' object.id %}?next={% url 'tf5_tilladelse' object.id %}" class="btn btn-success">
+                    {% translate "Opret tilladelse" %}
+                </button>
+                {% endif %}
+                {% if can_send_tilladelse %}
+                <button name="send" value="true" formaction="{% url 'tf5_tilladelse' object.id %}?next={% url 'tf5_tilladelse' object.id %}" class="btn btn-success">
+                    {% translate "Send tilladelse" %}
+                </button>
+                {% endif %}
                 {% endif %}
 
                 {% if can_view_tilladelse %}

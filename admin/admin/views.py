@@ -201,6 +201,7 @@ class TF10View(PermissionsRequiredMixin, TF10BaseView, FormView):
                             "cvr": indberetter_data.get("cvr"),
                             "titel": "Din afgiftsanmeldelse (TF10) er afvist",
                             "pdf": pdf,
+                            "afgiftsanmeldelse_id": anmeldelse_id,
                         }
                     )
                     # For at inspicere pdf'en

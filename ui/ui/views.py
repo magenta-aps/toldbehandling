@@ -13,10 +13,12 @@ from django.http import FileResponse, Http404
 from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext_lazy as _
-from django.views import View
+from django.views.generic import FormView
 from requests import HTTPError
 from told_common import forms as common_forms
 from told_common import views as common_views
+
+from ui import forms
 
 from told_common.util import (  # isort: skip
     dataclass_map_to_dict,
@@ -25,7 +27,6 @@ from told_common.util import (  # isort: skip
     render_pdf,
     write_pdf,
 )
-
 from told_common.view_mixins import (  # isort: skip
     FormWithFormsetView,
     HasRestClientMixin,
@@ -211,13 +212,15 @@ class TF5View(common_views.TF5View):
                 request=self.request, required_permissions=self.edit_permissions
             )
         )
+        tilladelse_eksisterer = TF5TilladelseView.exists(self.kwargs["id"])
         context.update(
             {
                 "object": self.object,
                 "can_edit": can_edit,
                 "can_cancel": can_edit,
                 "tillægsafgift": self.object.tillægsafgift,
-                "can_view_tilladelse": TF5TilladelseView.exists(self.kwargs["id"]),
+                "can_view_tilladelse": tilladelse_eksisterer,
+                "can_send_tilladelse": tilladelse_eksisterer,
             }
         )
         return context
@@ -233,10 +236,11 @@ class TF5LeverandørFakturaView(common_views.LeverandørFakturaView):
     key = "leverandørfaktura"
 
 
-class TF5TilladelseView(PermissionsRequiredMixin, HasRestClientMixin, View):
+class TF5TilladelseView(PermissionsRequiredMixin, HasRestClientMixin, FormView):
     template_name = "ui/tf5/tilladelse.html"
     required_permissions = ("anmeldelse.view_privatafgiftsanmeldelse",)
     edit_permissions = ("anmeldelse.add_privatafgiftsanmeldelse",)
+    form_class = forms.TF5TilladelseForm
 
     @cached_property
     def path(self) -> str:
@@ -250,18 +254,32 @@ class TF5TilladelseView(PermissionsRequiredMixin, HasRestClientMixin, View):
     def exists(id: int) -> bool:
         return os.path.exists(TF5TilladelseView.id_path(id))
 
-    def post(self, request, *args, **kwargs):
-        response = self.check_permissions(self.edit_permissions)
-        if response:
-            return response
-        context = {"object": self.object}
-        with language("kl"):
-            pdfdata_kl = render_pdf("told_common/tf5/tilladelse.html", context)
-        with language("da"):
-            pdfdata_da = render_pdf("told_common/tf5/tilladelse.html", context)
-        with self.object.leverandørfaktura.open() as faktura:
-            write_pdf(self.path, BytesIO(pdfdata_kl), BytesIO(pdfdata_da), faktura)
-        return redirect(request.GET.get("next") or reverse_lazy("tf5_list"))
+    def form_valid(self, form):
+        if form.cleaned_data["opret"]:
+            response = self.check_permissions(self.edit_permissions)
+            if response:
+                return response
+            context = {"object": self.object}
+            with language("kl"):
+                pdfdata_kl = render_pdf("told_common/tf5/tilladelse.html", context)
+            with language("da"):
+                pdfdata_da = render_pdf("told_common/tf5/tilladelse.html", context)
+            with self.object.leverandørfaktura.open() as faktura:
+                write_pdf(self.path, BytesIO(pdfdata_kl), BytesIO(pdfdata_da), faktura)
+        if form.cleaned_data["send"]:
+            indberetter_data = self.object.oprettet_af["indberetter_data"]
+            with open(self.path, "rb") as file:
+                pdfdata = file.read()
+            self.rest_client.eboks.create(
+                {
+                    "cpr": indberetter_data.get("cpr"),
+                    "cvr": indberetter_data.get("cvr"),
+                    "titel": "Indførselstilladelse",
+                    "pdf": pdfdata,
+                    "privat_afgiftsanmeldelse_id": self.object.id,
+                }
+            )
+        return redirect(self.request.GET.get("next") or reverse_lazy("tf5_list"))
 
     def get(self, request, *args, **kwargs):
         self.object  # Vil kaste 404 hvis man ikke har adgang til anmeldelsen
