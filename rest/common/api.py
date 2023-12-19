@@ -208,6 +208,7 @@ class UserAPI:
 
 class EboksBeskedIn(ModelSchema):
     afgiftsanmeldelse_id: int = None
+    privat_afgiftsanmeldelse_id: int = None
     pdf: str  # base64
 
     class Config:

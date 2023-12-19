@@ -76,6 +76,9 @@ class EboksBesked(models.Model):
     afgiftsanmeldelse = models.ForeignKey(
         "anmeldelse.Afgiftsanmeldelse", null=True, on_delete=models.SET_NULL
     )
+    privat_afgiftsanmeldelse = models.ForeignKey(
+        "anmeldelse.PrivatAfgiftsanmeldelse", null=True, on_delete=models.SET_NULL
+    )
 
     class Meta:
         constraints = [
