@@ -1,17 +1,30 @@
 # SPDX-FileCopyrightText: 2023 Magenta ApS <info@magenta.dk>
 #
 # SPDX-License-Identifier: MPL-2.0
+import os
 from datetime import date
 from functools import cached_property
+from io import BytesIO
 from typing import Any, Dict
 
 from django.conf import settings
 from django.contrib import messages
-from django.urls import reverse
+from django.http import FileResponse, Http404
+from django.shortcuts import redirect
+from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext_lazy as _
+from django.views import View
+from requests import HTTPError
 from told_common import forms as common_forms
 from told_common import views as common_views
-from told_common.util import dataclass_map_to_dict, opt_str
+
+from told_common.util import (  # isort: skip
+    dataclass_map_to_dict,
+    language,
+    opt_str,
+    render_pdf,
+    write_pdf,
+)
 
 from told_common.view_mixins import (  # isort: skip
     FormWithFormsetView,
@@ -204,6 +217,7 @@ class TF5View(common_views.TF5View):
                 "can_edit": can_edit,
                 "can_cancel": can_edit,
                 "tillægsafgift": self.object.tillægsafgift,
+                "can_view_tilladelse": TF5TilladelseView.exists(self.kwargs["id"]),
             }
         )
         return context
@@ -217,3 +231,52 @@ class TF5LeverandørFakturaView(common_views.LeverandørFakturaView):
     required_permissions = ("anmeldelse.view_privatafgiftsanmeldelse",)
     api = "privat_afgiftsanmeldelse"
     key = "leverandørfaktura"
+
+
+class TF5TilladelseView(PermissionsRequiredMixin, HasRestClientMixin, View):
+    template_name = "ui/tf5/tilladelse.html"
+    required_permissions = ("anmeldelse.view_privatafgiftsanmeldelse",)
+    edit_permissions = ("anmeldelse.add_privatafgiftsanmeldelse",)
+
+    @cached_property
+    def path(self) -> str:
+        return self.id_path(self.kwargs["id"])
+
+    @staticmethod
+    def id_path(id: int) -> str:
+        return os.path.join(settings.TF5_ROOT, "tilladelser", f"{id}.pdf")
+
+    @staticmethod
+    def exists(id: int) -> bool:
+        return os.path.exists(TF5TilladelseView.id_path(id))
+
+    def post(self, request, *args, **kwargs):
+        response = self.check_permissions(self.edit_permissions)
+        if response:
+            return response
+        context = {"object": self.object}
+        with language("kl"):
+            pdfdata_kl = render_pdf("told_common/tf5/tilladelse.html", context)
+        with language("da"):
+            pdfdata_da = render_pdf("told_common/tf5/tilladelse.html", context)
+        with self.object.leverandørfaktura.open() as faktura:
+            write_pdf(self.path, BytesIO(pdfdata_kl), BytesIO(pdfdata_da), faktura)
+        return redirect(request.GET.get("next") or reverse_lazy("tf5_list"))
+
+    def get(self, request, *args, **kwargs):
+        self.object  # Vil kaste 404 hvis man ikke har adgang til anmeldelsen
+        return FileResponse(open(self.path, "rb"))
+
+    @cached_property
+    def object(self):
+        id = self.kwargs["id"]
+        try:
+            anmeldelse = self.rest_client.privat_afgiftsanmeldelse.get(
+                id,
+                include_varelinjer=True,
+            )
+        except HTTPError as e:
+            if e.response.status_code == 404:
+                raise Http404("Afgiftsanmeldelse findes ikke")
+            raise
+        return anmeldelse

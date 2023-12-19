@@ -230,6 +230,13 @@
                 </button>
                 {% endif %}
 
+                {% if can_create_tilladelse %}
+                <button formaction="{% url 'tf5_tilladelse' object.id %}?next={% url 'tf5_tilladelse' object.id %}" class="btn btn-success">Opret tilladelse</button>
+                {% endif %}
+
+                {% if can_view_tilladelse %}
+                <a class="btn btn-primary" href="{% url 'tf5_tilladelse' object.id %}">Download tilladelse</a>
+                {% endif %}
             </div>
         </div>
     </div>

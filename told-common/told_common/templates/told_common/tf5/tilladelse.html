@@ -1,0 +1,178 @@
+{% load i18n %}
+{% load l10n %}
+{% get_current_language as LANGUAGE_CODE %}
+{% localize off %}
+<!DOCTYPE html>
+<html lang="{{LANGUAGE_CODE}}">
+<head>
+
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style>
+        @page {
+            size: A4;
+        }
+        html {
+            font-size: 80%;
+        }
+        table {
+            width: 100%;
+            table-layout: fixed;
+            border-collapse: collapse;
+            color: #548235;
+        }
+
+        td.bordered {
+            border: 2px solid #548235;
+            padding: 0;
+            vertical-align: top;
+        }
+
+        thead th.bordered {
+            border: none;
+            border-bottom: 2px solid #548235;
+        }
+
+        tr.sep {
+            height: 0.1em;
+        }
+
+        td.h-1 {
+            height: 1em;
+        }
+
+        td.h-2 {
+            height: 2em;
+        }
+
+        td.h-3 {
+            height: 3em;
+        }
+
+        p {
+            font-size: 0.6rem;
+            margin: 0;
+        }
+
+        td.nonborder {
+            border: 0 solid transparent;
+        }
+
+        p.important {
+            font-weight: bold;
+            text-decoration: underline;
+        }
+
+        tfoot p {
+            font-weight: bold;
+        }
+
+        hr {
+            border: 0.5em solid #a9d18e;
+        }
+
+    </style>
+</head>
+<body>
+
+<hr/>
+<table>
+    <thead>
+    <colgroup>
+        <col style="width:15%">
+        <col style="width:30%">
+        <col style="width:2%">
+        <col style="width:30%">
+        <col style="width:2%">
+        <col style="width:10%">
+        <col style="width:10%">
+    </colgroup>
+    <tr>
+        <td colspan="2"></td>
+        <th colspan="4" class="bordered">{% translate "Engangstilladelse til privatindførsel af øl, vin og spiritus" %}</p></th>
+        <th></th>
+    </tr>
+
+    </thead>
+    <tbody>
+    <tr class="sep"></tr>
+
+    <tr>
+        <td colspan="2" class="bordered h-2"><p>{% translate "Indehavers navn" %}</p>{{object.navn}}</td>
+        <td colspan="2" class="bordered h-2"><p>{% translate "CPR-nummer" %}</p>{{object.cpr}}</td>
+        <td></td>
+        <td colspan="2" rowspan="2" class="bordered h-3"><p>{% translate "Engangstilladelsesnummer" %}</p>{{object.id}}</td>
+    </tr>
+
+    <tr>
+        <td colspan="4" rowspan="2" class="bordered h-2"><p>{% translate "Indehavers adresse" %}</p>{{object.adresse}}  {{object.postnummer}}  {{object.by}}</td>
+    </tr>
+
+    <tr>
+        <td class="h-1 nonborder"></td>
+        <td colspan="2" class="h-1"></td>
+    </tr>
+
+    <tr>
+        <td colspan="4" class="bordered h-2"><p>{% translate "Bookingnr. for forsendelse" %}</p>{{object.bookingnummer}}</td>
+        <td></td>
+        <td colspan="2" rowspan="2" class="bordered h-3"><p>{% translate "Udstedelsesdato" %}</p>{{object.oprettet|date:"d.m.Y"}}</td>
+    </tr>
+
+    <tr>
+        <td colspan="4" class="h-1"></td>
+    </tr>
+
+    <tr>
+        <td colspan="7" class="h-1"></td>
+    </tr>
+
+    <tr>
+        <td class="bordered h-2"><p>{% translate "Omfang" %}</p></td>
+        <td colspan="3" class="bordered h-2">
+            <p>{% translate "Tilladelsen omfatter indførsel af den mængde øl, vin eller spiritus, der fremgår af udfyldte ansøgning. Indførsel af de angivne mængder er kun til privat forbrug." %}</p>
+        </td>
+    </tr>
+
+    {% for linje in object.varelinjer %}
+    <tr>
+        <td class="bordered h-2">{{linje.mængde}} {{linje.vareafgiftssats.enhed.value}}</td>
+        <td colspan="3" class="bordered h-2">
+            {% if LANGUAGE_CODE == "kl" %}
+            {{linje.vareafgiftssats.vareart_kl}}
+            {% else %}
+            {{linje.vareafgiftssats.vareart_da}}
+            {% endif %}
+        </td>
+    </tr>
+    {% endfor %}
+
+    <tr>
+        <td class="bordered h-2"><p>{% translate "Gyldighedsperiode" %}</p></td>
+        <td colspan="3" class="bordered h-2">
+            <p>{% translate "Tilladelsen er gyldig. Tilladelsen frafalder i det øjeblik, de indførte varer udleveres til tilladelsens indehaver i Grønland" %}</p>
+        </td>
+    </tr>
+    <tr>
+        <td class="bordered h-2"><p>{% translate "Dokumentation ved udlevering" %}</p></td>
+        <td colspan="3" class="bordered h-2">
+            <p class="important">{% translate "Ved udlevering skal ansøgning og tilladelse medbringes" %}</p>
+        </td>
+    </tr>
+
+
+    </tbody>
+    <tfoot>
+    <tr>
+        <td class="h-1"></td>
+    </tr>
+    <tr>
+        <td colspan="2" class="h-1"><p>{% translate "DENNE TILLADELSE ER UOVERDRAGELIG" %}</p></td>
+    </tr>
+    </tfoot>
+</table>
+<hr/>
+
+</body>
+</html>
+{% endlocalize %}

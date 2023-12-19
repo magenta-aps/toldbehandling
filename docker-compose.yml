@@ -71,6 +71,7 @@ services:
       - ./ui/:/app
       - ./told-common/told_common/:/app/told_common
       - file-data:/upload  # rw for at kunne teste; bør være ro i deployments
+      - tf5-data:/tf5:rw
       - ./dev-environment/cert:/ssl:ro
     environment:
       - MAKE_MIGRATIONS=true
@@ -161,3 +162,4 @@ services:
 volumes:
   postgres-data:
   file-data:
+  tf5-data:
