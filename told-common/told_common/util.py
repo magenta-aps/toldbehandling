@@ -3,13 +3,15 @@ import dataclasses
 from datetime import date, timedelta
 from decimal import ROUND_HALF_EVEN, Decimal
 from enum import Enum
-from typing import Any, Callable, Dict, Iterable, Optional, Union
+from typing import Any, BinaryIO, Callable, Dict, Iterable, Optional, Union
 
 import holidays
 from django.core.cache import cache
 from django.core.files import File
 from django.core.serializers.json import DjangoJSONEncoder
 from django.template.loader import render_to_string
+from django.utils import translation
+from pypdf import PdfWriter
 from weasyprint import HTML
 from weasyprint.text.fonts import FontConfiguration
 
@@ -59,6 +61,18 @@ def render_pdf(
     return HTML(string=html).write_pdf(font_config=font_config)
 
 
+class language:
+    def __init__(self, new_lang):
+        self.new_lang = new_lang
+        self.old_lang = translation.get_language()
+
+    def __enter__(self):
+        translation.activate(self.new_lang)
+
+    def __exit__(self, type, value, tb):
+        translation.activate(self.old_lang)
+
+
 def join_words(words: Optional[str], separator: str = " "):
     return separator.join(filter(lambda word: word, words))
 
@@ -105,3 +119,11 @@ def dataclass_map_to_dict(data: Dict):
         key: dataclasses.asdict(value, dict_factory=_asdict_factory)
         for key, value in data.items()
     }
+
+
+def write_pdf(output_path, *inputs: BinaryIO):
+    writer = PdfWriter()
+    for input in inputs:
+        writer.append(input)
+    with open(output_path, "wb") as output:
+        writer.write(output)

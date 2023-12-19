@@ -574,6 +574,7 @@ class TF5Form(BootstrapForm):
             attrs={
                 "data-tooltip-title": _("Varefaktura"),
                 "data-tooltip-content": _("Vedhæftning af varefaktura"),
+                "accept": ".pdf,application/pdf",
             }
         ),
     )

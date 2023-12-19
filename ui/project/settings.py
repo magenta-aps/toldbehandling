@@ -110,6 +110,16 @@ LOGGING = {
             "level": "INFO",
             "propagate": False,
         },
+        "weasyprint": {
+            "handlers": ["gunicorn"],
+            "level": "ERROR",
+            "propagate": False,
+        },
+        "fontTools": {
+            "handlers": ["gunicorn"],
+            "level": "ERROR",
+            "propagate": False,
+        },
     },
 }
 
@@ -180,6 +190,7 @@ THOUSAND_SEPARATOR = "."
 STATIC_URL = "/static/"
 STATIC_ROOT = "/static"
 MEDIA_ROOT = "/upload"
+TF5_ROOT = "/tf5"
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024
 
