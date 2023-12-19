@@ -60,6 +60,15 @@ urlpatterns = [
         name="tf5_leverandørfaktura",
     ),
     path(
+        "blanket/tf5/<int:id>/tilladelse",
+        views.TF5TilladelseView.as_view(),
+        name="tf5_tilladelse",
+    ),
+    path(
+        "blanket/tf5/tilladelse",
+        TemplateView.as_view(template_name="told_common/tf5/tilladelse.html"),
+    ),
+    path(
         "error/login-timeout/",
         AccessDeniedView.as_view(template_name="ui/error/login_timeout.html"),
         name="login-timeout",
