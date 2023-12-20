@@ -1024,7 +1024,6 @@ class RestClient:
         # Det bør ikke kunne lade sig gøre med mere end 1
         if afgiftstabeller["count"] == 1:
             afgiftstabel = afgiftstabeller["items"][0]
-            print(f"afgiftstabel: {afgiftstabel}")
             return {
                 key: Vareafgiftssats.from_dict(value)
                 for key, value in self.get_all_items(

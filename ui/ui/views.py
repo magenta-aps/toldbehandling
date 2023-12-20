@@ -114,7 +114,6 @@ class TF5FormCreateView(
         if self.request.POST:
             if "indleveringsdato" in self.request.POST:
                 dato = date.fromisoformat(self.request.POST["indleveringsdato"])
-        print(dato)
         return dict(
             filter(
                 lambda pair: pair[1].overordnet is None,
