@@ -61,6 +61,7 @@ class PrismeTest(TestCase):
             betalt=True,
             status="godkendt",
             dato=date(2023, 11, 13),
+            toldkategori="73A",
             varelinjer=[
                 Varelinje(
                     id=1,
@@ -159,12 +160,12 @@ class PrismeTest(TestCase):
               <DeliveryDate>2023-10-01</DeliveryDate>
               <DlvModeId>10</DlvModeId>
               <ImportAuthorizationNumber>1234</ImportAuthorizationNumber>
-              <LocationCode>None</LocationCode>
+              <LocationCode></LocationCode>
               <PaymentParty>Consigner</PaymentParty>
               <TaxNotificationNumber>1</TaxNotificationNumber>
               <Type>TF10</Type>
               <VendInvoiceNumber>5678</VendInvoiceNumber>
-              <WebDuedate>2024-01-01</WebDuedate>
+              <WebDueDate>2024-01-01</WebDueDate>
               <files>
                 <file>
                   <Content>{base64.b64encode("Testdata (leverandørfaktura)".encode("utf-8")).decode("ascii")}</Content>

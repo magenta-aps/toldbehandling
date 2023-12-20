@@ -95,7 +95,7 @@ class CustomDutyRequest(PrismeRequestObject):
     def afsenderbykode(self):
         if self.afgiftsanmeldelse.postforsendelse:
             return self.afgiftsanmeldelse.postforsendelse.afsenderbykode
-        return None
+        return ""
 
     @property
     def betaler(self):
@@ -107,17 +107,19 @@ class CustomDutyRequest(PrismeRequestObject):
     def forsendelsesnummer(self):
         if self.afgiftsanmeldelse.fragtforsendelse:
             return self.afgiftsanmeldelse.fragtforsendelse.fragtbrevsnummer
-        return None
+        if self.afgiftsanmeldelse.postforsendelse:
+            return self.afgiftsanmeldelse.postforsendelse.postforsendelsesnummer
+        return ""
 
     @property
     def forbindelsesnummer(self):
         if self.afgiftsanmeldelse.fragtforsendelse:
             return self.afgiftsanmeldelse.fragtforsendelse.forbindelsesnr
-        return None
+        return ""
 
     @property
     def toldkategori(self):
-        return "73A"
+        return self.afgiftsanmeldelse.toldkategori
 
     def qty(self, varelinje):
         if varelinje.vareafgiftssats.enhed in (
@@ -141,10 +143,10 @@ class CustomDutyRequest(PrismeRequestObject):
             "LocationCode": self.afsenderbykode,
             "PaymentParty": self.betaler,
             "DlvModeId": self.leveringsmåde,
-            "DeliveryDate": self.forsendelse.afgangsdato,
+            "DeliveryDate": self.forsendelse.afgangsdato.isoformat(),
             "ImportAuthorizationNumber": self.afgiftsanmeldelse.indførselstilladelse,
             "VendInvoiceNumber": self.afgiftsanmeldelse.leverandørfaktura_nummer,
-            "WebDuedate": self.afgiftsanmeldelse.beregnet_faktureringsdato,
+            "WebDueDate": self.afgiftsanmeldelse.beregnet_faktureringsdato.isoformat(),
             "CustomDutyHeaderLines": [
                 {
                     "CustomDutyHeaderLine": {

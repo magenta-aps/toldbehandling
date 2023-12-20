@@ -74,7 +74,10 @@ class TF10UpdateForm(common_forms.TF10Form):
     toldkategori = forms.ChoiceField(
         required=False,
         choices=[(None, "---------")]
-        + [(item["kategori"], item["navn"]) for item in settings.CVR_TOLDKATEGORI_MAP],
+        + [
+            (item["kategori"], f"{item['kategori']} - {item['navn']}")
+            for item in settings.CVR_TOLDKATEGORI_MAP
+        ],
     )
 
 

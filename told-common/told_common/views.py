@@ -430,6 +430,7 @@ class TF10FormUpdateView(
                 initial[key + "_change_existing"] = False
             initial["leverandørfaktura_nummer"] = item.leverandørfaktura_nummer
             initial["indførselstilladelse"] = item.indførselstilladelse
+            initial["modtager_betaler"] = item.modtager_betaler
             fragtforsendelse = item.fragtforsendelse
             postforsendelse = item.postforsendelse
             if fragtforsendelse:
