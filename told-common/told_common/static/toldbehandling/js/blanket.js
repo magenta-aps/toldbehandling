@@ -22,7 +22,6 @@ $(function () {
 
     for (let i = 0; i < aktører.length; i++) {
         const aktør = aktører[i];
-        console.log("aktør",aktør);
         const fields = aktør["fields"];
         const api = aktør["api"];
         const multi_container = $(aktør["multi_container"]);
@@ -44,7 +43,6 @@ $(function () {
         });
 
         const updateChoices = function(fieldName, event, callback) {
-            console.log("updateChoices");
             const filter = {};
             filter[fieldName] = this.val();
             if (filter[fieldName]) {
@@ -151,6 +149,12 @@ $(function () {
     // Vis afgiftssats og beregn afgiftsbeløb
     // --------------------------------------
     const varesatser = JSON.parse($('#varesatser').text());
+    let afgiftstabeller;
+    if ($('#afgiftstabeller').length) {
+        afgiftstabeller = JSON.parse($('#afgiftstabeller').text());
+    } else {
+        afgiftstabeller = [];
+    }
     const konstanter = JSON.parse($('#konstanter').text());
     const tillægsafgift_faktor = konstanter["tillægsafgift_faktor"] || 0;
     const ekspeditionsgebyr = konstanter["ekspeditionsgebyr"] || 0;
@@ -362,6 +366,39 @@ $(function () {
     const fileInputs = $("input[type=file]");
     fileInputs.change(fileUpdate);
     fileInputs.each(fileUpdate);
+
+
+    // TF5: Når indleveringsdato opdateres, brug den rigtige afgiftstabel
+    $("[name=indleveringsdato]").on("change", function () {
+        const value = $(this).val();
+        for (let afgiftstabel of afgiftstabeller) {
+            if (afgiftstabel["gyldig_fra"] <= value && (afgiftstabel["gyldig_til"] < value || afgiftstabel["gyldig_til"] == null)) {
+                const varesatser_by_afgiftsgruppenummer = {};
+                for (let key in varesatser) {
+                    let value = varesatser[key]
+                    if (value["afgiftstabel"] === afgiftstabel["id"]) {
+                        varesatser_by_afgiftsgruppenummer[value["afgiftsgruppenummer"]] = value
+                    }
+                }
+                $("[name$=vareafgiftssats]").each(function () {
+                    const $this = $(this);
+                    const old_sats = varesatser[$this.val()];
+                    const new_sats = varesatser_by_afgiftsgruppenummer[old_sats["afgiftsgruppenummer"]]
+                    $(this).find("option").remove();
+                    for (let key in varesatser_by_afgiftsgruppenummer) {
+                        const item = varesatser_by_afgiftsgruppenummer[key];
+                        $(this).append($('<option value="'+item["id"]+'">'+item["vareart_da"]+'</option>'));
+                    }
+                    $this.val(new_sats["id"]);
+                    const subform = $(this).parents(".row");
+                    updateVareart(subform);
+                    calcAfgift(subform);
+                });
+                break;
+            }
+        }
+    });
+
 });
 $(function () {
     // Custom-fejlbeskeder i klientvalidering
@@ -430,3 +467,4 @@ $(function (){
         });
     });
 });
+
