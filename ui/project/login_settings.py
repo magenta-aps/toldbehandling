@@ -31,7 +31,7 @@ if LOGIN_BYPASS_ENABLED:
 
     def POPULATE_DUMMY_SESSION():  # noqa
         return {
-            "cpr": "1234567890",
+            "cpr": "1111111111",
             "cvr": "12345678",
             "firstname": "Dummybruger",
             "lastname": "Testersen",

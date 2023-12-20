@@ -332,7 +332,11 @@ class AfgiftsanmeldelseAPI:
     def filter_user(self, qs: QuerySet) -> QuerySet:
         user = self.context.request.user
         if not user.has_perm("anmeldelse.view_all_anmeldelse"):
-            qs = qs.filter(Q(oprettet_af=user) | Q(oprettet_på_vegne_af=user))
+            cvr = user.indberetter_data.cvr
+            qs = qs.filter(
+                Q(oprettet_af__indberetter_data__cvr=cvr)
+                | Q(oprettet_på_vegne_af__indberetter_data__cvr=cvr)
+            )
         return qs
 
     def check_user(self, item: Afgiftsanmeldelse):
@@ -709,9 +713,10 @@ class VarelinjeAPI:
     def filter_user(self, qs: QuerySet) -> QuerySet:
         user = self.context.request.user
         if not user.has_perm("anmeldelse.view_all_anmeldelse"):
+            cvr = user.indberetter_data.cvr
             qs = qs.filter(
-                Q(afgiftsanmeldelse__oprettet_af=user)
-                | Q(afgiftsanmeldelse__oprettet_på_vegne_af=user)
+                Q(afgiftsanmeldelse__oprettet_af__indberetter_data__cvr=cvr)
+                | Q(afgiftsanmeldelse__oprettet_på_vegne_af__indberetter_data__cvr=cvr)
             )
         return qs
 
@@ -830,9 +835,10 @@ class NotatAPI:
     def filter_user(self, qs: QuerySet) -> QuerySet:
         user = self.context.request.user
         if not user.has_perm("anmeldelse.view_all_anmeldelse"):
+            cvr = user.indberetter_data.cvr
             qs = qs.filter(
-                Q(afgiftsanmeldelse__oprettet_af=user)
-                | Q(afgiftsanmeldelse__oprettet_på_vegne_af=user)
+                Q(afgiftsanmeldelse__oprettet_af__indberetter_data__cvr=cvr)
+                | Q(afgiftsanmeldelse__oprettet_på_vegne_af__indberetter_data__cvr=cvr)
             )
         return qs
 

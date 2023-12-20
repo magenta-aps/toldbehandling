@@ -107,9 +107,7 @@ class Command(BaseCommand):
                 "first_name": "Anders",
                 "last_name": "And",
                 "email": "anders@andeby.dk",
-                "password": make_password(
-                    os.environ.get("DATAANSVARLIG_PASSWORD", "indberetter")
-                ),
+                "password": make_password("indberetter"),
                 "is_active": True,
                 "is_staff": False,
                 "is_superuser": False,
@@ -120,4 +118,40 @@ class Command(BaseCommand):
 
         IndberetterProfile.objects.create(
             cpr=1111111111, cvr=12345678, user=indberetter
+        )
+
+        indberetter2, created = User.objects.update_or_create(
+            defaults={
+                "first_name": "Mickey",
+                "last_name": "Mouse",
+                "email": "mickey@andeby.dk",
+                "password": make_password("indberetter2"),
+                "is_active": True,
+                "is_staff": False,
+                "is_superuser": False,
+            },
+            username="indberetter2",
+        )
+        indberetter2.groups.add(indberettere_group)
+
+        IndberetterProfile.objects.create(
+            cpr=2222222222, cvr=12345678, user=indberetter2
+        )
+
+        indberetter3, created = User.objects.update_or_create(
+            defaults={
+                "first_name": "Fedtmule",
+                "last_name": "",
+                "email": "fedtmule@andeby.dk",
+                "password": make_password("indberetter3"),
+                "is_active": True,
+                "is_staff": False,
+                "is_superuser": False,
+            },
+            username="indberetter3",
+        )
+        indberetter3.groups.add(indberettere_group)
+
+        IndberetterProfile.objects.create(
+            cpr=3333333333, cvr=12121212, user=indberetter3
         )
