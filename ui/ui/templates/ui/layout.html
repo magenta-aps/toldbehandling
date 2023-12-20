@@ -39,9 +39,11 @@
         <span class="m-2 pt-2">
             {{user.first_name}} {{user.last_name}}
         </span>
+        {% if show_api_key %}
         <button type="button" class="btn mx-1 my-2 active" data-bs-toggle="modal"
                                           data-bs-target="#apikey_modal">API-nøgle
         </button>
+        {% endif %}
         <a href="{% url 'login:logout' %}" class="mx-1 my-2 btn btn-primary" id="logout-link">{% translate "Log ud" %}</a>
     </nav>
     <hr class="p-0 m-0"/>
@@ -59,17 +61,19 @@
         this.form.submit();
     });
 </script>
-        <div id="apikey_modal" class="modal">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">API-nøgle</h5>
-                    </div>
-                    <div class="modal-body">
-                         {{user.indberetter_data.api_key}}
-                    </div>
-                </div>
+{% if show_api_key %}
+<div id="apikey_modal" class="modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">API-nøgle</h5>
+            </div>
+            <div class="modal-body">
+                 {{user.indberetter_data.api_key}}
             </div>
         </div>
+    </div>
+</div>
+{% endif %}
 </body>
 </html>

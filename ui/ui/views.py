@@ -44,7 +44,9 @@ class TF10ListView(common_views.TF10ListView):
     extend_template = "ui/layout.html"
 
     def get_context_data(self, **context):
-        return super().get_context_data(**{**context, "can_create": True})
+        return super().get_context_data(
+            **{**context, "can_create": True, "show_api_key": True}
+        )
 
 
 class TF10FormUpdateView(common_views.TF10FormUpdateView):
@@ -199,6 +201,7 @@ class TF5FormCreateView(
 
 class TF5ListView(common_views.TF5ListView):
     actions_template = "ui/tf5/actions.html"
+    extend_template = "ui/layout.html"
 
     def get_context_data(self, **context: Dict[str, Any]) -> Dict[str, Any]:
         return super().get_context_data(
