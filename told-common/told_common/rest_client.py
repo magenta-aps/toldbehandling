@@ -760,7 +760,7 @@ class AfgiftstabelRestClient(ModelRestClient):
     ):
         return [
             Afgiftstabel.from_dict(item)
-            for item in self.rest.get("afgiftstabel", filter)
+            for item in self.rest.get("afgiftstabel", filter)["items"]
         ]
 
     def create(self, data: dict) -> Optional[int]:
@@ -1026,6 +1026,7 @@ class RestClient:
         # Det bør ikke kunne lade sig gøre med mere end 1
         if afgiftstabeller["count"] == 1:
             afgiftstabel = afgiftstabeller["items"][0]
+            print(f"afgiftstabel: {afgiftstabel}")
             return {
                 key: Vareafgiftssats.from_dict(value)
                 for key, value in self.get_all_items(
@@ -1033,6 +1034,31 @@ class RestClient:
                 ).items()
             }
         return {}
+
+    def varesatser_all(
+        self, filter_afgiftstabel=None, filter_varesats=None
+    ) -> Dict[int, Vareafgiftssats]:
+        if filter_afgiftstabel is None:
+            filter_afgiftstabel = {}
+        if filter_varesats is None:
+            filter_varesats = {}
+        afgiftstabeller = self.get(
+            "afgiftstabel",
+            {"kladde": False, **filter_afgiftstabel},
+        )["items"]
+        varesatser = {}
+        # Det bør ikke kunne lade sig gøre med mere end 1
+        for afgiftstabel in afgiftstabeller:
+            varesatser.update(
+                {
+                    key: Vareafgiftssats.from_dict(value)
+                    for key, value in self.get_all_items(
+                        "vareafgiftssats",
+                        {"afgiftstabel": afgiftstabel["id"], **filter_varesats},
+                    ).items()
+                }
+            )
+        return varesatser
 
     @cached_property
     def afsendere(self) -> Dict[int, dict]:

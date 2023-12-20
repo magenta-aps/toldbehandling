@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: 2023 Magenta ApS <info@magenta.dk>
 #
 # SPDX-License-Identifier: MPL-2.0
+import dataclasses
 import os
 from datetime import date
 from functools import cached_property
@@ -109,10 +110,15 @@ class TF5FormCreateView(
 
     @cached_property
     def toplevel_varesatser(self):
+        dato = date.today()
+        if self.request.POST:
+            if "indleveringsdato" in self.request.POST:
+                dato = date.fromisoformat(self.request.POST["indleveringsdato"])
+        print(dato)
         return dict(
             filter(
                 lambda pair: pair[1].overordnet is None,
-                self.rest_client.varesatser_privat.items(),
+                self.rest_client.varesatser_fra(dato, synlig_privat=True).items(),
             )
         )
 
@@ -161,25 +167,31 @@ class TF5FormCreateView(
         if "form_kwargs" not in kwargs:
             kwargs["form_kwargs"] = {}
         # Will be picked up by TF10VareForm's constructor
-        kwargs["form_kwargs"]["varesatser"] = dict(
-            filter(
-                lambda pair: pair[1].overordnet is None,
-                self.rest_client.varesatser_privat.items(),
-            )
-        )
+        kwargs["form_kwargs"]["varesatser"] = self.toplevel_varesatser
         return kwargs
 
     def get_context_data(self, **context: Dict[str, Any]) -> Dict[str, Any]:
         context = super().get_context_data(
             **{
                 **context,
-                "varesatser": dataclass_map_to_dict(self.rest_client.varesatser_privat),
                 "konstanter": {
                     "tillægsafgift_faktor": settings.TILLÆGSAFGIFT_FAKTOR,
                     "ekspeditionsgebyr": settings.EKSPEDITIONSGEBYR,
                 },
                 "extend_template": self.extend_template,
                 "highlight": self.request.GET.get("highlight"),
+                "varesatser": dataclass_map_to_dict(
+                    self.rest_client.varesatser_all(
+                        filter_afgiftstabel={"gyldig_til__gte": date.today()},
+                        filter_varesats={"synlig_privat": True},
+                    )
+                ),
+                "afgiftstabeller": [
+                    dataclasses.asdict(item)
+                    for item in self.rest_client.afgiftstabel.list(
+                        gyldig_til__gte=date.today(), kladde=False
+                    )
+                ],
             }
         )
         context["indførselstilladelse"] = self.indførselstilladelse
