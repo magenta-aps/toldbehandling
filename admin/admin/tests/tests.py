@@ -2538,6 +2538,7 @@ class TF10CreateTest(TestMixin, HasLogin, TestCase):
         "modtager_postbox": "124",
         "modtager_telefon": "123123",
         "modtager_change_existing": "false",
+        "modtager_betaler": "False",
         "indførselstilladelse": "123",
         "leverandørfaktura_nummer": "123",
         "fragttype": "skibsfragt",
