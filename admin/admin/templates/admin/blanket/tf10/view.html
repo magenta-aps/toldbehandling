@@ -537,11 +537,9 @@
 </form>
 <script>
     $(".modal").on("show.bs.modal", function () {
-        console.log(this);
         $(this).find("input,select,textarea").removeAttr("disabled");
     });
     $(".modal").on("hide.bs.modal", function () {
-        console.log(this);
         $(this).find("input,select,textarea").attr("disabled", "disabled");
     });
 </script>
