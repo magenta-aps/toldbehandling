@@ -229,7 +229,6 @@ function queryParams(params){  // Kaldes af bootstrap-table fordi vi peger på d
     return params;
 }
 function statusFormatter(value) {
-    console.log(value, this, arguments)
     if (value === true) {
         return "{% translate 'Godkendt' %}";
     } else if (value === false) {
