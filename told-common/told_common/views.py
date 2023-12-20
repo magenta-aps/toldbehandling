@@ -835,6 +835,21 @@ class TF5UpdateView(PermissionsRequiredMixin, HasRestClientMixin, FormWithFormse
         )
         return super().form_valid(form, formset)
 
+    @cached_property
+    def toplevel_varesatser(self):
+        dato = date.today()
+        if self.item.indleveringsdato:
+            dato = self.item.indleveringsdato
+        if self.request.POST:
+            if "indleveringsdato" in self.request.POST:
+                dato = date.fromisoformat(self.request.POST["indleveringsdato"])
+        return dict(
+            filter(
+                lambda pair: pair[1].overordnet is None,
+                self.rest_client.varesatser_fra(dato, synlig_privat=True).items(),
+            )
+        )
+
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs["leverandørfaktura_required"] = False
@@ -846,13 +861,7 @@ class TF5UpdateView(PermissionsRequiredMixin, HasRestClientMixin, FormWithFormse
         if "form_kwargs" not in kwargs:
             kwargs["form_kwargs"] = {}
         # Will be picked up by TF10VareForm's constructor
-        kwargs["form_kwargs"]["varesatser"] = dict(
-            filter(
-                lambda pair: pair[1].overordnet is None,
-                # TODO: Dato for varesatser?
-                self.rest_client.varesatser_privat.items(),
-            )
-        )
+        kwargs["form_kwargs"]["varesatser"] = self.toplevel_varesatser
         initial = []
         for item in self.item.varelinjer:
             itemdict = dataclasses.asdict(item)
@@ -867,8 +876,17 @@ class TF5UpdateView(PermissionsRequiredMixin, HasRestClientMixin, FormWithFormse
             **{
                 **context,
                 "varesatser": dataclass_map_to_dict(
-                    self.rest_client.varesatser_fra(self.item.indleveringsdato)
+                    self.rest_client.varesatser_all(
+                        filter_afgiftstabel={"gyldig_til__gte": date.today()},
+                        filter_varesats={"synlig_privat": True},
+                    )
                 ),
+                "afgiftstabeller": [
+                    dataclasses.asdict(item)
+                    for item in self.rest_client.afgiftstabel.list(
+                        gyldig_til__gte=date.today(), kladde=False
+                    )
+                ],
                 "item": self.item,
                 "extend_template": self.extend_template,
                 "indførselstilladelse": self.item.indførselstilladelse,
