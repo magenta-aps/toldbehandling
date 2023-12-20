@@ -111,11 +111,12 @@ class TF10View(PermissionsRequiredMixin, TF10BaseView, FormView):
             }
         )
 
-    def get_form_kwargs(self):
-        kwargs = super().get_form_kwargs()
-        kwargs["initial"] = {}
+    def get_initial(self):
+        initial = super().get_initial()
         # indberetter = self.object.oprettet_på_vegne_af or self.object.oprettet_af
         indberetter = self.object.oprettet_af
+        if self.object.toldkategori:
+            initial["toldkategori"] = self.object.toldkategori
         if indberetter and "indberetter_data" in indberetter:
             cvr = indberetter["indberetter_data"]["cvr"]
             kategorier = [
@@ -123,9 +124,9 @@ class TF10View(PermissionsRequiredMixin, TF10BaseView, FormView):
                 for item in settings.CVR_TOLDKATEGORI_MAP
                 if cvr in item["cvr"]
             ]
-            if kategorier:
-                kwargs["initial"]["toldkategori"] = kategorier[0]
-        return kwargs
+            if kategorier and not self.object.toldkategori:
+                initial["toldkategori"] = kategorier[0]
+        return initial
 
     def form_valid(self, form):
         anmeldelse_id = self.kwargs["id"]

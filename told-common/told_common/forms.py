@@ -242,11 +242,14 @@ class TF10Form(BootstrapForm):
     fragtbrevnr = forms.CharField(
         required=True,
     )
-    betales_af = forms.ChoiceField(
+    modtager_betaler = forms.BooleanField(
+        label=_("Betales af"),
         required=False,
-        choices=(
-            ("Modtager", _("Modtager")),
-            ("Afsender", _("Afsender")),
+        widget=forms.Select(
+            choices=(
+                (True, _("Modtager")),
+                (False, _("Afsender")),
+            )
         ),
     )
     afgangsdato = forms.DateField(
@@ -305,7 +308,7 @@ class TF10VareForm(BootstrapForm):
     vareafgiftssats = forms.ChoiceField(choices=())
     mængde = forms.DecimalField(min_value=0, required=False)
     antal = forms.IntegerField(min_value=1, required=False)
-    fakturabeløb = forms.DecimalField(min_value=1, decimal_places=2, required=False)
+    fakturabeløb = forms.DecimalField(min_value=1, decimal_places=2, required=True)
 
     def clean_mængde(self) -> int:
         mængde = self.cleaned_data["mængde"]
