@@ -115,7 +115,7 @@ class CustomDutyRequest(PrismeRequestObject):
     def forbindelsesnummer(self):
         if self.afgiftsanmeldelse.fragtforsendelse:
             return self.afgiftsanmeldelse.fragtforsendelse.forbindelsesnr
-        return ""
+        return "999"
 
     @property
     def toldkategori(self):
