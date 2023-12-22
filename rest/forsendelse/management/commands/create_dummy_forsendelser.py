@@ -17,7 +17,7 @@ class Command(BaseCommand):
         if Fragtforsendelse.objects.exists() or Postforsendelse.objects.exists():
             # Already contains dummy data
             return
-        indberetter_group = Group.objects.get(name="Indberettere")
+        indberetter_group = Group.objects.get(name="ErhvervIndberettere")
         users = User.objects.filter(groups=indberetter_group)
         if users.count() == 0:
             users = User.objects.all()
