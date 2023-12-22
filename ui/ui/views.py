@@ -271,12 +271,41 @@ class TF5TilladelseView(PermissionsRequiredMixin, HasRestClientMixin, FormView):
             if response:
                 return response
             context = {"object": self.object}
-            with language("kl"):
-                pdfdata_kl = render_pdf("told_common/tf5/tilladelse.html", context)
-            with language("da"):
-                pdfdata_da = render_pdf("told_common/tf5/tilladelse.html", context)
+            pdfdata = []
+            for language_code in "kl", "da":
+                with language(language_code):
+                    pdfdata.append(
+                        BytesIO(
+                            render_pdf(
+                                "told_common/tf5/tilladelse.html", context=context
+                            )
+                        )
+                    )
+            for language_code in "kl", "da":
+                with language(language_code):
+                    pdfdata.append(
+                        BytesIO(
+                            render_pdf(
+                                "told_common/tf5/view.html",
+                                context={
+                                    **context,
+                                    "extend_template": "ui/print.html",
+                                    "tillægsafgift": self.object.tillægsafgift,
+                                    "can_create_tilladelse": False,
+                                    "printing": True,
+                                },
+                                stylesheets=[
+                                    "/static/bootstrap/bootstrap.min.css",
+                                    "/static/toldbehandling/css/style.css",
+                                    "/static/toldbehandling/css/pdfprint.css",
+                                ],
+                            )
+                        )
+                    )
             with self.object.leverandørfaktura.open() as faktura:
-                write_pdf(self.path, BytesIO(pdfdata_kl), BytesIO(pdfdata_da), faktura)
+                pdfdata.append(faktura)
+                write_pdf(self.path, *pdfdata)
+
         if form.cleaned_data["send"]:
             indberetter_data = self.object.oprettet_af["indberetter_data"]
             with open(self.path, "rb") as file:

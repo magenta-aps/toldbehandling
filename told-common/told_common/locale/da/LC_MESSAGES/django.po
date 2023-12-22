@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-12-19 16:04+0000\n"
+"POT-Creation-Date: 2023-12-22 07:56+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -544,7 +544,6 @@ msgid "Nej"
 msgstr ""
 
 #: told_common/templates/told_common/tf5/form.html
-#: told_common/templates/told_common/tf5/view.html
 msgid ""
 "Ansøgning om engangstilladelse til privat indførsel af øl, vin og spiritus"
 msgstr ""
@@ -700,6 +699,10 @@ msgid "DENNE TILLADELSE ER UOVERDRAGELIG"
 msgstr ""
 
 #: told_common/templates/told_common/tf5/view.html
+msgid "Engangstilladelse til privat indførsel af øl, vin og spiritus"
+msgstr ""
+
+#: told_common/templates/told_common/tf5/view.html
 msgid "Adresse"
 msgstr ""
 
@@ -712,7 +715,7 @@ msgid "Fakturanummer"
 msgstr ""
 
 #: told_common/templates/told_common/tf5/view.html
-msgid "indleveringsdato"
+msgid "Indleveringsdato"
 msgstr ""
 
 #: told_common/templates/told_common/tf5/view.html

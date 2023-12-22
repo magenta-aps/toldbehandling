@@ -12,7 +12,7 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.template.loader import render_to_string
 from django.utils import translation
 from pypdf import PdfWriter
-from weasyprint import HTML
+from weasyprint import CSS, HTML
 from weasyprint.text.fonts import FontConfiguration
 
 
@@ -52,13 +52,18 @@ def cast_or_none(dest_class, value):
 
 
 def render_pdf(
-    template_name: str, context: dict, html_modifier: Optional[Callable] = None
+    template_name: str,
+    context: dict,
+    html_modifier: Optional[Callable] = None,
+    stylesheets=None,
 ) -> bytes:
     html = render_to_string(template_name, context)
     if callable(html_modifier):
         html = html_modifier(html)
     font_config = FontConfiguration()
-    return HTML(string=html).write_pdf(font_config=font_config)
+    if stylesheets:
+        stylesheets = [CSS(filename=filename) for filename in stylesheets]
+    return HTML(string=html).write_pdf(font_config=font_config, stylesheets=stylesheets)
 
 
 class language:
