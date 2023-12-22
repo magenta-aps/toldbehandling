@@ -37,8 +37,6 @@ class LoginRequiredMixin:
                 token.save(request, save_refresh_token=True)
                 return None
             else:
-                for key, value in request.session.items():
-                    print(f"{key} = {value}")
                 # Redirect to SAML login
                 return redirect(
                     reverse("login:login") + "?back=" + quote_plus(request.path)
