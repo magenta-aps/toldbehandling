@@ -70,6 +70,21 @@ urlpatterns = [
         TemplateView.as_view(template_name="told_common/tf5/tilladelse.html"),
     ),
     path(
+        "payment/checkout/<int:id>",
+        views.TF5PaymentCheckoutView.as_view(),
+        name="tf5_payment_checkout",
+    ),
+    path(
+        "payment/details/<int:id>",
+        views.TF5PaymentDetailsView.as_view(),
+        name="tf5_payment_details",
+    ),
+    path(
+        "payment/refresh/<int:id>",
+        views.TF5PaymentRefreshView.as_view(),
+        name="tf5_payment_refresh",
+    ),
+    path(
         "error/login-timeout/",
         AccessDeniedView.as_view(template_name="ui/error/login_timeout.html"),
         name="login-timeout",

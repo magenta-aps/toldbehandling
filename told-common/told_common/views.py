@@ -639,7 +639,8 @@ class TF5View(
                 **kwargs,
                 "object": self.object,
                 "tillægsafgift": self.object.tillægsafgift,
-                "can_create_tilladelse": settings.DEBUG,
+                "can_create_tilladelse": self.object.payment_status == "paid"
+                or settings.DEBUG,
             }
         )
 

@@ -1,0 +1,156 @@
+{% extends extend_template %}
+{% load static %}
+{% load i18n %}
+{% load l10n %}
+{% load common_tags %}
+{% load bootstrap_icons %}
+
+{% block content %}
+<div class="container-fluid">
+    <h1>Betal <a href="{% url 'tf5_view' id=payment.declaration.id %}">#{{ payment.declaration.id }}</a></h1>
+
+    <div class="row">
+        <div class="col-6 p-4 bg-light">
+            <!-- payment items / varelinjer converted for payment -->
+            <h2>{% translate 'Varelinjer' %}</h2>
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Vareart</th>
+                        <th style="min-width: 200px;">{% translate 'Varekode' %}</th>
+                        <th style="min-width: 200px;">{% translate 'Antal / Mængde' %}</th>
+                        <th style="min-width: 200px;">{% translate 'Afgiftssats' %}</th>
+                        <th style="min-width: 200px;">{% translate 'Afgiftsbeløb' %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in payment.items %}
+                    <tr>
+                        <td>{{ item.name }}</td>
+                        <td>{{ item.reference|zfill:9 }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>{{ item.unit_price | divide:100 | floatformat:"2g" }} {{ payment.currency }} pr.
+                            {{ item.unit }}</td>
+                        <td>
+                            {{ item.net_total_amount | divide:100 | floatformat:"2g" }}
+                            {{ payment.currency }}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7">
+                            {% translate "Ingen varelinjer" %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="4" class="text-right fw-bold">{% translate 'Total' %}</td>
+                        <td class="fw-bold">{{ payment.amount | divide:100 | floatformat:"2g" }} {{ payment.currency }}
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+
+            <h2>{% translate 'Detaljer' %}</h2>
+            <div class="row">
+                <div class="col-6">
+                    <div><strong>{% translate 'Afsender' %}</strong></div>
+                    <div>
+                        <p class="mb-0">{{ payment.declaration.navn }}</p>
+                        <p class="mb-0">{{ payment.declaration.adresse }}</p>
+                        <p class="mb-0">
+                            {{ payment.declaration.postnummer|unlocalize }},
+                            {{ payment.declaration.by }}
+                        </p>
+                        <p class="mb-0">Tlf.: {{ payment.declaration.telefon }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 p-2">
+            <h2>
+                {% translate 'Betaling' %} 
+                <small class="fs-6 text-secondary">
+                    NETs Payment ID: {{payment.provider_payment_id }}
+                </small>
+            </h2>
+            <div id="payment-checkout-embeded"></div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_footers %}
+<script src="https://test.checkout.dibspayment.eu/v1/checkout.js?v=1"></script>
+<script>
+    const current_payment_status = "{{ payment.status }}";
+
+    // Handle cookies for CSRF protection
+    // REF: https://docs.djangoproject.com/en/5.0/howto/csrf/#using-csrf-protection-with-ajax
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    const csrftoken = getCookie('csrftoken');
+
+    // Payment provider checkout
+    var checkout = new Dibs.Checkout({
+        checkoutKey: "{{ nets_checkout_key}}",
+        paymentId: "{{ payment.provider_payment_id }}",
+        containerId: "payment-checkout-embeded",
+        language: "da-DK",
+        theme: {
+            buttonRadius: "5px"
+        }
+    });
+
+    checkout.on('payment-completed', function (response) {
+        $.ajax(
+            {
+                url: "/payment/refresh/{{ payment.id }}",
+                type: "POST",
+                headers: { "X-CSRFToken": csrftoken },
+                success: function (response) {
+                    if (current_payment_status === "created") {
+                        if(response.payment_refreshed.status === "paid") {
+                            var $form = $('<form>', {
+                                'action': "{% url 'tf5_tilladelse' payment.declaration.id %}?next={% url 'tf5_tilladelse' payment.declaration.id %}",
+                                'method': 'post'
+                            });
+
+                            $form.append($('<input>', {
+                                'type': 'hidden',
+                                'name': 'csrfmiddlewaretoken',
+                                'value': csrftoken
+                            }));
+
+                            $form.append($('<input>', {
+                                'type': 'hidden',
+                                'name': 'opret',
+                                'value': 'true'
+                            }));
+
+                            $('body').append($form);
+                            $form.submit();
+                        }
+                    }
+                },
+            }
+        );
+
+    });
+</script>
+{% endblock %}

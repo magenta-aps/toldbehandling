@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     "anmeldelse",
     "forsendelse",
     "sats",
+    "payment",
     "ninja_extra",
     "ninja_jwt",
     "simple_history",
@@ -167,3 +168,16 @@ if not EBOKS["mock"]:
             "host": os.environ["EBOKS_HOST"],
         }
     )
+
+# Payments
+
+PAYMENT_PROVIDER = "nets"
+PAYMENT_PROVIDER_NETS_HOST = os.environ.get(
+    "PAYMENT_PROVIDER_NETS_HOST", "https://api.dibspayment.eu"
+)
+PAYMENT_PROVIDER_NETS_SECRET_KEY = os.environ.get(
+    "PAYMENT_PROVIDER_NETS_SECRET_KEY", "secret_key"
+)
+PAYMENT_PROVIDER_NETS_TERMS_URL = os.environ.get(
+    "PAYMENT_PROVIDER_NETS_TERMS_URL", "https://groendland.dk/terms"
+)

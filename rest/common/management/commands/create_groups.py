@@ -7,6 +7,7 @@ from django.contrib.auth.models import Group, Permission, User
 from django.contrib.contenttypes.models import ContentType
 from django.core.management.base import BaseCommand
 from forsendelse.models import Fragtforsendelse, Postforsendelse
+from payment.models import Item, Payment
 from sats.models import Afgiftstabel, Vareafgiftssats
 
 from anmeldelse.models import (  # isort: skip
@@ -62,6 +63,12 @@ class Command(BaseCommand):
         vareafgiftssats_model = ContentType.objects.get_for_model(
             Vareafgiftssats, for_concrete_model=False
         )
+        payment_model = ContentType.objects.get_for_model(
+            Payment, for_concrete_model=False
+        )
+        payment_item_model = ContentType.objects.get_for_model(
+            Item, for_concrete_model=False
+        )
 
         user_model = ContentType.objects.get_for_model(User, for_concrete_model=False)
 
@@ -108,6 +115,8 @@ class Command(BaseCommand):
             ("view", fragtforsendelse_model),
             ("view", afgiftstabel_model),
             ("view", vareafgiftssats_model),
+            ("view", payment_model),
+            ("view", payment_item_model),
             ("add", afsender_model),
             ("add", modtager_model),
             ("add", afgiftsanmeldelse_model),
@@ -115,6 +124,8 @@ class Command(BaseCommand):
             ("add", varelinje_model),
             ("add", postforsendelse_model),
             ("add", fragtforsendelse_model),
+            ("add", payment_model),
+            ("add", payment_item_model),
             # Ingen add på afgiftstabel og vareafgiftssats
             ("change", afsender_model),
             ("change", modtager_model),
@@ -123,6 +134,8 @@ class Command(BaseCommand):
             ("change", varelinje_model),
             ("change", postforsendelse_model),
             ("change", fragtforsendelse_model),
+            ("change", payment_model),
+            ("change", payment_item_model),
             ("delete", postforsendelse_model),
             ("delete", fragtforsendelse_model),
         ):
@@ -142,6 +155,8 @@ class Command(BaseCommand):
             ("view", fragtforsendelse_model),
             ("view", afgiftstabel_model),
             ("view", vareafgiftssats_model),
+            ("view", payment_model),
+            ("view", payment_item_model),
             ("add", afsender_model),
             ("add", modtager_model),
             ("add", afgiftsanmeldelse_model),
@@ -149,6 +164,8 @@ class Command(BaseCommand):
             ("add", postforsendelse_model),
             ("add", fragtforsendelse_model),
             # Ingen add på afgiftstabel og vareafgiftssats
+            ("add", payment_model),
+            ("add", payment_item_model),
             ("change", afgiftsanmeldelse_model),
             # Ingen change på andre modeller
             # Ingen delete
@@ -173,6 +190,8 @@ class Command(BaseCommand):
             ("view", fragtforsendelse_model),
             ("view", afgiftstabel_model),
             ("view", vareafgiftssats_model),
+            ("view", payment_model),
+            ("view", payment_item_model),
             # Ingen add
             # Ingen change på andre modeller
             # Ingen delete
