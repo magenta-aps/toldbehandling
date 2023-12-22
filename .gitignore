@@ -5,7 +5,6 @@ env/
 docker-compose.override.yml
 data/er/*
 !data/er/.gitkeep
-/.pre-commit-config.yaml
 rest/rest/static/doc/*
 *.sqlite3
 **/.coverage
@@ -13,3 +12,7 @@ told-common/build/
 told-common/dist/
 told-common/told_common.egg-info/
 MitID/
+
+*.venv*/
+*.vscode/
+*.code-workspace

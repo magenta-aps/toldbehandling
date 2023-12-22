@@ -1,0 +1,113 @@
+{% extends extend_template %}
+{% load static %}
+{% load i18n %}
+{% load l10n %}
+{% load common_tags %}
+{% load bootstrap_icons %}
+
+{% block content %}
+<div class="container-fluid">
+    <h1>{% translate 'Betalings detaljer' %}</h1>
+
+    <div class="row">
+        <div class="col-6 p-4 bg-light">
+            <div class="payment-items">
+                <h2>{% translate 'Varelinjer' %}</h2>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>{% translate 'Vareart' %}</th>
+                            <th>{% translate 'Varekode' %}</th>
+                            <th>{% translate 'Antal / Mængde' %}</th>
+                            <th>{% translate 'Afgiftssats' %}</th>
+                            <th>{% translate 'Afgiftsbeløb' %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in payment.items %}
+                        <tr>
+                            <td>{{ item.name }}</td>
+                            <td>{{ item.reference|zfill:9 }}</td>
+                            <td>{{ item.quantity }}</td>
+                            <td>{{ item.unit_price | divide:100 | floatformat:"2g" }} {{ payment.currency }}
+                                pr.
+                                {{ item.unit }}</td>
+                            <td>
+                                {{ item.net_total_amount | divide:100 | floatformat:"2g" }}
+                                {{ payment.currency }}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7">
+                                {% translate "Ingen varelinjer" %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="4" class="text-right fw-bold">{% translate 'Total' %}</td>
+                            <td class="fw-bold">
+                                {{ payment.amount | divide:100 | floatformat:"2g" }} {{ payment.currency }}
+                            </td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+
+        <div class="col-4 p-2">
+            <h2>{% translate 'Info' %}</h2>
+            <dl class="row">
+                <dt class="col-sm-3">NETs betalings ID:</dt>
+                <dd class="col-sm-9">{{ payment.provider_payment.payment_id }}</dd>
+
+                <dt class="col-sm-3">NETs betalings Status:</dt>
+                <dd class="col-sm-9">
+                    {% if payment.provider_payment.payment_details %}
+                        {% if payment.provider_payment.payment_details.payment_type == 'CARD' and  payment.provider_payment.payment_details.card_details %}
+                            <span class="badge bg-success">{% translate 'Betalt' %}</span>
+                        {% else %}
+                            <span class="badge bg-warning">{% translate 'Ikke betalt' %}</span>
+                        {% endif %}
+                    {% else %}
+                        <span class="badge bg-warning">{% translate 'Ikke betalt' %}</span>
+                    {% endif %}
+                </dd>
+
+                <dt class="col-sm-3">Afgiftsanmeldelses ID:</dt>
+                <dd class="col-sm-9">{{ payment.declaration.id }}</dd>
+            </dl>
+
+            <dl class="row">
+                <dt class="col-sm-3">{% translate 'Afsender' %}:</dt>
+                <dd class="col-sm-9">
+                    <div>
+                        <p class="mb-0">{{ payment.declaration.afsender.cvr|unlocalize }}</p>
+                        <p class="mb-0">{{ payment.declaration.afsender.navn }}</p>
+                        <p class="mb-0">{{ payment.declaration.afsender.adresse }}</p>
+                        <p class="mb-0">
+                            {{ payment.declaration.afsender.postnummer|unlocalize }}, 
+                            {{ payment.declaration.afsender.by}}
+                        </p>
+                    </div>
+                </dd>
+
+                <dt class="col-sm-3">{% translate 'Modtager' %}:</dt>
+                <dd class="col-sm-9">
+                    <div>
+                        <p class="mb-0">{{ payment.declaration.modtager.cvr|unlocalize }}</p>
+                        <p class="mb-0">{{ payment.declaration.modtager.navn }}</p>
+                        <p class="mb-0">{{ payment.declaration.modtager.adresse }}</p>
+                        <p class="mb-0">
+                            {{ payment.declaration.modtager.postnummer|unlocalize }}, 
+                            {{ payment.declaration.modtager.by }}
+                        </p>
+                    </div>
+                </dd>
+            </dl>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -22,6 +22,7 @@ from ninja_extra import api_controller, permissions, route
 from ninja_extra.exceptions import PermissionDenied
 from ninja_extra.pagination import paginate
 from ninja_extra.schemas import NinjaPaginationResponseSchema
+from payment.models import Payment
 from project.util import RestPermission, json_dump
 
 from anmeldelse.models import (  # isort: skip
@@ -414,6 +415,7 @@ class PartialPrivatAfgiftsanmeldelseIn(ModelSchema):
 
 class PrivatAfgiftsanmeldelseOut(ModelSchema):
     oprettet_af: Optional[UserOut]
+    payment_status: Optional[str]
 
     class Config:
         model = PrivatAfgiftsanmeldelse
@@ -435,6 +437,11 @@ class PrivatAfgiftsanmeldelseOut(ModelSchema):
             "status",
             "anonym",
         ]
+
+    @staticmethod
+    def resolve_payment_status(obj: PrivatAfgiftsanmeldelse):
+        p = Payment.objects.filter(declaration=obj).first()
+        return p.status if p else "created"
 
 
 class PrivatAfgiftsanmeldelseFilterSchema(FilterSchema):

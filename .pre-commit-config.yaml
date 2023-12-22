@@ -1,0 +1,29 @@
+# SPDX-FileCopyrightText: 2023 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: MPL-2.0
+
+repos:
+  - repo: https://github.com/pycqa/flake8
+    rev: 6.1.0
+    hooks:
+      - id: flake8
+        args:
+          - "--max-line-length=88"
+          - "--exclude=migrations,tests.py,settings.py,.venv-toldbehandling-ui,.venv-toldbehandling-rest"
+          - "--extend-ignore=E226,E203"
+        exclude: 'migrations|\.venv-toldbehandling-ui|\.venv-toldbehandling-rest'
+        files: 'rest/|ui/'
+
+  - repo: https://github.com/psf/black
+    rev: 23.1.0
+    hooks:
+      - id: black
+        exclude: 'migrations|\.venv-toldbehandling-ui|\.venv-toldbehandling-rest'
+
+  - repo: https://github.com/pycqa/isort
+    rev: 5.12.0
+    hooks:
+      - id: isort
+        name: isort (python)
+        exclude: 'migrations|\.venv-toldbehandling-ui|\.venv-toldbehandling-rest'
+        args: ["--profile", "black"]

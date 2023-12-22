@@ -226,3 +226,7 @@ TILLÆGSAFGIFT_FAKTOR = 0.5
 EKSPEDITIONSGEBYR = 250
 
 from .login_settings import *  # noqa
+
+PAYMENT_PROVIDER_NETS_CHECKOUT_KEY = os.environ.get(
+    "PAYMENT_PROVIDER_NETS_CHECKOUT_KEY", "checkout_key"
+)

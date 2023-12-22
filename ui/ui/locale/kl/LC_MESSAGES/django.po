@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-12-21 18:45+0000\n"
+"POT-Creation-Date: 2023-12-22 08:54+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -71,6 +71,78 @@ msgstr ""
 
 #: ui/templates/ui/tf5/actions.html
 msgid "Vis"
+msgstr ""
+
+#: ui/templates/ui/tf5/actions.html ui/templates/ui/tf5/payment/checkout.html
+msgid "Betaling"
+msgstr ""
+
+#: ui/templates/ui/tf5/payment/checkout.html
+#: ui/templates/ui/tf5/payment/details.html
+msgid "Varelinjer"
+msgstr ""
+
+#: ui/templates/ui/tf5/payment/checkout.html
+#: ui/templates/ui/tf5/payment/details.html
+msgid "Varekode"
+msgstr ""
+
+#: ui/templates/ui/tf5/payment/checkout.html
+#: ui/templates/ui/tf5/payment/details.html
+msgid "Antal / Mængde"
+msgstr ""
+
+#: ui/templates/ui/tf5/payment/checkout.html
+#: ui/templates/ui/tf5/payment/details.html
+msgid "Afgiftssats"
+msgstr ""
+
+#: ui/templates/ui/tf5/payment/checkout.html
+#: ui/templates/ui/tf5/payment/details.html
+msgid "Afgiftsbeløb"
+msgstr ""
+
+#: ui/templates/ui/tf5/payment/checkout.html
+#: ui/templates/ui/tf5/payment/details.html
+msgid "Ingen varelinjer"
+msgstr ""
+
+#: ui/templates/ui/tf5/payment/checkout.html
+#: ui/templates/ui/tf5/payment/details.html
+msgid "Total"
+msgstr ""
+
+#: ui/templates/ui/tf5/payment/checkout.html
+msgid "Detaljer"
+msgstr ""
+
+#: ui/templates/ui/tf5/payment/checkout.html
+#: ui/templates/ui/tf5/payment/details.html
+msgid "Afsender"
+msgstr ""
+
+#: ui/templates/ui/tf5/payment/details.html
+msgid "Betalings detaljer"
+msgstr ""
+
+#: ui/templates/ui/tf5/payment/details.html
+msgid "Vareart"
+msgstr ""
+
+#: ui/templates/ui/tf5/payment/details.html
+msgid "Info"
+msgstr ""
+
+#: ui/templates/ui/tf5/payment/details.html
+msgid "Betalt"
+msgstr ""
+
+#: ui/templates/ui/tf5/payment/details.html
+msgid "Ikke betalt"
+msgstr ""
+
+#: ui/templates/ui/tf5/payment/details.html
+msgid "Modtager"
 msgstr ""
 
 #: ui/views.py

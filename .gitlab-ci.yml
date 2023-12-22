@@ -57,10 +57,10 @@ Lint Python:
     - black --check --diff --exclude=migrations rest/
     - black --check --diff --exclude=migrations ui/
     - black --check --diff --exclude=migrations told-common/
-    - isort -c --diff --skip migrations rest/
-    - isort -c --diff --skip migrations admin/
-    - isort -c --diff --skip migrations told-common/
-    - isort -c --diff --skip migrations ui/
+    - isort -c --profile black --diff --skip migrations rest/
+    - isort -c --profile black --diff --skip migrations admin/
+    - isort -c --profile black --diff --skip migrations told-common/
+    - isort -c --profile black --diff --skip migrations ui/
 
 
 Lint Dockerfiles:
@@ -221,7 +221,7 @@ Unittest REST:
     - coverage run manage.py test
     - coverage report --show-missing
     - mv .coverage "${CI_PROJECT_DIR}/coverage_output/.coverage.${CI_JOB_ID}"
-    - cp -r ./sats ./common ./forsendelse ./anmeldelse ./aktør ./common ./project "${CI_PROJECT_DIR}/coverage_output/"
+    - cp -r ./sats ./common ./forsendelse ./anmeldelse ./aktør ./common ./payment ./project "${CI_PROJECT_DIR}/coverage_output/"
 
 Unittest UI:
   <<: *test-ui
