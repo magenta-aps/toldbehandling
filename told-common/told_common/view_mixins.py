@@ -30,6 +30,7 @@ class LoginRequiredMixin:
         if getattr(settings, "LOGIN_PROVIDER_CLASS", None):
             saml_data = request.session.get(settings.LOGIN_SESSION_DATA_KEY)
             if saml_data:
+                print("Got saml data, obtaining rest token")
                 # Get or create django User, obtain REST token
                 user, token = RestClient.login_saml_user(saml_data)
                 request.session["user"] = user
@@ -37,11 +38,16 @@ class LoginRequiredMixin:
                 token.save(request, save_refresh_token=True)
                 return None
             else:
+                print("Did not get saml data, redirecting to saml login")
+                print(f"session:")
+                for key, value in request.session.items():
+                    print(f"{key} = {value}")
                 # Redirect to SAML login
                 return redirect(
                     reverse("login:login") + "?back=" + quote_plus(request.path)
                 )
         else:
+            print("Redirect to normal login")
             # Redirect to normal django login
             return redirect(reverse("login") + "?back=" + quote_plus(request.path))
 
@@ -49,9 +55,11 @@ class LoginRequiredMixin:
         if not self.request.session.get("access_token") or not self.request.session.get(
             "refresh_token"
         ):
+            print("Token missing, logging in")
             return self.needs_login(self.request)
         refresh_token_timestamp = self.request.session.get("refresh_token_timestamp")
         if (int(time.time() - float(refresh_token_timestamp))) > 24 * 3600:
+            print("Token expired, logging in")
             return self.needs_login(self.request)
         return None
 
