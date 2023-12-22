@@ -4,13 +4,14 @@
 
 import told_common.views as common_views
 from django.urls import include, path
-from django.views.generic import RedirectView, TemplateView
+from django.views.generic import TemplateView
 from django_mitid_auth.saml.views import AccessDeniedView
 
 from ui import views
+from ui.views import IndexView
 
 urlpatterns = [
-    path("", RedirectView.as_view(pattern_name="tf10_list")),
+    path("", IndexView.as_view()),
     path("rest/<path:path>", common_views.RestView.as_view(), name="rest"),
     path(
         "file/leverandørfaktura/<int:id>",

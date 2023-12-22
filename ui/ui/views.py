@@ -14,7 +14,7 @@ from django.http import FileResponse, Http404
 from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext_lazy as _
-from django.views.generic import FormView
+from django.views.generic import FormView, RedirectView
 from requests import HTTPError
 from told_common import forms as common_forms
 from told_common import views as common_views
@@ -32,7 +32,15 @@ from told_common.view_mixins import (  # isort: skip
     FormWithFormsetView,
     HasRestClientMixin,
     PermissionsRequiredMixin,
+    LoginRequiredMixin,
 )
+
+
+class IndexView(LoginRequiredMixin, RedirectView):
+    def get_redirect_url(self, *args, **kwargs):
+        if self.userdata.get("indberetter_data", {}).get("cvr"):
+            return reverse("tf10_list")
+        return reverse("tf5_list")
 
 
 class TF10FormCreateView(common_views.TF10FormCreateView):
