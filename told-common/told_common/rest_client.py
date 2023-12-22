@@ -14,6 +14,7 @@ from urllib.parse import unquote, urlencode
 
 import requests
 from django.conf import settings
+from django.core.exceptions import ObjectDoesNotExist
 from django.core.files import File
 from django.core.files.uploadedfile import InMemoryUploadedFile, UploadedFile
 from django.core.serializers.json import DjangoJSONEncoder
@@ -839,6 +840,38 @@ class UserRestClient(ModelRestClient):
         return data["count"], [User.from_dict(item) for item in data["items"]]
 
 
+class PaymentRestClient(ModelRestClient):
+    def create(self, data: dict) -> dict:
+        return self.rest.post("payment", data)
+
+    def get(self, payment_id: int) -> dict:
+        return self.rest.get(f"payment/{payment_id}")
+
+    def get_by_declaration(self, declaration_id: int) -> dict:
+        for payment in self.rest.get(f"payment?declaration={declaration_id}&full=true"):
+            if payment["declaration"] == declaration_id:
+                declaration = self.rest.get(f"afgiftsanmeldelse/{declaration_id}")
+                return {
+                    **payment,
+                    "declaration": {
+                        **declaration,
+                        "afsender": self.rest.get(
+                            f"afsender/{declaration['afsender']}"
+                        ),
+                        "modtager": self.rest.get(
+                            f"modtager/{declaration['modtager']}"
+                        ),
+                    },
+                }
+
+        raise ObjectDoesNotExist(
+            f"Payment with declaration_id {declaration_id} does not exist"
+        )
+
+    def refresh(self, payment_id: int) -> dict:
+        return self.rest.post(f"payment/refresh/{payment_id}", {})
+
+
 class RestClient:
     domain = settings.REST_DOMAIN
 
@@ -859,6 +892,7 @@ class RestClient:
         self.prismeresponse = PrismeResponseRestClient(self)
         self.eboks = EboksBeskedRestClient(self)
         self.user = UserRestClient(self)
+        self.payment = PaymentRestClient(self)
 
     def check_access_token_age(self):
         max_age = getattr(settings, "NINJA_JWT", {}).get(

@@ -10,11 +10,12 @@ from typing import Any, Dict
 
 from django.conf import settings
 from django.contrib import messages
-from django.http import FileResponse, Http404
+from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
+from django.http import FileResponse, Http404, JsonResponse
 from django.shortcuts import redirect
 from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext_lazy as _
-from django.views.generic import FormView, RedirectView
+from django.views.generic import FormView, RedirectView, TemplateView, View
 from requests import HTTPError
 from told_common import forms as common_forms
 from told_common import views as common_views
@@ -278,6 +279,10 @@ class TF5TilladelseView(PermissionsRequiredMixin, HasRestClientMixin, FormView):
             response = self.check_permissions(self.edit_permissions)
             if response:
                 return response
+
+            if self.object.payment_status != "paid":
+                raise PermissionDenied("tf5 payment not paid")
+
             context = {"object": self.object}
             pdfdata = []
             for language_code in "kl", "da":
@@ -346,3 +351,72 @@ class TF5TilladelseView(PermissionsRequiredMixin, HasRestClientMixin, FormView):
                 raise Http404("Afgiftsanmeldelse findes ikke")
             raise
         return anmeldelse
+
+
+class TF5PaymentCheckoutView(
+    PermissionsRequiredMixin,
+    HasRestClientMixin,
+    common_views.CustomLayoutMixin,
+    TemplateView,
+):
+    extend_template = "ui/layout.html"
+    template_name = "ui/tf5/payment/checkout.html"
+
+    required_permissions = (
+        "payment.view_payment",
+        "payment.add_payment",
+    )
+
+    def get_context_data(self, **kwargs):
+        """Add the declaration and payment to the context
+
+        If the payment does not exist, it will be created.
+
+        IMPORTANT!
+        NETs use the lowest monetary unit for the given currency. For DKK, this is
+        "øre", which means we need to use a "currency multiplier" of 100 to get the
+        correct value.
+        ref: https://developer.nexigroup.com/nexi-checkout/en-EU/api/#currency-and-amount  # noqa: E501
+
+        Raises:
+            Exception: If the declaration or payment could not be found or created
+        """
+        context = super().get_context_data(**kwargs)
+
+        payment = self.rest_client.payment.create(
+            data={"declaration_id": int(self.kwargs["id"])}
+        )
+
+        if not payment:
+            raise Exception("Betaling kunne ikke findes eller oprettes")
+
+        context["payment"] = payment
+        context["nets_checkout_key"] = settings.PAYMENT_PROVIDER_NETS_CHECKOUT_KEY
+        return context
+
+
+class TF5PaymentDetailsView(
+    PermissionsRequiredMixin,
+    HasRestClientMixin,
+    common_views.CustomLayoutMixin,
+    TemplateView,
+):
+    extend_template = "ui/layout.html"
+    template_name = "ui/tf5/payment/details.html"
+
+    required_permissions = ("payment.view_payment",)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        payment = self.rest_client.payment.get_by_declaration(int(self.kwargs["id"]))
+        if not payment:
+            raise ObjectDoesNotExist("Betaling kunne ikke findes")
+
+        context["payment"] = payment
+        return context
+
+
+class TF5PaymentRefreshView(PermissionsRequiredMixin, HasRestClientMixin, View):
+    async def post(self, request, *args, **kwargs):
+        payment_refreshed = self.rest_client.payment.refresh(int(self.kwargs["id"]))
+        return JsonResponse({"payment_refreshed": payment_refreshed})

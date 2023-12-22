@@ -46,3 +46,11 @@ def get(item, attribute):
             return item[attribute]
         except (KeyError, TypeError):
             pass
+
+
+@register.filter
+def divide(value, arg):
+    try:
+        return int(value) / int(arg)
+    except (ValueError, ZeroDivisionError):
+        return None

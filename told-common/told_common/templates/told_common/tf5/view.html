@@ -21,6 +21,15 @@
         <span class="badge bg-secondary">Ny</span>
         {% endif %}
 
+        {% if object.payment_status == "created" %}
+        <span class="badge bg-secondary">Ikke betalt</span>
+        {% elif object.payment_status == "paid" %}
+        <span class="badge bg-success">Betalt</span>
+        {% elif object.payment_status == "declined" %}
+        <span class="badge bg-danger">Afvist</span>
+        {% endif %}
+        
+
         <div class="row">
             <div class="col-12">
                 {{form.non_field_errors}}

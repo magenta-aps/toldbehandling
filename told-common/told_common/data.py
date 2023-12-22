@@ -400,6 +400,7 @@ class PrivatAfgiftsanmeldelse(ToldDataClass):
         ),
     )
     oprettet_af: dict
+    payment_status: str
 
     @property
     def afgift_sum(self):
