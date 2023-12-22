@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-12-22 08:54+0000\n"
+"POT-Creation-Date: 2023-12-22 10:49+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -20,28 +20,28 @@ msgstr ""
 
 #: ui/templates/ui/error/error.html
 msgid "Tilbage"
-msgstr ""
+msgstr "Uterit"
 
 #: ui/templates/ui/error/error.html ui/templates/ui/layout.html
 msgid "Log ud"
-msgstr ""
+msgstr "Anigit"
 
 #: ui/templates/ui/error/error.html
 msgid "Log ind"
-msgstr ""
+msgstr "Iserit"
 
 #: ui/templates/ui/error/login_repeat.html
 #: ui/templates/ui/error/login_timeout.html
 msgid "Adgang nægtet"
-msgstr ""
+msgstr "Iserniarneq itigartinneqarpoq"
 
 #: ui/templates/ui/error/login_repeat.html
 msgid "Det anvendte login er allerede anvendt. Prøv at logge ind igen."
-msgstr ""
+msgstr "Isissut atoreerpoq. Iseqqeriarit."
 
 #: ui/templates/ui/error/login_timeout.html
 msgid "Det anvendte login er udløbet. Prøv at logge ind igen."
-msgstr ""
+msgstr "Isersimaneq qaangiutereerpoq. Iseqqeriarit."
 
 #: ui/templates/ui/layout.html ui/templates/ui/print.html
 msgid "Toldbehandling"
@@ -49,11 +49,11 @@ msgstr ""
 
 #: ui/templates/ui/layout.html
 msgid "Er du sikker på at du vil logge ud?"
-msgstr ""
+msgstr "Ilumut aniniarpit?"
 
 #: ui/templates/ui/loggedout.html
 msgid "Logget ud"
-msgstr ""
+msgstr "Anisimavutit"
 
 #: ui/templates/ui/loggedout.html
 msgid ""
@@ -63,11 +63,11 @@ msgstr ""
 
 #: ui/templates/ui/loggedout.html
 msgid "Log ind igen"
-msgstr ""
+msgstr "Iseqqigit"
 
 #: ui/templates/ui/tf10/actions.html
 msgid "Redigér"
-msgstr ""
+msgstr "Iluarsiuk"
 
 #: ui/templates/ui/tf5/actions.html
 msgid "Vis"
@@ -85,7 +85,7 @@ msgstr ""
 #: ui/templates/ui/tf5/payment/checkout.html
 #: ui/templates/ui/tf5/payment/details.html
 msgid "Varekode"
-msgstr ""
+msgstr "Nioqqutissap kodea"
 
 #: ui/templates/ui/tf5/payment/checkout.html
 #: ui/templates/ui/tf5/payment/details.html
@@ -95,12 +95,12 @@ msgstr ""
 #: ui/templates/ui/tf5/payment/checkout.html
 #: ui/templates/ui/tf5/payment/details.html
 msgid "Afgiftssats"
-msgstr ""
+msgstr "Akitsuutip annertussusia"
 
 #: ui/templates/ui/tf5/payment/checkout.html
 #: ui/templates/ui/tf5/payment/details.html
 msgid "Afgiftsbeløb"
-msgstr ""
+msgstr "Akitsuutit"
 
 #: ui/templates/ui/tf5/payment/checkout.html
 #: ui/templates/ui/tf5/payment/details.html
@@ -119,7 +119,7 @@ msgstr ""
 #: ui/templates/ui/tf5/payment/checkout.html
 #: ui/templates/ui/tf5/payment/details.html
 msgid "Afsender"
-msgstr ""
+msgstr "Nassiussisoq"
 
 #: ui/templates/ui/tf5/payment/details.html
 msgid "Betalings detaljer"
@@ -127,7 +127,7 @@ msgstr ""
 
 #: ui/templates/ui/tf5/payment/details.html
 msgid "Vareart"
-msgstr ""
+msgstr "Nioqqutissaq"
 
 #: ui/templates/ui/tf5/payment/details.html
 msgid "Info"
@@ -143,7 +143,7 @@ msgstr ""
 
 #: ui/templates/ui/tf5/payment/details.html
 msgid "Modtager"
-msgstr ""
+msgstr "Tigusisussaq"
 
 #: ui/views.py
 #, python-brace-format
@@ -151,6 +151,8 @@ msgid ""
 "Afgiftsanmeldelsen blev indregistreret. Blanket med nummer {id} afventer nu "
 "godkendelse."
 msgstr ""
+"Akitsuusigassat pillugit nalunaarut nalunaarsorneqarpoq. Immersukkap {id}-"
+"mik normullip akuerineqarnissaa utaqqisaalerpoq."
 
 #: ui/views.py
 msgid "Mine indførselstilladelser"
