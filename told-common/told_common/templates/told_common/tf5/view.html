@@ -8,8 +8,9 @@
 <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
     <div class="container-lg">
-        <h1>{% translate "Ansøgning om engangstilladelse til privat indførsel af øl, vin og spiritus" %}</h1>
+        <h1>{% translate "Engangstilladelse til privat indførsel af øl, vin og spiritus" %}</h1>
 
+        {% if not printing %}
         {% if object.status == "godkendt" %}
         <span class="badge bg-success">Godkendt</span>
         {% elif object.status == "annulleret" %}
@@ -25,8 +26,10 @@
                 {{form.non_field_errors}}
             </div>
         </div>
-
+        {% endif %}
         <hr/>
+
+        {% localize off %}
 
         <div class="row align-items-center">
             <div class="col-2 clearfix">
@@ -59,13 +62,9 @@
             <div class="col-2 clearfix">
                 {% translate "Postnr/by" %}
             </div>
-            <div class="col-2 pe-0">
+            <div class="col-4">
                 <div class="input-group">
                     {{object.postnummer}}
-                </div>
-            </div>
-            <div class="col-2 ps-0">
-                <div class="input-group">
                     {{object.by}}
                 </div>
             </div>
@@ -91,13 +90,15 @@
         </div>
 
         <div class="row align-items-center">
+            {% if not printing %}
             <div class="col-2 clearfix">
                 {% translate "Indførselstilladelse" %}
             </div>
-            <div class="col-4 px-4">
+            <div class="col-4">
                 {% translate "Ingen" as ingen %}
                 {{object.indførselstilladelse|default_if_none:ingen}}
             </div>
+            {% endif %}
             <div class="col-2 clearfix">
                 {% translate "Fakturanummer" %}
             </div>
@@ -110,13 +111,14 @@
 
         <div class="row align-items-center">
             <div class="col-2 clearfix">
-                {% translate "indleveringsdato" %}
+                {% translate "Indleveringsdato" %}
             </div>
             <div class="col-4">
                 <div class="input-group">
-                    {{object.indleveringsdato}}
+                    {{object.indleveringsdato|date:"d.m.Y"}}
                 </div>
             </div>
+            {% if not printing %}
             <div class="col-2 clearfix">
                 {% translate "Varefaktura" %}
             </div>
@@ -125,7 +127,11 @@
                     {{object.leverandørfaktura|file_basename}}
                 </a>
             </div>
+            {% endif %}
         </div>
+
+        {% endlocalize %}
+
         <hr/>
         <h5>{% translate "Afgifter" %}</h5>
 
@@ -218,6 +224,7 @@
             </tfoot>
         </table>
 
+        {% if not printing %}
         <div class="form-row">
             <div class="ml-auto">
                 {% if can_edit %}
@@ -249,6 +256,7 @@
                 {% endif %}
             </div>
         </div>
+        {% endif %}
     </div>
 
     <div class="modal" id="annuller_modal" tabindex="-1" style="display: none">
@@ -272,7 +280,7 @@
 
 
 
-
+{% if not printing %}
 {% if messages %}
 <div class="modal" id="message_modal" tabindex="-1">
     <div class="modal-dialog">
@@ -292,11 +300,11 @@
         </div>
     </div>
 </div>
+
 <script>
     const modal = new bootstrap.Modal('#message_modal', {});
     modal.show();
 </script>
-
 {% endif %}
 
 <script>
@@ -307,4 +315,5 @@
         $(this).find("input,select,textarea").attr("disabled", "disabled");
     });
 </script>
+{% endif %}
 {% endblock %}
