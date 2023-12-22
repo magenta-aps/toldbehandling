@@ -688,7 +688,7 @@ class TF5View(
 
 class TF5ListView(PermissionsRequiredMixin, HasRestClientMixin, ListView):
     required_permissions = (
-        "anmeldelse.view_afgiftsanmeldelse",
+        "anmeldelse.view_privatafgiftsanmeldelse",
         "anmeldelse.view_varelinje",
     )
     select_template = "told_common/tf5/select.html"
@@ -766,9 +766,9 @@ class TF5ListView(PermissionsRequiredMixin, HasRestClientMixin, ListView):
 
 class TF5UpdateView(PermissionsRequiredMixin, HasRestClientMixin, FormWithFormsetView):
     required_permissions = (
-        "anmeldelse.view_afgiftsanmeldelse",
+        "anmeldelse.view_privatafgiftsanmeldelse",
         "anmeldelse.view_varelinje",
-        "anmeldelse.change_afgiftsanmeldelse",
+        "anmeldelse.change_privatafgiftsanmeldelse",
         "anmeldelse.change_varelinje",
     )
     form_class = forms.TF5Form

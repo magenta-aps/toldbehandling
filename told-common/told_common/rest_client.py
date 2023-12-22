@@ -933,31 +933,40 @@ class RestClient:
         cpr = saml_data["cpr"]
         cvr = saml_data.get("cvr")
         client = RestClient(RestClient.login("system", settings.SYSTEM_USER_PASSWORD))
+        mapped_data = {
+            "indberetter_data": {"cpr": cpr, "cvr": cvr},
+            "username": " / ".join(filter(None, [cpr, cvr])),
+            "first_name": saml_data["firstname"],
+            "last_name": saml_data["lastname"],
+            "email": saml_data.get("email") or "",
+            "is_superuser": False,
+            "groups": [],
+        }
+        if cpr:
+            mapped_data["groups"].append("PrivatIndberettere")
+        if cvr:
+            mapped_data["groups"].append("ErhvervIndberettere")
         try:
             user = client.get(f"user/cpr/{int(cpr)}")
         except HTTPError as e:
             if e.response.status_code == 404:
-                user = client.post(
-                    "user",
-                    {
-                        "indberetter_data": {"cpr": cpr, "cvr": cvr},
-                        "username": " / ".join(filter(None, [cpr, cvr])),
-                        "first_name": saml_data["firstname"],
-                        "last_name": saml_data["lastname"],
-                        "email": saml_data.get("email") or "",
-                        "is_superuser": False,
-                        "groups": ["Indberettere"],
-                    },
-                )
+                user = client.post("user", mapped_data)
             else:
                 raise
+        if (
+            saml_data["firstname"] != user["first_name"]
+            or saml_data["lastname"] != user["last_name"]
+            or saml_data["email"] != user["email"]
+            or saml_data.get("cvr") != user["indberetter_data"]["cvr"]
+        ):
+            user = client.patch(f"user/cpr/{int(cpr)}", mapped_data)
+
         try:
             # Only the system user can obtain this
             api_key = client.get(f"user/cpr/{int(cpr)}/apikey")["api_key"]
             user["indberetter_data"]["api_key"] = api_key
         except HTTPError:
             pass
-
         token = JwtTokenInfo(
             access_token=user.pop("access_token"),
             refresh_token=user.pop("refresh_token"),

@@ -37,9 +37,13 @@ class Command(BaseCommand):
             dataansvarlige_group = None
 
         try:
-            indberettere_group = Group.objects.get(name="Indberettere")
+            erhvervindberettere_group = Group.objects.get(name="ErhvervIndberettere")
         except Group.DoesNotExist:
-            indberettere_group = None
+            erhvervindberettere_group = None
+        try:
+            privatindberettere_group = Group.objects.get(name="PrivatIndberettere")
+        except Group.DoesNotExist:
+            privatindberettere_group = None
 
         admin, created = User.objects.update_or_create(
             defaults={
@@ -114,7 +118,8 @@ class Command(BaseCommand):
             },
             username="indberetter",
         )
-        indberetter.groups.add(indberettere_group)
+        indberetter.groups.add(erhvervindberettere_group)
+        indberetter.groups.add(privatindberettere_group)
 
         IndberetterProfile.objects.create(
             cpr=1111111111, cvr=12345678, user=indberetter
@@ -132,7 +137,8 @@ class Command(BaseCommand):
             },
             username="indberetter2",
         )
-        indberetter2.groups.add(indberettere_group)
+        indberetter2.groups.add(erhvervindberettere_group)
+        indberetter.groups.add(privatindberettere_group)
 
         IndberetterProfile.objects.create(
             cpr=2222222222, cvr=12345678, user=indberetter2
@@ -150,8 +156,6 @@ class Command(BaseCommand):
             },
             username="indberetter3",
         )
-        indberetter3.groups.add(indberettere_group)
+        indberetter3.groups.add(privatindberettere_group)
 
-        IndberetterProfile.objects.create(
-            cpr=3333333333, cvr=12121212, user=indberetter3
-        )
+        IndberetterProfile.objects.create(cpr=3333333333, cvr=None, user=indberetter3)

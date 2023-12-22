@@ -74,9 +74,9 @@ class TF5FormCreateView(
     template_name = "told_common/tf5/form.html"
     extend_template = "ui/layout.html"
     required_permissions = (
-        "anmeldelse.view_afgiftsanmeldelse",
+        "anmeldelse.view_privatafgiftsanmeldelse",
         "anmeldelse.view_varelinje",
-        "anmeldelse.add_afgiftsanmeldelse",
+        "anmeldelse.add_privatafgiftsanmeldelse",
         "anmeldelse.add_varelinje",
         "sats.view_vareafgiftssats",
     )
