@@ -232,6 +232,28 @@ class UserAPI:
     def list(self, filters: UserFilterSchema = Query(...)):
         return list(filters.filter(User.objects.all()))
 
+    @route.patch(
+        "/cpr/{cpr}",
+        response=UserOutWithTokens,
+        auth=get_auth_methods(),
+        url_name="user_update",
+    )
+    def update(self, cpr, payload: UserIn):
+        user = get_object_or_404(User, indberetter_data__cpr=cpr)
+        try:
+            groups = [Group.objects.get(name=g) for g in payload.groups]
+        except Group.DoesNotExist:
+            raise ValidationError("Group does not exist")
+        user.first_name = payload.first_name
+        user.last_name = payload.last_name
+        user.email = payload.email
+        user.is_superuser = False
+        user.save()
+        user.groups.set(groups)
+        user.indberetter_data.cvr = payload.indberetter_data.cvr
+        user.indberetter_data.save()
+        return UserOutWithTokens.user_to_dict(user)
+
 
 class EboksBeskedIn(ModelSchema):
     afgiftsanmeldelse_id: int = None

@@ -23,8 +23,11 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         # Med disse rettigheder på plads vil et forsøg på at køre en
         # REST-kommando, som man ikke har adgang til, resultere i en HTTP 403 fra API'et
-        indberettere, _ = Group.objects.update_or_create(
-            name="Indberettere",
+        cpr_indberettere, _ = Group.objects.update_or_create(
+            name="PrivatIndberettere",
+        )
+        cvr_indberettere, _ = Group.objects.update_or_create(
+            name="ErhvervIndberettere",
         )
         toldmedarbejdere, _ = Group.objects.update_or_create(
             name="Toldmedarbejdere",
@@ -106,10 +109,25 @@ class Command(BaseCommand):
         )
 
         for action, model in (
+            ("view", privatafgiftsanmeldelse_model),
+            ("view", varelinje_model),
+            ("view", afgiftstabel_model),
+            ("view", vareafgiftssats_model),
+            ("add", privatafgiftsanmeldelse_model),
+            ("add", varelinje_model),
+            ("change", privatafgiftsanmeldelse_model),
+            ("change", varelinje_model),
+        ):
+            cpr_indberettere.permissions.add(
+                Permission.objects.get(
+                    codename=f"{action}_{model.model}", content_type=model
+                )
+            )
+
+        for action, model in (
             ("view", afsender_model),
             ("view", modtager_model),
             ("view", afgiftsanmeldelse_model),
-            ("view", privatafgiftsanmeldelse_model),
             ("view", varelinje_model),
             ("view", postforsendelse_model),
             ("view", fragtforsendelse_model),
@@ -120,7 +138,6 @@ class Command(BaseCommand):
             ("add", afsender_model),
             ("add", modtager_model),
             ("add", afgiftsanmeldelse_model),
-            ("add", privatafgiftsanmeldelse_model),
             ("add", varelinje_model),
             ("add", postforsendelse_model),
             ("add", fragtforsendelse_model),
@@ -130,7 +147,6 @@ class Command(BaseCommand):
             ("change", afsender_model),
             ("change", modtager_model),
             ("change", afgiftsanmeldelse_model),
-            ("change", privatafgiftsanmeldelse_model),
             ("change", varelinje_model),
             ("change", postforsendelse_model),
             ("change", fragtforsendelse_model),
@@ -139,7 +155,7 @@ class Command(BaseCommand):
             ("delete", postforsendelse_model),
             ("delete", fragtforsendelse_model),
         ):
-            indberettere.permissions.add(
+            cvr_indberettere.permissions.add(
                 Permission.objects.get(
                     codename=f"{action}_{model.model}", content_type=model
                 )

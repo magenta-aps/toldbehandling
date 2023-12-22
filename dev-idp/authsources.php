@@ -83,7 +83,6 @@ $config = array(
             'https://data.gov.dk/model/core/eid/age' => '60',
             'https://data.gov.dk/model/core/eid/cprUuid' => 'urn:uuid:323e4567-e89b-12d3-a456-
         426655440000',
-            'https://data.gov.dk/model/core/eid/professional/cvr' => '12121212',
             'https://data.gov.dk/model/core/eid/professional/orgName' => 'Arbejdsløs',
             'https://data.gov.dk/model/core/eid/privilegesIntermediate' =>
                 'PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGJwcDpQcml2aWxlZ2VMaXN0
