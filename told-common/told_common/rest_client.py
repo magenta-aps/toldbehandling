@@ -917,6 +917,13 @@ class RestClient:
                 )
             else:
                 raise
+        try:
+            # Only the system user can obtain this
+            api_key = client.get(f"user/cpr/{int(cpr)}/apikey")["api_key"]
+            user["indberetter_data"]["api_key"] = api_key
+        except HTTPError:
+            pass
+
         token = JwtTokenInfo(
             access_token=user.pop("access_token"),
             refresh_token=user.pop("refresh_token"),

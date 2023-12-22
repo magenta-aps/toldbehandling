@@ -39,9 +39,11 @@
         <span class="m-2 pt-2">
             {{user.first_name}} {{user.last_name}}
         </span>
-        <button type="button" class="btn mx-1 my-2 active" data-bs-toggle="modal"
-                                          data-bs-target="#apikey_modal">API-nøgle
+        {% if user.indberetter_data.api_key %}
+        <button type="button" class="mx-1 my-2 btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#apikey_modal">
+            API-nøgle
         </button>
+        {% endif %}
         <a href="{% url 'login:logout' %}" class="mx-1 my-2 btn btn-primary" id="logout-link">{% translate "Log ud" %}</a>
     </nav>
     <hr class="p-0 m-0"/>
