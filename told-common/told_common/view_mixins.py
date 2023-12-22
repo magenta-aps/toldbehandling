@@ -39,7 +39,7 @@ class LoginRequiredMixin:
                 return None
             else:
                 print("Did not get saml data, redirecting to saml login")
-                print(f"session:")
+                print("session:")
                 for key, value in request.session.items():
                     print(f"{key} = {value}")
                 # Redirect to SAML login
