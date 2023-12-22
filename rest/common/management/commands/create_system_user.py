@@ -5,7 +5,8 @@
 import os
 
 from django.contrib.auth.hashers import make_password
-from django.contrib.auth.models import User
+from django.contrib.auth.models import Permission, User
+from django.contrib.contenttypes.models import ContentType
 from django.core.management.base import BaseCommand
 
 
@@ -13,6 +14,14 @@ class Command(BaseCommand):
     help = "Creates system user"
 
     def handle(self, *args, **options):
+        user_model = ContentType.objects.get_for_model(User, for_concrete_model=False)
+
+        can_read_apikeys, _ = Permission.objects.update_or_create(
+            name="Kan læse API-nøgler",
+            codename="read_apikeys",
+            content_type=user_model,
+        )
+
         system, created = User.objects.update_or_create(
             defaults={
                 "first_name": "System",
@@ -25,3 +34,4 @@ class Command(BaseCommand):
             },
             username="system",
         )
+        system.user_permissions.add(can_read_apikeys)

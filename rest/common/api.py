@@ -6,7 +6,7 @@ from typing import Dict, List, Optional
 
 from common.models import EboksBesked, IndberetterProfile
 from django.contrib.auth.models import Group, User
-from django.http import HttpResponseBadRequest
+from django.http import HttpRequest, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404
 from ninja import Field, ModelSchema
 from ninja.errors import ValidationError
@@ -19,6 +19,8 @@ from ninja_extra.schemas import NinjaPaginationResponseSchema
 from ninja_jwt.authentication import JWTAuth
 from ninja_jwt.tokens import RefreshToken
 from project.util import json_dump
+
+from ninja_extra import ControllerBase  # isort: skip
 
 # Django-ninja har endnu ikke understøttelse for PATCH med filer i multipart/form-data
 # Se https://github.com/vitalik/django-ninja/pull/397
@@ -47,6 +49,14 @@ class APIKeyAuth(APIKeyHeader):
             return None
 
 
+class DjangoPermission(permissions.BasePermission):
+    def __init__(self, permission: str) -> None:
+        self._permission = permission
+
+    def has_permission(self, request: HttpRequest, controller: ControllerBase):
+        return request.user.has_perm(self._permission)
+
+
 def get_auth_methods():
     """This function defines the authentication methods available for this API."""
     return (JWTAuth(), APIKeyAuth())
@@ -55,7 +65,13 @@ def get_auth_methods():
 class IndberetterProfileOut(ModelSchema):
     class Config:
         model = IndberetterProfile
-        model_fields = ["cpr", "cvr", "api_key"]
+        model_fields = ["cpr", "cvr"]
+
+
+class IndberetterProfileApiKeyOut(ModelSchema):
+    class Config:
+        model = IndberetterProfile
+        model_fields = ["api_key"]
 
 
 class IndberetterProfileIn(ModelSchema):
@@ -171,6 +187,17 @@ class UserAPI:
     def get_user_cpr(self, cpr: int):
         user = get_object_or_404(User, indberetter_data__cpr=cpr)
         return UserOutWithTokens.user_to_dict(user)
+
+    @route.get(
+        "/cpr/{cpr}/apikey",
+        response=IndberetterProfileApiKeyOut,
+        auth=JWTAuth(),
+        url_name="user_cpr_get_apikey",
+        permissions=[DjangoPermission("auth.read_apikeys")],
+    )
+    def get_user_cpr_apikey(self, cpr: int):
+        user = get_object_or_404(User, indberetter_data__cpr=cpr)
+        return user.indberetter_data
 
     @route.post(
         "", response=UserOutWithTokens, auth=get_auth_methods(), url_name="user_create"
