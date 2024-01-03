@@ -269,7 +269,7 @@ class TF5TilladelseView(PermissionsRequiredMixin, HasRestClientMixin, FormView):
 
     @staticmethod
     def id_path(id: int) -> str:
-        return os.path.join(settings.TF5_ROOT, "tilladelser", f"{id}.pdf")
+        return os.path.join(settings.TF5_ROOT, f"{id}.pdf")
 
     @staticmethod
     def exists(id: int) -> bool:
@@ -319,6 +319,7 @@ class TF5TilladelseView(PermissionsRequiredMixin, HasRestClientMixin, FormView):
             with self.object.leverandørfaktura.open() as faktura:
                 pdfdata.append(faktura)
                 write_pdf(self.path, *pdfdata)
+                print(f"tf5 skrevet til {self.path}")
 
         if form.cleaned_data["send"]:
             indberetter_data = self.object.oprettet_af["indberetter_data"]
