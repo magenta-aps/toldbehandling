@@ -38,18 +38,21 @@ class PaymentAPI:
         except PrivatAfgiftsanmeldelse.DoesNotExist:
             print(f"{payload.declaration_id} not found")
             raise NotFound(f"Failed to fetch declaration: {payload.declaration_id}")
-
+        print("Found anmeldelse")
         # Get payment provider handler for this declaration
         provider_handler: NetsProviderHandler = get_provider_handler("nets")
+        print("Found provider_handler")
 
         # Create payment locally, if it does not exist
         try:
             payment_new = Payment.objects.get(declaration_id=payload.declaration_id)
+            print("exists")
             return payment_model_to_response(
                 payment_new,
                 field_converts=payment_field_converters(provider_handler, full=True),
             )
         except Payment.DoesNotExist:
+            print("creating")
             payment_new = Payment.objects.create(
                 amount=0,
                 currency="DKK",
@@ -60,6 +63,10 @@ class PaymentAPI:
         # Get declaration "varelinjer" and create payment items
         payment_new_amount = 0
         payment_new_items = []
+        qs = Varelinje.objects.filter(
+            privatafgiftsanmeldelse_id=payload.declaration_id
+        )
+        print(f"there are {qs.count()} varelinjer")
         for varelinje in Varelinje.objects.filter(
             privatafgiftsanmeldelse_id=payload.declaration_id
         ):
