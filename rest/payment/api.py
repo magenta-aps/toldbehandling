@@ -53,7 +53,9 @@ class PaymentAPI:
             if payment_new.provider_payment_id is not None:
                 return payment_model_to_response(
                     payment_new,
-                    field_converts=payment_field_converters(provider_handler, full=True),
+                    field_converts=payment_field_converters(
+                        provider_handler, full=True
+                    ),
                 )
         except Payment.DoesNotExist:
             pass
