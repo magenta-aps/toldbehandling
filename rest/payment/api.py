@@ -5,6 +5,7 @@
 from typing import Callable, Dict, List, Tuple
 
 from anmeldelse.models import PrivatAfgiftsanmeldelse, Varelinje
+from common.api import get_auth_methods
 from django.forms import model_to_dict
 from ninja_extra import api_controller, permissions, route
 from ninja_extra.exceptions import NotFound
@@ -13,15 +14,9 @@ from payment.exceptions import InternalPaymentError, PaymentValidationError
 from payment.models import Item, Payment
 from payment.permissions import PaymentPermission
 from payment.provider_handlers import NetsProviderHandler
-from payment.schemas import (
-    BasePayment,
-    PaymentCreatePayload,
-    PaymentResponse,
-    ProviderPaymentPayload,
-)
+from payment.schemas import (BasePayment, PaymentCreatePayload,
+                             PaymentResponse, ProviderPaymentPayload)
 from project import settings
-
-from common.api import get_auth_methods
 
 
 @api_controller(
