@@ -286,8 +286,9 @@ class TF5TilladelseView(PermissionsRequiredMixin, HasRestClientMixin, FormView):
 
             context = {"object": self.object}
             pdfdata = []
-            for language_code in "kl", "da":
+            for language_code in ("kl", "da"):
                 with language(language_code):
+                    print(f"write lang {language_code}")
                     pdfdata.append(
                         BytesIO(
                             render_pdf(
@@ -295,8 +296,9 @@ class TF5TilladelseView(PermissionsRequiredMixin, HasRestClientMixin, FormView):
                             )
                         )
                     )
-            for language_code in "kl", "da":
+            for language_code in ("kl", "da"):
                 with language(language_code):
+                    print(f"write lang {language_code}")
                     pdfdata.append(
                         BytesIO(
                             render_pdf(
@@ -319,7 +321,6 @@ class TF5TilladelseView(PermissionsRequiredMixin, HasRestClientMixin, FormView):
             with self.object.leverandørfaktura.open() as faktura:
                 pdfdata.append(faktura)
                 write_pdf(self.path, *pdfdata)
-                print(f"tf5 skrevet til {self.path}")
 
         if form.cleaned_data["send"]:
             indberetter_data = self.object.oprettet_af["indberetter_data"]

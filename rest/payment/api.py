@@ -32,23 +32,18 @@ from payment.schemas import (  # isort: skip
 class PaymentAPI:
     @route.post("", auth=get_auth_methods(), url_name="payment_create")
     def create(self, payload: PaymentCreatePayload) -> PaymentResponse:
-        print(payload)
         try:
             declaration = PrivatAfgiftsanmeldelse.objects.get(id=payload.declaration_id)
         except PrivatAfgiftsanmeldelse.DoesNotExist:
-            print(f"{payload.declaration_id} not found")
             raise NotFound(f"Failed to fetch declaration: {payload.declaration_id}")
-        print("Found anmeldelse")
         # Get payment provider handler for this declaration
         provider_handler: NetsProviderHandler = get_provider_handler("nets")
-        print("Found provider_handler")
 
         # Create payment locally, if it does not exist
         try:
             payment_new = Payment.objects.get(
                 declaration_id=payload.declaration_id, provider_payment_id__isnull=False
             )
-            print("exists")
             if payment_new.provider_payment_id is not None:
                 return payment_model_to_response(
                     payment_new,
@@ -59,7 +54,6 @@ class PaymentAPI:
         except Payment.DoesNotExist:
             pass
 
-        print("creating")
         payment_new = Payment.objects.create(
             amount=0,
             currency="DKK",
@@ -71,7 +65,6 @@ class PaymentAPI:
         payment_new_amount = 0
         payment_new_items = []
         qs = Varelinje.objects.filter(privatafgiftsanmeldelse_id=payload.declaration_id)
-        print(f"there are {qs.count()} varelinjer")
         for varelinje in Varelinje.objects.filter(
             privatafgiftsanmeldelse_id=payload.declaration_id
         ):
@@ -189,7 +182,6 @@ def payment_model_to_response(
     field_converts: Dict[str, Callable[[str | int], Tuple[str, str]]] | None,
 ) -> PaymentResponse:
     payment_local_dict = model_to_dict(payment_model)
-    print(f"payment_local_dict: {payment_local_dict}")
 
     if payment_model.items:
         payment_local_dict["items"] = [
@@ -198,8 +190,6 @@ def payment_model_to_response(
 
     if field_converts and len(field_converts.keys()) > 0:
         for field, convert in field_converts.items():
-            print(f"field: {field}")
-            print(f"value: {payment_local_dict[field]}")
             field_with_converted_val, converted_value = convert(
                 payment_local_dict[field]
             )
