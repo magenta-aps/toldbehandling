@@ -685,6 +685,7 @@ class AfgiftstabelDownloadView(PermissionsRequiredMixin, HasRestClientMixin, Vie
         ("afgiftssats", "Afgiftssats"),
         ("kræver_indførselstilladelse", "Kræver indførselstilladelse"),
         ("har_privat_tillægsafgift_alkohol", "Har privat tillægsafgift alkohol"),
+        ("synlig_privat", "Synlig for private"),
         ("minimumsbeløb", "Minimumsbeløb"),
         ("segment_nedre", "Segment nedre"),
         ("segment_øvre", "Segment øvre"),
