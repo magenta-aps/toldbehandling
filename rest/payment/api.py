@@ -50,18 +50,21 @@ class PaymentAPI:
             # TODO: Hvis provider_handler.provider_payment_id er None,
             #  springer dette i luften. Det kan ske hvis der opstår en fejl
             #  i create() inden vi kommer helt i mål
-            return payment_model_to_response(
-                payment_new,
-                field_converts=payment_field_converters(provider_handler, full=True),
-            )
+            if payment_new.provider_payment_id is not None:
+                return payment_model_to_response(
+                    payment_new,
+                    field_converts=payment_field_converters(provider_handler, full=True),
+                )
         except Payment.DoesNotExist:
-            print("creating")
-            payment_new = Payment.objects.create(
-                amount=0,
-                currency="DKK",
-                reference=payload.declaration_id,
-                declaration=declaration,
-            )
+            pass
+
+        print("creating")
+        payment_new = Payment.objects.create(
+            amount=0,
+            currency="DKK",
+            reference=payload.declaration_id,
+            declaration=declaration,
+        )
 
         # Get declaration "varelinjer" and create payment items
         payment_new_amount = 0
