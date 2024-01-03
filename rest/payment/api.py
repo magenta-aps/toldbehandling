@@ -47,8 +47,9 @@ class PaymentAPI:
         try:
             payment_new = Payment.objects.get(declaration_id=payload.declaration_id)
             print("exists")
-            # TODO: Hvis provider_handler.provider_payment_id er None, springer dette i luften
-            # Det kan ske hvis der opstår en fejl i create() inden vi kommer helt i mål
+            # TODO: Hvis provider_handler.provider_payment_id er None,
+            #  springer dette i luften. Det kan ske hvis der opstår en fejl
+            #  i create() inden vi kommer helt i mål
             return payment_model_to_response(
                 payment_new,
                 field_converts=payment_field_converters(provider_handler, full=True),
