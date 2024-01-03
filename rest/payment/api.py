@@ -44,9 +44,7 @@ class PaymentAPI:
 
         # Create payment locally, if it does not exist
         try:
-            payment_new = Payment.objects.get(
-                declaration_id=payload.declaration_id
-            )
+            payment_new = Payment.objects.get(declaration_id=payload.declaration_id)
             return payment_model_to_response(
                 payment_new,
                 field_converts=payment_field_converters(provider_handler, full=True),
