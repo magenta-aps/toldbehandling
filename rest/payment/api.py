@@ -182,6 +182,7 @@ def payment_model_to_response(
     field_converts: Dict[str, Callable[[str | int], Tuple[str, str]]] | None,
 ) -> PaymentResponse:
     payment_local_dict = model_to_dict(payment_model)
+    print(f"payment_local_dict: {payment_local_dict}")
 
     if payment_model.items:
         payment_local_dict["items"] = [
@@ -190,6 +191,8 @@ def payment_model_to_response(
 
     if field_converts and len(field_converts.keys()) > 0:
         for field, convert in field_converts.items():
+            print(f"field: {field}")
+            print(f"value: {payment_local_dict[field]}")
             field_with_converted_val, converted_value = convert(
                 payment_local_dict[field]
             )
