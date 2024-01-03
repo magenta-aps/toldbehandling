@@ -586,6 +586,7 @@ class PrivatAfgiftanmeldelseRestClient(ModelRestClient):
         include_notater=False,
     ):
         item = self.rest.get(f"privat_afgiftsanmeldelse/{id}")
+        print(f"item: {item}")
         if item.get("leverandørfaktura"):
             self.set_file(item, "leverandørfaktura")
         item["varelinjer"] = None

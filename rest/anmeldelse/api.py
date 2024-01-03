@@ -513,6 +513,7 @@ class PrivatAfgiftsanmeldelseAPI:
     )
     def get(self, id: int):
         item = get_object_or_404(PrivatAfgiftsanmeldelse, id=id)
+        print(item.leverandørfaktura)
         self.check_user(item)
         return item
 
