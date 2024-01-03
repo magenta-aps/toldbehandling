@@ -954,9 +954,9 @@ class RestClient:
             else:
                 raise
         if (
-            saml_data["firstname"] != user["first_name"]
-            or saml_data["lastname"] != user["last_name"]
-            or saml_data["email"] != user["email"]
+            saml_data.get("firstname") != user["first_name"]
+            or saml_data.get("lastname") != user["last_name"]
+            or saml_data.get("email") != user["email"]
             or saml_data.get("cvr") != user["indberetter_data"]["cvr"]
         ):
             user = client.patch(f"user/cpr/{int(cpr)}", mapped_data)
