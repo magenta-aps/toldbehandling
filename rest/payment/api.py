@@ -45,11 +45,8 @@ class PaymentAPI:
 
         # Create payment locally, if it does not exist
         try:
-            payment_new = Payment.objects.get(declaration_id=payload.declaration_id)
+            payment_new = Payment.objects.get(declaration_id=payload.declaration_id, provider_payment_id__isnone=False)
             print("exists")
-            # TODO: Hvis provider_handler.provider_payment_id er None,
-            #  springer dette i luften. Det kan ske hvis der opstår en fejl
-            #  i create() inden vi kommer helt i mål
             if payment_new.provider_payment_id is not None:
                 return payment_model_to_response(
                     payment_new,
