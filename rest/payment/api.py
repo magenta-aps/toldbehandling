@@ -63,9 +63,7 @@ class PaymentAPI:
         # Get declaration "varelinjer" and create payment items
         payment_new_amount = 0
         payment_new_items = []
-        qs = Varelinje.objects.filter(
-            privatafgiftsanmeldelse_id=payload.declaration_id
-        )
+        qs = Varelinje.objects.filter(privatafgiftsanmeldelse_id=payload.declaration_id)
         print(f"there are {qs.count()} varelinjer")
         for varelinje in Varelinje.objects.filter(
             privatafgiftsanmeldelse_id=payload.declaration_id
