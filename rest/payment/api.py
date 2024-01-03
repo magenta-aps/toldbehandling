@@ -21,6 +21,8 @@ from payment.schemas import (
 )
 from project import settings
 
+from common.api import get_auth_methods
+
 
 @api_controller(
     "/payment",
@@ -28,31 +30,34 @@ from project import settings
     permissions=[permissions.IsAuthenticated & PaymentPermission],
 )
 class PaymentAPI:
-    @route.post("", auth=JWTAuth(), url_name="payment_create")
+    @route.post("", auth=get_auth_methods(), url_name="payment_create")
     def create(self, payload: PaymentCreatePayload) -> PaymentResponse:
-        declaration = PrivatAfgiftsanmeldelse.objects.get(id=payload.declaration_id)
-        if not declaration:
+        print(payload)
+        try:
+            declaration = PrivatAfgiftsanmeldelse.objects.get(id=payload.declaration_id)
+        except PrivatAfgiftsanmeldelse.DoesNotExist:
+            print(f"{payload.declaration_id} not found")
             raise NotFound(f"Failed to fetch declaration: {payload.declaration_id}")
 
         # Get payment provider handler for this declaration
         provider_handler: NetsProviderHandler = get_provider_handler("nets")
 
         # Create payment locally, if it does not exist
-        payment_new = Payment.objects.filter(
-            declaration_id=payload.declaration_id
-        ).first()
-        if payment_new:
+        try:
+            payment_new = Payment.objects.get(
+                declaration_id=payload.declaration_id
+            )
             return payment_model_to_response(
                 payment_new,
                 field_converts=payment_field_converters(provider_handler, full=True),
             )
-
-        payment_new = Payment.objects.create(
-            amount=0,
-            currency="DKK",
-            reference=payload.declaration_id,
-            declaration=declaration,
-        )
+        except Payment.DoesNotExist:
+            payment_new = Payment.objects.create(
+                amount=0,
+                currency="DKK",
+                reference=payload.declaration_id,
+                declaration=declaration,
+            )
 
         # Get declaration "varelinjer" and create payment items
         payment_new_amount = 0
