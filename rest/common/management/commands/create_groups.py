@@ -113,10 +113,16 @@ class Command(BaseCommand):
             ("view", varelinje_model),
             ("view", afgiftstabel_model),
             ("view", vareafgiftssats_model),
+            ("view", payment_model),
+            ("view", payment_item_model),
             ("add", privatafgiftsanmeldelse_model),
             ("add", varelinje_model),
+            ("add", payment_model),
+            ("add", payment_item_model),
             ("change", privatafgiftsanmeldelse_model),
             ("change", varelinje_model),
+            ("change", payment_model),
+            ("change", payment_item_model),
         ):
             cpr_indberettere.permissions.add(
                 Permission.objects.get(
@@ -133,16 +139,12 @@ class Command(BaseCommand):
             ("view", fragtforsendelse_model),
             ("view", afgiftstabel_model),
             ("view", vareafgiftssats_model),
-            ("view", payment_model),
-            ("view", payment_item_model),
             ("add", afsender_model),
             ("add", modtager_model),
             ("add", afgiftsanmeldelse_model),
             ("add", varelinje_model),
             ("add", postforsendelse_model),
             ("add", fragtforsendelse_model),
-            ("add", payment_model),
-            ("add", payment_item_model),
             # Ingen add på afgiftstabel og vareafgiftssats
             ("change", afsender_model),
             ("change", modtager_model),
@@ -150,8 +152,6 @@ class Command(BaseCommand):
             ("change", varelinje_model),
             ("change", postforsendelse_model),
             ("change", fragtforsendelse_model),
-            ("change", payment_model),
-            ("change", payment_item_model),
             ("delete", postforsendelse_model),
             ("delete", fragtforsendelse_model),
         ):
