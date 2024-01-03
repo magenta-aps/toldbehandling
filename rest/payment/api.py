@@ -46,7 +46,7 @@ class PaymentAPI:
         # Create payment locally, if it does not exist
         try:
             payment_new = Payment.objects.get(
-                declaration_id=payload.declaration_id, provider_payment_id__isnone=False
+                declaration_id=payload.declaration_id, provider_payment_id__isnull=False
             )
             print("exists")
             if payment_new.provider_payment_id is not None:
