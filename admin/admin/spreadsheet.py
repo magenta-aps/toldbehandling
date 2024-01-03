@@ -36,6 +36,7 @@ class VareafgiftssatsSpreadsheetUtil:
                 elif header in (
                     "kræver_indførselstilladelse",
                     "har_privat_tillægsafgift_alkohol",
+                    "synlig_privat",
                 ):
                     value = "ja" if value else "nej"
                 elif header == "enhed":
@@ -52,6 +53,7 @@ class VareafgiftssatsSpreadsheetUtil:
         "afgiftsgruppenummer": int,
         "kræver_indførselstilladelse": parse_bool,
         "har_privat_tillægsafgift_alkohol": parse_bool,
+        "synlig_privat": parse_bool,
         "afgiftssats": unformat_decimal,
         "minimumsbeløb": unformat_decimal,
         "segment_øvre": unformat_decimal,
@@ -131,6 +133,7 @@ class VareafgiftssatsSpreadsheetUtil:
             "Afgiftssats",
             "Kræver indførselstilladelse",
             "Har privat tillægsafgift alkohol",
+            "Synlig for private",
             "Minimumsbeløb",
             "Segment nedre",
             "Segment øvre",
@@ -153,6 +156,7 @@ class VareafgiftssatsSpreadsheetUtil:
             "Enhed",
             "Kræver indførselstilladelse",
             "Har privat tillægsafgift alkohol",
+            "Synlig for private",
         )
         for linje, vareafgiftssats in enumerate(satser, 2):
             for pretty, raw in zip(
