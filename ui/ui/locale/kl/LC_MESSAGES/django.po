@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-12-22 10:49+0000\n"
+"POT-Creation-Date: 2024-01-04 07:41+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -65,7 +65,7 @@ msgstr ""
 msgid "Log ind igen"
 msgstr "Iseqqigit"
 
-#: ui/templates/ui/tf10/actions.html
+#: ui/templates/ui/tf10/actions.html ui/templates/ui/tf5/view.html
 msgid "Redigér"
 msgstr "Iluarsiuk"
 
@@ -83,7 +83,7 @@ msgid "Varelinjer"
 msgstr ""
 
 #: ui/templates/ui/tf5/payment/checkout.html
-#: ui/templates/ui/tf5/payment/details.html
+#: ui/templates/ui/tf5/payment/details.html ui/templates/ui/tf5/view.html
 msgid "Varekode"
 msgstr "Nioqqutissap kodea"
 
@@ -93,12 +93,12 @@ msgid "Antal / Mængde"
 msgstr ""
 
 #: ui/templates/ui/tf5/payment/checkout.html
-#: ui/templates/ui/tf5/payment/details.html
+#: ui/templates/ui/tf5/payment/details.html ui/templates/ui/tf5/view.html
 msgid "Afgiftssats"
 msgstr "Akitsuutip annertussusia"
 
 #: ui/templates/ui/tf5/payment/checkout.html
-#: ui/templates/ui/tf5/payment/details.html
+#: ui/templates/ui/tf5/payment/details.html ui/templates/ui/tf5/view.html
 msgid "Afgiftsbeløb"
 msgstr "Akitsuutit"
 
@@ -125,7 +125,7 @@ msgstr "Nassiussisoq"
 msgid "Betalings detaljer"
 msgstr ""
 
-#: ui/templates/ui/tf5/payment/details.html
+#: ui/templates/ui/tf5/payment/details.html ui/templates/ui/tf5/view.html
 msgid "Vareart"
 msgstr "Nioqqutissaq"
 
@@ -144,6 +144,178 @@ msgstr ""
 #: ui/templates/ui/tf5/payment/details.html
 msgid "Modtager"
 msgstr "Tigusisussaq"
+
+#: ui/templates/ui/tf5/tilladelse.html
+msgid "Engangstilladelse til privatindførsel af øl, vin og spiritus"
+msgstr ""
+"Immiaaqqanik, viinninik imigassanillu namminermut atugassanik eqqussinermi, "
+"ataasiartumik akuersissut"
+
+#: ui/templates/ui/tf5/tilladelse.html
+msgid "Indehavers navn"
+msgstr "Piginnittup aqqa"
+
+#: ui/templates/ui/tf5/tilladelse.html
+msgid "CPR-nummer"
+msgstr "CPR-normu"
+
+#: ui/templates/ui/tf5/tilladelse.html
+msgid "Engangstilladelsesnummer"
+msgstr "Ataasiartumik akuersissummut normu"
+
+#: ui/templates/ui/tf5/tilladelse.html
+msgid "Indehavers adresse"
+msgstr "Piginnittup najugaa"
+
+#: ui/templates/ui/tf5/tilladelse.html
+msgid "Bookingnr. for forsendelse"
+msgstr "Nassiussamut inniminniinermi normu"
+
+#: ui/templates/ui/tf5/tilladelse.html
+msgid "Udstedelsesdato"
+msgstr "Ulloq akuersissuteqarfik"
+
+#: ui/templates/ui/tf5/tilladelse.html
+msgid "Omfang"
+msgstr "Pineqartut"
+
+#: ui/templates/ui/tf5/tilladelse.html
+msgid ""
+"Tilladelsen omfatter indførsel af den mængde øl, vin eller spiritus, der "
+"fremgår af udfyldte ansøgning. Indførsel af de angivne mængder er kun til "
+"privat forbrug."
+msgstr ""
+"Immiaaqqanut, viinninut imalt. imigassanut eqqussinissamut akuersissut, "
+"eqqussinissamik qinnuteqaammi allassimasunut tunngavoq. Eqqussat pineqartut "
+"namminermuinnaq atugassaapput (tuniniaqqusaanngillat)"
+
+#: ui/templates/ui/tf5/tilladelse.html
+msgid "Gyldighedsperiode"
+msgstr "Piffissaq atuuffik"
+
+#: ui/templates/ui/tf5/tilladelse.html
+msgid ""
+"Tilladelsen er gyldig. Tilladelsen frafalder i det øjeblik, de indførte "
+"varer udleveres til tilladelsens indehaver i Grønland"
+msgstr ""
+"Akuersissut atuuppoq. Pisiat eqqussat akuersissummik piginnittumut, "
+"Kalaallit Nunaanniittumut tunniunneqarnerat ilutigalugu akuersissut "
+"ingerlaannartumik atuukkunnaassaaq."
+
+#: ui/templates/ui/tf5/tilladelse.html
+msgid "Dokumentation ved udlevering"
+msgstr "Tunniussinermi uppernarsaat"
+
+#: ui/templates/ui/tf5/tilladelse.html
+msgid "Ved udlevering skal ansøgning og tilladelse medbringes"
+msgstr ""
+"Tunniussinermi, qinnuteqaat eqqussinissamullu akuersissut nassarneqassapput."
+
+#: ui/templates/ui/tf5/tilladelse.html
+msgid "DENNE TILLADELSE ER UOVERDRAGELIG"
+msgstr "AKUERSISSUT UNA ALLAMUT TUNNIUNNEQARSINNAANNGILAQ"
+
+#: ui/templates/ui/tf5/view.html
+#, fuzzy
+#| msgid "Engangstilladelse til privatindførsel af øl, vin og spiritus"
+msgid "Engangstilladelse til privat indførsel af øl, vin og spiritus"
+msgstr ""
+"Immiaaqqanik, viinninik imigassanillu namminermut atugassanik eqqussinermi, "
+"ataasiartumik akuersissut"
+
+#: ui/templates/ui/tf5/view.html
+msgid "Navn"
+msgstr ""
+
+#: ui/templates/ui/tf5/view.html
+msgid "CPR"
+msgstr ""
+
+#: ui/templates/ui/tf5/view.html
+msgid "Adresse"
+msgstr "Najugaq"
+
+#: ui/templates/ui/tf5/view.html
+msgid "Postnr/by"
+msgstr "Postnr/Illoqarfik"
+
+#: ui/templates/ui/tf5/view.html
+msgid "Telefon"
+msgstr ""
+
+#: ui/templates/ui/tf5/view.html
+msgid "Bookingnummer"
+msgstr ""
+
+#: ui/templates/ui/tf5/view.html
+msgid "Indførselstilladelse"
+msgstr ""
+
+#: ui/templates/ui/tf5/view.html
+msgid "Ingen"
+msgstr ""
+
+#: ui/templates/ui/tf5/view.html
+msgid "Fakturanummer"
+msgstr ""
+
+#: ui/templates/ui/tf5/view.html
+msgid "Indleveringsdato"
+msgstr ""
+
+#: ui/templates/ui/tf5/view.html
+#, fuzzy
+#| msgid "Vareart"
+msgid "Varefaktura"
+msgstr "Nioqqutissaq"
+
+#: ui/templates/ui/tf5/view.html
+#, fuzzy
+#| msgid "Afgiftsbeløb"
+msgid "Afgifter"
+msgstr "Akitsuutit"
+
+#: ui/templates/ui/tf5/view.html
+msgid "kg | liter"
+msgstr ""
+
+#: ui/templates/ui/tf5/view.html
+msgid "Antal"
+msgstr ""
+
+#: ui/templates/ui/tf5/view.html
+msgid "Fakturabeløb"
+msgstr ""
+
+#: ui/templates/ui/tf5/view.html
+msgid "Indførselsafgift"
+msgstr ""
+
+#: ui/templates/ui/tf5/view.html
+msgid "Tillægsafgift alkohol"
+msgstr ""
+
+#: ui/templates/ui/tf5/view.html
+msgid "Ekspeditionsgebyr"
+msgstr ""
+
+#: ui/templates/ui/tf5/view.html
+#, fuzzy
+#| msgid "Afgiftssats"
+msgid "Afgift i alt"
+msgstr "Akitsuutip annertussusia"
+
+#: ui/templates/ui/tf5/view.html
+msgid "Annullér"
+msgstr ""
+
+#: ui/templates/ui/tf5/view.html
+msgid "Opret tilladelse"
+msgstr ""
+
+#: ui/templates/ui/tf5/view.html
+msgid "Send tilladelse"
+msgstr ""
 
 #: ui/views.py
 #, python-brace-format
