@@ -269,7 +269,7 @@ class TF5TilladelseView(PermissionsRequiredMixin, HasRestClientMixin, FormView):
 
     @staticmethod
     def id_path(id: int) -> str:
-        return os.path.join(settings.TF5_ROOT, "tilladelser", f"{id}.pdf")
+        return os.path.join(settings.TF5_ROOT, f"{id}.pdf")
 
     @staticmethod
     def exists(id: int) -> bool:
@@ -286,8 +286,9 @@ class TF5TilladelseView(PermissionsRequiredMixin, HasRestClientMixin, FormView):
 
             context = {"object": self.object}
             pdfdata = []
-            for language_code in "kl", "da":
+            for language_code in ("kl", "da"):
                 with language(language_code):
+                    print(f"write lang {language_code}")
                     pdfdata.append(
                         BytesIO(
                             render_pdf(
@@ -295,8 +296,9 @@ class TF5TilladelseView(PermissionsRequiredMixin, HasRestClientMixin, FormView):
                             )
                         )
                     )
-            for language_code in "kl", "da":
+            for language_code in ("kl", "da"):
                 with language(language_code):
+                    print(f"write lang {language_code}")
                     pdfdata.append(
                         BytesIO(
                             render_pdf(
