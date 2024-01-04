@@ -713,6 +713,8 @@ class TF5BlanketTest(TestMixin, HasLogin, TestCase):
 
     @override_settings(LOGIN_BYPASS_ENABLED=False)
     def test_requires_login(self):
+        if not settings.TF5_ENABLED:
+            return
         url = str(reverse("tf5_create"))
         response = self.client.get(url)
         self.assertEquals(response.status_code, 302)
@@ -802,6 +804,8 @@ class TF5BlanketTest(TestMixin, HasLogin, TestCase):
 
     @patch.object(requests.Session, "get")
     def test_get_form(self, mock_get):
+        if not settings.TF5_ENABLED:
+            return
         self.login()
         url = reverse("tf5_create")
         mock_get.side_effect = self.mock_requests_get
@@ -841,6 +845,8 @@ class TF5BlanketTest(TestMixin, HasLogin, TestCase):
     @patch.object(requests.Session, "get")
     @patch("ui.views.TF5FormCreateView.form_valid")
     def test_form_required_fields(self, mock_form_valid, mock_get):
+        if not settings.TF5_ENABLED:
+            return
         self.login()
         url = reverse("tf5_create")
         mock_get.side_effect = self.mock_requests_get
@@ -871,6 +877,8 @@ class TF5BlanketTest(TestMixin, HasLogin, TestCase):
             self.assertEquals(html_errors[required_field], ["Dette felt er påkrævet."])
 
     def test_vareform_required_fields(self):
+        if not settings.TF5_ENABLED:
+            return
         varesatser = {
             1: Vareafgiftssats(
                 id=1,
@@ -933,6 +941,8 @@ class TF5BlanketTest(TestMixin, HasLogin, TestCase):
         "post",
     )
     def test_form_successful(self, mock_post, mock_get):
+        if not settings.TF5_ENABLED:
+            return
         self.login()
         url = reverse("tf5_create")
         mock_get.side_effect = self.mock_requests_get
@@ -969,6 +979,8 @@ class TF5BlanketTest(TestMixin, HasLogin, TestCase):
     @patch.object(requests.Session, "get")
     @patch("ui.views.TF5FormCreateView.form_valid")
     def test_form_filefields_size(self, mock_form_valid, mock_get):
+        if not settings.TF5_ENABLED:
+            return
         self.login()
         url = reverse("tf5_create")
         mock_get.side_effect = self.mock_requests_get

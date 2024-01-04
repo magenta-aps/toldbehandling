@@ -230,3 +230,5 @@ from .login_settings import *  # noqa
 PAYMENT_PROVIDER_NETS_CHECKOUT_KEY = os.environ.get(
     "PAYMENT_PROVIDER_NETS_CHECKOUT_KEY", "checkout_key"
 )
+
+TF5_ENABLED = bool(strtobool(os.environ.get("TF5_ENABLED", "True")))
