@@ -4,3 +4,5 @@ include told_common/templates/*/*.html
 include told_common/templates/*/*/*.html
 include told_common/static/*/*
 include told_common/static/*/*/*
+include told_common/locale/*/*/django.po
+include told_common/locale/*/*/django.mo
