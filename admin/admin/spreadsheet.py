@@ -80,9 +80,13 @@ class VareafgiftssatsSpreadsheetUtil:
                         value is not None
                         and header in VareafgiftssatsSpreadsheetUtil.header_map_in
                     ):
-                        value = VareafgiftssatsSpreadsheetUtil.header_map_in[header](value)
+                        value = VareafgiftssatsSpreadsheetUtil.header_map_in[header](
+                            value
+                        )
                 except (TypeError, ValueError) as e:
-                    raise SpreadsheetImportException(f"Fejl ved import af regneark: {e}")
+                    raise SpreadsheetImportException(
+                        f"Fejl ved import af regneark: {e}"
+                    )
                 data[header] = value
         return data
 
