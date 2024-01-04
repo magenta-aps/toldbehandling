@@ -12,6 +12,7 @@ from sats.models import Afgiftstabel, Vareafgiftssats
 
 from anmeldelse.models import (  # isort: skip
     Afgiftsanmeldelse,
+    Notat,
     PrivatAfgiftsanmeldelse,
     Varelinje,
 )
@@ -48,6 +49,7 @@ class Command(BaseCommand):
         afgiftsanmeldelse_model = ContentType.objects.get_for_model(
             Afgiftsanmeldelse, for_concrete_model=False
         )
+        notat_model = ContentType.objects.get_for_model(Notat, for_concrete_model=False)
         privatafgiftsanmeldelse_model = ContentType.objects.get_for_model(
             PrivatAfgiftsanmeldelse, for_concrete_model=False
         )
@@ -139,6 +141,7 @@ class Command(BaseCommand):
             ("view", fragtforsendelse_model),
             ("view", afgiftstabel_model),
             ("view", vareafgiftssats_model),
+            ("view", notat_model),
             ("add", afsender_model),
             ("add", modtager_model),
             ("add", afgiftsanmeldelse_model),
@@ -173,6 +176,7 @@ class Command(BaseCommand):
             ("view", vareafgiftssats_model),
             ("view", payment_model),
             ("view", payment_item_model),
+            ("view", notat_model),
             ("add", afsender_model),
             ("add", modtager_model),
             ("add", afgiftsanmeldelse_model),
@@ -182,6 +186,7 @@ class Command(BaseCommand):
             # Ingen add på afgiftstabel og vareafgiftssats
             ("add", payment_model),
             ("add", payment_item_model),
+            ("add", notat_model),
             ("change", afgiftsanmeldelse_model),
             # Ingen change på andre modeller
             # Ingen delete
@@ -208,6 +213,7 @@ class Command(BaseCommand):
             ("view", vareafgiftssats_model),
             ("view", payment_model),
             ("view", payment_item_model),
+            ("view", notat_model),
             # Ingen add
             # Ingen change på andre modeller
             # Ingen delete
@@ -225,6 +231,7 @@ class Command(BaseCommand):
         for action, model in (
             ("view", afgiftstabel_model),
             ("view", vareafgiftssats_model),
+            ("view", notat_model),
             ("add", afgiftstabel_model),
             ("add", vareafgiftssats_model),
             ("change", afgiftstabel_model),
