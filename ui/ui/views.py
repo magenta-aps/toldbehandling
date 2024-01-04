@@ -288,21 +288,15 @@ class TF5TilladelseView(PermissionsRequiredMixin, HasRestClientMixin, FormView):
             pdfdata = []
             for language_code in ("kl", "da"):
                 with language(language_code):
-                    print(f"write lang {language_code}")
                     pdfdata.append(
-                        BytesIO(
-                            render_pdf(
-                                "told_common/tf5/tilladelse.html", context=context
-                            )
-                        )
+                        BytesIO(render_pdf("ui/tf5/tilladelse.html", context=context))
                     )
             for language_code in ("kl", "da"):
                 with language(language_code):
-                    print(f"write lang {language_code}")
                     pdfdata.append(
                         BytesIO(
                             render_pdf(
-                                "told_common/tf5/view.html",
+                                "ui/tf5/view.html",
                                 context={
                                     **context,
                                     "extend_template": "ui/print.html",
