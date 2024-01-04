@@ -440,8 +440,12 @@ class PrivatAfgiftsanmeldelseOut(ModelSchema):
 
     @staticmethod
     def resolve_payment_status(obj: PrivatAfgiftsanmeldelse):
-        p = Payment.objects.filter(declaration=obj).first()
-        return p.status if p else "created"
+        qs = Payment.objects.filter(declaration=obj)
+        if qs.exists():
+            if qs.filter(status="paid").exists():
+                return "paid"
+            return qs.first().status
+        return "created"
 
 
 class PrivatAfgiftsanmeldelseFilterSchema(FilterSchema):
@@ -509,6 +513,7 @@ class PrivatAfgiftsanmeldelseAPI:
     )
     def get(self, id: int):
         item = get_object_or_404(PrivatAfgiftsanmeldelse, id=id)
+        print(item.leverandørfaktura)
         self.check_user(item)
         return item
 

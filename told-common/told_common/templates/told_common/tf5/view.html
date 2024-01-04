@@ -6,7 +6,9 @@
 
 {% block content %}
 <form method="post" enctype="multipart/form-data">
+    {% if not printing %}
     {% csrf_token %}
+    {% endif %}
     <div class="container-lg">
         <h1>{% translate "Engangstilladelse til privat indførsel af øl, vin og spiritus" %}</h1>
 

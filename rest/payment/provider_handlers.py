@@ -24,7 +24,7 @@ class NetsProviderHandler:
         for item in payload.items:
             item.name = f"{item.name[:125]}..."
 
-        resp = requests.post(
+        response = requests.post(
             f"{self.host}/v1/payments",
             headers=self.headers,
             json={
@@ -37,10 +37,10 @@ class NetsProviderHandler:
             },
         )
 
-        if resp.status_code != 201:
+        if response.status_code != 201:
             raise Exception("Failed to create payments")
 
-        resp_body = resp.json()
+        resp_body = response.json()
         return self.read(resp_body["paymentId"])
 
     def read(self, payment_id: str):
