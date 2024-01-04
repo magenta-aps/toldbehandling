@@ -67,22 +67,23 @@ class VareafgiftssatsSpreadsheetUtil:
     ) -> Dict[str, Union[str, int, bool]]:
         data = {}
         for i, header in enumerate(headers):
-            header = header.lower()
-            try:
-                value = row[i]
-            except IndexError:
-                value = None
-            if value == "":
-                value = None
-            try:
-                if (
-                    value is not None
-                    and header in VareafgiftssatsSpreadsheetUtil.header_map_in
-                ):
-                    value = VareafgiftssatsSpreadsheetUtil.header_map_in[header](value)
-            except (TypeError, ValueError) as e:
-                raise SpreadsheetImportException(f"Fejl ved import af regneark: {e}")
-            data[header] = value
+            if header is not None:
+                header = header.lower()
+                try:
+                    value = row[i]
+                except IndexError:
+                    value = None
+                if value == "":
+                    value = None
+                try:
+                    if (
+                        value is not None
+                        and header in VareafgiftssatsSpreadsheetUtil.header_map_in
+                    ):
+                        value = VareafgiftssatsSpreadsheetUtil.header_map_in[header](value)
+                except (TypeError, ValueError) as e:
+                    raise SpreadsheetImportException(f"Fejl ved import af regneark: {e}")
+                data[header] = value
         return data
 
     @staticmethod
@@ -90,6 +91,7 @@ class VareafgiftssatsSpreadsheetUtil:
         return [
             header.replace(" ", "_").replace("(", "").replace(")", "").lower()
             for header in headers
+            if header is not None
         ]
 
     @staticmethod
