@@ -296,7 +296,7 @@ class TF5TilladelseView(PermissionsRequiredMixin, HasRestClientMixin, FormView):
                     pdfdata.append(
                         BytesIO(
                             render_pdf(
-                                "ui/tf5/view.html",
+                                "told_common/tf5/view.html",
                                 context={
                                     **context,
                                     "extend_template": "ui/print.html",
