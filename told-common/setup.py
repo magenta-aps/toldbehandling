@@ -3,7 +3,32 @@
 #
 # SPDX-License-Identifier: MPL-2.0
 
+import os
+import subprocess
+
 import setuptools
+
+
+# Solution from https://stackoverflow.com/questions/34070103/
+def create_mo_files():
+    data_files = []
+    localedir = "told_common/locale"
+    po_dirs = [
+        f"{localedir}/{locale}/LC_MESSAGES/" for locale in next(os.walk(localedir))[1]
+    ]
+    for folder in po_dirs:
+        mo_files = []
+        po_files = [
+            f for f in next(os.walk(folder))[2] if os.path.splitext(f)[1] == ".po"
+        ]
+        for po_file in po_files:
+            filename, extension = os.path.splitext(po_file)
+            mo_file = filename + ".mo"
+            subprocess.call(["msgfmt", "-o", folder + mo_file, folder + po_file])
+            mo_files.append(folder + mo_file)
+        data_files.append((folder, mo_files))
+    return data_files
+
 
 setuptools.setup(
     name="told_common",
@@ -27,4 +52,5 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     include_package_data=True,
+    data_files=create_mo_files(),
 )
