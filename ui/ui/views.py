@@ -208,6 +208,7 @@ class TF5FormCreateView(
 
 class TF5ListView(common_views.TF5ListView):
     actions_template = "ui/tf5/actions.html"
+    extend_template = "ui/layout.html"
 
     def get_context_data(self, **context: Dict[str, Any]) -> Dict[str, Any]:
         return super().get_context_data(
@@ -268,7 +269,7 @@ class TF5TilladelseView(PermissionsRequiredMixin, HasRestClientMixin, FormView):
 
     @staticmethod
     def id_path(id: int) -> str:
-        return os.path.join(settings.TF5_ROOT, "tilladelser", f"{id}.pdf")
+        return os.path.join(settings.TF5_ROOT, f"{id}.pdf")
 
     @staticmethod
     def exists(id: int) -> bool:
@@ -285,21 +286,17 @@ class TF5TilladelseView(PermissionsRequiredMixin, HasRestClientMixin, FormView):
 
             context = {"object": self.object}
             pdfdata = []
-            for language_code in "kl", "da":
+            for language_code in ("kl", "da"):
                 with language(language_code):
                     pdfdata.append(
-                        BytesIO(
-                            render_pdf(
-                                "told_common/tf5/tilladelse.html", context=context
-                            )
-                        )
+                        BytesIO(render_pdf("ui/tf5/tilladelse.html", context=context))
                     )
-            for language_code in "kl", "da":
+            for language_code in ("kl", "da"):
                 with language(language_code):
                     pdfdata.append(
                         BytesIO(
                             render_pdf(
-                                "told_common/tf5/view.html",
+                                "ui/tf5/view.html",
                                 context={
                                     **context,
                                     "extend_template": "ui/print.html",

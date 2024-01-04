@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-12-22 11:42+0000\n"
+"POT-Creation-Date: 2024-01-04 07:35+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -683,76 +683,6 @@ msgstr ""
 #: told_common/templates/told_common/tf5/subform.html
 msgid "Fakturabeløb inkl. moms."
 msgstr ""
-
-#: told_common/templates/told_common/tf5/tilladelse.html
-msgid "Engangstilladelse til privatindførsel af øl, vin og spiritus"
-msgstr ""
-"Immiaaqqanik, viinninik imigassanillu namminermut atugassanik eqqussinermi, "
-"ataasiartumik akuersissut"
-
-#: told_common/templates/told_common/tf5/tilladelse.html
-msgid "Indehavers navn"
-msgstr "Piginnittup aqqa"
-
-#: told_common/templates/told_common/tf5/tilladelse.html
-msgid "CPR-nummer"
-msgstr "CPR-normu"
-
-#: told_common/templates/told_common/tf5/tilladelse.html
-msgid "Engangstilladelsesnummer"
-msgstr "Ataasiartumik akuersissummut normu"
-
-#: told_common/templates/told_common/tf5/tilladelse.html
-msgid "Indehavers adresse"
-msgstr "Piginnittup najugaa"
-
-#: told_common/templates/told_common/tf5/tilladelse.html
-msgid "Bookingnr. for forsendelse"
-msgstr "Nassiussamut inniminniinermi normu"
-
-#: told_common/templates/told_common/tf5/tilladelse.html
-msgid "Udstedelsesdato"
-msgstr "Ulloq akuersissuteqarfik"
-
-#: told_common/templates/told_common/tf5/tilladelse.html
-msgid "Omfang"
-msgstr "Pineqartut"
-
-#: told_common/templates/told_common/tf5/tilladelse.html
-msgid ""
-"Tilladelsen omfatter indførsel af den mængde øl, vin eller spiritus, der "
-"fremgår af udfyldte ansøgning. Indførsel af de angivne mængder er kun til "
-"privat forbrug."
-msgstr ""
-"Immiaaqqanut, viinninut imalt. imigassanut eqqussinissamut akuersissut, "
-"eqqussinissamik qinnuteqaammi allassimasunut tunngavoq. Eqqussat pineqartut "
-"namminermuinnaq atugassaapput (tuniniaqqusaanngillat)"
-
-#: told_common/templates/told_common/tf5/tilladelse.html
-msgid "Gyldighedsperiode"
-msgstr "Piffissaq atuuffik"
-
-#: told_common/templates/told_common/tf5/tilladelse.html
-msgid ""
-"Tilladelsen er gyldig. Tilladelsen frafalder i det øjeblik, de indførte "
-"varer udleveres til tilladelsens indehaver i Grønland"
-msgstr ""
-"Akuersissut atuuppoq. Pisiat eqqussat akuersissummik piginnittumut, "
-"Kalaallit Nunaanniittumut tunniunneqarnerat ilutigalugu akuersissut "
-"ingerlaannartumik atuukkunnaassaaq."
-
-#: told_common/templates/told_common/tf5/tilladelse.html
-msgid "Dokumentation ved udlevering"
-msgstr "Tunniussinermi uppernarsaat"
-
-#: told_common/templates/told_common/tf5/tilladelse.html
-msgid "Ved udlevering skal ansøgning og tilladelse medbringes"
-msgstr ""
-"Tunniussinermi, qinnuteqaat eqqussinissamullu akuersissut nassarneqassapput."
-
-#: told_common/templates/told_common/tf5/tilladelse.html
-msgid "DENNE TILLADELSE ER UOVERDRAGELIG"
-msgstr "AKUERSISSUT UNA ALLAMUT TUNNIUNNEQARSINNAANNGILAQ"
 
 #: told_common/templates/told_common/tf5/view.html
 #, fuzzy

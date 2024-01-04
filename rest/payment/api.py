@@ -5,6 +5,7 @@
 from typing import Callable, Dict, List, Tuple
 
 from anmeldelse.models import PrivatAfgiftsanmeldelse, Varelinje
+from common.api import get_auth_methods
 from django.forms import model_to_dict
 from ninja_extra import api_controller, permissions, route
 from ninja_extra.exceptions import NotFound
@@ -13,13 +14,14 @@ from payment.exceptions import InternalPaymentError, PaymentValidationError
 from payment.models import Item, Payment
 from payment.permissions import PaymentPermission
 from payment.provider_handlers import NetsProviderHandler
-from payment.schemas import (
+from project import settings
+
+from payment.schemas import (  # isort: skip
     BasePayment,
     PaymentCreatePayload,
     PaymentResponse,
     ProviderPaymentPayload,
 )
-from project import settings
 
 
 @api_controller(
@@ -28,24 +30,29 @@ from project import settings
     permissions=[permissions.IsAuthenticated & PaymentPermission],
 )
 class PaymentAPI:
-    @route.post("", auth=JWTAuth(), url_name="payment_create")
+    @route.post("", auth=get_auth_methods(), url_name="payment_create")
     def create(self, payload: PaymentCreatePayload) -> PaymentResponse:
-        declaration = PrivatAfgiftsanmeldelse.objects.get(id=payload.declaration_id)
-        if not declaration:
+        try:
+            declaration = PrivatAfgiftsanmeldelse.objects.get(id=payload.declaration_id)
+        except PrivatAfgiftsanmeldelse.DoesNotExist:
             raise NotFound(f"Failed to fetch declaration: {payload.declaration_id}")
-
         # Get payment provider handler for this declaration
         provider_handler: NetsProviderHandler = get_provider_handler("nets")
 
         # Create payment locally, if it does not exist
-        payment_new = Payment.objects.filter(
-            declaration_id=payload.declaration_id
-        ).first()
-        if payment_new:
-            return payment_model_to_response(
-                payment_new,
-                field_converts=payment_field_converters(provider_handler, full=True),
+        try:
+            payment_new = Payment.objects.get(
+                declaration_id=payload.declaration_id, provider_payment_id__isnull=False
             )
+            if payment_new.provider_payment_id is not None:
+                return payment_model_to_response(
+                    payment_new,
+                    field_converts=payment_field_converters(
+                        provider_handler, full=True
+                    ),
+                )
+        except Payment.DoesNotExist:
+            pass
 
         payment_new = Payment.objects.create(
             amount=0,

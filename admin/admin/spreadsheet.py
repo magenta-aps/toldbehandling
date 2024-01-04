@@ -36,6 +36,7 @@ class VareafgiftssatsSpreadsheetUtil:
                 elif header in (
                     "kræver_indførselstilladelse",
                     "har_privat_tillægsafgift_alkohol",
+                    "synlig_privat",
                 ):
                     value = "ja" if value else "nej"
                 elif header == "enhed":
@@ -52,6 +53,7 @@ class VareafgiftssatsSpreadsheetUtil:
         "afgiftsgruppenummer": int,
         "kræver_indførselstilladelse": parse_bool,
         "har_privat_tillægsafgift_alkohol": parse_bool,
+        "synlig_privat": parse_bool,
         "afgiftssats": unformat_decimal,
         "minimumsbeløb": unformat_decimal,
         "segment_øvre": unformat_decimal,
@@ -65,22 +67,23 @@ class VareafgiftssatsSpreadsheetUtil:
     ) -> Dict[str, Union[str, int, bool]]:
         data = {}
         for i, header in enumerate(headers):
-            header = header.lower()
-            try:
-                value = row[i]
-            except IndexError:
-                value = None
-            if value == "":
-                value = None
-            try:
-                if (
-                    value is not None
-                    and header in VareafgiftssatsSpreadsheetUtil.header_map_in
-                ):
-                    value = VareafgiftssatsSpreadsheetUtil.header_map_in[header](value)
-            except (TypeError, ValueError) as e:
-                raise SpreadsheetImportException(f"Fejl ved import af regneark: {e}")
-            data[header] = value
+            if header is not None:
+                header = header.lower()
+                try:
+                    value = row[i]
+                except IndexError:
+                    value = None
+                if value == "":
+                    value = None
+                try:
+                    if (
+                        value is not None
+                        and header in VareafgiftssatsSpreadsheetUtil.header_map_in
+                    ):
+                        value = VareafgiftssatsSpreadsheetUtil.header_map_in[header](value)
+                except (TypeError, ValueError) as e:
+                    raise SpreadsheetImportException(f"Fejl ved import af regneark: {e}")
+                data[header] = value
         return data
 
     @staticmethod
@@ -88,6 +91,7 @@ class VareafgiftssatsSpreadsheetUtil:
         return [
             header.replace(" ", "_").replace("(", "").replace(")", "").lower()
             for header in headers
+            if header is not None
         ]
 
     @staticmethod
@@ -131,6 +135,7 @@ class VareafgiftssatsSpreadsheetUtil:
             "Afgiftssats",
             "Kræver indførselstilladelse",
             "Har privat tillægsafgift alkohol",
+            "Synlig for private",
             "Minimumsbeløb",
             "Segment nedre",
             "Segment øvre",
@@ -153,6 +158,7 @@ class VareafgiftssatsSpreadsheetUtil:
             "Enhed",
             "Kræver indførselstilladelse",
             "Har privat tillægsafgift alkohol",
+            "Synlig for private",
         )
         for linje, vareafgiftssats in enumerate(satser, 2):
             for pretty, raw in zip(
