@@ -96,11 +96,15 @@ class EboksBesked(models.Model):
         recipient_id = etree.Element("Id")
         if self.cvr is not None:
             recipient_id.text = str(self.cvr).zfill(8)
+            recipient_type = "V"
         elif self.cpr is not None:
             recipient_id.text = str(self.cpr).zfill(10)
+            recipient_type = "P"
+        else:
+            return None
         recipient.append(recipient_id)
         r_type = etree.Element("Type")
-        r_type.text = "P"
+        r_type.text = recipient_type
         recipient.append(r_type)
         nationality = etree.Element("Nationality")
         nationality.text = "DK"
