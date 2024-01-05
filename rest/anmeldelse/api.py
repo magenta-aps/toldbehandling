@@ -338,6 +338,8 @@ class AfgiftsanmeldelseAPI:
                 cvr = user.indberetter_data.cvr
             except IndberetterProfile.DoesNotExist:
                 return qs.none()
+            if cvr is None:
+                return qs.none()
             qs = qs.filter(
                 Q(oprettet_af__indberetter_data__cvr=cvr)
                 | Q(oprettet_på_vegne_af__indberetter_data__cvr=cvr)
@@ -720,7 +722,12 @@ class VarelinjeAPI:
     def filter_user(self, qs: QuerySet) -> QuerySet:
         user = self.context.request.user
         if not user.has_perm("anmeldelse.view_all_anmeldelse"):
-            cvr = user.indberetter_data.cvr
+            try:
+                cvr = user.indberetter_data.cvr
+            except IndberetterProfile.DoesNotExist:
+                return qs.none()
+            if cvr is None:
+                return qs.none()
             qs = qs.filter(
                 Q(afgiftsanmeldelse__oprettet_af__indberetter_data__cvr=cvr)
                 | Q(afgiftsanmeldelse__oprettet_på_vegne_af__indberetter_data__cvr=cvr)
@@ -836,7 +843,12 @@ class NotatAPI:
     def filter_user(self, qs: QuerySet) -> QuerySet:
         user = self.context.request.user
         if not user.has_perm("anmeldelse.view_all_anmeldelse"):
-            cvr = user.indberetter_data.cvr
+            try:
+                cvr = user.indberetter_data.cvr
+            except IndberetterProfile.DoesNotExist:
+                return qs.none()
+            if cvr is None:
+                return qs.none()
             qs = qs.filter(
                 Q(afgiftsanmeldelse__oprettet_af__indberetter_data__cvr=cvr)
                 | Q(afgiftsanmeldelse__oprettet_på_vegne_af__indberetter_data__cvr=cvr)
