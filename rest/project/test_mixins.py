@@ -104,6 +104,9 @@ class RestMixin:
             ]
             + view_all,
         )
+        cls.authorized_user.user_permissions.add(
+            Permission.objects.get(codename="view_all_anmeldelse")
+        )
 
         (
             cls.viewonly_user,
@@ -118,6 +121,9 @@ class RestMixin:
                 )
             ]
             + view_all,
+        )
+        cls.viewonly_user.user_permissions.add(
+            Permission.objects.get(codename="view_all_anmeldelse")
         )
 
         (
