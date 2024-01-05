@@ -11,6 +11,7 @@ from uuid import uuid4
 from aktør.api import AfsenderOut, ModtagerOut
 from anmeldelse.models import PrivatAfgiftsanmeldelse
 from common.api import UserOut, get_auth_methods
+from common.models import IndberetterProfile
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.db.models import Q, QuerySet
@@ -333,7 +334,10 @@ class AfgiftsanmeldelseAPI:
     def filter_user(self, qs: QuerySet) -> QuerySet:
         user = self.context.request.user
         if not user.has_perm("anmeldelse.view_all_anmeldelse"):
-            cvr = user.indberetter_data.cvr
+            try:
+                cvr = user.indberetter_data.cvr
+            except IndberetterProfile.DoesNotExist:
+                return qs.none()
             qs = qs.filter(
                 Q(oprettet_af__indberetter_data__cvr=cvr)
                 | Q(oprettet_på_vegne_af__indberetter_data__cvr=cvr)
@@ -341,12 +345,7 @@ class AfgiftsanmeldelseAPI:
         return qs
 
     def check_user(self, item: Afgiftsanmeldelse):
-        user = self.context.request.user
-        if not (
-            user.has_perm("anmeldelse.view_all_anmeldelse")
-            or item.oprettet_af == user
-            or item.oprettet_på_vegne_af == user
-        ):
+        if not self.filter_user(Afgiftsanmeldelse.objects.filter(id=item.id)).exists():
             raise PermissionDenied
 
     @staticmethod
@@ -544,12 +543,9 @@ class PrivatAfgiftsanmeldelseAPI:
         return qs
 
     def check_user(self, item: PrivatAfgiftsanmeldelse):
-        user = self.context.request.user
-        if not (
-            user.has_perm("anmeldelse.view_all_anmeldelse")
-            or item.oprettet_af == user
-            or item.oprettet_på_vegne_af == user
-        ):
+        if not self.filter_user(
+            PrivatAfgiftsanmeldelse.objects.filter(id=item.id)
+        ).exists():
             raise PermissionDenied
 
     @staticmethod
@@ -732,13 +728,7 @@ class VarelinjeAPI:
         return qs
 
     def check_user(self, item: Varelinje):
-        user = self.context.request.user
-        if not (
-            user.has_perm("anmeldelse.view_all_anmeldelse")
-            or item.afgiftsanmeldelse is None
-            or item.afgiftsanmeldelse.oprettet_af == user
-            or item.afgiftsanmeldelse.oprettet_på_vegne_af == user
-        ):
+        if not self.filter_user(Varelinje.objects.filter(id=item.id)).exists():
             raise PermissionDenied
 
 
@@ -854,13 +844,7 @@ class NotatAPI:
         return qs
 
     def check_user(self, item: Notat):
-        user = self.context.request.user
-        if not (
-            user.has_perm("anmeldelse.view_all_anmeldelse")
-            or item.afgiftsanmeldelse is None
-            or item.afgiftsanmeldelse.oprettet_af == user
-            or item.afgiftsanmeldelse.oprettet_på_vegne_af == user
-        ):
+        if not self.filter_user(Notat.objects.filter(id=item.id)).exists():
             raise PermissionDenied
 
 
