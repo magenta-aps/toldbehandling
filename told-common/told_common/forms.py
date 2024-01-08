@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: MPL-2.0
 from datetime import date
 from decimal import Decimal
-from typing import Optional
+from typing import Iterable, Optional
 
 from django import forms
 from django.core.exceptions import ValidationError
@@ -11,6 +11,7 @@ from django.core.validators import RegexValidator
 from django.forms import CharField, Form, formset_factory
 from django.utils import translation
 from django.utils.translation import gettext_lazy as _
+from dynamic_forms import DynamicField
 from requests import HTTPError
 from told_common.data import Vareafgiftssats
 from told_common.rest_client import RestClient
@@ -62,32 +63,10 @@ class TF10Form(BootstrapForm):
         *args,
         **kwargs,
     ):
-        super().__init__(*args, **kwargs)
-        if not leverandørfaktura_required:
-            self.fields["leverandørfaktura"].required = False
+        self.varesatser = varesatser
         self.leverandørfaktura_required = leverandørfaktura_required
         self.fragtbrev_required = fragtbrev_required
-        self.varesatser = varesatser
-        if varesatser:
-            self.fields["indførselstilladelse"].widget.attrs.update(
-                {
-                    "data-required-field": "[name$=vareafgiftssats]",
-                    "data-required-values": ",".join(
-                        [
-                            str(id)
-                            for id, sats in varesatser.items()
-                            if sats.kræver_indførselstilladelse
-                        ]
-                    ),
-                }
-            )
-        if fragtbrev_required:
-            self.fields["fragtbrev"].widget.attrs.update(
-                {
-                    "data-required-field": "[name=fragttype]",
-                    "data-required-values": "skibsfragt,luftfragt",
-                }
-            )
+        super().__init__(*args, **kwargs)
 
     afsender_cvr = ButtonlessIntegerField(
         min_value=10000000,
@@ -205,27 +184,50 @@ class TF10Form(BootstrapForm):
             )
         ),
     )
-    indførselstilladelse = forms.CharField(
+    indførselstilladelse = DynamicField(
+        forms.CharField,
         max_length=12,
         required=False,
         label=_("Indførsels­tilladelse nr."),
+        widget=lambda form: forms.TextInput(
+            attrs={
+                "data-required-field": "[name$=vareafgiftssats]",
+                "data-required-values": ",".join(
+                    [
+                        str(id)
+                        for id, sats in form.varesatser.items()
+                        if sats.kræver_indførselstilladelse
+                    ]
+                ),
+            }
+            if form.varesatser
+            else {}
+        ),
     )
     leverandørfaktura_nummer = forms.CharField(
         label=_("Leverandør­faktura nr."),
         max_length=20,
         required=True,
     )
-    leverandørfaktura = MaxSizeFileField(
+    leverandørfaktura = DynamicField(
+        MaxSizeFileField,
         allow_empty_file=False,
         label=_("Leverandør­faktura"),
         max_size=10000000,
-        required=True,
+        required=lambda form: bool(form.leverandørfaktura_required),
     )
-    fragtbrev = MaxSizeFileField(
+    fragtbrev = DynamicField(
+        MaxSizeFileField,
         allow_empty_file=False,
         label=_("Fragtbrev"),
         max_size=10000000,
         required=False,
+        widget_attrs=lambda form: {
+            "data-required-field": "[name=fragttype]",
+            "data-required-values": "skibsfragt,luftfragt",
+        }
+        if form.fragtbrev_required
+        else None,
     )
     fragttype = forms.ChoiceField(
         required=True,
@@ -252,9 +254,10 @@ class TF10Form(BootstrapForm):
             )
         ),
     )
-    afgangsdato = forms.DateField(
+    afgangsdato = DynamicField(
+        forms.DateField,
         required=True,
-        widget=DateInput(attrs={"min": date.today().isoformat()}),
+        widget=lambda form: DateInput(attrs={"min": date.today().isoformat()}),
     )
 
     def clean(self):
@@ -296,16 +299,18 @@ class TF10Form(BootstrapForm):
 class TF10VareForm(BootstrapForm):
     def __init__(self, *args, **kwargs):
         self.varesatser = kwargs.pop("varesatser", {})
-        super().__init__(*args, **kwargs)
         vareart_key = (
             "vareart_kl" if translation.get_language() == "kl" else "vareart_da"
         )
-        self.fields["vareafgiftssats"].choices = tuple(
+        self.varesatser_choices = tuple(
             (id, getattr(item, vareart_key)) for id, item in self.varesatser.items()
         )
+        super().__init__(*args, **kwargs)
 
     id = forms.IntegerField(min_value=1, required=False, widget=forms.HiddenInput)
-    vareafgiftssats = forms.ChoiceField(choices=())
+    vareafgiftssats = DynamicField(
+        forms.ChoiceField, choices=lambda form: form.varesatser_choices
+    )
     mængde = forms.DecimalField(min_value=0, required=False)
     antal = forms.IntegerField(min_value=1, required=False)
     fakturabeløb = forms.DecimalField(min_value=1, decimal_places=2, required=True)
@@ -365,6 +370,25 @@ class PaginateForm(Form):
     order = forms.CharField(required=False)
 
 
+def vareart_choices(varesatser: Iterable[Vareafgiftssats]):
+    vareart_key = "vareart_kl" if translation.get_language() == "kl" else "vareart_da"
+    return tuple(
+        [(None, "------")]
+        + sorted(
+            set(
+                [
+                    (
+                        getattr(item, vareart_key),
+                        getattr(item, vareart_key).lower().capitalize(),
+                    )
+                    for item in varesatser
+                ]
+            ),
+            key=lambda items: items[1],
+        )
+    )
+
+
 class TF10SearchForm(PaginateForm, BootstrapForm):
     def __init__(self, *args, **kwargs):
         self.varesatser = kwargs.pop("varesatser", {})
@@ -372,44 +396,11 @@ class TF10SearchForm(PaginateForm, BootstrapForm):
         self.modtagere = kwargs.pop("modtagere", {})
         super().__init__(*args, **kwargs)
 
-        # We use 'set' here, because one 'vareafgiftssats' can exist in many
-        # different tables
-        vareart_key = (
-            "vareart_kl" if translation.get_language() == "kl" else "vareart_da"
-        )
-        self.fields["vareart"].choices = tuple(
-            [(None, "------")]
-            + sorted(
-                set(
-                    [
-                        (
-                            getattr(item, vareart_key),
-                            getattr(item, vareart_key).lower().capitalize(),
-                        )
-                        for item in self.varesatser.values()
-                    ]
-                ),
-                key=lambda items: items[1],
-            )
-        )
-
-        self.fields["afsender"].choices = tuple(
-            [(None, "------")]
-            + sorted(
-                [(item["id"], item["navn"]) for item in self.afsendere.values()],
-                key=lambda items: items[1],
-            )
-        )
-
-        self.fields["modtager"].choices = tuple(
-            [(None, "------")]
-            + sorted(
-                [(item["id"], item["navn"]) for item in self.modtagere.values()],
-                key=lambda items: items[1],
-            )
-        )
-
-    vareart = forms.ChoiceField(choices=(), required=False)
+    vareart = DynamicField(
+        forms.ChoiceField,
+        choices=lambda form: vareart_choices(form.varesatser.values()),
+        required=False,
+    )
     status = forms.ChoiceField(
         choices=(
             (None, _("Alle")),
@@ -430,8 +421,28 @@ class TF10SearchForm(PaginateForm, BootstrapForm):
     order_by = forms.CharField(required=False)
 
     id = forms.IntegerField(required=False)
-    afsender = forms.ChoiceField(required=False)
-    modtager = forms.ChoiceField(required=False)
+    afsender = DynamicField(
+        forms.ChoiceField,
+        required=False,
+        choices=lambda form: tuple(
+            [(None, "------")]
+            + sorted(
+                [(item["id"], item["navn"]) for item in form.afsendere.values()],
+                key=lambda items: items[1],
+            )
+        ),
+    )
+    modtager = DynamicField(
+        forms.ChoiceField,
+        required=False,
+        choices=lambda form: tuple(
+            [(None, "------")]
+            + sorted(
+                [(item["id"], item["navn"]) for item in form.modtagere.values()],
+                key=lambda items: items[1],
+            )
+        ),
+    )
 
     afsenderbykode_or_forbindelsesnr = forms.CharField(required=False)
     postforsendelsesnummer_or_fragtbrevsnummer = forms.CharField(required=False)
@@ -442,28 +453,11 @@ class TF5SearchForm(PaginateForm, BootstrapForm):
         self.varesatser = kwargs.pop("varesatser", {})
         super().__init__(*args, **kwargs)
 
-        # We use 'set' here, because one 'vareafgiftssats' can exist in many
-        # different tables
-        vareart_key = (
-            "vareart_kl" if translation.get_language() == "kl" else "vareart_da"
-        )
-        self.fields["vareart"].choices = tuple(
-            [(None, "------")]
-            + sorted(
-                set(
-                    [
-                        (
-                            getattr(item, vareart_key),
-                            getattr(item, vareart_key).lower().capitalize(),
-                        )
-                        for item in self.varesatser.values()
-                    ]
-                ),
-                key=lambda items: items[1],
-            )
-        )
-
-    vareart = forms.ChoiceField(choices=(), required=False)
+    vareart = DynamicField(
+        forms.ChoiceField,
+        choices=lambda form: vareart_choices(form.varesatser.values()),
+        required=False,
+    )
     # status = forms.ChoiceField(
     #     choices=(
     #         (None, _("Alle")),
@@ -506,11 +500,9 @@ class TF5Form(BootstrapForm):
         *args,
         **kwargs,
     ):
-        super().__init__(*args, **kwargs)
-        if not leverandørfaktura_required:
-            self.fields["leverandørfaktura"].required = False
         self.leverandørfaktura_required = leverandørfaktura_required
         self.varesatser = varesatser
+        super().__init__(*args, **kwargs)
         self.fields["indleveringsdato"].widget.attrs.update(
             {"min": date_next_workdays(date.today(), 6)}
         )
@@ -568,11 +560,12 @@ class TF5Form(BootstrapForm):
         max_length=20,
         required=True,
     )
-    leverandørfaktura = MaxSizeFileField(
+    leverandørfaktura = DynamicField(
+        MaxSizeFileField,
         allow_empty_file=False,
         label=_("Vare­faktura"),
         max_size=10000000,
-        required=True,
+        required=lambda form: form.leverandørfaktura_required,
         widget=forms.widgets.ClearableFileInput(
             attrs={
                 "data-tooltip-title": _("Varefaktura"),
@@ -581,10 +574,13 @@ class TF5Form(BootstrapForm):
             }
         ),
     )
-    indleveringsdato = forms.DateField(
+    indleveringsdato = DynamicField(
+        forms.DateField,
         label=_("Dato for indlevering til forsendelse"),
         required=True,
-        widget=DateInput(),
+        widget=lambda form: DateInput(
+            attrs={"min": date_next_workdays(date.today(), 6)}
+        ),
     )
     anonym = forms.BooleanField(
         required=False,

@@ -9,6 +9,7 @@ from django import forms
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
+from dynamic_forms import DynamicField
 from told_common import forms as common_forms
 from told_common.form_mixins import BootstrapForm, DateInput, MaxSizeFileField
 
@@ -19,11 +20,15 @@ from admin.spreadsheet import (  # isort: skip
 
 
 class TF10CreateForm(common_forms.TF10Form):
-    oprettet_på_vegne_af = forms.ChoiceField(label=_("Opret på vegne af"))
+    oprettet_på_vegne_af = DynamicField(
+        forms.ChoiceField,
+        label=_("Opret på vegne af"),
+        choices=lambda form: form.oprettet_på_vegne_af_choices,
+    )
 
     def __init__(self, oprettet_på_vegne_af_choices: List[dict], **kwargs):
+        self.oprettet_på_vegne_af_choices = oprettet_på_vegne_af_choices
         super().__init__(**kwargs)
-        self.fields["oprettet_på_vegne_af"].choices = oprettet_på_vegne_af_choices
 
 
 class TF10ViewForm(BootstrapForm):
@@ -82,34 +87,38 @@ class TF10UpdateForm(common_forms.TF10Form):
 
 
 class TF10UpdateMultipleForm(BootstrapForm):
-    forbindelsesnr = forms.CharField(
+    forbindelsesnr = DynamicField(
+        forms.CharField,
         required=False,
+        label=lambda form: _("Forbindelsesnummer")
+        if form.fragttype in ("skibsfragt", "luftfragt")
+        else _("Afsenderbykode"),
+        disabled=lambda form: form.fragttype not in ("skibsfragt", "luftfragt"),
     )
-    fragtbrevnr = forms.CharField(
+    fragtbrevnr = DynamicField(
+        forms.CharField,
         required=False,
+        label=lambda form: _("Fragtbrevnr")
+        if form.fragttype in ("skibsfragt", "luftfragt")
+        else _("Postforsendelsesnummer"),
+        disabled=lambda form: form.fragttype
+        not in ("skibsfragt", "luftfragt", "skibspost", "luftpost"),
     )
-    afgangsdato = forms.DateField(
+    afgangsdato = DynamicField(
+        forms.DateField,
         required=False,
-        widget=DateInput,
+        widget=DateInput(),
         label=_("Afgangsdato"),
+        disabled=lambda form: form.fragttype
+        not in ("skibsfragt", "luftfragt", "skibspost", "luftpost"),
     )
     notat = forms.CharField(
         widget=forms.Textarea(attrs={"placeholder": _("Notat")}), required=False
     )
 
     def __init__(self, fragttype, **kwargs):
+        self.fragttype = fragttype
         super().__init__(**kwargs)
-        if fragttype in ("skibsfragt", "luftfragt"):
-            self.fields["forbindelsesnr"].label = _("Forbindelsesnummer")
-            self.fields["fragtbrevnr"].label = _("Fragtbrevnr")
-        elif fragttype in ("skibspost", "luftpost"):
-            self.fields["forbindelsesnr"].label = _("Afsenderbykode")
-            self.fields["forbindelsesnr"].disabled = True
-            self.fields["fragtbrevnr"].label = _("Postforsendelsesnummer")
-        else:
-            self.fields["forbindelsesnr"].disabled = True
-            self.fields["fragtbrevnr"].disabled = True
-            self.fields["afgangsdato"].disabled = True
 
 
 class ListForm(forms.Form):
@@ -128,9 +137,12 @@ class AfgiftstabelUpdateForm(BootstrapForm):
     kladde = forms.ChoiceField(
         required=False, choices=((True, _("Ja")), (False, _("Nej")))
     )
-    gyldig_fra = forms.DateField(
+    gyldig_fra = DynamicField(
+        forms.DateField,
         required=False,
-        widget=DateInput(attrs={"min": (date.today() + timedelta(1)).isoformat()}),
+        widget=lambda form: DateInput(
+            attrs={"min": (date.today() + timedelta(1)).isoformat()}
+        ),
     )
     delete = forms.BooleanField(required=False)
 

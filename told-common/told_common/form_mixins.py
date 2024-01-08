@@ -8,10 +8,11 @@ from django import forms
 from django.core.files import File
 from django.forms import FileField
 from django.utils.translation import gettext_lazy as _
+from dynamic_forms import DynamicFormMixin
 from humanize import naturalsize
 
 
-class BootstrapForm(forms.Form):
+class BootstrapForm(DynamicFormMixin, forms.Form):
     def __init__(self, *args, **kwargs):
         super(BootstrapForm, self).__init__(*args, **kwargs)
         for name, field in self.fields.items():
