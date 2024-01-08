@@ -290,10 +290,10 @@ class Varelinje(ToldDataClass):
     id: int
     afgiftsanmeldelse: int
     vareafgiftssats: int
-    mængde: Decimal
-    antal: int
     fakturabeløb: Decimal
     afgiftsbeløb: Decimal
+    mængde: Decimal = None
+    antal: int = None
 
 
 @dataclass_json
@@ -318,7 +318,6 @@ class Afgiftsanmeldelse(ToldDataClass):
             mm_field=fields.Date(format="iso"),
         ),
     )
-    varelinjer: List[Varelinje]
     beregnet_faktureringsdato: date = field(
         metadata=config(
             encoder=date.isoformat,
@@ -328,6 +327,7 @@ class Afgiftsanmeldelse(ToldDataClass):
     )
     notater: Optional[List[Notat]]
     prismeresponses: Optional[List[PrismeResponse]]
+    varelinjer: List[Varelinje] = None
     oprettet_af: Optional[dict] = None
     toldkategori: Optional[str] = None
 
