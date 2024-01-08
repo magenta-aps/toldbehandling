@@ -112,7 +112,7 @@ class TF5FormCreateView(
             messages.INFO,
             _(
                 "Afgiftsanmeldelsen blev indregistreret. "
-                "Blanket med nummer {id} afventer nu godkendelse."
+                "Blanket med nummer {id} afventer nu betaling."
             ).format(id=self.anmeldelse_id),
         )
         return super().form_valid(form, formset)

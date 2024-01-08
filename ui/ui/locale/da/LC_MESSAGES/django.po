@@ -77,7 +77,7 @@ msgstr ""
 #, python-brace-format
 msgid ""
 "Afgiftsanmeldelsen blev indregistreret. Blanket med nummer {id} afventer nu "
-"godkendelse."
+"betaling."
 msgstr ""
 
 #: ui/views.py
