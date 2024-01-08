@@ -254,10 +254,9 @@ class TF10Form(BootstrapForm):
             )
         ),
     )
-    afgangsdato = DynamicField(
-        forms.DateField,
+    afgangsdato = forms.DateField(
         required=True,
-        widget=lambda form: DateInput(attrs={"min": date.today().isoformat()}),
+        widget=DateInput(),
     )
 
     def clean(self):
