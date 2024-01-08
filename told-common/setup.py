@@ -45,6 +45,7 @@ setuptools.setup(
         "WeasyPrint==60.1",
         "holidays==0.38",
         "pypdf==3.17.3",
+        "django-forms-dynamic==1.0.0",
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
