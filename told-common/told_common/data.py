@@ -381,7 +381,6 @@ class PrivatAfgiftsanmeldelse(ToldDataClass):
     leverandørfaktura_nummer: str
     leverandørfaktura: File
     bookingnummer: str
-    indførselstilladelse: str
     status: str
     indleveringsdato: date = field(
         metadata=config(
@@ -390,7 +389,6 @@ class PrivatAfgiftsanmeldelse(ToldDataClass):
             mm_field=fields.Date(format="iso"),
         ),
     )
-    varelinjer: List[Varelinje]
     # notater: Optional[List[Notat]]
     # prismeresponses: Optional[List[PrismeResponse]]
     oprettet: datetime = field(
@@ -402,6 +400,8 @@ class PrivatAfgiftsanmeldelse(ToldDataClass):
     )
     oprettet_af: dict
     payment_status: str
+    indførselstilladelse: str = None
+    varelinjer: List[Varelinje] = None
 
     @property
     def afgift_sum(self):
