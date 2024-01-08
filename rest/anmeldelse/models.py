@@ -2,6 +2,7 @@
 #
 # SPDX-License-Identifier: MPL-2.0
 from datetime import timedelta
+from decimal import Decimal
 
 from aktør.models import Afsender, Modtager
 from common.models import Postnummer
@@ -90,8 +91,9 @@ class Afgiftsanmeldelse(models.Model):
     afgift_total = models.DecimalField(
         max_digits=16,
         decimal_places=2,
-        null=True,
-        blank=True,
+        null=False,
+        blank=False,
+        default=Decimal("0.00"),
     )
     betalt = models.BooleanField(
         default=False,
@@ -128,6 +130,13 @@ class Afgiftsanmeldelse(models.Model):
     def save(self, *args, **kwargs):
         super().full_clean()
         super().save(*args, **kwargs)
+
+    def beregn_afgift_total(self) -> bool:
+        old_value = self.afgift_total
+        self.afgift_total = sum(
+            [varelinje.afgiftsbeløb for varelinje in self.varelinje_set.all()]
+        )
+        return self.afgift_total != old_value
 
     @property
     def beregnet_faktureringsdato(self):
@@ -317,6 +326,10 @@ class Varelinje(models.Model):
         super().full_clean()
         self.beregn_afgift()
         super().save(*args, **kwargs)
+        if self.afgiftsanmeldelse:
+            changed = self.afgiftsanmeldelse.beregn_afgift_total()
+            if changed:
+                self.afgiftsanmeldelse.save(update_fields=("afgift_total",))
 
     def beregn_afgift(self) -> None:
         self.afgiftsbeløb = self.vareafgiftssats.beregn_afgift(self)

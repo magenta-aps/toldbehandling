@@ -39,6 +39,7 @@ class AfgiftsanmeldelseTest(RestMixin, TestCase):
             "indberetter_data": None,
         },
         "oprettet_på_vegne_af": None,
+        # "afgift_total": '0',
     }
 
     @property
@@ -69,7 +70,7 @@ class AfgiftsanmeldelseTest(RestMixin, TestCase):
                 {
                     "id": self.afgiftsanmeldelse.id,
                     "dato": self.afgiftsanmeldelse.dato.isoformat(),
-                    "afgift_total": None,
+                    "afgift_total": "0.00",
                     "fragtforsendelse": None,
                     "afsender": self.afsender.id,
                     "modtager": self.modtager.id,
@@ -120,7 +121,7 @@ class AfgiftsanmeldelseTest(RestMixin, TestCase):
                 {
                     "id": self.afgiftsanmeldelse.id,
                     "dato": self.afgiftsanmeldelse.dato.isoformat(),
-                    "afgift_total": None,
+                    "afgift_total": "0.00",
                     "fragtforsendelse": None,
                     "leverandørfaktura": f"/leverand%C3%B8rfakturaer/{self.afgiftsanmeldelse.id}/leverand%C3%B8rfaktura.pdf",
                     "status": "ny",
