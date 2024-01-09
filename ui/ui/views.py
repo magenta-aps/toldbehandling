@@ -107,6 +107,10 @@ class TF5FormCreateView(
                 self.rest_client.varelinje.create(
                     subform.cleaned_data, privatafgiftsanmeldelse_id=self.anmeldelse_id
                 )
+        if form.cleaned_data["betal"]:
+            return redirect(
+                reverse("tf5_payment_checkout", kwargs={"id": self.anmeldelse_id})
+            )
         messages.add_message(
             self.request,
             messages.INFO,

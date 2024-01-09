@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-04 07:35+0000\n"
+"POT-Creation-Date: 2024-01-09 07:09+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -320,6 +320,7 @@ msgid "For indførsel af afgiftspligtige varer i Grønland"
 msgstr "Nioqqutissanik akitsuusigassanik Kalaallit Nunaannut eqqussiniarluni"
 
 #: told_common/templates/told_common/tf10/form.html
+#: told_common/templates/told_common/tf5/form.html
 msgid "Gem"
 msgstr "Toqqoruk"
 
@@ -468,7 +469,6 @@ msgid "Opdatér"
 msgstr "Nutarteruk"
 
 #: told_common/templates/told_common/tf10/form.html
-#: told_common/templates/told_common/tf5/form.html
 msgid "Indsend"
 msgstr "Nassiuguk"
 
@@ -661,6 +661,12 @@ msgstr ""
 #: told_common/templates/told_common/tf5/view.html
 msgid "Ekspeditionsgebyr"
 msgstr ""
+
+#: told_common/templates/told_common/tf5/form.html
+#, fuzzy
+#| msgid "Betales af"
+msgid "Betal"
+msgstr "Akiliisussaq"
 
 #: told_common/templates/told_common/tf5/list.html
 #, fuzzy
