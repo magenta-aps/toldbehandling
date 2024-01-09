@@ -722,16 +722,24 @@ class VarelinjeAPI:
     def filter_user(self, qs: QuerySet) -> QuerySet:
         user = self.context.request.user
         if not user.has_perm("anmeldelse.view_all_anmeldelse"):
-            try:
-                cvr = user.indberetter_data.cvr
-            except IndberetterProfile.DoesNotExist:
-                return qs.none()
-            if cvr is None:
-                return qs.none()
-            qs = qs.filter(
-                Q(afgiftsanmeldelse__oprettet_af__indberetter_data__cvr=cvr)
-                | Q(afgiftsanmeldelse__oprettet_på_vegne_af__indberetter_data__cvr=cvr)
-            )
+            q = qs.none()
+            for a, c in (
+                ("afgiftsanmeldelse", "cvr"),
+                ("privatafgiftsanmeldelse", "cpr"),
+            ):
+                try:
+                    nr = getattr(user.indberetter_data, c)
+                except IndberetterProfile.DoesNotExist:
+                    pass
+                else:
+                    if nr is not None:
+                        q |= qs.filter(
+                            **{f"{a}__oprettet_af__indberetter_data__{c}": nr}
+                        )
+                        q |= qs.filter(
+                            **{f"{a}__oprettet_på_vegne_af__indberetter_data__{c}": nr}
+                        )
+            qs = q
         return qs
 
     def check_user(self, item: Varelinje):
@@ -843,16 +851,24 @@ class NotatAPI:
     def filter_user(self, qs: QuerySet) -> QuerySet:
         user = self.context.request.user
         if not user.has_perm("anmeldelse.view_all_anmeldelse"):
-            try:
-                cvr = user.indberetter_data.cvr
-            except IndberetterProfile.DoesNotExist:
-                return qs.none()
-            if cvr is None:
-                return qs.none()
-            qs = qs.filter(
-                Q(afgiftsanmeldelse__oprettet_af__indberetter_data__cvr=cvr)
-                | Q(afgiftsanmeldelse__oprettet_på_vegne_af__indberetter_data__cvr=cvr)
-            )
+            q = qs.none()
+            for a, c in (
+                ("afgiftsanmeldelse", "cvr"),
+                ("privatafgiftsanmeldelse", "cpr"),
+            ):
+                try:
+                    nr = getattr(user.indberetter_data, c)
+                except IndberetterProfile.DoesNotExist:
+                    pass
+                else:
+                    if nr is not None:
+                        q |= qs.filter(
+                            **{f"{a}__oprettet_af__indberetter_data__{c}": nr}
+                        )
+                        q |= qs.filter(
+                            **{f"{a}__oprettet_på_vegne_af__indberetter_data__{c}": nr}
+                        )
+            qs = q
         return qs
 
     def check_user(self, item: Notat):

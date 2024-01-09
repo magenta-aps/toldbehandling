@@ -584,3 +584,4 @@ class TF5Form(BootstrapForm):
     anonym = forms.BooleanField(
         required=False,
     )
+    betal = forms.BooleanField(required=False)
