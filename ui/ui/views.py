@@ -158,7 +158,7 @@ class TF5FormCreateView(
         if self.userdata:
             if self.userdata.get("indberetter_data"):
                 cpr = self.userdata["indberetter_data"]["cpr"]
-                initial["cpr"] = cpr
+                initial["cpr"] = str(cpr).zfill(10)
             if "first_name" in self.userdata or "last_name" in self.userdata:
                 initial["navn"] = " ".join(
                     filter(
