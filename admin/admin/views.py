@@ -113,8 +113,7 @@ class TF10View(PermissionsRequiredMixin, TF10BaseView, FormView):
 
     def get_initial(self):
         initial = super().get_initial()
-        # indberetter = self.object.oprettet_på_vegne_af or self.object.oprettet_af
-        indberetter = self.object.oprettet_af
+        indberetter = self.object.oprettet_på_vegne_af or self.object.oprettet_af
         if self.object.toldkategori:
             initial["toldkategori"] = self.object.toldkategori
         if indberetter and "indberetter_data" in indberetter:

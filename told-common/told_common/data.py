@@ -329,6 +329,7 @@ class Afgiftsanmeldelse(ToldDataClass):
     prismeresponses: Optional[List[PrismeResponse]]
     varelinjer: List[Varelinje] = None
     oprettet_af: Optional[dict] = None
+    oprettet_på_vegne_af: Optional[dict] = None
     toldkategori: Optional[str] = None
 
     @property
