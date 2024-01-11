@@ -248,6 +248,8 @@ class TF10FormUpdateView(
         "forsendelse.add_fragtforsendelse",
         "anmeldelse.add_afgiftsanmeldelse",
         "anmeldelse.add_varelinje",
+        "forsendelse.change_postforsendelse",
+        "forsendelse.change_fragtforsendelse",
     )
     form_class = forms.TF10Form
     formset_class = forms.TF10VareFormSet
