@@ -229,7 +229,8 @@ Unittest UI:
     - cd /app
     - cp -r ./told-common/told_common .
     - python manage.py collectstatic
-    - coverage run manage.py test
+    - coverage run manage.py test --parallel 4
+    - coverage combine
     - coverage report --show-missing
     - mv .coverage "${CI_PROJECT_DIR}/coverage_output/.coverage.${CI_JOB_ID}"
     - cp -r ./ui "${CI_PROJECT_DIR}/coverage_output/"
@@ -240,7 +241,8 @@ Unittest Admin:
     - cd /app
     - cp -r ./told-common/told_common .
     - python manage.py collectstatic
-    - coverage run manage.py test
+    - coverage run manage.py test --parallel 4
+    - coverage combine
     - coverage report --show-missing
     - mv .coverage "${CI_PROJECT_DIR}/coverage_output/.coverage.${CI_JOB_ID}"
     - cp -r ./admin ./told_common "${CI_PROJECT_DIR}/coverage_output/"
