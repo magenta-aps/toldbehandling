@@ -290,8 +290,8 @@ class Varelinje(ToldDataClass):
     id: int
     afgiftsanmeldelse: int
     vareafgiftssats: int
-    fakturabeløb: Decimal
     afgiftsbeløb: Decimal
+    fakturabeløb: Decimal = None
     mængde: Decimal = None
     antal: int = None
 

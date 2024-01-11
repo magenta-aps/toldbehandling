@@ -311,7 +311,7 @@ class TF10VareForm(BootstrapForm):
     )
     mængde = forms.DecimalField(min_value=0, required=False)
     antal = forms.IntegerField(min_value=1, required=False)
-    fakturabeløb = forms.DecimalField(min_value=1, decimal_places=2, required=True)
+    fakturabeløb = forms.DecimalField(min_value=1, decimal_places=2, required=False)
 
     def clean_mængde(self) -> int:
         mængde = self.cleaned_data["mængde"]
