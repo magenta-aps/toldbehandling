@@ -675,20 +675,6 @@ class AfgiftstabelDownloadView(PermissionsRequiredMixin, HasRestClientMixin, Vie
         "sats.view_vareafgiftssats",
     )
     valid_formats = ("xlsx", "csv")
-    headers = (
-        ("afgiftsgruppenummer", "Afgiftsgruppenummer"),
-        ("overordnet", "Overordnet"),
-        ("vareart_da", "Vareart (da)"),
-        ("vareart_kl", "Vareart (kl)"),
-        ("enhed", "Enhed"),
-        ("afgiftssats", "Afgiftssats"),
-        ("kræver_indførselstilladelse", "Kræver indførselstilladelse"),
-        ("har_privat_tillægsafgift_alkohol", "Har privat tillægsafgift alkohol"),
-        ("synlig_privat", "Synlig for private"),
-        ("minimumsbeløb", "Minimumsbeløb"),
-        ("segment_nedre", "Segment nedre"),
-        ("segment_øvre", "Segment øvre"),
-    )
 
     def get(self, request, *args, **kwargs):
         format = kwargs["format"]
@@ -706,7 +692,10 @@ class AfgiftstabelDownloadView(PermissionsRequiredMixin, HasRestClientMixin, Vie
             list(
                 VareafgiftssatsSpreadsheetUtil.spreadsheet_row(
                     item,
-                    [header[0] for header in self.headers],
+                    [
+                        header["field"]
+                        for header in VareafgiftssatsSpreadsheetUtil.header_definitions
+                    ],
                     lambda id: items_by_id[id],
                 )
             )
@@ -722,7 +711,10 @@ class AfgiftstabelDownloadView(PermissionsRequiredMixin, HasRestClientMixin, Vie
                 f"{afgiftstabel.gyldig_til if afgiftstabel.gyldig_til else 'altid'}."
                 f"{format}"
             )
-        headers_pretty = [header[1] for header in self.headers]
+        headers_pretty = [
+            header["label"]
+            for header in VareafgiftssatsSpreadsheetUtil.header_definitions
+        ]
         if format == "xlsx":
             return SpreadsheetExport.render_xlsx(headers_pretty, rows, filename)
         if format == "csv":

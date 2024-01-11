@@ -94,55 +94,111 @@ class VareafgiftssatsSpreadsheetUtil:
     def parse_bool(value):
         return value.lower() in ("ja", "aap", "yes", "true", "1")
 
-    header_map_in = {
-        "overordnet": int,
-        "afgiftsgruppenummer": int,
-        "kræver_indførselstilladelse": parse_bool,
-        "har_privat_tillægsafgift_alkohol": parse_bool,
-        "synlig_privat": parse_bool,
-        "afgiftssats": unformat_decimal,
-        "minimumsbeløb": unformat_decimal,
-        "segment_øvre": unformat_decimal,
-        "segment_nedre": unformat_decimal,
-        "enhed": lambda value: getattr(Vareafgiftssats.Enhed, value.upper()).value,
-    }
+    header_definitions = [
+        {
+            "label": "Afgiftsgruppenummer",
+            "field": "afgiftsgruppenummer",
+            "parser": int,
+            "required": True,
+        },
+        {
+            "label": "Overordnet",
+            "field": "overordnet",
+            "parser": int,
+            "required": False,
+        },
+        {
+            "label": "Vareart (da)",
+            "field": "vareart_da",
+            "parser": str,
+            "required": True,
+        },
+        {
+            "label": "Vareart (kl)",
+            "field": "vareart_kl",
+            "parser": str,
+            "required": True,
+        },
+        {
+            "label": "Enhed",
+            "field": "enhed",
+            "parser": lambda value: getattr(Vareafgiftssats.Enhed, value.upper()).value,
+            "required": True,
+        },
+        {
+            "label": "Afgiftssats",
+            "field": "afgiftssats",
+            "parser": unformat_decimal,
+            "required": False,
+        },
+        {
+            "label": "Kræver indførselstilladelse",
+            "field": "kræver_indførselstilladelse",
+            "parser": parse_bool,
+            "required": True,
+        },
+        {
+            "label": "Har privat tillægsafgift alkohol",
+            "field": "har_privat_tillægsafgift_alkohol",
+            "parser": parse_bool,
+            "required": True,
+        },
+        {
+            "label": "Synlig for private",
+            "field": "synlig_privat",
+            "parser": parse_bool,
+            "required": True,
+        },
+        {
+            "label": "Minimumsbeløb",
+            "field": "minimumsbeløb",
+            "parser": unformat_decimal,
+            "required": False,
+        },
+        {
+            "label": "Segment nedre",
+            "field": "segment_nedre",
+            "parser": unformat_decimal,
+            "required": False,
+        },
+        {
+            "label": "Segment øvre",
+            "field": "segment_øvre",
+            "parser": unformat_decimal,
+            "required": False,
+        },
+    ]
+
+    @staticmethod
+    def get_header(label):
+        for x in VareafgiftssatsSpreadsheetUtil.header_definitions:
+            if x["label"] == label:
+                return x
 
     @staticmethod
     def from_spreadsheet_row(
         headers: List[str], row: List[Union[str, int, bool]]
     ) -> Dict[str, Union[str, int, bool]]:
         data = {}
-        for i, header in enumerate(headers):
-            if header is not None:
-                header = header.lower()
-                try:
-                    value = row[i]
-                except IndexError:
-                    value = None
-                if value == "":
-                    value = None
-                try:
-                    if (
-                        value is not None
-                        and header in VareafgiftssatsSpreadsheetUtil.header_map_in
-                    ):
-                        value = VareafgiftssatsSpreadsheetUtil.header_map_in[header](
-                            value
+        for i, label in enumerate(headers):
+            if label is not None:
+                header_obj = VareafgiftssatsSpreadsheetUtil.get_header(label)
+                if header_obj:
+                    try:
+                        value = row[i]
+                    except IndexError:
+                        value = None
+                    if value == "":
+                        value = None
+                    try:
+                        if value is not None:
+                            value = header_obj["parser"](value)
+                    except (TypeError, ValueError) as e:
+                        raise SpreadsheetImportException(
+                            f"Fejl ved import af regneark: {e}"
                         )
-                except (TypeError, ValueError) as e:
-                    raise SpreadsheetImportException(
-                        f"Fejl ved import af regneark: {e}"
-                    )
-                data[header] = value
+                    data[header_obj["field"]] = value
         return data
-
-    @staticmethod
-    def headers_unpretty(headers: Iterable[str]):
-        return [
-            header.replace(" ", "_").replace("(", "").replace(")", "").lower()
-            for header in headers
-            if header is not None
-        ]
 
     @staticmethod
     def load_csv(data: UploadedFile) -> List[Dict[str, Union[str, int, bool]]]:
@@ -150,7 +206,6 @@ class VareafgiftssatsSpreadsheetUtil:
         reader = csv.reader(StringIO(d), delimiter=",", quotechar='"')
         headers = next(reader)
         VareafgiftssatsSpreadsheetUtil.validate_headers(headers)
-        headers = VareafgiftssatsSpreadsheetUtil.headers_unpretty(headers)
         satser = []
         for row in reader:
             satser.append(
@@ -165,7 +220,6 @@ class VareafgiftssatsSpreadsheetUtil:
         values = sheet.values
         headers = next(values)
         VareafgiftssatsSpreadsheetUtil.validate_headers(headers)
-        headers = VareafgiftssatsSpreadsheetUtil.headers_unpretty(headers)
         satser = []
         for row in values:
             satser.append(
@@ -176,24 +230,10 @@ class VareafgiftssatsSpreadsheetUtil:
     @staticmethod
     def validate_headers(headers):
         headers = set(headers)
-        for expected_header in (
-            "Afgiftsgruppenummer",
-            "Overordnet",
-            "Vareart (da)",
-            "Vareart (kl)",
-            "Enhed",
-            "Afgiftssats",
-            "Kræver indførselstilladelse",
-            "Har privat tillægsafgift alkohol",
-            "Synlig for private",
-            "Minimumsbeløb",
-            "Segment nedre",
-            "Segment øvre",
-        ):
-            if expected_header not in headers:
-                raise SpreadsheetImportException(
-                    f"Mangler kolonne med {expected_header}"
-                )
+        for header in VareafgiftssatsSpreadsheetUtil.header_definitions:
+            label = header["label"]
+            if label not in headers:
+                raise SpreadsheetImportException(f"Mangler kolonne med {label}")
 
     @staticmethod
     def validate_satser(satser: List[Dict[str, Union[str, int, bool]]]):
@@ -201,22 +241,12 @@ class VareafgiftssatsSpreadsheetUtil:
         # 1-indekserede og vi har en header-række
 
         # Tjek at felter har gyldige værdier
-        required = (
-            "Afgiftsgruppenummer",
-            "Vareart (da)",
-            "Vareart (kl)",
-            "Enhed",
-            "Kræver indførselstilladelse",
-            "Har privat tillægsafgift alkohol",
-            "Synlig for private",
-        )
         for linje, vareafgiftssats in enumerate(satser, 2):
-            for pretty, raw in zip(
-                required, VareafgiftssatsSpreadsheetUtil.headers_unpretty(required)
-            ):
-                if vareafgiftssats[raw] is None:
+            for header in VareafgiftssatsSpreadsheetUtil.header_definitions:
+                if header["required"] and vareafgiftssats[header["field"]] is None:
+                    label = header["label"]
                     raise SpreadsheetImportException(
-                        f'Mangler felt "{pretty}" på linje {linje}'
+                        f'Mangler felt "{label}" på linje {linje}'
                     )
 
         # Tjek at afgiftsgruppenummer er unikt
