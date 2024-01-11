@@ -6,7 +6,7 @@ import re
 
 from django import forms
 from django.core.files import File
-from django.forms import FileField
+from django.forms import FileField, MultipleChoiceField
 from django.utils.translation import gettext_lazy as _
 from dynamic_forms import DynamicFormMixin
 from humanize import naturalsize
@@ -114,3 +114,18 @@ class DateInput(forms.DateInput):
     def __init__(self, **kwargs):
         kwargs["format"] = "%Y-%m-%d"
         super().__init__(**kwargs)
+
+
+class MultipleSeparatedChoiceField(MultipleChoiceField):
+    widget = forms.TextInput()
+
+    def __init__(self, delimiters=",", **kwargs):
+        self.delimiters = delimiters if type(delimiters) is list else [delimiters]
+        super().__init__(**kwargs)
+        example = self.delimiters[0].join([label for label, value in self.choices[0:3]])
+        self.widget.attrs["placeholder"] = f"f.eks.: {example}"
+
+    def to_python(self, value):
+        if not value:
+            return []
+        return re.split("|".join(map(re.escape, self.delimiters)), value)

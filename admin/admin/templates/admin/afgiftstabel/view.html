@@ -43,8 +43,7 @@
                         {% if can_edit %}
                         {{form.kladde}}
                         {{form.kladde.errors}}
-                        {% endif %}
-                        {% if not object.kladde %}
+                        {% else if not object.kladde %}
                         {% translate "Nej" %}
                         {% endif %}
                     </div>

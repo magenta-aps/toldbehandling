@@ -14,15 +14,14 @@ from django.utils.translation import gettext_lazy as _
 from dynamic_forms import DynamicField
 from requests import HTTPError
 from told_common.data import Vareafgiftssats
-from told_common.rest_client import RestClient
-from told_common.util import cast_or_none, date_next_workdays
-
-from told_common.form_mixins import (  # isort: skip
+from told_common.form_mixins import (
     BootstrapForm,
     ButtonlessIntegerField,
     DateInput,
     MaxSizeFileField,
 )
+from told_common.rest_client import RestClient
+from told_common.util import cast_or_none, date_next_workdays
 
 
 class LoginForm(BootstrapForm):

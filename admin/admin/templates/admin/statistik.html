@@ -1,0 +1,177 @@
+{% extends "admin/admin_layout.html" %}
+{% load static %}
+{% load i18n %}
+{% load l10n %}
+{% load common_tags %}
+
+{% block extra_headers %}
+<script type="text/javascript" src="{% static 'toldbehandling/js/formset.js' %}"></script>
+<link rel="stylesheet" href="{% static 'font-awesome/css/all.min.css' %}" >
+<script>
+    $(function (){
+        const container = $("#formset_container");
+
+        // Formset
+        // -------
+        const formset = container.formset("form", $("#formset_prototype"));
+        const subformAdded = function(subform) {
+            if (!(subform instanceof $)) {
+                subform = $(subform);
+            }
+            subform.find(".remove-row").click(removeForm.bind(subform, subform));
+            const addButton = subform.find(".add-row");
+            addButton.click(addForm);
+            subformsUpdated();
+        };
+        const subformRemoved = function(subform) {
+            const rows = container.find(".row");
+            rows.each(function (index, element) {
+                $(this).find("input[name],select[name]").each(function (){
+                    this.id = this.id.replace(/-\d+-/, "-"+index+"-");
+                    this.name = this.name.replace(/-\d+-/, "-"+index+"-");
+                });
+            });
+            subformsUpdated();
+        };
+        const subformsUpdated = function () {
+            const rows = container.find(".row");
+            const lastRow = rows.last();
+            lastRow.find(".add-row").show();
+            if (rows.length === 1) {
+                lastRow.find(".remove-row").hide();
+            } else {
+                rows.find(".remove-row").show();
+                rows.not(lastRow).find(".add-row").hide();
+            }
+        }
+
+        const addForm = function () {
+            const newForm = formset.addForm();
+            subformAdded(newForm);
+        };
+        const removeForm = function(subform) {
+            formset.removeForm(subform, true);
+            subformRemoved(subform);
+        };
+        container.find(".row").each(function (){subformAdded(this)});
+
+    });
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="mx-5">
+<form method="post">
+    {% csrf_token %}
+    {{form.errors}}
+    <h3>Filtrering</h3>
+    <div class="row">
+        <div class="col-4">
+            <label for="{{form.anmeldelsestype.name}}" class="form-label">{% translate "Anmeldelsestype" %}</label>
+        </div>
+        <div class="col-8">
+            {{form.anmeldelsestype}}
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-4">{% translate "Dato mellem" %}</div>
+        <div class="col-4">{{form.startdato}}</div>
+        <div class="col-4">{{form.slutdato}}</div>
+    </div>
+    <h3>Grupper</h3>
+    <div id="formset">
+    {{ formset.management_form }}
+    <div id="formset_container">
+        {% for subform in formset %}
+        {{subform.errors}}
+        <div class="row">
+            <div class="col-4">
+                <label for="{{subform.gruppe.name}}">Gruppe:</label>
+            </div>
+            <div class="col-7">
+                {{subform.gruppe}}
+            </div>
+            <div class="col-1 px-0">
+                <button type="button" class="btn btn-danger remove-row"><i class="fa fa-minus"></i></button>
+                <button type="button" class="btn btn-success add-row"><i class="fa fa-plus"></i></button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    <div id="formset_prototype" style="display: none">
+        <div class="row">
+            <div class="col-4">
+                <label for="{{formset.empty_form.gruppe.name}}">Gruppe:</label>
+            </div>
+            <div class="col-7">
+                {{formset.empty_form.gruppe}}
+            </div>
+            <div class="col-1 px-0">
+                <button type="button" class="btn btn-danger remove-row"><i class="fa fa-minus"></i></button>
+                <button type="button" class="btn btn-success add-row"><i class="fa fa-plus"></i></button>
+            </div>
+        </div>
+    </div>
+    </div>
+    <button type="submit" class="btn btn-primary">Søg</button>
+    <button type="submit" class="btn btn-primary" name="{{form.download.name}}" value="true">Download regneark</button>
+</form>
+<hr/>
+<table class="table">
+    <thead>
+        <tr>
+            <th class="col-2">Afgiftsgruppe</th>
+            <th class="col-8">Afgiftstekst</th>
+            <th class="col-2">Afgift</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for row in rows %}
+        <tr>
+            <td>{{row.afgiftsgruppenummer|zfill:3}}</td>
+            <td>{{row.vareart_da}}</td>
+            <td>{{row.sum_afgiftsbeløb|floatformat:2}}</td>
+        </tr>
+    {% empty %}
+    <tr>
+        <td colspan="3" class="text-center">
+            Ingen data
+        </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+<h3>Gruppesummer</h3>
+<table class="table">
+    <thead>
+    <tr>
+        <th class="col-10">Gruppe</th>
+        <th class="col-2">Afgift</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for gruppering in grupperinger %}
+    <tr>
+        <td>{{gruppering.gruppe|join:"+"}}</td>
+        <td>{{gruppering.sum_afgiftsbeløb|floatformat:2}}</td>
+    </tr>
+    {% empty %}
+    <tr>
+        <td colspan="2" class="text-center">
+            Ingen data
+        </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+</div>
+
+<script>
+    // $(function(){
+    //     $("form input, form select").on("change", function (){
+    //         this.form.submit();
+    //     })
+    // });
+</script>
+{% endblock %}

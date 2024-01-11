@@ -51,7 +51,7 @@ class Command(BaseCommand):
         Varelinje.objects.create(
             afgiftsanmeldelse=anmeldelse,
             vareafgiftssats=Vareafgiftssats.objects.get(
-                afgiftstabel=tabel, afgiftsgruppenummer=72
+                afgiftstabel=tabel, afgiftsgruppenummer=72  # personbiler
             ),
             mængde=None,
             antal=1,

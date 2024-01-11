@@ -4,10 +4,10 @@
 
 from aktør.models import Afsender, Modtager
 from django.test import TestCase
-from project.test_mixins import RestMixin
+from project.test_mixins import RestTestMixin
 
 
-class AfsenderTest(RestMixin, TestCase):
+class AfsenderTest(RestTestMixin, TestCase):
     __test__ = True
     object_class = Afsender
 
@@ -68,7 +68,7 @@ class AfsenderTest(RestMixin, TestCase):
         )
 
 
-class ModtagerTest(RestMixin, TestCase):
+class ModtagerTest(RestTestMixin, TestCase):
     __test__ = True
     plural_classname = "modtagere"
     object_class = Modtager

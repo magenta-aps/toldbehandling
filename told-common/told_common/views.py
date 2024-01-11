@@ -19,17 +19,15 @@ from django.views import View
 from django.views.generic import FormView, RedirectView
 from requests import HTTPError
 from told_common import forms
-from told_common.rest_client import RestClient
-from told_common.util import JSONEncoder, dataclass_map_to_dict
-
-from told_common.data import (  # isort: skip
+from told_common.data import (
     Afgiftsanmeldelse,
     Forsendelsestype,
-    Vareafgiftssats,
     PrivatAfgiftsanmeldelse,
+    Vareafgiftssats,
 )
-
-from told_common.view_mixins import (  # isort: skip
+from told_common.rest_client import RestClient
+from told_common.util import JSONEncoder, dataclass_map_to_dict
+from told_common.view_mixins import (
     CustomLayoutMixin,
     FormWithFormsetView,
     HasRestClientMixin,

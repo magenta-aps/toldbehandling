@@ -4,10 +4,10 @@
 
 from django.test import TestCase
 from forsendelse.models import Fragtforsendelse, Postforsendelse
-from project.test_mixins import RestMixin
+from project.test_mixins import RestTestMixin
 
 
-class PostforsendelseTest(RestMixin, TestCase):
+class PostforsendelseTest(RestTestMixin, TestCase):
     object_class = Postforsendelse
     unique_fields = []
     exclude_fields = ["oprettet_af"]
@@ -71,7 +71,7 @@ class PostforsendelseTest(RestMixin, TestCase):
         self.assertIn(self.postforsendelse_data["afsenderbykode"], string)
 
 
-class FragtforsendelseTest(RestMixin, TestCase):
+class FragtforsendelseTest(RestTestMixin, TestCase):
     plural_classname = "fragtforsendelser"
     object_class = Fragtforsendelse
     unique_fields = []

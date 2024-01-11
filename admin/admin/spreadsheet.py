@@ -1,16 +1,62 @@
 from __future__ import annotations
 
 import csv
+from decimal import Context, Decimal
 from io import StringIO
-from typing import Callable, Dict, Iterable, List, Union
+from typing import Callable, Dict, Iterable, List, Optional, Union
 
 from django.core.files.uploadedfile import UploadedFile
-from openpyxl import load_workbook
+from django.http import HttpResponse
+from openpyxl import Workbook, load_workbook
+from openpyxl.utils import get_column_letter
+from openpyxl.worksheet.dimensions import ColumnDimension, DimensionHolder
 from told_common.data import Vareafgiftssats, format_decimal, unformat_decimal
 
 
 class SpreadsheetImportException(Exception):
     pass
+
+
+class SpreadsheetExport:
+    @staticmethod
+    def render_xlsx(
+        headers: Iterable[str],
+        items: Iterable[Iterable[Union[str, int, bool]]],
+        filename: str,
+        column_widths: Optional[List[int]] = None,
+    ) -> HttpResponse:
+        wb = Workbook(write_only=True)
+        ws = wb.create_sheet()
+        if headers:
+            ws.append(headers)
+        for item in items:
+            ws.append(item)
+        if column_widths:
+            for i, column_width in enumerate(column_widths, 1):
+                if column_width is not None:
+                    ws.column_dimensions[get_column_letter(i)].width = column_width
+        response = HttpResponse(
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            headers={"Content-Disposition": "attachment; filename={}".format(filename)},
+        )
+        wb.save(response)
+        return response
+
+    @staticmethod
+    def render_csv(
+        headers: Iterable[str],
+        items: Iterable[Iterable[Union[str, int, bool]]],
+        filename: str,
+    ) -> HttpResponse:
+        response = HttpResponse(
+            content_type="text/csv",
+            headers={"Content-Disposition": "attachment; filename={}".format(filename)},
+        )
+        writer = csv.writer(response)
+        writer.writerow(headers)
+        for item in items:
+            writer.writerow(item)
+        return response
 
 
 class VareafgiftssatsSpreadsheetUtil:

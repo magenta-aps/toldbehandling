@@ -83,12 +83,19 @@ class RestMixin:
                 Postforsendelse, for_concrete_model=False
             ),
         )
-        view_all = [
+        permissions = [
             view_all_anmeldelser,
             view_all_fragtforsendelser,
             view_all_postforsendelser,
         ]
 
+        if hasattr(cls, "object_class"):
+            permissions += [
+                Permission.objects.get(
+                    codename=f"{permission}_{cls.object_class.__name__.lower()}"
+                )
+                for permission in ("add", "change", "view", "delete")
+            ]
         (
             cls.authorized_user,
             cls.authorized_access_token,
@@ -96,18 +103,23 @@ class RestMixin:
         ) = cls.make_user(
             "testuser1",
             "testpassword",
-            [
-                Permission.objects.get(
-                    codename=f"{permission}_{cls.object_class.__name__.lower()}"
-                )
-                for permission in ("add", "change", "view", "delete")
-            ]
-            + view_all,
+            permissions,
         )
         cls.authorized_user.user_permissions.add(
             Permission.objects.get(codename="view_all_anmeldelse")
         )
 
+        permissions = [
+            view_all_anmeldelser,
+            view_all_fragtforsendelser,
+            view_all_postforsendelser,
+        ]
+        if hasattr(cls, "object_class"):
+            permissions.append(
+                Permission.objects.get(
+                    codename=f"view_{cls.object_class.__name__.lower()}"
+                )
+            )
         (
             cls.viewonly_user,
             cls.viewonly_access_token,
@@ -115,12 +127,7 @@ class RestMixin:
         ) = cls.make_user(
             "testuser2",
             "testpassword",
-            [
-                Permission.objects.get(
-                    codename=f"view_{cls.object_class.__name__.lower()}"
-                )
-            ]
-            + view_all,
+            permissions,
         )
         cls.viewonly_user.user_permissions.add(
             Permission.objects.get(codename="view_all_anmeldelse")
@@ -132,6 +139,13 @@ class RestMixin:
             unauthorized_refresh_token,
         ) = cls.make_user("testuser3", "testpassword", None)
 
+        permissions = []
+        if hasattr(cls, "object_class"):
+            permissions.append(
+                Permission.objects.get(
+                    codename=f"view_{cls.object_class.__name__.lower()}"
+                )
+            )
         (
             cls.viewonly_own_user,
             cls.viewonly_own_access_token,
@@ -139,51 +153,19 @@ class RestMixin:
         ) = cls.make_user(
             "testuser4",
             "testpassword",
-            [
-                Permission.objects.get(
-                    codename=f"view_{cls.object_class.__name__.lower()}"
-                )
-            ],
+            permissions,
         )  # udelad view_all
 
     def setUp(self) -> None:
-        super().setUp()
         self.define_static_data()
         if not hasattr(self, "client"):
             self.client = Client()
         self.afgiftsanmeldelse_data["leverandørfaktura"] = self.leverandørfaktura_file
         self.fragtforsendelse_data["fragtbrev"] = self.fragtbrev_file
+        super().setUp()
 
     def create_items(self):
         pass
-
-    @property
-    def create_function(self) -> str:
-        return f"{self.object_class.__name__.lower()}_create"
-
-    @property
-    def get_function(self) -> str:
-        return f"{self.object_class.__name__.lower()}_get"
-
-    @property
-    def get_full_function(self) -> Union[str, None]:
-        return None
-
-    @property
-    def list_function(self) -> str:
-        return f"{self.object_class.__name__.lower()}_list"
-
-    @property
-    def list_full_function(self) -> Union[str, None]:
-        return None
-
-    @property
-    def update_function(self) -> str:
-        return f"{self.object_class.__name__.lower()}_update"
-
-    @property
-    def delete_function(self) -> str:
-        return f"{self.object_class.__name__.lower()}_delete"
 
     @property
     def sort_fields(self):
@@ -284,6 +266,247 @@ class RestMixin:
     @classmethod
     def strip_id(cls, item: Dict[str, Any]) -> Dict[str, Any]:
         return {re.sub("_id$", "", key): value for key, value in item.items()}
+
+    @classmethod
+    def alter_value(cls, key: str, value: Any) -> Any:
+        t = type(value)
+        if t == str:
+            try:
+                d = date.fromisoformat(value)
+                return (d + timedelta(days=200)).isoformat()
+            except (TypeError, ValueError):
+                pass
+            try:
+                d = Decimal(value)
+                if str(d) == value:
+                    return str(d + Decimal(17.5))
+            except InvalidOperation:
+                pass
+            return f"{value}_nonexistent"
+        if t == int:
+            return value + 123456
+        if t == bool:
+            return not value
+
+    @property
+    def afsender(self) -> Afsender:
+        if not hasattr(self, "_afsender"):
+            try:
+                self._afsender = Afsender.objects.get(navn=self.afsender_data["navn"])
+            except Afsender.DoesNotExist:
+                self._afsender = Afsender.objects.create(**self.afsender_data)
+        return self._afsender
+
+    @property
+    def modtager(self) -> Modtager:
+        if not hasattr(self, "_modtager"):
+            try:
+                self._modtager = Modtager.objects.get(navn=self.modtager_data["navn"])
+            except Modtager.DoesNotExist:
+                self._modtager = Modtager.objects.create(**self.modtager_data)
+        return self._modtager
+
+    @property
+    def fragtforsendelse(self) -> Fragtforsendelse:
+        if not hasattr(self, "_fragtforsendelse"):
+            try:
+                self._fragtforsendelse = Fragtforsendelse.objects.get(
+                    fragtbrevsnummer=self.fragtforsendelse_data["fragtbrevsnummer"]
+                )
+            except Fragtforsendelse.DoesNotExist:
+                self._fragtforsendelse = Fragtforsendelse.objects.create(
+                    **self.fragtforsendelse_data,
+                    oprettet_af=self.authorized_user,
+                )
+                self._fragtforsendelse.fragtbrev.save(
+                    "fragtforsendelse.pdf", self.fragtforsendelse_data["fragtbrev"]
+                )
+        return self._fragtforsendelse
+
+    @property
+    def postforsendelse(self) -> Postforsendelse:
+        if not hasattr(self, "_postforsendelse"):
+            self._postforsendelse, _ = Postforsendelse.objects.get_or_create(
+                postforsendelsesnummer=self.postforsendelse_data[
+                    "postforsendelsesnummer"
+                ],
+                oprettet_af=self.authorized_user,
+                defaults=self.postforsendelse_data,
+            )
+        return self._postforsendelse
+
+    @property
+    def afgiftsanmeldelse(self) -> Afgiftsanmeldelse:
+        if not hasattr(self, "_afgiftsanmeldelse"):
+            self._afgiftsanmeldelse = Afgiftsanmeldelse.objects.first()
+            if self._afgiftsanmeldelse is None:
+                data = {**self.afgiftsanmeldelse_data}
+                data.update(
+                    {
+                        "afsender": self.afsender,
+                        "modtager": self.modtager,
+                        "fragtforsendelse": None,
+                        "postforsendelse": self.postforsendelse,
+                        "oprettet_af": self.authorized_user,
+                    }
+                )
+                self._afgiftsanmeldelse = Afgiftsanmeldelse.objects.create(**data)
+
+                faktura_id = self._afgiftsanmeldelse.pk
+                media_path = f"../upload/leverandørfakturaer/{faktura_id}"
+                try:
+                    os.remove(os.path.join(media_path, "leverandørfaktura.pdf"))
+                except FileNotFoundError:
+                    pass
+
+                self._afgiftsanmeldelse.leverandørfaktura.save(
+                    "leverandørfaktura.pdf",
+                    self.afgiftsanmeldelse_data["leverandørfaktura"],
+                )
+
+        return self._afgiftsanmeldelse
+
+    @property
+    def varelinje(self) -> Varelinje:
+        if not hasattr(self, "_varelinje"):
+            try:
+                self._varelinje = Varelinje.objects.get(
+                    vareafgiftssats=self.vareafgiftssats,
+                    afgiftsanmeldelse=self.afgiftsanmeldelse,
+                )
+            except Varelinje.DoesNotExist:
+                data = {**self.varelinje_data}
+                data.update(
+                    {
+                        "vareafgiftssats": self.vareafgiftssats,
+                        "afgiftsanmeldelse": self.afgiftsanmeldelse,
+                    }
+                )
+                self._varelinje = Varelinje.objects.create(**data)
+        return self._varelinje
+
+    @property
+    def vareafgiftssats(self) -> Vareafgiftssats:
+        if not hasattr(self, "_vareafgiftssats"):
+            try:
+                self._vareafgiftssats = Vareafgiftssats.objects.get(
+                    afgiftsgruppenummer=1234
+                )
+            except Vareafgiftssats.DoesNotExist:
+                data = {**self.vareafgiftssats_data}
+                data.update({"afgiftstabel": self.afgiftstabel})
+                self._vareafgiftssats = Vareafgiftssats.objects.create(**data)
+        return self._vareafgiftssats
+
+    @property
+    def afgiftstabel(self) -> Afgiftstabel:
+        if not hasattr(self, "_afgiftstabel"):
+            try:
+                today = date.today()
+                self._afgiftstabel = Afgiftstabel.objects.get(
+                    gyldig_fra__year=today.year,
+                    gyldig_fra__month=today.month,
+                    gyldig_fra__day=today.day,
+                )
+            except Afgiftstabel.DoesNotExist:
+                self._afgiftstabel = Afgiftstabel.objects.create(
+                    **self.afgiftstabel_data
+                )
+        return self._afgiftstabel
+
+    def define_static_data(self) -> None:
+        self.afsender_data = {
+            "navn": "Testfirma 1",
+            "adresse": "Testvej 42",
+            "postnummer": 1234,
+            "by": "TestBy",
+            "postbox": "123",
+            "telefon": "123456",
+            "cvr": 12345678,
+        }
+        self.modtager_data = {
+            "navn": "Testfirma 1",
+            "adresse": "Testvej 42",
+            "postnummer": 1234,
+            "by": "TestBy",
+            "postbox": "123",
+            "telefon": "123456",
+            "cvr": 12345678,
+            "kreditordning": True,
+        }
+
+        self.fragtforsendelse_data = {
+            "forsendelsestype": Fragtforsendelse.Forsendelsestype.SKIB,
+            "fragtbrevsnummer": "1234",
+            "forbindelsesnr": "1337",
+            "afgangsdato": "2023-11-03",
+        }
+        self.postforsendelse_data = {
+            "forsendelsestype": Postforsendelse.Forsendelsestype.SKIB,
+            "postforsendelsesnummer": "1234",
+            "afsenderbykode": "8200",
+            "afgangsdato": "2023-11-03",
+        }
+        self.afgiftsanmeldelse_data = {
+            "leverandørfaktura_nummer": "12345",
+            "modtager_betaler": False,
+            "indførselstilladelse": "abcde",
+            "betalt": False,
+        }
+        self.varelinje_data = {
+            "mængde": "15.00",
+            "antal": 1,
+            "fakturabeløb": "1000.00",
+            "afgiftsbeløb": "37.50",
+        }
+        self.vareafgiftssats_data = {
+            "vareart_da": "Kaffe",
+            "vareart_kl": "Kaffe",
+            "afgiftsgruppenummer": 1234,
+            "enhed": Vareafgiftssats.Enhed.KILOGRAM,
+            "afgiftssats": "2.50",
+            "kræver_indførselstilladelse": False,
+            "har_privat_tillægsafgift_alkohol": False,
+            "synlig_privat": False,
+        }
+        self.afgiftstabel_data = {"gyldig_fra": date.today().isoformat()}
+
+    @staticmethod
+    def unenumerate(item):
+        return {
+            key: value.value if isinstance(value, Enum) else value
+            for key, value in item.items()
+        }
+
+
+class RestTestMixin(RestMixin):
+    @property
+    def create_function(self) -> str:
+        return f"{self.object_class.__name__.lower()}_create"
+
+    @property
+    def get_function(self) -> str:
+        return f"{self.object_class.__name__.lower()}_get"
+
+    @property
+    def get_full_function(self) -> Union[str, None]:
+        return None
+
+    @property
+    def list_function(self) -> str:
+        return f"{self.object_class.__name__.lower()}_list"
+
+    @property
+    def list_full_function(self) -> Union[str, None]:
+        return None
+
+    @property
+    def update_function(self) -> str:
+        return f"{self.object_class.__name__.lower()}_update"
+
+    @property
+    def delete_function(self) -> str:
+        return f"{self.object_class.__name__.lower()}_delete"
 
     def test_get_access(self):
         self.create_items()
@@ -661,214 +884,3 @@ class RestMixin:
                 HTTP_AUTHORIZATION=f"Bearer {self.authorized_access_token}",
             )
             self.assertEquals(response.status_code, 200)
-
-    @classmethod
-    def alter_value(cls, key: str, value: Any) -> Any:
-        t = type(value)
-        if t == str:
-            try:
-                d = date.fromisoformat(value)
-                return (d + timedelta(days=200)).isoformat()
-            except (TypeError, ValueError):
-                pass
-            try:
-                d = Decimal(value)
-                if str(d) == value:
-                    return str(d + Decimal(17.5))
-            except InvalidOperation:
-                pass
-            return f"{value}_nonexistent"
-        if t == int:
-            return value + 123456
-        if t == bool:
-            return not value
-
-    @property
-    def afsender(self) -> Afsender:
-        if not hasattr(self, "_afsender"):
-            try:
-                self._afsender = Afsender.objects.get(navn=self.afsender_data["navn"])
-            except Afsender.DoesNotExist:
-                self._afsender = Afsender.objects.create(**self.afsender_data)
-        return self._afsender
-
-    @property
-    def modtager(self) -> Modtager:
-        if not hasattr(self, "_modtager"):
-            try:
-                self._modtager = Modtager.objects.get(navn=self.modtager_data["navn"])
-            except Modtager.DoesNotExist:
-                self._modtager = Modtager.objects.create(**self.modtager_data)
-        return self._modtager
-
-    @property
-    def fragtforsendelse(self) -> Fragtforsendelse:
-        if not hasattr(self, "_fragtforsendelse"):
-            try:
-                self._fragtforsendelse = Fragtforsendelse.objects.get(
-                    fragtbrevsnummer=self.fragtforsendelse_data["fragtbrevsnummer"]
-                )
-            except Fragtforsendelse.DoesNotExist:
-                self._fragtforsendelse = Fragtforsendelse.objects.create(
-                    **self.fragtforsendelse_data,
-                    oprettet_af=self.authorized_user,
-                )
-                self._fragtforsendelse.fragtbrev.save(
-                    "fragtforsendelse.pdf", self.fragtforsendelse_data["fragtbrev"]
-                )
-        return self._fragtforsendelse
-
-    @property
-    def postforsendelse(self) -> Postforsendelse:
-        if not hasattr(self, "_postforsendelse"):
-            self._postforsendelse, _ = Postforsendelse.objects.get_or_create(
-                postforsendelsesnummer=self.postforsendelse_data[
-                    "postforsendelsesnummer"
-                ],
-                oprettet_af=self.authorized_user,
-                defaults=self.postforsendelse_data,
-            )
-        return self._postforsendelse
-
-    @property
-    def afgiftsanmeldelse(self) -> Afgiftsanmeldelse:
-        if not hasattr(self, "_afgiftsanmeldelse"):
-            self._afgiftsanmeldelse = Afgiftsanmeldelse.objects.first()
-            if self._afgiftsanmeldelse is None:
-                data = {**self.afgiftsanmeldelse_data}
-                data.update(
-                    {
-                        "afsender": self.afsender,
-                        "modtager": self.modtager,
-                        "fragtforsendelse": None,
-                        "postforsendelse": self.postforsendelse,
-                        "oprettet_af": self.authorized_user,
-                    }
-                )
-                self._afgiftsanmeldelse = Afgiftsanmeldelse.objects.create(**data)
-
-                faktura_id = self._afgiftsanmeldelse.pk
-                media_path = f"../upload/leverandørfakturaer/{faktura_id}"
-                try:
-                    os.remove(os.path.join(media_path, "leverandørfaktura.pdf"))
-                except FileNotFoundError:
-                    pass
-
-                self._afgiftsanmeldelse.leverandørfaktura.save(
-                    "leverandørfaktura.pdf",
-                    self.afgiftsanmeldelse_data["leverandørfaktura"],
-                )
-
-        return self._afgiftsanmeldelse
-
-    @property
-    def varelinje(self) -> Varelinje:
-        if not hasattr(self, "_varelinje"):
-            try:
-                self._varelinje = Varelinje.objects.get(
-                    vareafgiftssats=self.vareafgiftssats,
-                    afgiftsanmeldelse=self.afgiftsanmeldelse,
-                )
-            except Varelinje.DoesNotExist:
-                data = {**self.varelinje_data}
-                data.update(
-                    {
-                        "vareafgiftssats": self.vareafgiftssats,
-                        "afgiftsanmeldelse": self.afgiftsanmeldelse,
-                    }
-                )
-                self._varelinje = Varelinje.objects.create(**data)
-        return self._varelinje
-
-    @property
-    def vareafgiftssats(self) -> Vareafgiftssats:
-        if not hasattr(self, "_vareafgiftssats"):
-            try:
-                self._vareafgiftssats = Vareafgiftssats.objects.get(
-                    afgiftsgruppenummer=1234
-                )
-            except Vareafgiftssats.DoesNotExist:
-                data = {**self.vareafgiftssats_data}
-                data.update({"afgiftstabel": self.afgiftstabel})
-                self._vareafgiftssats = Vareafgiftssats.objects.create(**data)
-        return self._vareafgiftssats
-
-    @property
-    def afgiftstabel(self) -> Afgiftstabel:
-        if not hasattr(self, "_afgiftstabel"):
-            try:
-                today = date.today()
-                self._afgiftstabel = Afgiftstabel.objects.get(
-                    gyldig_fra__year=today.year,
-                    gyldig_fra__month=today.month,
-                    gyldig_fra__day=today.day,
-                )
-            except Afgiftstabel.DoesNotExist:
-                self._afgiftstabel = Afgiftstabel.objects.create(
-                    **self.afgiftstabel_data
-                )
-        return self._afgiftstabel
-
-    def define_static_data(self) -> None:
-        self.afsender_data = {
-            "navn": "Testfirma 1",
-            "adresse": "Testvej 42",
-            "postnummer": 1234,
-            "by": "TestBy",
-            "postbox": "123",
-            "telefon": "123456",
-            "cvr": 12345678,
-        }
-        self.modtager_data = {
-            "navn": "Testfirma 1",
-            "adresse": "Testvej 42",
-            "postnummer": 1234,
-            "by": "TestBy",
-            "postbox": "123",
-            "telefon": "123456",
-            "cvr": 12345678,
-            "kreditordning": True,
-        }
-
-        self.fragtforsendelse_data = {
-            "forsendelsestype": Fragtforsendelse.Forsendelsestype.SKIB,
-            "fragtbrevsnummer": "1234",
-            "forbindelsesnr": "1337",
-            "afgangsdato": "2023-11-03",
-        }
-        self.postforsendelse_data = {
-            "forsendelsestype": Postforsendelse.Forsendelsestype.SKIB,
-            "postforsendelsesnummer": "1234",
-            "afsenderbykode": "8200",
-            "afgangsdato": "2023-11-03",
-        }
-        self.afgiftsanmeldelse_data = {
-            "leverandørfaktura_nummer": "12345",
-            "modtager_betaler": False,
-            "indførselstilladelse": "abcde",
-            "betalt": False,
-        }
-        self.varelinje_data = {
-            "mængde": "15.00",
-            "antal": 1,
-            "fakturabeløb": "1000.00",
-            "afgiftsbeløb": "37.50",
-        }
-        self.vareafgiftssats_data = {
-            "vareart_da": "Kaffe",
-            "vareart_kl": "Kaffe",
-            "afgiftsgruppenummer": 1234,
-            "enhed": Vareafgiftssats.Enhed.KILOGRAM,
-            "afgiftssats": "2.50",
-            "kræver_indførselstilladelse": False,
-            "har_privat_tillægsafgift_alkohol": False,
-            "synlig_privat": False,
-        }
-        self.afgiftstabel_data = {"gyldig_fra": date.today().isoformat()}
-
-    @staticmethod
-    def unenumerate(item):
-        return {
-            key: value.value if isinstance(value, Enum) else value
-            for key, value in item.items()
-        }

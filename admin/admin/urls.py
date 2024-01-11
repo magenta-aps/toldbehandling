@@ -98,4 +98,5 @@ urlpatterns = [
         views.TF5LeverandørFakturaView.as_view(),
         name="tf5_leverandørfaktura",
     ),
+    path("statistik", views.StatistikView.as_view(), name="statistik"),
 ]
