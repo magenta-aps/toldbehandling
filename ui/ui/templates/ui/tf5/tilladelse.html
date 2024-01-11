@@ -99,7 +99,7 @@
 
     <tr>
         <td colspan="2" class="bordered h-2"><p>{% translate "Indehavers navn" %}</p>{{object.navn}}</td>
-        <td colspan="2" class="bordered h-2"><p>{% translate "CPR-nummer" %}</p>{{object.cpr}}</td>
+        <td colspan="2" class="bordered h-2"><p>{% translate "CPR-nummer" %}</p>{{object.cpr|zfill:10}}</td>
         <td></td>
         <td colspan="2" rowspan="2" class="bordered h-3"><p>{% translate "Engangstilladelsesnummer" %}</p>{{object.id}}</td>
     </tr>
