@@ -187,6 +187,12 @@ class Command(BaseCommand):
             ("add", payment_item_model),
             ("add", notat_model),
             ("change", afgiftsanmeldelse_model),
+            ("change", varelinje_model),
+            ("change", postforsendelse_model),
+            ("change", fragtforsendelse_model),
+            ("delete", varelinje_model),
+            ("delete", postforsendelse_model),
+            ("delete", fragtforsendelse_model),
             # Ingen change på andre modeller
             # Ingen delete
         ):
