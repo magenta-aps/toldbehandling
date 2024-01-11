@@ -75,16 +75,18 @@ class ModelRestClient:
 
     @staticmethod
     def set_file(data: dict, field: str):
-        try:
-            data[field] = File(
-                open(f"{settings.MEDIA_ROOT}{unquote(data[field])}", "rb")
-            )
-        except FileNotFoundError:
-            print(
-                f"Fil ikke fundet [id={data.get('id')}, felt={field}]: "
-                f"{settings.MEDIA_ROOT}{unquote(data[field])}"
-            )
-            data[field] = None
+        if data.get(field):
+            try:
+                data[field] = File(
+                    open(f"{settings.MEDIA_ROOT}{unquote(data[field])}", "rb")
+                )
+                return
+            except FileNotFoundError:
+                print(
+                    f"Fil ikke fundet [id={data.get('id')}, felt={field}]: "
+                    f"{settings.MEDIA_ROOT}{unquote(data[field])}"
+                )
+        data[field] = None
 
 
 class AfsenderRestClient(ModelRestClient):
