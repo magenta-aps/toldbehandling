@@ -11,3 +11,5 @@ omit =
     */migrations/*
     */management/*
     */tests/*
+parallel = true
+concurrency=multiprocessing
