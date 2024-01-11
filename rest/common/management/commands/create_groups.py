@@ -3,19 +3,18 @@
 # SPDX-License-Identifier: MPL-2.0
 
 from aktør.models import Afsender, Modtager
+from anmeldelse.models import (
+    Afgiftsanmeldelse,
+    Notat,
+    PrivatAfgiftsanmeldelse,
+    Varelinje,
+)
 from django.contrib.auth.models import Group, Permission, User
 from django.contrib.contenttypes.models import ContentType
 from django.core.management.base import BaseCommand
 from forsendelse.models import Fragtforsendelse, Postforsendelse
 from payment.models import Item, Payment
 from sats.models import Afgiftstabel, Vareafgiftssats
-
-from anmeldelse.models import (  # isort: skip
-    Afgiftsanmeldelse,
-    Notat,
-    PrivatAfgiftsanmeldelse,
-    Varelinje,
-)
 
 
 class Command(BaseCommand):

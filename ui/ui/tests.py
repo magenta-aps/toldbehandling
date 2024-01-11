@@ -11,6 +11,7 @@ from urllib.parse import quote
 import requests
 from bs4 import BeautifulSoup
 from django.conf import settings
+from django.core.files.uploadedfile import SimpleUploadedFile, TemporaryUploadedFile
 from django.shortcuts import redirect
 from django.test import TestCase, override_settings
 from django.urls import reverse
@@ -18,17 +19,12 @@ from requests import Response
 from told_common.data import Vareafgiftssats
 from told_common.forms import TF5Form, TF10Form, TF10VareForm
 from told_common.rest_client import RestClient
-from told_common.tests import TestMixin
-
-from django.core.files.uploadedfile import (  # isort: skip
-    SimpleUploadedFile,
-    TemporaryUploadedFile,
-)
-from told_common.tests import (  # isort: skip
+from told_common.tests import (
     AnmeldelseListViewTest,
     FileViewTest,
     HasLogin,
     TemplateTagsTest,
+    TestMixin,
 )
 
 

@@ -9,12 +9,19 @@ from typing import List, Optional, Tuple
 from uuid import uuid4
 
 from aktør.api import AfsenderOut, ModtagerOut
-from anmeldelse.models import PrivatAfgiftsanmeldelse
+from anmeldelse.models import (
+    Afgiftsanmeldelse,
+    Notat,
+    PrismeResponse,
+    PrivatAfgiftsanmeldelse,
+    Varelinje,
+)
 from common.api import UserOut, get_auth_methods
 from common.models import IndberetterProfile
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
-from django.db.models import Q, QuerySet
+from django.db.models import Q, QuerySet, Sum
+from django.db.models.expressions import F, Value
 from django.http import Http404, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404
 from forsendelse.api import FragtforsendelseOut, PostforsendelseOut
@@ -25,13 +32,7 @@ from ninja_extra.pagination import paginate
 from ninja_extra.schemas import NinjaPaginationResponseSchema
 from payment.models import Payment
 from project.util import RestPermission, json_dump
-
-from anmeldelse.models import (  # isort: skip
-    Afgiftsanmeldelse,
-    Notat,
-    PrismeResponse,
-    Varelinje,
-)
+from sats.models import Vareafgiftssats
 
 
 class AfgiftsanmeldelseIn(ModelSchema):
@@ -946,3 +947,78 @@ class PrismeResponseAPI:
             "delivery_date"
         )
         return list(qs)
+
+
+class StatistikFilterSchema(FilterSchema):
+    anmeldelsestype: Optional[str] = None
+    startdato: Optional[date] = Field(
+        None,
+        q=[
+            "privatafgiftsanmeldelse__indleveringsdato__gte",
+            "afgiftsanmeldelse__dato__gte",
+        ],
+    )
+    slutdato: Optional[date] = Field(
+        None,
+        q=[
+            "privatafgiftsanmeldelse__indleveringsdato__lte",
+            "afgiftsanmeldelse__dato__lte",
+        ],
+    )
+
+    def filter_anmeldelsestype(self, value: str):
+        if value == "tf5":
+            return Q(privatafgiftsanmeldelse__isnull=False)
+        if value == "tf10":
+            return Q(afgiftsanmeldelse__isnull=False)
+
+
+@api_controller(
+    "/statistik",
+    tags=["Statistik"],
+    permissions=[permissions.IsAuthenticated],
+)
+class StatistikAPI:
+    @route.get(
+        "",
+        auth=get_auth_methods(),
+        url_name="statistik_get",
+    )
+    def get(self, filters: StatistikFilterSchema = Query(...)):
+        varelinjer = Varelinje.objects.select_related("vareafgiftssats").filter(
+            filters.get_filter_expression()
+        )
+
+        stats = list(
+            varelinjer.values("vareafgiftssats").annotate(
+                sum_afgiftsbeløb=Sum("afgiftsbeløb", default=0),
+                sum_mængde=Sum("mængde", default=0),
+                sum_antal=Sum("antal", default=0),
+                afgiftsgruppenummer=F("vareafgiftssats__afgiftsgruppenummer"),
+                vareart_da=F("vareafgiftssats__vareart_da"),
+                vareart_kl=F("vareafgiftssats__vareart_kl"),
+                enhed=F("vareafgiftssats__enhed"),
+            )
+        )
+
+        stats_unused = (
+            Vareafgiftssats.objects.filter(
+                afgiftstabel__kladde=False,
+                afgiftstabel__gyldig_til__isnull=True,
+                overordnet__isnull=True,
+            )
+            .exclude(
+                afgiftsgruppenummer__in=(stat["afgiftsgruppenummer"] for stat in stats),
+            )
+            .values("afgiftsgruppenummer", "vareart_da", "vareart_kl", "enhed")
+            .annotate(
+                sum_afgiftsbeløb=Value(Decimal("0.00")),
+                sum_mængde=Value(Decimal("0.00")),
+                sum_antal=Value(0),
+            )
+        )
+
+        stats_list = sorted(
+            list(stats) + list(stats_unused), key=lambda x: x["afgiftsgruppenummer"]
+        )
+        return {"count": len(stats_list), "items": stats_list}

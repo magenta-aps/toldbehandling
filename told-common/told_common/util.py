@@ -132,3 +132,23 @@ def write_pdf(output_path, *inputs: BinaryIO):
         writer.append(input)
     with open(output_path, "wb") as output:
         writer.write(output)
+
+
+def format_daterange(start: date, end: date, sep: str = " - "):
+    range_parts = []
+    if not start and not end:
+        range_parts.append("altid")
+    else:
+        if start:
+            range_parts.append(start.isoformat())
+        else:
+            range_parts.append("al fortid")
+        if end:
+            range_parts.append(end.isoformat())
+        else:
+            range_parts.append("al fremtid")
+    return sep.join(range_parts)
+
+
+def join(delimiter: Union[str, int], items: Iterable[Union[Any]]):
+    return str(delimiter).join([str(x) for x in items])

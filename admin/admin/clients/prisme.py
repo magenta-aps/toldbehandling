@@ -9,15 +9,10 @@ from django.conf import settings
 from requests import Session
 from requests.auth import HTTPBasicAuth
 from requests_ntlm import HttpNtlmAuth
+from told_common.data import Afgiftsanmeldelse, Forsendelsestype, Vareafgiftssats
 from told_common.util import get_file_base64
 from xmltodict import parse as xml_to_dict
 from zeep.transports import Transport
-
-from told_common.data import (  # isort: skip
-    Afgiftsanmeldelse,
-    Forsendelsestype,
-    Vareafgiftssats,
-)
 
 logger = logging.getLogger(__name__)
 

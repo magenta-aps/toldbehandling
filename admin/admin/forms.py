@@ -8,15 +8,18 @@ from typing import List
 from django import forms
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.forms import formset_factory
 from django.utils.translation import gettext_lazy as _
 from dynamic_forms import DynamicField
 from told_common import forms as common_forms
-from told_common.form_mixins import BootstrapForm, DateInput, MaxSizeFileField
-
-from admin.spreadsheet import (  # isort: skip
-    SpreadsheetImportException,
-    VareafgiftssatsSpreadsheetUtil,
+from told_common.form_mixins import (
+    BootstrapForm,
+    DateInput,
+    MaxSizeFileField,
+    MultipleSeparatedChoiceField,
 )
+
+from admin.spreadsheet import SpreadsheetImportException, VareafgiftssatsSpreadsheetUtil
 
 
 class TF10CreateForm(common_forms.TF10Form):
@@ -198,3 +201,34 @@ class AfgiftstabelCreateForm(BootstrapForm):
 
 class TF10PrismeSendForm(forms.Form):
     afgiftsanmeldelse = forms.IntegerField(widget=forms.HiddenInput())
+
+
+class StatistikForm(BootstrapForm):
+    anmeldelsestype = forms.ChoiceField(
+        choices=(
+            (None, "Alle"),
+            ("tf5", "Private afgiftsanmeldelser (TF5)"),
+            ("tf10", "Afgiftsanmeldelser (TF10)"),
+        ),
+        required=False,
+    )
+    startdato = forms.DateField(required=False, widget=DateInput())
+    slutdato = forms.DateField(required=False, widget=DateInput())
+    download = forms.BooleanField(required=False)
+
+
+class StatistikGruppeForm(BootstrapForm):
+    def __init__(self, gruppe_choices, *args, **kwargs):
+        self.gruppe_choices = gruppe_choices
+        super().__init__(*args, **kwargs)
+
+    gruppe = DynamicField(
+        MultipleSeparatedChoiceField,
+        choices=lambda form: ((str(gruppe), gruppe) for gruppe in form.gruppe_choices),
+        delimiters=["+", ","],
+    )
+
+
+StatistikGruppeFormSet = formset_factory(
+    StatistikGruppeForm, min_num=0, extra=1, can_delete=True
+)

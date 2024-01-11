@@ -10,19 +10,18 @@ from typing import Any, Dict, Iterable, Optional
 from urllib.parse import quote_plus
 
 from django.conf import settings
+from django.http import (
+    HttpRequest,
+    HttpResponse,
+    HttpResponseRedirect,
+    HttpResponseServerError,
+)
 from django.shortcuts import redirect
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.views.generic import FormView
 from requests import HTTPError
 from told_common.rest_client import JwtTokenInfo, RestClient
-
-from django.http import (  # isort: skip
-    HttpRequest,
-    HttpResponse,
-    HttpResponseRedirect,
-    HttpResponseServerError,
-)
 
 
 class LoginRequiredMixin:
@@ -194,7 +193,6 @@ class FormWithFormsetView(FormView):
             "initial": self.get_initial(),
             "prefix": self.get_prefix(),
         }
-
         if self.request.method in ("POST", "PUT"):
             kwargs.update(
                 {
@@ -202,6 +200,7 @@ class FormWithFormsetView(FormView):
                     "files": self.request.FILES,
                 }
             )
+
         return kwargs
 
     def get_formset_class(self):

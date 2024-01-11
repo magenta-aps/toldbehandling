@@ -20,21 +20,20 @@ from django.core.files.uploadedfile import InMemoryUploadedFile, UploadedFile
 from django.core.serializers.json import DjangoJSONEncoder
 from django.http import HttpRequest
 from requests import HTTPError, Session
-from told_common.util import cast_or_none, filter_dict_none, opt_int
-
-from told_common.data import (  # isort: skip
+from told_common.data import (
     Afgiftsanmeldelse,
     Afgiftstabel,
     FragtForsendelse,
-    PrivatAfgiftsanmeldelse,
     HistoricAfgiftsanmeldelse,
     Notat,
     PostForsendelse,
+    PrismeResponse,
+    PrivatAfgiftsanmeldelse,
+    User,
     Vareafgiftssats,
     Varelinje,
-    PrismeResponse,
-    User,
 )
+from told_common.util import cast_or_none, filter_dict_none, opt_int
 
 
 @dataclass
@@ -874,6 +873,13 @@ class PaymentRestClient(ModelRestClient):
         return self.rest.post(f"payment/refresh/{payment_id}", {})
 
 
+class StatistikRestClient(ModelRestClient):
+    def list(
+        self, **filter: Union[str, int, float, bool, List[Union[str, int, float, bool]]]
+    ):
+        return self.rest.get("statistik", filter)
+
+
 class RestClient:
     domain = settings.REST_DOMAIN
 
@@ -895,6 +901,7 @@ class RestClient:
         self.eboks = EboksBeskedRestClient(self)
         self.user = UserRestClient(self)
         self.payment = PaymentRestClient(self)
+        self.statistik = StatistikRestClient(self)
 
     def check_access_token_age(self):
         max_age = getattr(settings, "NINJA_JWT", {}).get(

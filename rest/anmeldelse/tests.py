@@ -8,12 +8,12 @@ from decimal import Decimal
 from anmeldelse.models import Afgiftsanmeldelse, Varelinje
 from django.test import TestCase
 from django.urls import reverse
-from project.test_mixins import RestMixin
+from project.test_mixins import RestMixin, RestTestMixin
 from project.util import json_dump
 from sats.models import Vareafgiftssats
 
 
-class AfgiftsanmeldelseTest(RestMixin, TestCase):
+class AfgiftsanmeldelseTest(RestTestMixin, TestCase):
     object_class = Afgiftsanmeldelse
     exclude_fields = ["oprettet_af"]
     object_restriction = True
@@ -219,7 +219,7 @@ class AfgiftsanmeldelseTest(RestMixin, TestCase):
         )
 
 
-class VarelinjeTest(RestMixin, TestCase):
+class VarelinjeTest(RestTestMixin, TestCase):
     plural_classname = "varelinjer"
     object_class = Varelinje
     unique_fields = []
@@ -363,4 +363,81 @@ class VarelinjeTest(RestMixin, TestCase):
         )
         self.assertEquals(
             varelinje3.afgiftsbeløb, Decimal(50_000 + 1.0 * 100_000 + 1.5 * 350_000)
+        )
+
+
+class StatistikTest(RestMixin, TestCase):
+    def setUp(self):
+        super().setUp()
+        self.varelinje
+        self.vareafgiftssats2 = Vareafgiftssats.objects.create(
+            afgiftstabel=self.afgiftstabel,
+            afgiftsgruppenummer=5678,
+            vareart_da="Te",
+            vareart_kl="Te",
+            enhed=Vareafgiftssats.Enhed.KILOGRAM,
+            minimumsbeløb=None,
+            afgiftssats=Decimal(1000),
+            kræver_indførselstilladelse=False,
+        )
+        self.varelinje2 = Varelinje.objects.create(
+            vareafgiftssats=self.vareafgiftssats2,
+            afgiftsanmeldelse=self.afgiftsanmeldelse,
+            mængde=500,
+            fakturabeløb=5000,
+        )
+        self.varelinje3 = Varelinje.objects.create(
+            vareafgiftssats=self.vareafgiftssats,
+            afgiftsanmeldelse=self.afgiftsanmeldelse,
+            mængde=700,
+            fakturabeløb=5000,
+            antal=10,
+        )
+        self.varelinje4 = Varelinje.objects.create(
+            vareafgiftssats=self.vareafgiftssats2,
+            afgiftsanmeldelse=self.afgiftsanmeldelse,
+            mængde=900,
+            fakturabeløb=9000,
+        )
+
+    def test_statistik_access(self):
+        url = reverse(f"api-1.0.0:statistik_get")
+        response = self.client.get(url)
+        self.assertEquals(response.status_code, 401)
+
+    def test_statistik(self):
+        url = reverse(f"api-1.0.0:statistik_get")
+        response = self.client.get(
+            url, HTTP_AUTHORIZATION=f"Bearer {self.authorized_access_token}"
+        )
+        print(response.json())
+        data = response.json()["items"]
+        self.assertEquals(len(data), 2)
+        # Sorteret efter afgiftsgruppenummer
+        self.assertEquals(
+            data[0],
+            {
+                # self.varelinje3 + self.varelinje_data
+                "vareafgiftssats": self.vareafgiftssats.id,
+                "sum_afgiftsbeløb": "1787.50",
+                "afgiftsgruppenummer": 1234,
+                "vareart_da": "Kaffe",
+                "vareart_kl": "Kaffe",
+                "enhed": "kg",
+                "sum_antal": 11,
+                "sum_mængde": "715.00",
+            },
+        )
+        self.assertEquals(
+            data[1],
+            {
+                "vareafgiftssats": self.vareafgiftssats2.id,
+                "sum_afgiftsbeløb": "1400000.00",
+                "afgiftsgruppenummer": 5678,
+                "vareart_da": "Te",
+                "vareart_kl": "Te",
+                "enhed": "kg",
+                "sum_antal": 0,
+                "sum_mængde": "1400.00",
+            },
         )

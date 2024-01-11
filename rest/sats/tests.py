@@ -6,11 +6,11 @@ from datetime import date, timedelta
 from decimal import Decimal
 
 from django.test import TestCase
-from project.test_mixins import RestMixin
+from project.test_mixins import RestTestMixin
 from sats.models import Afgiftstabel, Vareafgiftssats
 
 
-class AfgiftstabelTest(RestMixin, TestCase):
+class AfgiftstabelTest(RestTestMixin, TestCase):
     __test__ = True
     object_class = Afgiftstabel
     has_delete = True
@@ -121,7 +121,7 @@ class AfgiftstabelTest(RestMixin, TestCase):
         self.assertEquals(tabel4.gyldig_til, date(2020, 12, 31))
 
 
-class VareafgiftssatsTest(RestMixin, TestCase):
+class VareafgiftssatsTest(RestTestMixin, TestCase):
     __test__ = True
     plural_classname = "vareafgiftssatser"
     object_class = Vareafgiftssats

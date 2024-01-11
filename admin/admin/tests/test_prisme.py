@@ -5,10 +5,7 @@ from unittest import TestCase
 from django.core.files.base import ContentFile
 from django.utils.datetime_safe import date
 from lxml import etree
-
-from admin.clients.prisme import CustomDutyRequest
-
-from told_common.data import (  # isort: skip
+from told_common.data import (
     Afgiftsanmeldelse,
     Afsender,
     Forsendelsestype,
@@ -17,6 +14,8 @@ from told_common.data import (  # isort: skip
     Vareafgiftssats,
     Varelinje,
 )
+
+from admin.clients.prisme import CustomDutyRequest
 
 
 class PrismeTest(TestCase):

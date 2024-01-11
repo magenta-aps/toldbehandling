@@ -14,13 +14,11 @@ from ninja.filter_schema import FilterSchema
 from ninja.params import Query
 from ninja.schema import Schema
 from ninja.security import APIKeyHeader
-from ninja_extra import api_controller, paginate, permissions, route
+from ninja_extra import ControllerBase, api_controller, paginate, permissions, route
 from ninja_extra.schemas import NinjaPaginationResponseSchema
 from ninja_jwt.authentication import JWTAuth
 from ninja_jwt.tokens import RefreshToken
 from project.util import json_dump
-
-from ninja_extra import ControllerBase  # isort: skip
 
 # Django-ninja har endnu ikke understøttelse for PATCH med filer i multipart/form-data
 # Se https://github.com/vitalik/django-ninja/pull/397

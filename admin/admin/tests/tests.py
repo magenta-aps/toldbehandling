@@ -21,6 +21,7 @@ from bs4 import BeautifulSoup
 from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.shortcuts import redirect
+from django.template.response import TemplateResponse
 from django.test import TestCase
 from django.urls import reverse
 from django.views.generic import TemplateView
@@ -29,32 +30,29 @@ from requests import Response
 from told_common.data import Notat, Vareafgiftssats
 from told_common.forms import TF10VareForm
 from told_common.rest_client import RestClient
-from told_common.tests import TestMixin
-from told_common.views import FileView, FragtbrevView
-
-from admin.clients.prisme import CustomDutyResponse, PrismeClient
-from admin.forms import TF10CreateForm
-from admin.views import TF10EditMultipleView
-
-from admin.views import (  # isort: skip
-    TF10FormUpdateView,
-    TF10HistoryDetailView,
-    TF10HistoryListView,
-)
-
-from admin.views import (  # isort: skip
-    AfgiftstabelDownloadView,
-    AfgiftstabelListView,
-    TF10ListView,
-    TF10View,
-)
-from told_common.tests import (  # isort: skip
+from told_common.tests import (
     AnmeldelseListViewTest,
     HasLogin,
     LoginTest,
     PermissionsTest,
     TemplateTagsTest,
+    TestMixin,
     modify_values,
+)
+from told_common.views import FileView, FragtbrevView
+
+from admin.clients.prisme import CustomDutyResponse, PrismeClient
+from admin.forms import TF10CreateForm
+from admin.views import (
+    AfgiftstabelDownloadView,
+    AfgiftstabelListView,
+    StatistikView,
+    TF10EditMultipleView,
+    TF10FormUpdateView,
+    TF10HistoryDetailView,
+    TF10HistoryListView,
+    TF10ListView,
+    TF10View,
 )
 
 
@@ -3166,3 +3164,253 @@ class TF10CreateTest(TestMixin, HasLogin, TestCase):
             self.assertEquals(
                 html_errors[file_field], ["Filen er for stor; den må max. være 10.0 MB"]
             )
+
+
+class StatistikTest(PermissionsTest, TestCase):
+    view = StatistikView
+
+    check_permissions = ((reverse("statistik"), view.required_permissions),)
+
+    def setUp(self):
+        super().setUp()
+        self.posted: List[Tuple[str, str]] = []
+
+    def mock_requests_get(self, path):
+        expected_prefix = f"{settings.REST_DOMAIN}/api/"
+        path_parts = path.split("?")
+        path = path_parts[0]
+        query = parse_qs(path_parts[1])
+        path = path.rstrip("/")
+        response = Response()
+        json_content = None
+        content = None
+        status_code = None
+        if path == expected_prefix + "statistik":
+            if query.get("anmeldelsestype") in (["tf10"], None):
+                json_content = {
+                    "count": 2,
+                    "items": [
+                        {
+                            "vareafgiftssats": 2,
+                            "sum_afgiftsbeløb": "1750.00",
+                            "afgiftsgruppenummer": 1234,
+                            "vareart_da": "Kaffe",
+                            "vareart_kl": "Kaffe",
+                            "enhed": "kg",
+                            "sum_mængde": "1000.00",
+                            "sum_antal": 0,
+                        },
+                        {
+                            "vareafgiftssats": 1,
+                            "sum_afgiftsbeløb": "1400000.00",
+                            "afgiftsgruppenummer": 5678,
+                            "vareart_da": "Te",
+                            "vareart_kl": "Te",
+                            "enhed": "kg",
+                            "sum_mængde": "1000.00",
+                            "sum_antal": 0,
+                        },
+                    ],
+                }
+            else:
+                json_content = {"count": 0, "items": []}
+        elif path == expected_prefix + "vareafgiftssats":
+            json_content = {
+                "count": 1,
+                "items": [
+                    {
+                        "id": 1,
+                        "afgiftstabel": 1,
+                        "vareart_da": "Kaffe",
+                        "vareart_kl": "Kaffe",
+                        "afgiftsgruppenummer": 1234,
+                        "enhed": "kg",
+                        "afgiftssats": "1.00",
+                    },
+                    {
+                        "id": 2,
+                        "afgiftstabel": 1,
+                        "vareart_da": "Te",
+                        "vareart_kl": "Te",
+                        "afgiftsgruppenummer": 5678,
+                        "enhed": "kg",
+                        "afgiftssats": "1.00",
+                    },
+                ],
+            }
+        else:
+            print(f"Mock got unrecognized path: {path}")
+        if json_content:
+            content = json.dumps(json_content).encode("utf-8")
+        if content:
+            if not status_code:
+                status_code = 200
+            response._content = content
+        response.status_code = status_code or 404
+        return response
+
+    @staticmethod
+    def get_html_list(html: str):
+        soup = BeautifulSoup(html, "html.parser")
+        tables_in = soup.css.select("table")
+        tables_out = []
+        for table in tables_in:
+            headers = [element.text for element in table.css.select("thead tr th")]
+            tables_out.append(
+                [
+                    dict(zip(headers, [td.text.strip() for td in row.select("td")]))
+                    for row in table.css.select("table tbody tr")
+                ]
+            )
+        return tables_out
+
+    @patch.object(requests.Session, "get")
+    def test_submit_basic(self, mock_get):
+        self.login()
+        url = reverse("statistik")
+        mock_get.side_effect = self.mock_requests_get
+        response = self.client.post(
+            url,
+            data={
+                "form-TOTAL_FORMS": 0,
+                "form-INITIAL_FORMS": 0,
+                "form-MIN_NUM_FORMS": 0,
+                "form-MAX_NUM_FORMS": 1000,
+            },
+        )
+        self.assertTrue(isinstance(response, TemplateResponse))
+        tabledata = self.get_html_list(response.content)
+        summary_table = tabledata[0]
+        self.assertEquals(
+            summary_table,
+            [
+                {
+                    "Afgiftsgruppe": "1234",
+                    "Afgiftstekst": "Kaffe",
+                    "Afgift": "1.750,00",
+                },
+                {
+                    "Afgiftsgruppe": "5678",
+                    "Afgiftstekst": "Te",
+                    "Afgift": "1.400.000,00",
+                },
+            ],
+        )
+        group_table = tabledata[1]
+        self.assertEquals(
+            group_table,
+            [
+                {"Gruppe": "Ingen data"},
+            ],
+        )
+
+    @patch.object(requests.Session, "get")
+    def test_submit_filter_1(self, mock_get):
+        self.login()
+        url = reverse("statistik")
+        mock_get.side_effect = self.mock_requests_get
+        response = self.client.post(
+            url,
+            data={
+                "anmeldelsestype": "tf10",
+                "form-TOTAL_FORMS": 0,
+                "form-INITIAL_FORMS": 0,
+                "form-MIN_NUM_FORMS": 0,
+                "form-MAX_NUM_FORMS": 1000,
+            },
+        )
+        self.assertTrue(isinstance(response, TemplateResponse))
+        tabledata = self.get_html_list(response.content)
+        summary_table = tabledata[0]
+        self.assertEquals(
+            summary_table,
+            [
+                {
+                    "Afgiftsgruppe": "1234",
+                    "Afgiftstekst": "Kaffe",
+                    "Afgift": "1.750,00",
+                },
+                {
+                    "Afgiftsgruppe": "5678",
+                    "Afgiftstekst": "Te",
+                    "Afgift": "1.400.000,00",
+                },
+            ],
+        )
+        group_table = tabledata[1]
+        self.assertEquals(
+            group_table,
+            [
+                {"Gruppe": "Ingen data"},
+            ],
+        )
+
+    @patch.object(requests.Session, "get")
+    def test_submit_filter_2(self, mock_get):
+        self.login()
+        url = reverse("statistik")
+        mock_get.side_effect = self.mock_requests_get
+        response = self.client.post(
+            url,
+            data={
+                "anmeldelsestype": "tf5",
+                "form-TOTAL_FORMS": 0,
+                "form-INITIAL_FORMS": 0,
+                "form-MIN_NUM_FORMS": 0,
+                "form-MAX_NUM_FORMS": 1000,
+            },
+        )
+        self.assertTrue(isinstance(response, TemplateResponse))
+        tabledata = self.get_html_list(response.content)
+        summary_table = tabledata[0]
+        self.assertEquals(
+            summary_table,
+            [
+                {"Afgiftsgruppe": "Ingen data"},
+            ],
+        )
+        group_table = tabledata[1]
+        self.assertEquals(
+            group_table,
+            [
+                {"Gruppe": "Ingen data"},
+            ],
+        )
+
+    @patch.object(requests.Session, "get")
+    def test_submit_group(self, mock_get):
+        self.login()
+        url = reverse("statistik")
+        mock_get.side_effect = self.mock_requests_get
+        response = self.client.post(
+            url,
+            data={
+                "form-TOTAL_FORMS": 1,
+                "form-INITIAL_FORMS": 0,
+                "form-MIN_NUM_FORMS": 0,
+                "form-MAX_NUM_FORMS": 1000,
+                "form-0-gruppe": "1234+5678",
+            },
+        )
+        self.assertTrue(isinstance(response, TemplateResponse))
+        tabledata = self.get_html_list(response.content)
+        summary_table = tabledata[0]
+        self.assertEquals(
+            summary_table,
+            [
+                {
+                    "Afgift": "1.750,00",
+                    "Afgiftsgruppe": "1234",
+                    "Afgiftstekst": "Kaffe",
+                },
+                {
+                    "Afgift": "1.400.000,00",
+                    "Afgiftsgruppe": "5678",
+                    "Afgiftstekst": "Te",
+                },
+            ],
+        )
+        group_table = tabledata[1]
+        self.assertEquals(
+            group_table, [{"Afgift": "1.401.750,00", "Gruppe": "1234+5678"}]
+        )

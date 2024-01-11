@@ -19,22 +19,21 @@ from django.views.generic import FormView, RedirectView, TemplateView, View
 from requests import HTTPError
 from told_common import forms as common_forms
 from told_common import views as common_views
-
-from ui import forms
-
-from told_common.util import (  # isort: skip
+from told_common.util import (
     dataclass_map_to_dict,
     language,
     opt_str,
     render_pdf,
     write_pdf,
 )
-from told_common.view_mixins import (  # isort: skip
+from told_common.view_mixins import (
     FormWithFormsetView,
     HasRestClientMixin,
-    PermissionsRequiredMixin,
     LoginRequiredMixin,
+    PermissionsRequiredMixin,
 )
+
+from ui import forms
 
 
 class IndexView(LoginRequiredMixin, RedirectView):

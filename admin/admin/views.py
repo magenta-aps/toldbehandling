@@ -2,45 +2,45 @@
 #
 # SPDX-License-Identifier: MPL-2.0
 
-import csv
 from datetime import date, datetime
+from decimal import Context, Decimal
 from functools import cached_property
-from typing import Any, Dict, Iterable, List, Optional, Set, Union
+from typing import Any, Dict, List, Optional, Set, Union
 
 from django.conf import settings
 from django.contrib import messages
+from django.http import Http404, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import redirect
 from django.template import loader
 from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from django.views import View
 from django.views.generic import FormView, TemplateView
-from openpyxl import Workbook
 from requests import HTTPError
 from told_common import views as common_views
-from told_common.util import filter_dict_values, join_words, render_pdf
-
-from admin import forms
-from admin.clients.prisme import PrismeException, send_afgiftsanmeldelse
-from admin.spreadsheet import VareafgiftssatsSpreadsheetUtil
-
-from django.http import (  # isort: skip
-    Http404,
-    HttpResponse,
-    HttpResponseBadRequest,
-    JsonResponse,
-)
-from told_common.data import (  # isort: skip
+from told_common.data import (
     Afgiftstabel,
     Forsendelsestype,
-    Vareafgiftssats,
     PrismeResponse,
+    Vareafgiftssats,
 )
-from told_common.view_mixins import (  # isort: skip
+from told_common.util import (
+    filter_dict_values,
+    format_daterange,
+    join,
+    join_words,
+    render_pdf,
+)
+from told_common.view_mixins import (
+    FormWithFormsetView,
     GetFormView,
     HasRestClientMixin,
     PermissionsRequiredMixin,
 )
+
+from admin import forms
+from admin.clients.prisme import PrismeException, send_afgiftsanmeldelse
+from admin.spreadsheet import SpreadsheetExport, VareafgiftssatsSpreadsheetUtil
 
 
 class IndexView(PermissionsRequiredMixin, HasRestClientMixin, TemplateView):
@@ -724,43 +724,9 @@ class AfgiftstabelDownloadView(PermissionsRequiredMixin, HasRestClientMixin, Vie
             )
         headers_pretty = [header[1] for header in self.headers]
         if format == "xlsx":
-            return self.render_xlsx(headers_pretty, rows, filename)
+            return SpreadsheetExport.render_xlsx(headers_pretty, rows, filename)
         if format == "csv":
-            return self.render_csv(headers_pretty, rows, filename)
-
-    def render_xlsx(
-        self,
-        headers: Iterable[str],
-        items: Iterable[Iterable[Union[str, int, bool]]],
-        filename: str,
-    ) -> HttpResponse:
-        wb = Workbook(write_only=True)
-        ws = wb.create_sheet()
-        ws.append(headers)
-        for item in items:
-            ws.append(item)
-        response = HttpResponse(
-            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            headers={"Content-Disposition": "attachment; filename={}".format(filename)},
-        )
-        wb.save(response)
-        return response
-
-    def render_csv(
-        self,
-        headers: Iterable[str],
-        items: Iterable[Iterable[Union[str, int, bool]]],
-        filename: str,
-    ) -> HttpResponse:
-        response = HttpResponse(
-            content_type="text/csv",
-            headers={"Content-Disposition": "attachment; filename={}".format(filename)},
-        )
-        writer = csv.writer(response)
-        writer.writerow(headers)
-        for item in items:
-            writer.writerow(item)
-        return response
+            return SpreadsheetExport.render_csv(headers_pretty, rows, filename)
 
 
 class AfgiftstabelCreateView(PermissionsRequiredMixin, HasRestClientMixin, FormView):
@@ -858,3 +824,116 @@ class TF5LeverandørFakturaView(common_views.LeverandørFakturaView):
     )
     api = "privat_afgiftsanmeldelse"
     key = "leverandørfaktura"
+
+
+class StatistikView(PermissionsRequiredMixin, HasRestClientMixin, FormWithFormsetView):
+    required_permissions = ("auth.admin",)
+    form_class = forms.StatistikForm
+    formset_class = forms.StatistikGruppeFormSet
+    template_name = "admin/statistik.html"
+
+    @cached_property
+    def satser(self):
+        return self.rest_client.vareafgiftssats.list()
+
+    def get_formset_kwargs(self) -> Dict[str, Any]:
+        kwargs = super().get_formset_kwargs()
+        # The form_kwargs dict is passed as kwargs to subforms in the formset
+        if "form_kwargs" not in kwargs:
+            kwargs["form_kwargs"] = {}
+        # Will be picked up by StatistikGruppeForm's constructor
+        kwargs["form_kwargs"]["gruppe_choices"] = sorted(
+            list(
+                set(
+                    (
+                        sats.afgiftsgruppenummer
+                        for sats in self.rest_client.vareafgiftssats.list()
+                    )
+                )
+            )
+        )
+        return kwargs
+
+    def form_valid(self, form, formset):
+        context = super().get_context_data()
+
+        stats = self.rest_client.statistik.list(
+            **filter_dict_values(form.cleaned_data, (None, ""))
+        )["items"]
+
+        stats_by_afgiftsgruppenummer = {}
+        for stat in stats:
+            if stat["enhed"] in (Vareafgiftssats.Enhed.ANTAL.value,):
+                stat["kvantum"] = stat["sum_antal"]
+            elif stat["enhed"] in (
+                Vareafgiftssats.Enhed.KILOGRAM.value,
+                Vareafgiftssats.Enhed.LITER.value,
+            ):
+                stat["kvantum"] = Decimal(stat["sum_mængde"])
+            else:
+                stat["kvantum"] = None
+            stats_by_afgiftsgruppenummer[stat["afgiftsgruppenummer"]] = stat
+
+        grupperinger = []
+        for subform in formset:
+            gruppe = subform.cleaned_data.get("gruppe")
+            if gruppe:
+                gruppe_sum = sum(
+                    [
+                        Decimal(
+                            stats_by_afgiftsgruppenummer[int(afgiftsgruppenummer)][
+                                "sum_afgiftsbeløb"
+                            ]
+                        )
+                        for afgiftsgruppenummer in gruppe
+                    ]
+                )
+                grupperinger.append(
+                    {
+                        "gruppe": set([int(g) for g in gruppe]),
+                        "sum_afgiftsbeløb": gruppe_sum,
+                    }
+                )
+
+        context.update({"rows": stats, "grupperinger": grupperinger})
+        if form.cleaned_data["download"]:
+            headers = ["AFGIFTGRP", "AFGIFTSTEKST", "KVANTUM", "AFGIFT"]
+            visited = set()
+            grp_by_nr = {}
+            if grupperinger:
+                for gruppering in grupperinger:
+                    for medlem in gruppering["gruppe"]:
+                        grp_by_nr[medlem] = gruppering
+                headers += ["GRUPPE", "GRUPPESUM"]
+            rows = []
+            for stat in stats:
+                afgiftsgruppenummer = stat["afgiftsgruppenummer"]
+                visited.add(afgiftsgruppenummer)
+                row = [
+                    str(afgiftsgruppenummer).zfill(3),
+                    stat["vareart_da"],
+                    stat["kvantum"],
+                    Decimal(stat["sum_afgiftsbeløb"], Context(prec=2)),
+                ]
+                gruppe_data = grp_by_nr.get(afgiftsgruppenummer)
+                if gruppe_data and gruppe_data["gruppe"].issubset(visited):
+                    row.append(join("+", list(gruppe_data["gruppe"])))
+                    row.append(gruppe_data["sum_afgiftsbeløb"])
+                rows.append(row)
+
+            daterange = format_daterange(
+                form.cleaned_data["startdato"], form.cleaned_data["slutdato"]
+            )
+            filnavn = (
+                " ".join(
+                    [
+                        "statistik",
+                        form.cleaned_data["anmeldelsestype"] or "alle",
+                        f"({daterange})",
+                    ]
+                )
+                + ".xlsx"
+            )
+
+            return SpreadsheetExport.render_xlsx(headers, rows, filnavn, [None, 50.0])
+        return self.render_to_response(context)
