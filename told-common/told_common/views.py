@@ -637,8 +637,9 @@ class TF5View(
                 **kwargs,
                 "object": self.object,
                 "tillægsafgift": self.object.tillægsafgift,
-                "can_create_tilladelse": self.object.payment_status == "paid"
-                or settings.DEBUG,
+                # Opret en path i admin/urls.py ved navn "tf5_tilladelse"
+                # hvis denne sættes til True
+                "can_create_tilladelse": False,
             }
         )
 
