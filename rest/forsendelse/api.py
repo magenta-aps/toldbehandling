@@ -6,8 +6,8 @@ import base64
 from typing import Optional
 from uuid import uuid4
 
-from anmeldelse.models import Varelinje
 from common.api import get_auth_methods
+from common.models import IndberetterProfile
 from django.core.files.base import ContentFile
 from django.db.models import QuerySet
 from django.shortcuts import get_object_or_404
@@ -143,15 +143,24 @@ class PostforsendelseAPI:
     def filter_user(self, qs: QuerySet) -> QuerySet:
         user = self.context.request.user
         if not user.has_perm("forsendelse.view_all_postforsendelser"):
-            qs = qs.filter(oprettet_af=user)
+            q = qs.none()
+            try:
+                c = getattr(user.indberetter_data, "cvr")
+            except IndberetterProfile.DoesNotExist:
+                pass
+            else:
+                if c is not None:
+                    q |= qs.filter(
+                        afgiftsanmeldelse__oprettet_af__indberetter_data__cvr=c
+                    )
+                    q |= qs.filter(
+                        afgiftsanmeldelse__oprettet_på_vegne_af__indberetter_data__cvr=c
+                    )
+            qs = q
         return qs
 
-    def check_user(self, item: Varelinje):
-        user = self.context.request.user
-        if not (
-            user.has_perm("forsendelse.view_all_postforsendelser")
-            or item.oprettet_af == user
-        ):
+    def check_user(self, item: Postforsendelse):
+        if not self.filter_user(Postforsendelse.objects.filter(id=item.id)).exists():
             raise PermissionDenied
 
 
@@ -290,13 +299,22 @@ class FragtforsendelseAPI:
     def filter_user(self, qs: QuerySet) -> QuerySet:
         user = self.context.request.user
         if not user.has_perm("forsendelse.view_all_fragtforsendelser"):
-            qs = qs.filter(oprettet_af=user)
+            q = qs.none()
+            try:
+                c = getattr(user.indberetter_data, "cvr")
+            except IndberetterProfile.DoesNotExist:
+                pass
+            else:
+                if c is not None:
+                    q |= qs.filter(
+                        afgiftsanmeldelse__oprettet_af__indberetter_data__cvr=c
+                    )
+                    q |= qs.filter(
+                        afgiftsanmeldelse__oprettet_på_vegne_af__indberetter_data__cvr=c
+                    )
+            qs = q
         return qs
 
-    def check_user(self, item: Varelinje):
-        user = self.context.request.user
-        if not (
-            user.has_perm("forsendelse.view_all_fragtforsendelser")
-            or item.oprettet_af == user
-        ):
+    def check_user(self, item: Fragtforsendelse):
+        if not self.filter_user(Fragtforsendelse.objects.filter(id=item.id)).exists():
             raise PermissionDenied
