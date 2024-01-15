@@ -36,6 +36,17 @@ from told_common.view_mixins import (
 from ui import forms
 
 
+class UiViewMixin:
+    def get_context_data(self, **context):
+        return super().get_context_data(
+            **{
+                **context,
+                "can_list_tf5": TF5ListView.has_permissions(request=self.request),
+                "can_list_tf10": TF10ListView.has_permissions(request=self.request),
+            }
+        )
+
+
 class IndexView(LoginRequiredMixin, RedirectView):
     def get_redirect_url(self, *args, **kwargs):
         if self.userdata.get("indberetter_data", {}).get("cvr"):
@@ -43,11 +54,11 @@ class IndexView(LoginRequiredMixin, RedirectView):
         return reverse("tf5_list")
 
 
-class TF10FormCreateView(common_views.TF10FormCreateView):
+class TF10FormCreateView(UiViewMixin, common_views.TF10FormCreateView):
     extend_template = "ui/layout.html"
 
 
-class TF10ListView(common_views.TF10ListView):
+class TF10ListView(UiViewMixin, common_views.TF10ListView):
     actions_template = "ui/tf10/actions.html"
     extend_template = "ui/layout.html"
 
@@ -55,18 +66,18 @@ class TF10ListView(common_views.TF10ListView):
         return super().get_context_data(**{**context, "can_create": True})
 
 
-class TF10FormUpdateView(common_views.TF10FormUpdateView):
+class TF10FormUpdateView(UiViewMixin, common_views.TF10FormUpdateView):
     extend_template = "ui/layout.html"
 
 
-class TF10LeverandørFakturaView(common_views.LeverandørFakturaView):
+class TF10LeverandørFakturaView(UiViewMixin, common_views.LeverandørFakturaView):
     required_permissions = ("anmeldelse.view_afgiftsanmeldelse",)
     api = "afgiftsanmeldelse"
     key = "leverandørfaktura"
 
 
 class TF5FormCreateView(
-    PermissionsRequiredMixin, HasRestClientMixin, FormWithFormsetView
+    PermissionsRequiredMixin, HasRestClientMixin, UiViewMixin, FormWithFormsetView
 ):
     form_class = common_forms.TF5Form
     formset_class = common_forms.TF10VareFormSet
@@ -209,7 +220,7 @@ class TF5FormCreateView(
         return context
 
 
-class TF5ListView(common_views.TF5ListView):
+class TF5ListView(UiViewMixin, common_views.TF5ListView):
     actions_template = "ui/tf5/actions.html"
     extend_template = "ui/layout.html"
 
@@ -224,7 +235,7 @@ class TF5ListView(common_views.TF5ListView):
         )
 
 
-class TF5View(common_views.TF5View):
+class TF5View(UiViewMixin, common_views.TF5View):
     extend_template = "ui/layout.html"
 
     def get_context_data(self, **kwargs):
@@ -250,17 +261,19 @@ class TF5View(common_views.TF5View):
         return context
 
 
-class TF5UpdateView(common_views.TF5UpdateView):
+class TF5UpdateView(UiViewMixin, common_views.TF5UpdateView):
     extend_template = "ui/layout.html"
 
 
-class TF5LeverandørFakturaView(common_views.LeverandørFakturaView):
+class TF5LeverandørFakturaView(UiViewMixin, common_views.LeverandørFakturaView):
     required_permissions = ("anmeldelse.view_privatafgiftsanmeldelse",)
     api = "privat_afgiftsanmeldelse"
     key = "leverandørfaktura"
 
 
-class TF5TilladelseView(PermissionsRequiredMixin, HasRestClientMixin, FormView):
+class TF5TilladelseView(
+    PermissionsRequiredMixin, HasRestClientMixin, UiViewMixin, FormView
+):
     template_name = "ui/tf5/tilladelse.html"
     required_permissions = ("anmeldelse.view_privatafgiftsanmeldelse",)
     edit_permissions = ("anmeldelse.add_privatafgiftsanmeldelse",)
@@ -357,6 +370,7 @@ class TF5PaymentCheckoutView(
     PermissionsRequiredMixin,
     HasRestClientMixin,
     common_views.CustomLayoutMixin,
+    UiViewMixin,
     TemplateView,
 ):
     extend_template = "ui/layout.html"
@@ -399,6 +413,7 @@ class TF5PaymentDetailsView(
     PermissionsRequiredMixin,
     HasRestClientMixin,
     common_views.CustomLayoutMixin,
+    UiViewMixin,
     TemplateView,
 ):
     extend_template = "ui/layout.html"
@@ -416,7 +431,9 @@ class TF5PaymentDetailsView(
         return context
 
 
-class TF5PaymentRefreshView(PermissionsRequiredMixin, HasRestClientMixin, View):
+class TF5PaymentRefreshView(
+    PermissionsRequiredMixin, HasRestClientMixin, UiViewMixin, View
+):
     async def post(self, request, *args, **kwargs):
         payment_refreshed = self.rest_client.payment.refresh(int(self.kwargs["id"]))
         return JsonResponse({"payment_refreshed": payment_refreshed})

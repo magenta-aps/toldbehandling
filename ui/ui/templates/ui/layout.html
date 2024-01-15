@@ -19,7 +19,12 @@
 {% block header %}
 <header>
     <nav class="nav flex-column flex-sm-row p-1">
-
+        {% if can_list_tf5 %}
+        <a class="p-2 text-muted" href="{% url 'tf5_list' %}">{% translate "TF5-anmeldelser" %}</a>
+        {% endif %}
+        {% if can_list_tf5 %}
+        <a class="p-2 text-muted" href="{% url 'tf10_list' %}">{% translate "TF10-anmeldelser" %}</a>
+        {% endif %}
         <span class="locale-changer navbar-text ms-auto">
             <form action="{% url 'set_language' %}" method="post">
                 {% csrf_token %}

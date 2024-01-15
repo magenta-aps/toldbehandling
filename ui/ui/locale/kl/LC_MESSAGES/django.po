@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-08 08:57+0000\n"
+"POT-Creation-Date: 2024-01-15 09:14+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -45,6 +45,14 @@ msgstr "Isersimaneq qaangiutereerpoq. Iseqqeriarit."
 
 #: ui/templates/ui/layout.html ui/templates/ui/print.html
 msgid "Toldbehandling"
+msgstr ""
+
+#: ui/templates/ui/layout.html
+msgid "TF5-anmeldelser"
+msgstr ""
+
+#: ui/templates/ui/layout.html
+msgid "TF10-anmeldelser"
 msgstr ""
 
 #: ui/templates/ui/layout.html
