@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-09 07:09+0000\n"
+"POT-Creation-Date: 2024-01-15 11:43+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -247,9 +247,9 @@ msgstr "Itigartinneqarpoq"
 msgid "Godkendt"
 msgstr "Akuerineqarpoq"
 
-#: told_common/forms.py
-msgid "Afsluttet"
-msgstr "Naammassivoq"
+#: told_common/forms.py told_common/views.py
+msgid "Sendt til Prisme"
+msgstr ""
 
 #: told_common/forms.py
 msgid "Notat"

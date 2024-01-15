@@ -405,7 +405,7 @@ class TF10SearchForm(PaginateForm, BootstrapForm):
             ("ny", _("Ny")),
             ("afvist", _("Afvist")),
             ("godkendt", _("Godkendt")),
-            ("afsluttet", _("Afsluttet")),
+            ("afsluttet", _("Sendt til Prisme")),
         ),
         required=False,
         widget=forms.Select(attrs={"onchange": "form.submit();"}),
