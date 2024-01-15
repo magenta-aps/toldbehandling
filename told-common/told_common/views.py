@@ -185,6 +185,7 @@ class TF10FormCreateView(
         kwargs = super().get_form_kwargs()
         kwargs.update(
             {
+                "fragtbrev_required": False,
                 "varesatser": self.toplevel_varesatser,
                 "initial": {
                     "afsender_change_existing": False,
@@ -370,7 +371,7 @@ class TF10FormUpdateView(
                 "leverandørfaktura_required": False,
                 # Hvis vi allerede har en fragtforsendelse, har vi også et
                 # fragtbrev, og det er ikke påkrævet at formularen indeholder ét
-                "fragtbrev_required": self.item.fragtforsendelse is None,
+                "fragtbrev_required": False,
                 "varesatser": self.toplevel_varesatser,
             }
         )

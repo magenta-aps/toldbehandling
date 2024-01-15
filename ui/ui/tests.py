@@ -318,11 +318,11 @@ class TF10BlanketTest(TestMixin, HasLogin, TestCase):
             self.assertEquals(html_errors[required_field], ["Dette felt er påkrævet."])
 
         files = {**self.formfiles1}
-        del files["fragtbrev"]
+        del files["leverandørfaktura"]
         form = TF10Form(data=self.formdata1, files=files)
-        self.assertEquals(form.errors["fragtbrev"], ["Mangler fragtbrev"])
+        self.assertEquals(form.errors["leverandørfaktura"], ["Dette felt er påkrævet."])
         html_errors = self.submit_get_errors(url, {**self.formdata1, **files})
-        self.assertEquals(html_errors["fragtbrev"], ["Mangler fragtbrev"])
+        self.assertEquals(html_errors["leverandørfaktura"], ["Dette felt er påkrævet."])
 
     def test_vareform_required_fields(self):
         varesatser = {
