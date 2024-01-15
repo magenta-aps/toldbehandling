@@ -468,3 +468,6 @@ $(function (){
     });
 });
 
+$("input[readonly]").on("focus", function(){
+    this.blur();
+});
