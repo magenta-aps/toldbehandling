@@ -234,6 +234,10 @@ msgstr ""
 msgid "Godkendt"
 msgstr ""
 
+#: told_common/forms.py told_common/views.py
+msgid "Sendt til Prisme"
+msgstr ""
+
 #: told_common/forms.py
 msgid "Afsluttet"
 msgstr ""
