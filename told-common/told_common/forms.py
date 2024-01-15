@@ -86,7 +86,7 @@ class TF10Form(BootstrapForm):
     afsender_adresse = forms.CharField(
         max_length=100,
         required=True,
-        label=_("Vej og husnummer"),
+        label=_("Adresse"),
     )
     afsender_postnummer = ButtonlessIntegerField(
         min_value=1000,
@@ -144,7 +144,7 @@ class TF10Form(BootstrapForm):
     modtager_adresse = forms.CharField(
         max_length=100,
         required=True,
-        label=_("Vej og husnummer"),
+        label=_("Adresse"),
     )
     modtager_postnummer = ButtonlessIntegerField(
         min_value=1000,
@@ -525,7 +525,7 @@ class TF5Form(BootstrapForm):
     adresse = forms.CharField(
         max_length=100,
         required=True,
-        label=_("Vej og husnummer"),
+        label=_("Adresse"),
     )
     postnummer = ButtonlessIntegerField(
         min_value=1000,
