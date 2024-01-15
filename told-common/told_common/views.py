@@ -910,5 +910,8 @@ class TF5UpdateView(PermissionsRequiredMixin, HasRestClientMixin, FormWithFormse
         item = self.item
         for field in dataclasses.fields(item):
             if field.name != "leverandørfaktura":
-                initial[field.name] = getattr(item, field.name)
+                value = getattr(item, field.name)
+                if field.name == "cpr":
+                    value = str(value).zfill(10)
+                initial[field.name] = value
         return initial
