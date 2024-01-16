@@ -189,7 +189,12 @@ CVR_TOLDKATEGORI_MAP = [
     {"kategori": "76", "navn": "Fra Tusass A/S", "cvr": []},
     {"kategori": "77", "navn": "Fra Skattestyrelsen", "cvr": []},
     {"kategori": "79", "navn": "Refusion", "cvr": []},
-    {"kategori": "80", "navn": "Blue Water Shipping", "cvr": [12345678], "kan_vælges_i_form": True}
+    {
+        "kategori": "80",
+        "navn": "Blue Water Shipping",
+        "cvr": [12345678],
+        "kan_vælges_i_form": True,
+    },
 ]
 
 TILLÆGSAFGIFT_FAKTOR = 0.5

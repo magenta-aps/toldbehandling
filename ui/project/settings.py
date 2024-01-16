@@ -217,7 +217,12 @@ STORAGES = {
 
 # TODO: Smid dette i en model og lav rest-interface til det.
 CVR_TOLDKATEGORI_MAP = [
-    {"kategori": "70", "navn": "RAL Royal Arctic Line A/S", "cvr": [], "kan_vælges_i_form": True},
+    {
+        "kategori": "70",
+        "navn": "RAL Royal Arctic Line A/S",
+        "cvr": [],
+        "kan_vælges_i_form": True,
+    },
     {"kategori": "71", "navn": "Forudbetalt indførselsafgift", "cvr": []},
     {
         "kategori": "73A",
@@ -231,7 +236,12 @@ CVR_TOLDKATEGORI_MAP = [
     {"kategori": "76", "navn": "Fra Tusass A/S", "cvr": []},
     {"kategori": "77", "navn": "Fra Skattestyrelsen", "cvr": []},
     {"kategori": "79", "navn": "Refusion", "cvr": []},
-    {"kategori": "80", "navn": "Blue Water Shipping", "cvr": [12345678], "kan_vælges_i_form": True}
+    {
+        "kategori": "80",
+        "navn": "Blue Water Shipping",
+        "cvr": [12345678],
+        "kan_vælges_i_form": True,
+    },
 ]
 
 # Når SAML-IdP'en POSTer til os, skal vi modtage vores session-cookie fra browseren

@@ -120,10 +120,10 @@ class TF10FormView(PermissionsRequiredMixin, HasRestClientMixin, FormWithFormset
         row and highlight it. Also show a success message.
         """
         return (
-                reverse("tf10_list")
-                + "?sort=id"
-                + "&order=asc"
-                + f"&highlight={self.anmeldelse_id}"
+            reverse("tf10_list")
+            + "?sort=id"
+            + "&order=asc"
+            + f"&highlight={self.anmeldelse_id}"
         )
 
     @cached_property
@@ -171,10 +171,10 @@ class TF10FormView(PermissionsRequiredMixin, HasRestClientMixin, FormWithFormset
         kwargs["form_kwargs"]["varesatser"] = self.toplevel_varesatser
         return kwargs
 
-
     def get_context_data(self, **context: Dict[str, Any]) -> Dict[str, Any]:
         context = super().get_context_data()
-        context.update({
+        context.update(
+            {
                 "varesatser": dataclass_map_to_dict(self.varesatser),
                 "extend_template": self.extend_template,
                 "highlight": self.request.GET.get("highlight"),
@@ -184,7 +184,6 @@ class TF10FormView(PermissionsRequiredMixin, HasRestClientMixin, FormWithFormset
 
 
 class TF10FormCreateView(TF10FormView):
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.anmeldelse_id = None
@@ -406,11 +405,13 @@ class TF10FormUpdateView(CustomLayoutMixin, TF10FormView):
 
     def get_context_data(self, **context: Dict[str, Any]) -> Dict[str, Any]:
         context = super().get_context_data()
-        context.update({
-            "item": self.item,
-            "afsender_existing_id": self.item.afsender.id,
-            "modtager_existing_id": self.item.modtager.id,
-        })
+        context.update(
+            {
+                "item": self.item,
+                "afsender_existing_id": self.item.afsender.id,
+                "modtager_existing_id": self.item.modtager.id,
+            }
+        )
         return context
 
     @cached_property

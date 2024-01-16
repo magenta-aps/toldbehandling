@@ -255,6 +255,7 @@ class TF10Form(BootstrapForm):
             )
         ),
     )
+
     def betaler_choices(self):
         choices = [
             ("modtager", _("Modtager")),
@@ -266,8 +267,7 @@ class TF10Form(BootstrapForm):
         return choices
 
     betaler = DynamicField(
-        forms.ChoiceField,
-        choices=lambda form: form.betaler_choices()
+        forms.ChoiceField, choices=lambda form: form.betaler_choices()
     )
     afgangsdato = forms.DateField(
         required=True,
