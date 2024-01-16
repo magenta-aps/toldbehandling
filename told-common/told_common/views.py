@@ -133,24 +133,36 @@ class TF10FormCreateView(
         )
 
     def form_valid(self, form, formset):
-        if form.cleaned_data["afsender_change_existing"]:
+        data = form.cleaned_data.copy()
+        if data["afsender_change_existing"]:
             afsender_id = self.rest_client.afsender.update(
-                form.cleaned_data["afsender_existing_id"], form.cleaned_data
+                data["afsender_existing_id"], data
             )
         else:
-            afsender_id = self.rest_client.afsender.get_or_create(form.cleaned_data)
-        if form.cleaned_data["modtager_change_existing"]:
+            afsender_id = self.rest_client.afsender.get_or_create(data)
+        if data["modtager_change_existing"]:
             modtager_id = self.rest_client.modtager.update(
-                form.cleaned_data["modtager_existing_id"], form.cleaned_data
+                data["modtager_existing_id"], data
             )
         else:
-            modtager_id = self.rest_client.modtager.get_or_create(form.cleaned_data)
-        postforsendelse_id = self.rest_client.postforsendelse.create(form.cleaned_data)
+            modtager_id = self.rest_client.modtager.get_or_create(data)
+        postforsendelse_id = self.rest_client.postforsendelse.create(data)
         fragtforsendelse_id = self.rest_client.fragtforsendelse.create(
-            form.cleaned_data, self.request.FILES.get("fragtbrev")
+            data, self.request.FILES.get("fragtbrev")
         )
+
+        betaler = data.pop("betaler")
+        if betaler == "afsender":
+            data["modtager_betaler"] = False
+        elif betaler == "modtager":
+            data["modtager_betaler"] = True
+        elif betaler:
+            data["modtager_betaler"] = False
+            data["toldkategori"] = betaler
+        print(data)
+
         self.anmeldelse_id = self.rest_client.afgiftanmeldelse.create(
-            form.cleaned_data,
+            data,
             self.request.FILES["leverandørfaktura"],
             afsender_id,
             modtager_id,
@@ -181,12 +193,25 @@ class TF10FormCreateView(
             )
         )
 
+    @property
+    def toldkategorier(self):
+        user = self.request.session["user"]
+        cvr = user.get("indberetter_data", {}).get("cvr")
+        if cvr:
+            return {
+                kategori["kategori"]: kategori["navn"]
+                for kategori in settings.CVR_TOLDKATEGORI_MAP
+                if cvr in kategori["cvr"] and kategori.get("kan_vælges_i_form")
+            }
+        return None
+
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs.update(
             {
                 "fragtbrev_required": False,
                 "varesatser": self.toplevel_varesatser,
+                "toldkategorier": self.toldkategorier,
                 "initial": {
                     "afsender_change_existing": False,
                     "modtager_change_existing": False,
@@ -266,6 +291,18 @@ class TF10FormUpdateView(
         Return to previous page. Highlight the updated form and display a success msg.
         """
         return reverse("tf10_list") + f"?highlight={self.anmeldelse_id}"
+
+    @property
+    def toldkategorier(self):
+        user = self.request.session["user"]
+        cvr = user.get("indberetter_data", {}).get("cvr")
+        if cvr:
+            return {
+                kategori["kategori"]: kategori["navn"]
+                for kategori in settings.CVR_TOLDKATEGORI_MAP
+                if cvr in kategori["cvr"] and kategori.get("kan_vælges_i_form")
+            }
+        return None
 
     def form_valid(self, form, formset):
         afsender_id = self.rest_client.afsender.get_or_create(
@@ -371,6 +408,7 @@ class TF10FormUpdateView(
                 "leverandørfaktura_required": False,
                 # Hvis vi allerede har en fragtforsendelse, har vi også et
                 # fragtbrev, og det er ikke påkrævet at formularen indeholder ét
+                "toldkategorier": self.toldkategorier,
                 "fragtbrev_required": False,
                 "varesatser": self.toplevel_varesatser,
             }
@@ -432,6 +470,14 @@ class TF10FormUpdateView(
             initial["leverandørfaktura_nummer"] = item.leverandørfaktura_nummer
             initial["indførselstilladelse"] = item.indførselstilladelse
             initial["modtager_betaler"] = item.modtager_betaler
+
+            if item.toldkategori in self.toldkategorier:
+                initial["betaler"] = item.toldkategori
+            elif item.modtager_betaler:
+                initial["betaler"] = "modtager"
+            else:
+                initial["betaler"] = "afsender"
+
             fragtforsendelse = item.fragtforsendelse
             postforsendelse = item.postforsendelse
             if fragtforsendelse:

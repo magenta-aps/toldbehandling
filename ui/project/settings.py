@@ -215,6 +215,24 @@ STORAGES = {
     },
 }
 
+# TODO: Smid dette i en model og lav rest-interface til det.
+CVR_TOLDKATEGORI_MAP = [
+    {"kategori": "70", "navn": "RAL Royal Arctic Line A/S", "cvr": [], "kan_vælges_i_form": True},
+    {"kategori": "71", "navn": "Forudbetalt indførselsafgift", "cvr": []},
+    {
+        "kategori": "73A",
+        "navn": "Kreditkunder Nan,Qaq,Nar,Kali,Qas,Nuu,Man,Sis,Nars",
+        "cvr": [12345678],
+    },
+    {"kategori": "73B", "navn": "Kreditkunder Kangaa,Aas,Qas,Ilu,Qeq", "cvr": []},
+    {"kategori": "73C", "navn": "Kreditkunder Uum,Uper", "cvr": []},
+    {"kategori": "73D", "navn": "Kreditkunder Tasiilaq,Kangerlussuaq", "cvr": []},
+    {"kategori": "73E", "navn": "Kreditkunder Ittoqqortoormiit,Qaanaq", "cvr": []},
+    {"kategori": "76", "navn": "Fra Tusass A/S", "cvr": []},
+    {"kategori": "77", "navn": "Fra Skattestyrelsen", "cvr": []},
+    {"kategori": "79", "navn": "Refusion", "cvr": []},
+    {"kategori": "80", "navn": "Blue Water Shipping", "cvr": [12345678], "kan_vælges_i_form": True}
+]
 
 # Når SAML-IdP'en POSTer til os, skal vi modtage vores session-cookie fra browseren
 # https://docs.djangoproject.com/en/4.2/ref/settings/#session-cookie-samesite

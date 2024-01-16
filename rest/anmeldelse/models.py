@@ -81,6 +81,8 @@ class Afgiftsanmeldelse(models.Model):
     )
     modtager_betaler = models.BooleanField(
         default=False,
+        null=True,
+        blank=True,
     )
     indførselstilladelse = models.CharField(
         max_length=20,

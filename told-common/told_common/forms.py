@@ -59,12 +59,14 @@ class TF10Form(BootstrapForm):
         leverandørfaktura_required: bool = True,
         fragtbrev_required: bool = True,
         varesatser: Optional[dict] = None,
+        toldkategorier: Optional[dict] = None,
         *args,
         **kwargs,
     ):
         self.varesatser = varesatser
         self.leverandørfaktura_required = leverandørfaktura_required
         self.fragtbrev_required = fragtbrev_required
+        self.toldkategorier = toldkategorier
         super().__init__(*args, **kwargs)
 
     afsender_cvr = ButtonlessIntegerField(
@@ -252,6 +254,20 @@ class TF10Form(BootstrapForm):
                 (False, _("Afsender")),
             )
         ),
+    )
+    def betaler_choices(self):
+        choices = [
+            ("modtager", _("Modtager")),
+            ("afsender", _("Afsender")),
+        ]
+        if self.toldkategorier:
+            for kategori, navn in self.toldkategorier.items():
+                choices.append((kategori, navn))
+        return choices
+
+    betaler = DynamicField(
+        forms.ChoiceField,
+        choices=lambda form: form.betaler_choices()
     )
     afgangsdato = forms.DateField(
         required=True,
