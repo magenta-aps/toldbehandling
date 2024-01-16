@@ -290,6 +290,15 @@ class TF10Form(BootstrapForm):
                 }
             )
 
+        betaler = self.cleaned_data["betaler"]
+        if betaler == "afsender":
+            self.cleaned_data["modtager_betaler"] = False
+        elif betaler == "modtager":
+            self.cleaned_data["modtager_betaler"] = True
+        elif betaler:
+            self.cleaned_data["modtager_betaler"] = False
+            self.cleaned_data["toldkategori"] = betaler
+
     def clean_with_formset(self, formset):
         # Perform validation on form and formset together
         if not self.cleaned_data["indførselstilladelse"]:

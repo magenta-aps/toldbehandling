@@ -62,6 +62,7 @@ class TF10BlanketTest(TestMixin, HasLogin, TestCase):
         "form-0-antal": "6",
         "form-0-fakturabeløb": "100.00",
         "forbindelsesnr": "1337",
+        "betaler": "afsender",
     }
     formdata2 = {**formdata1, "fragttype": "luftpost"}
 

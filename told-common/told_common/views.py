@@ -93,9 +93,7 @@ class FragtbrevView(PermissionsRequiredMixin, FileView):
     key = "fragtbrev"
 
 
-class TF10FormCreateView(
-    PermissionsRequiredMixin, HasRestClientMixin, FormWithFormsetView
-):
+class TF10FormView(PermissionsRequiredMixin, HasRestClientMixin, FormWithFormsetView):
     form_class = forms.TF10Form
     formset_class = forms.TF10VareFormSet
     template_name = "told_common/tf10/form.html"
@@ -116,21 +114,80 @@ class TF10FormCreateView(
         "sats.view_vareafgiftssats",
     )
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.anmeldelse_id = None
-
     def get_success_url(self):
         """
         Return to previous page. Make sure that the last form is displayed in the first
         row and highlight it. Also show a success message.
         """
         return (
-            reverse("tf10_list")
-            + "?sort=id"
-            + "&order=desc"
-            + f"&highlight={self.anmeldelse_id}"
+                reverse("tf10_list")
+                + "?sort=id"
+                + "&order=asc"
+                + f"&highlight={self.anmeldelse_id}"
         )
+
+    @cached_property
+    def cvr(self):
+        user = self.request.session["user"] or self.request.user
+        if user.get("indberetter_data"):
+            return user["indberetter_data"]["cvr"]
+
+    @property
+    def toldkategorier(self):
+        if self.cvr:
+            return {
+                kategori["kategori"]: kategori["navn"]
+                for kategori in settings.CVR_TOLDKATEGORI_MAP
+                if self.cvr in kategori["cvr"] and kategori.get("kan_vælges_i_form")
+            }
+        return {}
+
+    @cached_property
+    def toplevel_varesatser(self):
+        return dict(
+            filter(
+                lambda pair: pair[1].overordnet is None,
+                self.rest_client.varesatser.items(),
+            )
+        )
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs.update(
+            {
+                "fragtbrev_required": False,
+                "varesatser": self.toplevel_varesatser,
+                "toldkategorier": self.toldkategorier,
+            }
+        )
+        return kwargs
+
+    def get_formset_kwargs(self) -> Dict[str, Any]:
+        kwargs = super().get_formset_kwargs()
+        # The form_kwargs dict is passed as kwargs to subforms in the formset
+        if "form_kwargs" not in kwargs:
+            kwargs["form_kwargs"] = {}
+        # Will be picked up by TF10VareForm's constructor
+        kwargs["form_kwargs"]["varesatser"] = self.toplevel_varesatser
+        return kwargs
+
+
+    def get_context_data(self, **context: Dict[str, Any]) -> Dict[str, Any]:
+        context = super().get_context_data()
+        context.update({
+                "varesatser": dataclass_map_to_dict(self.varesatser),
+                "extend_template": self.extend_template,
+                "highlight": self.request.GET.get("highlight"),
+            }
+        )
+        return context
+
+
+class TF10FormCreateView(TF10FormView):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.anmeldelse_id = None
 
     def form_valid(self, form, formset):
         data = form.cleaned_data.copy()
@@ -159,7 +216,6 @@ class TF10FormCreateView(
         elif betaler:
             data["modtager_betaler"] = False
             data["toldkategori"] = betaler
-        print(data)
 
         self.anmeldelse_id = self.rest_client.afgiftanmeldelse.create(
             data,
@@ -184,34 +240,10 @@ class TF10FormCreateView(
         )
         return super().form_valid(form, formset)
 
-    @cached_property
-    def toplevel_varesatser(self):
-        return dict(
-            filter(
-                lambda pair: pair[1].overordnet is None,
-                self.rest_client.varesatser.items(),
-            )
-        )
-
-    @property
-    def toldkategorier(self):
-        user = self.request.session["user"]
-        cvr = user.get("indberetter_data", {}).get("cvr")
-        if cvr:
-            return {
-                kategori["kategori"]: kategori["navn"]
-                for kategori in settings.CVR_TOLDKATEGORI_MAP
-                if cvr in kategori["cvr"] and kategori.get("kan_vælges_i_form")
-            }
-        return None
-
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs.update(
             {
-                "fragtbrev_required": False,
-                "varesatser": self.toplevel_varesatser,
-                "toldkategorier": self.toldkategorier,
                 "initial": {
                     "afsender_change_existing": False,
                     "modtager_change_existing": False,
@@ -220,29 +252,12 @@ class TF10FormCreateView(
         )
         return kwargs
 
-    def get_formset_kwargs(self) -> Dict[str, Any]:
-        kwargs = super().get_formset_kwargs()
-        # The form_kwargs dict is passed as kwargs to subforms in the formset
-        if "form_kwargs" not in kwargs:
-            kwargs["form_kwargs"] = {}
-        # Will be picked up by TF10VareForm's constructor
-        kwargs["form_kwargs"]["varesatser"] = dict(
-            filter(
-                lambda pair: pair[1].overordnet is None,
-                self.rest_client.varesatser.items(),
-            )
-        )
-        return kwargs
+    @cached_property
+    def varesatser(self):
+        return self.rest_client.varesatser
 
     def get_context_data(self, **context: Dict[str, Any]) -> Dict[str, Any]:
-        context = super().get_context_data(
-            **{
-                **context,
-                "varesatser": dataclass_map_to_dict(self.rest_client.varesatser),
-                "extend_template": self.extend_template,
-                "highlight": self.request.GET.get("highlight"),
-            }
-        )
+        context = super().get_context_data()
         form = context["form"]
         if hasattr(form, "cleaned_data"):
             context.update(
@@ -258,51 +273,15 @@ class TF10FormCreateView(
         return context
 
 
-class TF10FormUpdateView(
-    PermissionsRequiredMixin, HasRestClientMixin, CustomLayoutMixin, FormWithFormsetView
-):
-    required_permissions = (
-        "aktør.view_afsender",
-        "aktør.view_modtager",
-        "forsendelse.view_postforsendelse",
-        "forsendelse.view_fragtforsendelse",
-        "anmeldelse.view_afgiftsanmeldelse",
-        "anmeldelse.view_varelinje",
-        "aktør.add_afsender",
-        "aktør.add_modtager",
-        "forsendelse.add_postforsendelse",
-        "forsendelse.add_fragtforsendelse",
-        "anmeldelse.add_afgiftsanmeldelse",
-        "anmeldelse.add_varelinje",
+class TF10FormUpdateView(CustomLayoutMixin, TF10FormView):
+    required_permissions = TF10FormView.required_permissions + (
         "forsendelse.change_postforsendelse",
         "forsendelse.change_fragtforsendelse",
     )
-    form_class = forms.TF10Form
-    formset_class = forms.TF10VareFormSet
-    template_name = "told_common/tf10/form.html"
-    extend_template = "told_common/layout.html"
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.anmeldelse_id = None
-
-    def get_success_url(self):
-        """
-        Return to previous page. Highlight the updated form and display a success msg.
-        """
-        return reverse("tf10_list") + f"?highlight={self.anmeldelse_id}"
-
-    @property
-    def toldkategorier(self):
-        user = self.request.session["user"]
-        cvr = user.get("indberetter_data", {}).get("cvr")
-        if cvr:
-            return {
-                kategori["kategori"]: kategori["navn"]
-                for kategori in settings.CVR_TOLDKATEGORI_MAP
-                if cvr in kategori["cvr"] and kategori.get("kan_vælges_i_form")
-            }
-        return None
 
     def form_valid(self, form, formset):
         afsender_id = self.rest_client.afsender.get_or_create(
@@ -393,6 +372,10 @@ class TF10FormUpdateView(
         return super().form_valid(form, formset)
 
     @cached_property
+    def varesatser(self):
+        return self.rest_client.varesatser_fra(self.item.dato)
+
+    @cached_property
     def toplevel_varesatser(self):
         return dict(
             filter(
@@ -406,22 +389,12 @@ class TF10FormUpdateView(
         kwargs.update(
             {
                 "leverandørfaktura_required": False,
-                # Hvis vi allerede har en fragtforsendelse, har vi også et
-                # fragtbrev, og det er ikke påkrævet at formularen indeholder ét
-                "toldkategorier": self.toldkategorier,
-                "fragtbrev_required": False,
-                "varesatser": self.toplevel_varesatser,
             }
         )
         return kwargs
 
     def get_formset_kwargs(self) -> Dict[str, Any]:
         kwargs = super().get_formset_kwargs()
-        # The form_kwargs dict is passed as kwargs to subforms in the formset
-        if "form_kwargs" not in kwargs:
-            kwargs["form_kwargs"] = {}
-        # Will be picked up by TF10VareForm's constructor
-        kwargs["form_kwargs"]["varesatser"] = self.toplevel_varesatser
         initial = []
         for item in self.item.varelinjer:
             itemdict = dataclasses.asdict(item)
@@ -432,17 +405,13 @@ class TF10FormUpdateView(
         return kwargs
 
     def get_context_data(self, **context: Dict[str, Any]) -> Dict[str, Any]:
-        return super().get_context_data(
-            **{
-                **context,
-                "varesatser": dataclass_map_to_dict(
-                    self.rest_client.varesatser_fra(self.item.dato)
-                ),
-                "item": self.item,
-                "afsender_existing_id": self.item.afsender.id,
-                "modtager_existing_id": self.item.modtager.id,
-            }
-        )
+        context = super().get_context_data()
+        context.update({
+            "item": self.item,
+            "afsender_existing_id": self.item.afsender.id,
+            "modtager_existing_id": self.item.modtager.id,
+        })
+        return context
 
     @cached_property
     def item(self) -> Afgiftsanmeldelse:
@@ -453,6 +422,13 @@ class TF10FormUpdateView(
             include_notater=False,
             include_prismeresponses=False,
         )
+
+    @cached_property
+    def cvr(self):
+        if self.item.oprettet_på_vegne_af:
+            return self.item.oprettet_på_vegne_af["indberetter_data"]["cvr"]
+        if self.item.oprettet_af:
+            return self.item.oprettet_af["indberetter_data"]["cvr"]
 
     def get_initial(self):
         initial = {}
@@ -477,6 +453,7 @@ class TF10FormUpdateView(
                 initial["betaler"] = "modtager"
             else:
                 initial["betaler"] = "afsender"
+            initial["toldkategori"] = item.toldkategori
 
             fragtforsendelse = item.fragtforsendelse
             postforsendelse = item.postforsendelse

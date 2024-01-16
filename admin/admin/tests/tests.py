@@ -1620,6 +1620,7 @@ class AnmeldelseNotatTest(PermissionsTest, TestCase):
                 "form-0-antal": 5,
                 "form-0-fakturabeløb": "25000.00",
                 "notat": "Testnotat",
+                "betaler": "afsender",
             },
         )
         self.assertIn(
@@ -2564,6 +2565,7 @@ class TF10CreateTest(TestMixin, HasLogin, TestCase):
         "form-0-fakturabeløb": "100.00",
         "forbindelsesnr": "1337",
         "oprettet_på_vegne_af": 1,
+        "betaler": "afsender",
     }
     formdata2 = {**formdata1, "fragttype": "luftpost"}
 
