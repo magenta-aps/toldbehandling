@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-15 11:43+0000\n"
+"POT-Creation-Date: 2024-01-15 15:38+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -120,9 +120,9 @@ msgstr "CVR-normu 8-nik kisitsisitaqassaaq 0-imillu aallartissanani"
 msgid "Navn"
 msgstr "Ateq"
 
-#: told_common/forms.py
-msgid "Vej og husnummer"
-msgstr "Aqqusineq illullu normua"
+#: told_common/forms.py told_common/templates/told_common/tf5/view.html
+msgid "Adresse"
+msgstr "Najugaq"
 
 #: told_common/forms.py
 msgid "Postnr."
@@ -697,10 +697,6 @@ msgid "Engangstilladelse til privat indførsel af øl, vin og spiritus"
 msgstr ""
 "Immiaaqqanik, viinninik imigassanillu namminermut atugassanik eqqussinermi, "
 "ataasiartumik akuersissut"
-
-#: told_common/templates/told_common/tf5/view.html
-msgid "Adresse"
-msgstr "Najugaq"
 
 #: told_common/templates/told_common/tf5/view.html
 msgid "Postnr/by"
