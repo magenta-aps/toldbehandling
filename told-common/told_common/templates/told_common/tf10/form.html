@@ -443,6 +443,9 @@
         <div class="row align-items-center">
             <div class="col-2"><label for="{{form.toldkategori.id_for_label}}">{{form.toldkategori.label}}</label></div>
             <div class="col-4">{{form.toldkategori}}</div>
+            <div id="toldkategori_message" class="col-6" style="display: none">
+                Fordi feltet Betaler er sat til en speditør med en dedikeret toldkategori, kan toldkategorien kun sættes til speditører.
+            </div>
         </div>
         {% endif %}
 
@@ -456,6 +459,8 @@
 
 {{ varesatser|json_script:"varesatser" }}
 {{ konstanter|json_script:"konstanter" }}
+{{ betalende_toldkategorier|json_script:"betalende_toldkategorier" }}
+
 <script>
     window.satsTekster = {
         "kg": "{% translate '%f kr/kg' %}",
@@ -513,4 +518,48 @@
         $("#betales_af_row").toggle($(this).val() === "luftfragt");
     });
 </script>
+{% if form.toldkategori %}
+<script>
+    $(function (){
+        const betaler_field = $("[name={{form.betaler.name}}]");
+        const toldkategori_field = $("[name={{form.toldkategori.name}}]");
+        const betalende_toldkategorier = JSON.parse($("#betalende_toldkategorier").text());
+        const toldkategori_message = $("#toldkategori_message");
+        const fallback_betaler = betaler_field.val() === "afsender" ? "afsender" : "modtager";
+
+        // Når toldkategori opdateres af bruger, opdatér feltet "Betaler" tilsvarende
+        toldkategori_field.on("change", function (){
+            const value = $(this).val();
+            if (betalende_toldkategorier[value]) {
+                // Speditør - kopiér værdi
+                betaler_field.val(value);
+            } else {
+                // Noget andet - tilbage til oprindelig værdi
+                betaler_field.val(fallback_betaler);
+                toldkategori_message.hide();
+            }
+        });
+
+        // Synkronisering den anden vej
+        betaler_field.on("change", function () {
+            const value = $(this).val();
+            if (betalende_toldkategorier[value]) {
+                // Speditør - kopiér værdi, vis advarsel, og disable speditører i toldkategori
+                toldkategori_field.val(value);
+                toldkategori_message.show();
+                const enabled_options = [];
+                for (let key in betalende_toldkategorier) {
+                    enabled_options.push("[value="+key+"]");
+                }
+                toldkategori_field.find("option").not(enabled_options.join(",")).prop("disabled", true);
+            } else {
+                // Noget andet - reenable, og clear toldkategori
+                toldkategori_field.val("");
+                toldkategori_message.hide();
+                toldkategori_field.find("option").prop("disabled", false);
+            }
+        });
+    });
+</script>
+{% endif %}
 {% endblock %}

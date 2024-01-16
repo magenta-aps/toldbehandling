@@ -175,7 +175,12 @@ STORAGES = {
 
 # TODO: Smid dette i en model og lav rest-interface til det.
 CVR_TOLDKATEGORI_MAP = [
-    {"kategori": "70", "navn": "RAL Royal Arctic Line A/S", "cvr": []},
+    {
+        "kategori": "70",
+        "navn": "RAL Royal Arctic Line A/S",
+        "cvr": [],
+        "kan_vælges_i_form": True,
+    },
     {"kategori": "71", "navn": "Forudbetalt indførselsafgift", "cvr": []},
     {
         "kategori": "73A",

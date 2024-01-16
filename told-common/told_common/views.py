@@ -178,6 +178,7 @@ class TF10FormView(PermissionsRequiredMixin, HasRestClientMixin, FormWithFormset
                 "varesatser": dataclass_map_to_dict(self.varesatser),
                 "extend_template": self.extend_template,
                 "highlight": self.request.GET.get("highlight"),
+                "betalende_toldkategorier": self.toldkategorier,
             }
         )
         return context
