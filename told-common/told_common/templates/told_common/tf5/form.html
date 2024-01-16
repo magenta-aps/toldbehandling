@@ -150,6 +150,11 @@
             <div class="col-4">
                 {{form.leverandørfaktura}}
                 {{form.leverandørfaktura.errors}}
+                {% if item %}
+                <a href="{% url 'leverandørfaktura_view' id=item.id %}">
+                    {{item.leverandørfaktura|file_basename|unquote}}
+                </a>
+                {% endif %}
             </div>
         </div>
         <hr/>
