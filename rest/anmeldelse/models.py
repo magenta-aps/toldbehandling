@@ -98,7 +98,7 @@ class Afgiftsanmeldelse(models.Model):
     betalt = models.BooleanField(
         default=False,
     )
-    dato = models.DateField(
+    dato = models.DateTimeField(
         auto_now_add=True,
         db_index=True,
     )

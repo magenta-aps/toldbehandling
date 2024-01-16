@@ -448,7 +448,7 @@ class AnmeldelseListViewTest(HasLogin):
                     "afgangsdato": "2023-11-03",
                     "afsenderbykode": "1234",
                 },
-                "dato": "2023-09-03",
+                "dato": "2023-09-03T00:00:00-02:00",
                 "beregnet_faktureringsdato": "2023-11-10",
                 "afgift_total": None,
                 "fragtforsendelse": None,
@@ -491,7 +491,7 @@ class AnmeldelseListViewTest(HasLogin):
                     "afgangsdato": "2023-11-03",
                     "afsenderbykode": "1234",
                 },
-                "dato": "2023-09-02",
+                "dato": "2023-09-02T00:00:00-02:00",
                 "beregnet_faktureringsdato": "2023-11-10",
                 "afgift_total": None,
                 "fragtforsendelse": None,
@@ -534,7 +534,7 @@ class AnmeldelseListViewTest(HasLogin):
                     "afgangsdato": "2023-11-03",
                     "afsenderbykode": "1234",
                 },
-                "dato": "2023-09-01",
+                "dato": "2023-09-01T00:00:00-02:00",
                 "beregnet_faktureringsdato": "2023-11-10",
                 "afgift_total": None,
                 "fragtforsendelse": None,
@@ -641,7 +641,7 @@ class AnmeldelseListViewTest(HasLogin):
                 "items": [
                     {
                         "id": 1,
-                        "gyldig_fra": "2023-01-01",
+                        "gyldig_fra": "2023-01-01T00:00:00-02:00",
                         "gyldig_til": None,
                         "kladde": False,
                     }
@@ -789,7 +789,7 @@ class AnmeldelseListViewTest(HasLogin):
                 {
                     "select": "",
                     "id": 1,
-                    "dato": "2023-09-03",
+                    "dato": "2023-09-03T00:00:00-02:00",
                     "afsender": {
                         "adresse": "Testvej 42",
                         "by": "TestBy",
@@ -817,7 +817,7 @@ class AnmeldelseListViewTest(HasLogin):
                 {
                     "select": "",
                     "id": 2,
-                    "dato": "2023-09-02",
+                    "dato": "2023-09-02T00:00:00-02:00",
                     "afsender": {
                         "adresse": "Testvej 42",
                         "by": "TestBy",
@@ -853,7 +853,7 @@ class AnmeldelseListViewTest(HasLogin):
                 {
                     "select": "",
                     "id": 3,
-                    "dato": "2023-09-01",
+                    "dato": "2023-09-01T00:00:00-02:00",
                     "afsender": {
                         "adresse": "Testvej 42",
                         "by": "TestBy",

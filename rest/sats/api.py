@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2023 Magenta ApS <info@magenta.dk>
 #
 # SPDX-License-Identifier: MPL-2.0
-from datetime import date
+from datetime import datetime
 from decimal import Decimal
 from typing import Optional
 
@@ -49,22 +49,30 @@ class AfgiftstabelFilterSchema(FilterSchema):
     def filter_gyldig_fra__lt(self, value: str) -> Q:
         if value is None:
             return Q()
-        return Q(gyldig_fra__lt=date.fromisoformat(value)) | Q(gyldig_fra__isnull=True)
+        return Q(gyldig_fra__lt=datetime.fromisoformat(value)) | Q(
+            gyldig_fra__isnull=True
+        )
 
     def filter_gyldig_fra__lte(self, value: str) -> Q:
         if value is None:
             return Q()
-        return Q(gyldig_fra__lte=date.fromisoformat(value)) | Q(gyldig_fra__isnull=True)
+        return Q(gyldig_fra__lte=datetime.fromisoformat(value)) | Q(
+            gyldig_fra__isnull=True
+        )
 
     def filter_gyldig_til__gt(self, value: str) -> Q:
         if value is None:
             return Q()
-        return Q(gyldig_til__gt=date.fromisoformat(value)) | Q(gyldig_til__isnull=True)
+        return Q(gyldig_til__gt=datetime.fromisoformat(value)) | Q(
+            gyldig_til__isnull=True
+        )
 
     def filter_gyldig_til__gte(self, value: str) -> Q:
         if value is None:
             return Q()
-        return Q(gyldig_til__gte=date.fromisoformat(value)) | Q(gyldig_til__isnull=True)
+        return Q(gyldig_til__gte=datetime.fromisoformat(value)) | Q(
+            gyldig_til__isnull=True
+        )
 
 
 class AfgiftstabelPermission(RestPermission):

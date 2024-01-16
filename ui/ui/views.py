@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: MPL-2.0
 import dataclasses
 import os
-from datetime import date
+from datetime import date, datetime, timezone
 from functools import cached_property
 from io import BytesIO
 from typing import Any, Dict
@@ -204,14 +204,16 @@ class TF5FormCreateView(
                 "highlight": self.request.GET.get("highlight"),
                 "varesatser": dataclass_map_to_dict(
                     self.rest_client.varesatser_all(
-                        filter_afgiftstabel={"gyldig_til__gte": date.today()},
+                        filter_afgiftstabel={
+                            "gyldig_til__gte": datetime.now(timezone.utc)
+                        },
                         filter_varesats={"synlig_privat": True},
                     )
                 ),
                 "afgiftstabeller": [
                     dataclasses.asdict(item)
                     for item in self.rest_client.afgiftstabel.list(
-                        gyldig_til__gte=date.today(), kladde=False
+                        gyldig_til__gte=datetime.now(timezone.utc), kladde=False
                     )
                 ],
             }

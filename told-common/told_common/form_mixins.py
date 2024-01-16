@@ -116,6 +116,14 @@ class DateInput(forms.DateInput):
         super().__init__(**kwargs)
 
 
+class DateTimeInput(forms.DateTimeInput):
+    input_type = "datetime-local"
+
+    def __init__(self, **kwargs):
+        kwargs["format"] = "%Y-%m-%dT%H:%M:%S"
+        super().__init__(**kwargs)
+
+
 class MultipleSeparatedChoiceField(MultipleChoiceField):
     widget = forms.TextInput()
 

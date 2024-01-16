@@ -7,7 +7,7 @@ import time
 from base64 import b64encode
 from collections import defaultdict
 from dataclasses import dataclass, field
-from datetime import date, timedelta
+from datetime import datetime, timedelta, timezone
 from functools import cached_property
 from typing import Any, Dict, List, Optional, Tuple, Union
 from urllib.parse import unquote, urlencode
@@ -1064,13 +1064,13 @@ class RestClient:
 
     @cached_property
     def varesatser(self) -> Dict[int, Vareafgiftssats]:
-        return self.varesatser_fra(date.today())
+        return self.varesatser_fra(datetime.now(timezone.utc))
 
     @cached_property
     def varesatser_privat(self) -> Dict[int, Vareafgiftssats]:
-        return self.varesatser_fra(date.today(), synlig_privat=True)
+        return self.varesatser_fra(datetime.now(timezone.utc), synlig_privat=True)
 
-    def varesatser_fra(self, at: date, **filter) -> Dict[int, Vareafgiftssats]:
+    def varesatser_fra(self, at: datetime, **filter) -> Dict[int, Vareafgiftssats]:
         datestring = at.isoformat()
         afgiftstabeller = self.get(
             "afgiftstabel",

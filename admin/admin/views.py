@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: MPL-2.0
 
-from datetime import date, datetime
+from datetime import date, datetime, timezone
 from decimal import Context, Decimal
 from functools import cached_property
 from typing import Any, Dict, List, Optional, Set, Union
@@ -13,6 +13,7 @@ from django.http import Http404, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import redirect
 from django.template import loader
 from django.urls import reverse, reverse_lazy
+from django.utils import timezone as tz
 from django.utils.translation import gettext_lazy as _
 from django.views import View
 from django.views.generic import FormView, TemplateView
@@ -587,12 +588,16 @@ class AfgiftstabelListView(PermissionsRequiredMixin, HasRestClientMixin, GetForm
                 {"item": item, "can_download": self.can_download},
                 self.request,
             )
+        if key in ("gyldig_fra", "gyldig_til"):
+            if value:
+                value = datetime.fromisoformat(value)
+                item[key] = value
         if key == "gældende":
-            today = date.today().isoformat()
+            now = datetime.now(timezone.utc)
             value = (
                 not item["kladde"]
-                and item["gyldig_fra"] <= today
-                and (item["gyldig_til"] is None or today < item["gyldig_til"])
+                and item["gyldig_fra"] <= now
+                and (item["gyldig_til"] is None or now < item["gyldig_til"])
             )
         return value
 
@@ -613,7 +618,10 @@ class AfgiftstabelDetailView(PermissionsRequiredMixin, HasRestClientMixin, FormV
             **{
                 **kwargs,
                 "object": self.item,
-                "can_edit": (self.item.kladde or self.item.gyldig_fra > date.today())
+                "can_edit": (
+                    self.item.kladde
+                    or self.item.gyldig_fra > datetime.now(timezone.utc)
+                )
                 and self.has_permissions(
                     request=self.request, required_permissions=self.edit_permissions
                 ),
@@ -645,7 +653,7 @@ class AfgiftstabelDetailView(PermissionsRequiredMixin, HasRestClientMixin, FormV
                 self.rest_client.afgiftstabel.delete(tabel_id)
             return redirect(reverse("afgiftstabel_list"))
         try:
-            if self.item.kladde or self.item.gyldig_fra > date.today():
+            if self.item.kladde or self.item.gyldig_fra > datetime.now(timezone.utc):
                 self.rest_client.afgiftstabel.update(tabel_id, form.cleaned_data)
             return redirect(reverse("afgiftstabel_list"))
         except HTTPError as e:

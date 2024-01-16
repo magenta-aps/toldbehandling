@@ -6,7 +6,7 @@
 import json
 import os
 import re
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta, timezone
 from decimal import Decimal, InvalidOperation
 from enum import Enum
 from itertools import chain
@@ -204,13 +204,11 @@ class RestMixin:
     @classmethod
     def object_to_dict(cls, item):
         def format_value(value):
-            if type(value) is date:
+            if type(value) in (date, datetime):
                 return value.isoformat()
             if type(value) is FieldFile and not value:
                 return None
-            if type(value) is Decimal:
-                return str(value)
-            if isinstance(value, Choices):
+            if type(value) is Decimal or isinstance(value, Choices):
                 return str(value)
             return value
 
@@ -469,7 +467,7 @@ class RestMixin:
             "har_privat_tillægsafgift_alkohol": False,
             "synlig_privat": False,
         }
-        self.afgiftstabel_data = {"gyldig_fra": date.today().isoformat()}
+        self.afgiftstabel_data = {"gyldig_fra": datetime.now(timezone.utc).isoformat()}
 
     @staticmethod
     def unenumerate(item):

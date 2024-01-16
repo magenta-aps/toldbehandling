@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: MPL-2.0
 
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta, timezone
 from typing import List
 
 from django import forms
@@ -15,6 +15,7 @@ from told_common import forms as common_forms
 from told_common.form_mixins import (
     BootstrapForm,
     DateInput,
+    DateTimeInput,
     MaxSizeFileField,
     MultipleSeparatedChoiceField,
 )
@@ -141,11 +142,10 @@ class AfgiftstabelUpdateForm(BootstrapForm):
         required=False, choices=((True, _("Ja")), (False, _("Nej")))
     )
     gyldig_fra = DynamicField(
-        forms.DateField,
+        forms.DateTimeField,  # Vil konvertere naive datetime-input fra klienten
+        # til aware datetimes ud fra settings.TIME_ZONE
         required=False,
-        widget=lambda form: DateInput(
-            attrs={"min": (date.today() + timedelta(1)).isoformat()}
-        ),
+        widget=lambda form: DateTimeInput(attrs={"min": datetime.now().isoformat()}),
     )
     delete = forms.BooleanField(required=False)
 
@@ -165,7 +165,7 @@ class AfgiftstabelUpdateForm(BootstrapForm):
 
     def clean_gyldig_fra(self):
         value = self.cleaned_data.get("gyldig_fra")
-        if value is not None and value <= date.today():
+        if value is not None and value <= datetime.now(timezone.utc):
             raise ValidationError(_("Dato skal være efter i dag"))
         return value
 

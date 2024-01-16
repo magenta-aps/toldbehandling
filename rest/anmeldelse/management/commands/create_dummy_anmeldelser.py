@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: MPL-2.0
 
 import random
-from datetime import date, timedelta
+from datetime import date, datetime, time, timedelta, timezone
 from decimal import Decimal
 
 from aktør.models import Afsender, Modtager
@@ -34,7 +34,7 @@ class Command(BaseCommand):
         anmeldelse.leverandørfaktura.save(
             "leverandørfaktura.txt", ContentFile("testdata")
         )
-        today = date.today()
+        today = datetime.now(tz=timezone.utc)
         tabel = Afgiftstabel.objects.filter(
             kladde=False, gyldig_fra__lt=today, gyldig_til__gt=today
         ).first()
@@ -76,7 +76,9 @@ class Command(BaseCommand):
                 status=random.choice(["ny", "afvist", "godkendt"]),
                 oprettet_af=(fragtforsendelse or postforsendelse).oprettet_af,
             )
-            anmeldelse.dato = date.today() - timedelta(days=random.randint(0, 1000))
+            anmeldelse.dato = datetime.combine(
+                date.today(), time(6, 0, 0), tzinfo=timezone.utc
+            ) - timedelta(days=random.randint(0, 1000))
             earliest_tabel = (
                 Afgiftstabel.objects.filter(kladde=False)
                 .order_by("gyldig_fra")

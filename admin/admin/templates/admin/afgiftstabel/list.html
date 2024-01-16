@@ -2,6 +2,8 @@
 {% load static %}
 {% load i18n %}
 {% load l10n %}
+{% load tz %}
+{% get_current_timezone as TIME_ZONE %}
 
 {# Docs for bootstrap-table: https://bootstrap-table.com/docs/ #}
 {% block extra_headers %}
@@ -63,8 +65,20 @@
             <tr>
             {% endif %}
 
-                <td>{{item.gyldig_fra|default_if_none:"-"}}</td>
-                <td>{{item.gyldig_til|default_if_none:"-"}}</td>
+                <td>
+                    {% if item.gyldig_fra %}
+                    {{item.gyldig_fra|date:"d.m.Y H:i:s"}}
+                    {% else %}
+                    -
+                    {% endif %}
+                </td>
+                <td>
+                    {% if item.gyldig_til %}
+                    {{item.gyldig_til|date:"d.m.Y H:i:s"}}
+                    {% else %}
+                    -
+                    {% endif %}
+                </td>
                 <td>{{item.kladde|yesno|capfirst}}</td>
                 <td>{% include actions_template with item=item %}</td>
             </tr>

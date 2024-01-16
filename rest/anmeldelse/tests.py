@@ -410,7 +410,6 @@ class StatistikTest(RestMixin, TestCase):
         response = self.client.get(
             url, HTTP_AUTHORIZATION=f"Bearer {self.authorized_access_token}"
         )
-        print(response.json())
         data = response.json()["items"]
         self.assertEquals(len(data), 2)
         # Sorteret efter afgiftsgruppenummer
