@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: MPL-2.0
 
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta, timezone
 from decimal import Decimal
 
 from django.test import TestCase
@@ -35,7 +35,7 @@ class AfgiftstabelTest(RestTestMixin, TestCase):
                 dt = timedelta(days=-100)
             else:
                 dt = timedelta(days=100)
-            newdate = date.fromisoformat(value) + dt
+            newdate = datetime.fromisoformat(value) + dt
             return newdate.isoformat()
         return super().alter_value(key, value)
 
@@ -46,10 +46,14 @@ class AfgiftstabelTest(RestTestMixin, TestCase):
     @property
     def filter_data(self):
         return {
-            "gyldig_fra__gt": (date.today() - timedelta(days=20)).isoformat(),
-            "gyldig_fra__lt": (date.today() + timedelta(days=20)).isoformat(),
-            "gyldig_fra__gte": (date.today()).isoformat(),
-            "gyldig_fra__lte": (date.today()).isoformat(),
+            "gyldig_fra__gt": (
+                self.afgiftstabel.gyldig_fra - timedelta(days=20)
+            ).isoformat(),
+            "gyldig_fra__lt": (
+                self.afgiftstabel.gyldig_fra + timedelta(days=20)
+            ).isoformat(),
+            "gyldig_fra__gte": (self.afgiftstabel.gyldig_fra).isoformat(),
+            "gyldig_fra__lte": (self.afgiftstabel.gyldig_fra).isoformat(),
         }
 
     @property
@@ -57,7 +61,7 @@ class AfgiftstabelTest(RestTestMixin, TestCase):
         return {
             "id": self.afgiftstabel.id,
             **self.creation_data,
-            "gyldig_fra": date.today().isoformat(),
+            "gyldig_fra": self.afgiftstabel.gyldig_fra.isoformat(),
             "gyldig_til": None,
             "kladde": True,
         }
@@ -67,7 +71,7 @@ class AfgiftstabelTest(RestTestMixin, TestCase):
         return {
             "id": self.afgiftstabel.id,
             **self.creation_data,
-            "gyldig_fra": date.today().isoformat(),
+            "gyldig_fra": self.afgiftstabel.gyldig_fra.isoformat(),
             "gyldig_til": None,
             "kladde": True,
         }
@@ -85,40 +89,64 @@ class AfgiftstabelTest(RestTestMixin, TestCase):
     def test_str(self):
         self.assertEqual(
             str(self.afgiftstabel),
-            f"Afgiftstabel(gyldig_fra={date.today().isoformat()}, gyldig_til={None}, kladde={True})",
+            f"Afgiftstabel(gyldig_fra={self.afgiftstabel_data['gyldig_fra']}, gyldig_til={None}, kladde={True})",
         )
 
     def test_update_gyldig_til(self):
         # Tjek at gyldig_til opdateres automatisk
-        tabel1 = Afgiftstabel.objects.create(gyldig_fra=date(2020, 1, 1), kladde=False)
-        tabel2 = Afgiftstabel.objects.create(gyldig_fra=date(2021, 1, 1), kladde=False)
-        tabel3 = Afgiftstabel.objects.create(gyldig_fra=date(2022, 1, 1), kladde=False)
+        tabel1 = Afgiftstabel.objects.create(
+            gyldig_fra=datetime(2020, 1, 1, 0, 0, 0, tzinfo=timezone.utc), kladde=False
+        )
+        tabel2 = Afgiftstabel.objects.create(
+            gyldig_fra=datetime(2021, 1, 1, 0, 0, 0, tzinfo=timezone.utc), kladde=False
+        )
+        tabel3 = Afgiftstabel.objects.create(
+            gyldig_fra=datetime(2022, 1, 1, 0, 0, 0, tzinfo=timezone.utc), kladde=False
+        )
         tabeller = [tabel1, tabel2, tabel3]
         for tabel in tabeller:
             tabel.refresh_from_db()
-        self.assertEquals(tabel1.gyldig_til, date(2020, 12, 31))
-        self.assertEquals(tabel2.gyldig_til, date(2021, 12, 31))
+        self.assertEquals(
+            tabel1.gyldig_til, datetime(2021, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
+        )
+        self.assertEquals(
+            tabel2.gyldig_til, datetime(2022, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
+        )
         self.assertEquals(tabel3.gyldig_til, None)
 
         # Indsæt ny tabel midt i sekvensen og tjek at gyldig_til opdateres
-        tabel4 = Afgiftstabel.objects.create(gyldig_fra=date(2021, 7, 1), kladde=False)
+        tabel4 = Afgiftstabel.objects.create(
+            gyldig_fra=datetime(2021, 7, 1, 0, 0, 0, tzinfo=timezone.utc), kladde=False
+        )
         tabeller.append(tabel4)
         for tabel in tabeller:
             tabel.refresh_from_db()
-        self.assertEquals(tabel1.gyldig_til, date(2020, 12, 31))
-        self.assertEquals(tabel2.gyldig_til, date(2021, 6, 30))
+        self.assertEquals(
+            tabel1.gyldig_til, datetime(2021, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
+        )
+        self.assertEquals(
+            tabel2.gyldig_til, datetime(2021, 7, 1, 0, 0, 0, tzinfo=timezone.utc)
+        )
         self.assertEquals(tabel3.gyldig_til, None)
-        self.assertEquals(tabel4.gyldig_til, date(2021, 12, 31))
+        self.assertEquals(
+            tabel4.gyldig_til, datetime(2022, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
+        )
 
         # Flyt tabel til andet sted i sekvensen og tjek at gyldig_til opdateres
-        tabel4.gyldig_fra = date(2020, 3, 10)
+        tabel4.gyldig_fra = datetime(2020, 3, 10, 0, 0, 0, tzinfo=timezone.utc)
         tabel4.save()
         for tabel in tabeller:
             tabel.refresh_from_db()
-        self.assertEquals(tabel1.gyldig_til, date(2020, 3, 9))
-        self.assertEquals(tabel2.gyldig_til, date(2021, 12, 31))
+        self.assertEquals(
+            tabel1.gyldig_til, datetime(2020, 3, 10, 0, 0, 0, tzinfo=timezone.utc)
+        )
+        self.assertEquals(
+            tabel2.gyldig_til, datetime(2022, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
+        )
         self.assertEquals(tabel3.gyldig_til, None)
-        self.assertEquals(tabel4.gyldig_til, date(2020, 12, 31))
+        self.assertEquals(
+            tabel4.gyldig_til, datetime(2021, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
+        )
 
 
 class VareafgiftssatsTest(RestTestMixin, TestCase):

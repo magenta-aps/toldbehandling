@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: MPL-2.0
 
-from datetime import date
+from datetime import date, datetime, timedelta, timezone
 from decimal import Decimal
 
 from django.core.management.base import BaseCommand
@@ -14,13 +14,14 @@ class Command(BaseCommand):
         if Afgiftstabel.objects.exists() or Vareafgiftssats.objects.exists():
             # Don't create dummy data more than once
             return
+        tz = timezone(-timedelta(seconds=2 * 3600))
         tabel1 = Afgiftstabel.objects.create(
-            gyldig_fra=date(date.today().year, 1, 1),
-            gyldig_til=date(date.today().year, 12, 31),
+            gyldig_fra=datetime(date.today().year, 1, 1, 0, 0, 0, tzinfo=tz),
+            gyldig_til=datetime(date.today().year + 1, 1, 1, 0, 0, 0, tzinfo=tz),
             kladde=False,
         )
         tabel2 = Afgiftstabel.objects.create(
-            gyldig_fra=date(date.today().year + 1, 1, 1),
+            gyldig_fra=datetime(date.today().year + 1, 1, 10, 0, 0, tzinfo=tz),
             gyldig_til=None,
             kladde=False,
         )

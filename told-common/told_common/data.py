@@ -184,19 +184,19 @@ def encode_optional_isoformat(d):
 class Afgiftstabel(ToldDataClass):
     id: int
     kladde: bool
-    gyldig_fra: Optional[date] = field(
+    gyldig_fra: Optional[datetime] = field(
         metadata=config(
             encoder=encode_optional_isoformat,
-            decoder=date.fromisoformat,
-            mm_field=fields.Date(format="iso"),
+            decoder=datetime.fromisoformat,
+            mm_field=fields.DateTime(format="iso"),
         ),
         default=None,
     )
-    gyldig_til: Optional[date] = field(
+    gyldig_til: Optional[datetime] = field(
         metadata=config(
             encoder=encode_optional_isoformat,
-            decoder=date.fromisoformat,
-            mm_field=fields.Date(format="iso"),
+            decoder=datetime.fromisoformat,
+            mm_field=fields.DateTime(format="iso"),
         ),
         default=None,
     )
@@ -311,18 +311,18 @@ class Afgiftsanmeldelse(ToldDataClass):
     afgift_total: Decimal
     betalt: bool
     status: str
-    dato: date = field(
+    dato: datetime = field(
         metadata=config(
-            encoder=date.isoformat,
-            decoder=date.fromisoformat,
-            mm_field=fields.Date(format="iso"),
+            encoder=datetime.isoformat,
+            decoder=datetime.fromisoformat,
+            mm_field=fields.DateTime(format="iso"),
         ),
     )
-    beregnet_faktureringsdato: date = field(
+    beregnet_faktureringsdato: datetime = field(
         metadata=config(
-            encoder=date.isoformat,
-            decoder=date.fromisoformat,
-            mm_field=fields.Date(format="iso"),
+            encoder=datetime.isoformat,
+            decoder=datetime.fromisoformat,
+            mm_field=fields.DateTime(format="iso"),
         ),
     )
     notater: Optional[List[Notat]]

@@ -4,7 +4,6 @@
 
 from __future__ import annotations
 
-from datetime import timedelta
 from decimal import Decimal
 
 from django.db import models
@@ -23,11 +22,11 @@ class Afgiftstabel(models.Model):
             )
         ]
 
-    gyldig_fra = models.DateField(
+    gyldig_fra = models.DateTimeField(
         null=True,
         blank=True,
     )
-    gyldig_til = models.DateField(
+    gyldig_til = models.DateTimeField(
         null=True,
         blank=True,
     )
@@ -36,8 +35,8 @@ class Afgiftstabel(models.Model):
     )
 
     def __str__(self):
-        fra = self.gyldig_fra
-        til = self.gyldig_til
+        fra = self.gyldig_fra.isoformat() if self.gyldig_fra else None
+        til = self.gyldig_til.isoformat() if self.gyldig_til else None
         kladde = self.kladde
         return f"Afgiftstabel(gyldig_fra={fra}, gyldig_til={til}, kladde={kladde})"
 
@@ -63,7 +62,7 @@ class Afgiftstabel(models.Model):
                     item.gyldig_til = gyldig_til
                     # Sæt kun `gyldig_til`, så vi forhindrer rekursion
                     item.save(update_fields=("gyldig_til",))
-                gyldig_til = item.gyldig_fra - timedelta(days=1)
+                gyldig_til = item.gyldig_fra
 
 
 post_save.connect(

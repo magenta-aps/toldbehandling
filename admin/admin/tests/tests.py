@@ -329,7 +329,7 @@ class TestGodkend(PermissionsTest, TestCase):
                 "indførselstilladelse": "5678",
                 "afgift_total": "5000.00",
                 "betalt": False,
-                "dato": "2023-08-22",
+                "dato": "2023-08-22T00:00:00-02:00",
                 "status": "afvist",
                 "beregnet_faktureringsdato": "2023-10-10",
             }
@@ -372,7 +372,7 @@ class TestGodkend(PermissionsTest, TestCase):
                 "indførselstilladelse": "5678",
                 "afgift_total": "5000.00",
                 "betalt": False,
-                "dato": "2023-08-22",
+                "dato": "2023-08-22T00:00:00-02:00",
                 "status": "afvist",
                 "beregnet_faktureringsdato": "2023-10-10",
                 "oprettet_af": {
@@ -686,7 +686,7 @@ class TestPrisme(PermissionsTest, TestCase):
                 "indførselstilladelse": "5678",
                 "afgift_total": "5000.00",
                 "betalt": False,
-                "dato": "2023-08-22",
+                "dato": "2023-08-22T00:00:00-02:00",
                 "status": "afvist",
                 "beregnet_faktureringsdato": "2023-10-10",
             }
@@ -729,7 +729,7 @@ class TestPrisme(PermissionsTest, TestCase):
                 "indførselstilladelse": "5678",
                 "afgift_total": "5000.00",
                 "betalt": False,
-                "dato": "2023-08-22",
+                "dato": "2023-08-22T00:00:00-02:00",
                 "status": "afvist",
                 "beregnet_faktureringsdato": "2023-10-10",
             }
@@ -972,7 +972,7 @@ class AnmeldelseHistoryListViewTest(PermissionsTest, TestCase):
                 "afsender": 1,
                 "modtager": 1,
                 "postforsendelse": 1,
-                "dato": "2023-09-03",
+                "dato": "2023-09-03T00:00:00-02:00",
                 "beregnet_faktureringsdato": "2023-10-10",
                 "afgift_total": "0.00",
                 "fragtforsendelse": None,
@@ -991,7 +991,7 @@ class AnmeldelseHistoryListViewTest(PermissionsTest, TestCase):
                 "afsender": 1,
                 "modtager": 1,
                 "postforsendelse": 1,
-                "dato": "2023-09-03",
+                "dato": "2023-09-03T00:00:00-02:00",
                 "beregnet_faktureringsdato": "2023-10-10",
                 "afgift_total": "0.00",
                 "fragtforsendelse": None,
@@ -1114,7 +1114,7 @@ class AnmeldelseHistoryDetailViewTest(PermissionsTest, TestCase):
                 "indførselstilladelse": "5678",
                 "afgift_total": "5000.00",
                 "betalt": False,
-                "dato": "2023-10-06",
+                "dato": "2023-10-06T00:00:00-02:00",
                 "beregnet_faktureringsdato": "2023-10-10",
                 "status": "ny",
                 "history_username": "admin",
@@ -1233,7 +1233,7 @@ class AnmeldelseHistoryDetailViewTest(PermissionsTest, TestCase):
                         "indførselstilladelse": "5678",
                         "afgift_total": "5000.00",
                         "betalt": False,
-                        "dato": "2023-10-06",
+                        "dato": "2023-10-06T00:00:00-02:00",
                         "beregnet_faktureringsdato": "2023-10-10",
                         "status": "ny",
                         "history_username": "admin",
@@ -1437,7 +1437,7 @@ class AnmeldelseNotatTest(PermissionsTest, TestCase):
                 "indførselstilladelse": "5678",
                 "afgift_total": "5000.00",
                 "betalt": False,
-                "dato": "2023-08-22",
+                "dato": "2023-08-22T00:00:00-02:00",
                 "beregnet_faktureringsdato": "2023-10-10",
                 "status": "afvist",
             }
@@ -1477,7 +1477,7 @@ class AnmeldelseNotatTest(PermissionsTest, TestCase):
                     "afsenderbykode": "2468",
                     "afgangsdato": "2023-11-03",
                 },
-                "dato": "2023-09-03",
+                "dato": "2023-09-03T00:00:00-02:00",
                 "beregnet_faktureringsdato": "2023-10-10",
                 "afgift_total": "5000.00",
                 "fragtforsendelse": None,
@@ -1671,13 +1671,13 @@ class AfgiftstabelListViewTest(PermissionsTest, TestCase):
         cls.testdata = [
             {
                 "id": 1,
-                "gyldig_fra": "2022-01-01",
-                "gyldig_til": "2023-01-01",
+                "gyldig_fra": "2023-01-01T00:00:00-03:00",
+                "gyldig_til": "2024-01-01T00:00:00-02:00",
                 "kladde": False,
             },
             {
                 "id": 2,
-                "gyldig_fra": "2023-01-01",
+                "gyldig_fra": "2024-01-01T00:00:00-02:00",
                 "gyldig_til": None,
                 "kladde": False,
             },
@@ -1753,13 +1753,13 @@ class AfgiftstabelListViewTest(PermissionsTest, TestCase):
             self.strip_html_tags(table_data),
             [
                 {
-                    "Gyldig fra": "2022-01-01",
-                    "Gyldig til": "2023-01-01",
+                    "Gyldig fra": "01.01.2023 00:00:00",
+                    "Gyldig til": "01.01.2024 00:00:00",
                     "Kladde": "Nej",
                     "Handlinger": "Vis Download .xlsx .csv",
                 },
                 {
-                    "Gyldig fra": "2023-01-01",
+                    "Gyldig fra": "01.01.2024 00:00:00",
                     "Gyldig til": "-",
                     "Kladde": "Nej",
                     "Handlinger": "Vis Download .xlsx .csv",
@@ -1785,15 +1785,15 @@ class AfgiftstabelListViewTest(PermissionsTest, TestCase):
                 "items": [
                     {
                         "id": 1,
-                        "gyldig_fra": "2022-01-01",
-                        "gyldig_til": "2023-01-01",
+                        "gyldig_fra": "2023-01-01T00:00:00-03:00",
+                        "gyldig_til": "2024-01-01T00:00:00-02:00",
                         "kladde": False,
                         "actions": "Vis Download .xlsx .csv",
                         "gældende": False,
                     },
                     {
                         "id": 2,
-                        "gyldig_fra": "2023-01-01",
+                        "gyldig_fra": "2024-01-01T00:00:00-02:00",
                         "gyldig_til": None,
                         "kladde": False,
                         "actions": "Vis Download .xlsx .csv",
@@ -1896,8 +1896,8 @@ class AfgiftstabelDownloadTest(PermissionsTest, TestCase):
         super().setUpClass()
         cls.afgiftstabel = {
             "id": 1,
-            "gyldig_fra": "2022-01-01",
-            "gyldig_til": "2023-01-01",
+            "gyldig_fra": "2022-01-01T00:00:00-02:00",
+            "gyldig_til": "2023-01-01T00:00:00-02:00",
             "kladde": False,
         }
         cls.afgiftssatser = [
@@ -2343,7 +2343,7 @@ class TF10EditMultipleViewTest(PermissionsTest, TestCase):
                     "indførselstilladelse": "5678",
                     "afgift_total": "5000.00",
                     "betalt": False,
-                    "dato": "2023-08-22",
+                    "dato": "2023-08-22T00:00:00-02:00",
                     "beregnet_faktureringsdato": "2023-10-10",
                     "status": "afvist",
                 },
@@ -2385,7 +2385,7 @@ class TF10EditMultipleViewTest(PermissionsTest, TestCase):
                     "indførselstilladelse": "5678",
                     "afgift_total": "5000.00",
                     "betalt": False,
-                    "dato": "2023-08-22",
+                    "dato": "2023-08-22T00:00:00-02:00",
                     "beregnet_faktureringsdato": "2023-10-10",
                     "status": "afvist",
                 },
@@ -2427,7 +2427,7 @@ class TF10EditMultipleViewTest(PermissionsTest, TestCase):
                     "indførselstilladelse": "5678",
                     "afgift_total": "5000.00",
                     "betalt": False,
-                    "dato": "2023-08-22",
+                    "dato": "2023-08-22T00:00:00-02:00",
                     "beregnet_faktureringsdato": "2023-10-10",
                     "status": "afvist",
                 },
@@ -2641,7 +2641,7 @@ class TF10CreateTest(TestMixin, HasLogin, TestCase):
                 "items": [
                     {
                         "id": 1,
-                        "gyldig_fra": "2023-01-01",
+                        "gyldig_fra": "2023-01-01T00:00:00-02:00",
                         "gyldig_til": None,
                         "kladde": False,
                     }
