@@ -214,20 +214,8 @@
                         {% endif %}
                     </div>
                 </div>
-                {% if object.fragtforsendelse.forsendelsestype.name == "FLY" %}
-                <div class="row">
-                    <div class="col-4">
-                        <label>Betales af:</label>
-                    </div>
-                    <div class="col-8">
-                        {% if object.modtager_betaler %}
-                        Modtager
-                        {% else %}
-                        Afsender
-                        {% endif %}
-                    </div>
-                </div>
-                {% endif %}
+
+
                 <div class="row">
                     <div class="col-4">
                         {% if object.fragtforsendelse %}
@@ -244,6 +232,7 @@
                         {% endif %}
                     </div>
                 </div>
+
                 <div class="row">
                     <div class="col-4">
                         {% if object.fragtforsendelse %}
@@ -399,6 +388,17 @@
             <div class="col-2">{% translate "Toldkategori" %}:</div>
             {% translate "Ikke angivet" as ikke_angivet %}
             <div class="col-4">{{object.toldkategori|default:ikke_angivet}}</div>
+        </div>
+
+        <div class="row align-items-center">
+            <div class="col-2">{% translate "Betales af" %}:</div>
+            <div class="col-4">
+                {% if object.modtager_betaler %}
+                    {% translate "Modtager" %}
+                {% else %}
+                    {% translate "Afsender" %}
+                {% endif %}
+            </div>
         </div>
 
         <hr/>
