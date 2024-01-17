@@ -14,3 +14,4 @@ requests[socks]
 psycopg2==2.9.6
 whitenoise==6.0.0
 django-forms-dynamic==1.0.0
+django-tempus-dominus==5.1.2.17

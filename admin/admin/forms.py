@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: MPL-2.0
 
-from datetime import date, datetime, timedelta, timezone
+from datetime import datetime, timezone
 from typing import List
 
 from django import forms
@@ -11,11 +11,11 @@ from django.core.exceptions import ValidationError
 from django.forms import formset_factory
 from django.utils.translation import gettext_lazy as _
 from dynamic_forms import DynamicField
+from tempus_dominus.widgets import DateTimePicker
 from told_common import forms as common_forms
 from told_common.form_mixins import (
     BootstrapForm,
     DateInput,
-    DateTimeInput,
     MaxSizeFileField,
     MultipleSeparatedChoiceField,
 )
@@ -144,8 +144,14 @@ class AfgiftstabelUpdateForm(BootstrapForm):
     gyldig_fra = DynamicField(
         forms.DateTimeField,  # Vil konvertere naive datetime-input fra klienten
         # til aware datetimes ud fra settings.TIME_ZONE
+        input_formats=["%d/%m/%Y %H:%M"],
         required=False,
-        widget=lambda form: DateTimeInput(attrs={"min": datetime.now().isoformat()}),
+        widget=lambda form: DateTimePicker(
+            options={
+                "minDate": datetime.now().isoformat(),
+                "sideBySide": True,
+            }
+        ),
     )
     delete = forms.BooleanField(required=False)
 
