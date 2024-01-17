@@ -223,8 +223,12 @@ $(function () {
         }
         const vareafgiftssats = subform.find("[name$=vareafgiftssats]");
         const varesats = varesatser[vareafgiftssats.val()];
+        if (varesats === undefined) {
+            return
+        }
+
         const enhed = varesats["enhed"];
-        const varekode = String(varesats["afgiftsgruppenummer"]).padStart(9, "0");
+        const varekode = String(varesats["afgiftsgruppenummer"]).padStart(3, "0");
         subform.find("[data-value=varekode]").val(varekode);
         subform.find("[data-value=varekode]").attr("title", varekode);
         subform.find("[data-value=afgiftssats]").val(get_afgiftssats_text(varesats));
@@ -266,6 +270,10 @@ $(function () {
         }
         const vareafgiftssats = subform.find("[name$=vareafgiftssats]");
         const varesats = varesatser[vareafgiftssats.val()];
+        if (varesats === undefined) {
+            return
+        }
+
         const afgift = calcSubAfgift(
             varesats,
             parseFloat(subform.find("[name$=mængde]").val()),
@@ -286,6 +294,10 @@ $(function () {
             const subform = $(this);
             const vareafgiftssats = subform.find("[name$=vareafgiftssats]");
             const varesats = varesatser[vareafgiftssats.val()];
+            if (varesats === undefined) {
+                return
+            }
+
             const afgift = subform.data("afgift");
             if (afgift !== null) {
                 totalAfgift += afgift;
@@ -399,6 +411,42 @@ $(function () {
         }
     });
 
+    $("[data-value=varekode]").on("input", function () {
+        $this = $(this);
+        const varekode = $this.val();
+
+        // convert varekode zero-padded string to integer
+        const varekode_int = parseInt(varekode, 10);
+        if (isNaN(varekode_int)) {
+            return;
+        }
+
+        // Update the entered varekode with leading zeros
+        const varekode_str = String(varekode_int).padStart(3, "0")
+        $this.val(varekode_str);
+
+        // Update vareafgiftssats select-dropdown
+        const vareafgiftssats = $this.parents(".row").find("[name$=vareafgiftssats]");
+
+        let foundVaresats = null;
+        for(let key in varesatser) {
+            const varesats = varesatser[key];
+            if (varekode_int === varesats["afgiftsgruppenummer"]) {
+                foundVaresats = varesats;
+                break;
+            }
+        }
+
+        if (foundVaresats) {
+            vareafgiftssats.val(foundVaresats["id"]);
+            $this.removeClass("is-invalid");
+            $this.attr("title", varekode_str);
+        } else {
+            vareafgiftssats.val(-1);
+            $this.addClass("is-invalid");
+            $this.attr("title", "Ukendt varekode");
+        }
+    });
 });
 $(function () {
     // Custom-fejlbeskeder i klientvalidering
