@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     "told_common",
     "admin",
     "django_bootstrap_icons",
+    "tempus_dominus",
 ]
 
 MIDDLEWARE = [
@@ -230,3 +231,5 @@ LOGGING = {
         },
     },
 }
+
+TEMPUS_DOMINUS_DATETIME_FORMAT = "DD/MM/YYYY HH:mm"
