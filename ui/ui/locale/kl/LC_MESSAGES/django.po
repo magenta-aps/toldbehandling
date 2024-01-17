@@ -130,7 +130,7 @@ msgid "Afsender"
 msgstr "Nassiussisoq"
 
 #: ui/templates/ui/tf5/payment/details.html
-msgid "Betalings detaljer"
+msgid "Betalingsdetaljer"
 msgstr ""
 
 #: ui/templates/ui/tf5/payment/details.html
