@@ -12,3 +12,7 @@
     margin: 0;
     padding: 0;
 }
+.file-input.dragover .input-group-text,
+.file-input.dragover input[type=text] {
+    border-color: #888;
+}
