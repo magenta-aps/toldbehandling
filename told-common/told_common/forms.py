@@ -300,7 +300,7 @@ class TF10VareForm(BootstrapForm):
         vareart_key = (
             "vareart_kl" if translation.get_language() == "kl" else "vareart_da"
         )
-        self.varesatser_choices = tuple(
+        self.varesatser_choices = ((-1, "-- Vælg vareart"),) + tuple(
             (id, getattr(item, vareart_key)) for id, item in self.varesatser.items()
         )
         super().__init__(*args, **kwargs)
@@ -312,6 +312,18 @@ class TF10VareForm(BootstrapForm):
     mængde = forms.DecimalField(min_value=0, required=False)
     antal = forms.IntegerField(min_value=1, required=False)
     fakturabeløb = forms.DecimalField(min_value=1, decimal_places=2, required=False)
+
+    def clean_vareafgiftssats(self) -> int:
+        # Get 'varekode' for selected vareafgiftssats
+        vareafgiftssats_selected_id = self.cleaned_data["vareafgiftssats"]
+        for id in self.varesatser.keys():
+            if id == int(vareafgiftssats_selected_id):
+                return vareafgiftssats_selected_id
+
+        raise ValidationError(
+            self.fields["vareafgiftssats"].error_messages["required"],
+            code="required",
+        )
 
     def clean_mængde(self) -> int:
         mængde = self.cleaned_data["mængde"]
