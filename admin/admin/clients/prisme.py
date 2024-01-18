@@ -167,7 +167,10 @@ class CustomDutyRequest(PrismeRequestObject):
                 ]
             },
         }
-        if self.afgiftsanmeldelse.fragtforsendelse:
+        if (
+            self.afgiftsanmeldelse.fragtforsendelse
+            and self.afgiftsanmeldelse.fragtforsendelse.fragtbrev
+        ):
             data["files"]["file"].append(
                 {
                     "Name": basename(
