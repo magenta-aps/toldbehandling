@@ -33,6 +33,7 @@ from told_common.view_mixins import (
     HasRestClientMixin,
     LoginRequiredMixin,
     PermissionsRequiredMixin,
+    TF5Mixin,
 )
 
 
@@ -620,7 +621,7 @@ class TF10ListView(
 
 
 class TF5View(
-    PermissionsRequiredMixin, HasRestClientMixin, CustomLayoutMixin, FormView
+    PermissionsRequiredMixin, HasRestClientMixin, CustomLayoutMixin, TF5Mixin, FormView
 ):
     required_permissions = (
         "anmeldelse.view_privatafgiftsanmeldelse",
@@ -690,7 +691,7 @@ class TF5View(
         return anmeldelse
 
 
-class TF5ListView(PermissionsRequiredMixin, HasRestClientMixin, ListView):
+class TF5ListView(PermissionsRequiredMixin, HasRestClientMixin, TF5Mixin, ListView):
     required_permissions = (
         "anmeldelse.view_privatafgiftsanmeldelse",
         "anmeldelse.view_varelinje",
@@ -768,7 +769,9 @@ class TF5ListView(PermissionsRequiredMixin, HasRestClientMixin, ListView):
         return kwargs
 
 
-class TF5UpdateView(PermissionsRequiredMixin, HasRestClientMixin, FormWithFormsetView):
+class TF5UpdateView(
+    PermissionsRequiredMixin, HasRestClientMixin, TF5Mixin, FormWithFormsetView
+):
     required_permissions = (
         "anmeldelse.view_privatafgiftsanmeldelse",
         "anmeldelse.view_varelinje",
