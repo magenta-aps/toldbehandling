@@ -44,7 +44,7 @@
         <span class="m-2 pt-2">
             {{user.first_name}} {{user.last_name}}
         </span>
-        {% if user.indberetter_data.api_key %}
+        {% if user.indberetter_data.api_key and not hide_api_key_btn %}
         <button type="button" class="mx-1 my-2 btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#apikey_modal">
             API-nøgle
         </button>

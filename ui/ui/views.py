@@ -31,6 +31,7 @@ from told_common.view_mixins import (
     HasRestClientMixin,
     LoginRequiredMixin,
     PermissionsRequiredMixin,
+    TF5Mixin,
 )
 
 from ui import forms
@@ -77,7 +78,11 @@ class TF10LeverandørFakturaView(UiViewMixin, common_views.LeverandørFakturaVie
 
 
 class TF5FormCreateView(
-    PermissionsRequiredMixin, HasRestClientMixin, UiViewMixin, FormWithFormsetView
+    PermissionsRequiredMixin,
+    HasRestClientMixin,
+    UiViewMixin,
+    TF5Mixin,
+    FormWithFormsetView,
 ):
     form_class = common_forms.TF5Form
     formset_class = common_forms.TF10VareFormSet
@@ -373,6 +378,7 @@ class TF5PaymentCheckoutView(
     HasRestClientMixin,
     common_views.CustomLayoutMixin,
     UiViewMixin,
+    TF5Mixin,
     TemplateView,
 ):
     extend_template = "ui/layout.html"
@@ -397,8 +403,6 @@ class TF5PaymentCheckoutView(
         Raises:
             Exception: If the declaration or payment could not be found or created
         """
-        context = super().get_context_data(**kwargs)
-
         payment = self.rest_client.payment.create(
             data={"declaration_id": int(self.kwargs["id"])}
         )
@@ -406,9 +410,13 @@ class TF5PaymentCheckoutView(
         if not payment:
             raise Exception("Betaling kunne ikke findes eller oprettes")
 
-        context["payment"] = payment
-        context["nets_checkout_key"] = settings.PAYMENT_PROVIDER_NETS_CHECKOUT_KEY
-        return context
+        return super().get_context_data(
+            **{
+                **kwargs,
+                "payment": payment,
+                "nets_checkout_key": settings.PAYMENT_PROVIDER_NETS_CHECKOUT_KEY,
+            }
+        )
 
 
 class TF5PaymentDetailsView(
@@ -416,6 +424,7 @@ class TF5PaymentDetailsView(
     HasRestClientMixin,
     common_views.CustomLayoutMixin,
     UiViewMixin,
+    TF5Mixin,
     TemplateView,
 ):
     extend_template = "ui/layout.html"
@@ -424,17 +433,20 @@ class TF5PaymentDetailsView(
     required_permissions = ("payment.view_payment",)
 
     def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
         payment = self.rest_client.payment.get_by_declaration(int(self.kwargs["id"]))
         if not payment:
             raise ObjectDoesNotExist("Betaling kunne ikke findes")
 
-        context["payment"] = payment
-        return context
+        return super().get_context_data(
+            **{
+                **kwargs,
+                "payment": payment,
+            }
+        )
 
 
 class TF5PaymentRefreshView(
-    PermissionsRequiredMixin, HasRestClientMixin, UiViewMixin, View
+    PermissionsRequiredMixin, HasRestClientMixin, UiViewMixin, TF5Mixin, View
 ):
     async def post(self, request, *args, **kwargs):
         payment_refreshed = self.rest_client.payment.refresh(int(self.kwargs["id"]))

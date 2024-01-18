@@ -254,3 +254,13 @@ class CustomLayoutMixin:
                 "extend_template": self.extend_template,
             }
         )
+
+
+class TF5Mixin:
+    def get_context_data(self, **kwargs):
+        return super().get_context_data(
+            **{
+                **kwargs,
+                "hide_api_key_btn": True,
+            }
+        )
