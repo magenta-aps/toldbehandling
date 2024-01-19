@@ -253,7 +253,7 @@ msgstr ""
 
 #: told_common/forms.py
 msgid "Notat"
-msgstr ""
+msgstr "Allakkiaq"
 
 #: told_common/forms.py told_common/templates/told_common/tf5/view.html
 msgid "CPR"
@@ -267,15 +267,15 @@ msgstr "CVR-normu 8-nik kisitsisitaqassaaq 0-imillu aallartissanani"
 
 #: told_common/forms.py told_common/templates/told_common/tf5/view.html
 msgid "Telefon"
-msgstr ""
+msgstr "Oqarasuaat"
 
 #: told_common/forms.py told_common/templates/told_common/tf5/view.html
 msgid "Bookingnummer"
-msgstr ""
+msgstr "Nassiussat normuat"
 
 #: told_common/forms.py
 msgid "Varefakturanummer"
-msgstr ""
+msgstr "Nioqqutissat fakturaata normua"
 
 #: told_common/forms.py
 msgid "Vare­faktura"
@@ -287,11 +287,11 @@ msgstr "Nioqqutissaq"
 
 #: told_common/forms.py told_common/templates/told_common/tf5/form.html
 msgid "Vedhæftning af varefaktura"
-msgstr ""
+msgstr "Fakturamik ilanngussineq"
 
 #: told_common/forms.py
 msgid "Dato for indlevering til forsendelse"
-msgstr ""
+msgstr "Ulloq nassiussassanik tunniussivik"
 
 #: told_common/templates/told_common/access_denied.html
 msgid "Ingen adgang"
@@ -399,7 +399,7 @@ msgstr "Akiliisussaq (timmisartukkut nassiussaannarnut atugassaavoq)"
 
 #: told_common/templates/told_common/tf10/form.html
 msgid "Varelinjer med afgifter"
-msgstr ""
+msgstr "Titarnerit nioqqutissat akitsuutaasa allassimaffii"
 
 #: told_common/templates/told_common/tf10/form.html
 #: told_common/templates/told_common/tf5/form.html
@@ -588,37 +588,41 @@ msgstr "Naamik"
 msgid ""
 "Ansøgning om engangstilladelse til privat indførsel af øl, vin og spiritus"
 msgstr ""
+"Immiaaqqanik, viinninik imigassanillu kimittuunik nammineq atugassanik "
+"eqqussiniarluni ataasiartumik akuersissummik qinnuteqaat"
 
 #: told_common/templates/told_common/tf5/form.html
 msgid ""
 "Navn på den borger der importerer varerne. Det vil oftest være dig selv."
-msgstr ""
+msgstr "Innuttaasup nioqqutissanik eqqussisup aqqa. Amerlanertigut illiussaaq."
 
 #: told_common/templates/told_common/tf5/form.html
 msgid ""
 "Personnummer på den borger der importerer varerne. Det vil oftest være dig "
 "selv."
 msgstr ""
+"Innuttaasup nioqqutissanik eqqussisup inuttut normua. Amerlanertigut "
+"illiussaaq."
 
 #: told_common/templates/told_common/tf5/form.html
 msgid "Adresse for den borger der importerer varerne."
-msgstr ""
+msgstr "Innuttaasup nioqqutissanik eqqussisup najugaa."
 
 #: told_common/templates/told_common/tf5/form.html
 msgid "Postnummer for den borger der importerer varerne."
-msgstr ""
+msgstr "Innuttaasup nioqqutissanik eqqussisup postnormua."
 
 #: told_common/templates/told_common/tf5/form.html
 msgid "By for den borger der importerer varerne."
-msgstr ""
+msgstr "Innuttaasup nioqqutissanik eqqussisup illoqarfia."
 
 #: told_common/templates/told_common/tf5/form.html
 msgid "Telefonnummer for den borger der importerer varerne."
-msgstr ""
+msgstr "Innuttaasup nioqqutissanik eqqussisup oqarasuaataata normua."
 
 #: told_common/templates/told_common/tf5/form.html
 msgid "Bookingnummer for forsendelsen"
-msgstr ""
+msgstr "Nassiussat normuat"
 
 #: told_common/templates/told_common/tf5/form.html
 #: told_common/templates/told_common/tf5/view.html
@@ -630,15 +634,15 @@ msgstr "Eqqussuisinnaanermut akuersissutip nr.-a"
 #: told_common/templates/told_common/tf5/form.html
 #: told_common/templates/told_common/tf5/view.html
 msgid "Ingen"
-msgstr ""
+msgstr "Soqanngilaq"
 
 #: told_common/templates/told_common/tf5/form.html
 msgid "Fakturanummer fra leverandøren (hvor varerne er købt)"
-msgstr ""
+msgstr "Pisiffigisamit (nioqqutissanik pisiffigisamit) fakturap normua"
 
 #: told_common/templates/told_common/tf5/form.html
 msgid "Forventet dato for afgang til Grønland"
-msgstr ""
+msgstr "Ulloq Kalaallit Nunaannut aallarunneqarfissaattut naatsorsuutigisaq"
 
 #: told_common/templates/told_common/tf5/form.html
 #: told_common/templates/told_common/tf5/view.html
@@ -648,17 +652,17 @@ msgstr "Akitsuutit"
 #: told_common/templates/told_common/tf5/form.html
 #: told_common/templates/told_common/tf5/view.html
 msgid "Indførselsafgift"
-msgstr ""
+msgstr "Eqqussuinermi akitsuutit"
 
 #: told_common/templates/told_common/tf5/form.html
 #: told_common/templates/told_common/tf5/view.html
 msgid "Tillægsafgift alkohol"
-msgstr ""
+msgstr "Aalakoornartut tapiliussatut akitsuutaat"
 
 #: told_common/templates/told_common/tf5/form.html
 #: told_common/templates/told_common/tf5/view.html
 msgid "Ekspeditionsgebyr"
-msgstr ""
+msgstr "Sullissinermi akiliut"
 
 #: told_common/templates/told_common/tf5/form.html
 msgid "Betal"
@@ -672,19 +676,19 @@ msgstr "Pisiffigisamit fakturap nr.-a"
 
 #: told_common/templates/told_common/tf5/subform.html
 msgid "Type af vare der importeres"
-msgstr ""
+msgstr "Nioqqutissat eqqunneqartut suussusiat"
 
 #: told_common/templates/told_common/tf5/subform.html
 msgid "Mængde der importeres"
-msgstr ""
+msgstr "Eqqunneqartut annertussusiat"
 
 #: told_common/templates/told_common/tf5/subform.html
 msgid "Antal der importeres"
-msgstr ""
+msgstr "Eqqunneqartut qassiuneri"
 
 #: told_common/templates/told_common/tf5/subform.html
 msgid "Fakturabeløb inkl. moms."
-msgstr ""
+msgstr "Fakturap moms ilanngullugu akiligassartai"
 
 #: told_common/templates/told_common/tf5/view.html
 #, fuzzy
@@ -700,11 +704,11 @@ msgstr "Postnr/Illoqarfik"
 
 #: told_common/templates/told_common/tf5/view.html
 msgid "Fakturanummer"
-msgstr ""
+msgstr "Fakturap normua"
 
 #: told_common/templates/told_common/tf5/view.html
 msgid "Indleveringsdato"
-msgstr ""
+msgstr "Ulloq nassiussassatut tunniussivik"
 
 #: told_common/templates/told_common/tf5/view.html
 msgid "Varekode"
@@ -712,19 +716,19 @@ msgstr "Nioqqutissap kodea"
 
 #: told_common/templates/told_common/tf5/view.html
 msgid "kg | liter"
-msgstr ""
+msgstr "kg-t | literit"
 
 #: told_common/templates/told_common/tf5/view.html
 msgid "Annullér"
-msgstr ""
+msgstr "Atorunnaarsiguk"
 
 #: told_common/templates/told_common/tf5/view.html
 msgid "Opret tilladelse"
-msgstr ""
+msgstr "Akuersissut suliariuk"
 
 #: told_common/templates/told_common/tf5/view.html
 msgid "Send tilladelse"
-msgstr ""
+msgstr "Akuersissut nassiuguk"
 
 #: told_common/templates/told_common/widgets/file.html
 msgid "Gennemse..."

@@ -45,7 +45,7 @@ msgstr "Isersimaneq qaangiutereerpoq. Iseqqeriarit."
 
 #: ui/templates/ui/layout.html ui/templates/ui/print.html
 msgid "Toldbehandling"
-msgstr ""
+msgstr "Ilanngaaserineq"
 
 #: ui/templates/ui/layout.html
 msgid "TF5-anmeldelser"
@@ -79,16 +79,16 @@ msgstr "Iluarsiuk"
 
 #: ui/templates/ui/tf5/actions.html
 msgid "Vis"
-msgstr ""
+msgstr "Takutiguk"
 
 #: ui/templates/ui/tf5/actions.html ui/templates/ui/tf5/payment/checkout.html
 msgid "Betaling"
-msgstr ""
+msgstr "Akiliineq"
 
 #: ui/templates/ui/tf5/payment/checkout.html
 #: ui/templates/ui/tf5/payment/details.html
 msgid "Varelinjer"
-msgstr ""
+msgstr "Titarnerit nioqqutissat allanneqarfissaat"
 
 #: ui/templates/ui/tf5/payment/checkout.html
 #: ui/templates/ui/tf5/payment/details.html
@@ -98,7 +98,7 @@ msgstr "Nioqqutissap kodea"
 #: ui/templates/ui/tf5/payment/checkout.html
 #: ui/templates/ui/tf5/payment/details.html
 msgid "Antal / Mængde"
-msgstr ""
+msgstr "Qassiuneri / Annertussusii"
 
 #: ui/templates/ui/tf5/payment/checkout.html
 #: ui/templates/ui/tf5/payment/details.html
@@ -113,16 +113,16 @@ msgstr "Akitsuutit"
 #: ui/templates/ui/tf5/payment/checkout.html
 #: ui/templates/ui/tf5/payment/details.html
 msgid "Ingen varelinjer"
-msgstr ""
+msgstr "Titarnerit nioqqutissat allanneqarfissaat amigarput"
 
 #: ui/templates/ui/tf5/payment/checkout.html
 #: ui/templates/ui/tf5/payment/details.html
 msgid "Total"
-msgstr ""
+msgstr "Katillugit"
 
 #: ui/templates/ui/tf5/payment/checkout.html
 msgid "Detaljer"
-msgstr ""
+msgstr "Paasissutissat"
 
 #: ui/templates/ui/tf5/payment/checkout.html
 #: ui/templates/ui/tf5/payment/details.html
@@ -131,7 +131,7 @@ msgstr "Nassiussisoq"
 
 #: ui/templates/ui/tf5/payment/details.html
 msgid "Betalingsdetaljer"
-msgstr ""
+msgstr "Akiliinissap paasissutissartai"
 
 #: ui/templates/ui/tf5/payment/details.html
 msgid "Vareart"
@@ -139,15 +139,15 @@ msgstr "Nioqqutissaq"
 
 #: ui/templates/ui/tf5/payment/details.html
 msgid "Info"
-msgstr ""
+msgstr "Paasissutissaq"
 
 #: ui/templates/ui/tf5/payment/details.html
 msgid "Betalt"
-msgstr ""
+msgstr "Akilerneqareerput"
 
 #: ui/templates/ui/tf5/payment/details.html
 msgid "Ikke betalt"
-msgstr ""
+msgstr "Akilerneqanngillat"
 
 #: ui/templates/ui/tf5/payment/details.html
 msgid "Modtager"
@@ -229,7 +229,9 @@ msgid ""
 "Afgiftsanmeldelsen blev indregistreret. Blanket med nummer {id} afventer nu "
 "betaling."
 msgstr ""
+"Akitsuusigassat pillugit nalunaarut nalunaarsorneqarpoq. Immersukkap {id}-"
+"mik normullip akuerineqarnissaa utaqqisaalerpoq."
 
 #: ui/views.py
 msgid "Mine indførselstilladelser"
-msgstr ""
+msgstr "Eqqussisinnaanermut akuersissutikka"
