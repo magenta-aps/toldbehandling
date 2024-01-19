@@ -147,6 +147,7 @@ class Command(BaseCommand):
             ("add", varelinje_model),
             ("add", postforsendelse_model),
             ("add", fragtforsendelse_model),
+            ("add", notat_model),
             # Ingen add på afgiftstabel og vareafgiftssats
             ("change", afsender_model),
             ("change", modtager_model),

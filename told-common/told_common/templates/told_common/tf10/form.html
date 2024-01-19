@@ -404,9 +404,7 @@
         <hr/>
 
 		{% if vis_notater %}
-
         <h5>Notater</h5>
-
         <table class="table table-striped">
             <thead>
             <tr>
@@ -418,7 +416,7 @@
             <tbody>
             {% for notat in notater %}
             <tr>
-                <td>{{notat.brugernavn}}</td>
+                <td>{{notat.navn}}</td>
                 <td>{{notat.oprettet}}</td>
                 <td>{{notat.tekst}}</td>
             </tr>
@@ -429,15 +427,16 @@
             {% endfor %}
             </tbody>
         </table>
+        {% endif %}
 
+        {% if form.notat %}
         <div class="row">
             <div class="col-12 px-0">
                 {{form.notat}}
             </div>
         </div>
-		{% endif %}
+        {% endif %}
 
-        <hr/>
 
         {% if form.toldkategori %}
         <div class="row align-items-center">

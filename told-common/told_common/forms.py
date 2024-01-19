@@ -257,6 +257,9 @@ class TF10Form(BootstrapForm):
         required=True,
         widget=DateInput(),
     )
+    notat = forms.CharField(
+        widget=forms.Textarea(attrs={"placeholder": _("Notat")}), required=False
+    )
 
     def clean(self):
         if (

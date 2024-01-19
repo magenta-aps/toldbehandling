@@ -163,6 +163,12 @@ class TF10FormCreateView(
                 self.rest_client.varelinje.create(
                     subform.cleaned_data, self.anmeldelse_id
                 )
+
+        # Opret notat _efter_ den nye version af anmeldelsen,
+        # så vores historik-filtrering fungerer
+        notat = form.cleaned_data["notat"]
+        if notat:
+            self.rest_client.notat.create({"tekst": notat}, self.anmeldelse_id)
         messages.add_message(
             self.request,
             messages.INFO,
@@ -347,6 +353,11 @@ class TF10FormUpdateView(
             if id not in data_map:
                 self.rest_client.varelinje.delete(id)
 
+        # Opret notat _efter_ den nye version af anmeldelsen,
+        # så vores historik-filtrering fungerer
+        notat = form.cleaned_data["notat"]
+        if notat:
+            self.rest_client.notat.create({"tekst": notat}, self.anmeldelse_id)
         messages.add_message(
             self.request,
             messages.INFO,
@@ -398,12 +409,16 @@ class TF10FormUpdateView(
         return super().get_context_data(
             **{
                 **context,
+                "vis_notater": True,
                 "varesatser": dataclass_map_to_dict(
                     self.rest_client.varesatser_fra(self.item.dato)
                 ),
                 "item": self.item,
                 "afsender_existing_id": self.item.afsender.id,
                 "modtager_existing_id": self.item.modtager.id,
+                "notater": self.rest_client.notat.list(
+                    afgiftsanmeldelse=self.kwargs["id"]
+                ),
             }
         )
 

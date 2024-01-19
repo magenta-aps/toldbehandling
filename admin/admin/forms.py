@@ -77,9 +77,6 @@ class TF10ViewForm(BootstrapForm):
 
 
 class TF10UpdateForm(common_forms.TF10Form):
-    notat = forms.CharField(
-        widget=forms.Textarea(attrs={"placeholder": _("Notat")}), required=False
-    )
     toldkategori = forms.ChoiceField(
         required=False,
         choices=[(None, "---------")]
