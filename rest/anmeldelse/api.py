@@ -759,7 +759,7 @@ class NotatIn(ModelSchema):
 
 
 class NotatOut(ModelSchema):
-    brugernavn: str = None
+    navn: str = None
 
     class Config:
         model = Notat
@@ -772,8 +772,9 @@ class NotatOut(ModelSchema):
         ]
 
     @staticmethod
-    def resolve_brugernavn(item):
-        return item.user and item.user.username
+    def resolve_navn(item):
+        if item.user:
+            return " ".join(filter(None, [item.user.first_name, item.user.last_name]))
 
 
 class NotatFilterSchema(FilterSchema):

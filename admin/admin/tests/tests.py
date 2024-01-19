@@ -431,7 +431,7 @@ class TestGodkend(PermissionsTest, TestCase):
                         "id": 1,
                         "afgiftsanmeldelse": 1,
                         "tekst": "Hephey",
-                        "brugernavn": "tester",
+                        "navn": "tester",
                         "oprettet": "2023-10-01T00:00:00.000000+00:00",
                         "index": 0,
                     }
@@ -767,7 +767,7 @@ class TestPrisme(PermissionsTest, TestCase):
                         "id": 1,
                         "afgiftsanmeldelse": 1,
                         "tekst": "Hephey",
-                        "brugernavn": "tester",
+                        "navn": "tester",
                         "oprettet": "2023-10-01T00:00:00.000000+00:00",
                         "index": 0,
                     }
@@ -1271,7 +1271,7 @@ class AnmeldelseHistoryDetailViewTest(PermissionsTest, TestCase):
                                 oprettet=datetime(
                                     2023, 10, 1, 0, 0, tzinfo=timezone.utc
                                 ),
-                                brugernavn=None,
+                                navn=None,
                                 index=0,
                             )
                         ],
@@ -1517,7 +1517,7 @@ class AnmeldelseNotatTest(PermissionsTest, TestCase):
                         "id": 1,
                         "afgiftsanmeldelse": 1,
                         "tekst": "Hephey",
-                        "brugernavn": "tester",
+                        "navn": "tester",
                         "oprettet": "2023-10-01T00:00:00.000000+00:00",
                         "index": 0,
                     }

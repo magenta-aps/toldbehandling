@@ -294,24 +294,12 @@ class TF10FormUpdateView(common_views.TF10FormUpdateView):
         *common_views.TF10FormUpdateView.required_permissions,
     )
 
-    def form_valid(self, form, formset):
-        response = super().form_valid(form, formset)
-        # Opret notat _efter_ den nye version af anmeldelsen, så vores historik-filtrering fungerer
-        notat = form.cleaned_data["notat"]
-        if notat:
-            self.rest_client.notat.create({"tekst": notat}, self.kwargs["id"])
-        return response
-
     def get_context_data(self, **context):
         return super().get_context_data(
             **{
                 **context,
-                "vis_notater": True,
                 "admin": True,
                 "gem_top": True,
-                "notater": self.rest_client.notat.list(
-                    afgiftsanmeldelse=self.kwargs["id"]
-                ),
             }
         )
 

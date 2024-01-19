@@ -218,7 +218,7 @@ class Notat(ToldDataClass):
         ),
         default=None,
     )
-    brugernavn: str = None
+    navn: str = None
 
 
 @dataclass_json
