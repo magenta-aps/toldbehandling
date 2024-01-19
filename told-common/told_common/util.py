@@ -152,3 +152,9 @@ def format_daterange(start: date, end: date, sep: str = " - "):
 
 def join(delimiter: Union[str, int], items: Iterable[Union[Any]]):
     return str(delimiter).join([str(x) for x in items])
+
+
+def tf5_common_context() -> dict:
+    return {
+        "hide_api_key_btn": True,
+    }

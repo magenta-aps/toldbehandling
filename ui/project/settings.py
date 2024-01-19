@@ -89,6 +89,11 @@ TEMPLATES = [
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
+    "filters": {
+        "require_debug_false": {
+            "()": "django.utils.log.RequireDebugFalse",
+        },
+    },
     "formatters": {
         "simple": {
             "format": "{levelname} {message}",
@@ -100,16 +105,7 @@ LOGGING = {
             "class": "logging.StreamHandler",
         },
     },
-    "root": {
-        "handlers": ["gunicorn"],
-        "level": "INFO",
-    },
     "loggers": {
-        "django": {
-            "handlers": ["gunicorn"],
-            "level": "INFO",
-            "propagate": False,
-        },
         "weasyprint": {
             "handlers": ["gunicorn"],
             "level": "ERROR",
@@ -122,6 +118,19 @@ LOGGING = {
         },
     },
 }
+
+log_filename = "/log/ui.log"
+if os.path.isfile(log_filename):
+    LOGGING["handlers"]["file"] = {
+        "filters": ["require_debug_false"],
+        "class": "logging.FileHandler",  # eller WatchedFileHandler
+        "filename": log_filename,
+        "formatter": "simple",
+    }
+    LOGGING["root"] = {
+        "handlers": ["gunicorn", "file"],
+        "level": "INFO",
+    }
 
 WSGI_APPLICATION = "project.wsgi.application"
 

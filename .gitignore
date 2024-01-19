@@ -12,6 +12,7 @@ told-common/build/
 told-common/dist/
 told-common/told_common.egg-info/
 MitID/
+*.log.*
 
 *.venv*/
 *.vscode/

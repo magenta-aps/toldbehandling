@@ -10,6 +10,7 @@ MIGRATE=${MIGRATE:=false}
 TEST=${TEST:=false}
 CREATE_GROUPS=${CREATE_GROUPS:=true}
 CREATE_USERS=${CREATE_USERS:=false}
+CREATE_SYSTEM_USER=${CREATE_SYSTEM_USER:=false}
 DUMMYDATA=${DUMMYDATA:=false}
 DJANGO_DEBUG=${DJANGO_DEBUG:=false}
 MAKEMESSAGES=${MAKEMESSAGES:=true}
@@ -36,10 +37,10 @@ if [ "${CREATE_USERS,,}" = true ]; then
   echo 'create users'
   python manage.py create_dummy_users
 fi
-
-echo 'create system user'
-python manage.py create_system_user
-
+if [ "${CREATE_SYSTEM_USER,,}" = true ]; then
+  echo 'create system user'
+  python manage.py create_system_user
+fi
 if [ "${CREATE_POSTNUMRE,,}" = true ]; then
   echo 'creating postnumre'
   python manage.py create_postnumre

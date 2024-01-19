@@ -198,6 +198,11 @@ EKSPEDITIONSGEBYR = 250
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
+    "filters": {
+        "require_debug_false": {
+            "()": "django.utils.log.RequireDebugFalse",
+        },
+    },
     "formatters": {
         "simple": {
             "format": "{levelname} {message}",
@@ -214,11 +219,6 @@ LOGGING = {
         "level": "INFO",
     },
     "loggers": {
-        "django": {
-            "handlers": ["gunicorn"],
-            "level": "INFO",
-            "propagate": False,
-        },
         "weasyprint": {
             "handlers": ["gunicorn"],
             "level": "ERROR",
@@ -231,5 +231,18 @@ LOGGING = {
         },
     },
 }
+
+log_filename = "/log/admin.log"
+if os.path.isfile(log_filename):
+    LOGGING["handlers"]["file"] = {
+        "filters": ["require_debug_false"],
+        "class": "logging.FileHandler",  # eller WatchedFileHandler
+        "filename": log_filename,
+        "formatter": "simple",
+    }
+    LOGGING["root"] = {
+        "handlers": ["gunicorn", "file"],
+        "level": "INFO",
+    }
 
 TEMPUS_DOMINUS_DATETIME_FORMAT = "DD/MM/YYYY HH:mm"

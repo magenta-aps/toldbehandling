@@ -19,6 +19,7 @@ services:
       - ./rest/:/app
       - ./data/er:/static/er
       - file-data:/upload
+      - ./log/rest.log:/log/rest.log:rw
     depends_on:
       - toldbehandling-db
     environment:
@@ -41,13 +42,17 @@ services:
       - ./dev-environment/rest.env
     volumes:
       - ./rest/:/app
+      - ./dev-environment/logrotate.conf:/logrotate.conf:ro
       - ./dev-environment/rest.crontab:/crontab
+      - ./log/cron.log:/log/rest.log:rw
+      - ./log/:/log:rw
     depends_on:
       - toldbehandling-db
     environment:
       - MAKE_MIGRATIONS=false
       - MIGRATE=false
       - CREATE_USERS=false
+      - CREATE_SYSTEM_USER=false
       - CREATE_GROUPS=false
       - CREATE_POSTNUMRE=false
       - TEST=false
@@ -73,6 +78,7 @@ services:
       - file-data:/upload  # rw for at kunne teste; bør være ro i deployments
       - tf5-data:/tf5:rw
       - ./dev-environment/cert:/ssl:ro
+      - ./log/ui.log:/log/ui.log:rw
     environment:
       - MAKE_MIGRATIONS=true
       - MIGRATE=true
@@ -96,6 +102,7 @@ services:
       - ./admin/:/app
       - ./told-common/told_common/:/app/told_common
       - file-data:/upload  # rw for at kunne teste; bør være ro i deployments
+      - ./log/admin.log:/log/admin.log:rw
     environment:
       - MAKE_MIGRATIONS=true
       - MIGRATE=true
