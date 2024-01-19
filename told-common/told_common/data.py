@@ -273,7 +273,6 @@ class FragtForsendelse(ToldDataClass):
     id: int
     forsendelsestype: Forsendelsestype
     fragtbrevsnummer: str
-    fragtbrev: File
     forbindelsesnr: str
     afgangsdato: date = field(
         metadata=config(
@@ -282,6 +281,7 @@ class FragtForsendelse(ToldDataClass):
             mm_field=fields.Date(format="iso"),
         ),
     )
+    fragtbrev: Optional[File] = None
 
 
 @dataclass_json
@@ -291,9 +291,9 @@ class Varelinje(ToldDataClass):
     afgiftsanmeldelse: int
     vareafgiftssats: int
     afgiftsbeløb: Decimal
-    fakturabeløb: Decimal = None
-    mængde: Decimal = None
-    antal: int = None
+    fakturabeløb: Optional[Decimal] = None
+    mængde: Optional[Decimal] = None
+    antal: Optional[int] = None
 
 
 @dataclass_json
@@ -327,7 +327,7 @@ class Afgiftsanmeldelse(ToldDataClass):
     )
     notater: Optional[List[Notat]]
     prismeresponses: Optional[List[PrismeResponse]]
-    varelinjer: List[Varelinje] = None
+    varelinjer: Optional[List[Varelinje]] = None
     oprettet_af: Optional[dict] = None
     oprettet_på_vegne_af: Optional[dict] = None
     toldkategori: Optional[str] = None

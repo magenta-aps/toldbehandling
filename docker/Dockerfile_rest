@@ -17,7 +17,7 @@ COPY rest/requirements.txt /app/requirements.txt
 RUN pip install --no-cache-dir -r /app/requirements.txt
 # hadolint ignore=DL3008
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends gettext python3-distutils graphviz && \
+    apt-get install -y --no-install-recommends gettext python3-distutils graphviz logrotate && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 RUN wget --progress=dot:giga "$SUPERCRONIC_URL" \
@@ -26,7 +26,9 @@ RUN wget --progress=dot:giga "$SUPERCRONIC_URL" \
     && mv "$SUPERCRONIC" "/usr/local/bin/${SUPERCRONIC}" \
     && ln -s "/usr/local/bin/${SUPERCRONIC}" /usr/local/bin/supercronic
 
-RUN mkdir /upload && chown -R toldbehandling /upload
+RUN mkdir /upload && \
+    chown -R toldbehandling /upload && \
+    chown -R toldbehandling /var/lib/logrotate
 USER toldbehandling
 COPY ./docker/entrypoint_rest.sh /entrypoint.sh
 COPY --chown=toldbehandling:toldbehandling ./rest /app

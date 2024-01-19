@@ -7,3 +7,7 @@
 # * * * * * command to execute
 
   * * * * * python manage.py send_eboks
+
+# For at teste logrotation. Den vil rotere logs hvert minut,
+# så den er udkommenteret for at undgå at spamme filer i log-mappen
+# * * * * * logrotate --force /logrotate.conf

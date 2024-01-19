@@ -26,7 +26,7 @@ from told_common.data import (
     Vareafgiftssats,
 )
 from told_common.rest_client import RestClient
-from told_common.util import JSONEncoder, dataclass_map_to_dict
+from told_common.util import JSONEncoder, dataclass_map_to_dict, tf5_common_context
 from told_common.view_mixins import (
     CustomLayoutMixin,
     FormWithFormsetView,
@@ -641,6 +641,7 @@ class TF5View(
         return super().get_context_data(
             **{
                 **kwargs,
+                **tf5_common_context(),
                 "object": self.object,
                 "tillægsafgift": self.object.tillægsafgift,
                 # Opret en path i admin/urls.py ved navn "tf5_tilladelse"
@@ -711,6 +712,7 @@ class TF5ListView(PermissionsRequiredMixin, HasRestClientMixin, TF5Mixin, ListVi
         return super().get_context_data(
             **{
                 **context,
+                **tf5_common_context(),
                 "highlight": self.request.GET.get("highlight"),
                 "extend_template": self.extend_template,
             }
@@ -884,6 +886,7 @@ class TF5UpdateView(
         return super().get_context_data(
             **{
                 **context,
+                **tf5_common_context(),
                 "varesatser": dataclass_map_to_dict(
                     self.rest_client.varesatser_all(
                         filter_afgiftstabel={"gyldig_til__gte": date.today()},
