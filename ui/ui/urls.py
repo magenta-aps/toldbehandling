@@ -70,10 +70,6 @@ if settings.TF5_ENABLED:
             name="tf5_tilladelse",
         ),
         path(
-            "blanket/tf5/tilladelse",
-            TemplateView.as_view(template_name="told_common/tf5/tilladelse.html"),
-        ),
-        path(
             "payment/checkout/<int:id>",
             views.TF5PaymentCheckoutView.as_view(),
             name="tf5_payment_checkout",
