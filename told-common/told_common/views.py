@@ -14,6 +14,7 @@ from django.http import FileResponse, Http404, JsonResponse
 from django.shortcuts import redirect
 from django.template import loader
 from django.urls import reverse
+from django.utils.timezone import get_current_timezone
 from django.utils.translation import gettext_lazy as _
 from django.views import View
 from django.views.generic import FormView, RedirectView
@@ -732,6 +733,9 @@ class TF5ListView(PermissionsRequiredMixin, HasRestClientMixin, TF5Mixin, ListVi
                 "extend_template": self.extend_template,
             }
         )
+
+
+
 
     def item_to_json_dict(
         self, item: Dict[str, Any], context: Dict[str, Any], index: int
