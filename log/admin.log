@@ -1,0 +1,300 @@
+WARNING Bad Request: /admin/blanket/tf10
+WARNING Bad Request: /admin/blanket/tf10
+WARNING Bad Request: /admin/blanket/tf10
+WARNING Bad Request: /admin/blanket/tf10
+WARNING Bad Request: /admin/blanket/tf10
+WARNING Bad Request: /admin/blanket/tf10
+WARNING Bad Request: /admin/blanket/tf10
+WARNING Bad Request: /admin/blanket/tf10
+WARNING Bad Request: /admin/blanket/tf10
+WARNING Bad Request: /admin/blanket/tf10
+WARNING Bad Request: /admin/blanket/tf10
+WARNING Bad Request: /admin/blanket/tf10
+WARNING Bad Request: /admin/blanket/tf10
+WARNING Forbidden: /admin/blanket/tf10
+WARNING Forbidden: /admin/blanket/tf10
+WARNING Forbidden: /admin/blanket/tf10
+WARNING Forbidden: /admin/blanket/tf10
+WARNING Forbidden: /admin/blanket/tf10
+WARNING Forbidden: /admin/blanket/tf10
+WARNING Forbidden: /admin/blanket/tf10
+WARNING Forbidden: /admin/file/fragtbrev/1
+WARNING Forbidden: /admin/afgiftstabel/1/xlsx
+WARNING Forbidden: /admin/afgiftstabel/1/xlsx
+WARNING Forbidden: /admin/afgiftstabel/1/xlsx
+WARNING Forbidden: /admin/afgiftstabel/1/csv
+WARNING Forbidden: /admin/afgiftstabel/1/csv
+WARNING Forbidden: /admin/afgiftstabel/1/csv
+WARNING Forbidden: /admin/afgiftstabel
+WARNING Forbidden: /admin/afgiftstabel
+ERROR Internal Server Error: /admin/blanket/tf10/1/history/0
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/base.py", line 220, in _get_response
+    response = response.render()
+               ^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/template/response.py", line 114, in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/template/response.py", line 92, in rendered_content
+    return template.render(context, self._request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/template/backends/django.py", line 57, in render
+    context = make_context(
+              ^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/template/context.py", line 278, in make_context
+    raise TypeError(
+TypeError: context must be a dict rather than MagicMock.
+WARNING Forbidden: /admin/blanket/tf10/1/history
+WARNING Forbidden: /admin/blanket/tf10/1/history
+WARNING Forbidden: /admin/blanket/tf10/1/history
+WARNING Forbidden: /admin/blanket/tf10/1/history
+WARNING Forbidden: /admin/blanket/tf10/1/history
+WARNING Forbidden: /admin/blanket/tf10/1/history
+WARNING Forbidden: /admin/blanket/tf10/1/edit
+WARNING Forbidden: /admin/blanket/tf10/1/edit
+WARNING Forbidden: /admin/blanket/tf10/1/edit
+WARNING Forbidden: /admin/blanket/tf10/1/edit
+WARNING Forbidden: /admin/blanket/tf10/1/edit
+WARNING Forbidden: /admin/blanket/tf10/1/edit
+WARNING Forbidden: /admin/blanket/tf10/1/edit
+WARNING Forbidden: /admin/blanket/tf10/1/edit
+WARNING Forbidden: /admin/blanket/tf10/1/edit
+WARNING Forbidden: /admin/blanket/tf10/1/edit
+WARNING Forbidden: /admin/blanket/tf10/1/edit
+WARNING Forbidden: /admin/blanket/tf10/1/edit
+WARNING Forbidden: /admin/blanket/tf10/1/edit
+WARNING Forbidden: /admin/blanket/tf10/1/edit
+WARNING Forbidden: /admin/blanket/tf10/1/edit
+WARNING Forbidden: /admin/file/fragtbrev/1
+WARNING Forbidden: /admin/statistik
+WARNING Forbidden: /admin/blanket/tf10/edit
+WARNING Forbidden: /admin/blanket/tf10/edit
+WARNING Forbidden: /admin/blanket/tf10/edit
+WARNING Forbidden: /admin/blanket/tf10/edit
+WARNING Forbidden: /admin/blanket/tf10/edit
+WARNING Forbidden: /admin/blanket/tf10/edit
+WARNING Forbidden: /admin/blanket/tf10/edit
+WARNING Forbidden: /admin/blanket/tf10/edit
+WARNING Not Found: /admin/blanket/tf10/2
+ERROR Internal Server Error: /admin/blanket/tf10/1
+WARNING Forbidden: /admin/blanket/tf10/1
+WARNING Forbidden: /admin/blanket/tf10/1
+WARNING Forbidden: /admin/blanket/tf10/1
+WARNING Forbidden: /admin/blanket/tf10/1
+WARNING Forbidden: /admin/blanket/tf10/1
+WARNING Forbidden: /admin/blanket/tf10/1
+WARNING Forbidden: /admin/blanket/tf10/1
+WARNING Forbidden: /admin/blanket/tf10/1
+WARNING Not Found: /admin/blanket/tf10/2
+ERROR Internal Server Error: /admin/blanket/tf10/1
+WARNING Forbidden: /admin/blanket/tf10/1
+WARNING Forbidden: /admin/blanket/tf10/1
+WARNING Forbidden: /admin/blanket/tf10/1
+WARNING Forbidden: /admin/blanket/tf10/1
+WARNING Forbidden: /admin/blanket/tf10/1
+WARNING Forbidden: /admin/blanket/tf10/1
+WARNING Forbidden: /admin/blanket/tf10/1
+WARNING Forbidden: /admin/blanket/tf10/1
+WARNING Bad Request: /admin/blanket/tf10
+WARNING Bad Request: /admin/blanket/tf10
+WARNING Bad Request: /admin/blanket/tf10
+WARNING Bad Request: /admin/blanket/tf10
+WARNING Bad Request: /admin/blanket/tf10
+WARNING Bad Request: /admin/blanket/tf10
+WARNING Bad Request: /admin/blanket/tf10
+WARNING Bad Request: /admin/blanket/tf10
+WARNING Bad Request: /admin/blanket/tf10
+WARNING Bad Request: /admin/blanket/tf10
+WARNING Bad Request: /admin/blanket/tf10
+WARNING Bad Request: /admin/blanket/tf10
+WARNING Bad Request: /admin/blanket/tf10
+WARNING Forbidden: /admin/blanket/tf10
+WARNING Forbidden: /admin/blanket/tf10
+WARNING Forbidden: /admin/blanket/tf10
+WARNING Forbidden: /admin/blanket/tf10
+WARNING Forbidden: /admin/blanket/tf10
+WARNING Forbidden: /admin/blanket/tf10
+WARNING Forbidden: /admin/blanket/tf10
+WARNING Forbidden: /admin/file/fragtbrev/1
+WARNING Forbidden: /admin/afgiftstabel/1/xlsx
+WARNING Forbidden: /admin/afgiftstabel/1/xlsx
+WARNING Forbidden: /admin/afgiftstabel/1/xlsx
+WARNING Forbidden: /admin/afgiftstabel/1/csv
+WARNING Forbidden: /admin/afgiftstabel/1/csv
+WARNING Forbidden: /admin/afgiftstabel/1/csv
+WARNING Forbidden: /admin/afgiftstabel
+WARNING Forbidden: /admin/afgiftstabel
+ERROR Internal Server Error: /admin/blanket/tf10/1/history/0
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/base.py", line 220, in _get_response
+    response = response.render()
+               ^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/template/response.py", line 114, in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/template/response.py", line 92, in rendered_content
+    return template.render(context, self._request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/template/backends/django.py", line 57, in render
+    context = make_context(
+              ^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/template/context.py", line 278, in make_context
+    raise TypeError(
+TypeError: context must be a dict rather than MagicMock.
+WARNING Forbidden: /admin/blanket/tf10/1/history
+WARNING Forbidden: /admin/blanket/tf10/1/history
+WARNING Forbidden: /admin/blanket/tf10/1/history
+WARNING Forbidden: /admin/blanket/tf10/1/history
+WARNING Forbidden: /admin/blanket/tf10/1/history
+WARNING Forbidden: /admin/blanket/tf10/1/history
+WARNING Forbidden: /admin/blanket/tf10/1/edit
+WARNING Forbidden: /admin/blanket/tf10/1/edit
+WARNING Forbidden: /admin/blanket/tf10/1/edit
+WARNING Forbidden: /admin/blanket/tf10/1/edit
+WARNING Forbidden: /admin/blanket/tf10/1/edit
+WARNING Forbidden: /admin/blanket/tf10/1/edit
+WARNING Forbidden: /admin/blanket/tf10/1/edit
+WARNING Forbidden: /admin/blanket/tf10/1/edit
+WARNING Forbidden: /admin/blanket/tf10/1/edit
+WARNING Forbidden: /admin/blanket/tf10/1/edit
+WARNING Forbidden: /admin/blanket/tf10/1/edit
+WARNING Forbidden: /admin/blanket/tf10/1/edit
+WARNING Forbidden: /admin/blanket/tf10/1/edit
+WARNING Forbidden: /admin/blanket/tf10/1/edit
+WARNING Forbidden: /admin/blanket/tf10/1/edit
+WARNING Forbidden: /admin/file/fragtbrev/1
+WARNING Forbidden: /admin/statistik
+WARNING Forbidden: /admin/blanket/tf10/edit
+WARNING Forbidden: /admin/blanket/tf10/edit
+WARNING Forbidden: /admin/blanket/tf10/edit
+WARNING Forbidden: /admin/blanket/tf10/edit
+WARNING Forbidden: /admin/blanket/tf10/edit
+WARNING Forbidden: /admin/blanket/tf10/edit
+WARNING Forbidden: /admin/blanket/tf10/edit
+WARNING Forbidden: /admin/blanket/tf10/edit
+WARNING Not Found: /admin/blanket/tf10/2
+ERROR Internal Server Error: /admin/blanket/tf10/1
+WARNING Forbidden: /admin/blanket/tf10/1
+WARNING Forbidden: /admin/blanket/tf10/1
+WARNING Forbidden: /admin/blanket/tf10/1
+WARNING Forbidden: /admin/blanket/tf10/1
+WARNING Forbidden: /admin/blanket/tf10/1
+WARNING Forbidden: /admin/blanket/tf10/1
+WARNING Forbidden: /admin/blanket/tf10/1
+WARNING Forbidden: /admin/blanket/tf10/1
+WARNING Not Found: /admin/blanket/tf10/2
+ERROR Internal Server Error: /admin/blanket/tf10/1
+WARNING Forbidden: /admin/blanket/tf10/1
+WARNING Forbidden: /admin/blanket/tf10/1
+WARNING Forbidden: /admin/blanket/tf10/1
+WARNING Forbidden: /admin/blanket/tf10/1
+WARNING Forbidden: /admin/blanket/tf10/1
+WARNING Forbidden: /admin/blanket/tf10/1
+WARNING Forbidden: /admin/blanket/tf10/1
+WARNING Forbidden: /admin/blanket/tf10/1
+WARNING Bad Request: /admin/blanket/tf10
+WARNING Bad Request: /admin/blanket/tf10
+WARNING Bad Request: /admin/blanket/tf10
+WARNING Bad Request: /admin/blanket/tf10
+WARNING Bad Request: /admin/blanket/tf10
+WARNING Bad Request: /admin/blanket/tf10
+WARNING Bad Request: /admin/blanket/tf10
+WARNING Bad Request: /admin/blanket/tf10
+WARNING Bad Request: /admin/blanket/tf10
+WARNING Bad Request: /admin/blanket/tf10
+WARNING Bad Request: /admin/blanket/tf10
+WARNING Bad Request: /admin/blanket/tf10
+WARNING Bad Request: /admin/blanket/tf10
+WARNING Forbidden: /admin/blanket/tf10
+WARNING Forbidden: /admin/blanket/tf10
+WARNING Forbidden: /admin/blanket/tf10
+WARNING Forbidden: /admin/blanket/tf10
+WARNING Forbidden: /admin/blanket/tf10
+WARNING Forbidden: /admin/blanket/tf10
+WARNING Forbidden: /admin/blanket/tf10
+WARNING Forbidden: /admin/file/fragtbrev/1
+WARNING Forbidden: /admin/afgiftstabel/1/xlsx
+WARNING Forbidden: /admin/afgiftstabel/1/xlsx
+WARNING Forbidden: /admin/afgiftstabel/1/xlsx
+WARNING Forbidden: /admin/afgiftstabel/1/csv
+WARNING Forbidden: /admin/afgiftstabel/1/csv
+WARNING Forbidden: /admin/afgiftstabel/1/csv
+WARNING Forbidden: /admin/afgiftstabel
+WARNING Forbidden: /admin/afgiftstabel
+ERROR Internal Server Error: /admin/blanket/tf10/1/history/0
+Traceback (most recent call last):
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/core/handlers/base.py", line 220, in _get_response
+    response = response.render()
+               ^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/template/response.py", line 114, in render
+    self.content = self.rendered_content
+                   ^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/template/response.py", line 92, in rendered_content
+    return template.render(context, self._request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/template/backends/django.py", line 57, in render
+    context = make_context(
+              ^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/site-packages/django/template/context.py", line 278, in make_context
+    raise TypeError(
+TypeError: context must be a dict rather than MagicMock.
+WARNING Forbidden: /admin/blanket/tf10/1/history
+WARNING Forbidden: /admin/blanket/tf10/1/history
+WARNING Forbidden: /admin/blanket/tf10/1/history
+WARNING Forbidden: /admin/blanket/tf10/1/history
+WARNING Forbidden: /admin/blanket/tf10/1/history
+WARNING Forbidden: /admin/blanket/tf10/1/history
+WARNING Forbidden: /admin/blanket/tf10/1/edit
+WARNING Forbidden: /admin/blanket/tf10/1/edit
+WARNING Forbidden: /admin/blanket/tf10/1/edit
+WARNING Forbidden: /admin/blanket/tf10/1/edit
+WARNING Forbidden: /admin/blanket/tf10/1/edit
+WARNING Forbidden: /admin/blanket/tf10/1/edit
+WARNING Forbidden: /admin/blanket/tf10/1/edit
+WARNING Forbidden: /admin/blanket/tf10/1/edit
+WARNING Forbidden: /admin/blanket/tf10/1/edit
+WARNING Forbidden: /admin/blanket/tf10/1/edit
+WARNING Forbidden: /admin/blanket/tf10/1/edit
+WARNING Forbidden: /admin/blanket/tf10/1/edit
+WARNING Forbidden: /admin/blanket/tf10/1/edit
+WARNING Forbidden: /admin/blanket/tf10/1/edit
+WARNING Forbidden: /admin/blanket/tf10/1/edit
+WARNING Forbidden: /admin/file/fragtbrev/1
+WARNING Forbidden: /admin/statistik
+WARNING Forbidden: /admin/blanket/tf10/edit
+WARNING Forbidden: /admin/blanket/tf10/edit
+WARNING Forbidden: /admin/blanket/tf10/edit
+WARNING Forbidden: /admin/blanket/tf10/edit
+WARNING Forbidden: /admin/blanket/tf10/edit
+WARNING Forbidden: /admin/blanket/tf10/edit
+WARNING Forbidden: /admin/blanket/tf10/edit
+WARNING Forbidden: /admin/blanket/tf10/edit
+WARNING Not Found: /admin/blanket/tf10/2
+ERROR Internal Server Error: /admin/blanket/tf10/1
+WARNING Forbidden: /admin/blanket/tf10/1
+WARNING Forbidden: /admin/blanket/tf10/1
+WARNING Forbidden: /admin/blanket/tf10/1
+WARNING Forbidden: /admin/blanket/tf10/1
+WARNING Forbidden: /admin/blanket/tf10/1
+WARNING Forbidden: /admin/blanket/tf10/1
+WARNING Forbidden: /admin/blanket/tf10/1
+WARNING Forbidden: /admin/blanket/tf10/1
+WARNING Not Found: /admin/blanket/tf10/2
+ERROR Internal Server Error: /admin/blanket/tf10/1
+WARNING Forbidden: /admin/blanket/tf10/1
+WARNING Forbidden: /admin/blanket/tf10/1
+WARNING Forbidden: /admin/blanket/tf10/1
+WARNING Forbidden: /admin/blanket/tf10/1
+WARNING Forbidden: /admin/blanket/tf10/1
+WARNING Forbidden: /admin/blanket/tf10/1
+WARNING Forbidden: /admin/blanket/tf10/1
+WARNING Forbidden: /admin/blanket/tf10/1

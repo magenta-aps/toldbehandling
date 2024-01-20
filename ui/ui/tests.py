@@ -734,7 +734,7 @@ class TF5BlanketTest(TestMixin, HasLogin, TestCase):
                 "items": [
                     {
                         "id": 1,
-                        "gyldig_fra": "2023-01-01",
+                        "gyldig_fra": "2023-01-01T00:00:00-03:00",
                         "gyldig_til": None,
                         "kladde": False,
                     }
