@@ -734,9 +734,6 @@ class TF5ListView(PermissionsRequiredMixin, HasRestClientMixin, TF5Mixin, ListVi
             }
         )
 
-
-
-
     def item_to_json_dict(
         self, item: Dict[str, Any], context: Dict[str, Any], index: int
     ) -> Dict[str, Any]:
