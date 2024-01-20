@@ -184,7 +184,7 @@ PAYMENT_PROVIDER_NETS_TERMS_URL = os.environ.get(
 
 LOGGING = {
     "version": 1,
-    "disable_existing_loggers": False,
+    "disable_existing_loggers": True,
     "filters": {
         "require_debug_false": {
             "()": "django.utils.log.RequireDebugFalse",
@@ -205,6 +205,13 @@ LOGGING = {
         "handlers": ["gunicorn"],
         "level": "INFO",
     },
+    "loggers": {
+        "django": {
+            "handlers": ["gunicorn"],
+            "level": "INFO",
+            "propagate": False,
+        },
+    },
 }
 
 log_filename = "/log/rest.log"
@@ -219,3 +226,4 @@ if os.path.isfile(log_filename):
         "handlers": ["gunicorn", "file"],
         "level": "INFO",
     }
+    LOGGING["loggers"]["django"]["handlers"].append("file")

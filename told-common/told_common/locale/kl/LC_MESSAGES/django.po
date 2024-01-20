@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-19 10:10-0200\n"
+"POT-Creation-Date: 2024-01-19 12:44-0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -219,6 +219,10 @@ msgid "Afsender"
 msgstr "Nassiussisoq"
 
 #: told_common/forms.py
+msgid "Notat"
+msgstr "Allakkiaq"
+
+#: told_common/forms.py
 msgid "Mangler fragtbrev"
 msgstr "Nassiussat allagartaat amigaataavoq"
 
@@ -250,10 +254,6 @@ msgstr "Akuerineqarpoq"
 #: told_common/forms.py told_common/views.py
 msgid "Sendt til Prisme"
 msgstr ""
-
-#: told_common/forms.py
-msgid "Notat"
-msgstr "Allakkiaq"
 
 #: told_common/forms.py told_common/templates/told_common/tf5/view.html
 msgid "CPR"
