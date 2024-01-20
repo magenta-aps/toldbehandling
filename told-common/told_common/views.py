@@ -14,7 +14,6 @@ from django.http import FileResponse, Http404, JsonResponse
 from django.shortcuts import redirect
 from django.template import loader
 from django.urls import reverse
-from django.utils.timezone import get_current_timezone
 from django.utils.translation import gettext_lazy as _
 from django.views import View
 from django.views.generic import FormView, RedirectView
