@@ -427,6 +427,8 @@ class AfgiftanmeldelseRestClient(ModelRestClient):
                 )
         for item in data["items"]:
             self.set_file(item, "leverandørfaktura")
+            if item.get("fragtforsendelse"):
+                self.set_file(item["fragtforsendelse"], "fragtbrev")
         return data["count"], [
             Afgiftsanmeldelse.from_dict(item) for item in data["items"]
         ]
