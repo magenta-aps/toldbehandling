@@ -49,8 +49,8 @@
     >
         <thead>
         <tr>
-            <th data-sortable="true" data-field="gyldig_fra" class="col-3">Gyldig fra</th>
-            <th data-sortable="true" data-field="gyldig_til" class="col-3">Gyldig til</th>
+            <th data-sortable="true" data-field="gyldig_fra" class="col-3" data-formatter="datoFormatter">Gyldig fra</th>
+            <th data-sortable="true" data-field="gyldig_til" class="col-3" data-formatter="datoFormatter">Gyldig til</th>
             <th data-sortable="true" data-field="kladde" class="col-3" data-formatter="kladdeFormatter">Kladde</th>
             <th data-field="actions" class="col-3">Handlinger</th>
         </tr>
@@ -67,14 +67,14 @@
 
                 <td>
                     {% if item.gyldig_fra %}
-                    {{item.gyldig_fra|date:"d.m.Y H:i:s"}}
+                    {{item.gyldig_fra|date:"c"}}
                     {% else %}
                     -
                     {% endif %}
                 </td>
                 <td>
                     {% if item.gyldig_til %}
-                    {{item.gyldig_til|date:"d.m.Y H:i:s"}}
+                    {{item.gyldig_til|date:"c"}}
                     {% else %}
                     -
                     {% endif %}
@@ -114,6 +114,23 @@
     }
     function kladdeFormatter(value, row) {
         return bool(value) ? "Ja" : "Nej";
+    }
+    function datoFormatter(value) {
+        if (value && value !== "-") {
+            const parsed = new Date(value);
+            const date = [
+                String(parsed.getDate()).padStart(2, "0"),
+                String(parsed.getMonth() + 1).padStart(2, "0"),
+                parsed.getFullYear()
+            ].join(".");
+            const time = [
+                String(parsed.getHours()).padStart(2, "0"),
+                String(parsed.getMinutes()).padStart(2, "0"),
+                String(parsed.getSeconds()).padStart(2, "0"),
+            ].join(":");
+            return [date, time, "(lokal tid)"].join(" ");
+        }
+        return "-";
     }
 </script>
 {% endblock %}

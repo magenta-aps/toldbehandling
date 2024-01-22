@@ -709,6 +709,7 @@ class AnmeldelseListViewTest(HasLogin):
 
     @patch.object(requests.sessions.Session, "get")
     def test_list(self, mock_get):
+        self.maxDiff = None
         mock_get.side_effect = self.mock_requests_get
         self.login()
         url = self.list_url
@@ -718,7 +719,7 @@ class AnmeldelseListViewTest(HasLogin):
         expected = [
             {
                 "Nummer": "1",
-                "Dato": "2023-09-03",
+                "Dato": "2023-09-03T00:00:00-02:00",
                 "Afsender": "Testfirma 5",
                 "Modtager": "Testfirma 3",
                 "Status": "Godkendt",
@@ -726,7 +727,7 @@ class AnmeldelseListViewTest(HasLogin):
             },
             {
                 "Nummer": "2",
-                "Dato": "2023-09-02",
+                "Dato": "2023-09-02T00:00:00-02:00",
                 "Afsender": "Testfirma 4",
                 "Modtager": "Testfirma 1",
                 "Status": "Afvist",
@@ -742,7 +743,7 @@ class AnmeldelseListViewTest(HasLogin):
             },
             {
                 "Nummer": "3",
-                "Dato": "2023-09-01",
+                "Dato": "2023-09-01T00:00:00-02:00",
                 "Afsender": "Testfirma 6",
                 "Modtager": "Testfirma 2",
                 "Status": "Ny",
