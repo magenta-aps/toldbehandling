@@ -244,20 +244,6 @@ function trAttributter(data, index) {
         "data-id": data.id
     };
 }
-function datoFormatter(value) {
-    const parsed = new Date(value);
-    const date = [
-        String(parsed.getDate()).padStart(2, "0"),
-        String(parsed.getMonth() + 1).padStart(2, "0"),
-        parsed.getFullYear()
-    ].join(".");
-    const time = [
-        String(parsed.getHours()).padStart(2, "0"),
-        String(parsed.getMinutes()).padStart(2, "0"),
-        String(parsed.getSeconds()).padStart(2, "0"),
-    ].join(":");
-    return [date, time, "(lokal tid)"].join(" ");
-}
 </script>
 
 {% if can_edit_multiple %}
