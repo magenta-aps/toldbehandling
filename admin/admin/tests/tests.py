@@ -1753,13 +1753,13 @@ class AfgiftstabelListViewTest(PermissionsTest, TestCase):
             self.strip_html_tags(table_data),
             [
                 {
-                    "Gyldig fra": "01.01.2023 00:00:00",
-                    "Gyldig til": "01.01.2024 00:00:00",
+                    "Gyldig fra": "2023-01-01T00:00:00-03:00",
+                    "Gyldig til": "2024-01-01T00:00:00-02:00",
                     "Kladde": "Nej",
                     "Handlinger": "Vis Download .xlsx .csv",
                 },
                 {
-                    "Gyldig fra": "01.01.2024 00:00:00",
+                    "Gyldig fra": "2024-01-01T00:00:00-02:00",
                     "Gyldig til": "-",
                     "Kladde": "Nej",
                     "Handlinger": "Vis Download .xlsx .csv",

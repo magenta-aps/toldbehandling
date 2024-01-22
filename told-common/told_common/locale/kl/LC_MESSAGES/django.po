@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-19 12:44-0200\n"
+"POT-Creation-Date: 2024-01-20 09:22-0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -387,7 +387,6 @@ msgid "Fragtbrevnr/postforsendelsesnummer"
 msgstr "Nassiussat allagartaata nr-a/allakkatigut nassiussat normuat"
 
 #: told_common/templates/told_common/tf10/form.html
-#: told_common/templates/told_common/tf5/list.html
 #, fuzzy
 #| msgid "Afgangsdato mellem"
 msgid "Afgangsdato"
@@ -674,6 +673,11 @@ msgstr "Akiliisussaq"
 msgid "Leverandørfakturanummer"
 msgstr "Pisiffigisamit fakturap nr.-a"
 
+#: told_common/templates/told_common/tf5/list.html
+#: told_common/templates/told_common/tf5/view.html
+msgid "Indleveringsdato"
+msgstr "Ulloq nassiussassatut tunniussivik"
+
 #: told_common/templates/told_common/tf5/subform.html
 msgid "Type af vare der importeres"
 msgstr "Nioqqutissat eqqunneqartut suussusiat"
@@ -705,10 +709,6 @@ msgstr "Postnr/Illoqarfik"
 #: told_common/templates/told_common/tf5/view.html
 msgid "Fakturanummer"
 msgstr "Fakturap normua"
-
-#: told_common/templates/told_common/tf5/view.html
-msgid "Indleveringsdato"
-msgstr "Ulloq nassiussassatut tunniussivik"
 
 #: told_common/templates/told_common/tf5/view.html
 msgid "Varekode"

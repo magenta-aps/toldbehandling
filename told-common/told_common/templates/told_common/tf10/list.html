@@ -134,7 +134,7 @@
             <th data-field="select"><input type="checkbox" id="select_all"/></th>
             {% endif %}
             <th data-sortable="true" data-field="id">{% translate "Nummer" %}</th>
-            <th data-sortable="true" data-field="dato">{% translate "Dato" %}</th>
+            <th data-sortable="true" data-field="dato" data-formatter="datoFormatter">{% translate "Dato" %}</th>
             <th data-sortable="true" data-field="afsender" data-formatter="aktørFormatter">{% translate "Afsender" %}</th>
             <th data-sortable="true" data-field="modtager" data-formatter="aktørFormatter">{% translate "Modtager" %}</th>
             <th data-sortable="true" data-field="status" data-formatter="statusFormatter">{% translate "Status" %}</th>
@@ -150,7 +150,7 @@
             </td>
             {% endif %}
             <td>{{item.id}}</td>
-            <td>{{item.dato|date:"Y-m-d"}}</td>
+            <td>{{item.dato|date:"c"}}</td>
             <td>{{item.afsender.navn}}</td>
             <td>{{item.modtager.navn}}</td>
             <td>{% translate item.status|capfirst %}</td>
@@ -239,6 +239,23 @@ function trAttributter(data, index) {
         "class": (String(data.id)===highlight_id) ? "table-success" : "",
         "data-id": data.id
     };
+}
+function datoFormatter(value) {
+    if (value && value !== "-") {
+        const parsed = new Date(value);
+        const date = [
+            String(parsed.getDate()).padStart(2, "0"),
+            String(parsed.getMonth() + 1).padStart(2, "0"),
+            parsed.getFullYear()
+        ].join(".");
+        const time = [
+            String(parsed.getHours()).padStart(2, "0"),
+            String(parsed.getMinutes()).padStart(2, "0"),
+            String(parsed.getSeconds()).padStart(2, "0"),
+        ].join(":");
+        return [date, time, "(lokal tid)"].join(" ");
+    }
+    return "-";
 }
 </script>
 
