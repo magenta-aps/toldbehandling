@@ -128,7 +128,7 @@
                 String(parsed.getMinutes()).padStart(2, "0"),
                 String(parsed.getSeconds()).padStart(2, "0"),
             ].join(":");
-            return [date, time, "(lokal tid)"].join(" ");
+            return [date, time].join(" ");
         }
         return "-";
     }
