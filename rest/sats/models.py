@@ -11,6 +11,8 @@ from django.db.models import CheckConstraint, Q
 from django.db.models.signals import post_save
 from django.utils.translation import gettext_lazy as _
 
+PERMISSION_APPROVE_AFGIFTSTABEL = "approve_afgiftstabel"
+
 
 class Afgiftstabel(models.Model):
     class Meta:
@@ -20,6 +22,12 @@ class Afgiftstabel(models.Model):
                 check=Q(kladde=True) | Q(gyldig_fra__isnull=False),
                 name="kladde_or_has_gyldig_fra",
             )
+        ]
+        permissions = [
+            (
+                PERMISSION_APPROVE_AFGIFTSTABEL,
+                _("Kan godkende afgiftstabel / sætte kladde til False"),
+            ),
         ]
 
     gyldig_fra = models.DateTimeField(

@@ -38,6 +38,7 @@
                     <div class="col-2"><label>{% translate "Gyldig til" %}</label></div>
                     <div class="col-10">{{object.gyldig_til|default_if_none:"-"}}</div>
                 </div>
+                {% if can_approve_drafts %}
                 <div class="row">
                     <div class="col-2"><label for="{{form.kladde.name}}">{% translate "Kladde" %}</label></div>
                     <div class="col-10">
@@ -49,6 +50,7 @@
                         {% endif %}
                     </div>
                 </div>
+                {% endif %}
             </div>
             <div class="col-6 clearfix">
                 {% if can_download %}

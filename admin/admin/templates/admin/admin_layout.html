@@ -3,9 +3,18 @@
 {% block header %}
 <header>
     <nav class="nav flex-column flex-sm-row p-1">
+        {% if nav_afgiftstabeller %}
         <a class="p-2 text-muted" href="{% url 'afgiftstabel_list' %}">Afgiftstabeller</a>
+        {% endif %}
+
+        {% if nav_afgiftsanmeldelser %}
         <a class="p-2 text-muted" href="{% url 'tf10_list' %}">Afgiftsanmeldelser</a>
+        {% endif %}
+
+        {% if nav_privatafgiftsanmeldelser %}
         <a class="p-2 text-muted" href="{% url 'tf5_list' %}">Private indførselstilladelser</a>
+        {% endif %}
+
         <a class="p-2 text-muted" href="{% url 'statistik' %}">Statistik</a>
         <span class="p-2 ms-auto">
             {{user.first_name}} {{user.last_name}} ({{user.username}})

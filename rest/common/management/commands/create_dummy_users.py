@@ -45,6 +45,11 @@ class Command(BaseCommand):
         except Group.DoesNotExist:
             privatindberettere_group = None
 
+        try:
+            admin_godkendere_group = Group.objects.get(name="AdminGodkendere")
+        except Group.DoesNotExist:
+            admin_godkendere_group = None
+
         admin, created = User.objects.update_or_create(
             defaults={
                 "first_name": "Admin",
@@ -159,3 +164,19 @@ class Command(BaseCommand):
         indberetter3.groups.add(privatindberettere_group)
 
         IndberetterProfile.objects.create(cpr=3333333333, cvr=None, user=indberetter3)
+
+        admin_godkender, created = User.objects.update_or_create(
+            username="admin_godkender",
+            defaults={
+                "first_name": "AdminGodkender",
+                "last_name": "",
+                "email": "",
+                "password": make_password(
+                    os.environ.get("ADMIN_GODKENDER_PASSWORD", "admin_godkender")
+                ),
+                "is_active": True,
+                "is_staff": False,
+                "is_superuser": False,
+            },
+        )
+        admin_godkender.groups.add(admin_godkendere_group)

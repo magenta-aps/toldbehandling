@@ -38,6 +38,9 @@ class Command(BaseCommand):
         dataansvarlige, _ = Group.objects.update_or_create(
             name="Dataansvarlige",
         )
+        admin_godkendere, _ = Group.objects.update_or_create(
+            name="AdminGodkendere",
+        )
 
         afsender_model = ContentType.objects.get_for_model(
             Afsender, for_concrete_model=False
@@ -107,6 +110,15 @@ class Command(BaseCommand):
             name="Kan logge ind på admin-sitet",
             codename="admin",
             content_type=user_model,
+        )
+
+        admin_tf10_list_view_required_permissions = (
+            ("view", afsender_model),
+            ("view", modtager_model),
+            ("view", postforsendelse_model),
+            ("view", fragtforsendelse_model),
+            ("view", afgiftsanmeldelse_model),
+            ("view", varelinje_model),
         )
 
         for action, model in (
@@ -242,10 +254,25 @@ class Command(BaseCommand):
             ("add", vareafgiftssats_model),
             ("change", afgiftstabel_model),
             ("change", vareafgiftssats_model),
-        ):
+        ) + admin_tf10_list_view_required_permissions:
             dataansvarlige.permissions.add(
                 Permission.objects.get(
                     codename=f"{action}_{model.name}", content_type=model
                 )
             )
         dataansvarlige.permissions.add(admin_site_access)
+
+        # "AdminGodkendere" permissions
+        admin_godkendere.permissions.add(admin_site_access)
+
+        for action, model in (
+            ("view", afgiftstabel_model),
+            ("view", vareafgiftssats_model),
+            ("change", afgiftstabel_model),
+            ("approve", afgiftstabel_model),
+        ) + admin_tf10_list_view_required_permissions:
+            admin_godkendere.permissions.add(
+                Permission.objects.get(
+                    codename=f"{action}_{model.name}", content_type=model
+                )
+            )

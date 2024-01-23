@@ -155,7 +155,7 @@ class AfgiftstabelUpdateForm(BootstrapForm):
     def clean(self, *args, **kwargs):
         data = self.cleaned_data
         if not data.get("delete"):
-            for required_field in ("kladde", "gyldig_fra"):
+            for required_field in ("gyldig_fra",):
                 if not data.get(required_field):
                     self.add_error(
                         required_field,
