@@ -10,9 +10,11 @@ from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from ninja import FilterSchema, ModelSchema, Query
 from ninja_extra import api_controller, permissions, route
+from ninja_extra.exceptions import PermissionDenied
 from ninja_extra.pagination import paginate
 from ninja_extra.schemas import NinjaPaginationResponseSchema
 from project.util import RestPermission
+from sats import models
 from sats.models import Afgiftstabel, Vareafgiftssats
 
 
@@ -135,8 +137,16 @@ class AfgiftstabelAPI:
     @route.patch("/{id}", auth=get_auth_methods(), url_name="afgiftstabel_update")
     def update_afgiftstabel(self, id: int, payload: PartialAfgiftstabelIn):
         item = get_object_or_404(Afgiftstabel, id=id)
+
         for attr, value in payload.dict(exclude_unset=True).items():
+            if attr == "kladde" and value != item.kladde:
+                if not self.context.request.user.has_perm(
+                    f"sats.{models.PERMISSION_APPROVE_AFGIFTSTABEL}"
+                ):
+                    raise PermissionDenied
+
             setattr(item, attr, value)
+
         item.save()
         return {"success": True}
 

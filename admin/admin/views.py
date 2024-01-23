@@ -44,6 +44,50 @@ from admin.clients.prisme import PrismeException, send_afgiftsanmeldelse
 from admin.spreadsheet import SpreadsheetExport, VareafgiftssatsSpreadsheetUtil
 
 
+class AdminLayoutBaseView(PermissionsRequiredMixin, HasRestClientMixin):
+    """Base view for admin pages, using a common layout with navigation.
+
+    NOTE: We do not set default required-permissions in this view, yet, since they
+    will currently be overridden by the child-views equivalent.. we need a way to
+    combine them for if we want default permissions for this view.
+    """
+
+    extend_template = "admin/admin_layout.html"
+
+    # NOTE: We add 'auth.admin' since its for navigation on the admin-page
+    permissions_view_afgiftstabeller = (
+        "auth.admin",
+        "sats.view_afgiftstabel",
+    )
+    permissions_view_afgiftsanmeldelser = (
+        "auth.admin",
+        *common_views.TF10ListView.required_permissions,
+    )
+    permissions_view_privatafgiftsanmeldelser = (
+        "auth.admin",
+        *common_views.TF5ListView.required_permissions,
+    )
+
+    def get_context_data(self, **kwargs):
+        return super().get_context_data(
+            **{
+                **kwargs,
+                "nav_afgiftstabeller": self.has_permissions(
+                    request=self.request,
+                    required_permissions=self.permissions_view_afgiftstabeller,
+                ),
+                "nav_afgiftsanmeldelser": self.has_permissions(
+                    request=self.request,
+                    required_permissions=self.permissions_view_afgiftsanmeldelser,
+                ),
+                "nav_privatafgiftsanmeldelser": self.has_permissions(
+                    request=self.request,
+                    required_permissions=self.permissions_view_privatafgiftsanmeldelser,
+                ),
+            }
+        )
+
+
 class IndexView(PermissionsRequiredMixin, HasRestClientMixin, TemplateView):
     template_name = "admin/index.html"
     required_permissions = ("auth.admin",)
@@ -78,7 +122,7 @@ class TF10BaseView(HasRestClientMixin):
         return self.rest_client.vareafgiftssats.list(overordnet=parent_id)
 
 
-class TF10View(PermissionsRequiredMixin, TF10BaseView, FormView):
+class TF10View(AdminLayoutBaseView, TF10BaseView, FormView):
     required_permissions = (
         "auth.admin",
         "aktør.view_afsender",
@@ -239,9 +283,8 @@ class TF10View(PermissionsRequiredMixin, TF10BaseView, FormView):
         return anmeldelse
 
 
-class TF10ListView(common_views.TF10ListView):
+class TF10ListView(AdminLayoutBaseView, common_views.TF10ListView):
     actions_template = "admin/blanket/tf10/link.html"
-    extend_template = "admin/admin_layout.html"
     required_permissions = (
         "auth.admin",
         *common_views.TF10ListView.required_permissions,
@@ -257,8 +300,7 @@ class TF10ListView(common_views.TF10ListView):
         return context
 
 
-class TF10FormCreateView(common_views.TF10FormCreateView):
-    extend_template = "admin/admin_layout.html"
+class TF10FormCreateView(AdminLayoutBaseView, common_views.TF10FormCreateView):
     required_permissions = (
         "auth.admin",
         *common_views.TF10FormCreateView.required_permissions,
@@ -289,8 +331,7 @@ class TF10FormCreateView(common_views.TF10FormCreateView):
         )
 
 
-class TF10FormUpdateView(common_views.TF10FormUpdateView):
-    extend_template = "admin/admin_layout.html"
+class TF10FormUpdateView(AdminLayoutBaseView, common_views.TF10FormUpdateView):
     form_class = forms.TF10UpdateForm
     required_permissions = (
         "auth.admin",
@@ -307,9 +348,7 @@ class TF10FormUpdateView(common_views.TF10FormUpdateView):
         )
 
 
-class TF10HistoryListView(
-    PermissionsRequiredMixin, HasRestClientMixin, common_views.ListView
-):
+class TF10HistoryListView(AdminLayoutBaseView, common_views.ListView):
     required_permissions = (
         "aktør.view_afsender",
         "aktør.view_modtager",
@@ -374,7 +413,7 @@ class TF10HistoryListView(
         return value
 
 
-class TF10HistoryDetailView(PermissionsRequiredMixin, TF10BaseView, TemplateView):
+class TF10HistoryDetailView(AdminLayoutBaseView, TF10BaseView, TemplateView):
     template_name = "admin/blanket/tf10/history/view.html"
 
     def get_object(self):
@@ -392,7 +431,7 @@ class TF10HistoryDetailView(PermissionsRequiredMixin, TF10BaseView, TemplateView
         )
 
 
-class TF10EditMultipleView(PermissionsRequiredMixin, HasRestClientMixin, FormView):
+class TF10EditMultipleView(AdminLayoutBaseView, FormView):
     template_name = "admin/blanket/tf10/multi.html"
     form_class = forms.TF10UpdateMultipleForm
     success_url = reverse_lazy("tf10_list")
@@ -500,14 +539,12 @@ class TF10EditMultipleView(PermissionsRequiredMixin, HasRestClientMixin, FormVie
         return super().form_valid(form)
 
 
-class AfgiftstabelListView(PermissionsRequiredMixin, HasRestClientMixin, GetFormView):
-    required_permissions = (
-        "auth.admin",
-        "sats.view_afgiftstabel",
-    )
+class AfgiftstabelListView(AdminLayoutBaseView, GetFormView):
     template_name = "admin/afgiftstabel/list.html"
-    form_class = forms.AfgiftstabelSearchForm
     actions_template = "admin/afgiftstabel/handlinger.html"
+    required_permissions = AdminLayoutBaseView.permissions_view_afgiftstabeller
+
+    form_class = forms.AfgiftstabelSearchForm
     list_size = 20
 
     def get_context_data(self, **context):
@@ -593,7 +630,7 @@ class AfgiftstabelListView(PermissionsRequiredMixin, HasRestClientMixin, GetForm
         return value
 
 
-class AfgiftstabelDetailView(PermissionsRequiredMixin, HasRestClientMixin, FormView):
+class AfgiftstabelDetailView(AdminLayoutBaseView, FormView):
     required_permissions = (
         "auth.admin",
         "sats.view_afgiftstabel",
@@ -601,6 +638,7 @@ class AfgiftstabelDetailView(PermissionsRequiredMixin, HasRestClientMixin, FormV
     )
     edit_permissions = ("sats.change_afgiftstabel",)
     delete_permissions = ("sats.delete_afgiftstabel",)
+    approve_permissions = ("sats.approve_afgiftstabel",)
     template_name = "admin/afgiftstabel/view.html"
     form_class = forms.AfgiftstabelUpdateForm
 
@@ -623,6 +661,9 @@ class AfgiftstabelDetailView(PermissionsRequiredMixin, HasRestClientMixin, FormV
                 "can_download": AfgiftstabelDownloadView.has_permissions(
                     request=self.request
                 ),
+                "can_approve_drafts": self.has_permissions(
+                    request=self.request, required_permissions=self.approve_permissions
+                ),
             }
         )
 
@@ -643,8 +684,15 @@ class AfgiftstabelDetailView(PermissionsRequiredMixin, HasRestClientMixin, FormV
             if self.item.kladde:
                 self.rest_client.afgiftstabel.delete(tabel_id)
             return redirect(reverse("afgiftstabel_list"))
+
+        # if draft-status is missing from the form, ex when users dont have permissions
+        # to change it, use the current draft-status.
+        tabel_draft = self.item.kladde
+        if "kladde" in form.cleaned_data and form.cleaned_data["kladde"] == "":
+            form.cleaned_data["kladde"] = tabel_draft
+
         try:
-            if self.item.kladde or self.item.gyldig_fra > datetime.now(timezone.utc):
+            if tabel_draft or self.item.gyldig_fra > datetime.now(timezone.utc):
                 self.rest_client.afgiftstabel.update(tabel_id, form.cleaned_data)
             return redirect(reverse("afgiftstabel_list"))
         except HTTPError as e:
@@ -720,7 +768,7 @@ class AfgiftstabelDownloadView(PermissionsRequiredMixin, HasRestClientMixin, Vie
             return SpreadsheetExport.render_csv(headers_pretty, rows, filename)
 
 
-class AfgiftstabelCreateView(PermissionsRequiredMixin, HasRestClientMixin, FormView):
+class AfgiftstabelCreateView(AdminLayoutBaseView, FormView):
     template_name = "admin/afgiftstabel/form.html"
     form_class = forms.AfgiftstabelCreateForm
     required_permissions = (
@@ -762,8 +810,7 @@ class AfgiftstabelCreateView(PermissionsRequiredMixin, HasRestClientMixin, FormV
         return tabel_id
 
 
-class TF5ListView(common_views.TF5ListView):
-    extend_template = "admin/admin_layout.html"
+class TF5ListView(AdminLayoutBaseView, common_views.TF5ListView):
     actions_template = "admin/blanket/tf5/actions.html"
 
     def get_context_data(self, **context: Dict[str, Any]) -> Dict[str, Any]:
@@ -777,8 +824,7 @@ class TF5ListView(common_views.TF5ListView):
         )
 
 
-class TF5View(common_views.TF5View):
-    extend_template = "admin/admin_layout.html"
+class TF5View(AdminLayoutBaseView, common_views.TF5View):
     required_permissions = (
         "auth.admin",
         "anmeldelse.view_privatafgiftsanmeldelse",
@@ -804,8 +850,8 @@ class TF5View(common_views.TF5View):
         return context
 
 
-class TF5UpdateView(common_views.TF5UpdateView):
-    extend_template = "admin/admin_layout.html"
+class TF5UpdateView(AdminLayoutBaseView, common_views.TF5UpdateView):
+    pass
 
 
 class TF5LeverandørFakturaView(common_views.LeverandørFakturaView):
@@ -817,7 +863,7 @@ class TF5LeverandørFakturaView(common_views.LeverandørFakturaView):
     key = "leverandørfaktura"
 
 
-class StatistikView(PermissionsRequiredMixin, HasRestClientMixin, FormWithFormsetView):
+class StatistikView(AdminLayoutBaseView, FormWithFormsetView):
     required_permissions = ("auth.admin",)
     form_class = forms.StatistikForm
     formset_class = forms.StatistikGruppeFormSet
