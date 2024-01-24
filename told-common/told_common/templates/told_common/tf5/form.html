@@ -33,7 +33,7 @@
             <div class="col-4">
                 <div class="input-group">
                     {{form.navn}}
-                    {% include "told_common/tf5/info.html" with title=form.navn.label content=content %}
+                    {% include "told_common/widgets/info.html" with title=form.navn.label content=content %}
                 </div>
                 {{form.navn.errors}}
             </div>
@@ -44,7 +44,7 @@
             <div class="col-4">
                 <div class="input-group">
                     {{form.cpr}}
-                    {% include "told_common/tf5/info.html" with title=form.cpr.label content=content %}
+                    {% include "told_common/widgets/info.html" with title=form.cpr.label content=content %}
                 </div>
                 {{form.cpr.errors}}
             </div>
@@ -58,7 +58,7 @@
             <div class="col-4">
                 <div class="input-group">
                     {{form.adresse}}
-                    {% include "told_common/tf5/info.html" with title=form.cpr.label content=content %}
+                    {% include "told_common/widgets/info.html" with title=form.cpr.label content=content %}
                 </div>
                 {{form.adresse.errors}}
             </div>
@@ -71,7 +71,7 @@
                 <div class="input-group">
                     {{form.postnummer}}
                     {% translate 'Postnummer for den borger der importerer varerne.' as content %}
-                    {% include "told_common/tf5/info.html" with title=form.postnummer.label content=content %}
+                    {% include "told_common/widgets/info.html" with title=form.postnummer.label content=content %}
                 </div>
                 {{form.postnummer.errors}}
             </div>
@@ -79,7 +79,7 @@
                 <div class="input-group">
                 {{form.by}}
                     {% translate 'By for den borger der importerer varerne.' as content %}
-                    {% include "told_common/tf5/info.html" with title=form.by.label content=content %}
+                    {% include "told_common/widgets/info.html" with title=form.by.label content=content %}
                 </div>
                 {{form.by.errors}}
             </div>
@@ -93,7 +93,7 @@
             <div class="col-4">
                 <div class="input-group">
                     {{form.telefon}}
-                    {% include "told_common/tf5/info.html" with title=form.telefon.label content=content %}
+                    {% include "told_common/widgets/info.html" with title=form.telefon.label content=content %}
                 </div>
                 {{form.telefon.errors}}
             </div>
@@ -104,7 +104,7 @@
             <div class="col-4">
                 <div class="input-group">
                     {{form.bookingnummer}}
-                    {% include "told_common/tf5/info.html" with title=form.bookingnummer.label content=content %}
+                    {% include "told_common/widgets/info.html" with title=form.bookingnummer.label content=content %}
                 </div>
                 {{form.bookingnummer.errors}}
             </div>
@@ -125,7 +125,7 @@
             <div class="col-4">
                 <div class="input-group">
                     {{form.leverandørfaktura_nummer}}
-                    {% include "told_common/tf5/info.html" with title=form.leverandørfaktura_nummer.label content=content %}
+                    {% include "told_common/widgets/info.html" with title=form.leverandørfaktura_nummer.label content=content %}
                 </div>
                 {{form.leverandørfaktura_nummer.errors}}
             </div>
@@ -139,7 +139,7 @@
             <div class="col-4">
                 <div class="input-group">
                     {{form.indleveringsdato}}
-                    {% include "told_common/tf5/info.html" with title=form.indleveringsdato.label content=content %}
+                    {% include "told_common/widgets/info.html" with title=form.indleveringsdato.label content=content %}
                 </div>
                 {{form.indleveringsdato.errors}}
             </div>

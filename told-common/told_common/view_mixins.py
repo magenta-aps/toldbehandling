@@ -70,9 +70,13 @@ class LoginRequiredMixin:
             if e.response.status_code == 401:
                 # Refresh failed, must re-login
                 return self.needs_login(request)
+            try:
+                content = e.response.json()
+            except ValueError:
+                content = e.response.content
             return HttpResponseServerError(
                 f"Failure in REST API request; "
-                f"got http {e.response.status_code} from API"
+                f"got http {e.response.status_code} from API. Response: {content}"
             )
 
     def get_context_data(self, **context):
@@ -222,6 +226,9 @@ class FormWithFormsetView(FormView):
     def post(self, request, *args, **kwargs):
         form = self.get_form()
         formset = self.get_formset()
+        for subform in formset:
+            if hasattr(subform, "set_parent_form"):
+                subform.set_parent_form(form)
         form.full_clean()
         formset.full_clean()
         if hasattr(form, "clean_with_formset"):

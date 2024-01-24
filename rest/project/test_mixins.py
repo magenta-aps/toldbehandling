@@ -421,6 +421,7 @@ class RestMixin:
             "postbox": "123",
             "telefon": "123456",
             "cvr": 12345678,
+            "kladde": False,
         }
         self.modtager_data = {
             "navn": "Testfirma 1",
@@ -431,6 +432,7 @@ class RestMixin:
             "telefon": "123456",
             "cvr": 12345678,
             "kreditordning": True,
+            "kladde": False,
         }
 
         self.fragtforsendelse_data = {
@@ -438,12 +440,14 @@ class RestMixin:
             "fragtbrevsnummer": "1234",
             "forbindelsesnr": "1337",
             "afgangsdato": "2023-11-03",
+            "kladde": False,
         }
         self.postforsendelse_data = {
             "forsendelsestype": Postforsendelse.Forsendelsestype.SKIB,
             "postforsendelsesnummer": "1234",
             "afsenderbykode": "8200",
             "afgangsdato": "2023-11-03",
+            "kladde": False,
         }
         self.afgiftsanmeldelse_data = {
             "leverandørfaktura_nummer": "12345",
@@ -456,6 +460,7 @@ class RestMixin:
             "antal": 1,
             "fakturabeløb": "1000.00",
             "afgiftsbeløb": "37.50",
+            "kladde": False,
         }
         self.vareafgiftssats_data = {
             "vareart_da": "Kaffe",

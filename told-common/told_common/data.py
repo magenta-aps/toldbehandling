@@ -183,7 +183,7 @@ def encode_optional_isoformat(d):
 @dataclass
 class Afgiftstabel(ToldDataClass):
     id: int
-    kladde: bool
+    kladde: bool = False
     gyldig_fra: Optional[datetime] = field(
         metadata=config(
             encoder=encode_optional_isoformat,
@@ -225,12 +225,12 @@ class Notat(ToldDataClass):
 @dataclass
 class Aktør(ToldDataClass):
     id: int
-    navn: str
-    adresse: str
-    postnummer: int
-    by: str
+    navn: Optional[str]
+    adresse: Optional[str]
+    postnummer: Optional[int]
+    by: Optional[str]
     postbox: Optional[str]
-    telefon: str
+    telefon: Optional[str]
     cvr: Optional[int]
 
 
@@ -265,6 +265,7 @@ class PostForsendelse(ToldDataClass):
             mm_field=fields.Date(format="iso"),
         ),
     )
+    kladde: bool = False
 
 
 @dataclass_json
@@ -281,6 +282,7 @@ class FragtForsendelse(ToldDataClass):
             mm_field=fields.Date(format="iso"),
         ),
     )
+    kladde: bool = False
     fragtbrev: Optional[File] = None
 
 
@@ -289,8 +291,9 @@ class FragtForsendelse(ToldDataClass):
 class Varelinje(ToldDataClass):
     id: int
     afgiftsanmeldelse: int
-    vareafgiftssats: int
-    afgiftsbeløb: Decimal
+    kladde: bool = False
+    vareafgiftssats: Optional[int] = None
+    afgiftsbeløb: Optional[Decimal] = None
     fakturabeløb: Optional[Decimal] = None
     mængde: Optional[Decimal] = None
     antal: Optional[int] = None
@@ -300,14 +303,14 @@ class Varelinje(ToldDataClass):
 @dataclass
 class Afgiftsanmeldelse(ToldDataClass):
     id: int
-    afsender: Union[int, Afsender]
-    modtager: Union[int, Modtager]
+    afsender: Union[int, Afsender, None]
+    modtager: Union[int, Modtager, None]
     fragtforsendelse: Union[int, FragtForsendelse, None]
     postforsendelse: Union[int, PostForsendelse, None]
-    leverandørfaktura_nummer: str
-    leverandørfaktura: File
-    modtager_betaler: bool
-    indførselstilladelse: str
+    leverandørfaktura_nummer: Optional[str]
+    leverandørfaktura: Optional[File]
+    modtager_betaler: Optional[bool]
+    indførselstilladelse: Optional[str]
     afgift_total: Decimal
     betalt: bool
     status: str
@@ -334,7 +337,13 @@ class Afgiftsanmeldelse(ToldDataClass):
 
     @property
     def afgift_sum(self):
-        return sum([varelinje.afgiftsbeløb for varelinje in self.varelinjer or []])
+        return sum(
+            [
+                varelinje.afgiftsbeløb
+                for varelinje in self.varelinjer
+                if varelinje.afgiftsbeløb or []
+            ]
+        )
 
 
 @dataclass_json

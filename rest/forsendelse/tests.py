@@ -25,6 +25,7 @@ class PostforsendelseTest(RestTestMixin, TestCase):
             self._expected_object_data.update(
                 {
                     "id": self.postforsendelse.id,
+                    "kladde": False,
                 }
             )
         return self._expected_object_data
@@ -37,6 +38,7 @@ class PostforsendelseTest(RestTestMixin, TestCase):
             self._expected_list_response_dict.update(
                 {
                     "id": self.postforsendelse.id,
+                    "kladde": False,
                 }
             )
         return self._expected_list_response_dict
@@ -70,6 +72,11 @@ class PostforsendelseTest(RestTestMixin, TestCase):
         self.assertIn(str(self.postforsendelse_data["forsendelsestype"].label), string)
         self.assertIn(self.postforsendelse_data["afsenderbykode"], string)
 
+    def test_kladde(self):
+        self.creation_data = {"kladde": True}
+        print("==========================")
+        print(self.postforsendelse)
+
 
 class FragtforsendelseTest(RestTestMixin, TestCase):
     plural_classname = "fragtforsendelser"
@@ -90,6 +97,7 @@ class FragtforsendelseTest(RestTestMixin, TestCase):
             self._expected_object_data.update(
                 {
                     "id": self.fragtforsendelse.id,
+                    "kladde": False,
                 }
             )
         return self._expected_object_data
@@ -102,6 +110,7 @@ class FragtforsendelseTest(RestTestMixin, TestCase):
             self._expected_list_response_dict.update(
                 {
                     "id": self.fragtforsendelse.id,
+                    "kladde": False,
                 }
             )
         return self._expected_list_response_dict

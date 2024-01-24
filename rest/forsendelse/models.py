@@ -4,6 +4,7 @@
 
 from django.contrib.auth.models import User
 from django.db import models
+from django.db.models import CheckConstraint, Q
 from django.utils.datetime_safe import date
 from django.utils.translation import gettext_lazy as _
 
@@ -11,6 +12,12 @@ from django.utils.translation import gettext_lazy as _
 class Forsendelse(models.Model):
     class Meta:
         abstract = True
+        constraints = [
+            CheckConstraint(
+                check=Q(afgangsdato__isnull=False) | Q(kladde=True),
+                name="aktuel_har_afgangsdato",
+            )
+        ]
 
     class Forsendelsestype(models.TextChoices):
         SKIB = "S", _("Skib")
@@ -26,7 +33,8 @@ class Forsendelse(models.Model):
         on_delete=models.SET_NULL,  # Vi kan slette brugere & beholde deres forsendelser
         null=True,
     )
-    afgangsdato = models.DateField(null=False, blank=False, default=date.today)
+    afgangsdato = models.DateField(null=True, blank=True, default=date.today)
+    kladde = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
         super().full_clean()
@@ -36,12 +44,29 @@ class Forsendelse(models.Model):
 class Postforsendelse(Forsendelse):
     class Meta:
         ordering = ["postforsendelsesnummer"]
+        constraints = [
+            CheckConstraint(
+                check=Q(postforsendelsesnummer__isnull=False) | Q(kladde=True),
+                name="aktuel_har_postforsendelsesnummer",
+            ),
+            CheckConstraint(
+                check=Q(afsenderbykode__isnull=False) | Q(kladde=True),
+                name="aktuel_har_afsenderbykode",
+            ),
+        ]
 
     postforsendelsesnummer = models.CharField(
         max_length=20,
         db_index=True,
+        blank=True,
+        null=True,
     )
-    afsenderbykode = models.CharField(max_length=4, db_index=True)
+    afsenderbykode = models.CharField(
+        max_length=4,
+        db_index=True,
+        blank=True,
+        null=True,
+    )
 
     def __str__(self):
         nummer = self.postforsendelsesnummer
@@ -63,12 +88,29 @@ def fragtbrev_upload_to(instance, filename):
 class Fragtforsendelse(Forsendelse):
     class Meta:
         ordering = ["fragtbrevsnummer"]
+        constraints = [
+            CheckConstraint(
+                check=Q(fragtbrevsnummer__isnull=False) | Q(kladde=True),
+                name="aktuel_har_fragtbrevsnummer",
+            ),
+            CheckConstraint(
+                check=Q(forbindelsesnr__isnull=False) | Q(kladde=True),
+                name="aktuel_har_forbindelsesnr",
+            ),
+        ]
 
     fragtbrevsnummer = models.CharField(
         max_length=20,
         db_index=True,
+        null=True,
+        blank=True,
     )
-    forbindelsesnr = models.CharField(max_length=100, db_index=True)
+    forbindelsesnr = models.CharField(
+        max_length=100,
+        db_index=True,
+        null=True,
+        blank=True,
+    )
 
     fragtbrev = models.FileField(
         upload_to=fragtbrev_upload_to,

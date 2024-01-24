@@ -109,6 +109,8 @@ class AfsenderRestClient(ModelRestClient):
             )
             for d, store in (("ident", ident), ("data", data))
         }
+        if "kladde" in data:
+            mapped["data"]["kladde"] = data["kladde"]
         if mapped["ident"]:
             afsender_response = self.rest.get("afsender", mapped["ident"])
             if afsender_response["count"] > 0:
@@ -154,6 +156,8 @@ class ModtagerRestClient(ModelRestClient):
             )
             for d, store in (("ident", ident), ("data", data))
         }
+        if "kladde" in data:
+            mapped["data"]["kladde"] = data["kladde"]
         if mapped["ident"]:
             modtager_response = self.rest.get("modtager", mapped["ident"])
             if modtager_response["count"] > 0:
@@ -346,6 +350,7 @@ class AfgiftanmeldelseRestClient(ModelRestClient):
             else None,
             "modtager_betaler": data.get("modtager_betaler"),
             "oprettet_på_vegne_af_id": opt_int(data.get("oprettet_på_vegne_af")),
+            "kladde": data.get("kladde", False),
         }
 
     def create(
@@ -638,9 +643,10 @@ class VarelinjeRestClient(ModelRestClient):
             "afgiftsanmeldelse_id": afgiftsanmeldelse_id,
             "privatafgiftsanmeldelse_id": privatafgiftsanmeldelse_id,
             "fakturabeløb": cast_or_none(str, data["fakturabeløb"]),
-            "vareafgiftssats_id": int(data["vareafgiftssats"]),
+            "vareafgiftssats_id": opt_int(data["vareafgiftssats"]),
             "antal": data["antal"],
             "mængde": data["mængde"],
+            "kladde": data.get("kladde", False),
         }
 
     @staticmethod
@@ -660,9 +666,10 @@ class VarelinjeRestClient(ModelRestClient):
         afgiftsanmeldelse_id: Optional[int] = None,
         privatafgiftsanmeldelse_id: Optional[int] = None,
     ):
+        mapped = self.map(data, afgiftsanmeldelse_id, privatafgiftsanmeldelse_id)
         response = self.rest.post(
             "varelinje",
-            self.map(data, afgiftsanmeldelse_id, privatafgiftsanmeldelse_id),
+            mapped,
         )
         return response["id"]
 
@@ -687,7 +694,10 @@ class VarelinjeRestClient(ModelRestClient):
             for item in self.rest.get("varelinje", filter)["items"]
         ]
         for item in data:
-            item.vareafgiftssats = self.rest.vareafgiftssats.get(item.vareafgiftssats)
+            if item.vareafgiftssats:
+                item.vareafgiftssats = self.rest.vareafgiftssats.get(
+                    item.vareafgiftssats
+                )
         return data
 
     def delete(self, id):
