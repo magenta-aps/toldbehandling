@@ -43,6 +43,7 @@ class AfgiftsanmeldelseIn(ModelSchema):
     leverandørfaktura: str = None  # Base64
     leverandørfaktura_navn: str = None
     oprettet_på_vegne_af_id: int = None
+    kladde: Optional[bool] = False
 
     class Config:
         model = Afgiftsanmeldelse
@@ -65,6 +66,7 @@ class PartialAfgiftsanmeldelseIn(ModelSchema):
     leverandørfaktura_navn: str = None
     modtager_betaler: bool = None
     toldkategori: str = None
+    kladde: Optional[bool] = False
 
     class Config:
         model = Afgiftsanmeldelse
@@ -201,6 +203,9 @@ class AfgiftsanmeldelseAPI:
             leverandørfaktura_navn = data.pop("leverandørfaktura_navn", None) or (
                 str(uuid4()) + ".pdf"
             )
+            kladde = data.pop("kladde", False)
+            if kladde:
+                data["status"] = "kladde"
             item = Afgiftsanmeldelse.objects.create(
                 **data, oprettet_af=self.context.request.user
             )
@@ -323,6 +328,9 @@ class AfgiftsanmeldelseAPI:
         self.check_user(item)
         data = payload.dict(exclude_unset=True)
         leverandørfaktura = data.pop("leverandørfaktura", None)
+        kladde = data.pop("kladde", False)
+        if not kladde and item.status == "kladde":
+            data["status"] = "ny"
         for attr, value in data.items():
             if value is not None:
                 setattr(item, attr, value)
@@ -604,7 +612,8 @@ class VarelinjeIn(ModelSchema):
 
     class Config:
         model = Varelinje
-        model_fields = ["mængde", "antal"]
+        model_fields = ["mængde", "antal", "kladde", "fakturabeløb"]
+        model_fields_optional = ["mængde", "antal", "kladde", "fakturabeløb"]
 
 
 class PartialVarelinjeIn(ModelSchema):
@@ -617,6 +626,7 @@ class PartialVarelinjeIn(ModelSchema):
             "mængde",
             "antal",
             "fakturabeløb",
+            "kladde",
         ]
         model_fields_optional = "__all__"
 
@@ -633,6 +643,7 @@ class VarelinjeOut(ModelSchema):
             "antal",
             "fakturabeløb",
             "afgiftsbeløb",
+            "kladde",
         ]
 
 
@@ -644,6 +655,7 @@ class VarelinjeFilterSchema(FilterSchema):
     antal: Optional[int]
     fakturabeløb: Optional[Decimal]
     afgiftsbeløb: Optional[Decimal]
+    kladde: Optional[bool]
 
 
 class VarelinjePermission(RestPermission):
@@ -659,7 +671,12 @@ class VarelinjePermission(RestPermission):
 class VarelinjeAPI:
     @route.post("", auth=get_auth_methods(), url_name="varelinje_create")
     def create(self, payload: VarelinjeIn):
-        item = Varelinje.objects.create(**payload.dict())
+        try:
+            item = Varelinje.objects.create(**payload.dict())
+        except ValidationError as e:
+            return HttpResponseBadRequest(
+                json_dump(e.message_dict), content_type="application/json"
+            )
         return {"id": item.id}
 
     @route.get(

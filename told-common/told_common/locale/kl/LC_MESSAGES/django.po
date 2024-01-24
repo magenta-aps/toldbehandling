@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-20 09:22-0200\n"
+"POT-Creation-Date: 2024-01-24 07:39-0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -222,6 +222,14 @@ msgstr "Nassiussisoq"
 msgid "Notat"
 msgstr "Allakkiaq"
 
+#: told_common/forms.py told_common/templates/told_common/tf10/list.html
+msgid "Nej"
+msgstr "Naamik"
+
+#: told_common/forms.py told_common/templates/told_common/tf10/list.html
+msgid "Ja"
+msgstr "Aap"
+
 #: told_common/forms.py
 msgid "Mangler fragtbrev"
 msgstr "Nassiussat allagartaat amigaataavoq"
@@ -318,6 +326,16 @@ msgid "For indførsel af afgiftspligtige varer i Grønland"
 msgstr "Nioqqutissanik akitsuusigassanik Kalaallit Nunaannut eqqussiniarluni"
 
 #: told_common/templates/told_common/tf10/form.html
+msgid "Kladde"
+msgstr ""
+
+#: told_common/templates/told_common/tf10/form.html
+msgid ""
+"En kladde kan redigeres efterfølgende, men bliver først behandlet når den er "
+"færdigudfyldt og ikke længere er en kladde."
+msgstr ""
+
+#: told_common/templates/told_common/tf10/form.html
 #: told_common/templates/told_common/tf5/form.html
 msgid "Gem"
 msgstr "Toqqoruk"
@@ -412,14 +430,14 @@ msgstr ""
 
 #: told_common/templates/told_common/tf10/form.html
 #: told_common/templates/told_common/tf5/form.html
-#: told_common/templates/told_common/tf5/view.html
-msgid "Vareart"
-msgstr "Nioqqutissaq"
+msgid "Vare­kode"
+msgstr "Nioqqutissap kodea"
 
 #: told_common/templates/told_common/tf10/form.html
 #: told_common/templates/told_common/tf5/form.html
-msgid "Vare­kode"
-msgstr "Nioqqutissap kodea"
+#: told_common/templates/told_common/tf5/view.html
+msgid "Vareart"
+msgstr "Nioqqutissaq"
 
 #: told_common/templates/told_common/tf10/form.html
 #: told_common/templates/told_common/tf5/form.html
@@ -459,6 +477,16 @@ msgstr "Piiaruk"
 #: told_common/templates/told_common/tf5/view.html
 msgid "Afgift i alt"
 msgstr "Akitsuutit katillugit"
+
+#: told_common/templates/told_common/tf10/form.html
+#, fuzzy
+#| msgid "Notat"
+msgid "Notater"
+msgstr "Allakkiaq"
+
+#: told_common/templates/told_common/tf10/form.html
+msgid "Toldkategori"
+msgstr ""
 
 #: told_common/templates/told_common/tf10/form.html
 #: told_common/templates/told_common/tf5/form.html
@@ -574,14 +602,6 @@ msgstr "Iliuutsit"
 #: told_common/templates/told_common/tf5/list.html
 msgid "Ingen søgeresultater"
 msgstr "Ujaasineq kinguneqanngilaq"
-
-#: told_common/templates/told_common/tf10/list.html
-msgid "Ja"
-msgstr "Aap"
-
-#: told_common/templates/told_common/tf10/list.html
-msgid "Nej"
-msgstr "Naamik"
 
 #: told_common/templates/told_common/tf5/form.html
 msgid ""
@@ -737,6 +757,12 @@ msgstr "Misissoruk..."
 #: told_common/templates/told_common/widgets/file.html
 msgid "Ingen fil valgt"
 msgstr "Fili toqqarneqanngilaq"
+
+#: told_common/views.py
+#, fuzzy, python-brace-format
+#| msgid "Afgiftsanmeldelsen med nummer {id} blev opdateret"
+msgid "Afgiftsanmeldelsen med nummer {id} blev gemt som kladde."
+msgstr "Akitsuusigassanik nalunaarut {id} -mik normulik nutarterneqarpoq"
 
 #: told_common/views.py
 #, python-brace-format

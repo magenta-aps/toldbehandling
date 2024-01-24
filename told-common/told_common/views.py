@@ -152,7 +152,7 @@ class TF10FormCreateView(
         )
         self.anmeldelse_id = self.rest_client.afgiftanmeldelse.create(
             form.cleaned_data,
-            self.request.FILES["leverandørfaktura"],
+            self.request.FILES.get("leverandørfaktura"),
             afsender_id,
             modtager_id,
             postforsendelse_id,
@@ -161,7 +161,8 @@ class TF10FormCreateView(
         for subform in formset:
             if subform.cleaned_data:
                 self.rest_client.varelinje.create(
-                    subform.cleaned_data, self.anmeldelse_id
+                    {**subform.cleaned_data, "kladde": form.cleaned_data["kladde"]},
+                    self.anmeldelse_id,
                 )
 
         # Opret notat _efter_ den nye version af anmeldelsen,
@@ -169,14 +170,23 @@ class TF10FormCreateView(
         notat = form.cleaned_data["notat"]
         if notat:
             self.rest_client.notat.create({"tekst": notat}, self.anmeldelse_id)
-        messages.add_message(
-            self.request,
-            messages.INFO,
-            _(
-                "Afgiftsanmeldelsen blev indregistreret. "
-                "Blanket med nummer {id} afventer nu godkendelse."
-            ).format(id=self.anmeldelse_id),
-        )
+        if form.cleaned_data["kladde"]:
+            messages.add_message(
+                self.request,
+                messages.INFO,
+                _("Afgiftsanmeldelsen med nummer {id} blev gemt som kladde.").format(
+                    id=self.anmeldelse_id
+                ),
+            )
+        else:
+            messages.add_message(
+                self.request,
+                messages.INFO,
+                _(
+                    "Afgiftsanmeldelsen blev indregistreret. "
+                    "Blanket med nummer {id} afventer nu godkendelse."
+                ).format(id=self.anmeldelse_id),
+            )
         return super().form_valid(form, formset)
 
     @cached_property
@@ -223,6 +233,7 @@ class TF10FormCreateView(
                 "varesatser": dataclass_map_to_dict(self.rest_client.varesatser),
                 "extend_template": self.extend_template,
                 "highlight": self.request.GET.get("highlight"),
+                "kan_ændre_kladde": True,
             }
         )
         form = context["form"]
@@ -400,7 +411,8 @@ class TF10FormUpdateView(
         for item in self.item.varelinjer:
             itemdict = dataclasses.asdict(item)
             # Dropdown skal bruge id'er, ikke objekter
-            itemdict["vareafgiftssats"] = itemdict["vareafgiftssats"]["id"]
+            if itemdict["vareafgiftssats"]:
+                itemdict["vareafgiftssats"] = itemdict["vareafgiftssats"]["id"]
             initial.append(itemdict)
         kwargs["initial"] = initial
         return kwargs
@@ -419,6 +431,7 @@ class TF10FormUpdateView(
                 "notater": self.rest_client.notat.list(
                     afgiftsanmeldelse=self.kwargs["id"]
                 ),
+                "kan_ændre_kladde": self.item.status == "kladde",
             }
         )
 
@@ -436,6 +449,7 @@ class TF10FormUpdateView(
         initial = {}
         item = self.item
         if item:
+            initial["kladde"] = item.status == "kladde"
             for key in ("afsender", "modtager"):
                 aktør = getattr(item, key)
                 initial.update(

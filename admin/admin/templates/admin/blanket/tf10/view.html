@@ -19,6 +19,8 @@
         <span class="badge bg-danger">Afvist</span>
         {% elif object.status == "ny" %}
         <span class="badge bg-secondary">Ny</span>
+        {% elif object.status == "kladde" %}
+        <span class="badge bg-warning">Kladde</span>
         {% endif %}
 
         <h4>For indførsel af afgiftspligtige varer i Grønland</h4>
@@ -51,7 +53,7 @@
                         <label>Navn:</label>
                     </div>
                     <div class="col-8">
-                        {{object.afsender.navn}}
+                        {{object.afsender.navn|default_if_none:""}}
                     </div>
                 </div>
                 <div class="row">
@@ -111,7 +113,7 @@
                         <label>Navn:</label>
                     </div>
                     <div class="col-8">
-                        {{object.modtager.navn}}
+                        {{object.modtager.navn|default_if_none:""}}
                     </div>
                 </div>
                 <div class="row">
@@ -416,7 +418,7 @@
                         Afvis
                     </button>
                     {% endif %}
-                    {% if object.status == "ny" or object.status == "afvist" %}
+                    {% if object.status == "ny" or object.status == "kladde" or object.status == "afvist" %}
                     <a href="{% url 'tf10_edit' id=object.id %}" class="btn btn-primary">Redigér</a>
                     {% endif %}
                 {% endif %}

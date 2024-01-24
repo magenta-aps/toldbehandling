@@ -43,7 +43,7 @@ $(function () {
         });
 
         const updateChoices = function(fieldName, event, callback) {
-            const filter = {};
+            const filter = {"kladde": false};
             filter[fieldName] = this.val();
             if (filter[fieldName]) {
                 lastEdited[i] = fieldName;
@@ -465,14 +465,32 @@ $(function () {
     });
 });
 $(function (){
+    const draftField = $("[name=kladde]");
+
+    const setRequired = function(jqField, required) {
+        if (required) {
+            jqField.attr("required", "required");
+        } else {
+            jqField.removeAttr("required");
+        }
+        jqField.each(function () {
+            const labels = $("label[for="+$(this).attr("name")+"], label[for="+this.id+"]");
+            labels.each(function () {
+                const label = $(this);
+                let text = label.text();
+                // Erstat [0..n] trailing asterisks med asterisk eller ingenting
+                text = text.replace(/\**$/, required ? "*":"");
+                label.text(text);
+            });
+        });
+    }
+
     $("[data-required-field]").each(function () {
         const $this = $(this);
-        const labels = $("label[for="+$this.attr("name")+"], label[for="+this.id+"]");
         const fieldExpr = $this.data("required-field");  // f.eks. "[name=foobar]"
         // Liste af værdier som gør at vi nu er required
-        // Hvis bare ét felt som matcher `fieldExpr` har en af disse værdier, er feltet `this` required
+        // Hvis vi ikke er en kladde, og bare ét felt som matcher `fieldExpr` har en af disse værdier, er feltet `this` required
         const values = $this.data("required-values").split(",");
-
         const updateRequired = function () {
             const fields = $(fieldExpr);
             const fieldValues = new Set();
@@ -482,29 +500,23 @@ $(function (){
                     fieldValues.add($(this).val());
                 }
             })
-            // Tjek om der er sammenfald mellem values of fieldValues
-            let found = false;
-            for (let value of values) {
-                if (fieldValues.has(value)) {
-                    found = true;
-                    break;
-                }
-            }
-            // Sæt required-attribut og asterisk
-            if (found) {
-                $this.attr("required", "required");
+            const draft = draftField && draftField.val().toLowerCase() === "true";
+            if (draft) {
+                setRequired($this, false);
             } else {
-                $this.removeAttr("required");
+                // Tjek om der er sammenfald mellem values of fieldValues
+                let found = false;
+                for (let value of values) {
+                    if (fieldValues.has(value)) {
+                        found = true;
+                        break;
+                    }
+                }
+                setRequired($this, found);
             }
-            labels.each(function () {
-                const label = $(this);
-                let text = label.text();
-                // Erstat [0..n] trailing asterisks med asterisk eller ingenting
-                text = text.replace(/\**$/, found ? "*":"");
-                label.text(text);
-            })
         }
         $(fieldExpr).on("change", updateRequired);
+        draftField.on("change", updateRequired);
         updateRequired();
         const formset = $("#formset");
         // Revidér når der fjernes en række
@@ -514,6 +526,15 @@ $(function (){
             $(row).find(fieldExpr).on("change", updateRequired);
         });
     });
+
+    const required_fields = $("input,select,textarea").filter("[required]").not("[data-required-field]");
+
+    const draftChanged = function () {
+        const draft = draftField.val().toLowerCase() === "true";
+        setRequired(required_fields, !draft);
+    };
+    draftField.on("change", draftChanged);
+    draftChanged();
 });
 
 $("input[readonly]").on("focus", function(){

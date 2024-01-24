@@ -110,6 +110,8 @@ class AfgiftsanmeldelseTest(RestTestMixin, TestCase):
             self._expected_full_object_data = deepcopy(self.expected_object_data)
             self._expected_full_object_data.update(self.calculated_fields)
             self.nest_expected_data(self._expected_full_object_data)
+
+        print(f"self._expected_full_object_data: {self._expected_full_object_data}")
         return self._expected_full_object_data
 
     @property
@@ -255,7 +257,11 @@ class VarelinjeTest(RestTestMixin, TestCase):
             self._expected_object_data = {}
             self._expected_object_data.update(self.strip_id(self.creation_data))
             self._expected_object_data.update(
-                {"id": self.varelinje.id, "afgiftsbeløb": "37.50"}
+                {
+                    "id": self.varelinje.id,
+                    "afgiftsbeløb": "37.50",
+                    "kladde": False,
+                }
             )
         return self._expected_object_data
 
@@ -267,6 +273,7 @@ class VarelinjeTest(RestTestMixin, TestCase):
             self._expected_list_response_dict.update(
                 {
                     "id": self.varelinje.id,
+                    "kladde": False,
                 }
             )
         return self._expected_list_response_dict

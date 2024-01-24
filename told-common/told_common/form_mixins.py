@@ -15,6 +15,7 @@ from humanize import naturalsize
 class BootstrapForm(DynamicFormMixin, forms.Form):
     def __init__(self, *args, **kwargs):
         super(BootstrapForm, self).__init__(*args, **kwargs)
+        self.kwargs = kwargs
         for name, field in self.fields.items():
             self.update_field(name, field)
             self.set_field_classes(name, field)

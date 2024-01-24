@@ -238,7 +238,7 @@ LOGGING = {
 }
 
 log_filename = "/log/admin.log"
-if os.path.isfile(log_filename):
+if os.path.isfile(log_filename) and not DEBUG:
     LOGGING["handlers"]["file"] = {
         "filters": ["require_debug_false"],
         "class": "logging.FileHandler",  # eller WatchedFileHandler

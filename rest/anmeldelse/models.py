@@ -31,6 +31,20 @@ def privatafgiftsanmeldelse_upload_to(instance, filename):
 class Afgiftsanmeldelse(models.Model):
     class Meta:
         ordering = ["id"]
+        constraints = [
+            CheckConstraint(
+                check=Q(afsender__isnull=False) | Q(status="kladde"),
+                name="aktuel_har_afsender",
+            ),
+            CheckConstraint(
+                check=Q(modtager__isnull=False) | Q(status="kladde"),
+                name="aktuel_har_modtager",
+            ),
+            CheckConstraint(
+                check=Q(leverandørfaktura_nummer__isnull=False) | Q(status="kladde"),
+                name="aktuel_har_leverandørfaktura_nummer",
+            ),
+        ]
 
     history = HistoricalRecords()
     oprettet_af = models.ForeignKey(
@@ -50,11 +64,15 @@ class Afgiftsanmeldelse(models.Model):
         Afsender,
         related_name="afgiftsanmeldelser",
         on_delete=models.CASCADE,
+        null=True,
+        blank=True,
     )
     modtager = models.ForeignKey(
         Modtager,
         related_name="afgiftsanmeldelser",
         on_delete=models.CASCADE,
+        null=True,
+        blank=True,
     )
     fragtforsendelse = models.OneToOneField(
         Fragtforsendelse,
@@ -73,6 +91,8 @@ class Afgiftsanmeldelse(models.Model):
     leverandørfaktura_nummer = models.CharField(
         max_length=20,
         db_index=True,
+        null=True,
+        blank=True,
     )
     leverandørfaktura = models.FileField(
         upload_to=afgiftsanmeldelse_upload_to,
@@ -104,6 +124,7 @@ class Afgiftsanmeldelse(models.Model):
     )
     status = models.CharField(
         choices=(
+            ("kladde", "kladde"),
             ("ny", "ny"),
             ("afvist", "afvist"),
             ("godkendt", "godkendt"),
@@ -134,7 +155,11 @@ class Afgiftsanmeldelse(models.Model):
     def beregn_afgift_total(self) -> bool:
         old_value = self.afgift_total
         self.afgift_total = sum(
-            [varelinje.afgiftsbeløb for varelinje in self.varelinje_set.all()]
+            [
+                varelinje.afgiftsbeløb
+                for varelinje in self.varelinje_set.all()
+                if varelinje.afgiftsbeløb
+            ]
         )
         return self.afgift_total != old_value
 
@@ -269,6 +294,10 @@ class Varelinje(models.Model):
                 | Q(privatafgiftsanmeldelse__isnull=True),
                 name="afgiftsanmeldelse_only_one",
             ),
+            CheckConstraint(
+                check=Q(vareafgiftssats__isnull=False) | Q(kladde=True),
+                name="aktuel_har_vareafgiftssats",
+            ),
         ]
 
     history = HistoricalRecords()
@@ -289,6 +318,8 @@ class Varelinje(models.Model):
     vareafgiftssats = models.ForeignKey(
         Vareafgiftssats,
         on_delete=models.CASCADE,
+        null=True,
+        blank=True,
     )
     mængde = models.DecimalField(
         null=True,
@@ -315,6 +346,7 @@ class Varelinje(models.Model):
         blank=True,
         validators=[MinValueValidator(0)],
     )
+    kladde = models.BooleanField(default=False)
 
     def __str__(self):
         return (
@@ -332,7 +364,8 @@ class Varelinje(models.Model):
                 self.afgiftsanmeldelse.save(update_fields=("afgift_total",))
 
     def beregn_afgift(self) -> None:
-        self.afgiftsbeløb = self.vareafgiftssats.beregn_afgift(self)
+        if self.vareafgiftssats:
+            self.afgiftsbeløb = self.vareafgiftssats.beregn_afgift(self)
 
 
 class Notat(models.Model):

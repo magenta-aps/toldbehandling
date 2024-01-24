@@ -2949,6 +2949,7 @@ class TF10CreateTest(TestMixin, HasLogin, TestCase):
                     "postbox": "123",
                     "telefon": "123456",
                     "cvr": 12345678,
+                    "kladde": False,
                 }
             ],
         )
@@ -2963,6 +2964,7 @@ class TF10CreateTest(TestMixin, HasLogin, TestCase):
                     "postbox": "124",
                     "telefon": "123123",
                     "cvr": 12345679,
+                    "kladde": False,
                 }
             ],
         )
@@ -2998,6 +3000,7 @@ class TF10CreateTest(TestMixin, HasLogin, TestCase):
                     "modtager_betaler": False,
                     "oprettet_på_vegne_af_id": 1,
                     "toldkategori": None,
+                    "kladde": False,
                 }
             ],
         )
@@ -3057,6 +3060,7 @@ class TF10CreateTest(TestMixin, HasLogin, TestCase):
                     "modtager_betaler": False,
                     "oprettet_på_vegne_af_id": 1,
                     "toldkategori": None,
+                    "kladde": False,
                 }
             ],
         )
@@ -3085,6 +3089,7 @@ class TF10CreateTest(TestMixin, HasLogin, TestCase):
                     "postbox": "123",
                     "telefon": "123456",
                     "cvr": 12345678,
+                    "kladde": False,
                 }
             ],
         )
@@ -3099,6 +3104,7 @@ class TF10CreateTest(TestMixin, HasLogin, TestCase):
                     "postbox": "124",
                     "telefon": "123123",
                     "cvr": 12345679,
+                    "kladde": False,
                 }
             ],
         )
@@ -3130,6 +3136,7 @@ class TF10CreateTest(TestMixin, HasLogin, TestCase):
                     "modtager_betaler": False,
                     "oprettet_på_vegne_af_id": 1,
                     "toldkategori": None,
+                    "kladde": False,
                 }
             ],
         )

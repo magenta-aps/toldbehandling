@@ -27,11 +27,9 @@ class AfsenderIn(ModelSchema):
             "postbox",
             "telefon",
             "cvr",
+            "kladde",
         ]
-        model_fields_optional = [
-            "postbox",
-            "cvr",
-        ]
+        model_fields_optional = "__all__"
 
 
 class PartialAfsenderIn(ModelSchema):
@@ -45,6 +43,7 @@ class PartialAfsenderIn(ModelSchema):
             "postbox",
             "telefon",
             "cvr",
+            "kladde",
         ]
         model_fields_optional = "__all__"
 
@@ -61,6 +60,7 @@ class AfsenderOut(ModelSchema):
             "postbox",
             "telefon",
             "cvr",
+            "kladde",
         ]
 
 
@@ -72,6 +72,7 @@ class AfsenderFilterSchema(FilterSchema):
     postbox: Optional[str]
     telefon: Optional[str]
     cvr: Optional[int]
+    kladde: Optional[bool]
 
 
 class AfsenderPermission(RestPermission):
@@ -88,6 +89,7 @@ class AfsenderAPI:
     @route.post("", auth=get_auth_methods(), url_name="afsender_create")
     def create_afsender(self, payload: AfsenderIn):
         try:
+            print(payload)
             item = Afsender.objects.create(**payload.dict())
             return {"id": item.id}
         except ValidationError as e:
@@ -147,8 +149,9 @@ class ModtagerIn(ModelSchema):
             "telefon",
             "cvr",
             "kreditordning",
+            "kladde",
         ]
-        model_fields_optional = ["postbox", "cvr"]
+        model_fields_optional = "__all__"
 
 
 class PartialModtagerIn(ModelSchema):
@@ -163,6 +166,7 @@ class PartialModtagerIn(ModelSchema):
             "telefon",
             "cvr",
             "kreditordning",
+            "kladde",
         ]
         model_fields_optional = "__all__"
 
@@ -180,6 +184,7 @@ class ModtagerOut(ModelSchema):
             "telefon",
             "cvr",
             "kreditordning",
+            "kladde",
         ]
 
 
@@ -192,6 +197,7 @@ class ModtagerFilterSchema(FilterSchema):
     telefon: Optional[str]
     cvr: Optional[int]
     kreditordning: Optional[bool]
+    kladde: Optional[bool]
 
 
 class ModtagerPermission(RestPermission):

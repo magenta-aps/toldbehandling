@@ -8,8 +8,10 @@ from uuid import uuid4
 
 from common.api import get_auth_methods
 from common.models import IndberetterProfile
+from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.db.models import QuerySet
+from django.http import HttpResponseBadRequest
 from django.shortcuts import get_object_or_404
 from forsendelse.models import Fragtforsendelse, Postforsendelse
 from ninja import Field, FilterSchema, ModelSchema, Query
@@ -17,7 +19,7 @@ from ninja_extra import api_controller, permissions, route
 from ninja_extra.exceptions import PermissionDenied
 from ninja_extra.pagination import paginate
 from ninja_extra.schemas import NinjaPaginationResponseSchema
-from project.util import RestPermission
+from project.util import RestPermission, json_dump
 
 # Django-ninja har endnu ikke understøttelse for PATCH med filer i multipart/form-data
 # Se https://github.com/vitalik/django-ninja/pull/397
@@ -42,6 +44,7 @@ class PostforsendelseIn(ModelSchema):
             "postforsendelsesnummer",
             "afsenderbykode",
             "afgangsdato",
+            "kladde",
         ]
 
 
@@ -53,6 +56,7 @@ class PartialPostforsendelseIn(ModelSchema):
             "postforsendelsesnummer",
             "afsenderbykode",
             "afgangsdato",
+            "kladde",
         ]
         model_fields_optional = "__all__"
 
@@ -66,6 +70,7 @@ class PostforsendelseOut(ModelSchema):
             "postforsendelsesnummer",
             "afsenderbykode",
             "afgangsdato",
+            "kladde",
         ]
 
 
@@ -91,9 +96,14 @@ class PostforsendelsePermission(RestPermission):
 class PostforsendelseAPI:
     @route.post("", auth=get_auth_methods(), url_name="postforsendelse_create")
     def create_postforsendelse(self, payload: PostforsendelseIn):
-        item = Postforsendelse.objects.create(
-            **payload.dict(), oprettet_af=self.context.request.user
-        )
+        try:
+            item = Postforsendelse.objects.create(
+                **payload.dict(), oprettet_af=self.context.request.user
+            )
+        except ValidationError as e:
+            return HttpResponseBadRequest(
+                json_dump(e.message_dict), content_type="application/json"
+            )
         return {"id": item.id}
 
     @route.get(
@@ -175,7 +185,9 @@ class FragtforsendelseIn(ModelSchema):
             "fragtbrevsnummer",
             "forbindelsesnr",
             "afgangsdato",
+            "kladde",
         ]
+        model_fields_optional = "__all__"
 
 
 class PartialFragtforsendelseIn(ModelSchema):
@@ -189,6 +201,7 @@ class PartialFragtforsendelseIn(ModelSchema):
             "fragtbrevsnummer",
             "forbindelsesnr",
             "afgangsdato",
+            "kladde",
         ]
         model_fields_optional = "__all__"
 
@@ -203,6 +216,7 @@ class FragtforsendelseOut(ModelSchema):
             "fragtbrev",
             "forbindelsesnr",
             "afgangsdato",
+            "kladde",
         ]
 
 
@@ -213,6 +227,7 @@ class FragtforsendelseFilterSchema(FilterSchema):
     afgangsdato: Optional[str]
     afgangsdato__før: Optional[str] = Field(q="afgangsdato__lt")
     afgangsdato__efter: Optional[str] = Field(q="afgangsdato__gte")
+    kladde: Optional[bool]
 
 
 class FragtforsendelsePermission(RestPermission):
@@ -234,9 +249,14 @@ class FragtforsendelseAPI:
         data = payload.dict()
         fragtbrev = data.pop("fragtbrev", None)
         fragtbrev_navn = data.pop("fragtbrev_navn", None) or (str(uuid4()) + ".pdf")
-        item = Fragtforsendelse.objects.create(
-            **data, oprettet_af=self.context.request.user
-        )
+        try:
+            item = Fragtforsendelse.objects.create(
+                **data, oprettet_af=self.context.request.user
+            )
+        except ValidationError as e:
+            return HttpResponseBadRequest(
+                json_dump(e.message_dict), content_type="application/json"
+            )
         if fragtbrev is not None:
             item.fragtbrev = ContentFile(
                 base64.b64decode(fragtbrev), name=fragtbrev_navn

@@ -151,8 +151,8 @@
             {% endif %}
             <td>{{item.id}}</td>
             <td>{{item.dato|date:"c"}}</td>
-            <td>{{item.afsender.navn}}</td>
-            <td>{{item.modtager.navn}}</td>
+            <td>{{item.afsender.navn|default_if_none:"-"}}</td>
+            <td>{{item.modtager.navn|default_if_none:"-"}}</td>
             <td>{% translate item.status|capfirst %}</td>
             <td>
                 {{item.actions}}

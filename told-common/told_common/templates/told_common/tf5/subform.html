@@ -5,7 +5,7 @@
         <div class="input-group">
             {{subform.vareafgiftssats}}
             {% translate 'Type af vare der importeres' as content %}
-            {% include "told_common/tf5/info.html" with title=subform.vareafgiftssats.label content=content %}
+            {% include "told_common/widgets/info.html" with title=subform.vareafgiftssats.label content=content %}
         </div>
     </div>
     <div class="col-1 px-0" data-value="_varekode">
@@ -15,21 +15,21 @@
         <div class="input-group">
             {{subform.mængde}}
             {% translate 'Mængde der importeres' as content %}
-            {% include "told_common/tf5/info.html" with title=subform.mængde.label content=content %}
+            {% include "told_common/widgets/info.html" with title=subform.mængde.label content=content %}
         </div>
     </div>
     <div class="col-1 px-0">
         <div class="input-group">
             {{subform.antal}}
             {% translate 'Antal der importeres' as content %}
-            {% include "told_common/tf5/info.html" with title=subform.antal.label content=content %}
+            {% include "told_common/widgets/info.html" with title=subform.antal.label content=content %}
         </div>
     </div>
     <div class="col-2 px-0">
         <div class="input-group">
             {{subform.fakturabeløb}}
             {% translate 'Fakturabeløb inkl. moms.' as content %}
-            {% include "told_common/tf5/info.html" with title=subform.fakturabeløb.label content=content %}
+            {% include "told_common/widgets/info.html" with title=subform.fakturabeløb.label content=content %}
         </div>
     </div>
     <div class="col-2 px-0" data-value="_afgiftssats">

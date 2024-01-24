@@ -67,6 +67,17 @@ class TF10Form(BootstrapForm):
         self.fragtbrev_required = fragtbrev_required
         super().__init__(*args, **kwargs)
 
+    def full_clean(self):
+        self.klasse_fjern_required()
+        return super().full_clean()
+
+    def klasse_fjern_required(self):
+        kladde = self["kladde"].data
+        if kladde:
+            for name, bf in self._bound_items():
+                field = bf.field
+                field.required = False
+
     afsender_cvr = ButtonlessIntegerField(
         min_value=10000000,
         max_value=99999999,
@@ -260,6 +271,15 @@ class TF10Form(BootstrapForm):
     notat = forms.CharField(
         widget=forms.Textarea(attrs={"placeholder": _("Notat")}), required=False
     )
+    kladde = forms.BooleanField(
+        required=False,
+        widget=forms.Select(
+            choices=(
+                (False, _("Nej")),
+                (True, _("Ja")),
+            )
+        ),
+    )
 
     def clean(self):
         if (
@@ -279,7 +299,10 @@ class TF10Form(BootstrapForm):
 
     def clean_with_formset(self, formset):
         # Perform validation on form and formset together
-        if not self.cleaned_data["indførselstilladelse"]:
+        if (
+            not self.cleaned_data["indførselstilladelse"]
+            and not self.cleaned_data["kladde"]
+        ):
             # Hvis vi ikke har en indførselstilladelse,
             # tjek om der er nogle varer der kræver det
             for subform in formset:
@@ -300,6 +323,7 @@ class TF10Form(BootstrapForm):
 class TF10VareForm(BootstrapForm):
     def __init__(self, *args, **kwargs):
         self.varesatser = kwargs.pop("varesatser", {})
+        self.parent_form = None
         vareart_key = (
             "vareart_kl" if translation.get_language() == "kl" else "vareart_da"
         )
@@ -310,11 +334,22 @@ class TF10VareForm(BootstrapForm):
 
     id = forms.IntegerField(min_value=1, required=False, widget=forms.HiddenInput)
     vareafgiftssats = DynamicField(
-        forms.ChoiceField, choices=lambda form: form.varesatser_choices
+        forms.ChoiceField,
+        choices=lambda form: form.varesatser_choices,
+        required=lambda form: not form.kladde,
     )
     mængde = forms.DecimalField(min_value=0, required=False)
     antal = forms.IntegerField(min_value=1, required=False)
     fakturabeløb = forms.DecimalField(min_value=1, decimal_places=2, required=False)
+
+    def set_parent_form(self, form):
+        self.parent_form = form
+
+    @property
+    def kladde(self):
+        if self.parent_form:
+            return self.parent_form.cleaned_data["kladde"]
+        return False
 
     def clean_vareafgiftssats(self) -> int:
         # Get 'varekode' for selected vareafgiftssats
@@ -323,17 +358,17 @@ class TF10VareForm(BootstrapForm):
             if id == int(vareafgiftssats_selected_id):
                 return vareafgiftssats_selected_id
 
-        raise ValidationError(
-            self.fields["vareafgiftssats"].error_messages["required"],
-            code="required",
-        )
+        if not self.kladde:
+            raise ValidationError(
+                self.fields["vareafgiftssats"].error_messages["required"],
+                code="required",
+            )
 
     def clean_mængde(self) -> int:
         mængde = self.cleaned_data["mængde"]
-        if (
-            "vareafgiftssats" in self.cleaned_data
-        ):  # If not, it will fail validation elsewhere
-            varesats = self.varesatser[int(self.cleaned_data["vareafgiftssats"])]
+        vareafgiftssats = self.cleaned_data.get("vareafgiftssats")
+        if vareafgiftssats:
+            varesats = self.varesatser[int(vareafgiftssats)]
             if not mængde and varesats.enhed in (
                 Vareafgiftssats.Enhed.KILOGRAM,
                 Vareafgiftssats.Enhed.LITER,
@@ -345,10 +380,9 @@ class TF10VareForm(BootstrapForm):
 
     def clean_antal(self) -> int:
         antal = self.cleaned_data["antal"]
-        if (
-            "vareafgiftssats" in self.cleaned_data
-        ):  # If not, it will fail validation elsewhere
-            varesats = self.varesatser[int(self.cleaned_data["vareafgiftssats"])]
+        vareafgiftssats = self.cleaned_data.get("vareafgiftssats")
+        if vareafgiftssats:
+            varesats = self.varesatser[int(vareafgiftssats)]
             if not antal and varesats.enhed == Vareafgiftssats.Enhed.ANTAL:
                 raise ValidationError(
                     self.fields["antal"].error_messages["required"], code="required"
@@ -357,10 +391,9 @@ class TF10VareForm(BootstrapForm):
 
     def clean_fakturabeløb(self) -> Optional[Decimal]:
         fakturabeløb = self.cleaned_data["fakturabeløb"]
-        if (
-            "vareafgiftssats" in self.cleaned_data
-        ):  # If not, it will fail validation elsewhere
-            varesats = self.varesatser[int(self.cleaned_data["vareafgiftssats"])]
+        vareafgiftssats = self.cleaned_data.get("vareafgiftssats")
+        if vareafgiftssats:
+            varesats = self.varesatser[int(vareafgiftssats)]
             if not fakturabeløb and varesats.enhed in (
                 Vareafgiftssats.Enhed.PROCENT,
                 Vareafgiftssats.Enhed.SAMMENSAT,
@@ -440,7 +473,11 @@ class TF10SearchForm(PaginateForm, BootstrapForm):
         choices=lambda form: tuple(
             [(None, "------")]
             + sorted(
-                [(item["id"], item["navn"]) for item in form.afsendere.values()],
+                [
+                    (item["id"], item["navn"])
+                    for item in form.afsendere.values()
+                    if item["navn"] is not None
+                ],
                 key=lambda items: items[1],
             )
         ),
@@ -451,7 +488,11 @@ class TF10SearchForm(PaginateForm, BootstrapForm):
         choices=lambda form: tuple(
             [(None, "------")]
             + sorted(
-                [(item["id"], item["navn"]) for item in form.modtagere.values()],
+                [
+                    (item["id"], item["navn"])
+                    for item in form.modtagere.values()
+                    if item["navn"] is not None
+                ],
                 key=lambda items: items[1],
             )
         ),

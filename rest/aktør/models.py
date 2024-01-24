@@ -4,6 +4,7 @@
 
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+from django.db.models import CheckConstraint, Q
 
 
 class Aktør(models.Model):
@@ -14,9 +15,13 @@ class Aktør(models.Model):
     navn = models.CharField(
         max_length=100,
         db_index=True,
+        null=True,
+        blank=True,
     )
     adresse = models.CharField(
         max_length=100,
+        null=True,
+        blank=True,
     )
     postnummer = models.PositiveSmallIntegerField(
         db_index=True,
@@ -24,10 +29,14 @@ class Aktør(models.Model):
             MinValueValidator(1000),
             MaxValueValidator(9999),
         ),
+        null=True,
+        blank=True,
     )
     by = models.CharField(
         max_length=50,
         db_index=True,
+        null=True,
+        blank=True,
     )
     postbox = models.CharField(
         max_length=10,
@@ -36,6 +45,8 @@ class Aktør(models.Model):
     )
     telefon = models.CharField(
         max_length=12,
+        null=True,
+        blank=True,
     )
     cvr = models.PositiveIntegerField(
         validators=(
@@ -47,6 +58,9 @@ class Aktør(models.Model):
         blank=True,
         db_index=True,
     )
+    kladde = models.BooleanField(
+        default=False,
+    )
 
     def __str__(self):
         return f"{self.__class__.__name__}(navn={self.navn}, cvr={self.cvr})"
@@ -57,10 +71,56 @@ class Aktør(models.Model):
 
 
 class Afsender(Aktør):
-    pass
+    class Meta:
+        constraints = [
+            CheckConstraint(
+                check=Q(navn__isnull=False) | Q(kladde=True),
+                name="aktuel_afsender_har_navn",
+            ),
+            CheckConstraint(
+                check=Q(adresse__isnull=False) | Q(kladde=True),
+                name="aktuel_afsender_har_adresse",
+            ),
+            CheckConstraint(
+                check=Q(postnummer__isnull=False) | Q(kladde=True),
+                name="aktuel_afsender_har_postnummer",
+            ),
+            CheckConstraint(
+                check=Q(by__isnull=False) | Q(kladde=True),
+                name="aktuel_afsender_har_by",
+            ),
+            CheckConstraint(
+                check=Q(telefon__isnull=False) | Q(kladde=True),
+                name="aktuel_afsender_har_telefon",
+            ),
+        ]
 
 
 class Modtager(Aktør):
+    class Meta:
+        constraints = [
+            CheckConstraint(
+                check=Q(navn__isnull=False) | Q(kladde=True),
+                name="aktuel_modtager_har_navn",
+            ),
+            CheckConstraint(
+                check=Q(adresse__isnull=False) | Q(kladde=True),
+                name="aktuel_modtager_har_adresse",
+            ),
+            CheckConstraint(
+                check=Q(postnummer__isnull=False) | Q(kladde=True),
+                name="aktuel_modtager_har_postnummer",
+            ),
+            CheckConstraint(
+                check=Q(by__isnull=False) | Q(kladde=True),
+                name="aktuel_modtager_har_by",
+            ),
+            CheckConstraint(
+                check=Q(telefon__isnull=False) | Q(kladde=True),
+                name="aktuel_modtager_har_telefon",
+            ),
+        ]
+
     kreditordning = models.BooleanField(
         default=False,
     )
