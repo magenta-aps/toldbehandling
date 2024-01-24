@@ -125,22 +125,32 @@ class CustomDutyRequest(PrismeRequestObject):
         else:
             return varelinje.antal
 
+    @staticmethod
+    def empty_if_none(value):
+        if value is None:
+            return ""
+        return value
+
     @property
     def xml(self):
         data = {
             "Type": "TF10",
-            "CvrConsignee": self.afgiftsanmeldelse.modtager.cvr,
-            "CvrConsigner": self.afgiftsanmeldelse.afsender.cvr,
+            "CvrConsignee": self.empty_if_none(self.afgiftsanmeldelse.modtager.cvr),
+            "CvrConsigner": self.empty_if_none(self.afgiftsanmeldelse.afsender.cvr),
             "TaxNotificationNumber": self.afgiftsanmeldelse.id,
             "BillOfLadingOrPostalNumber": self.forsendelsesnummer,
-            "ConnectionNumber": self.forbindelsesnummer,
+            "ConnectionNumber": self.empty_if_none(self.forbindelsesnummer),
             "CustomsCategory": self.toldkategori,
-            "LocationCode": self.afsenderbykode,
+            "LocationCode": self.empty_if_none(self.afsenderbykode),
             "PaymentParty": self.betaler,
             "DlvModeId": self.leveringsmåde,
             "DeliveryDate": self.forsendelse.afgangsdato.isoformat(),
-            "ImportAuthorizationNumber": self.afgiftsanmeldelse.indførselstilladelse,
-            "VendInvoiceNumber": self.afgiftsanmeldelse.leverandørfaktura_nummer,
+            "ImportAuthorizationNumber": self.empty_if_none(
+                self.afgiftsanmeldelse.indførselstilladelse
+            ),
+            "VendInvoiceNumber": self.empty_if_none(
+                self.afgiftsanmeldelse.leverandørfaktura_nummer
+            ),
             "WebDueDate": self.afgiftsanmeldelse.beregnet_faktureringsdato.isoformat(),
             "CustomDutyHeaderLines": [
                 {
@@ -150,7 +160,7 @@ class CustomDutyRequest(PrismeRequestObject):
                             varelinje.vareafgiftssats.afgiftsgruppenummer
                         ).zfill(3),
                         "Qty": self.qty(varelinje),
-                        "BillAmount": str(varelinje.fakturabeløb),
+                        "BillAmount": str(self.empty_if_none(varelinje.fakturabeløb)),
                         "LineAmount": str(varelinje.afgiftsbeløb),
                     }
                 }
