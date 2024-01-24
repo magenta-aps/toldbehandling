@@ -38,7 +38,7 @@ class NetsProviderHandler:
         )
 
         if response.status_code != 201:
-            raise Exception("Failed to create payments")
+            raise Exception("Failed to create payment: " + response.text)
 
         resp_body = response.json()
         return self.read(resp_body["paymentId"])
