@@ -824,11 +824,13 @@ class TF5ListView(AdminLayoutBaseView, common_views.TF5ListView):
         )
 
 
-class TF5View(AdminLayoutBaseView, common_views.TF5View):
+class TF5View(AdminLayoutBaseView, common_views.TF5View, FormView):
+    form_class = forms.TF5Form
     required_permissions = (
         "auth.admin",
         "anmeldelse.view_privatafgiftsanmeldelse",
     )
+    show_notater = True
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -851,7 +853,20 @@ class TF5View(AdminLayoutBaseView, common_views.TF5View):
 
 
 class TF5UpdateView(AdminLayoutBaseView, common_views.TF5UpdateView):
-    pass
+    form_class = forms.TF5Form
+
+    def form_valid(self, form, formset):
+        response = super().form_valid(form, formset)
+        privatanmeldelse_id = self.kwargs["id"]
+        notat = form.cleaned_data["notat"]
+
+        # Opret notat _efter_ den nye version af anmeldelsen, så vores historik-filtrering fungerer
+        if notat:
+            self.rest_client.notat.create(
+                {"tekst": notat}, privatafgiftsanmeldelse_id=self.kwargs["id"]
+            )
+
+        return redirect(reverse("tf5_view", kwargs={"id": privatanmeldelse_id}))
 
 
 class TF5LeverandørFakturaView(common_views.LeverandørFakturaView):

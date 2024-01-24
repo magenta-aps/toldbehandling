@@ -578,7 +578,7 @@ class PrivatAfgiftanmeldelseRestClient(ModelRestClient):
             if include_varelinjer:
                 item["varelinjer"] = self.rest.varelinje.list(afgiftsanmeldelse=id)
             if include_notater:
-                item["notater"] = self.rest.notat.list(afgiftsanmeldelse=id)
+                item["notater"] = self.rest.notat.list(privatafgiftsanmeldelse=id)
 
         for item in data["items"]:
             if item.get("leverandørfaktura"):
@@ -601,7 +601,7 @@ class PrivatAfgiftanmeldelseRestClient(ModelRestClient):
         if include_varelinjer:
             item["varelinjer"] = self.rest.varelinje.list(privatafgiftsanmeldelse=id)
         if include_notater:
-            item["notater"] = self.rest.notat.list(afgiftsanmeldelse=id)
+            item["notater"] = self.rest.notat.list(privatafgiftsanmeldelse=id)
         return PrivatAfgiftsanmeldelse.from_dict(item)
 
     def seneste_indførselstilladelse(self, cpr):
@@ -639,6 +639,8 @@ class VarelinjeRestClient(ModelRestClient):
         afgiftsanmeldelse_id: Optional[int] = None,
         privatafgiftsanmeldelse_id: Optional[int] = None,
     ) -> dict:
+        if afgiftsanmeldelse_id is None and privatafgiftsanmeldelse_id is None:
+            raise Exception("Skal specificere enten anmeldelse eller privatanmeldelse")
         return {
             "afgiftsanmeldelse_id": afgiftsanmeldelse_id,
             "privatafgiftsanmeldelse_id": privatafgiftsanmeldelse_id,
@@ -706,14 +708,30 @@ class VarelinjeRestClient(ModelRestClient):
 
 class NotatRestClient(ModelRestClient):
     @staticmethod
-    def map(data: dict, afgiftsanmeldelse_id: int) -> dict:
+    def map(
+        data: dict,
+        afgiftsanmeldelse_id: Optional[int] = None,
+        privatafgiftsanmeldelse_id: Optional[int] = None,
+    ) -> dict:
+        if afgiftsanmeldelse_id is None and privatafgiftsanmeldelse_id is None:
+            raise Exception(
+                "Skal specificere enten afgiftsanmeldelse eller privatanmeldelse"
+            )
         return {
             "afgiftsanmeldelse_id": afgiftsanmeldelse_id,
+            "privatafgiftsanmeldelse_id": privatafgiftsanmeldelse_id,
             "tekst": str(data["tekst"]),
         }
 
-    def create(self, data: dict, afgiftsanmeldelse_id: int):
-        response = self.rest.post("notat", self.map(data, afgiftsanmeldelse_id))
+    def create(
+        self,
+        data: dict,
+        afgiftsanmeldelse_id: Optional[int] = None,
+        privatafgiftsanmeldelse_id: Optional[int] = None,
+    ):
+        response = self.rest.post(
+            "notat", self.map(data, afgiftsanmeldelse_id, privatafgiftsanmeldelse_id)
+        )
         return response["id"]
 
     def delete(self, id):

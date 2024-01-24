@@ -235,6 +235,12 @@
             </tfoot>
         </table>
 
+        {% if show_notater %}
+        <hr/>
+        <h5>{% translate "Notater" %}</h5>
+        {% include "told_common/notat/list.html" with notater=object.notater %}
+        {% endif %}
+
         {% if not printing %}
         <div class="form-row">
             <div class="ml-auto">

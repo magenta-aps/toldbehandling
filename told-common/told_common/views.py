@@ -676,6 +676,7 @@ class TF5View(
                 # Opret en path i admin/urls.py ved navn "tf5_tilladelse"
                 # hvis denne sættes til True
                 "can_create_tilladelse": False,
+                "show_notater": self.show_notater,
             }
         )
 

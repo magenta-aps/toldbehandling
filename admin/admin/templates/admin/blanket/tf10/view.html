@@ -356,31 +356,8 @@
         </table>
 
         <hr/>
-
         <h5>Notater</h5>
-
-        <table class="table table-striped">
-            <thead>
-                <tr>
-                    <th class="col-2">Bruger</th>
-                    <th class="col-2">Tidspunkt</th>
-                    <th class="col-8">Notat</th>
-                </tr>
-            </thead>
-            <tbody>
-            {% for notat in object.notater %}
-            <tr>
-                <td>{{notat.navn}}</td>
-                <td>{{notat.oprettet}}</td>
-                <td>{{notat.tekst}}</td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="3" class="text-center">Ingen notater</td>
-            </tr>
-            {% endfor %}
-            </tbody>
-        </table>
+        {% include "told_common/notat/list.html" with notater=object.notater %}
 
         <hr/>
 

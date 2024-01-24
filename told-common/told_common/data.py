@@ -208,7 +208,8 @@ class Afgiftstabel(ToldDataClass):
 class Notat(ToldDataClass):
     id: int
     tekst: str
-    afgiftsanmeldelse: int
+    afgiftsanmeldelse: Optional[int]
+    privatafgiftsanmeldelse: Optional[int]
     index: int
     oprettet: datetime = field(
         metadata=config(
@@ -412,6 +413,7 @@ class PrivatAfgiftsanmeldelse(ToldDataClass):
     payment_status: str
     indførselstilladelse: str = None
     varelinjer: List[Varelinje] = None
+    notater: Optional[List[Notat]] = None
 
     @property
     def afgift_sum(self):
