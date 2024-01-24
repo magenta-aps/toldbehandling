@@ -184,6 +184,7 @@ class Afgiftsanmeldelse(models.Model):
 
 
 class PrivatAfgiftsanmeldelse(models.Model):
+    history = HistoricalRecords()
     oprettet = models.DateTimeField(auto_now_add=True)
     oprettet_af = models.ForeignKey(
         User,
@@ -369,6 +370,20 @@ class Varelinje(models.Model):
 
 
 class Notat(models.Model):
+    class Meta:
+        constraints = [
+            CheckConstraint(
+                check=Q(afgiftsanmeldelse__isnull=False)
+                | Q(privatafgiftsanmeldelse__isnull=False),
+                name="notat_has_one_anmeldelse",
+            ),
+            CheckConstraint(
+                check=Q(afgiftsanmeldelse__isnull=True)
+                | Q(privatafgiftsanmeldelse__isnull=True),
+                name="notat_only_one_anmeldelse",
+            ),
+        ]
+
     user = models.ForeignKey(
         User,
         null=True,
@@ -379,6 +394,16 @@ class Notat(models.Model):
     afgiftsanmeldelse = models.ForeignKey(
         Afgiftsanmeldelse,
         on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        default=None,
+    )
+    privatafgiftsanmeldelse = models.ForeignKey(
+        PrivatAfgiftsanmeldelse,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        default=None,
     )
     index = models.PositiveSmallIntegerField(
         null=False,

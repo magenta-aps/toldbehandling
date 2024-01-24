@@ -13,7 +13,7 @@ from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from io import BytesIO, StringIO
 from typing import Dict, List, Tuple
-from unittest.mock import patch
+from unittest.mock import mock_open, patch
 from urllib.parse import parse_qs, quote, quote_plus, urlparse
 
 import requests
@@ -430,6 +430,7 @@ class TestGodkend(PermissionsTest, TestCase):
                     {
                         "id": 1,
                         "afgiftsanmeldelse": 1,
+                        "privatafgiftsanmeldelse": None,
                         "tekst": "Hephey",
                         "navn": "tester",
                         "oprettet": "2023-10-01T00:00:00.000000+00:00",
@@ -766,6 +767,7 @@ class TestPrisme(PermissionsTest, TestCase):
                     {
                         "id": 1,
                         "afgiftsanmeldelse": 1,
+                        "privatafgiftsanmeldelse": None,
                         "tekst": "Hephey",
                         "navn": "tester",
                         "oprettet": "2023-10-01T00:00:00.000000+00:00",
@@ -1154,6 +1156,7 @@ class AnmeldelseHistoryDetailViewTest(PermissionsTest, TestCase):
                     {
                         "id": 1,
                         "afgiftsanmeldelse": 1,
+                        "privatafgiftsanmeldelse": None,
                         "oprettet": "2023-10-01T00:00:00.000000+00:00",
                         "tekst": "Test tekst",
                         "index": 0,
@@ -1516,6 +1519,8 @@ class AnmeldelseNotatTest(PermissionsTest, TestCase):
                     {
                         "id": 1,
                         "afgiftsanmeldelse": 1,
+                        "privatafgiftsanmeldelse": None,
+                        "privatafgiftsanmeldelse": None,
                         "tekst": "Hephey",
                         "navn": "tester",
                         "oprettet": "2023-10-01T00:00:00.000000+00:00",
@@ -1625,7 +1630,7 @@ class AnmeldelseNotatTest(PermissionsTest, TestCase):
         self.assertIn(
             (
                 f"{settings.REST_DOMAIN}/api/notat",
-                '{"afgiftsanmeldelse_id": 1, "tekst": "Testnotat"}',
+                '{"afgiftsanmeldelse_id": 1, "privatafgiftsanmeldelse_id": null, "tekst": "Testnotat"}',
             ),
             self.posted,
         )
@@ -3420,4 +3425,231 @@ class StatistikTest(PermissionsTest, TestCase):
         group_table = tabledata[1]
         self.assertEquals(
             group_table, [{"Afgift": "1.401.750,00", "Gruppe": "1234+5678"}]
+        )
+
+
+class TF5NotatTest(HasLogin, TestCase):
+    formdata = {
+        "cpr": "1234567890",
+        "navn": "TestPerson1",
+        "adresse": "Testvej 42",
+        "postnummer": "1234",
+        "by": "TestBy",
+        "telefon": "123456",
+        "bookingnummer": "123",
+        "indførselstilladelse": "123",
+        "leverandørfaktura_nummer": "123",
+        "indleveringsdato": "2023-11-03",
+        "form-TOTAL_FORMS": "1",
+        "form-INITIAL_FORMS": "1",
+        "form-0-id": "1",
+        "form-0-vareafgiftssats": "1",
+        "form-0-mængde": "1.00",
+        "form-0-antal": "5",
+        "form-0-fakturabeløb": "25000.00",
+        "notat": "Dette er en test",
+    }
+
+    _formfiles1 = {
+        "leverandørfaktura": SimpleUploadedFile(
+            "leverandørfaktura.txt", "Testtekst".encode("utf-8")
+        ),
+    }
+
+    def setUp(self):
+        super().setUp()
+        self.patched: List[Tuple[str, str]] = []
+        self.posted: List[Tuple[str, str]] = []
+
+    def mock_requests_post(self, path, data, headers=None):
+        path = path.rstrip("/")
+        response = Response()
+        content = None
+        status_code = None
+        json_content = {"id": 1}
+        self.posted.append((path, data))
+        if json_content:
+            content = json.dumps(json_content).encode("utf-8")
+        if content:
+            if not status_code:
+                status_code = 200
+            response._content = content
+        response.status_code = status_code or 404
+        return response
+
+    def mock_requests_patch(self, path, data, headers=None):
+        path = path.rstrip("/")
+        response = Response()
+        content = None
+        status_code = None
+        json_content = {"id": 1}
+        self.patched.append((path, data))
+        if json_content:
+            content = json.dumps(json_content).encode("utf-8")
+        if content:
+            if not status_code:
+                status_code = 200
+            response._content = content
+        response.status_code = status_code or 404
+        return response
+
+    def mock_requests_get(self, path):
+        expected_prefix = f"{settings.REST_DOMAIN}/api/"
+        path = path.split("?")[0]
+        path = path.rstrip("/")
+        response = Response()
+        json_content = None
+        content = None
+        status_code = None
+        empty = {"count": 0, "items": []}
+        if path == expected_prefix + "afgiftstabel":
+            json_content = {
+                "count": 1,
+                "items": [
+                    {
+                        "id": 1,
+                        "gyldig_fra": "2023-01-01T00:00:00-03:00",
+                        "gyldig_til": None,
+                        "kladde": False,
+                    }
+                ],
+            }
+        elif path == expected_prefix + "vareafgiftssats":
+            json_content = {
+                "count": 1,
+                "items": [
+                    {
+                        "id": 1,
+                        "afgiftstabel": 1,
+                        "vareart_da": "Båthorn",
+                        "vareart_kl": "Båthorn",
+                        "afgiftsgruppenummer": 1234567,
+                        "enhed": "kg",
+                        "afgiftssats": "1.00",
+                        "kræver_indførselstilladelse": False,
+                        "har_privat_tillægsafgift_alkohol": False,
+                    }
+                ],
+            }
+        elif path == expected_prefix + "vareafgiftssats/1":
+            json_content = {
+                "id": 1,
+                "afgiftstabel": 1,
+                "vareart_da": "Båthorn",
+                "vareart_kl": "Båthorn",
+                "afgiftsgruppenummer": 1234567,
+                "enhed": "kg",
+                "afgiftssats": "1.00",
+                "kræver_indførselstilladelse": False,
+                "har_privat_tillægsafgift_alkohol": False,
+            }
+        elif path == expected_prefix + "varelinje":
+            json_content = {
+                "count": 1,
+                "items": [
+                    {
+                        "id": 1,
+                        "afgiftsanmeldelse": 1,
+                        "vareafgiftssats": 1,
+                        "antal": 5,
+                        "mængde": "1.00",
+                        "fakturabeløb": "25000.00",
+                        "afgiftsbeløb": "5000.00",
+                    }
+                ],
+            }
+        elif path == expected_prefix + "privat_afgiftsanmeldelse/1":
+            json_content = {
+                "id": 1,
+                "cpr": 111111111,
+                "navn": "Dummybruger Testersen",
+                "adresse": "Testvej 12",
+                "postnummer": 1234,
+                "by": "Testby",
+                "telefon": "123456",
+                "bookingnummer": "1234",
+                "indleveringsdato": "2024-02-01",
+                "leverandørfaktura_nummer": "1234",
+                "indførselstilladelse": None,
+                "leverandørfaktura": None,  # "/privatfakturaer/1/a.pdf",
+                "oprettet": "2024-01-24T12:23:17.315148+00:00",
+                "oprettet_af": {
+                    "id": 10,
+                    "username": "0111111111 / 12345678",
+                    "first_name": "Dummybruger",
+                    "last_name": "Testersen",
+                    "email": "test@magenta.dk",
+                    "is_superuser": False,
+                    "groups": ["PrivatIndberettere", "ErhvervIndberettere"],
+                    "permissions": [
+                        "aktør.add_afsender",
+                        "aktør.add_modtager",
+                        "aktør.change_afsender",
+                        "aktør.change_modtager",
+                        "aktør.view_afsender",
+                        "aktør.view_modtager",
+                        "anmeldelse.add_afgiftsanmeldelse",
+                        "anmeldelse.add_notat",
+                        "anmeldelse.add_privatafgiftsanmeldelse",
+                        "anmeldelse.add_varelinje",
+                        "anmeldelse.change_afgiftsanmeldelse",
+                        "anmeldelse.change_privatafgiftsanmeldelse",
+                        "anmeldelse.change_varelinje",
+                        "anmeldelse.view_afgiftsanmeldelse",
+                        "anmeldelse.view_notat",
+                        "anmeldelse.view_privatafgiftsanmeldelse",
+                        "anmeldelse.view_varelinje",
+                        "forsendelse.add_fragtforsendelse",
+                        "forsendelse.add_postforsendelse",
+                        "forsendelse.change_fragtforsendelse",
+                        "forsendelse.change_postforsendelse",
+                        "forsendelse.delete_fragtforsendelse",
+                        "forsendelse.delete_postforsendelse",
+                        "forsendelse.view_fragtforsendelse",
+                        "forsendelse.view_postforsendelse",
+                        "payment.add_item",
+                        "payment.add_payment",
+                        "payment.change_item",
+                        "payment.change_payment",
+                        "payment.view_item",
+                        "payment.view_payment",
+                        "sats.view_afgiftstabel",
+                        "sats.view_vareafgiftssats",
+                    ],
+                    "indberetter_data": {"cpr": 111111111, "cvr": 12345678},
+                },
+                "status": "ny",
+                "anonym": False,
+                "payment_status": "created",
+            }
+
+        else:
+            print(f"Mock got unrecognized path: {path}")
+        if json_content:
+            content = json.dumps(json_content).encode("utf-8")
+        if content:
+            if not status_code:
+                status_code = 200
+            response._content = content
+        response.status_code = status_code or 404
+        return response
+
+    @patch.object(requests.sessions.Session, "get")
+    @patch.object(requests.sessions.Session, "patch")
+    @patch.object(requests.sessions.Session, "post")
+    def test_add_notat(self, mock_post, mock_patch, mock_get):
+        self.login()
+        mock_get.side_effect = self.mock_requests_get
+        mock_patch.side_effect = self.mock_requests_patch
+        mock_post.side_effect = self.mock_requests_post
+        response = self.client.post(
+            reverse("tf5_edit", kwargs={"id": 1}),
+            self.formdata,
+        )
+        self.assertIn(
+            (
+                f"{settings.REST_DOMAIN}/api/notat",
+                '{"afgiftsanmeldelse_id": null, "privatafgiftsanmeldelse_id": 1, "tekst": "Dette er en test"}',
+            ),
+            self.posted,
         )

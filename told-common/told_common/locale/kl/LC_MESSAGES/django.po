@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-24 07:39-0200\n"
+"POT-Creation-Date: 2024-01-24 11:18-0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -218,7 +218,7 @@ msgstr "Tigusisussaq"
 msgid "Afsender"
 msgstr "Nassiussisoq"
 
-#: told_common/forms.py
+#: told_common/forms.py told_common/templates/told_common/notat/list.html
 msgid "Notat"
 msgstr "Allakkiaq"
 
@@ -316,6 +316,18 @@ msgstr "Uterit"
 #: told_common/templates/told_common/login.html
 msgid "Login"
 msgstr "Iserit"
+
+#: told_common/templates/told_common/notat/list.html
+msgid "Bruger"
+msgstr ""
+
+#: told_common/templates/told_common/notat/list.html
+msgid "Tidspunkt"
+msgstr ""
+
+#: told_common/templates/told_common/notat/list.html
+msgid "Ingen notater"
+msgstr ""
 
 #: told_common/templates/told_common/tf10/form.html
 msgid "Afgiftsanmeldelse"
@@ -479,10 +491,9 @@ msgid "Afgift i alt"
 msgstr "Akitsuutit katillugit"
 
 #: told_common/templates/told_common/tf10/form.html
-#, fuzzy
-#| msgid "Notat"
+#: told_common/templates/told_common/tf5/view.html
 msgid "Notater"
-msgstr "Allakkiaq"
+msgstr ""
 
 #: told_common/templates/told_common/tf10/form.html
 msgid "Toldkategori"
@@ -759,10 +770,9 @@ msgid "Ingen fil valgt"
 msgstr "Fili toqqarneqanngilaq"
 
 #: told_common/views.py
-#, fuzzy, python-brace-format
-#| msgid "Afgiftsanmeldelsen med nummer {id} blev opdateret"
+#, python-brace-format
 msgid "Afgiftsanmeldelsen med nummer {id} blev gemt som kladde."
-msgstr "Akitsuusigassanik nalunaarut {id} -mik normulik nutarterneqarpoq"
+msgstr ""
 
 #: told_common/views.py
 #, python-brace-format

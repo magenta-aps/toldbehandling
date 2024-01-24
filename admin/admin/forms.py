@@ -235,3 +235,9 @@ class StatistikGruppeForm(BootstrapForm):
 StatistikGruppeFormSet = formset_factory(
     StatistikGruppeForm, min_num=0, extra=1, can_delete=True
 )
+
+
+class TF5Form(common_forms.TF5Form):
+    notat = forms.CharField(
+        widget=forms.Textarea(attrs={"placeholder": _("Notat")}), required=False
+    )

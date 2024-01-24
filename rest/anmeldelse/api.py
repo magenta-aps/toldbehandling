@@ -603,6 +603,25 @@ class PrivatAfgiftsanmeldelseAPI:
         item.save()
         return {"success": True}
 
+    @staticmethod
+    def get_historical(id: int, index: int) -> Tuple[PrivatAfgiftsanmeldelse, datetime]:
+        anmeldelse = PrivatAfgiftsanmeldelse.objects.get(id=id)
+        historiske_anmeldelser = anmeldelse.history.order_by("history_date")
+        if index < 0 or index >= historiske_anmeldelser.count():
+            raise Http404
+        next = historiske_anmeldelser[index].next_record
+        if next:  # next er None hvis vi har fat i den seneste version
+            as_of = next.history_date - timedelta(microseconds=1)
+        else:
+            as_of = datetime.now()
+        anmeldelse = anmeldelse.history.as_of(as_of)
+        return anmeldelse, as_of
+
+    @staticmethod
+    def get_historical_count(id: int):
+        anmeldelse = PrivatAfgiftsanmeldelse.objects.get(id=id)
+        return anmeldelse.history.count()
+
 
 class VarelinjeIn(ModelSchema):
     fakturabeløb: str = None
@@ -769,6 +788,7 @@ class VarelinjeAPI:
 class NotatIn(ModelSchema):
     tekst: str
     afgiftsanmeldelse_id: int = None
+    privatafgiftsanmeldelse_id: int = None
 
     class Config:
         model = Notat
@@ -783,6 +803,7 @@ class NotatOut(ModelSchema):
         model_fields = [
             "id",
             "afgiftsanmeldelse",
+            "privatafgiftsanmeldelse",
             "oprettet",
             "tekst",
             "index",
@@ -796,6 +817,7 @@ class NotatOut(ModelSchema):
 
 class NotatFilterSchema(FilterSchema):
     afgiftsanmeldelse: Optional[int]
+    privatafgiftsanmeldelse: Optional[int]
 
 
 class NotatPermission(RestPermission):
@@ -811,13 +833,22 @@ class NotatPermission(RestPermission):
 class NotatAPI:
     @route.post("", auth=get_auth_methods(), url_name="notat_create")
     def create_notat(self, payload: NotatIn):
+        if payload.afgiftsanmeldelse_id:
+            index = (
+                AfgiftsanmeldelseAPI.get_historical_count(payload.afgiftsanmeldelse_id)
+                - 1
+            )
+        else:
+            index = (
+                PrivatAfgiftsanmeldelseAPI.get_historical_count(
+                    payload.privatafgiftsanmeldelse_id
+                )
+                - 1
+            )
         item = Notat.objects.create(
             **payload.dict(),
             user=self.context.request.user,
-            index=AfgiftsanmeldelseAPI.get_historical_count(
-                payload.afgiftsanmeldelse_id
-            )
-            - 1,
+            index=index,
         )
         return {"id": item.id}
 
@@ -851,6 +882,23 @@ class NotatAPI:
                 # # Find notater som de så ud lige før den næste version
                 # qs = anmeldelse.notat_set.filter(oprettet__lte=as_of)
                 qs = anmeldelse.notat_set.filter(
+                    index__lte=afgiftsanmeldelse_history_index
+                )
+            except Afgiftsanmeldelse.DoesNotExist:
+                qs = Notat.objects.none
+        if (
+            filters.privatafgiftsanmeldelse
+            and afgiftsanmeldelse_history_index is not None
+        ):
+            # Historik-opslag: Find notater for en given version
+            # af en privatafgiftsanmeldelse
+            try:
+                privatanmeldelse, as_of = PrivatAfgiftsanmeldelseAPI.get_historical(
+                    filters.privatafgiftsanmeldelse, afgiftsanmeldelse_history_index
+                )
+                # # Find notater som de så ud lige før den næste version
+                # qs = anmeldelse.notat_set.filter(oprettet__lte=as_of)
+                qs = privatanmeldelse.notat_set.filter(
                     index__lte=afgiftsanmeldelse_history_index
                 )
             except Afgiftsanmeldelse.DoesNotExist:
