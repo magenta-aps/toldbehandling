@@ -16,6 +16,7 @@ from requests import HTTPError
 from told_common.data import Vareafgiftssats
 from told_common.form_mixins import (
     BootstrapForm,
+    ButtonlessDecimalField,
     ButtonlessIntegerField,
     DateInput,
     MaxSizeFileField,
@@ -338,9 +339,9 @@ class TF10VareForm(BootstrapForm):
         choices=lambda form: form.varesatser_choices,
         required=lambda form: not form.kladde,
     )
-    mængde = forms.DecimalField(min_value=0, required=False)
-    antal = forms.IntegerField(min_value=1, required=False)
-    fakturabeløb = forms.DecimalField(min_value=1, decimal_places=2, required=False)
+    mængde = ButtonlessDecimalField(min_value=0.01, required=False)
+    antal = ButtonlessIntegerField(min_value=1, required=False)
+    fakturabeløb = ButtonlessDecimalField(min_value=1, decimal_places=2, required=False)
 
     def set_parent_form(self, form):
         self.parent_form = form

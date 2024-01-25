@@ -1133,7 +1133,6 @@ class RestClient:
             {"kladde": False, **filter_afgiftstabel},
         )["items"]
         varesatser = {}
-        # Det bør ikke kunne lade sig gøre med mere end 1
         for afgiftstabel in afgiftstabeller:
             varesatser.update(
                 {
