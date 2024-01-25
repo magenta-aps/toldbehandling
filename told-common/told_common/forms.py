@@ -348,7 +348,7 @@ class TF10VareForm(BootstrapForm):
     @property
     def kladde(self):
         if self.parent_form:
-            return self.parent_form.cleaned_data["kladde"]
+            return self.parent_form.cleaned_data.get("kladde", False)
         return False
 
     def clean_vareafgiftssats(self) -> int:
@@ -557,9 +557,6 @@ class TF5Form(BootstrapForm):
         self.leverandørfaktura_required = leverandørfaktura_required
         self.varesatser = varesatser
         super().__init__(*args, **kwargs)
-        self.fields["indleveringsdato"].widget.attrs.update(
-            {"min": date_next_workdays(date.today(), 6)}
-        )
         if "initial" in kwargs:
             for field in ("cpr", "navn"):
                 if field in kwargs["initial"]:
@@ -628,12 +625,15 @@ class TF5Form(BootstrapForm):
             }
         ),
     )
+    indleveringsdato_ubegrænset = False  # Overstyr i subklasser
     indleveringsdato = DynamicField(
         forms.DateField,
         label=_("Dato for indlevering til forsendelse"),
         required=True,
         widget=lambda form: DateInput(
-            attrs={"min": date_next_workdays(date.today(), 6)}
+            attrs={}
+            if form.indleveringsdato_ubegrænset
+            else {"min": date_next_workdays(date.today(), 6)}
         ),
     )
     anonym = forms.BooleanField(

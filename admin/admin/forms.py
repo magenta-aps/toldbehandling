@@ -241,3 +241,4 @@ class TF5Form(common_forms.TF5Form):
     notat = forms.CharField(
         widget=forms.Textarea(attrs={"placeholder": _("Notat")}), required=False
     )
+    indleveringsdato_ubegrænset = True
