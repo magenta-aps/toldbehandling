@@ -214,10 +214,9 @@ LOGGING = {
     },
 }
 
-log_filename = "/log/rest.log"
-if os.path.isfile(log_filename) and not DEBUG:
+log_filename = "/rest.log"
+if os.path.isfile(log_filename) and ENVIRONMENT != "development":
     LOGGING["handlers"]["file"] = {
-        "filters": ["require_debug_false"],
         "class": "logging.FileHandler",  # eller WatchedFileHandler
         "filename": log_filename,
         "formatter": "simple",
