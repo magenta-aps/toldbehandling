@@ -500,7 +500,7 @@ $(function (){
                     fieldValues.add($(this).val());
                 }
             })
-            const draft = draftField && draftField.val().toLowerCase() === "true";
+            const draft = draftField && draftField.val() && draftField.val().toLowerCase() === "true";
             if (draft) {
                 setRequired($this, false);
             } else {
@@ -530,7 +530,7 @@ $(function (){
     const required_fields = $("input,select,textarea").filter("[required]").not("[data-required-field]");
 
     const draftChanged = function () {
-        const draft = draftField.val().toLowerCase() === "true";
+        const draft = draftField && draftField.val() && draftField.val().toLowerCase() === "true";
         setRequired(required_fields, !draft);
     };
     draftField.on("change", draftChanged);
