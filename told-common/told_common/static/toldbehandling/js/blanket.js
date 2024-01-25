@@ -387,9 +387,9 @@ $(function () {
             if (afgiftstabel["gyldig_fra"] <= value && (afgiftstabel["gyldig_til"] < value || afgiftstabel["gyldig_til"] == null)) {
                 const varesatser_by_afgiftsgruppenummer = {};
                 for (let key in varesatser) {
-                    let value = varesatser[key]
-                    if (value["afgiftstabel"] === afgiftstabel["id"]) {
-                        varesatser_by_afgiftsgruppenummer[value["afgiftsgruppenummer"]] = value
+                    let varesats = varesatser[key];
+                    if (varesats["afgiftstabel"] === afgiftstabel["id"]) {
+                        varesatser_by_afgiftsgruppenummer[varesats["afgiftsgruppenummer"]] = varesats;
                     }
                 }
                 $("[name$=vareafgiftssats]").each(function () {
