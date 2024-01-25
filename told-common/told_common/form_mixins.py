@@ -81,6 +81,14 @@ class ButtonlessIntegerField(ErrorMessagesFieldMixin, forms.IntegerField):
     }
 
 
+class ButtonlessDecimalField(ErrorMessagesFieldMixin, forms.DecimalField):
+    widget = forms.NumberInput(attrs={"class": "no-buttons"})
+    attribute_map = {
+        "min_value": "data-validity-rangeunderflow",
+        "max_value": "data-validity-rangeoverflow",
+    }
+
+
 class MaxSizeFileField(ErrorMessagesFieldMixin, FileField):
     default_error_messages = {
         "max_size": _("Filen er for stor; den må max. være %(max_size_natural)s"),

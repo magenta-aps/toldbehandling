@@ -382,9 +382,9 @@ $(function () {
 
     // TF5: Når indleveringsdato opdateres, brug den rigtige afgiftstabel
     $("[name=indleveringsdato]").on("change", function () {
-        const value = $(this).val();
+        const date = Date.parse($(this).val());
         for (let afgiftstabel of afgiftstabeller) {
-            if (afgiftstabel["gyldig_fra"] <= value && (afgiftstabel["gyldig_til"] < value || afgiftstabel["gyldig_til"] == null)) {
+            if (Date.parse(afgiftstabel["gyldig_fra"]) <= date && (afgiftstabel["gyldig_til"] == null || Date.parse(afgiftstabel["gyldig_til"]) > date)) {
                 const varesatser_by_afgiftsgruppenummer = {};
                 for (let key in varesatser) {
                     let varesats = varesatser[key];
@@ -394,14 +394,17 @@ $(function () {
                 }
                 $("[name$=vareafgiftssats]").each(function () {
                     const $this = $(this);
-                    const old_sats = varesatser[$this.val()];
-                    const new_sats = varesatser_by_afgiftsgruppenummer[old_sats["afgiftsgruppenummer"]]
+                    const currentValue = $this.val();
                     $(this).find("option").remove();
                     for (let key in varesatser_by_afgiftsgruppenummer) {
                         const item = varesatser_by_afgiftsgruppenummer[key];
-                        $(this).append($('<option value="'+item["id"]+'">'+item["vareart_da"]+'</option>'));
+                        $(this).append($('<option value="' + item["id"] + '">' + item["vareart_da"] + '</option>'));
                     }
-                    $this.val(new_sats["id"]);
+                    if (!$this.parents("#formset_prototype").length) {  // Not the prototype row
+                        const old_sats = varesatser[currentValue];
+                        const new_sats = varesatser_by_afgiftsgruppenummer[old_sats["afgiftsgruppenummer"]]
+                        $this.val(new_sats["id"]);
+                    }
                     const subform = $(this).parents(".row");
                     updateVareart(subform);
                     calcAfgift(subform);
