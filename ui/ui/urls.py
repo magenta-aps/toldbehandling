@@ -25,8 +25,9 @@ urlpatterns = [
         name="fragtbrev_view",
     ),
     path("blanket/tf10/create", views.TF10FormCreateView.as_view(), name="tf10_create"),
+    path("blanket/tf10/<int:id>", views.TF10View.as_view(), name="tf10_view"),
     path(
-        "blanket/tf10/<int:id>",
+        "blanket/tf10/<int:id>/edit",
         views.TF10FormUpdateView.as_view(),
         name="tf10_edit",
     ),

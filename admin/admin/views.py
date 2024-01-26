@@ -13,7 +13,6 @@ from django.http import Http404, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import redirect
 from django.template import loader
 from django.urls import reverse, reverse_lazy
-from django.utils import timezone as tz
 from django.utils.translation import gettext_lazy as _
 from django.views import View
 from django.views.generic import FormView, TemplateView
@@ -117,36 +116,22 @@ class IndexView(PermissionsRequiredMixin, HasRestClientMixin, TemplateView):
         return context
 
 
-class TF10BaseView(HasRestClientMixin):
-    def get_subsatser(self, parent_id: int) -> List[Vareafgiftssats]:
-        return self.rest_client.vareafgiftssats.list(overordnet=parent_id)
-
-
-class TF10View(AdminLayoutBaseView, TF10BaseView, FormView):
-    required_permissions = (
-        "auth.admin",
-        "aktør.view_afsender",
-        "aktør.view_modtager",
-        "forsendelse.view_postforsendelse",
-        "forsendelse.view_fragtforsendelse",
-        "anmeldelse.view_afgiftsanmeldelse",
-        "anmeldelse.view_varelinje",
-        "sats.view_vareafgiftssats",
-    )
-    edit_permissions = ("anmeldelse.change_afgiftsanmeldelse",)
+class TF10View(AdminLayoutBaseView, common_views.TF10View, FormView):
+    required_permissions = ("auth.admin", *common_views.TF10View.required_permissions)
     prisme_permissions = ("anmeldelse.prisme_afgiftsanmeldelse",)
-
-    template_name = "admin/blanket/tf10/view.html"
     form_class = forms.TF10ViewForm
+    extend_template = "admin/admin_layout.html"
 
     def get_context_data(self, **kwargs):
-        return super().get_context_data(
-            **{
-                **kwargs,
-                "object": self.object,
-                "can_edit": self.has_permissions(
-                    request=self.request, required_permissions=self.edit_permissions
-                ),
+        context = super().get_context_data(**kwargs)
+        can_edit = self.has_permissions(
+            request=self.request, required_permissions=self.edit_permissions
+        )
+        context.update(
+            {
+                "can_godkend": can_edit,
+                "can_afvis": can_edit,
+                "can_edit": can_edit,
                 "can_send_prisme": self.has_permissions(
                     request=self.request, required_permissions=self.prisme_permissions
                 ),
@@ -155,22 +140,7 @@ class TF10View(AdminLayoutBaseView, TF10BaseView, FormView):
                 ),
             }
         )
-
-    def get_initial(self):
-        initial = super().get_initial()
-        indberetter = self.object.oprettet_på_vegne_af or self.object.oprettet_af
-        if self.object.toldkategori:
-            initial["toldkategori"] = self.object.toldkategori
-        if indberetter and "indberetter_data" in indberetter:
-            cvr = indberetter["indberetter_data"]["cvr"]
-            kategorier = [
-                item["kategori"]
-                for item in settings.CVR_TOLDKATEGORI_MAP
-                if cvr in item["cvr"]
-            ]
-            if kategorier and not self.object.toldkategori:
-                initial["toldkategori"] = kategorier[0]
-        return initial
+        return context
 
     def form_valid(self, form):
         anmeldelse_id = self.kwargs["id"]
@@ -264,23 +234,6 @@ class TF10View(AdminLayoutBaseView, TF10BaseView, FormView):
                 raise Http404("Afgiftsanmeldelse findes ikke")
             raise
         return redirect(reverse("tf10_view", kwargs={"id": anmeldelse_id}))
-
-    @cached_property
-    def object(self):
-        id = self.kwargs["id"]
-        try:
-            anmeldelse = self.rest_client.afgiftanmeldelse.get(
-                id,
-                full=True,
-                include_notater=True,
-                include_varelinjer=True,
-                include_prismeresponses=True,
-            )
-        except HTTPError as e:
-            if e.response.status_code == 404:
-                raise Http404("Afgiftsanmeldelse findes ikke")
-            raise
-        return anmeldelse
 
 
 class TF10ListView(AdminLayoutBaseView, common_views.TF10ListView):
@@ -413,7 +366,9 @@ class TF10HistoryListView(AdminLayoutBaseView, common_views.ListView):
         return value
 
 
-class TF10HistoryDetailView(AdminLayoutBaseView, TF10BaseView, TemplateView):
+class TF10HistoryDetailView(
+    AdminLayoutBaseView, common_views.TF10BaseView, TemplateView
+):
     template_name = "admin/blanket/tf10/history/view.html"
 
     def get_object(self):

@@ -920,7 +920,7 @@ class AdminLoginTest(LoginTest, TestCase):
 
 class AdminAnmeldelseListViewTest(PermissionsTest, AnmeldelseListViewTest, TestCase):
     can_view = True
-    can_edit = False
+    can_edit = True
     can_select_multiple = True
     view = TF10ListView
     check_permissions = ((reverse("tf10_list"), view.required_permissions),)

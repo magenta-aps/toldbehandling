@@ -111,6 +111,11 @@ class Command(BaseCommand):
             codename="admin",
             content_type=user_model,
         )
+        godkend_afgiftsanmeldelser, _ = Permission.objects.update_or_create(
+            name="Kan godkende og afvise afgiftsanmeldelser",
+            codename="approve_reject_anmeldelse",
+            content_type=afgiftsanmeldelse_model,
+        )
 
         admin_tf10_list_view_required_permissions = (
             ("view", afsender_model),
@@ -215,11 +220,15 @@ class Command(BaseCommand):
                     codename=f"{action}_{model.model}", content_type=model
                 )
             )
-        toldmedarbejdere.permissions.add(send_til_prisme)
-        toldmedarbejdere.permissions.add(admin_site_access)
-        toldmedarbejdere.permissions.add(se_alle_afgiftsanmeldelser)
-        toldmedarbejdere.permissions.add(se_alle_fragtforsendelser)
-        toldmedarbejdere.permissions.add(se_alle_postforsendelser)
+        for permission in (
+            send_til_prisme,
+            admin_site_access,
+            se_alle_afgiftsanmeldelser,
+            se_alle_fragtforsendelser,
+            se_alle_postforsendelser,
+            godkend_afgiftsanmeldelser,
+        ):
+            toldmedarbejdere.permissions.add(permission)
 
         for action, model in (
             ("view", afsender_model),
@@ -242,10 +251,14 @@ class Command(BaseCommand):
                     codename=f"{action}_{model.model}", content_type=model
                 )
             )
-        afstemmere_bogholdere.permissions.add(admin_site_access)
-        afstemmere_bogholdere.permissions.add(se_alle_afgiftsanmeldelser)
-        afstemmere_bogholdere.permissions.add(se_alle_fragtforsendelser)
-        afstemmere_bogholdere.permissions.add(se_alle_postforsendelser)
+        for permission in (
+            send_til_prisme,
+            admin_site_access,
+            se_alle_afgiftsanmeldelser,
+            se_alle_fragtforsendelser,
+            se_alle_postforsendelser,
+        ):
+            toldmedarbejdere.permissions.add(permission)
 
         for action, model in (
             ("view", afgiftstabel_model),

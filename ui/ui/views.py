@@ -77,6 +77,12 @@ class TF10LeverandørFakturaView(UiViewMixin, common_views.LeverandørFakturaVie
     key = "leverandørfaktura"
 
 
+class TF10View(
+    PermissionsRequiredMixin, HasRestClientMixin, UiViewMixin, common_views.TF10View
+):
+    pass
+
+
 class TF5FormCreateView(
     PermissionsRequiredMixin,
     HasRestClientMixin,

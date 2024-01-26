@@ -643,7 +643,7 @@ class UiTemplateTagsTest(TemplateTagsTest, TestCase):
 
 
 class UiAnmeldelseListViewTest(AnmeldelseListViewTest, TestCase):
-    can_view = False
+    can_view = True
     can_edit = True
 
     @property
@@ -656,6 +656,9 @@ class UiAnmeldelseListViewTest(AnmeldelseListViewTest, TestCase):
 
     def edit_url(self, id):
         return str(reverse("tf10_edit", kwargs={"id": id}))
+
+    def view_url(self, id):
+        return str(reverse("tf10_view", kwargs={"id": id}))
 
 
 class UiFileViewTest(FileViewTest, TestCase):

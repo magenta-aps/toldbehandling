@@ -731,12 +731,12 @@ class AnmeldelseListViewTest(HasLogin):
                 "Afsender": "Testfirma 4",
                 "Modtager": "Testfirma 1",
                 "Status": "Afvist",
-                "Handlinger": " ".join(
+                "Handlinger": "\n".join(
                     filter(
                         None,
                         [
-                            "Redigér" if self.can_edit else None,
                             "Vis" if self.can_view else None,
+                            "Redigér" if self.can_edit else None,
                         ],
                     )
                 ),
@@ -747,12 +747,12 @@ class AnmeldelseListViewTest(HasLogin):
                 "Afsender": "Testfirma 6",
                 "Modtager": "Testfirma 2",
                 "Status": "Ny",
-                "Handlinger": " ".join(
+                "Handlinger": "\n".join(
                     filter(
                         None,
                         [
-                            "Redigér" if self.can_edit else None,
                             "Vis" if self.can_view else None,
+                            "Redigér" if self.can_edit else None,
                         ],
                     )
                 ),
@@ -845,8 +845,8 @@ class AnmeldelseListViewTest(HasLogin):
                         filter(
                             None,
                             [
-                                _edit_button(2),
                                 _view_button(2),
+                                _edit_button(2),
                             ],
                         )
                     ),
@@ -881,8 +881,8 @@ class AnmeldelseListViewTest(HasLogin):
                         filter(
                             None,
                             [
-                                _edit_button(3),
                                 _view_button(3),
+                                _edit_button(3),
                             ],
                         )
                     ),
@@ -896,7 +896,9 @@ class AnmeldelseListViewTest(HasLogin):
                     "select"
                 ] = f'<input type="checkbox" id="select_{id}" name="id" value="{id}"/>'
 
-        self.assertEquals(modify_values(data, (str,), lambda s: s.strip()), expected)
+        self.assertEquals(
+            modify_values(data, (str,), lambda s: collapse_newlines(s)), expected
+        )
 
     @patch.object(requests.Session, "get")
     def test_list_sort(self, mock_get):
@@ -1063,6 +1065,15 @@ def modify_values(item: Any, types: Tuple, action: Callable) -> Any:
     if t in types:
         return action(item)
     return item
+
+
+def collapse_newlines(value: str):
+    new_values = []
+    for line in value.split("\n"):
+        line = line.strip()
+        if line:
+            new_values.append(line)
+    return "\n".join(new_values)
 
 
 class TestData(TestCase):
