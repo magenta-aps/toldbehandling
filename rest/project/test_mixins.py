@@ -83,10 +83,18 @@ class RestMixin:
                 Postforsendelse, for_concrete_model=False
             ),
         )
+        can_approve_reject_anmeldelse = Permission.objects.create(
+            name="Kan godkende og afvise afgiftsanmeldelser",
+            codename="approve_reject_anmeldelse",
+            content_type=ContentType.objects.get_for_model(
+                Afgiftsanmeldelse, for_concrete_model=False
+            ),
+        )
         permissions = [
             view_all_anmeldelser,
             view_all_fragtforsendelser,
             view_all_postforsendelser,
+            can_approve_reject_anmeldelse,
         ]
 
         if hasattr(cls, "object_class"):
@@ -113,6 +121,7 @@ class RestMixin:
             view_all_anmeldelser,
             view_all_fragtforsendelser,
             view_all_postforsendelser,
+            can_approve_reject_anmeldelse,
         ]
         if hasattr(cls, "object_class"):
             permissions.append(
@@ -249,7 +258,7 @@ class RestMixin:
             file1 = self.get_file_data(items_nofiles[0].pop(key))
             file2 = self.get_file_data(items_nofiles[1].pop(key))
             self.assertEqual(file1, file2)
-        msg = str(msg) + f" {str(items_nofiles[0])} != {str(items_nofiles[1])}"
+        msg = str(msg) + f" {str(items_nofiles[0])}\n != \n{str(items_nofiles[1])}"
         self.assertEquals(items_nofiles[0], items_nofiles[1], msg)
 
     def compare_in(self, itemlist: list, item: dict, msg: str) -> None:
@@ -258,8 +267,8 @@ class RestMixin:
                 self.compare_dicts(expected, item, msg)
             except AssertionError:
                 continue
-            return  # Loop until we fint one that doesn't raise AssertionError
-        raise AssertionError(msg + f" {itemlist} vs {item}")
+            return  # Loop until we find one that doesn't raise AssertionError
+        raise AssertionError(msg + f" {itemlist}\n vs \n{item}")
 
     @classmethod
     def strip_id(cls, item: Dict[str, Any]) -> Dict[str, Any]:

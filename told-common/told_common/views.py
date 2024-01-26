@@ -16,7 +16,7 @@ from django.template import loader
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from django.views import View
-from django.views.generic import FormView, RedirectView
+from django.views.generic import FormView, RedirectView, TemplateView
 from requests import HTTPError
 from told_common import forms
 from told_common.data import (
@@ -647,6 +647,73 @@ class TF10ListView(
             item[1]["id"]: item[1] for item in self.rest_client.modtagere.items()
         }
         return kwargs
+
+
+class TF10BaseView:
+    def get_subsatser(self, parent_id: int) -> List[Vareafgiftssats]:
+        return self.rest_client.vareafgiftssats.list(overordnet=parent_id)
+
+
+class TF10View(TF10BaseView, TemplateView):
+    required_permissions = (
+        "aktør.view_afsender",
+        "aktør.view_modtager",
+        "forsendelse.view_postforsendelse",
+        "forsendelse.view_fragtforsendelse",
+        "anmeldelse.view_afgiftsanmeldelse",
+        "anmeldelse.view_varelinje",
+        "sats.view_vareafgiftssats",
+    )
+    edit_permissions = ("anmeldelse.change_afgiftsanmeldelse",)
+
+    extend_template = "told_common/layout.html"
+    template_name = "told_common/tf10/view.html"
+
+    def get_context_data(self, **kwargs):
+        return super().get_context_data(
+            **{
+                **kwargs,
+                "object": self.object,
+                "can_edit": self.has_permissions(
+                    request=self.request, required_permissions=self.edit_permissions
+                )
+                and self.object.status in ("ny", "kladde", "afvist"),
+                "extend_template": self.extend_template,
+            }
+        )
+
+    def get_initial(self):
+        initial = super().get_initial()
+        indberetter = self.object.oprettet_på_vegne_af or self.object.oprettet_af
+        if self.object.toldkategori:
+            initial["toldkategori"] = self.object.toldkategori
+        if indberetter and "indberetter_data" in indberetter:
+            cvr = indberetter["indberetter_data"]["cvr"]
+            kategorier = [
+                item["kategori"]
+                for item in settings.CVR_TOLDKATEGORI_MAP
+                if cvr in item["cvr"]
+            ]
+            if kategorier and not self.object.toldkategori:
+                initial["toldkategori"] = kategorier[0]
+        return initial
+
+    @cached_property
+    def object(self):
+        id = self.kwargs["id"]
+        try:
+            anmeldelse = self.rest_client.afgiftanmeldelse.get(
+                id,
+                full=True,
+                include_notater=True,
+                include_varelinjer=True,
+                include_prismeresponses=True,
+            )
+        except HTTPError as e:
+            if e.response.status_code == 404:
+                raise Http404("Afgiftsanmeldelse findes ikke")
+            raise
+        return anmeldelse
 
 
 class TF5View(

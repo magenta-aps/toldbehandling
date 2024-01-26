@@ -29,6 +29,7 @@ class AfgiftsanmeldelseTest(RestTestMixin, TestCase):
             "groups": [],
             "permissions": [
                 "anmeldelse.add_afgiftsanmeldelse",
+                "anmeldelse.approve_reject_anmeldelse",
                 "anmeldelse.change_afgiftsanmeldelse",
                 "anmeldelse.delete_afgiftsanmeldelse",
                 "anmeldelse.view_afgiftsanmeldelse",
@@ -110,8 +111,6 @@ class AfgiftsanmeldelseTest(RestTestMixin, TestCase):
             self._expected_full_object_data = deepcopy(self.expected_object_data)
             self._expected_full_object_data.update(self.calculated_fields)
             self.nest_expected_data(self._expected_full_object_data)
-
-        print(f"self._expected_full_object_data: {self._expected_full_object_data}")
         return self._expected_full_object_data
 
     @property

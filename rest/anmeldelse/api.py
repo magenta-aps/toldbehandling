@@ -327,8 +327,12 @@ class AfgiftsanmeldelseAPI:
         item = get_object_or_404(Afgiftsanmeldelse, id=id)
         self.check_user(item)
         data = payload.dict(exclude_unset=True)
+        if payload.status is not None:
+            if not self.check_perm("anmeldelse.approve_reject_anmeldelse"):
+                raise PermissionDenied
         leverandørfaktura = data.pop("leverandørfaktura", None)
         kladde = data.pop("kladde", False)
+
         if not kladde and item.status == "kladde":
             data["status"] = "ny"
         for attr, value in data.items():
@@ -341,9 +345,12 @@ class AfgiftsanmeldelseAPI:
         item.save()
         return {"success": True}
 
+    def check_perm(self, permission):
+        return self.context.request.user.has_perm(permission)
+
     def filter_user(self, qs: QuerySet) -> QuerySet:
         user = self.context.request.user
-        if not user.has_perm("anmeldelse.view_all_anmeldelse"):
+        if not self.check_perm("anmeldelse.view_all_anmeldelse"):
             try:
                 cvr = user.indberetter_data.cvr
             except IndberetterProfile.DoesNotExist:

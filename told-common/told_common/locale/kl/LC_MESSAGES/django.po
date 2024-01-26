@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-24 11:18-0200\n"
+"POT-Creation-Date: 2024-01-24 12:06-0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -202,18 +202,20 @@ msgstr "Allakkat umiarsuakkoortitat"
 msgid "Luftpost"
 msgstr "Allakkat timmisartukkoortitat"
 
-#: told_common/forms.py
+#: told_common/forms.py told_common/templates/told_common/tf10/view.html
 msgid "Betales af"
 msgstr "Akiliisussaq"
 
 #: told_common/forms.py told_common/templates/told_common/tf10/form.html
 #: told_common/templates/told_common/tf10/list.html
+#: told_common/templates/told_common/tf10/view.html
 #: told_common/templates/told_common/tf5/list.html
 msgid "Modtager"
 msgstr "Tigusisussaq"
 
 #: told_common/forms.py told_common/templates/told_common/tf10/form.html
 #: told_common/templates/told_common/tf10/list.html
+#: told_common/templates/told_common/tf10/view.html
 #: told_common/templates/told_common/tf5/list.html
 msgid "Afsender"
 msgstr "Nassiussisoq"
@@ -401,6 +403,7 @@ msgstr ""
 "nalunaarsorneqareersumut tunngatillugu paasissutissanit allaanerupput."
 
 #: told_common/templates/told_common/tf10/form.html
+#: told_common/templates/told_common/tf10/view.html
 msgid "Oplysninger om fragt"
 msgstr "Assartuineq pillugu paasissutissat"
 
@@ -496,6 +499,7 @@ msgid "Notater"
 msgstr ""
 
 #: told_common/templates/told_common/tf10/form.html
+#: told_common/templates/told_common/tf10/view.html
 msgid "Toldkategori"
 msgstr ""
 
@@ -613,6 +617,10 @@ msgstr "Iliuutsit"
 #: told_common/templates/told_common/tf5/list.html
 msgid "Ingen søgeresultater"
 msgstr "Ujaasineq kinguneqanngilaq"
+
+#: told_common/templates/told_common/tf10/view.html
+msgid "Ikke angivet"
+msgstr ""
 
 #: told_common/templates/told_common/tf5/form.html
 msgid ""

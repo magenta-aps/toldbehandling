@@ -1,4 +1,4 @@
-{% extends "admin/admin_layout.html" %}
+{% extends extend_template %}
 {% load static %}
 {% load i18n %}
 {% load l10n %}
@@ -384,17 +384,21 @@
 
         <div class="form-row">
             <div class="ml-auto">
-                {% if can_edit %}
+                {% if can_godkend %}
                     {% if object.status == "ny" or object.status == "afvist" %}
                     <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#godkend_modal">
                         Godkend
                     </button>
                     {% endif %}
+                {% endif %}
+                {% if can_afvis %}
                     {% if object.status == "ny" %}
                     <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#afvis_modal">
                         Afvis
                     </button>
                     {% endif %}
+                {% endif %}
+                {% if can_edit %}
                     {% if object.status == "ny" or object.status == "kladde" or object.status == "afvist" %}
                     <a href="{% url 'tf10_edit' id=object.id %}" class="btn btn-primary">Redigér</a>
                     {% endif %}
