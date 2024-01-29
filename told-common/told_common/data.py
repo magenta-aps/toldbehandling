@@ -317,7 +317,6 @@ class Afgiftsanmeldelse(ToldDataClass):
     postforsendelse: Union[int, PostForsendelse, None]
     leverandørfaktura_nummer: Optional[str]
     leverandørfaktura: Optional[File]
-    modtager_betaler: Optional[bool]
     indførselstilladelse: Optional[str]
     afgift_total: Decimal
     betalt: bool
@@ -343,6 +342,7 @@ class Afgiftsanmeldelse(ToldDataClass):
     oprettet_på_vegne_af: Optional[dict] = None
     toldkategori: Optional[str] = None
     fuldmagtshaver: Optional[Speditør] = None
+    betales_af: Optional[str] = None
 
     @property
     def afgift_sum(self):

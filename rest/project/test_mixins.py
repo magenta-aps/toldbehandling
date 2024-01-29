@@ -460,7 +460,7 @@ class RestMixin:
         }
         self.afgiftsanmeldelse_data = {
             "leverandørfaktura_nummer": "12345",
-            "modtager_betaler": False,
+            "betales_af": "afsender",
             "indførselstilladelse": "abcde",
             "betalt": False,
             "fuldmagtshaver": None,

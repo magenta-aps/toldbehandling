@@ -248,6 +248,14 @@ class TF10FormCreateView(
                     ),
                 }
             )
+
+        context["indberetter_data"] = (
+            self.userdata["indberetter_data"]
+            if "indberetter_data" in self.userdata
+            and isinstance(self.userdata["indberetter_data"], dict)
+            else None
+        )
+
         return context
 
 
@@ -461,7 +469,7 @@ class TF10FormUpdateView(
                 initial[key + "_change_existing"] = False
             initial["leverandørfaktura_nummer"] = item.leverandørfaktura_nummer
             initial["indførselstilladelse"] = item.indførselstilladelse
-            initial["modtager_betaler"] = item.modtager_betaler
+            initial["betales_af"] = item.betales_af
             fragtforsendelse = item.fragtforsendelse
             postforsendelse = item.postforsendelse
             if fragtforsendelse:

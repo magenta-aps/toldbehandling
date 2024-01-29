@@ -62,6 +62,7 @@ class TF10BlanketTest(TestMixin, HasLogin, TestCase):
         "form-0-antal": "6",
         "form-0-fakturabeløb": "100.00",
         "forbindelsesnr": "1337",
+        "betales_af": "afsender",
     }
     formdata2 = {**formdata1, "fragttype": "luftpost"}
 
@@ -470,7 +471,7 @@ class TF10BlanketTest(TestMixin, HasLogin, TestCase):
                         "Testtekst".encode("utf-8")
                     ).decode("ascii"),
                     "leverandørfaktura_navn": "leverandørfaktura.txt",
-                    "modtager_betaler": False,
+                    "betales_af": "afsender",
                     "oprettet_på_vegne_af_id": None,
                     "toldkategori": None,
                     "kladde": False,
@@ -534,7 +535,7 @@ class TF10BlanketTest(TestMixin, HasLogin, TestCase):
                         "Testtekst".encode("utf-8")
                     ).decode("ascii"),
                     "leverandørfaktura_navn": "leverandørfaktura.txt",
-                    "modtager_betaler": False,
+                    "betales_af": "afsender",
                     "oprettet_på_vegne_af_id": None,
                     "toldkategori": None,
                     "kladde": False,
@@ -614,7 +615,7 @@ class TF10BlanketTest(TestMixin, HasLogin, TestCase):
                         "Testtekst".encode("utf-8")
                     ).decode("ascii"),
                     "leverandørfaktura_navn": "leverandørfaktura.txt",
-                    "modtager_betaler": False,
+                    "betales_af": "afsender",
                     "oprettet_på_vegne_af_id": None,
                     "toldkategori": None,
                     "kladde": False,

@@ -55,7 +55,7 @@ class PrismeTest(TestCase):
                 kreditordning=True,
             ),
             leverandørfaktura_nummer="5678",
-            modtager_betaler=False,
+            betales_af="afsender",
             indførselstilladelse="1234",
             betalt=True,
             status="godkendt",

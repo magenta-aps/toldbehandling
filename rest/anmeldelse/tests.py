@@ -162,7 +162,7 @@ class AfgiftsanmeldelseTest(RestTestMixin, TestCase):
             }
             self._update_object_data.update(
                 {
-                    "modtager_betaler": True,
+                    "betales_af": "modtager",
                     "leverandørfaktura": self.afgiftsanmeldelse_data[
                         "leverandørfaktura"
                     ],

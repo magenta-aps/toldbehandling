@@ -349,7 +349,7 @@ class AfgiftanmeldelseRestClient(ModelRestClient):
             "leverandørfaktura_navn": leverandørfaktura.name
             if leverandørfaktura
             else None,
-            "modtager_betaler": data.get("modtager_betaler"),
+            "betales_af": data.get("betales_af"),
             "oprettet_på_vegne_af_id": opt_int(data.get("oprettet_på_vegne_af")),
             "kladde": data.get("kladde", False),
             "fuldmagtshaver_id": data.get("fuldmagtshaver") or None,

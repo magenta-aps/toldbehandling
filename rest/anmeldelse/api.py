@@ -50,10 +50,9 @@ class AfgiftsanmeldelseIn(ModelSchema):
         model = Afgiftsanmeldelse
         model_fields = [
             "leverandørfaktura_nummer",
-            "modtager_betaler",
+            "betales_af",
             "indførselstilladelse",
             "betalt",
-            "modtager_betaler",
             "toldkategori",
         ]
 
@@ -65,7 +64,7 @@ class PartialAfgiftsanmeldelseIn(ModelSchema):
     fragtforsendelse_id: int = None
     leverandørfaktura: str = None  # Base64
     leverandørfaktura_navn: str = None
-    modtager_betaler: bool = None
+    betales_af: str = None
     toldkategori: str = None
     kladde: Optional[bool] = False
     fuldmagtshaver_id: Optional[int] = None
@@ -74,11 +73,10 @@ class PartialAfgiftsanmeldelseIn(ModelSchema):
         model = Afgiftsanmeldelse
         model_fields = [
             "leverandørfaktura_nummer",
-            "modtager_betaler",
+            "betales_af",
             "indførselstilladelse",
             "betalt",
             "status",
-            "modtager_betaler",
             "toldkategori",
         ]
         model_fields_optional = "__all__"
@@ -98,13 +96,12 @@ class AfgiftsanmeldelseOut(ModelSchema):
             "postforsendelse",
             "leverandørfaktura_nummer",
             "leverandørfaktura",
-            "modtager_betaler",
+            "betales_af",
             "indførselstilladelse",
             "afgift_total",
             "betalt",
             "dato",
             "status",
-            "modtager_betaler",
             "oprettet_af",
             "oprettet_på_vegne_af",
             "toldkategori",
@@ -164,7 +161,7 @@ class AfgiftsanmeldelseFilterSchema(FilterSchema):
     # leverandørfaktura = models.FileField(
     #     upload_to=afgiftsanmeldelse_upload_to,
     # )
-    modtager_betaler: Optional[bool]
+    betales_af: Optional[str]
     indførselstilladelse: Optional[str]
     betalt: Optional[bool]
     status: Optional[str]
@@ -212,6 +209,10 @@ class AfgiftsanmeldelseAPI:
             kladde = data.pop("kladde", False)
             if kladde:
                 data["status"] = "kladde"
+
+            if "betales_af" in data and data["betales_af"] == "":
+                data["betales_af"] = None
+
             item = Afgiftsanmeldelse.objects.create(
                 **data, oprettet_af=self.context.request.user
             )

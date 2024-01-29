@@ -283,13 +283,14 @@
                         {{form.indførselstilladelse.errors}}
                     </div>
                 </div>
+
                 <div class="row align-items-center">
                     <div class="col-4">
-                        <label for="{{form.modtager_betaler.id_for_label}}">{{form.modtager_betaler.label}}</label>
+                        <label for="{{form.betales_af.id_for_label}}">{{form.betales_af.label}}</label>
                     </div>
                     <div class="col-8">
-                        {{form.modtager_betaler}}
-                        {{form.modtager_betaler.errors}}
+                        {{form.betales_af}}
+                        {{form.betales_af.errors}}
                     </div>
                 </div>
         </div>
@@ -370,15 +371,6 @@
                     </div>
                     <div class="col-6">
                         {{form.afgangsdato}}
-                    </div>
-                </div>
-                <!-- Should ideally be hidden, unless Fragttype == Luftfragt -->
-                <div class="row align-items-center" id="betales_af_row" {% if form.fragttype.value != 'luftfragt' %}style="display:none"{% endif %}>
-                    <div class="col-6">
-                        <label for="{{form.betales_af.id_for_label}}">{% translate "Betales af (kun relevant for luftfragt)" %}*</label>
-                    </div>
-                    <div class="col-6">
-                        {{form.betales_af}}
                     </div>
                 </div>
 
@@ -500,6 +492,7 @@
     </div>
 </form>
 
+{{ indberetter_data|json_script:"indberetter_data" }}
 {{ varesatser|json_script:"varesatser" }}
 {{ konstanter|json_script:"konstanter" }}
 <script>
@@ -554,11 +547,6 @@
     ];
 </script>
 <script src="{% static 'toldbehandling/js/blanket.js' %}"></script>
-<script>
-    $("[name={{form.fragttype.name}}]").on("change", function (){
-        $("#betales_af_row").toggle($(this).val() === "luftfragt");
-    });
-</script>
 <script>
     const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]')
     const popoverList = [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl))

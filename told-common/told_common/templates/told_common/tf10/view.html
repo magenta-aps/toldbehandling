@@ -372,10 +372,14 @@
         <div class="row align-items-center">
             <div class="col-2">{% translate "Betales af" %}:</div>
             <div class="col-4">
-                {% if object.modtager_betaler %}
-                    {% translate "Modtager" %}
-                {% else %}
+                {% if object.betales_af == 'afsender'  %}
                     {% translate "Afsender" %}
+                {% elif object.betales_af == 'modtager' %}
+                    {% translate "Modtager" %}
+                {% elif object.betales_af == 'indberetter' %}
+                    {% translate "Indberetter" %}
+                {% else %}
+                    {% translate "Ikke tilgængelig" %}
                 {% endif %}
             </div>
         </div>
