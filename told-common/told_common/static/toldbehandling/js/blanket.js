@@ -411,7 +411,7 @@ $(function () {
         }
     });
 
-    $("[data-value=varekode]").on("input", function () {
+    $("form").on("input", "[data-value=varekode]", function () {
         $this = $(this);
         const varekode = $this.val();
 
