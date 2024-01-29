@@ -245,4 +245,9 @@ PAYMENT_PROVIDER_NETS_CHECKOUT_KEY = os.environ.get(
     "PAYMENT_PROVIDER_NETS_CHECKOUT_KEY", "checkout_key"
 )
 
+PAYMENT_PROVIDER_NETS_JS_SDK_URL = os.environ.get(
+    "PAYMENT_PROVIDER_NETS_JS_SDK_URL",
+    "https://checkout.dibspayment.eu/v1/checkout.js?v=1",
+)
+
 TF5_ENABLED = bool(strtobool(os.environ.get("TF5_ENABLED", "True")))

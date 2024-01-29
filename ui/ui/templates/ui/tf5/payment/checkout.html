@@ -83,7 +83,7 @@
 {% endblock %}
 
 {% block extra_footers %}
-<script src="https://test.checkout.dibspayment.eu/v1/checkout.js?v=1"></script>
+<script src="{{ nets_js_sdk_url }}"></script>
 <script>
     const current_payment_status = "{{ payment.status }}";
 

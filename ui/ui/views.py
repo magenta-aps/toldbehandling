@@ -457,6 +457,7 @@ class TF5PaymentCheckoutView(
                 **kwargs,
                 "payment": payment,
                 "nets_checkout_key": settings.PAYMENT_PROVIDER_NETS_CHECKOUT_KEY,
+                "nets_js_sdk_url": settings.PAYMENT_PROVIDER_NETS_JS_SDK_URL,
             }
         )
 
