@@ -463,6 +463,7 @@ class RestMixin:
             "modtager_betaler": False,
             "indførselstilladelse": "abcde",
             "betalt": False,
+            "fuldmagtshaver": None,
         }
         self.varelinje_data = {
             "mængde": "15.00",

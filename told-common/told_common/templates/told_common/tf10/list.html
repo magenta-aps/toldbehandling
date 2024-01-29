@@ -25,60 +25,70 @@
     {{form.errors}}
 
     <form method="get" action="{% url 'tf10_list' %}">
-        <div class="row">
+        <div class="row align-items-center">
             <div class="col-4"><label for="{{form.status.name}}" class="form-label">{% translate "Status" %}</label></div>
             <div class="col-8">
                 {{form.status}}
             </div>
         </div>
-        <div class="row">
+        <div class="row align-items-center">
             <div class="col-4">{% translate "Oprettelsesdato mellem" %}</div>
             <div class="col-4">{{form.dato_efter}}</div>
             <div class="col-4">{{form.dato_før}}</div>
         </div>
-        <div class="row">
+        <div class="row align-items-center">
             <div class="col-4">{% translate "Afgangsdato mellem" %}</div>
             <div class="col-4">{{form.afgangsdato_efter}}</div>
             <div class="col-4">{{form.afgangsdato_før}}</div>
         </div>
-        <div class="row">
+        <div class="row align-items-center">
             <div class="col-4"><label for="{{form.afsender.name}}" class="form-label">{% translate "Afsender" %}</label></div>
             <div class="col-8">
                 {{form.afsender}}
             </div>
         </div>
-        <div class="row">
+        <div class="row align-items-center">
             <div class="col-4"><label for="{{form.modtager.name}}" class="form-label">{% translate "Modtager" %}</label></div>
             <div class="col-8">
                 {{form.modtager}}
             </div>
         </div>
-        <div class="row">
+        <div class="row align-items-center">
             <div class="col-4"><label for="{{form.vareart.name}}" class="form-label">{% translate "Varetype" %}</label></div>
             <div class="col-8">
                 {{form.vareart}}
             </div>
         </div>
-        <div class="row">
+        <div class="row align-items-center">
             <div class="col-4"><label for="{{form.id.name}}" class="form-label">{% translate "Anmeldelsesnummer" %}</label></div>
             <div class="col-8">
                 {{form.id}}
             </div>
         </div>
-        <div class="row">
+        <div class="row align-items-center">
             <div class="col-4"><label for="{{form.afsenderbykode_or_forbindelsesnr.name}}" class="form-label">{% translate "Afsender bykode/forbindelsesnummer" %}</label></div>
             <div class="col-8">
                 {{form.afsenderbykode_or_forbindelsesnr}}
             </div>
         </div>
-        <div class="row">
+        <div class="row align-items-center">
             <div class="col-4"><label for="{{form.postforsendelsesnummer_or_fragtbrevsnummer.name}}" class="form-label">{% translate "Postforsendelsesnummer/fragtbrevsnummer" %}</label></div>
             <div class="col-8">
                 {{form.postforsendelsesnummer_or_fragtbrevsnummer}}
             </div>
         </div>
+
+        {% if is_speditør %}
+        <div class="row align-items-center">
+            <div class="col-4"><label for="{{form.fuldmagtshaver_isnull.name}}" class="form-label">{% translate "Fuldmagtsstatus" %}</label></div>
+            <div class="col-8">
+                {{form.fuldmagtshaver_isnull}}
+            </div>
+        </div>
+        {% endif %}
+
         <div class="row">
-            <div class="col-12 cleafix">
+            <div class="col-12 clearfix">
                 <button type="submit" class="btn btn-primary float-end">{% translate "Søg" %}</button>
                 {% if can_create %}
                 <a href="{% url 'tf10_create' %}" class="btn btn-primary float-end">{% translate "Opret ny" %}</a>

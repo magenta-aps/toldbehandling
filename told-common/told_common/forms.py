@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: MPL-2.0
 from datetime import date
 from decimal import Decimal
-from typing import Iterable, Optional
+from typing import Iterable, List, Optional
 
 from django import forms
 from django.core.exceptions import ValidationError
@@ -13,7 +13,7 @@ from django.utils import translation
 from django.utils.translation import gettext_lazy as _
 from dynamic_forms import DynamicField
 from requests import HTTPError
-from told_common.data import Vareafgiftssats
+from told_common.data import Speditør, Vareafgiftssats
 from told_common.form_mixins import (
     BootstrapForm,
     ButtonlessDecimalField,
@@ -60,12 +60,14 @@ class TF10Form(BootstrapForm):
         leverandørfaktura_required: bool = True,
         fragtbrev_required: bool = True,
         varesatser: Optional[dict] = None,
+        speditører: Optional[List[Speditør]] = None,
         *args,
         **kwargs,
     ):
         self.varesatser = varesatser
         self.leverandørfaktura_required = leverandørfaktura_required
         self.fragtbrev_required = fragtbrev_required
+        self.speditører = speditører
         super().__init__(*args, **kwargs)
 
     def full_clean(self):
@@ -280,6 +282,14 @@ class TF10Form(BootstrapForm):
                 (True, _("Ja")),
             )
         ),
+    )
+    fuldmagtshaver = DynamicField(
+        forms.ChoiceField,
+        required=False,
+        choices=lambda form: [(None, "---")]
+        + [(speditør.cvr, speditør.navn) for speditør in form.speditører]
+        if form.speditører
+        else [],
     )
 
     def clean(self):
@@ -501,6 +511,15 @@ class TF10SearchForm(PaginateForm, BootstrapForm):
 
     afsenderbykode_or_forbindelsesnr = forms.CharField(required=False)
     postforsendelsesnummer_or_fragtbrevsnummer = forms.CharField(required=False)
+    fuldmagtshaver_isnull = DynamicField(
+        forms.ChoiceField,
+        required=False,
+        choices=lambda form: [
+            (None, _("Alle")),
+            (True, _("Mine egne afgiftsanmeldelser")),
+            (False, _("Afgiftsanmeldelser som jeg har fuldmagt til")),
+        ],
+    )
 
 
 class TF5SearchForm(PaginateForm, BootstrapForm):

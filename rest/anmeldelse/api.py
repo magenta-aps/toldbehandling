@@ -8,7 +8,7 @@ from decimal import Decimal
 from typing import List, Optional, Tuple
 from uuid import uuid4
 
-from aktør.api import AfsenderOut, ModtagerOut
+from aktør.api import AfsenderOut, ModtagerOut, SpeditørOut
 from anmeldelse.models import (
     Afgiftsanmeldelse,
     Notat,
@@ -44,6 +44,7 @@ class AfgiftsanmeldelseIn(ModelSchema):
     leverandørfaktura_navn: str = None
     oprettet_på_vegne_af_id: int = None
     kladde: Optional[bool] = False
+    fuldmagtshaver_id: Optional[int] = None
 
     class Config:
         model = Afgiftsanmeldelse
@@ -67,6 +68,7 @@ class PartialAfgiftsanmeldelseIn(ModelSchema):
     modtager_betaler: bool = None
     toldkategori: str = None
     kladde: Optional[bool] = False
+    fuldmagtshaver_id: Optional[int] = None
 
     class Config:
         model = Afgiftsanmeldelse
@@ -106,6 +108,7 @@ class AfgiftsanmeldelseOut(ModelSchema):
             "oprettet_af",
             "oprettet_på_vegne_af",
             "toldkategori",
+            "fuldmagtshaver",
         ]
 
     beregnet_faktureringsdato: str
@@ -124,6 +127,7 @@ class AfgiftsanmeldelseFullOut(AfgiftsanmeldelseOut):
     modtager: ModtagerOut
     fragtforsendelse: Optional[FragtforsendelseOut]
     postforsendelse: Optional[PostforsendelseOut]
+    fuldmagtshaver: Optional[SpeditørOut]
 
 
 class AfgiftsanmeldelseHistoryOut(AfgiftsanmeldelseOut):
@@ -164,6 +168,8 @@ class AfgiftsanmeldelseFilterSchema(FilterSchema):
     indførselstilladelse: Optional[str]
     betalt: Optional[bool]
     status: Optional[str]
+    fuldmagtshaver: Optional[int]
+    fuldmagtshaver_isnull: Optional[bool] = Field(q="fuldmagtshaver__isnull")
     dato_efter: Optional[date] = Field(q="dato__gte")
     dato_før: Optional[date] = Field(q="dato__lt")
     vareart: Optional[str] = Field(q="varelinje__vareafgiftssats__vareart_da")
@@ -360,6 +366,7 @@ class AfgiftsanmeldelseAPI:
             qs = qs.filter(
                 Q(oprettet_af__indberetter_data__cvr=cvr)
                 | Q(oprettet_på_vegne_af__indberetter_data__cvr=cvr)
+                | Q(fuldmagtshaver__cvr=cvr)
             )
         return qs
 

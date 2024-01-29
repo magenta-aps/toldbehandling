@@ -124,3 +124,17 @@ class Modtager(Aktør):
     kreditordning = models.BooleanField(
         default=False,
     )
+
+
+class Speditør(models.Model):
+    cvr = models.PositiveIntegerField(
+        primary_key=True,
+        validators=(
+            MinValueValidator(10000000),
+            MaxValueValidator(99999999),
+        ),
+        unique=True,
+        null=False,
+        blank=False,
+    )
+    navn = models.CharField(max_length=100, null=False, blank=False, unique=True)

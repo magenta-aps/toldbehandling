@@ -46,6 +46,32 @@
                 </div>
                 {% endif %}
 
+                {% if form.speditører %}
+                <div class="row align-items-center">
+                    <div class="col-4">
+                        <label for="{{form.kladde.id_for_label}}">{% translate "Fuldmagt" %}</label>
+                    </div>
+                    <div class="col-8">
+                        <div class="col-8 input-group">
+                            {{form.fuldmagtshaver}}
+                            {% translate 'Der kan gives fuldmagt til en speditør, til at redigere og indsende afgiftsanmeldelsen.' as content %}
+                            {% include "told_common/widgets/info.html" with title=form.fuldmagtshaver.label content=content %}
+                        </div>
+                    </div>
+                </div>
+                {% elif item.fuldmagtshaver %}
+                <div class="row align-items-center">
+                    <div class="col-4">
+                        <label for="{{form.kladde.id_for_label}}">{% translate "Fuldmagt" %}</label>
+                    </div>
+                    <div class="col-8">
+                        {% localize off %}
+                        {{ item.fuldmagtshaver.navn }} (CVR: {{ item.fuldmagtshaver.cvr }})
+                        {% endlocalize %}
+                    </div>
+                </div>
+                {% endif %}
+
             </div>
 
 			{% if gem_top %}
@@ -86,26 +112,26 @@
                 </div>
                 <div class="row" id="afsender_adresse_container" >
                 <div class="col-12">
-                        <div class="alert alert-warning multiple" style="display: none">
-                            <label for="{{form.afsender_existing_id.id_for_label}}">
-                            <span data-multi="cvr">
-                            {% translate "Der er mere end én registreret afsender for det angivne CVR-nummer." %}
-                            </span>
-                            <span data-multi="navn">
-                            {% translate "Der er mere end én registreret afsender for det angivne navn." %}
-                            </span>
-                            {% translate "Vælg én fra listen herunder, eller udfyld felterne med nye data." %}
-                        </label>
-                        <p>
-                                {{form.afsender_existing_id}}
-                        </p>
+                    <div class="alert alert-warning multiple" style="display: none">
+                        <label for="{{form.afsender_existing_id.id_for_label}}">
+                        <span data-multi="cvr">
+                        {% translate "Der er mere end én registreret afsender for det angivne CVR-nummer." %}
+                        </span>
+                        <span data-multi="navn">
+                        {% translate "Der er mere end én registreret afsender for det angivne navn." %}
+                        </span>
+                        {% translate "Vælg én fra listen herunder, eller udfyld felterne med nye data." %}
+                    </label>
+                    <p>
+                        {{form.afsender_existing_id}}
+                    </p>
+                    </div>
+                    <input style="display: none" type="hidden" name="{{form.afsender_existing_id.name}}"/>
+                    <div class="alert alert-warning changed" style="display: none">
+                        <div>
+                            {% translate "Afsenderoplysninger er ændrede i forhold til den afsender, der allerede er registreret." %}
                         </div>
-                        <input style="display: none" type="hidden" name="{{form.afsender_existing_id.name}}"/>
-                        <div class="alert alert-warning changed" style="display: none">
-                            <div>
-                                {% translate "Afsenderoplysninger er ændrede i forhold til den afsender, der allerede er registreret." %}
-                            </div>
-                            {{form.afsender_change_existing}}
+                        {{form.afsender_change_existing}}
                     </div>
                 </div>
             </div>

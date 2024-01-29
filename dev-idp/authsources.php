@@ -22,8 +22,7 @@ $config = array(
             'https://data.gov.dk/model/core/eid/email' => 'anders@andeby.dk',
             'https://data.gov.dk/model/core/eid/cprNumber' => '0111111111',
             'https://data.gov.dk/model/core/eid/age' => '60',
-            'https://data.gov.dk/model/core/eid/cprUuid' => 'urn:uuid:323e4567-e89b-12d3-a456-
-426655440000',
+            'https://data.gov.dk/model/core/eid/cprUuid' => 'urn:uuid:323e4567-e89b-12d3-a456-426655440000',
             'https://data.gov.dk/model/core/eid/professional/cvr' => '12345678',
             'https://data.gov.dk/model/core/eid/professional/orgName' => 'Joakim von Ands pengetank',
             'https://data.gov.dk/model/core/eid/privilegesIntermediate' =>
@@ -52,9 +51,8 @@ $config = array(
             'https://data.gov.dk/model/core/eid/email' => 'mickey@andeby.dk',
             'https://data.gov.dk/model/core/eid/cprNumber' => '2222222222',
             'https://data.gov.dk/model/core/eid/age' => '60',
-            'https://data.gov.dk/model/core/eid/cprUuid' => 'urn:uuid:323e4567-e89b-12d3-a456-
-426655440000',
-            'https://data.gov.dk/model/core/eid/professional/cvr' => '12345678',
+            'https://data.gov.dk/model/core/eid/cprUuid' => 'urn:uuid:323e4567-e89b-12d3-a456-426655440000',
+            'https://data.gov.dk/model/core/eid/professional/cvr' => '12345679',
             'https://data.gov.dk/model/core/eid/professional/orgName' => 'Joakim von Ands pengetank',
             'https://data.gov.dk/model/core/eid/privilegesIntermediate' =>
                 'PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGJwcDpQcml2aWxlZ2VMaXN0
@@ -81,8 +79,7 @@ $config = array(
             'https://data.gov.dk/model/core/eid/email' => 'fedtmule@andeby.dk',
             'https://data.gov.dk/model/core/eid/cprNumber' => '3333333333',
             'https://data.gov.dk/model/core/eid/age' => '60',
-            'https://data.gov.dk/model/core/eid/cprUuid' => 'urn:uuid:323e4567-e89b-12d3-a456-
-        426655440000',
+            'https://data.gov.dk/model/core/eid/cprUuid' => 'urn:uuid:323e4567-e89b-12d3-a456-426655440000',
             'https://data.gov.dk/model/core/eid/professional/orgName' => 'Arbejdsløs',
             'https://data.gov.dk/model/core/eid/privilegesIntermediate' =>
                 'PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGJwcDpQcml2aWxlZ2VMaXN0
@@ -109,8 +106,7 @@ $config = array(
             'https://data.gov.dk/model/core/eid/email' => 'rip@andeby.dk',
             'https://data.gov.dk/model/core/eid/cprNumber' => '4444444444',
             'https://data.gov.dk/model/core/eid/age' => '60',
-            'https://data.gov.dk/model/core/eid/cprUuid' => 'urn:uuid:323e4567-e89b-12d3-a456-
-        426655440000',
+            'https://data.gov.dk/model/core/eid/cprUuid' => 'urn:uuid:323e4567-e89b-12d3-a456-426655440000',
             'https://data.gov.dk/model/core/eid/professional/orgName' => 'Arbejdsløs',
             'https://data.gov.dk/model/core/eid/privilegesIntermediate' =>
                 'PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPGJwcDpQcml2aWxlZ2VMaXN0

@@ -1592,7 +1592,7 @@ class AnmeldelseNotatTest(PermissionsTest, TestCase):
         mock_get.side_effect = self.mock_requests_get
         mock_patch.side_effect = self.mock_requests_patch
         mock_post.side_effect = self.mock_requests_post
-        self.client.post(
+        response = self.client.post(
             reverse("tf10_edit", kwargs={"id": 1}),
             {
                 "afsender_cvr": "12345678",
@@ -2996,6 +2996,7 @@ class TF10CreateTest(TestMixin, HasLogin, TestCase):
                     "indførselstilladelse": "123",
                     "afsender_id": 1,
                     "modtager_id": 1,
+                    "fuldmagtshaver_id": None,
                     "postforsendelse_id": None,
                     "fragtforsendelse_id": 1,
                     "leverandørfaktura": base64.b64encode(
@@ -3056,6 +3057,7 @@ class TF10CreateTest(TestMixin, HasLogin, TestCase):
                     "indførselstilladelse": "123",
                     "afsender_id": 1,
                     "modtager_id": 1,
+                    "fuldmagtshaver_id": None,
                     "postforsendelse_id": None,
                     "fragtforsendelse_id": 1,
                     "leverandørfaktura": base64.b64encode(
@@ -3132,6 +3134,7 @@ class TF10CreateTest(TestMixin, HasLogin, TestCase):
                     "indførselstilladelse": "123",
                     "afsender_id": 1,
                     "modtager_id": 1,
+                    "fuldmagtshaver_id": None,
                     "postforsendelse_id": 1,
                     "fragtforsendelse_id": None,
                     "leverandørfaktura": base64.b64encode(

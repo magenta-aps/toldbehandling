@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: MPL-2.0
 
-from aktør.models import Afsender, Modtager
+from aktør.models import Afsender, Modtager, Speditør
 from anmeldelse.models import (
     Afgiftsanmeldelse,
     Notat,
@@ -47,6 +47,9 @@ class Command(BaseCommand):
         )
         modtager_model = ContentType.objects.get_for_model(
             Modtager, for_concrete_model=False
+        )
+        speditør_model = ContentType.objects.get_for_model(
+            Speditør, for_concrete_model=False
         )
         afgiftsanmeldelse_model = ContentType.objects.get_for_model(
             Afgiftsanmeldelse, for_concrete_model=False
@@ -151,6 +154,7 @@ class Command(BaseCommand):
         for action, model in (
             ("view", afsender_model),
             ("view", modtager_model),
+            ("view", speditør_model),
             ("view", afgiftsanmeldelse_model),
             ("view", varelinje_model),
             ("view", postforsendelse_model),
@@ -184,6 +188,7 @@ class Command(BaseCommand):
         for action, model in (
             ("view", afsender_model),
             ("view", modtager_model),
+            ("view", speditør_model),
             ("view", afgiftsanmeldelse_model),
             ("view", privatafgiftsanmeldelse_model),
             ("view", varelinje_model),
@@ -233,6 +238,7 @@ class Command(BaseCommand):
         for action, model in (
             ("view", afsender_model),
             ("view", modtager_model),
+            ("view", speditør_model),
             ("view", afgiftsanmeldelse_model),
             ("view", varelinje_model),
             ("view", postforsendelse_model),

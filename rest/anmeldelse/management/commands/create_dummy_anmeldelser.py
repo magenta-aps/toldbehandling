@@ -6,7 +6,7 @@ import random
 from datetime import date, datetime, time, timedelta, timezone
 from decimal import Decimal
 
-from aktør.models import Afsender, Modtager
+from aktør.models import Afsender, Modtager, Speditør
 from anmeldelse.models import Afgiftsanmeldelse, PrismeResponse, Varelinje
 from django.core.files.base import ContentFile
 from django.core.management.base import BaseCommand
@@ -76,6 +76,8 @@ class Command(BaseCommand):
                 status=random.choice(["ny", "afvist", "godkendt"]),
                 oprettet_af=(fragtforsendelse or postforsendelse).oprettet_af,
             )
+            if anmeldelse.oprettet_af.indberetter_data.cvr == 12345679:
+                anmeldelse.fuldmagtshaver = Speditør.objects.get(cvr=12345678)
             anmeldelse.dato = datetime.combine(
                 date.today(), time(6, 0, 0), tzinfo=timezone.utc
             ) - timedelta(days=random.randint(0, 1000))

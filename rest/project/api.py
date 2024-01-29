@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: MPL-2.0
 
-from aktør.api import AfsenderAPI, ModtagerAPI
+from aktør.api import AfsenderAPI, ModtagerAPI, SpeditørAPI
 from anmeldelse.api import (
     AfgiftsanmeldelseAPI,
     NotatAPI,
@@ -21,7 +21,7 @@ from sats.api import AfgiftstabelAPI, VareafgiftssatsAPI
 
 api = NinjaExtraAPI(title="Toldbehandling", renderer=ORJSONRenderer(), csrf=False)
 api.register_controllers(NinjaJWTDefaultController)
-api.register_controllers(AfsenderAPI, ModtagerAPI)
+api.register_controllers(AfsenderAPI, ModtagerAPI, SpeditørAPI)
 api.register_controllers(
     AfgiftsanmeldelseAPI,
     PrivatAfgiftsanmeldelseAPI,

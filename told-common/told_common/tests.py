@@ -686,6 +686,16 @@ class AnmeldelseListViewTest(HasLogin):
                 ],
             }
 
+        elif path == expected_prefix + "speditør":
+            json_content = {
+                "count": 1,
+                "items": [
+                    {
+                        "cvr": 12345678,
+                        "navn": "TestSpeditør",
+                    }
+                ],
+            }
         else:
             print(f"Mock got unrecognized path: {path}")
         if json_content:
