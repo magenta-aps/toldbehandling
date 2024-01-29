@@ -4,7 +4,7 @@
 
 from typing import Optional
 
-from aktør.models import Afsender, Modtager
+from aktør.models import Afsender, Modtager, Speditør
 from common.api import get_auth_methods
 from django.core.exceptions import ValidationError
 from django.http import HttpResponseBadRequest
@@ -89,7 +89,6 @@ class AfsenderAPI:
     @route.post("", auth=get_auth_methods(), url_name="afsender_create")
     def create_afsender(self, payload: AfsenderIn):
         try:
-            print(payload)
             item = Afsender.objects.create(**payload.dict())
             return {"id": item.id}
         except ValidationError as e:
@@ -259,3 +258,39 @@ class ModtagerAPI:
                 setattr(item, attr, value)
         item.save()
         return {"success": True}
+
+
+class SpeditørOut(ModelSchema):
+    class Config:
+        model = Speditør
+        model_fields = [
+            "cvr",
+            "navn",
+        ]
+
+
+class SpeditørFilterSchema(FilterSchema):
+    navn: Optional[str] = Field(q="navn__icontains")
+    cvr: Optional[int]
+
+
+class SpeditørPermission(RestPermission):
+    appname = "aktør"
+    modelname = "speditør"
+
+
+@api_controller(
+    "/speditør",
+    tags=["Speditør"],
+    permissions=[permissions.IsAuthenticated & SpeditørPermission],
+)
+class SpeditørAPI:
+    @route.get(
+        "",
+        response=NinjaPaginationResponseSchema[SpeditørOut],
+        auth=get_auth_methods(),
+        url_name="speditør_list",
+    )
+    @paginate()  # https://eadwincode.github.io/django-ninja-extra/tutorial/pagination/
+    def list(self, filters: SpeditørFilterSchema = Query(...)):
+        return list(filters.filter(Speditør.objects.all()))

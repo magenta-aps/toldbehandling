@@ -72,10 +72,8 @@ class PostforsendelseTest(RestTestMixin, TestCase):
         self.assertIn(str(self.postforsendelse_data["forsendelsestype"].label), string)
         self.assertIn(self.postforsendelse_data["afsenderbykode"], string)
 
-    def test_kladde(self):
-        self.creation_data = {"kladde": True}
-        print("==========================")
-        print(self.postforsendelse)
+    # def test_kladde(self):
+    #     self.creation_data = {"kladde": True}
 
 
 class FragtforsendelseTest(RestTestMixin, TestCase):

@@ -5,7 +5,7 @@
 import random
 import string
 
-from aktør.models import Afsender, Modtager
+from aktør.models import Afsender, Modtager, Speditør
 from common.models import Postnummer
 from django.core.management.base import BaseCommand
 
@@ -112,3 +112,4 @@ class Command(BaseCommand):
             telefon=str(random.randint(100000, 999999)),
             cvr=20000000,
         )
+        Speditør.objects.create(cvr=12345678, navn="TestSpeditør")

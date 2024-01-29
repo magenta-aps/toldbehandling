@@ -247,6 +247,13 @@ class Modtager(Aktør):
     kreditordning: bool
 
 
+@dataclass_json
+@dataclass
+class Speditør:
+    cvr: int
+    navn: str
+
+
 class Forsendelsestype(Enum):
     SKIB = "S"
     FLY = "F"
@@ -335,6 +342,7 @@ class Afgiftsanmeldelse(ToldDataClass):
     oprettet_af: Optional[dict] = None
     oprettet_på_vegne_af: Optional[dict] = None
     toldkategori: Optional[str] = None
+    fuldmagtshaver: Optional[Speditør] = None
 
     @property
     def afgift_sum(self):

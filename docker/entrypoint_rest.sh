@@ -16,6 +16,7 @@ DJANGO_DEBUG=${DJANGO_DEBUG:=false}
 MAKEMESSAGES=${MAKEMESSAGES:=true}
 COMPILEMESSAGES=${COMPILEMESSAGES:=true}
 CREATE_POSTNUMRE=${CREATE_POSTNUMRE:=true}
+CREATE_SPEDITORER=${CREATE_SPEDITORER:=true}
 
 python manage.py wait_for_db
 
@@ -44,6 +45,10 @@ fi
 if [ "${CREATE_POSTNUMRE,,}" = true ]; then
   echo 'creating postnumre'
   python manage.py create_postnumre
+fi
+if [ "${CREATE_SPEDITORER,,}" = true ]; then
+  echo 'creating speditører'
+  python manage.py create_speditører
 fi
 if [ "${TEST,,}" = true ]; then
   echo 'running tests!'

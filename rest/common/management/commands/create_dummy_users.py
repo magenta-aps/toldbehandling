@@ -146,7 +146,7 @@ class Command(BaseCommand):
         indberetter.groups.add(privatindberettere_group)
 
         IndberetterProfile.objects.create(
-            cpr=2222222222, cvr=12345678, user=indberetter2
+            cpr=2222222222, cvr=12345679, user=indberetter2
         )
 
         indberetter3, created = User.objects.update_or_create(

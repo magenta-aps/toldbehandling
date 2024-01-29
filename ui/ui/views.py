@@ -47,28 +47,64 @@ class UiViewMixin:
             }
         )
 
+    @property
+    def user_cvr(self):
+        if self.userdata.get("indberetter_data"):
+            return self.userdata["indberetter_data"].get("cvr")
 
-class IndexView(LoginRequiredMixin, RedirectView):
+
+class IndexView(LoginRequiredMixin, UiViewMixin, RedirectView):
     def get_redirect_url(self, *args, **kwargs):
-        if self.userdata.get("indberetter_data", {}).get("cvr"):
+        if self.user_cvr:
             return reverse("tf10_list")
         return reverse("tf5_list")
 
 
-class TF10FormCreateView(UiViewMixin, common_views.TF10FormCreateView):
+class SpeditørMixin:
+    @cached_property
+    def speditører(self):
+        return self.rest_client.speditør.list()
+
+    @cached_property
+    def is_speditør(self):
+        cvr = self.user_cvr
+        return any(
+            [
+                True
+                for speditør in self.speditører  # Hvis brugeren har et cvr som passer
+                if speditør.cvr == cvr  # til en speditør, kan han ikke vælge én
+            ]
+        )
+
+
+class TF10FormCreateView(UiViewMixin, SpeditørMixin, common_views.TF10FormCreateView):
     extend_template = "ui/layout.html"
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        if self.user_cvr is None or not self.is_speditør:
+            kwargs["speditører"] = self.speditører
+        return kwargs
 
-class TF10ListView(UiViewMixin, common_views.TF10ListView):
+
+class TF10ListView(UiViewMixin, SpeditørMixin, common_views.TF10ListView):
     actions_template = "ui/tf10/actions.html"
     extend_template = "ui/layout.html"
 
     def get_context_data(self, **context):
-        return super().get_context_data(**{**context, "can_create": True})
+        return super().get_context_data(
+            **{**context, "can_create": True, "is_speditør": self.is_speditør}
+        )
 
 
-class TF10FormUpdateView(UiViewMixin, common_views.TF10FormUpdateView):
+class TF10FormUpdateView(UiViewMixin, SpeditørMixin, common_views.TF10FormUpdateView):
     extend_template = "ui/layout.html"
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        if self.user_cvr is None or not self.is_speditør:
+            kwargs["speditører"] = self.speditører
+        return kwargs
 
 
 class TF10LeverandørFakturaView(UiViewMixin, common_views.LeverandørFakturaView):

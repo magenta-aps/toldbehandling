@@ -4,7 +4,7 @@
 from datetime import timedelta
 from decimal import Decimal
 
-from aktør.models import Afsender, Modtager
+from aktør.models import Afsender, Modtager, Speditør
 from common.models import Postnummer
 from common.util import dato_måned_slut
 from django.contrib.auth.models import User
@@ -135,6 +135,12 @@ class Afgiftsanmeldelse(models.Model):
     toldkategori = models.CharField(
         max_length=3,
         verbose_name=_("Toldkategori"),
+        null=True,
+        blank=True,
+    )
+    fuldmagtshaver = models.ForeignKey(
+        Speditør,
+        on_delete=models.SET_NULL,
         null=True,
         blank=True,
     )

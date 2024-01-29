@@ -482,6 +482,8 @@ class TF10FormUpdateView(
                 initial["fragtbrevnr"] = postforsendelse.postforsendelsesnummer
                 initial["forbindelsesnr"] = postforsendelse.afsenderbykode
                 initial["afgangsdato"] = postforsendelse.afgangsdato
+            if item.fuldmagtshaver:
+                initial["fuldmagtshaver"] = getattr(item.fuldmagtshaver, "cvr")
         return initial
 
 

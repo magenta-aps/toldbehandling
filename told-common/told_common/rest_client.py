@@ -29,6 +29,7 @@ from told_common.data import (
     PostForsendelse,
     PrismeResponse,
     PrivatAfgiftsanmeldelse,
+    Speditør,
     User,
     Vareafgiftssats,
     Varelinje,
@@ -351,6 +352,7 @@ class AfgiftanmeldelseRestClient(ModelRestClient):
             "modtager_betaler": data.get("modtager_betaler"),
             "oprettet_på_vegne_af_id": opt_int(data.get("oprettet_på_vegne_af")),
             "kladde": data.get("kladde", False),
+            "fuldmagtshaver_id": data.get("fuldmagtshaver") or None,
         }
 
     def create(
@@ -910,6 +912,16 @@ class StatistikRestClient(ModelRestClient):
         return self.rest.get("statistik", filter)
 
 
+class SpeditørRestClient(ModelRestClient):
+    def list(
+        self, **filter: Union[str, int, float, bool, List[Union[str, int, float, bool]]]
+    ):
+        return [
+            Speditør.from_dict(item)
+            for item in self.rest.get("speditør", filter)["items"]
+        ]
+
+
 class RestClient:
     domain = settings.REST_DOMAIN
 
@@ -932,6 +944,7 @@ class RestClient:
         self.user = UserRestClient(self)
         self.payment = PaymentRestClient(self)
         self.statistik = StatistikRestClient(self)
+        self.speditør = SpeditørRestClient(self)
 
     def check_access_token_age(self):
         max_age = getattr(settings, "NINJA_JWT", {}).get(

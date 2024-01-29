@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-24 12:06-0200\n"
+"POT-Creation-Date: 2024-01-26 11:53-0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -265,6 +265,18 @@ msgstr "Akuerineqarpoq"
 msgid "Sendt til Prisme"
 msgstr ""
 
+#: told_common/forms.py
+#, fuzzy
+#| msgid "Mine afgiftsanmeldelser"
+msgid "Mine egne afgiftsanmeldelser"
+msgstr "Akitsuusigassanik nalunaaruteqarnikka"
+
+#: told_common/forms.py
+#, fuzzy
+#| msgid "Afgiftsanmeldelsen med nummer {id} blev opdateret"
+msgid "Afgiftsanmeldelser som jeg har fuldmagt til"
+msgstr "Akitsuusigassanik nalunaarut {id} -mik normulik nutarterneqarpoq"
+
 #: told_common/forms.py told_common/templates/told_common/tf5/view.html
 msgid "CPR"
 msgstr "CPR"
@@ -347,6 +359,16 @@ msgstr ""
 msgid ""
 "En kladde kan redigeres efterfølgende, men bliver først behandlet når den er "
 "færdigudfyldt og ikke længere er en kladde."
+msgstr ""
+
+#: told_common/templates/told_common/tf10/form.html
+msgid "Fuldmagt"
+msgstr ""
+
+#: told_common/templates/told_common/tf10/form.html
+msgid ""
+"Der kan gives fuldmagt til en speditør, til at redigere og indsende "
+"afgiftsanmeldelsen."
 msgstr ""
 
 #: told_common/templates/told_common/tf10/form.html
@@ -568,6 +590,10 @@ msgstr "Nassiussisup illoqarfiata kodea/attavigisap normua"
 #: told_common/templates/told_common/tf10/list.html
 msgid "Postforsendelsesnummer/fragtbrevsnummer"
 msgstr "Allakkatigut nassiussap normua/nassiussat allagartaata normua"
+
+#: told_common/templates/told_common/tf10/list.html
+msgid "Fuldmagtsstatus"
+msgstr ""
 
 #: told_common/templates/told_common/tf10/list.html
 #: told_common/templates/told_common/tf5/list.html

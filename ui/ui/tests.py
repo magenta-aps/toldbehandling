@@ -102,6 +102,7 @@ class TF10BlanketTest(TestMixin, HasLogin, TestCase):
             "afsender": False,
             "modtager": False,
             "vareafgiftssats": True,
+            "speditør": True,
         }
 
     def test_uploadfile_to_base64str(self):
@@ -204,6 +205,18 @@ class TF10BlanketTest(TestMixin, HasLogin, TestCase):
                 }
             else:
                 json_content = empty
+
+        elif path == expected_prefix + "speditør":
+            if self.mock_existing["speditør"]:
+                json_content = {
+                    "count": 1,
+                    "items": [
+                        {
+                            "cvr": 12345678,
+                            "navn": "TestSpeditør",
+                        }
+                    ],
+                }
         else:
             print(f"Mock got unrecognized path: {path}")
         if json_content:
@@ -450,6 +463,7 @@ class TF10BlanketTest(TestMixin, HasLogin, TestCase):
                     "indførselstilladelse": "123",
                     "afsender_id": 1,
                     "modtager_id": 1,
+                    "fuldmagtshaver_id": None,
                     "postforsendelse_id": None,
                     "fragtforsendelse_id": 1,
                     "leverandørfaktura": base64.b64encode(
@@ -513,6 +527,7 @@ class TF10BlanketTest(TestMixin, HasLogin, TestCase):
                     "indførselstilladelse": "123",
                     "afsender_id": 1,
                     "modtager_id": 1,
+                    "fuldmagtshaver_id": None,
                     "postforsendelse_id": None,
                     "fragtforsendelse_id": 1,
                     "leverandørfaktura": base64.b64encode(
@@ -592,6 +607,7 @@ class TF10BlanketTest(TestMixin, HasLogin, TestCase):
                     "indførselstilladelse": "123",
                     "afsender_id": 1,
                     "modtager_id": 1,
+                    "fuldmagtshaver_id": None,
                     "postforsendelse_id": 1,
                     "fragtforsendelse_id": None,
                     "leverandørfaktura": base64.b64encode(
