@@ -414,7 +414,7 @@ class AnmeldelseListViewTest(HasLogin):
             {
                 "id": 1,
                 "leverandørfaktura_nummer": "12345",
-                "modtager_betaler": False,
+                "betales_af": "afsender",
                 "indførselstilladelse": "abcde",
                 "betalt": False,
                 "leverandørfaktura": "/leverand%C3%B8rfakturaer"
@@ -457,7 +457,7 @@ class AnmeldelseListViewTest(HasLogin):
             {
                 "id": 2,
                 "leverandørfaktura_nummer": "12345",
-                "modtager_betaler": False,
+                "betales_af": "afsender",
                 "indførselstilladelse": "abcde",
                 "betalt": False,
                 "leverandørfaktura": "/leverand%C3%B8rfakturaer"
@@ -500,7 +500,7 @@ class AnmeldelseListViewTest(HasLogin):
             {
                 "id": 3,
                 "leverandørfaktura_nummer": "12345",
-                "modtager_betaler": False,
+                "betales_af": "afsender",
                 "indførselstilladelse": "abcde",
                 "betalt": False,
                 "leverandørfaktura": "/leverand%C3%B8rfakturaer"

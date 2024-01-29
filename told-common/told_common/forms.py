@@ -257,16 +257,6 @@ class TF10Form(BootstrapForm):
     fragtbrevnr = forms.CharField(
         required=True,
     )
-    modtager_betaler = forms.BooleanField(
-        label=_("Betales af"),
-        required=False,
-        widget=forms.Select(
-            choices=(
-                (True, _("Modtager")),
-                (False, _("Afsender")),
-            )
-        ),
-    )
     afgangsdato = forms.DateField(
         required=True,
         widget=DateInput(),
@@ -290,6 +280,21 @@ class TF10Form(BootstrapForm):
         + [(speditør.cvr, speditør.navn) for speditør in form.speditører]
         if form.speditører
         else [],
+    )
+
+    betales_af = forms.CharField(
+        label=_("Betales af"),
+        required=False,
+        widget=forms.Select(
+            # OBS: we write the choices manually, since rest don't have access to
+            # told-common filen and UI don't have access to rest
+            choices=(
+                (None, _("-- Vælg betaler")),
+                ("afsender", _("Afsender")),
+                ("modtager", _("Modtager")),
+                ("indberetter", _("Indberetter")),
+            )
+        ),
     )
 
     def clean(self):

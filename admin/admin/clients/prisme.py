@@ -94,7 +94,7 @@ class CustomDutyRequest(PrismeRequestObject):
 
     @property
     def betaler(self):
-        if self.afgiftsanmeldelse.modtager_betaler:
+        if self.afgiftsanmeldelse.betales_af == "modtager":
             return "Consignee"
         return "Consigner"
 

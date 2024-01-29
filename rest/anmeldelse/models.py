@@ -46,6 +46,17 @@ class Afgiftsanmeldelse(models.Model):
             ),
         ]
 
+    BETALES_AF_BLANK = None
+    BETALES_AF_AFSENDER = "afsender"
+    BETALES_AF_MODTAGER = "modtager"
+    BETALES_AF_INDBERETTER = "indberetter"
+    BETALES_AF_CHOICES = {
+        BETALES_AF_BLANK: "Blank",
+        BETALES_AF_AFSENDER: "Afsender",
+        BETALES_AF_MODTAGER: "Modtager",
+        BETALES_AF_INDBERETTER: "Indberetter",
+    }
+
     history = HistoricalRecords()
     oprettet_af = models.ForeignKey(
         User,
@@ -99,9 +110,6 @@ class Afgiftsanmeldelse(models.Model):
         null=True,
         blank=True,
     )
-    modtager_betaler = models.BooleanField(
-        default=False,
-    )
     indførselstilladelse = models.CharField(
         max_length=20,
         db_index=True,
@@ -143,6 +151,14 @@ class Afgiftsanmeldelse(models.Model):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
+    )
+
+    betales_af = models.CharField(
+        max_length=20,
+        null=True,
+        blank=True,
+        choices=BETALES_AF_CHOICES.items(),
+        default=BETALES_AF_BLANK,
     )
 
     def clean(self):

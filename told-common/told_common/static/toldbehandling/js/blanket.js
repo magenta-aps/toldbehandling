@@ -141,9 +141,6 @@ $(function () {
     }
 });
 
-
-
-
 $(function () {
 
     // Vis afgiftssats og beregn afgiftsbeløb
@@ -451,6 +448,7 @@ $(function () {
         }
     });
 });
+
 $(function () {
     // Custom-fejlbeskeder i klientvalidering
     const validity_checks = ["rangeUnderflow", "rangeOverflow"];
@@ -467,6 +465,7 @@ $(function () {
         return false;
     });
 });
+
 $(function (){
     const draftField = $("[name=kladde]");
 
@@ -539,6 +538,22 @@ $(function (){
     draftField.on("change", draftChanged);
     draftChanged();
 });
+
+$(function () {
+    const indberetter_data = JSON.parse($('#indberetter_data').text());
+    let $betales_af_select = $("#id_betales_af")
+
+    if (indberetter_data !== null && $betales_af_select.length > 0) {
+        let options = $betales_af_select.find("option");
+        for(let i = 0; i < options.length; i++) {
+            let option = $(options[i]);
+            if (option.val() === "indberetter") {
+                option.text(option.text() + ` (CVR: ${indberetter_data["cvr"]})`)
+                break;
+            }
+        }
+    }
+})
 
 $("input[readonly]").on("focus", function(){
     this.blur();
