@@ -334,7 +334,7 @@ class AfgiftsanmeldelseAPI:
         item = get_object_or_404(Afgiftsanmeldelse, id=id)
         self.check_user(item)
         data = payload.dict(exclude_unset=True)
-        if payload.status is not None:
+        if payload.status in ("godkendt", "afvist", "afsluttet"):
             if not self.check_perm("anmeldelse.approve_reject_anmeldelse"):
                 raise PermissionDenied
         leverandørfaktura = data.pop("leverandørfaktura", None)
