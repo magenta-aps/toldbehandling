@@ -570,7 +570,7 @@ class PrivatAfgiftanmeldelseRestClient(ModelRestClient):
         include_varelinjer=False,
         include_notater=False,
         **filter: Union[str, int, float, bool, List[Union[str, int, float, bool]]],
-    ) -> Tuple[int, List[Afgiftsanmeldelse]]:
+    ) -> Tuple[int, List[PrivatAfgiftsanmeldelse]]:
         data = self.rest.get("privat_afgiftsanmeldelse", filter)
         for item in data["items"]:
             id = item["id"]
