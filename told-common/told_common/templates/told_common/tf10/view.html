@@ -9,25 +9,31 @@
     {% csrf_token %}
     {{form.errors}}
     <div class="mx-5">
-        <h1>Afgiftsanmeldelse {{object.id}}</h1>
+        <h1>{% blocktranslate with id=object.id %}Afgiftsanmeldelse {{id}}{% endblocktranslate %}</h1>
 
         {% if object.status == "afsluttet" %}
-        <span class="badge bg-success">Sendt til Prisme</span>
+        <span class="badge bg-success">
+            {% if ui %}
+            {% translate "Godkendt" %}
+            {% else %}
+            {% translate "Sendt til Prisme" %}
+            {% endif %}
+        </span>
         {% elif object.status == "godkendt" %}
-        <span class="badge bg-success">Godkendt</span>
+        <span class="badge bg-success">{% translate "Godkendt" %}</span>
         {% elif object.status == "afvist" %}
-        <span class="badge bg-danger">Afvist</span>
+        <span class="badge bg-danger">{% translate "Afvist" %}</span>
         {% elif object.status == "ny" %}
-        <span class="badge bg-secondary">Ny</span>
+        <span class="badge bg-secondary">{% translate "Ny" %}</span>
         {% elif object.status == "kladde" %}
-        <span class="badge bg-warning">Kladde</span>
+        <span class="badge bg-warning">{% translate "Kladde" %}</span>
         {% endif %}
 
-        <h4>For indførsel af afgiftspligtige varer i Grønland</h4>
+        <h4>{% translate "For indførsel af afgiftspligtige varer i Grønland" %}</h4>
 
         <div class="row">
             <div class="col-2">
-                <label>Oprettelsesdato:</label>
+                <label>{% translate "Oprettelsesdato" %}:</label>
             </div>
             <div class="col-10">
                 {{object.dato}}
@@ -39,10 +45,10 @@
         <div class="row">
 
             <div class="col-6">
-                <h5>Afsender</h5>
+                <h5>{% translate "Afsender" %}</h5>
                 <div class="row">
                     <div class="col-4">
-                        <label>CVR:</label>
+                        <label>{% translate "CVR" %}:</label>
                     </div>
                     <div class="col-8">
                         {{object.afsender.cvr|default_if_none:""}}
@@ -50,7 +56,7 @@
                 </div>
                 <div class="row">
                     <div class="col-4">
-                        <label>Navn:</label>
+                        <label>{% translate "Navn" %}:</label>
                     </div>
                     <div class="col-8">
                         {{object.afsender.navn|default_if_none:""}}
@@ -58,7 +64,7 @@
                 </div>
                 <div class="row">
                     <div class="col-4">
-                        <label>Adresse:</label>
+                        <label>{% translate "Adresse" %}:</label>
                     </div>
                     <div class="col-8">
                         {{object.afsender.adresse|default_if_none:""}}
@@ -66,7 +72,7 @@
                 </div>
                 <div class="row">
                     <div class="col-4">
-                        <label>Postbox:</label>
+                        <label>{% translate "Postbox" %}:</label>
                     </div>
                     <div class="col-8">
                         {{object.afsender.postbox|default_if_none:""}}
@@ -74,7 +80,7 @@
                 </div>
                 <div class="row">
                     <div class="col-4">
-                        <label>Postnummer:</label>
+                        <label>{% translate "Postnummer" %}:</label>
                     </div>
                     <div class="col-8">
                         {{object.afsender.postnummer|default_if_none:""}}
@@ -82,7 +88,7 @@
                 </div>
                 <div class="row">
                     <div class="col-4">
-                        <label>By:</label>
+                        <label>{% translate "By" %}:</label>
                     </div>
                     <div class="col-8">
                         {{object.afsender.by|default_if_none:""}}
@@ -90,7 +96,7 @@
                 </div>
                 <div class="row">
                     <div class="col-4">
-                        <label>Telefon:</label>
+                        <label>{% translate "Telefon" %}:</label>
                     </div>
                     <div class="col-8">
                         {{object.afsender.telefon|default_if_none:""}}
@@ -99,10 +105,10 @@
             </div>
 
             <div class="col-6">
-                <h5>Modtager</h5>
+                <h5>{% translate "Modtager" %}</h5>
                 <div class="row">
                     <div class="col-4">
-                        <label>CVR:</label>
+                        <label>{% translate "CVR" %}:</label>
                     </div>
                     <div class="col-8">
                         {{object.modtager.cvr|default_if_none:""}}
@@ -110,7 +116,7 @@
                 </div>
                 <div class="row">
                     <div class="col-4">
-                        <label>Navn:</label>
+                        <label>{% translate "Navn" %}:</label>
                     </div>
                     <div class="col-8">
                         {{object.modtager.navn|default_if_none:""}}
@@ -118,7 +124,7 @@
                 </div>
                 <div class="row">
                     <div class="col-4">
-                        <label>Adresse:</label>
+                        <label>{% translate "Adresse" %}:</label>
                     </div>
                     <div class="col-8">
                         {{object.modtager.adresse|default_if_none:""}}
@@ -126,7 +132,7 @@
                 </div>
                 <div class="row">
                     <div class="col-4">
-                        <label>Postbox:</label>
+                        <label>{% translate "Postbox" %}:</label>
                     </div>
                     <div class="col-8">
                         {{object.modtager.postbox|default_if_none:""}}
@@ -134,7 +140,7 @@
                 </div>
                 <div class="row">
                     <div class="col-4">
-                        <label>Postnummer:</label>
+                        <label>{% translate "Postnummer" %}:</label>
                     </div>
                     <div class="col-8">
                         {{object.modtager.postnummer|default_if_none:""}}
@@ -142,7 +148,7 @@
                 </div>
                 <div class="row">
                     <div class="col-4">
-                        <label>By:</label>
+                        <label>{% translate "By" %}:</label>
                     </div>
                     <div class="col-8">
                         {{object.modtager.by|default_if_none:""}}
@@ -150,7 +156,7 @@
                 </div>
                 <div class="row">
                     <div class="col-4">
-                        <label>Telefon:</label>
+                        <label>{% translate "Telefon" %}:</label>
                     </div>
                     <div class="col-8">
                         {{object.modtager.telefon|default_if_none:""}}
@@ -176,7 +182,7 @@
                 </div>
                 <div class="row">
                     <div class="col-4">
-                        <label>Leverandørfaktura:</label>
+                        <label>{% translate "Leverandørfaktura" %}:</label>
                     </div>
                     <div class="col-8">
                         <a href="{% url 'leverandørfaktura_view' id=object.id %}">
@@ -186,7 +192,7 @@
                 </div>
                 <div class="row">
                     <div class="col-4">
-                        <label>Fragtbrev:</label>
+                        <label>{% translate "Fragtbrev" %}:</label>
                     </div>
                     <div class="col-8">
                         {% if object.fragtforsendelse.fragtbrev %}
@@ -202,17 +208,17 @@
 
                 <div class="row">
                     <div class="col-4">
-                        <label>Forsendelsesmåde:</label>
+                        <label>{% translate "Forsendelsesmåde" %}:</label>
                     </div>
                     <div class="col-8">
                         {% if object.fragtforsendelse.forsendelsestype.name == "SKIB" %}
-                        Skibsfragt
+                        {% translate "Skibsfragt" %}
                         {% elif object.fragtforsendelse.forsendelsestype.name == "FLY" %}
-                        Luftfragt
+                        {% translate "Luftfragt" %}
                         {% elif object.postforsendelse.forsendelsestype.name == "SKIB" %}
-                        Skibspost
+                        {% translate "Skibspost" %}
                         {% elif object.postforsendelse.forsendelsestype.name == "FLY" %}
-                        Luftpost
+                        {% translate "Luftpost" %}
                         {% endif %}
                     </div>
                 </div>
@@ -221,9 +227,9 @@
                 <div class="row">
                     <div class="col-4">
                         {% if object.fragtforsendelse %}
-                        Forbindelsesnr.:
+                        {% translate "Forbindelsesnr." %}:
                         {% elif object.postforsendelse %}
-                        Afsenderby­kode:
+                        {% translate "Afsenderby­kode" %}:
                         {% endif %}
                     </div>
                     <div class="col-8">
@@ -238,9 +244,9 @@
                 <div class="row">
                     <div class="col-4">
                         {% if object.fragtforsendelse %}
-                        Fragtbrevnr.
+                        {% translate "Fragtbrevnr." %}
                         {% elif object.postforsendelse %}
-                        Post­forsendelses­nr.:
+                        {% translate "Post­forsendelses­nr." %}:
                         {% endif %}
                     </div>
                     <div class="col-8">
@@ -254,7 +260,7 @@
 
                 <div class="row">
                     <div class="col-4">
-                        Afgangsdato:
+                        {% translate "Afgangsdato" %}:
                     </div>
                     <div class="col-8">
                         {% if object.fragtforsendelse %}
@@ -267,7 +273,7 @@
 
                 <div class="row">
                     <div class="col-4">
-                        Beregnet faktureringsdato:
+                        {% translate "Beregnet faktureringsdato" %}:
                     </div>
                     <div class="col-8">
                         {{object.beregnet_faktureringsdato}}
@@ -278,31 +284,31 @@
 
         <hr/>
 
-        <h5>Varelinjer med afgifter</h5>
+        <h5>{% translate "Varelinjer med afgifter" %}</h5>
 
         <table class="table table-striped">
             <thead>
             <tr>
                 <th class="col-2 px-0">
-                    Vareart
+                    {% translate "Vareart" %}
                 </th>
                 <th class="col-2 px-0">
-                    Varekode
+                    {% translate "Varekode" %}
                 </th>
                 <th class="col-1 px-0">
-                    kg | liter
+                    {% translate "kg | liter" %}
                 </th>
                 <th class="col-1 px-0">
-                    Antal
+                    {% translate "Antal" %}
                 </th>
                 <th class="col-2 px-0">
-                    Fakturabeløb
+                    {% translate "Fakturabeløb" %}
                 </th>
                 <th class="col-2 px-0">
-                    Afgiftssats
+                    {% translate "Afgiftssats" %}
                 </th>
                 <th class="col-2 px-0">
-                    Afgiftsbeløb
+                    {% translate "Afgiftsbeløb" %}
                 </th>
             </tr>
             </thead>
@@ -349,19 +355,19 @@
             <tfoot>
                 <tr>
                     <td colspan="5"></td>
-                    <td style="font-weight: bold">Afgift i alt</td>
+                    <td style="font-weight: bold">{% translate "Afgift i alt" %}</td>
                     <td>{{object.afgift_sum}}</td>
                 </tr>
             </tfoot>
         </table>
 
         <hr/>
-        <h5>Notater</h5>
+        <h5>{% translate "Notater" %}</h5>
         {% include "told_common/notat/list.html" with notater=object.notater %}
 
         <hr/>
 
-        <h5>Betaling</h5>
+        <h5>{% translate "Betaling" %}</h5>
 
         <div class="row align-items-center">
             <div class="col-2">{% translate "Toldkategori" %}:</div>
@@ -391,20 +397,20 @@
                 {% if can_godkend %}
                     {% if object.status == "ny" or object.status == "afvist" %}
                     <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#godkend_modal">
-                        Godkend
+                        {% translate "Godkend" %}
                     </button>
                     {% endif %}
                 {% endif %}
                 {% if can_afvis %}
                     {% if object.status == "ny" %}
                     <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#afvis_modal">
-                        Afvis
+                        {% translate "Afvis" %}
                     </button>
                     {% endif %}
                 {% endif %}
                 {% if can_edit %}
                     {% if object.status == "ny" or object.status == "kladde" or object.status == "afvist" %}
-                    <a href="{% url 'tf10_edit' id=object.id %}" class="btn btn-primary">Redigér</a>
+                    <a href="{% url 'tf10_edit' id=object.id %}" class="btn btn-primary">{% translate "Redigér" %}</a>
                     {% endif %}
                 {% endif %}
 
@@ -412,18 +418,18 @@
                 {% if object.status == "godkendt" or object.status == "afsluttet" %}
                     {% if object.status == "afsluttet" %}
                     <button type="button" class="btn btn-success disabled">
-                        Send til Prisme
+                        {% translate "Send til Prisme" %}
                     </button>
                     {% else %}
                     <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#prisme_modal">
-                        Send til Prisme
+                        {% translate "Send til Prisme" %}
                     </button>
                     {% endif %}
                 {% endif %}
                 {% endif %}
 
                 {% if can_view_history %}
-                    <a href="{% url 'tf10_history' id=object.id %}" class="btn btn-primary">Historik</a>
+                    <a href="{% url 'tf10_history' id=object.id %}" class="btn btn-primary">{% translate "Historik" %}</a>
                 {% endif %}
             </div>
         </div>

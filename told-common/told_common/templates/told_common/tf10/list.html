@@ -141,14 +141,14 @@
         <thead>
         <tr>
             {% if can_edit_multiple %}
-            <th data-field="select"><input type="checkbox" id="select_all"/></th>
+            <th class="col-1" data-field="select"><input type="checkbox" id="select_all"/></th>
             {% endif %}
-            <th data-sortable="true" data-field="id">{% translate "Nummer" %}</th>
-            <th data-sortable="true" data-field="dato" data-formatter="datoFormatter">{% translate "Dato" %}</th>
-            <th data-sortable="true" data-field="afsender" data-formatter="aktørFormatter">{% translate "Afsender" %}</th>
-            <th data-sortable="true" data-field="modtager" data-formatter="aktørFormatter">{% translate "Modtager" %}</th>
-            <th data-sortable="true" data-field="status" data-formatter="statusFormatter">{% translate "Status" %}</th>
-            <th data-field="actions">{% translate "Handlinger" %}</th>
+            <th class="col-1" data-sortable="true" data-field="id">{% translate "Nummer" %}</th>
+            <th class="col-2" data-sortable="true" data-field="dato" data-formatter="datoFormatter">{% translate "Dato" %}</th>
+            <th class="col-3" data-sortable="true" data-field="afsender" data-formatter="aktørFormatter">{% translate "Afsender" %}</th>
+            <th class="col-3" data-sortable="true" data-field="modtager" data-formatter="aktørFormatter">{% translate "Modtager" %}</th>
+            <th class="col-1" data-sortable="true" data-field="status">{% translate "Status" %}</th>
+            <th class="col-1" data-field="actions">{% translate "Handlinger" %}</th>
         </tr>
         </thead>
         <tbody id="table_body">
@@ -218,16 +218,6 @@ function queryParams(params){  // Kaldes af bootstrap-table fordi vi peger på d
     }
 
     return params;
-}
-function statusFormatter(value) {
-    if (value === true) {
-        return "{% translate 'Godkendt' %}";
-    } else if (value === false) {
-        return "{% translate 'Afvist' %}";
-    } else if (value === null) {
-        return "{% translate 'Ny' %}"
-    }
-    return value;
 }
 function aktørFormatter(value) {
     if (typeof(value) === "object") {
