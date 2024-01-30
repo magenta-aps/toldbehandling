@@ -242,3 +242,7 @@ class TF5Form(common_forms.TF5Form):
         widget=forms.Textarea(attrs={"placeholder": _("Notat")}), required=False
     )
     indleveringsdato_ubegrænset = True
+
+
+class TF5ViewForm(common_forms.TF5ViewForm):
+    betalt = forms.BooleanField(required=False)

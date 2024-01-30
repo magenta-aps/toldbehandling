@@ -780,31 +780,52 @@ class TF5ListView(AdminLayoutBaseView, common_views.TF5ListView):
 
 
 class TF5View(AdminLayoutBaseView, common_views.TF5View, FormView):
-    form_class = forms.TF5Form
+    form_class = forms.TF5ViewForm
     required_permissions = (
         "auth.admin",
         "anmeldelse.view_privatafgiftsanmeldelse",
+    )
+    payment_permissions = (
+        "payment.add_payment",
+        "payment.add_item",
+        "payment.bank_payment",
     )
     show_notater = True
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        can_edit = (
-            self.object.status == "ny"
-            and self.object.indleveringsdato > date.today()
-            and self.has_permissions(
-                request=self.request, required_permissions=self.edit_permissions
-            )
-        )
         context.update(
             {
                 "object": self.object,
-                "can_edit": can_edit,
-                "can_cancel": False,
                 "tillægsafgift": self.object.tillægsafgift,
+                "can_opret_betaling": self.can_opret_betaling,
             }
         )
         return context
+
+    @cached_property
+    def can_opret_betaling(self):
+        return (
+            self.has_permissions(
+                request=self.request, required_permissions=self.payment_permissions
+            )
+            and self.object.payment_status != "paid"
+        )
+
+    def form_valid(self, form):
+        anmeldelse_id = self.kwargs["id"]
+        betalt = form.cleaned_data["betalt"]
+        if betalt and self.can_opret_betaling:
+            response = self.check_permissions(self.edit_permissions)
+            if response:
+                return response
+            self.rest_client.payment.create(
+                {
+                    "declaration_id": anmeldelse_id,
+                    "provider": "bank",
+                }
+            )
+        return super().form_valid(form)
 
 
 class TF5UpdateView(AdminLayoutBaseView, common_views.TF5UpdateView):
@@ -818,10 +839,10 @@ class TF5UpdateView(AdminLayoutBaseView, common_views.TF5UpdateView):
         # Opret notat _efter_ den nye version af anmeldelsen, så vores historik-filtrering fungerer
         if notat:
             self.rest_client.notat.create(
-                {"tekst": notat}, privatafgiftsanmeldelse_id=self.kwargs["id"]
+                {"tekst": notat}, privatafgiftsanmeldelse_id=privatanmeldelse_id
             )
 
-        return redirect(reverse("tf5_view", kwargs={"id": privatanmeldelse_id}))
+        return response
 
 
 class TF5LeverandørFakturaView(common_views.LeverandørFakturaView):

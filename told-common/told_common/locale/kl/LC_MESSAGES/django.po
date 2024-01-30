@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-30 11:16-0200\n"
+"POT-Creation-Date: 2024-01-30 11:49-0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -258,16 +258,19 @@ msgstr "Tamarmik/Tamaasa"
 
 #: told_common/forms.py told_common/templates/told_common/tf10/view.html
 #: told_common/templates/told_common/tf5/list.html
+#: told_common/templates/told_common/tf5/view.html
 msgid "Ny"
 msgstr "Nutaaq"
 
 #: told_common/forms.py told_common/templates/told_common/tf10/view.html
 #: told_common/templates/told_common/tf5/list.html
+#: told_common/templates/told_common/tf5/view.html
 msgid "Afvist"
 msgstr "Itigartinneqarpoq"
 
 #: told_common/forms.py told_common/templates/told_common/tf10/view.html
 #: told_common/templates/told_common/tf5/list.html
+#: told_common/templates/told_common/tf5/view.html
 msgid "Godkendt"
 msgstr "Akuerineqarpoq"
 
@@ -453,10 +456,8 @@ msgstr "Nassiussat allagartaata nr-a/allakkatigut nassiussat normuat"
 
 #: told_common/templates/told_common/tf10/form.html
 #: told_common/templates/told_common/tf10/view.html
-#, fuzzy
-#| msgid "Afgangsdato mellem"
 msgid "Afgangsdato"
-msgstr "-t akornanni nassiunneqarpoq"
+msgstr ""
 
 #: told_common/templates/told_common/tf10/form.html
 #: told_common/templates/told_common/tf10/view.html
@@ -859,6 +860,18 @@ msgid "Engangstilladelse til privat indførsel af øl, vin og spiritus"
 msgstr ""
 "Immiaaqqanik, viinninik imigassanillu namminermut atugassanik eqqussinermi, "
 "ataasiartumik akuersissut"
+
+#: told_common/templates/told_common/tf5/view.html
+msgid "Annulleret"
+msgstr ""
+
+#: told_common/templates/told_common/tf5/view.html
+msgid "Ikke betalt"
+msgstr ""
+
+#: told_common/templates/told_common/tf5/view.html
+msgid "Betalt"
+msgstr ""
 
 #: told_common/templates/told_common/tf5/view.html
 msgid "Postnr/by"

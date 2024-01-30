@@ -9,7 +9,27 @@ from payment.utils import convert_keys_to_camel_case
 from project import settings
 
 
-class NetsProviderHandler:
+class ProviderHandler:
+    initial_status = "created"
+
+    def create(self, payload: ProviderPaymentPayload, checkout_url: str):
+        raise NotImplementedError()
+
+    def update(self):
+        raise NotImplementedError()
+
+    def delete(self):
+        raise NotImplementedError()
+
+    def read(self, payment_id: str):
+        raise NotImplementedError()
+
+    @property
+    def headers(self):
+        raise NotImplementedError()
+
+
+class NetsProviderHandler(ProviderHandler):
     def __init__(self, secret_key: str) -> None:
         self.host = settings.PAYMENT_PROVIDER_NETS_HOST
         self.terms_url = settings.PAYMENT_PROVIDER_NETS_TERMS_URL
@@ -55,12 +75,6 @@ class NetsProviderHandler:
         resp_body = resp.json()
         return resp_body["payment"]
 
-    def update(self):
-        raise NotImplementedError()
-
-    def delete(self):
-        raise NotImplementedError()
-
     @property
     def headers(self):
         return {
@@ -68,3 +82,14 @@ class NetsProviderHandler:
             "content-type": "application/*+json",
             "Authorization": f"Bearer {self.secret_key}",
         }
+
+
+class BankProviderHandler(ProviderHandler):
+    host = None
+    initial_status = "paid"
+
+    def create(self, payload: ProviderPaymentPayload, checkout_url: str):
+        return {"paymentId": "Der er foretaget en bankoverførsel"}
+
+    def read(self, payment_id: str):
+        return None

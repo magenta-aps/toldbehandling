@@ -89,6 +89,7 @@ class ContactDetails(Schema):
 
 class PaymentCreatePayload(Schema):
     declaration_id: int
+    provider: str = "nets"
 
 
 # Provider input schemas / payloads

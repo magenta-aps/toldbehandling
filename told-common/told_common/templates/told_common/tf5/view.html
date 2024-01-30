@@ -14,21 +14,21 @@
 
         {% if not printing %}
         {% if object.status == "godkendt" %}
-        <span class="badge bg-success">Godkendt</span>
+        <span class="badge bg-success">{% translate "Godkendt" %}</span>
         {% elif object.status == "annulleret" %}
-        <span class="badge bg-danger">Annulleret</span>
+        <span class="badge bg-danger">{% translate "Annulleret" %}</span>
         {% elif object.status == "afvist" %}
-        <span class="badge bg-danger">Afvist</span>
+        <span class="badge bg-danger">{% translate "Afvist" %}</span>
         {% elif object.status == "ny" %}
-        <span class="badge bg-secondary">Ny</span>
+        <span class="badge bg-secondary">{% translate "Ny" %}</span>
         {% endif %}
 
         {% if object.payment_status == "created" %}
-        <span class="badge bg-secondary">Ikke betalt</span>
+        <span class="badge bg-secondary">{% translate "Ikke betalt" %}</span>
         {% elif object.payment_status == "paid" %}
-        <span class="badge bg-success">Betalt</span>
+        <span class="badge bg-success">{% translate "Betalt" %}</span>
         {% elif object.payment_status == "declined" %}
-        <span class="badge bg-danger">Afvist</span>
+        <span class="badge bg-danger">{% translate "Afvist" %}</span>
         {% endif %}
         
 
@@ -271,6 +271,12 @@
                 {% if can_view_tilladelse %}
                 <a class="btn btn-primary" href="{% url 'tf5_tilladelse' object.id %}">Download tilladelse</a>
                 {% endif %}
+
+                {% if can_opret_betaling %}
+                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#betal_modal">
+                    Opret betaling
+                </button>
+                {% endif %}
             </div>
         </div>
         {% endif %}
@@ -293,7 +299,28 @@
             </div>
         </div>
     </div>
-</form>
+
+{% if can_opret_betaling %}
+<div class="modal" id="betal_modal" tabindex="-1" style="display: none">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Opret betaling</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Dette vil sætte afgiftsanmeldelsens betalingsstatus til "betalt", selvom borgeren ikke har gennemført betaling gennem websitet, f.eks. hvis der i stedet er foretaget en bankoverførsel.</p>
+                <p>Er du sikker på at du vil sætte status til "betalt"?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Nej</button>
+                <button type="submit" name="{{form.betalt.name}}" value="true" class="btn btn-success">Ja</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
 
 
 
@@ -318,6 +345,7 @@
     </div>
 </div>
 
+</form>
 <script>
     const modal = new bootstrap.Modal('#message_modal', {});
     modal.show();
