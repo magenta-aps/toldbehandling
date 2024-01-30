@@ -287,7 +287,6 @@ class TF5ListView(UiViewMixin, common_views.TF5ListView):
                 **context,
                 "title": _("Mine indførselstilladelser"),
                 "can_create": True,
-                "can_cancel": True,
             }
         )
 
@@ -297,19 +296,10 @@ class TF5View(UiViewMixin, common_views.TF5View):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        can_edit = (
-            self.object.status == "ny"
-            and self.object.indleveringsdato > date.today()
-            and self.has_permissions(
-                request=self.request, required_permissions=self.edit_permissions
-            )
-        )
         tilladelse_eksisterer = TF5TilladelseView.exists(self.kwargs["id"])
         context.update(
             {
                 "object": self.object,
-                "can_edit": can_edit,
-                "can_cancel": can_edit,
                 "tillægsafgift": self.object.tillægsafgift,
                 "can_view_tilladelse": tilladelse_eksisterer,
                 "can_send_tilladelse": tilladelse_eksisterer,
@@ -454,7 +444,10 @@ class TF5PaymentCheckoutView(
             Exception: If the declaration or payment could not be found or created
         """
         payment = self.rest_client.payment.create(
-            data={"declaration_id": int(self.kwargs["id"])}
+            data={
+                "declaration_id": int(self.kwargs["id"]),
+                "provider": "nets",
+            }
         )
 
         if not payment:

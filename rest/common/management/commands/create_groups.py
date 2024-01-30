@@ -119,6 +119,11 @@ class Command(BaseCommand):
             codename="approve_reject_anmeldelse",
             content_type=afgiftsanmeldelse_model,
         )
+        bank_transfer, _ = Permission.objects.update_or_create(
+            name="Kan oprette payments som erklærer at der er foretaget bankoverførsel",
+            codename="bank_payment",
+            content_type=payment_model,
+        )
 
         admin_tf10_list_view_required_permissions = (
             ("view", afsender_model),
@@ -232,6 +237,7 @@ class Command(BaseCommand):
             se_alle_fragtforsendelser,
             se_alle_postforsendelser,
             godkend_afgiftsanmeldelser,
+            bank_transfer,
         ):
             toldmedarbejdere.permissions.add(permission)
 

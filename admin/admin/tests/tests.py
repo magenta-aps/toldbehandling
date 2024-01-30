@@ -47,6 +47,7 @@ from admin.views import (
     AfgiftstabelDownloadView,
     AfgiftstabelListView,
     StatistikView,
+    TF5View,
     TF10EditMultipleView,
     TF10FormUpdateView,
     TF10HistoryDetailView,
@@ -3655,4 +3656,199 @@ class TF5NotatTest(HasLogin, TestCase):
                 '{"afgiftsanmeldelse_id": null, "privatafgiftsanmeldelse_id": 1, "tekst": "Dette er en test"}',
             ),
             self.posted,
+        )
+
+
+class TF5BankPaymentTest(HasLogin, TestCase):
+    view = TF5View
+
+    check_permissions = (
+        (reverse("tf5_view", kwargs={"id": 1}), view.required_permissions),
+    )
+
+    def setUp(self):
+        super().setUp()
+        self.posted: List[Tuple[str, str]] = []
+
+    def mock_requests_post(self, path, data, headers=None):
+        path = path.rstrip("/")
+        response = Response()
+        content = None
+        status_code = None
+        json_content = {"id": 1}
+        self.posted.append((path, data))
+        if json_content:
+            content = json.dumps(json_content).encode("utf-8")
+        if content:
+            if not status_code:
+                status_code = 200
+            response._content = content
+        response.status_code = status_code or 404
+        return response
+
+    def mock_requests_get(self, path):
+        expected_prefix = f"{settings.REST_DOMAIN}/api/"
+        path = path.split("?")[0]
+        path = path.rstrip("/")
+        response = Response()
+        json_content = None
+        content = None
+        status_code = None
+        empty = {"count": 0, "items": []}
+        if path == expected_prefix + "afgiftstabel":
+            json_content = {
+                "count": 1,
+                "items": [
+                    {
+                        "id": 1,
+                        "gyldig_fra": "2023-01-01T00:00:00-03:00",
+                        "gyldig_til": None,
+                        "kladde": False,
+                    }
+                ],
+            }
+        elif path == expected_prefix + "vareafgiftssats":
+            json_content = {
+                "count": 1,
+                "items": [
+                    {
+                        "id": 1,
+                        "afgiftstabel": 1,
+                        "vareart_da": "Båthorn",
+                        "vareart_kl": "Båthorn",
+                        "afgiftsgruppenummer": 1234567,
+                        "enhed": "kg",
+                        "afgiftssats": "1.00",
+                        "kræver_indførselstilladelse": False,
+                        "har_privat_tillægsafgift_alkohol": False,
+                    }
+                ],
+            }
+        elif path == expected_prefix + "vareafgiftssats/1":
+            json_content = {
+                "id": 1,
+                "afgiftstabel": 1,
+                "vareart_da": "Båthorn",
+                "vareart_kl": "Båthorn",
+                "afgiftsgruppenummer": 1234567,
+                "enhed": "kg",
+                "afgiftssats": "1.00",
+                "kræver_indførselstilladelse": False,
+                "har_privat_tillægsafgift_alkohol": False,
+            }
+        elif path == expected_prefix + "varelinje":
+            json_content = {
+                "count": 1,
+                "items": [
+                    {
+                        "id": 1,
+                        "afgiftsanmeldelse": 1,
+                        "vareafgiftssats": 1,
+                        "antal": 5,
+                        "mængde": "1.00",
+                        "fakturabeløb": "25000.00",
+                        "afgiftsbeløb": "5000.00",
+                    }
+                ],
+            }
+        elif path == expected_prefix + "privat_afgiftsanmeldelse/1":
+            json_content = {
+                "id": 1,
+                "cpr": 111111111,
+                "navn": "Dummybruger Testersen",
+                "adresse": "Testvej 12",
+                "postnummer": 1234,
+                "by": "Testby",
+                "telefon": "123456",
+                "bookingnummer": "1234",
+                "indleveringsdato": "2024-02-01",
+                "leverandørfaktura_nummer": "1234",
+                "indførselstilladelse": None,
+                "leverandørfaktura": None,  # "/privatfakturaer/1/a.pdf",
+                "oprettet": "2024-01-24T12:23:17.315148+00:00",
+                "oprettet_af": {
+                    "id": 10,
+                    "username": "0111111111 / 12345678",
+                    "first_name": "Dummybruger",
+                    "last_name": "Testersen",
+                    "email": "test@magenta.dk",
+                    "is_superuser": False,
+                    "groups": ["PrivatIndberettere", "ErhvervIndberettere"],
+                    "permissions": [
+                        "aktør.add_afsender",
+                        "aktør.add_modtager",
+                        "aktør.change_afsender",
+                        "aktør.change_modtager",
+                        "aktør.view_afsender",
+                        "aktør.view_modtager",
+                        "anmeldelse.add_afgiftsanmeldelse",
+                        "anmeldelse.add_notat",
+                        "anmeldelse.add_privatafgiftsanmeldelse",
+                        "anmeldelse.add_varelinje",
+                        "anmeldelse.change_afgiftsanmeldelse",
+                        "anmeldelse.change_privatafgiftsanmeldelse",
+                        "anmeldelse.change_varelinje",
+                        "anmeldelse.view_afgiftsanmeldelse",
+                        "anmeldelse.view_notat",
+                        "anmeldelse.view_privatafgiftsanmeldelse",
+                        "anmeldelse.view_varelinje",
+                        "forsendelse.add_fragtforsendelse",
+                        "forsendelse.add_postforsendelse",
+                        "forsendelse.change_fragtforsendelse",
+                        "forsendelse.change_postforsendelse",
+                        "forsendelse.delete_fragtforsendelse",
+                        "forsendelse.delete_postforsendelse",
+                        "forsendelse.view_fragtforsendelse",
+                        "forsendelse.view_postforsendelse",
+                        "payment.add_item",
+                        "payment.add_payment",
+                        "payment.change_item",
+                        "payment.change_payment",
+                        "payment.view_item",
+                        "payment.view_payment",
+                        "sats.view_afgiftstabel",
+                        "sats.view_vareafgiftssats",
+                    ],
+                    "indberetter_data": {"cpr": 111111111, "cvr": 12345678},
+                },
+                "status": "ny",
+                "anonym": False,
+                "payment_status": "created",
+            }
+        elif path == expected_prefix + "notat":
+            json_content = {
+                "count": 0,
+                "items": [],
+            }
+
+        else:
+            print(f"Mock got unrecognized path: {path}")
+        if json_content:
+            content = json.dumps(json_content).encode("utf-8")
+        if content:
+            if not status_code:
+                status_code = 200
+            response._content = content
+        response.status_code = status_code or 404
+        return response
+
+    @patch.object(requests.sessions.Session, "get")
+    @patch.object(requests.sessions.Session, "post")
+    def test_create_bank_payment(self, mock_post, mock_get):
+        self.login()
+        mock_get.side_effect = self.mock_requests_get
+        mock_post.side_effect = self.mock_requests_post
+        response = self.client.get("/admin/blanket/tf5/1")
+        soup = BeautifulSoup(response.content, "html.parser")
+        buttons = [element.text.strip() for element in soup.css.select("button")]
+        self.assertIn("Opret betaling", buttons)
+
+        self.client.post("/admin/blanket/tf5/1", {"betalt": "true"})
+        prefix = f"{settings.REST_DOMAIN}/api/"
+        posted_map = defaultdict(list)
+        for url, data in self.posted:
+            posted_map[url].append(json.loads(data))
+        self.assertEquals(
+            posted_map[prefix+"payment"],
+            [{"declaration_id": 1, "provider": "bank"}],
         )

@@ -8,12 +8,16 @@ from anmeldelse.models import PrivatAfgiftsanmeldelse, Varelinje
 from common.api import get_auth_methods
 from django.forms import model_to_dict
 from ninja_extra import api_controller, permissions, route
-from ninja_extra.exceptions import NotFound
+from ninja_extra.exceptions import NotFound, PermissionDenied
 from ninja_jwt.authentication import JWTAuth
 from payment.exceptions import InternalPaymentError, PaymentValidationError
 from payment.models import Item, Payment
 from payment.permissions import PaymentPermission
-from payment.provider_handlers import NetsProviderHandler
+from payment.provider_handlers import (
+    BankProviderHandler,
+    NetsProviderHandler,
+    ProviderHandler,
+)
 from payment.schemas import (
     BasePayment,
     PaymentCreatePayload,
@@ -36,7 +40,18 @@ class PaymentAPI:
         except PrivatAfgiftsanmeldelse.DoesNotExist:
             raise NotFound(f"Failed to fetch declaration: {payload.declaration_id}")
         # Get payment provider handler for this declaration
-        provider_handler: NetsProviderHandler = get_provider_handler("nets")
+
+        if payload.provider not in ("nets", "bank"):
+            raise NotFound(
+                f"Failed to get payment provider '{payload.provider}',"
+                " valid are: 'nets', 'bank'"
+            )
+
+        if payload.provider == "bank":
+            if not self.context.request.user.has_perm("payment.bank_payment"):
+                raise PermissionDenied
+
+        provider_handler: ProviderHandler = get_provider_handler(payload.provider)
 
         # Create payment locally, if it does not exist
         try:
@@ -91,7 +106,7 @@ class PaymentAPI:
         # Update local payment with external provider payment info
         payment_new.provider_host = provider_handler.host
         payment_new.provider_payment_id = provider_payment_new["paymentId"]
-        payment_new.status = "created"
+        payment_new.status = provider_handler.initial_status
         payment_new.save()
 
         return payment_model_to_response(
@@ -200,7 +215,8 @@ def payment_model_to_response(
 def get_provider_handler(provider_name: str) -> NetsProviderHandler:
     if provider_name.lower() == "nets":
         return NetsProviderHandler(secret_key=settings.PAYMENT_PROVIDER_NETS_SECRET_KEY)
-
+    if provider_name.lower() == "bank":
+        return BankProviderHandler()
     raise InternalPaymentError(f"Unknown provider: {provider_name}")
 
 

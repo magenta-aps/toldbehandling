@@ -744,6 +744,13 @@ class TF5View(
         return self.rest_client.vareafgiftssats.list(overordnet=parent_id)
 
     def get_context_data(self, **kwargs):
+        can_edit = (
+            self.object.status == "ny"
+            and self.object.indleveringsdato > date.today()
+            and self.has_permissions(
+                request=self.request, required_permissions=self.edit_permissions
+            )
+        )
         return super().get_context_data(
             **{
                 **kwargs,
@@ -754,6 +761,9 @@ class TF5View(
                 # hvis denne sættes til True
                 "can_create_tilladelse": False,
                 "show_notater": self.show_notater,
+                "can_opret_betaling": False,
+                "can_cancel": can_edit,
+                "can_edit": can_edit,
             }
         )
 
@@ -763,7 +773,7 @@ class TF5View(
         notat = form.cleaned_data["notat1"]
 
         try:
-            if annulleret is not None:
+            if annulleret:
                 # Yderligere tjek for om brugeren må ændre noget.
                 # Vi kan have en situation hvor brugeren må se siden
                 # men ikke submitte formularen
