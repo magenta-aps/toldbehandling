@@ -1582,48 +1582,49 @@ class AnmeldelseNotatTest(PermissionsTest, TestCase):
         mock_get.side_effect = self.mock_requests_get
         mock_patch.side_effect = self.mock_requests_patch
         mock_post.side_effect = self.mock_requests_post
-        response = self.client.post(
-            reverse("tf10_edit", kwargs={"id": 1}),
-            {
-                "afsender_cvr": "12345678",
-                "afsender_navn": "Testfirma 5",
-                "afsender_adresse": "Testvej 42",
-                "afsender_postbox": "123",
-                "afsender_postnummer": "1234",
-                "afsender_by": "TestBy",
-                "afsender_telefon": "123456",
-                "modtager_cvr": "12345678",
-                "modtager_navn": "Testfirma 3",
-                "modtager_adresse": "Testvej 42",
-                "modtager_postbox": "123",
-                "modtager_postnummer": ["3506"],
-                "modtager_by": "TestBy",
-                "modtager_telefon": "123456",
-                "indførselstilladelse": "123",
-                "leverandørfaktura_nummer": "5678",
-                "fragttype": "skibspost",
-                "forbindelsesnr": "2468",
-                "fragtbrevnr": "1234",
-                "afgangsdato": "2023-11-03",
-                "form-TOTAL_FORMS": "1",
-                "form-INITIAL_FORMS": "1",
-                "form-MIN_NUM_FORMS": "1",
-                "form-MAX_NUM_FORMS": "1000",
-                "form-0-id": 1,
-                "form-0-vareafgiftssats": 1,
-                "form-0-mængde": 2,
-                "form-0-antal": 5,
-                "form-0-fakturabeløb": "25000.00",
-                "notat": "Testnotat",
-            },
-        )
-        self.assertIn(
-            (
-                f"{settings.REST_DOMAIN}/api/notat",
-                '{"afgiftsanmeldelse_id": 1, "privatafgiftsanmeldelse_id": null, "tekst": "Testnotat"}',
-            ),
-            self.posted,
-        )
+        with patch("builtins.open", mock_open(read_data=b"test_data")):
+            response = self.client.post(
+                reverse("tf10_edit", kwargs={"id": 1}),
+                {
+                    "afsender_cvr": "12345678",
+                    "afsender_navn": "Testfirma 5",
+                    "afsender_adresse": "Testvej 42",
+                    "afsender_postbox": "123",
+                    "afsender_postnummer": "1234",
+                    "afsender_by": "TestBy",
+                    "afsender_telefon": "123456",
+                    "modtager_cvr": "12345678",
+                    "modtager_navn": "Testfirma 3",
+                    "modtager_adresse": "Testvej 42",
+                    "modtager_postbox": "123",
+                    "modtager_postnummer": ["3506"],
+                    "modtager_by": "TestBy",
+                    "modtager_telefon": "123456",
+                    "indførselstilladelse": "123",
+                    "leverandørfaktura_nummer": "5678",
+                    "fragttype": "skibspost",
+                    "forbindelsesnr": "2468",
+                    "fragtbrevnr": "1234",
+                    "afgangsdato": "2023-11-03",
+                    "form-TOTAL_FORMS": "1",
+                    "form-INITIAL_FORMS": "1",
+                    "form-MIN_NUM_FORMS": "1",
+                    "form-MAX_NUM_FORMS": "1000",
+                    "form-0-id": 1,
+                    "form-0-vareafgiftssats": 1,
+                    "form-0-mængde": 2,
+                    "form-0-antal": 5,
+                    "form-0-fakturabeløb": "25000.00",
+                    "notat": "Testnotat",
+                },
+            )
+            self.assertIn(
+                (
+                    f"{settings.REST_DOMAIN}/api/notat",
+                    '{"afgiftsanmeldelse_id": 1, "privatafgiftsanmeldelse_id": null, "tekst": "Testnotat"}',
+                ),
+                self.posted,
+            )
 
 
 class AdminFileViewTest(FileViewTest, TestCase):
@@ -3637,7 +3638,7 @@ class TF5NotatTest(HasLogin, TestCase):
         mock_post.side_effect = self.mock_requests_post
         response = self.client.post(
             reverse("tf5_edit", kwargs={"id": 1}),
-            self.formdata,
+            {**self.formdata, **self._formfiles1},
         )
         self.assertIn(
             (
