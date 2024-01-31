@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-30 11:49-0200\n"
+"POT-Creation-Date: 2024-01-31 06:53-0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -585,7 +585,6 @@ msgid "Oprettelsesdato mellem"
 msgstr "-t akornanni pilersinneqarpoq"
 
 #: told_common/templates/told_common/tf10/list.html
-#: told_common/templates/told_common/tf5/list.html
 msgid "Afgangsdato mellem"
 msgstr "-t akornanni nassiunneqarpoq"
 
@@ -677,6 +676,8 @@ msgid "Postnummer"
 msgstr "Postnr."
 
 #: told_common/templates/told_common/tf10/view.html
+#, fuzzy
+#| msgid "Leverandørfaktura"
 msgid "Leverandørfaktura"
 msgstr "Pisiffigisamit faktura"
 
@@ -827,10 +828,18 @@ msgid "Betal"
 msgstr ""
 
 #: told_common/templates/told_common/tf5/list.html
+msgid "Indleveringsdato mellem"
+msgstr ""
+
+#: told_common/templates/told_common/tf5/list.html
 #, fuzzy
 #| msgid "Leverandørfaktura nr."
 msgid "Leverandørfakturanummer"
 msgstr "Pisiffigisamit fakturap nr.-a"
+
+#: told_common/templates/told_common/tf5/list.html
+msgid "Indberetningsdato"
+msgstr ""
 
 #: told_common/templates/told_common/tf5/list.html
 #: told_common/templates/told_common/tf5/view.html
