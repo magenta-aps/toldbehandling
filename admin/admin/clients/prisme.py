@@ -312,7 +312,32 @@ class PrismeClient:
             raise e
 
 
+def prisme_send_dummy(
+    request_object: PrismeRequestObject,
+) -> Optional[List[PrismeResponseObject]]:
+    """Dummy implementation of PrismeClient.send for development purposes
+
+    OBS: This implementation is based on how we mocked in test. This has now
+    been moved to this function instead as well, so it's only specified in one place.
+    """
+    return [
+        CustomDutyResponse(
+            request_object,
+            """
+                <CustomDutyTableFUJ>
+                <RecId>5637147578</RecId>
+                <TaxNotificationNumber>44668899</TaxNotificationNumber>
+                <DeliveryDate>2023-04-07T00:00:00</DeliveryDate>
+                </CustomDutyTableFUJ>
+            """,
+        )
+    ]
+
+
 def send_afgiftsanmeldelse(
     afgiftsanmeldelse: Afgiftsanmeldelse,
 ) -> List[CustomDutyResponse]:
+    if settings.ENVIRONMENT != "production":
+        return prisme_send_dummy(CustomDutyRequest(afgiftsanmeldelse))
+
     return PrismeClient().send(CustomDutyRequest(afgiftsanmeldelse))

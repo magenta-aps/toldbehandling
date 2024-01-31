@@ -41,7 +41,7 @@ from told_common.tests import (
 )
 from told_common.views import FileView, FragtbrevView
 
-from admin.clients.prisme import CustomDutyResponse, PrismeClient
+from admin.clients.prisme import CustomDutyResponse, PrismeClient, prisme_send_dummy
 from admin.forms import TF10CreateForm
 from admin.views import (
     AfgiftstabelDownloadView,
@@ -830,18 +830,7 @@ class TestPrisme(PermissionsTest, TestCase):
         return response
 
     def mock_prisme_send(self, request_object):
-        return [
-            CustomDutyResponse(
-                request_object,
-                """
-                <CustomDutyTableFUJ>
-                <RecId>5637147578</RecId>
-                <TaxNotificationNumber>44668899</TaxNotificationNumber>
-                <DeliveryDate>2023-04-07T00:00:00</DeliveryDate>
-                </CustomDutyTableFUJ>
-            """,
-            )
-        ]
+        return prisme_send_dummy(request_object)
 
     @patch.object(requests.sessions.Session, "get")
     @patch.object(requests.sessions.Session, "post")
@@ -3849,6 +3838,6 @@ class TF5BankPaymentTest(HasLogin, TestCase):
         for url, data in self.posted:
             posted_map[url].append(json.loads(data))
         self.assertEquals(
-            posted_map[prefix+"payment"],
+            posted_map[prefix + "payment"],
             [{"declaration_id": 1, "provider": "bank"}],
         )
