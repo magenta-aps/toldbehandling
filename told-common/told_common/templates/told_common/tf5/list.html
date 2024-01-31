@@ -135,6 +135,7 @@
             <th data-field="select"><input type="checkbox" id="select_all"/></th>
             {% endif %}
             <th data-sortable="true" data-field="id">{% translate "Nummer" %}</th>
+            <th data-sortable="true" data-field="oprettet">{% translate "Indberetningsdato" %}</th>
             <th data-sortable="true" data-field="indleveringsdato">{% translate "Indleveringsdato" %}</th>
             <th data-sortable="true" data-field="leverandørfaktura_nummer">{% translate "Leverandørfakturanummer" %}</th>
             <th data-sortable="true" data-field="status" data-formatter="statusFormatter">{% translate "Status" %}</th>
@@ -150,12 +151,11 @@
             </td>
             {% endif %}
             <td>{{item.id}}</td>
-            <td>{{item.indleveringsdato|date:"Y-m-d"}}</td>
+            <td>{{item.oprettet}}</td>
+            <td>{{item.indleveringsdato}}</td>
             <td>{{item.leverandørfaktura_nummer}}</td>
             <td>{% translate item.status|capfirst %}</td>
-            <td>
-                {{item.actions}}
-            </td>
+            <td>{{item.actions}}</td>
         </tr>
         {% empty %}
         <tr>

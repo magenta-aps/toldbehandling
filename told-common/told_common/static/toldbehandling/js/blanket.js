@@ -540,16 +540,18 @@ $(function (){
 });
 
 $(function () {
-    const indberetter_data = JSON.parse($('#indberetter_data').text());
-    let $betales_af_select = $("#id_betales_af")
+    if ($('#indberetter_data').length) {
+        const indberetter_data = JSON.parse($('#indberetter_data').text());
+        let $betales_af_select = $("#id_betales_af")
 
-    if (indberetter_data !== null && $betales_af_select.length > 0) {
-        let options = $betales_af_select.find("option");
-        for(let i = 0; i < options.length; i++) {
-            let option = $(options[i]);
-            if (option.val() === "indberetter") {
-                option.text(option.text() + ` (CVR: ${indberetter_data["cvr"]})`)
-                break;
+        if (indberetter_data !== null && $betales_af_select.length > 0) {
+            let options = $betales_af_select.find("option");
+            for (let i = 0; i < options.length; i++) {
+                let option = $(options[i]);
+                if (option.val() === "indberetter") {
+                    option.text(option.text() + ` (CVR: ${indberetter_data["cvr"]})`)
+                    break;
+                }
             }
         }
     }
