@@ -821,7 +821,6 @@ class TF5ListView(PermissionsRequiredMixin, HasRestClientMixin, TF5Mixin, ListVi
     list_size = 20
 
     def get_items(self, search_data: Dict[str, Any]):
-        # return self.rest_client.get("afgiftsanmeldelse/full", search_data)
         count, items = self.rest_client.privat_afgiftsanmeldelse.list(**search_data)
         return {"count": count, "items": items}
 
@@ -843,6 +842,7 @@ class TF5ListView(PermissionsRequiredMixin, HasRestClientMixin, TF5Mixin, ListVi
             for key in (
                 "select",
                 "id",
+                "oprettet",
                 "indleveringsdato",
                 "leverandørfaktura_nummer",
                 "status",
@@ -870,6 +870,10 @@ class TF5ListView(PermissionsRequiredMixin, HasRestClientMixin, TF5Mixin, ListVi
         value = getattr(item, key)
         if key == "status":
             return _(value.capitalize())
+
+        if value is not None and key in ("oprettet", "indleveringsdato"):
+            return value.strftime("%d-%m-%Y")
+
         return value
 
     def get_form_kwargs(self) -> Dict[str, Any]:
