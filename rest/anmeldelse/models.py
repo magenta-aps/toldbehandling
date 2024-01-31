@@ -44,6 +44,10 @@ class Afgiftsanmeldelse(models.Model):
                 check=Q(leverandørfaktura_nummer__isnull=False) | Q(status="kladde"),
                 name="aktuel_har_leverandørfaktura_nummer",
             ),
+            CheckConstraint(
+                check=Q(leverandørfaktura__isnull=False) | Q(status="kladde"),
+                name="aktuel_har_leverandørfaktura",
+            ),
         ]
 
     BETALES_AF_BLANK = None

@@ -399,7 +399,8 @@ class TF10FormUpdateView(
         kwargs = super().get_form_kwargs()
         kwargs.update(
             {
-                "leverandørfaktura_required": False,
+                # Påkrævet hvis vi ikke allerede har én
+                "leverandørfaktura_required": not self.item.leverandørfaktura,
                 # Hvis vi allerede har en fragtforsendelse, har vi også et
                 # fragtbrev, og det er ikke påkrævet at formularen indeholder ét
                 "fragtbrev_required": False,
@@ -984,7 +985,7 @@ class TF5UpdateView(
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs["leverandørfaktura_required"] = False
+        kwargs["leverandørfaktura_required"] = not self.item.leverandørfaktura
         return kwargs
 
     def get_formset_kwargs(self) -> Dict[str, Any]:
