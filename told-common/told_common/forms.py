@@ -549,14 +549,11 @@ class TF5SearchForm(PaginateForm, BootstrapForm):
     #     widget=forms.Select(attrs={"onchange": "form.submit();"}),
     # )
     leverandørfaktura_nummer = forms.CharField(required=False)
-
-    afgangsdato_efter = forms.DateField(required=False, widget=DateInput)
-    afgangsdato_før = forms.DateField(required=False, widget=DateInput)
+    indleveringsdato_efter = forms.DateField(required=False, widget=DateInput)
+    indleveringsdato_før = forms.DateField(required=False, widget=DateInput)
     oprettet_efter = forms.DateField(required=False, widget=DateInput)
     oprettet_før = forms.DateField(required=False, widget=DateInput)
-
     order_by = forms.CharField(required=False)
-
     id = forms.IntegerField(required=False)
 
 
