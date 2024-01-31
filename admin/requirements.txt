@@ -11,7 +11,7 @@ zeep>=4.2.1
 zeep[xmlsec]>=1.3.13
 requests_ntlm==1.2.0
 requests[socks]
-psycopg2==2.9.6
+psycopg2-binary==2.9.9
 whitenoise==6.0.0
 django-forms-dynamic==1.0.0
 django-tempus-dominus==5.1.2.17
