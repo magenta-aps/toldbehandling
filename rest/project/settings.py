@@ -226,3 +226,7 @@ if os.path.isfile(log_filename) and ENVIRONMENT != "development":
         "level": "INFO",
     }
     LOGGING["loggers"]["django"]["handlers"].append("file")
+
+
+TILLAEGSAFGIFT_FAKTOR = 0.5
+EKSPEDITIONSGEBYR = 250
