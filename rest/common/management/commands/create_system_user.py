@@ -4,7 +4,6 @@
 
 import os
 
-from django.contrib.auth.hashers import make_password
 from django.contrib.auth.models import Permission, User
 from django.contrib.contenttypes.models import ContentType
 from django.core.management.base import BaseCommand
@@ -27,11 +26,12 @@ class Command(BaseCommand):
                 "first_name": "System",
                 "last_name": "",
                 "email": "",
-                "password": make_password(os.environ["SYSTEM_USER_PASSWORD"]),
                 "is_active": True,
                 "is_staff": True,
                 "is_superuser": False,
             },
             username="system",
         )
+        system.set_password(os.environ["SYSTEM_USER_PASSWORD"])
+        system.save()
         system.user_permissions.add(can_read_apikeys)
