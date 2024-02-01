@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: MPL-2.0
 
 import re
+from decimal import ROUND_HALF_EVEN, Decimal
 
 
 def convert_keys_to_camel_case(data):
@@ -55,3 +56,7 @@ def convert_keys_to_snake_case(data):
         return [convert_keys_to_snake_case(item) for item in data]
     else:
         return data
+
+
+def round_decimal(d: Decimal, rounding: str = ROUND_HALF_EVEN):
+    return Decimal(d.quantize(Decimal(".01"), rounding=rounding))

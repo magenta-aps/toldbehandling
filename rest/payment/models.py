@@ -29,7 +29,7 @@ class Item(models.Model):
 
     The following special characters are not supported: `<,>,\\\\`"""
 
-    quantity = models.IntegerField()
+    quantity = models.FloatField()
     """The quantity of the product.
 
     Allowed: >=0"""

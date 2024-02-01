@@ -2,6 +2,7 @@
 #
 # SPDX-License-Identifier: MPL-2.0
 
+from decimal import ROUND_HALF_EVEN, Decimal
 from typing import Callable, Dict, List, Tuple
 
 from anmeldelse.models import PrivatAfgiftsanmeldelse, Varelinje
@@ -24,6 +25,7 @@ from payment.schemas import (
     PaymentResponse,
     ProviderPaymentPayload,
 )
+from payment.utils import round_decimal
 from project import settings
 
 
@@ -75,17 +77,26 @@ class PaymentAPI:
             declaration=declaration,
         )
 
-        # Get declaration "varelinjer" and create payment items
+        varelinjer = Varelinje.objects.filter(
+            privatafgiftsanmeldelse_id=payload.declaration_id
+        )
+
+        # Create provider payment items from varelinjer
         payment_new_amount = 0
         payment_new_items = []
-        for varelinje in Varelinje.objects.filter(
-            privatafgiftsanmeldelse_id=payload.declaration_id
-        ):
+        for varelinje in varelinjer:
             payment_item = generate_payment_item_from_varelinje(varelinje)
             payment_new_items.append(
                 Item.objects.create(**payment_item, payment=payment_new)
             )
             payment_new_amount += payment_item["gross_total_amount"]
+
+        # add additional NETs-items to payment,
+        # ex.: "tillægsafgift" and "ekspeditionsgebyr"
+        payment_fees = get_payment_fees(varelinjer)
+        for fee in payment_fees.values():
+            payment_new_items.append(Item.objects.create(**fee, payment=payment_new))
+            payment_new_amount += fee["gross_total_amount"]
 
         payment_new.amount = payment_new_amount
         payment_new.save()
@@ -242,10 +253,10 @@ def generate_payment_item_from_varelinje(
 
     quantity = varelinje.antal
     if varelinje.vareafgiftssats.enhed in ["kg", "liter", "l"]:
-        quantity = int(varelinje.mængde)
+        quantity = float(varelinje.mængde)
 
     unit = varelinje.vareafgiftssats.enhed
-    unit_price = varelinje.vareafgiftssats.afgiftssats * currency_multiplier
+    unit_price = float(varelinje.vareafgiftssats.afgiftssats * currency_multiplier)
 
     tax_rate = 0  # DKK is 25 * 100, but greenland is 0
     tax_amount = unit_price * quantity * tax_rate / 10000
@@ -260,6 +271,69 @@ def generate_payment_item_from_varelinje(
         "unit_price": int(unit_price),
         "tax_rate": tax_rate,
         "tax_amount": int(tax_amount),
+        "gross_total_amount": int(gross_total_amount),
+        "net_total_amount": int(net_total_amount),
+    }
+
+
+def get_payment_fees(varelinjer: List[Varelinje], currency_multiplier: int = 100):
+    tillaegsafgift = round_decimal(
+        Decimal(settings.TILLAEGSAFGIFT_FAKTOR)
+        * sum(
+            [
+                varelinje.afgiftsbeløb
+                for varelinje in varelinjer or []
+                if varelinje.vareafgiftssats.har_privat_tillægsafgift_alkohol
+            ]
+        )
+    )
+
+    # OBS: logic copied from "told_common/util.py::round_decimal", but since rest
+    # dont have access to told_common tools anymore, its needs to be copied here
+    ekspeditionsgebyr = Decimal(
+        Decimal(settings.EKSPEDITIONSGEBYR).quantize(
+            Decimal(".01"), rounding=ROUND_HALF_EVEN
+        )
+    )
+
+    return {
+        "tillægsafgift": create_nets_payment_item(
+            "Tillægsafgift",
+            tillaegsafgift,
+            reference="tillægsafgift",
+        ),
+        "ekspeditionsgebyr": create_nets_payment_item(
+            "Ekspeditionsgebyr",
+            ekspeditionsgebyr,
+            reference="ekspeditionsgebyr",
+        ),
+    }
+
+
+def create_nets_payment_item(
+    name: str,
+    price: float,
+    unit: str = "ant",
+    quantity: int = 1,
+    reference="",
+    currency_multiplier: int = 100,
+):
+    unit_price = float(price * currency_multiplier)
+
+    tax_rate = 0  # DKK is 25 * 100, but greenland is 0
+    tax_amount = unit_price * quantity * tax_rate / 10000
+
+    net_total_amount = unit_price * quantity
+    gross_total_amount = net_total_amount + tax_amount
+
+    return {
+        "reference": reference,
+        "name": name,
+        "quantity": quantity,
+        "unit": unit,
+        "unit_price": unit_price,
+        "tax_rate": tax_rate,
+        "tax_amount": tax_amount,
         "gross_total_amount": int(gross_total_amount),
         "net_total_amount": int(net_total_amount),
     }
