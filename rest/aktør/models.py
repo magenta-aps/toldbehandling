@@ -89,10 +89,6 @@ class Afsender(Aktør):
                 check=Q(by__isnull=False) | Q(kladde=True),
                 name="aktuel_afsender_har_by",
             ),
-            CheckConstraint(
-                check=Q(telefon__isnull=False) | Q(kladde=True),
-                name="aktuel_afsender_har_telefon",
-            ),
         ]
 
 
@@ -114,10 +110,6 @@ class Modtager(Aktør):
             CheckConstraint(
                 check=Q(by__isnull=False) | Q(kladde=True),
                 name="aktuel_modtager_har_by",
-            ),
-            CheckConstraint(
-                check=Q(telefon__isnull=False) | Q(kladde=True),
-                name="aktuel_modtager_har_telefon",
             ),
         ]
 
