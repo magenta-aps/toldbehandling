@@ -125,7 +125,7 @@ class TF10Form(BootstrapForm):
     )
     afsender_telefon = forms.CharField(
         max_length=12,
-        required=True,
+        required=False,
         label=_("Tlf."),
     )
     afsender_existing_id = forms.IntegerField(required=False, widget=forms.Select)
@@ -184,7 +184,7 @@ class TF10Form(BootstrapForm):
     )
     modtager_telefon = forms.CharField(
         max_length=12,
-        required=True,
+        required=False,
         label=_("Tlf."),
     )
     modtager_existing_id = forms.IntegerField(required=False, widget=forms.Select)
