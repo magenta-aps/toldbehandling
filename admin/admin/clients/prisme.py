@@ -135,8 +135,8 @@ class CustomDutyRequest(PrismeRequestObject):
     def xml(self):
         data = {
             "Type": "TF10",
-            "CvrConsignee": self.empty_if_none(self.afgiftsanmeldelse.modtager.cvr),
-            "CvrConsigner": self.empty_if_none(self.afgiftsanmeldelse.afsender.cvr),
+            "CvrConsignee": self.afgiftsanmeldelse.modtager.cvr or 0,
+            "CvrConsigner": self.afgiftsanmeldelse.afsender.cvr or 0,
             "TaxNotificationNumber": self.afgiftsanmeldelse.id,
             "BillOfLadingOrPostalNumber": self.forsendelsesnummer,
             "ConnectionNumber": self.empty_if_none(self.forbindelsesnummer),
