@@ -38,7 +38,7 @@ class Command(BaseCommand):
             fragtforsendelse = Fragtforsendelse.objects.create(
                 forsendelsestype=fragtforsendelsestype,
                 fragtbrevsnummer=str(i),
-                forbindelsesnr=random.choice(["1337", "7331"]),
+                forbindelsesnr=random.choice(["1337", "7331", "abc123", "def456"]),
                 oprettet_af=users.order_by("?").first(),
                 afgangsdato=date.today() + timedelta(days=30),
             )
