@@ -157,7 +157,9 @@ class AfgiftsanmeldelseFilterSchema(FilterSchema):
     modtager: Optional[int]
     fragtforsendelse: Optional[int]
     postforsendelse: Optional[int]
-    leverandørfaktura_nummer: Optional[str]
+    leverandørfaktura_nummer: Optional[str] = Field(
+        q="leverandørfaktura_nummer__iexact"
+    )
     # leverandørfaktura = models.FileField(
     #     upload_to=afgiftsanmeldelse_upload_to,
     # )
@@ -172,14 +174,14 @@ class AfgiftsanmeldelseFilterSchema(FilterSchema):
     vareart: Optional[str] = Field(q="varelinje__vareafgiftssats__vareart_da")
     afsenderbykode_or_forbindelsesnr: Optional[str] = Field(
         q=[
-            "postforsendelse__afsenderbykode",
-            "fragtforsendelse__forbindelsesnr",
+            "postforsendelse__afsenderbykode__iexact",
+            "fragtforsendelse__forbindelsesnr__iexact",
         ]
     )
     postforsendelsesnummer_or_fragtbrevsnummer: Optional[str] = Field(
         q=[
-            "postforsendelse__postforsendelsesnummer",
-            "fragtforsendelse__fragtbrevsnummer",
+            "postforsendelse__postforsendelsesnummer__iexact",
+            "fragtforsendelse__fragtbrevsnummer__iexact",
         ]
     )
 
