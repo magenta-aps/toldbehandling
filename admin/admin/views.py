@@ -197,6 +197,8 @@ class TF10View(AdminLayoutBaseView, common_views.TF10View, FormView):
                     return response
                 self.rest_client.afgiftanmeldelse.set_godkendt(anmeldelse_id, godkendt)
 
+                # Disabled jf. #59545
+                """
                 if godkendt == False:
                     anmeldelse = self.rest_client.afgiftanmeldelse.get(
                         anmeldelse_id, full=True, include_varelinjer=True
@@ -224,6 +226,7 @@ class TF10View(AdminLayoutBaseView, common_views.TF10View, FormView):
                         )
                         # For at inspicere pdf'en
                         # return HttpResponse(content=pdf, content_type="application/pdf")
+                """
 
             # Opret notat _efter_ den nye version af anmeldelsen, så vores historik-filtrering fungerer
             if notat:
