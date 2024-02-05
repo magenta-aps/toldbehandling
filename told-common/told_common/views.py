@@ -600,6 +600,7 @@ class TF10ListView(
                 **context,
                 "title": _("Mine afgiftsanmeldelser"),
                 "highlight": self.request.GET.get("highlight"),
+                "can_edit": TF10FormUpdateView.has_permissions(request=self.request),
             }
         )
 
@@ -657,6 +658,7 @@ class TF10ListView(
         kwargs["modtagere"] = {
             item[1]["id"]: item[1] for item in self.rest_client.modtagere.items()
         }
+        kwargs["permissions"] = set(self.userdata.get("permissions") or [])
         return kwargs
 
 

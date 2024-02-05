@@ -17,31 +17,6 @@ class AfgiftsanmeldelseTest(RestTestMixin, TestCase):
     object_class = Afgiftsanmeldelse
     exclude_fields = ["oprettet_af"]
     object_restriction = True
-    calculated_fields = {
-        "beregnet_faktureringsdato": "2023-11-30",
-        "oprettet_af": {
-            "id": 9,
-            "username": "testuser1",
-            "first_name": "",
-            "last_name": "",
-            "email": "",
-            "is_superuser": False,
-            "groups": [],
-            "permissions": [
-                "anmeldelse.add_afgiftsanmeldelse",
-                "anmeldelse.approve_reject_anmeldelse",
-                "anmeldelse.change_afgiftsanmeldelse",
-                "anmeldelse.delete_afgiftsanmeldelse",
-                "anmeldelse.view_afgiftsanmeldelse",
-                "anmeldelse.view_all_anmeldelse",
-                "forsendelse.view_all_fragtforsendelser",
-                "forsendelse.view_all_postforsendelser",
-            ],
-            "indberetter_data": None,
-        },
-        "oprettet_på_vegne_af": None,
-        # "afgift_total": '0',
-    }
 
     @property
     def list_full_function(self) -> str:
@@ -61,6 +36,31 @@ class AfgiftsanmeldelseTest(RestTestMixin, TestCase):
             }
         )
         self.creation_data = self.afgiftsanmeldelse_data
+        self.calculated_fields = {
+            "beregnet_faktureringsdato": "2023-11-30",
+            "oprettet_af": {
+                "id": self.authorized_user.id,
+                "username": "testuser1",
+                "first_name": "",
+                "last_name": "",
+                "email": "",
+                "is_superuser": False,
+                "groups": [],
+                "permissions": [
+                    "anmeldelse.add_afgiftsanmeldelse",
+                    "anmeldelse.approve_reject_anmeldelse",
+                    "anmeldelse.change_afgiftsanmeldelse",
+                    "anmeldelse.delete_afgiftsanmeldelse",
+                    "anmeldelse.view_afgiftsanmeldelse",
+                    "anmeldelse.view_all_anmeldelse",
+                    "forsendelse.view_all_fragtforsendelser",
+                    "forsendelse.view_all_postforsendelser",
+                ],
+                "indberetter_data": None,
+            },
+            "oprettet_på_vegne_af": None,
+            # "afgift_total": '0',
+        }
 
     @property
     def expected_object_data(self):
@@ -218,6 +218,28 @@ class AfgiftsanmeldelseTest(RestTestMixin, TestCase):
             response.status_code,
             (200, 201),
             f"Attempted to reach CREATE API endpoint, expected HTTP 200 or 201 for POST {url}. Got HTTP {response.status_code}: {response.content}",
+        )
+
+    def test_approved_only(self):
+        afgiftsanmeldelse = self.afgiftsanmeldelse
+        url = reverse(f"api-1.0.0:{self.list_function}")
+        response = self.client.get(
+            url, HTTP_AUTHORIZATION=f"Bearer {self.approvedonly_access_token}"
+        )
+        data = response.json()
+        self.assertEquals(data["count"], 0)
+        self.assertEquals(data["items"], [])
+
+        self._afgiftsanmeldelse.status = "godkendt"
+        self._afgiftsanmeldelse.save()
+
+        response = self.client.get(
+            url, HTTP_AUTHORIZATION=f"Bearer {self.approvedonly_access_token}"
+        )
+        data = response.json()
+        self.assertEquals(data["count"], 1)
+        self.assertEquals(
+            data["items"][0], {**self.expected_list_response_dict, "status": "godkendt"}
         )
 
 
