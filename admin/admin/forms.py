@@ -36,7 +36,14 @@ class TF10CreateForm(common_forms.TF10Form):
 
 
 class TF10ViewForm(BootstrapForm):
-    godkendt = forms.BooleanField(required=False)
+    status = forms.ChoiceField(
+        required=False,
+        choices=(
+            ("ny", _("Ny")),
+            ("godkendt", _("Godkendt")),
+            ("afvist", _("Afvist")),
+        ),
+    )
     # For at vi kan have tre formfelter i hver sin modal
     notat1 = forms.CharField(
         widget=forms.Textarea(

@@ -547,7 +547,7 @@ class TestGodkend(PermissionsTest, TestCase):
         view_url = reverse("tf10_view", kwargs={"id": 1})
         mock_patch.side_effect = self.mock_requests_patch
         mock_get.side_effect = self.mock_requests_get
-        response = self.client.post(view_url, {"godkendt": "true"})
+        response = self.client.post(view_url, {"status": "godkendt"})
         self.assertEquals(response.status_code, 302)
         prefix = f"{settings.REST_DOMAIN}/api/"
         patched_map = defaultdict(list)
@@ -566,7 +566,7 @@ class TestGodkend(PermissionsTest, TestCase):
         mock_patch.side_effect = self.mock_requests_patch
         mock_post.side_effect = self.mock_requests_post
         mock_get.side_effect = self.mock_requests_get
-        response = self.client.post(view_url, {"godkendt": "false"})
+        response = self.client.post(view_url, {"status": "afvist"})
         self.assertEquals(response.status_code, 302)
         prefix = f"{settings.REST_DOMAIN}/api/"
         patched_map = defaultdict(list)
@@ -583,7 +583,7 @@ class TestGodkend(PermissionsTest, TestCase):
         view_url = reverse("tf10_view", kwargs={"id": 2})
         mock_patch.side_effect = self.mock_requests_patch
         mock_get.side_effect = self.mock_requests_get
-        response = self.client.post(view_url, {"godkendt": "true"})
+        response = self.client.post(view_url, {"status": "godkendt"})
         self.assertEquals(response.status_code, 404)
         prefix = f"{settings.REST_DOMAIN}/api/"
         patched_map = defaultdict(list)
@@ -614,7 +614,7 @@ class TestGodkend(PermissionsTest, TestCase):
         view_url = reverse("tf10_view", kwargs={"id": 1})
         mock_get.side_effect = self.mock_requests_get
         mock_patch.side_effect = self.mock_requests_error
-        response = self.client.post(view_url, {"godkendt": "true"})
+        response = self.client.post(view_url, {"status": "godkendt"})
         self.assertEquals(response.status_code, 500)
 
 

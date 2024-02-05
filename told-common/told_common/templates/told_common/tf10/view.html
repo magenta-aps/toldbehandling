@@ -394,6 +394,7 @@
 
         <div class="form-row">
             <div class="ml-auto">
+
                 {% if can_godkend %}
                     {% if object.status == "ny" or object.status == "afvist" %}
                     <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#godkend_modal">
@@ -401,13 +402,27 @@
                     </button>
                     {% endif %}
                 {% endif %}
+
                 {% if can_afvis %}
-                    {% if object.status == "ny" %}
-                    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#afvis_modal">
-                        {% translate "Afvis" %}
-                    </button>
-                    {% endif %}
+                {% if object.status == "ny" %}
+                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#afvis_modal">
+                    {% translate "Afvis" %}
+                </button>
                 {% endif %}
+                {% endif %}
+
+                {% if can_godkend or can_afvis %}
+                {% if object.status == "godkendt" or object.status == "afvist" %}
+                <button type="submit" name="{{form.status.name}}" value="ny" class="btn btn-primary">
+                    {% if object.status == "godkendt" %}
+                    {% translate "Annullér godkendelse" %}
+                    {% elif object.status == "afvist" %}
+                    {% translate "Annullér afvisning" %}
+                    {% endif %}
+                </button>
+                {% endif %}
+                {% endif %}
+
                 {% if can_edit %}
                     {% if object.status == "ny" or object.status == "kladde" or object.status == "afvist" %}
                     <a href="{% url 'tf10_edit' id=object.id %}" class="btn btn-primary">{% translate "Redigér" %}</a>
@@ -448,7 +463,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Nej</button>
-                    <button type="submit" name="{{form.godkendt.name}}" value="true" class="btn btn-success">Ja</button>
+                    <button type="submit" name="{{form.status.name}}" value="godkendt" class="btn btn-success">Ja</button>
                 </div>
             </div>
         </div>
@@ -467,7 +482,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Nej</button>
-                    <button type="submit" name="{{form.godkendt.name}}" value="false" class="btn btn-danger">Ja</button>
+                    <button type="submit" name="{{form.status.name}}" value="afvist" class="btn btn-danger">Ja</button>
                 </div>
             </div>
         </div>
