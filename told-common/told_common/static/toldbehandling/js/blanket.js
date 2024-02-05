@@ -392,12 +392,12 @@ $(function () {
                 $("[name$=vareafgiftssats]").each(function () {
                     const $this = $(this);
                     const currentValue = $this.val();
-                    $(this).find("option").remove();
+                    $(this).find("option").not("[value=-1]").remove();
                     for (let key in varesatser_by_afgiftsgruppenummer) {
                         const item = varesatser_by_afgiftsgruppenummer[key];
                         $(this).append($('<option value="' + item["id"] + '">' + item["vareart_da"] + '</option>'));
                     }
-                    if (!$this.parents("#formset_prototype").length) {  // Not the prototype row
+                    if (!$this.parents("#formset_prototype").length && currentValue !== "-1") {  // Not the prototype row, and not if nothing is selected
                         const old_sats = varesatser[currentValue];
                         const new_sats = varesatser_by_afgiftsgruppenummer[old_sats["afgiftsgruppenummer"]]
                         $this.val(new_sats["id"]);
