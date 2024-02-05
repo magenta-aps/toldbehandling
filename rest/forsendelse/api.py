@@ -299,12 +299,13 @@ class FragtforsendelseAPI:
         self.check_user(item)
         data = payload.dict(exclude_unset=True)
         fragtbrev = data.pop("fragtbrev", None)
+        fragtbrev_navn = data.pop("fragtbrev_navn", None) or (str(uuid4()) + ".pdf")
         for attr, value in data.items():
             if value is not None:
                 setattr(item, attr, value)
         if fragtbrev is not None:
             item.fragtbrev = ContentFile(
-                base64.b64decode(fragtbrev), name=str(uuid4()) + ".pdf"
+                base64.b64decode(fragtbrev), name=fragtbrev_navn
             )
         item.save()
         return {"success": True}

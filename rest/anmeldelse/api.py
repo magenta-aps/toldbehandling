@@ -340,6 +340,9 @@ class AfgiftsanmeldelseAPI:
             if not self.check_perm("anmeldelse.approve_reject_anmeldelse"):
                 raise PermissionDenied
         leverandørfaktura = data.pop("leverandørfaktura", None)
+        leverandørfaktura_navn = data.pop("leverandørfaktura_navn", None) or (
+            str(uuid4()) + ".pdf"
+        )
         kladde = data.pop("kladde", False)
 
         if not kladde and item.status == "kladde":
@@ -349,7 +352,7 @@ class AfgiftsanmeldelseAPI:
                 setattr(item, attr, value)
         if leverandørfaktura is not None:
             item.leverandørfaktura = ContentFile(
-                base64.b64decode(leverandørfaktura), name=str(uuid4()) + ".pdf"
+                base64.b64decode(leverandørfaktura), name=leverandørfaktura_navn
             )
         item.save()
         return {"success": True}
