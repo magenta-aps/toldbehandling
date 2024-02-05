@@ -145,7 +145,7 @@ class TF10View(AdminLayoutBaseView, common_views.TF10View, FormView):
     def form_valid(self, form):
         anmeldelse_id = self.kwargs["id"]
         send_til_prisme = form.cleaned_data["send_til_prisme"]
-        godkendt = form.cleaned_data["godkendt"]
+        status = form.cleaned_data["status"]
         notat = (
             form.cleaned_data["notat1"]
             or form.cleaned_data["notat2"]
@@ -189,17 +189,15 @@ class TF10View(AdminLayoutBaseView, common_views.TF10View, FormView):
                         f"Besked ikke sendt til Prisme; {e.message}",
                     )
 
-            elif godkendt is not None:
+            elif status is not None:
                 # Yderligere tjek for om brugeren må ændre noget.
                 # Vi kan have en situation hvor brugeren må se siden men ikke submitte formularen
                 response = self.check_permissions(self.edit_permissions)
                 if response:
                     return response
-                self.rest_client.afgiftanmeldelse.set_godkendt(anmeldelse_id, godkendt)
-
-                # Disabled jf. #59545
+                self.rest_client.afgiftanmeldelse.set_status(anmeldelse_id, status)
                 """
-                if godkendt == False:
+                if status == "afvist":
                     anmeldelse = self.rest_client.afgiftanmeldelse.get(
                         anmeldelse_id, full=True, include_varelinjer=True
                     )
