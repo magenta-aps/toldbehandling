@@ -2,6 +2,8 @@
 {% if can_view %}
 <a class="btn btn-primary btn-sm" href="{% url 'tf10_view' id=item.id %}">{% translate 'Vis' %}</a>
 {% endif %}
+{% if can_edit %}
 {% if item.status == "ny" or item.status == "kladde" or item.status == "afvist" %}
 <a class="btn btn-primary btn-sm" href="{% url 'tf10_edit' id=item.id %}">{% translate 'Redigér' %}</a>
+{% endif %}
 {% endif %}

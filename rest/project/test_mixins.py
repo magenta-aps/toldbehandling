@@ -35,7 +35,6 @@ class RestMixin:
     exclude_fields = []
     has_delete = False
     object_restriction = False
-    calculated_fields = {}
 
     @classmethod
     def make_user(
@@ -65,6 +64,13 @@ class RestMixin:
         view_all_anmeldelser = Permission.objects.create(
             name="Kan se alle afgiftsanmeldelser, ikke kun egne",
             codename="view_all_anmeldelse",
+            content_type=ContentType.objects.get_for_model(
+                Afgiftsanmeldelse, for_concrete_model=False
+            ),
+        )
+        view_approved_anmeldelser = Permission.objects.create(
+            name="Kan se alle godkendte afgiftsanmeldelser",
+            codename="view_approved_anmeldelse",
             content_type=ContentType.objects.get_for_model(
                 Afgiftsanmeldelse, for_concrete_model=False
             ),
@@ -165,12 +171,29 @@ class RestMixin:
             permissions,
         )  # udelad view_all
 
+        (
+            cls.approvedonly_user,
+            cls.approvedonly_access_token,
+            approvedonly_refresh_token,
+        ) = cls.make_user(
+            "testuser5",
+            "testpassword",
+            permissions,
+        )
+        for permission in [
+            view_approved_anmeldelser,
+            view_all_fragtforsendelser,
+            view_all_postforsendelser,
+        ]:
+            cls.approvedonly_user.user_permissions.add(permission)
+
     def setUp(self) -> None:
         self.define_static_data()
         if not hasattr(self, "client"):
             self.client = Client()
         self.afgiftsanmeldelse_data["leverandørfaktura"] = self.leverandørfaktura_file
         self.fragtforsendelse_data["fragtbrev"] = self.fragtbrev_file
+        self.calculated_fields = {}
         super().setUp()
 
     def create_items(self):

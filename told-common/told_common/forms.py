@@ -456,6 +456,7 @@ class TF10SearchForm(PaginateForm, BootstrapForm):
         self.varesatser = kwargs.pop("varesatser", {})
         self.afsendere = kwargs.pop("afsendere", {})
         self.modtagere = kwargs.pop("modtagere", {})
+        self.permissions = kwargs.pop("permissions", {})
         super().__init__(*args, **kwargs)
 
     vareart = DynamicField(
@@ -463,14 +464,26 @@ class TF10SearchForm(PaginateForm, BootstrapForm):
         choices=lambda form: vareart_choices(form.varesatser.values()),
         required=False,
     )
-    status = forms.ChoiceField(
-        choices=(
-            (None, _("Alle")),
-            ("ny", _("Ny")),
-            ("afvist", _("Afvist")),
-            ("godkendt", _("Godkendt")),
-            ("afsluttet", _("Sendt til Prisme")),
-        ),
+
+    status_choices_all = (
+        (None, _("Alle")),
+        ("ny", _("Ny")),
+        ("afvist", _("Afvist")),
+        ("godkendt", _("Godkendt")),
+        ("afsluttet", _("Sendt til Prisme")),
+    )
+    status_choices_kun_godkendte = (
+        (None, _("Alle")),
+        ("godkendt", _("Godkendt")),
+        ("afsluttet", _("Sendt til Prisme")),
+    )
+
+    status = DynamicField(
+        forms.ChoiceField,
+        choices=lambda form: form.status_choices_kun_godkendte
+        if "anmeldelse.view_approved_anmeldelse" in form.permissions
+        and "anmeldelse.view_all_anmeldelse" not in form.permissions
+        else form.status_choices_all,
         required=False,
         widget=forms.Select(attrs={"onchange": "form.submit();"}),
     )

@@ -41,6 +41,9 @@ class Command(BaseCommand):
         admin_godkendere, _ = Group.objects.update_or_create(
             name="AdminGodkendere",
         )
+        kontrollører, _ = Group.objects.update_or_create(
+            name="Kontrollører",
+        )
 
         afsender_model = ContentType.objects.get_for_model(
             Afsender, for_concrete_model=False
@@ -90,6 +93,11 @@ class Command(BaseCommand):
         se_alle_afgiftsanmeldelser, _ = Permission.objects.update_or_create(
             name="Kan se alle afgiftsanmeldelser, ikke kun egne",
             codename="view_all_anmeldelse",
+            content_type=afgiftsanmeldelse_model,
+        )
+        se_alle_godkendte_afgiftsanmeldelser, _ = Permission.objects.update_or_create(
+            name="Kan se alle godkendte afgiftsanmeldelser",
+            codename="view_approved_anmeldelse",
             content_type=afgiftsanmeldelse_model,
         )
         se_alle_private_afgiftsanmeldelser, _ = Permission.objects.update_or_create(
@@ -238,6 +246,7 @@ class Command(BaseCommand):
             se_alle_postforsendelser,
             godkend_afgiftsanmeldelser,
             bank_transfer,
+            se_alle_private_afgiftsanmeldelser,
         ):
             toldmedarbejdere.permissions.add(permission)
 
@@ -269,6 +278,7 @@ class Command(BaseCommand):
             se_alle_afgiftsanmeldelser,
             se_alle_fragtforsendelser,
             se_alle_postforsendelser,
+            se_alle_private_afgiftsanmeldelser,
         ):
             toldmedarbejdere.permissions.add(permission)
 
@@ -283,7 +293,7 @@ class Command(BaseCommand):
         ) + admin_tf10_list_view_required_permissions:
             dataansvarlige.permissions.add(
                 Permission.objects.get(
-                    codename=f"{action}_{model.name}", content_type=model
+                    codename=f"{action}_{model.model}", content_type=model
                 )
             )
         dataansvarlige.permissions.add(admin_site_access)
@@ -299,6 +309,33 @@ class Command(BaseCommand):
         ) + admin_tf10_list_view_required_permissions:
             admin_godkendere.permissions.add(
                 Permission.objects.get(
-                    codename=f"{action}_{model.name}", content_type=model
+                    codename=f"{action}_{model.model}", content_type=model
                 )
             )
+
+        for action, model in (
+            ("view", afsender_model),
+            ("view", modtager_model),
+            ("view", speditør_model),
+            ("view", afgiftsanmeldelse_model),
+            ("view", varelinje_model),
+            ("view", postforsendelse_model),
+            ("view", fragtforsendelse_model),
+            ("view", afgiftstabel_model),
+            ("view", vareafgiftssats_model),
+            ("view", notat_model),
+            ("view", privatafgiftsanmeldelse_model),
+        ):
+            kontrollører.permissions.add(
+                Permission.objects.get(
+                    codename=f"{action}_{model.model}", content_type=model
+                )
+            )
+        for permission in (
+            admin_site_access,
+            se_alle_godkendte_afgiftsanmeldelser,
+            se_alle_fragtforsendelser,
+            se_alle_postforsendelser,
+            se_alle_private_afgiftsanmeldelser,
+        ):
+            kontrollører.permissions.add(permission)

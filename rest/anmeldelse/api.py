@@ -359,19 +359,23 @@ class AfgiftsanmeldelseAPI:
 
     def filter_user(self, qs: QuerySet) -> QuerySet:
         user = self.context.request.user
-        if not self.check_perm("anmeldelse.view_all_anmeldelse"):
-            try:
-                cvr = user.indberetter_data.cvr
-            except IndberetterProfile.DoesNotExist:
-                return qs.none()
-            if cvr is None:
-                return qs.none()
-            qs = qs.filter(
-                Q(oprettet_af__indberetter_data__cvr=cvr)
-                | Q(oprettet_på_vegne_af__indberetter_data__cvr=cvr)
-                | Q(fuldmagtshaver__cvr=cvr)
-            )
-        return qs
+        if self.check_perm("anmeldelse.view_all_anmeldelse"):
+            return qs
+        if self.check_perm("anmeldelse.view_approved_anmeldelse"):
+            # Hvis brugeren må se alle godkendte, filtrer på dem
+            return qs.filter(status__in=("godkendt", "afsluttet"))
+        # Hvis brugeren hverken må se alle eller godkendte, filtrér på opretteren
+        try:
+            cvr = user.indberetter_data.cvr
+        except IndberetterProfile.DoesNotExist:
+            return qs.none()
+        if cvr is None:
+            return qs.none()
+        return qs.filter(
+            Q(oprettet_af__indberetter_data__cvr=cvr)
+            | Q(oprettet_på_vegne_af__indberetter_data__cvr=cvr)
+            | Q(fuldmagtshaver__cvr=cvr)
+        )
 
     def check_user(self, item: Afgiftsanmeldelse):
         if not self.filter_user(Afgiftsanmeldelse.objects.filter(id=item.id)).exists():
@@ -567,9 +571,9 @@ class PrivatAfgiftsanmeldelseAPI:
 
     def filter_user(self, qs: QuerySet) -> QuerySet:
         user = self.context.request.user
-        if not user.has_perm("anmeldelse.view_all_anmeldelse"):
-            qs = qs.filter(Q(oprettet_af=user) | Q(oprettet_på_vegne_af=user))
-        return qs
+        if user.has_perm("anmeldelse.view_all_privatafgiftsanmeldelse"):
+            return qs
+        return qs.filter(Q(oprettet_af=user) | Q(oprettet_på_vegne_af=user))
 
     def check_user(self, item: PrivatAfgiftsanmeldelse):
         if not self.filter_user(

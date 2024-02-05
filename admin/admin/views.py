@@ -124,14 +124,14 @@ class TF10View(AdminLayoutBaseView, common_views.TF10View, FormView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        can_edit = self.has_permissions(
+        can_approve = self.has_permissions(
             request=self.request, required_permissions=self.edit_permissions
         )
         context.update(
             {
-                "can_godkend": can_edit,
-                "can_afvis": can_edit,
-                "can_edit": can_edit,
+                "can_godkend": can_approve,
+                "can_afvis": can_approve,
+                "can_edit": TF10FormUpdateView.has_permissions(request=self.request),
                 "can_send_prisme": self.has_permissions(
                     request=self.request, required_permissions=self.prisme_permissions
                 ),
@@ -249,9 +249,11 @@ class TF10ListView(AdminLayoutBaseView, common_views.TF10ListView):
     def get_context_data(self, **kwargs):
         context = super(TF10ListView, self).get_context_data(**kwargs)
         context["title"] = "Afgiftsanmeldelser"
-        context["can_create"] = True
+        context["can_create"] = TF10FormCreateView.has_permissions(request=self.request)
         context["can_view"] = TF10View.has_permissions(request=self.request)
-        context["can_edit_multiple"] = True
+        context["can_edit_multiple"] = TF10FormUpdateView.has_permissions(
+            request=self.request
+        )
         context["multiedit_url"] = reverse("tf10_edit_multiple")
         return context
 
