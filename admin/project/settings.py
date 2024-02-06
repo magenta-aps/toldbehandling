@@ -177,19 +177,55 @@ STORAGES = {
 # TODO: Smid dette i en model og lav rest-interface til det.
 CVR_TOLDKATEGORI_MAP = [
     {"kategori": "70", "navn": "RAL Royal Arctic Line A/S", "cvr": []},
-    {"kategori": "71", "navn": "Forudbetalt indførselsafgift", "cvr": []},
+    {
+        "kategori": "71",
+        "navn": "Forudbetalt indførselsafgift",
+        "cvr": [],
+        "kræver_cvr": True,
+    },
     {
         "kategori": "73A",
         "navn": "Kreditkunder Nan,Qaq,Nar,Kali,Qas,Nuu,Man,Sis,Nars",
-        "cvr": [12345678],
+        "cvr": [],
+        "kræver_cvr": True,
     },
-    {"kategori": "73B", "navn": "Kreditkunder Kangaa,Aas,Qas,Ilu,Qeq", "cvr": []},
-    {"kategori": "73C", "navn": "Kreditkunder Uum,Uper", "cvr": []},
-    {"kategori": "73D", "navn": "Kreditkunder Tasiilaq,Kangerlussuaq", "cvr": []},
-    {"kategori": "73E", "navn": "Kreditkunder Ittoqqortoormiit,Qaanaq", "cvr": []},
+    {
+        "kategori": "73B",
+        "navn": "Kreditkunder Kangaa,Aas,Qas,Ilu,Qeq",
+        "cvr": [],
+        "kræver_cvr": True,
+    },
+    {
+        "kategori": "73C",
+        "navn": "Kreditkunder Uum,Uper",
+        "cvr": [],
+        "kræver_cvr": True,
+    },
+    {
+        "kategori": "73D",
+        "navn": "Kreditkunder Tasiilaq,Kangerlussuaq",
+        "cvr": [],
+        "kræver_cvr": True,
+    },
+    {
+        "kategori": "73E",
+        "navn": "Kreditkunder Ittoqqortoormiit,Qaanaq",
+        "cvr": [],
+        "kræver_cvr": True,
+    },
     {"kategori": "76", "navn": "Fra Tusass A/S", "cvr": []},
-    {"kategori": "77", "navn": "Fra Skattestyrelsen", "cvr": []},
-    {"kategori": "79", "navn": "Refusion", "cvr": []},
+    {
+        "kategori": "77",
+        "navn": "Fra Skattestyrelsen",
+        "cvr": [],
+        "kræver_cvr": True,
+    },
+    {
+        "kategori": "79",
+        "navn": "Refusion",
+        "cvr": [],
+        "kræver_cvr": True,
+    },
 ]
 
 TILLÆGSAFGIFT_FAKTOR = 0.5
