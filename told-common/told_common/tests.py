@@ -781,14 +781,14 @@ class AnmeldelseListViewTest(HasLogin):
         def _view_button(id):
             if self.can_view:
                 return (
-                    f'<a class="btn btn-primary btn-sm" '
+                    f'<a class="btn btn-primary btn-sm m-1" '
                     f'href="{self.view_url(id)}">Vis</a>'
                 )
 
         def _edit_button(id):
             if self.can_edit:
                 return (
-                    f'<a class="btn btn-primary btn-sm" '
+                    f'<a class="btn btn-primary btn-sm m-1" '
                     f'href="{self.edit_url(id)}">Redigér</a>'
                 )
 
