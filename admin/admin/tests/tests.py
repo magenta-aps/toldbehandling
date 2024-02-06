@@ -2998,6 +2998,7 @@ class TF10CreateTest(TestMixin, HasLogin, TestCase):
                     "oprettet_på_vegne_af_id": 1,
                     "toldkategori": None,
                     "kladde": False,
+                    "status": None,
                 }
             ],
         )
@@ -3059,6 +3060,7 @@ class TF10CreateTest(TestMixin, HasLogin, TestCase):
                     "oprettet_på_vegne_af_id": 1,
                     "toldkategori": None,
                     "kladde": False,
+                    "status": None,
                 }
             ],
         )
@@ -3136,6 +3138,7 @@ class TF10CreateTest(TestMixin, HasLogin, TestCase):
                     "oprettet_på_vegne_af_id": 1,
                     "toldkategori": None,
                     "kladde": False,
+                    "status": None,
                 }
             ],
         )

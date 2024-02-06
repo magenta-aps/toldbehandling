@@ -475,6 +475,7 @@ class TF10BlanketTest(TestMixin, HasLogin, TestCase):
                     "oprettet_på_vegne_af_id": None,
                     "toldkategori": None,
                     "kladde": False,
+                    "status": None,
                 }
             ],
         )
@@ -539,6 +540,7 @@ class TF10BlanketTest(TestMixin, HasLogin, TestCase):
                     "oprettet_på_vegne_af_id": None,
                     "toldkategori": None,
                     "kladde": False,
+                    "status": None,
                 }
             ],
         )
@@ -619,6 +621,7 @@ class TF10BlanketTest(TestMixin, HasLogin, TestCase):
                     "oprettet_på_vegne_af_id": None,
                     "toldkategori": None,
                     "kladde": False,
+                    "status": None,
                 }
             ],
         )

@@ -303,6 +303,10 @@ class TF10FormUpdateView(AdminLayoutBaseView, common_views.TF10FormUpdateView):
             }
         )
 
+    def status(self, item, form):
+        if item.status == "afvist":
+            return "ny"
+
 
 class TF10HistoryListView(AdminLayoutBaseView, common_views.ListView):
     required_permissions = (

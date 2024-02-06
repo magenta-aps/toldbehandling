@@ -336,6 +336,7 @@ class AfgiftanmeldelseRestClient(ModelRestClient):
         modtager_id: Optional[int],
         postforsendelse_id: Optional[int],
         fragtforsendelse_id: Optional[int],
+        status: Optional[str] = None,
     ) -> dict:
         return {
             "leverandørfaktura_nummer": data.get("leverandørfaktura_nummer"),
@@ -353,6 +354,7 @@ class AfgiftanmeldelseRestClient(ModelRestClient):
             "oprettet_på_vegne_af_id": opt_int(data.get("oprettet_på_vegne_af")),
             "kladde": data.get("kladde", False),
             "fuldmagtshaver_id": data.get("fuldmagtshaver") or None,
+            "status": status,
         }
 
     def create(
@@ -386,6 +388,7 @@ class AfgiftanmeldelseRestClient(ModelRestClient):
         fragtforsendelse_id: Optional[int] = None,
         existing: Optional[dict] = None,
         force_write: bool = False,
+        status: Optional[str] = None,
     ):
         mapped = self.map(
             data,
@@ -394,6 +397,7 @@ class AfgiftanmeldelseRestClient(ModelRestClient):
             modtager_id,
             postforsendelse_id,
             fragtforsendelse_id,
+            status,
         )
         if force_write or not self.compare(mapped, existing):
             self.rest.patch(f"afgiftsanmeldelse/{id}", mapped)

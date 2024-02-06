@@ -152,22 +152,23 @@ class PostforsendelseAPI:
 
     def filter_user(self, qs: QuerySet) -> QuerySet:
         user = self.context.request.user
-        if not user.has_perm("forsendelse.view_all_postforsendelser"):
-            q = qs.none()
-            try:
-                c = getattr(user.indberetter_data, "cvr")
-            except IndberetterProfile.DoesNotExist:
-                pass
-            else:
-                if c is not None:
-                    q |= qs.filter(
-                        afgiftsanmeldelse__oprettet_af__indberetter_data__cvr=c
-                    )
-                    q |= qs.filter(
-                        afgiftsanmeldelse__oprettet_på_vegne_af__indberetter_data__cvr=c
-                    )
-            qs = q
-        return qs
+        if user.has_perm("forsendelse.view_all_postforsendelser"):
+            return qs
+        q = qs.none()
+        try:
+            cvr = getattr(user.indberetter_data, "cvr")
+        except IndberetterProfile.DoesNotExist:
+            pass
+        else:
+            if cvr is not None:
+                q |= qs.filter(
+                    afgiftsanmeldelse__oprettet_af__indberetter_data__cvr=cvr
+                )
+                q |= qs.filter(
+                    afgiftsanmeldelse__oprettet_på_vegne_af__indberetter_data__cvr=cvr
+                )
+                q |= qs.filter(afgiftsanmeldelse__fuldmagtshaver__cvr=cvr)
+        return q
 
     def check_user(self, item: Postforsendelse):
         if not self.filter_user(Postforsendelse.objects.filter(id=item.id)).exists():
@@ -319,22 +320,23 @@ class FragtforsendelseAPI:
 
     def filter_user(self, qs: QuerySet) -> QuerySet:
         user = self.context.request.user
-        if not user.has_perm("forsendelse.view_all_fragtforsendelser"):
-            q = qs.none()
-            try:
-                c = getattr(user.indberetter_data, "cvr")
-            except IndberetterProfile.DoesNotExist:
-                pass
-            else:
-                if c is not None:
-                    q |= qs.filter(
-                        afgiftsanmeldelse__oprettet_af__indberetter_data__cvr=c
-                    )
-                    q |= qs.filter(
-                        afgiftsanmeldelse__oprettet_på_vegne_af__indberetter_data__cvr=c
-                    )
-            qs = q
-        return qs
+        if user.has_perm("forsendelse.view_all_fragtforsendelser"):
+            return qs
+        q = qs.none()
+        try:
+            cvr = getattr(user.indberetter_data, "cvr")
+        except IndberetterProfile.DoesNotExist:
+            pass
+        else:
+            if cvr is not None:
+                q |= qs.filter(
+                    afgiftsanmeldelse__oprettet_af__indberetter_data__cvr=cvr
+                )
+                q |= qs.filter(
+                    afgiftsanmeldelse__oprettet_på_vegne_af__indberetter_data__cvr=cvr
+                )
+                q |= qs.filter(afgiftsanmeldelse__fuldmagtshaver__cvr=cvr)
+        return q
 
     def check_user(self, item: Fragtforsendelse):
         if not self.filter_user(Fragtforsendelse.objects.filter(id=item.id)).exists():
