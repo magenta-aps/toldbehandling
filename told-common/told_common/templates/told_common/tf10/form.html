@@ -71,14 +71,11 @@
                     </div>
                 </div>
                 {% endif %}
-
+                {% if gem_top %}
+                    <button type="submit" class="btn btn-success float-end">{% translate "Gem" %}</button>
+                {% endif %}
             </div>
 
-			{% if gem_top %}
-            <div class="col-6 clearfix my-1">
-                <button type="submit" class="btn btn-success float-end">{% translate "Gem" %}</button>
-            </div>
-			{% endif %}
         </div>
         <div class="row">
             <div class="col-12">

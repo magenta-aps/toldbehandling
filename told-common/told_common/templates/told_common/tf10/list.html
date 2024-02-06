@@ -89,12 +89,12 @@
 
         <div class="row">
             <div class="col-12 clearfix">
-                <button type="submit" class="btn btn-primary float-end">{% translate "Søg" %}</button>
+                <button type="submit" class="btn btn-primary float-end ms-1">{% translate "Søg" %}</button>
                 {% if can_create %}
-                <a href="{% url 'tf10_create' %}" class="btn btn-primary float-end">{% translate "Opret ny" %}</a>
+                <a href="{% url 'tf10_create' %}" class="btn btn-primary float-end mx-1">{% translate "Opret ny" %}</a>
                 {% endif %}
                 {% if can_edit_multiple %}
-                <a class="edit_button btn btn-secondary float-end" href="#">{% translate "Redigér" %}</a>
+                <a class="edit_button btn btn-secondary float-end mx-1" href="#">{% translate "Redigér" %}</a>
                 {% endif %}
             </div>
         </div>
@@ -145,10 +145,10 @@
             {% endif %}
             <th class="col-1" data-sortable="true" data-field="id">{% translate "Nummer" %}</th>
             <th class="col-2" data-sortable="true" data-field="dato" data-formatter="datoFormatter">{% translate "Dato" %}</th>
-            <th class="col-3" data-sortable="true" data-field="afsender" data-formatter="aktørFormatter">{% translate "Afsender" %}</th>
-            <th class="col-3" data-sortable="true" data-field="modtager" data-formatter="aktørFormatter">{% translate "Modtager" %}</th>
-            <th class="col-1" data-sortable="true" data-field="status">{% translate "Status" %}</th>
-            <th class="col-1" data-field="actions">{% translate "Handlinger" %}</th>
+            <th class="col-2" data-sortable="true" data-field="afsender" data-formatter="aktørFormatter">{% translate "Afsender" %}</th>
+            <th class="col-2" data-sortable="true" data-field="modtager" data-formatter="aktørFormatter">{% translate "Modtager" %}</th>
+            <th class="col-2" data-sortable="true" data-field="status">{% translate "Status" %}</th>
+            <th class="col-2" data-field="actions">{% translate "Handlinger" %}</th>
         </tr>
         </thead>
         <tbody id="table_body">

@@ -244,11 +244,11 @@
 
         <hr/>
         <div class="clearfix">
-            <button type="submit" class="btn btn-success float-end">
+            <button type="submit" class="btn btn-success float-end ms-1">
                 {% if item %}{% translate "Opdatér" %}{% else %}{% translate "Gem" %}{% endif %}
             </button>
             {% if not item %}
-            <button type="submit" name="betal" value="true" class="btn btn-success float-end">
+            <button type="submit" name="betal" value="true" class="btn btn-success float-end mx-1">
                 {% translate "Betal" %}
             </button>
             {% endif %}
