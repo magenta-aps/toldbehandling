@@ -342,6 +342,7 @@ class TF10FormUpdateView(
             fragtforsendelse_id,
             self.item,
             force_write=True,
+            status=self.status(self.item, form),
         )
 
         data_map = {
@@ -385,6 +386,9 @@ class TF10FormUpdateView(
             ),
         )
         return super().form_valid(form, formset)
+
+    def status(self, item, form):
+        return None  # override in subclasses. None means "no change"
 
     @cached_property
     def toplevel_varesatser(self):
