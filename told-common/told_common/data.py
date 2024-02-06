@@ -345,6 +345,10 @@ class Afgiftsanmeldelse(ToldDataClass):
     betales_af: Optional[str] = None
 
     @property
+    def indberetter(self) -> dict:
+        return self.oprettet_på_vegne_af or self.oprettet_af
+
+    @property
     def afgift_sum(self):
         return sum(
             [

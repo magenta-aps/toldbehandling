@@ -2,13 +2,14 @@
 #
 # SPDX-License-Identifier: MPL-2.0
 
-from datetime import date, datetime, timezone
+from datetime import datetime, timezone
 from decimal import Context, Decimal
 from functools import cached_property
 from typing import Any, Dict, List, Optional, Set, Union
 
 from django.conf import settings
 from django.contrib import messages
+from django.core.exceptions import ValidationError
 from django.http import Http404, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import redirect
 from django.template import loader
@@ -24,13 +25,7 @@ from told_common.data import (
     PrismeResponse,
     Vareafgiftssats,
 )
-from told_common.util import (
-    filter_dict_values,
-    format_daterange,
-    join,
-    join_words,
-    render_pdf,
-)
+from told_common.util import filter_dict_values, format_daterange, join, join_words
 from told_common.view_mixins import (
     FormWithFormsetView,
     GetFormView,
@@ -167,7 +162,27 @@ class TF10View(AdminLayoutBaseView, common_views.TF10View, FormView):
                 anmeldelse = self.rest_client.afgiftanmeldelse.get(
                     anmeldelse_id, full=True, include_varelinjer=True
                 )
+
                 try:
+                    kræver_cvr = {
+                        item["kategori"]
+                        for item in settings.CVR_TOLDKATEGORI_MAP
+                        if item.get("kræver_cvr")
+                    }
+                    if anmeldelse.toldkategori in kræver_cvr:
+                        cvr = None
+                        if anmeldelse.betales_af == "afsender":
+                            cvr = anmeldelse.afsender.cvr
+                        elif anmeldelse.betales_af == "modtager":
+                            cvr = anmeldelse.modtager.cvr
+                        # elif anmeldelse.betales_af == "indberetter":
+                        #     cvr = anmeldelse.indberetter["indberetter_data"]["cvr"]
+                        if not cvr:
+                            raise ValidationError(
+                                f"For toldkategori {anmeldelse.toldkategori} skal der angives et "
+                                f"CVR-nummer på betaleren, som er enten afsender eller modtager",
+                            )
+
                     responses = send_afgiftsanmeldelse(anmeldelse)
                     # Gem data
                     for response in responses:
@@ -182,7 +197,7 @@ class TF10View(AdminLayoutBaseView, common_views.TF10View, FormView):
                                 ),
                             )
                         )
-                except PrismeException as e:
+                except (PrismeException, ValidationError) as e:
                     messages.add_message(
                         self.request,
                         messages.ERROR,
