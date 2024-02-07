@@ -574,7 +574,7 @@ class TF10FormUpdateView(
 
         initial["oprettet_på_vegne_af"] = (
             item.oprettet_på_vegne_af["id"]
-            if type(item.oprettet_på_vegne_af) == dict
+            if type(item.oprettet_på_vegne_af) is dict
             else item.oprettet_på_vegne_af
         )
         return initial

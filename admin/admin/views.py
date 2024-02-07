@@ -288,15 +288,10 @@ class TF10FormCreateView(AdminLayoutBaseView, common_views.TF10FormCreateView):
         kwargs["oprettet_på_vegne_af_choices"] = tuple(
             (
                 user.id,
-                join_words(
-                    [
-                        user.first_name,
-                        user.last_name,
-                        f"(CVR: {user.cvr})" if user.cvr else None,
-                    ]
-                ),
+                join_words([user.first_name, user.last_name, f"(CVR: {user.cvr})"]),
             )
             for user in users
+            if user.cvr
         )
         return kwargs
 
@@ -323,11 +318,12 @@ class TF10FormUpdateView(AdminLayoutBaseView, common_views.TF10FormUpdateView):
                     [
                         user.first_name,
                         user.last_name,
-                        f"(CVR: {user.cvr})" if user.cvr else None,
+                        f"(CVR: {user.cvr})",
                     ]
                 ),
             )
             for user in users
+            if user.cvr
         )
         return kwargs
 

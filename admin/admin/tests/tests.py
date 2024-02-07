@@ -1530,6 +1530,45 @@ class AnmeldelseNotatTest(PermissionsTest, TestCase):
                     },
                 ],
             }
+        elif path == expected_prefix + "user":
+            json_content = {
+                "count": 1,
+                "items": [
+                    {
+                        "id": 1,
+                        "username": "indberetter",
+                        "first_name": "Testperson",
+                        "last_name": "Testersen",
+                        "email": "",
+                        "is_superuser": False,
+                        "groups": ["Indberettere"],
+                        "permissions": [
+                            "aktør.add_afsender",
+                            "aktør.add_modtager",
+                            "aktør.view_afsender",
+                            "aktør.view_modtager",
+                            "anmeldelse.add_afgiftsanmeldelse",
+                            "anmeldelse.add_varelinje",
+                            "anmeldelse.change_afgiftsanmeldelse",
+                            "anmeldelse.view_afgiftsanmeldelse",
+                            "anmeldelse.view_all_anmeldelse",
+                            "anmeldelse.view_varelinje",
+                            "forsendelse.add_fragtforsendelse",
+                            "forsendelse.add_postforsendelse",
+                            "forsendelse.view_all_fragtforsendelser",
+                            "forsendelse.view_all_postforsendelser",
+                            "forsendelse.view_fragtforsendelse",
+                            "forsendelse.view_postforsendelse",
+                            "sats.view_afgiftstabel",
+                            "sats.view_vareafgiftssats",
+                        ],
+                        "indberetter_data": {
+                            "cpr": "1234567890",
+                            "cvr": "12345678",
+                        },
+                    }
+                ],
+            }
         else:
             print(f"Mock AnmeldelseNotatTest got unrecognized path: {path}")
             traceback.print_stack()
@@ -1586,6 +1625,7 @@ class AnmeldelseNotatTest(PermissionsTest, TestCase):
             response = self.client.post(
                 reverse("tf10_edit", kwargs={"id": 1}),
                 {
+                    "oprettet_på_vegne_af": 1,
                     "afsender_cvr": "12345678",
                     "afsender_navn": "Testfirma 5",
                     "afsender_adresse": "Testvej 42",

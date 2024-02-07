@@ -304,7 +304,7 @@ class PermissionsTest(HasLogin):
         path = path.rstrip("/")
         response = Response()
         if path == expected_prefix + "user":
-            json_content = self.userdata
+            json_content = {"count": 1, "items": [self.userdata]}
             response._content = json.dumps(json_content).encode("utf-8")
             response.status_code = 200
             return response
@@ -315,11 +315,18 @@ class PermissionsTest(HasLogin):
     @patch.object(FileView, "get")
     def test_permissions_admin(self, mock_fileview, mock_get, *args):
         self.userdata = {
+            "id": 1,
             "username": "admin",
             "first_name": "Administrator",
             "last_name": "",
             "email": "admin@told.gl",
             "is_superuser": True,
+            "groups": [],
+            "permissions": [
+                f"{p.content_type.app_label}.{p.codename}"
+                for p in Permission.objects.all()
+            ],
+            "indberetter_data": {"cpr": 1234567890, "cvr": 12345678},
         }
         self.login(self.userdata)
         mock_get.side_effect = self.mock_perm_get
@@ -339,11 +346,18 @@ class PermissionsTest(HasLogin):
     @patch.object(FileView, "get")
     def test_permissions_allowed(self, mock_fileview, mock_get, *args):
         self.userdata = {
+            "id": 1,
             "username": "allowed_user",
             "first_name": "Allowed",
             "last_name": "User",
             "email": "allowed@told.gl",
             "is_superuser": False,
+            "groups": [],
+            "permissions": [
+                f"{p.content_type.app_label}.{p.codename}"
+                for p in Permission.objects.all()
+            ],
+            "indberetter_data": {"cpr": 1234567890, "cvr": 12345678},
         }
         mock_get.side_effect = self.mock_perm_get
         mock_fileview.return_value = FileResponse(StringIO("test_data"))
@@ -368,6 +382,7 @@ class PermissionsTest(HasLogin):
             url = item[0]
             permissions = item[1]
             self.userdata = {
+                "id": 2,
                 "username": "disallowed_user",
                 "first_name": "disallowed",
                 "last_name": "User",
