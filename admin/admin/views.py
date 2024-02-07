@@ -313,6 +313,24 @@ class TF10FormUpdateView(AdminLayoutBaseView, common_views.TF10FormUpdateView):
         *common_views.TF10FormUpdateView.required_permissions,
     )
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        count, users = self.rest_client.user.list(group="Indberettere", limit=100000)
+        kwargs["oprettet_på_vegne_af_choices"] = tuple(
+            (
+                user.id,
+                join_words(
+                    [
+                        user.first_name,
+                        user.last_name,
+                        f"(CVR: {user.cvr})" if user.cvr else None,
+                    ]
+                ),
+            )
+            for user in users
+        )
+        return kwargs
+
     def get_context_data(self, **context):
         return super().get_context_data(
             **{

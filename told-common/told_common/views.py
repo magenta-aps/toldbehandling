@@ -325,6 +325,7 @@ class TF10FormUpdateView(
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.anmeldelse_id = None
+        self._initial = None
 
     def get_success_url(self):
         """
@@ -530,7 +531,9 @@ class TF10FormUpdateView(
         )
 
     def get_initial(self):
-        initial = {}
+        if self._initial:
+            return self._initial
+        self._initial = initial = {}
         item = self.item
         if item:
             initial["kladde"] = item.status == "kladde"
@@ -568,6 +571,12 @@ class TF10FormUpdateView(
                 initial["afgangsdato"] = postforsendelse.afgangsdato
             if item.fuldmagtshaver:
                 initial["fuldmagtshaver"] = getattr(item.fuldmagtshaver, "cvr")
+
+        initial["oprettet_på_vegne_af"] = (
+            item.oprettet_på_vegne_af["id"]
+            if type(item.oprettet_på_vegne_af) == dict
+            else item.oprettet_på_vegne_af
+        )
         return initial
 
 

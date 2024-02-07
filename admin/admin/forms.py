@@ -92,6 +92,15 @@ class TF10UpdateForm(common_forms.TF10Form):
             for item in settings.CVR_TOLDKATEGORI_MAP
         ],
     )
+    oprettet_på_vegne_af = DynamicField(
+        forms.ChoiceField,
+        label=_("På vegne af"),
+        choices=lambda form: form.oprettet_på_vegne_af_choices,
+    )
+
+    def __init__(self, oprettet_på_vegne_af_choices: List[dict], **kwargs):
+        self.oprettet_på_vegne_af_choices = oprettet_på_vegne_af_choices
+        super().__init__(**kwargs)
 
 
 class TF10UpdateMultipleForm(BootstrapForm):

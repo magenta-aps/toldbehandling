@@ -67,6 +67,7 @@ class PartialAfgiftsanmeldelseIn(ModelSchema):
     fragtforsendelse_id: int = None
     leverandørfaktura: str = None  # Base64
     leverandørfaktura_navn: str = None
+    oprettet_på_vegne_af_id: int = None
     betales_af: str = None
     toldkategori: str = None
     kladde: Optional[bool] = False
