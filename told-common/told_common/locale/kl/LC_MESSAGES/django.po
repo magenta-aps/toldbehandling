@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-02 10:21-0200\n"
+"POT-Creation-Date: 2024-02-07 04:58-0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -262,6 +262,11 @@ msgstr "Tamarmik/Tamaasa"
 msgid "Ny"
 msgstr "Nutaaq"
 
+#: told_common/forms.py told_common/templates/told_common/tf10/form.html
+#: told_common/templates/told_common/tf10/view.html
+msgid "Kladde"
+msgstr ""
+
 #: told_common/forms.py told_common/templates/told_common/tf10/view.html
 #: told_common/templates/told_common/tf5/list.html
 #: told_common/templates/told_common/tf5/view.html
@@ -362,11 +367,6 @@ msgstr "Akitsuusigasssanik nalunaaruteqarneq"
 #: told_common/templates/told_common/tf10/view.html
 msgid "For indførsel af afgiftspligtige varer i Grønland"
 msgstr "Nioqqutissanik akitsuusigassanik Kalaallit Nunaannut eqqussiniarluni"
-
-#: told_common/templates/told_common/tf10/form.html
-#: told_common/templates/told_common/tf10/view.html
-msgid "Kladde"
-msgstr ""
 
 #: told_common/templates/told_common/tf10/form.html
 msgid ""

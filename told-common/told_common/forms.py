@@ -468,6 +468,7 @@ class TF10SearchForm(PaginateForm, BootstrapForm):
     status_choices_all = (
         (None, _("Alle")),
         ("ny", _("Ny")),
+        ("kladde", _("Kladde")),
         ("afvist", _("Afvist")),
         ("godkendt", _("Godkendt")),
         ("afsluttet", _("Sendt til Prisme")),
