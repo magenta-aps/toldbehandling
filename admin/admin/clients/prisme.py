@@ -12,12 +12,19 @@ from requests_ntlm import HttpNtlmAuth
 from told_common.data import Afgiftsanmeldelse, Forsendelsestype, Vareafgiftssats
 from told_common.util import get_file_base64
 from xmltodict import parse as xml_to_dict
+from zeep.exceptions import TransportError
 from zeep.transports import Transport
 
 logger = logging.getLogger(__name__)
 
 
 class PrismeException(Exception):
+    def __init__(self, code, message):
+        self.code = code
+        self.message = message
+
+
+class PrismeHttpException(Exception):
     def __init__(self, code, message):
         self.code = code
         self.message = message
@@ -320,6 +327,9 @@ def prisme_send_dummy(
     OBS: This implementation is based on how we mocked in test. This has now
     been moved to this function instead as well, so it's only specified in one place.
     """
+    if settings.PRISME_MOCK_HTTP_ERROR == 413:
+        raise TransportError("Server returned HTTP status 413", 413)
+
     return [
         CustomDutyResponse(
             request_object,
@@ -337,7 +347,13 @@ def prisme_send_dummy(
 def send_afgiftsanmeldelse(
     afgiftsanmeldelse: Afgiftsanmeldelse,
 ) -> List[CustomDutyResponse]:
-    if settings.ENVIRONMENT != "production":
-        return prisme_send_dummy(CustomDutyRequest(afgiftsanmeldelse))
-
-    return PrismeClient().send(CustomDutyRequest(afgiftsanmeldelse))
+    try:
+        request = CustomDutyRequest(afgiftsanmeldelse)
+        if settings.ENVIRONMENT != "production":
+            return prisme_send_dummy(request)
+        return PrismeClient().send(request)
+    except TransportError as e:
+        message = [e.message]
+        if e.status_code == 413:
+            message.append("Prisme-fejl: Afsendelse er for stor (for store filer vedhæftet)")
+        raise PrismeHttpException(e.status_code, "\n".join(message))

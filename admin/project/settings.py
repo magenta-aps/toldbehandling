@@ -13,12 +13,11 @@ https://docs.djangoproject.com/en/4.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
-import json
 import os
 from datetime import timedelta
 from pathlib import Path
 
-from told_common.util import strtobool
+from told_common.util import opt_int, strtobool
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -162,6 +161,7 @@ PRISME = {
 }
 if "PRISME_SOCKS_PROXY" in os.environ:
     PRISME["proxy"] = {"socks": os.environ["PRISME_SOCKS_PROXY"]}
+PRISME_MOCK_HTTP_ERROR = opt_int(os.environ.get("PRISME_MOCK_HTTP_ERROR"))
 
 SESSION_COOKIE_PATH = "/admin"
 SESSION_COOKIE_SAMESITE = "Strict"

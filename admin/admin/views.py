@@ -34,7 +34,11 @@ from told_common.view_mixins import (
 )
 
 from admin import forms
-from admin.clients.prisme import PrismeException, send_afgiftsanmeldelse
+from admin.clients.prisme import (
+    PrismeException,
+    PrismeHttpException,
+    send_afgiftsanmeldelse,
+)
 from admin.spreadsheet import SpreadsheetExport, VareafgiftssatsSpreadsheetUtil
 
 
@@ -197,11 +201,11 @@ class TF10View(AdminLayoutBaseView, common_views.TF10View, FormView):
                                 ),
                             )
                         )
-                except (PrismeException, ValidationError) as e:
+                except (PrismeException, PrismeHttpException, ValidationError) as e:
                     messages.add_message(
                         self.request,
                         messages.ERROR,
-                        f"Besked ikke sendt til Prisme; {e.message}",
+                        f"Anmeldelse ikke sendt til Prisme. Fejlbesked:\n{e.message}",
                     )
 
             elif status is not None:
