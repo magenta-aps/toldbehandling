@@ -2,6 +2,7 @@
 #
 # SPDX-License-Identifier: MPL-2.0
 import dataclasses
+import logging
 import os
 from datetime import date
 from functools import cached_property
@@ -35,6 +36,8 @@ from told_common.view_mixins import (
     PermissionsRequiredMixin,
     TF5Mixin,
 )
+
+log = logging.getLogger(__name__)
 
 
 class LoginView(FormView):
@@ -153,9 +156,38 @@ class TF10FormCreateView(
         else:
             modtager_id = self.rest_client.modtager.get_or_create(form.cleaned_data)
         postforsendelse_id = self.rest_client.postforsendelse.create(form.cleaned_data)
+
+        fragtfil = self.request.FILES.get("fragtbrev")
+        if fragtfil:
+            log.info(
+                "Bruger '%s' opretter TF10 med fragtbrev %s (%s bytes)",
+                self.userdata["username"],
+                fragtfil.name,
+                fragtfil.size,
+            )
+        else:
+            log.info(
+                "Bruger '%s' opretter TF10 uden at sætte fragtbrev",
+                self.userdata["username"],
+            )
+
         fragtforsendelse_id = self.rest_client.fragtforsendelse.create(
             form.cleaned_data, self.request.FILES.get("fragtbrev")
         )
+        leverandørfakturafil = self.request.FILES.get("leverandørfaktura")
+        if leverandørfakturafil:
+            log.info(
+                "Bruger '%s' opretter TF10 med leverandørfaktura %s (%s bytes)",
+                self.userdata["username"],
+                leverandørfakturafil.name,
+                leverandørfakturafil.size,
+            )
+        else:
+            log.info(
+                "Bruger '%s' opretter TF10 uden at sætte fragtbrev",
+                self.userdata["username"],
+            )
+
         self.anmeldelse_id = self.rest_client.afgiftanmeldelse.create(
             form.cleaned_data,
             self.request.FILES.get("leverandørfaktura"),
@@ -164,6 +196,7 @@ class TF10FormCreateView(
             postforsendelse_id,
             fragtforsendelse_id,
         )
+        log.info("TF10 %d oprettet", self.anmeldelse_id)
         for subform in formset:
             if subform.cleaned_data:
                 self.rest_client.varelinje.create(
@@ -300,6 +333,7 @@ class TF10FormUpdateView(
         return reverse("tf10_list") + f"?highlight={self.anmeldelse_id}"
 
     def form_valid(self, form, formset):
+        self.anmeldelse_id = self.item.id
         afsender_id = self.rest_client.afsender.get_or_create(
             form.cleaned_data, form.cleaned_data
         )
@@ -321,6 +355,22 @@ class TF10FormUpdateView(
                 form.cleaned_data
             )
 
+        fragtfil = self.request.FILES.get("fragtbrev")
+        if fragtfil:
+            log.info(
+                "Bruger '%s' opdaterer TF10 %d med fragtbrev %s (%d bytes)",
+                self.userdata["username"],
+                self.anmeldelse_id,
+                fragtfil.name,
+                fragtfil.size,
+            )
+        else:
+            log.info(
+                "Bruger '%s' opdaterer TF10 %d uden at sætte fragtbrev",
+                self.userdata["username"],
+                self.anmeldelse_id,
+            )
+
         fragtforsendelse_id = (
             self.item.fragtforsendelse.id if self.item.fragtforsendelse else None
         )
@@ -337,7 +387,21 @@ class TF10FormUpdateView(
                 form.cleaned_data, self.request.FILES.get("fragtbrev")
             )
 
-        self.anmeldelse_id = self.item.id
+        leverandørfakturafil = self.request.FILES.get("leverandørfaktura")
+        if leverandørfakturafil:
+            log.info(
+                "Bruger '%s' opdaterer TF10 %d med leverandørfaktura %s (%d bytes)",
+                self.userdata["username"],
+                self.anmeldelse_id,
+                leverandørfakturafil.name,
+                leverandørfakturafil.size,
+            )
+        else:
+            log.info(
+                "Bruger '%s' opdaterer TF10 %d uden at sætte leverandørfaktura",
+                self.userdata["username"],
+                self.anmeldelse_id,
+            )
         self.rest_client.afgiftanmeldelse.update(
             self.anmeldelse_id,
             form.cleaned_data,
@@ -350,6 +414,7 @@ class TF10FormUpdateView(
             force_write=True,
             status=self.status(self.item, form),
         )
+        log.info("TF10 %d opdateret", self.anmeldelse_id)
 
         data_map = {
             subform.cleaned_data["id"]: subform.cleaned_data

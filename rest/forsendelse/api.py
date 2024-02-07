@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: MPL-2.0
 
 import base64
+import logging
 from typing import Optional
 from uuid import uuid4
 
@@ -21,6 +22,7 @@ from ninja_extra.pagination import paginate
 from ninja_extra.schemas import NinjaPaginationResponseSchema
 from project.util import RestPermission, json_dump
 
+log = logging.getLogger(__name__)
 # Django-ninja har endnu ikke understøttelse for PATCH med filer i multipart/form-data
 # Se https://github.com/vitalik/django-ninja/pull/397
 # Derfor laver vi alle skrivninger (POST og PATCH)  med application/json
@@ -262,7 +264,17 @@ class FragtforsendelseAPI:
             item.fragtbrev = ContentFile(
                 base64.b64decode(fragtbrev), name=fragtbrev_navn
             )
+            log.info(
+                "Rest API opretter Fragtforsendelse %d med fragtbrev %s (%d bytes)",
+                item.id,
+                fragtbrev_navn,
+                item.fragtbrev.size,
+            )
             item.save()
+        else:
+            log.info(
+                "Rest API opretter Fragtforsendelse %d uden at sætte fragtbrev", item.id
+            )
         return {"id": item.id}
 
     @route.get(
@@ -308,6 +320,17 @@ class FragtforsendelseAPI:
             item.fragtbrev = ContentFile(
                 base64.b64decode(fragtbrev), name=fragtbrev_navn
             )
+            log.info(
+                "Rest API opdaterer Fragtforsendelse %d med fragtbrev %s (%d bytes)",
+                item.id,
+                fragtbrev_navn,
+                item.fragtbrev.size,
+            )
+        else:
+            log.info(
+                "Rest API opdaterer Fragtforsendelse %d uden at sætte fragtbrev",
+                item.id,
+            )
         item.save()
         return {"success": True}
 
@@ -315,6 +338,7 @@ class FragtforsendelseAPI:
     def delete_fragtforsendelse(self, id):
         item = get_object_or_404(Fragtforsendelse, id=id)
         self.check_user(item)
+        log.info("Rest API sletter Fragtforsendelse %d", id)
         item.delete()
         return {"success": True}
 

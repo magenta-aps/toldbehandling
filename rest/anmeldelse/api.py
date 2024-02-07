@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: MPL-2.0
 
 import base64
+import logging
 from datetime import date, datetime, timedelta
 from decimal import Decimal
 from typing import List, Optional, Tuple
@@ -33,6 +34,8 @@ from ninja_extra.schemas import NinjaPaginationResponseSchema
 from payment.models import Payment
 from project.util import RestPermission, json_dump
 from sats.models import Vareafgiftssats
+
+log = logging.getLogger(__name__)
 
 
 class AfgiftsanmeldelseIn(ModelSchema):
@@ -223,7 +226,14 @@ class AfgiftsanmeldelseAPI:
                 item.leverandørfaktura = ContentFile(
                     base64.b64decode(leverandørfaktura), name=leverandørfaktura_navn
                 )
+                log.info(
+                    "Rest API opretter TF10 med leverandørfaktura '%s' (%d bytes)",
+                    leverandørfaktura_navn,
+                    item.leverandørfaktura.size,
+                )
                 item.save()
+            else:
+                log.info("Rest API opretter TF10 uden leverandørfaktura")
             return {"id": item.id}
         except ValidationError as e:
             return HttpResponseBadRequest(
@@ -355,6 +365,22 @@ class AfgiftsanmeldelseAPI:
             item.leverandørfaktura = ContentFile(
                 base64.b64decode(leverandørfaktura), name=leverandørfaktura_navn
             )
+            log.info(
+                "Rest API opdaterer TF10 %d med leverandørfaktura '%s' (%d bytes)",
+                id,
+                leverandørfaktura_navn,
+                item.leverandørfaktura.size,
+            )
+        else:
+            log.info("Rest API opdaterer TF10 %d uden at sætte leverandørfaktura", id)
+            if item.leverandørfaktura:
+                log.info(
+                    "Der findes allerede leverandørfaktura '%s' (%d bytes)",
+                    item.leverandørfaktura.name,
+                    item.leverandørfaktura.size,
+                )
+            else:
+                log.info("Der findes ikke en eksisterende leverandørfaktura")
         item.save()
         return {"success": True}
 

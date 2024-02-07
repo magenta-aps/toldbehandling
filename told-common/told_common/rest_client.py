@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: MPL-2.0
 import base64
 import json
+import logging
 import time
 from base64 import b64encode
 from collections import defaultdict
@@ -35,6 +36,8 @@ from told_common.data import (
     Varelinje,
 )
 from told_common.util import cast_or_none, filter_dict_none, opt_int
+
+log = logging.getLogger(__name__)
 
 
 @dataclass
@@ -280,6 +283,13 @@ class FragtforsendelseRestClient(ModelRestClient):
     def create(self, data: dict, file: Optional[UploadedFile]) -> Optional[int]:
         mapped = self.map(data, file)
         if mapped:
+            if mapped["fragtbrev"]:
+                log.info(
+                    "rest_client opretter Fragtforsendelse "
+                    "med fragtbrev '%s' (%d bytes BASE64)",
+                    mapped["fragtbrev_navn"],
+                    len(mapped["fragtbrev"]),
+                )
             response = self.rest.post("fragtforsendelse", mapped)
             return response["id"]
 
@@ -292,13 +302,23 @@ class FragtforsendelseRestClient(ModelRestClient):
     ) -> None:
         mapped = self.map(data, file)
         if mapped is None:
+            log.info("rest_client sletter Fragtbrev %d", id)
             self.rest.delete(f"fragtforsendelse/{id}")
             return None
         elif existing is not None and self.compare(mapped, existing):
             # Data passer med eksisterende, opdatér ikke
+            log.info("rest_client ændrer ikke Fragtbrev %d", id)
             pass
         else:
             # Håndterer opdatering af eksisterende
+            if mapped.get("fragtbrev"):
+                log.info(
+                    "rest_client opdaterer Fragtforsendelse "
+                    "%d med fragtbrev '%s' (%d bytes BASE64)",
+                    id,
+                    mapped["fragtbrev_navn"],
+                    len(mapped["fragtbrev"]),
+                )
             self.rest.patch(f"fragtforsendelse/{id}", mapped)
         return id
 
@@ -374,6 +394,12 @@ class AfgiftanmeldelseRestClient(ModelRestClient):
             postforsendelse_id,
             fragtforsendelse_id,
         )
+        if mapped["leverandørfaktura"]:
+            log.info(
+                "rest_client opretter TF10 med leverandørfaktura %s (%d bytes BASE64)",
+                mapped["leverandørfaktura_navn"],
+                len(mapped["leverandørfaktura"]),
+            )
         response = self.rest.post("afgiftsanmeldelse", mapped)
         return response["id"]
 
@@ -400,6 +426,14 @@ class AfgiftanmeldelseRestClient(ModelRestClient):
             status,
         )
         if force_write or not self.compare(mapped, existing):
+            if mapped["leverandørfaktura"]:
+                log.info(
+                    "rest_client opdaterer TF10 %d med "
+                    "leverandørfaktura %s (%d bytes BASE64)",
+                    id,
+                    mapped["leverandørfaktura_navn"],
+                    len(mapped["leverandørfaktura"]),
+                )
             self.rest.patch(f"afgiftsanmeldelse/{id}", mapped)
         return id
 
