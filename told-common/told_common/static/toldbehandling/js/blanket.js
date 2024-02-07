@@ -3,7 +3,6 @@ $(function () {
     // ----------------------------
 
     const items = [];
-    const lastEdited = [];
     const aktører = window.aktører;
     if (!aktører) {
         return;
@@ -13,10 +12,8 @@ $(function () {
         const aktør = aktører[i];
         const fields = aktør["fields"];
         for (let name in fields) {
-            if (name !== lastEdited[i]) {
-                let jqElement = $(fields[name]);
-                jqElement.val(item[name] || "");
-            }
+            let jqElement = $(fields[name]);
+            jqElement.val(item[name] || "");
         }
     }
 
@@ -29,7 +26,6 @@ $(function () {
         const multi_select = multi_container.find("select");
         const preselected_id = aktør["preselected_id"];
         items.push([]);
-        lastEdited.push(null);
 
         multi_select.change(function () {
             const id = $(this).val();
@@ -46,7 +42,6 @@ $(function () {
             const filter = {"kladde": false};
             filter[fieldName] = this.val();
             if (filter[fieldName]) {
-                lastEdited[i] = fieldName;
                 const warning = multi_container.find(".multiple");
                 const hiddenfield = multi_container.find("[type=hidden]");
                 $.ajax({
@@ -83,6 +78,7 @@ $(function () {
                             hiddenfield.val(item["id"]);
                             hiddenfield.show();
                             warning.hide();
+                            updateChangeWarning();
                         } else {
                             warning.hide();
                             hiddenfield.hide();
@@ -97,15 +93,6 @@ $(function () {
         for (let searchfield of aktør["searchfields"]) {
             $(fields[searchfield]).on("change", updateChoices.bind($(fields[searchfield]), searchfield));
         }
-
-        const searchfield = aktør["searchfields"][0];
-        updateChoices.call($(fields[searchfield]), searchfield, null, function () {
-            if (preselected_id) {
-                multi_select.val(preselected_id);
-                updateChangeWarning();
-            }
-        });
-        lastEdited[i] = null;
 
         const updateChangeWarning = function () {
             const items_count = Object.keys(items[i]).length;
@@ -126,6 +113,7 @@ $(function () {
                         const newValue = $(aktør["fields"][fieldname]).val();
                         const oldValue = existing[fieldname] === null ? "" : existing[fieldname].toString();
                         if (newValue !== oldValue) {
+                            console.log(fieldname, oldValue, newValue);
                             anyChanged = true;
                             break;
                         }

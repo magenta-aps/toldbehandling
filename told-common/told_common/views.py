@@ -134,13 +134,19 @@ class TF10FormCreateView(
         )
 
     def form_valid(self, form, formset):
-        if form.cleaned_data["afsender_change_existing"]:
+        if (
+            form.cleaned_data["afsender_change_existing"]
+            and form.cleaned_data["afsender_existing_id"]
+        ):
             afsender_id = self.rest_client.afsender.update(
                 form.cleaned_data["afsender_existing_id"], form.cleaned_data
             )
         else:
             afsender_id = self.rest_client.afsender.get_or_create(form.cleaned_data)
-        if form.cleaned_data["modtager_change_existing"]:
+        if (
+            form.cleaned_data["modtager_change_existing"]
+            and form.cleaned_data["modtager_existing_id"]
+        ):
             modtager_id = self.rest_client.modtager.update(
                 form.cleaned_data["modtager_existing_id"], form.cleaned_data
             )

@@ -511,7 +511,8 @@
                 "postbox": "[name={{form.afsender_postbox.name}}]",
                 "telefon": "[name={{form.afsender_telefon.name}}]",
             },
-            "searchfields": ["cvr", "navn"],  // Felter som initierer søgning
+            // Felter som initierer søgning
+            "searchfields": ["cvr", "navn", "adresse", "postnummer", "by", "postbox", "telefon"],
             "api": "{% url 'rest' path='afsender' %}",
             "multi_container": "#afsender_adresse_container",
             "multi_label": {
@@ -531,7 +532,8 @@
                 "postbox": "[name={{form.modtager_postbox.name}}]",
                 "telefon": "[name={{form.modtager_telefon.name}}]",
             },
-            "searchfields": ["cvr", "navn"],
+            // Felter som initierer søgning
+            "searchfields": ["cvr", "navn", "adresse", "postnummer", "by", "postbox", "telefon"],
             "api": "{% url 'rest' path='modtager' %}",
             "multi_container": "#modtager_adresse_container",
             "multi_label": {
