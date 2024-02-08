@@ -283,7 +283,7 @@ class FragtforsendelseRestClient(ModelRestClient):
     def create(self, data: dict, file: Optional[UploadedFile]) -> Optional[int]:
         mapped = self.map(data, file)
         if mapped:
-            if mapped["fragtbrev"]:
+            if mapped.get("fragtbrev"):
                 log.info(
                     "rest_client opretter Fragtforsendelse "
                     "med fragtbrev '%s' (%d bytes BASE64)",
@@ -394,7 +394,7 @@ class AfgiftanmeldelseRestClient(ModelRestClient):
             postforsendelse_id,
             fragtforsendelse_id,
         )
-        if mapped["leverandørfaktura"]:
+        if mapped.get("leverandørfaktura"):
             log.info(
                 "rest_client opretter TF10 med leverandørfaktura %s (%d bytes BASE64)",
                 mapped["leverandørfaktura_navn"],
@@ -426,7 +426,7 @@ class AfgiftanmeldelseRestClient(ModelRestClient):
             status,
         )
         if force_write or not self.compare(mapped, existing):
-            if mapped["leverandørfaktura"]:
+            if mapped.get("leverandørfaktura"):
                 log.info(
                     "rest_client opdaterer TF10 %d med "
                     "leverandørfaktura %s (%d bytes BASE64)",
