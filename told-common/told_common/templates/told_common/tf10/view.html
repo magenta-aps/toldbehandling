@@ -362,6 +362,40 @@
         </table>
 
         <hr/>
+        
+        <h5>{% translate "Indberetter(e)" %}</h5>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th class="col-2">{% translate "Type" %}</th>
+                    <th class="col-2">{% translate "Navn" %}</th>
+                    <th class="col-4">CPR</th>
+                    <th class="col-4">CVR</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for indberetter in indberettere %}
+                <tr>
+                    <td>{{indberetter.type}}</td>
+                    <td>{{indberetter.navn}}</td>
+                    <td>
+                        {% if indberetter.cpr_cvr.cpr %}
+                            {{indberetter.cpr_cvr.cpr|stringformat:"s"}}
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if indberetter.cpr_cvr.cvr %}
+                            {{indberetter.cpr_cvr.cvr|stringformat:"s"}}
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+
+        <hr/>
+
         <h5>{% translate "Notater" %}</h5>
         {% include "told_common/notat/list.html" with notater=object.notater %}
 
