@@ -161,7 +161,7 @@ PRISME = {
 }
 if "PRISME_SOCKS_PROXY" in os.environ:
     PRISME["proxy"] = {"socks": os.environ["PRISME_SOCKS_PROXY"]}
-PRISME_MOCK_HTTP_ERROR = opt_int(os.environ.get("PRISME_MOCK_HTTP_ERROR"))
+PRISME_MOCK_HTTP_ERROR = opt_int(os.environ.get("PRISME_MOCK_HTTP_ERROR") or None)
 
 SESSION_COOKIE_PATH = "/admin"
 SESSION_COOKIE_SAMESITE = "Strict"

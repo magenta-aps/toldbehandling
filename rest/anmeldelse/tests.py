@@ -453,7 +453,7 @@ class StatistikTest(RestMixin, TestCase):
                 "vareart_kl": "Kaffe",
                 "enhed": "kg",
                 "sum_antal": 11,
-                "sum_mængde": "715.00",
+                "sum_mængde": "715.000",
             },
         )
         self.assertEquals(
@@ -466,6 +466,6 @@ class StatistikTest(RestMixin, TestCase):
                 "vareart_kl": "Te",
                 "enhed": "kg",
                 "sum_antal": 0,
-                "sum_mængde": "1400.00",
+                "sum_mængde": "1400.000",
             },
         )

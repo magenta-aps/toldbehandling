@@ -3206,7 +3206,7 @@ class StatistikTest(PermissionsTest, TestCase):
                             "vareart_da": "Kaffe",
                             "vareart_kl": "Kaffe",
                             "enhed": "kg",
-                            "sum_mængde": "1000.00",
+                            "sum_mængde": "1000.000",
                             "sum_antal": 0,
                         },
                         {
@@ -3216,7 +3216,7 @@ class StatistikTest(PermissionsTest, TestCase):
                             "vareart_da": "Te",
                             "vareart_kl": "Te",
                             "enhed": "kg",
-                            "sum_mængde": "1000.00",
+                            "sum_mængde": "1000.000",
                             "sum_antal": 0,
                         },
                     ],

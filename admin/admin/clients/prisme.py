@@ -355,5 +355,7 @@ def send_afgiftsanmeldelse(
     except TransportError as e:
         message = [e.message]
         if e.status_code == 413:
-            message.append("Prisme-fejl: Afsendelse er for stor (for store filer vedhæftet)")
+            message.append(
+                "Prisme-fejl: Afsendelse er for stor (for store filer vedhæftet)"
+            )
         raise PrismeHttpException(e.status_code, "\n".join(message))
