@@ -146,7 +146,7 @@ class PostforsendelseAPI:
         return {"success": True}
 
     @route.delete("/{id}", auth=get_auth_methods(), url_name="postforsendelse_delete")
-    def delete_postforsendelse(self, id):
+    def delete_postforsendelse(self, id: int):
         item = get_object_or_404(Postforsendelse, id=id)
         self.check_user(item)
         item.delete()
@@ -335,7 +335,7 @@ class FragtforsendelseAPI:
         return {"success": True}
 
     @route.delete("/{id}", auth=get_auth_methods(), url_name="fragtforsendelse_delete")
-    def delete_fragtforsendelse(self, id):
+    def delete_fragtforsendelse(self, id: int):
         item = get_object_or_404(Fragtforsendelse, id=id)
         self.check_user(item)
         log.info("Rest API sletter Fragtforsendelse %d", id)

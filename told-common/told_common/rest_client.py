@@ -743,7 +743,7 @@ class VarelinjeRestClient(ModelRestClient):
                 )
         return data
 
-    def delete(self, id):
+    def delete(self, id: int):
         self.rest.delete(f"varelinje/{id}")
 
 
@@ -775,7 +775,7 @@ class NotatRestClient(ModelRestClient):
         )
         return response["id"]
 
-    def delete(self, id):
+    def delete(self, id: int):
         self.rest.delete(f"notat/{id}")
 
     def list(
