@@ -758,15 +758,18 @@ class TF10View(TF10BaseView, TemplateView):
     template_name = "told_common/tf10/view.html"
 
     def get_context_data(self, **kwargs):
+        anmeldelse: Afgiftsanmeldelse = self.object
+
         return super().get_context_data(
             **{
                 **kwargs,
-                "object": self.object,
+                "object": anmeldelse,
                 "can_edit": self.has_permissions(
                     request=self.request, required_permissions=self.edit_permissions
                 )
-                and self.object.status in ("ny", "kladde", "afvist"),
+                and anmeldelse.status in ("ny", "kladde", "afvist"),
                 "extend_template": self.extend_template,
+                "indberettere": self.get_indberettere(anmeldelse),
             }
         )
 
@@ -802,6 +805,54 @@ class TF10View(TF10BaseView, TemplateView):
                 raise Http404("Afgiftsanmeldelse findes ikke")
             raise
         return anmeldelse
+
+    def get_indberettere(self, anmeldelse: Afgiftsanmeldelse):
+        reportees = []
+        if anmeldelse.oprettet_af:
+            reportees.append(
+                TF10View.reportee_from_user_dict("Oprettet af", anmeldelse.oprettet_af)
+            )
+
+        if anmeldelse.oprettet_på_vegne_af:
+            reportees.append(
+                TF10View.reportee_from_user_dict(
+                    "Oprettet på vegne af", anmeldelse.oprettet_på_vegne_af
+                )
+            )
+
+        if anmeldelse.fuldmagtshaver:
+            reportees.append(
+                {
+                    "type": "Fuldmagtshaver",
+                    "navn": anmeldelse.fuldmagtshaver.navn,
+                    "cpr_cvr": {
+                        "cpr": None,
+                        "cvr": str(anmeldelse.fuldmagtshaver.cvr).zfill(8),
+                    },
+                }
+            )
+
+        return reportees
+
+    @staticmethod
+    def reportee_from_user_dict(type_label: str, user_dict: dict):
+        return {
+            "type": type_label,
+            "navn": f"{user_dict['first_name']} {user_dict['last_name']}",
+            "cpr_cvr": {
+                "cpr": str(user_dict["indberetter_data"]["cpr"]).zfill(10)
+                if "cpr" in user_dict["indberetter_data"]
+                else None,
+                "cvr": str(user_dict["indberetter_data"]["cvr"]).zfill(8)
+                if "cvr" in user_dict["indberetter_data"]
+                else None,
+            }
+            if user_dict.get("indberetter_data")
+            else {
+                "cpr": None,
+                "cvr": None,
+            },
+        }
 
 
 class TF5View(
