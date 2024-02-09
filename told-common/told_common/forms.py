@@ -354,7 +354,7 @@ class TF10VareForm(BootstrapForm):
         choices=lambda form: form.varesatser_choices,
         required=lambda form: not form.kladde,
     )
-    mængde = ButtonlessDecimalField(min_value=0.01, required=False)
+    mængde = ButtonlessDecimalField(min_value=0.01, required=False, decimal_places=3)
     antal = ButtonlessIntegerField(min_value=1, required=False)
     fakturabeløb = ButtonlessDecimalField(min_value=1, decimal_places=2, required=False)
 

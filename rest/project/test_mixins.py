@@ -489,7 +489,7 @@ class RestMixin:
             "fuldmagtshaver": None,
         }
         self.varelinje_data = {
-            "mængde": "15.00",
+            "mængde": "15.000",
             "antal": 1,
             "fakturabeløb": "1000.00",
             "afgiftsbeløb": "37.50",

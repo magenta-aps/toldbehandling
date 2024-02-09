@@ -352,8 +352,8 @@ class Varelinje(models.Model):
         null=True,
         blank=True,
         validators=[MinValueValidator(0)],
-        decimal_places=2,
-        max_digits=12,
+        decimal_places=3,
+        max_digits=13,
     )
     antal = models.PositiveIntegerField(
         null=True,
