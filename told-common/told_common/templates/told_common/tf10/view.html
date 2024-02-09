@@ -369,7 +369,6 @@
                 <tr>
                     <th class="col-2">{% translate "Type" %}</th>
                     <th class="col-2">{% translate "Navn" %}</th>
-                    <th class="col-4">CPR</th>
                     <th class="col-4">CVR</th>
                 </tr>
             </thead>
@@ -378,11 +377,6 @@
                 <tr>
                     <td>{{indberetter.type}}</td>
                     <td>{{indberetter.navn}}</td>
-                    <td>
-                        {% if indberetter.cpr_cvr.cpr %}
-                            {{indberetter.cpr_cvr.cpr|stringformat:"s"}}
-                        {% endif %}
-                    </td>
                     <td>
                         {% if indberetter.cpr_cvr.cvr %}
                             {{indberetter.cpr_cvr.cvr|stringformat:"s"}}
