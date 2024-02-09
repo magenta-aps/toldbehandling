@@ -674,10 +674,10 @@ class UiAnmeldelseListViewTest(AnmeldelseListViewTest, TestCase):
     def list_url(self):
         return str(reverse("tf10_list"))
 
-    def edit_url(self, id):
+    def edit_url(self, id: int):
         return str(reverse("tf10_edit", kwargs={"id": id}))
 
-    def view_url(self, id):
+    def view_url(self, id: int):
         return str(reverse("tf10_view", kwargs={"id": id}))
 
 

@@ -392,10 +392,10 @@ class AnmeldelseListViewTest(HasLogin):
     def list_url(self):
         raise NotImplementedError("Implement in subclasses")
 
-    def edit_url(self, id):
+    def edit_url(self, id: int):
         raise NotImplementedError("Implement in subclasses")
 
-    def view_url(self, id):
+    def view_url(self, id: int):
         raise NotImplementedError("Implement in subclasses")
 
     @staticmethod
@@ -778,14 +778,14 @@ class AnmeldelseListViewTest(HasLogin):
         self.assertEquals(response.status_code, 200)
         data = response.json()
 
-        def _view_button(id):
+        def _view_button(id: int):
             if self.can_view:
                 return (
                     f'<a class="btn btn-primary btn-sm m-1" '
                     f'href="{self.view_url(id)}">Vis</a>'
                 )
 
-        def _edit_button(id):
+        def _edit_button(id: int):
             if self.can_edit:
                 return (
                     f'<a class="btn btn-primary btn-sm m-1" '

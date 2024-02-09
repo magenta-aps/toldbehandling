@@ -923,10 +923,10 @@ class AdminAnmeldelseListViewTest(PermissionsTest, AnmeldelseListViewTest, TestC
     def list_url(self):
         return str(reverse("tf10_list"))
 
-    def edit_url(self, id):
+    def edit_url(self, id: int):
         return str(reverse("tf10_edit", kwargs={"id": id}))
 
-    def view_url(self, id):
+    def view_url(self, id: int):
         return str(reverse("tf10_view", kwargs={"id": id}))
 
 
@@ -1649,7 +1649,7 @@ class AfgiftstabelListViewTest(PermissionsTest, TestCase):
     def list_url(self):
         return reverse("afgiftstabel_list")
 
-    def view_url(self, id):
+    def view_url(self, id: int):
         return reverse("afgiftstabel_view", kwargs={"id": id})
 
     @staticmethod

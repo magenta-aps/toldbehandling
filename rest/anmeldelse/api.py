@@ -802,7 +802,7 @@ class VarelinjeAPI:
         return {"success": True}
 
     @route.delete("/{id}", auth=get_auth_methods(), url_name="varelinje_delete")
-    def delete(self, id):
+    def delete(self, id: int):
         item = get_object_or_404(Varelinje, id=id)
         self.check_user(item)
         item.delete()
@@ -961,7 +961,7 @@ class NotatAPI:
         return list(qs)
 
     @route.delete("/{id}", auth=get_auth_methods(), url_name="notat_delete")
-    def delete_notat(self, id):
+    def delete_notat(self, id: int):
         item = get_object_or_404(Notat, id=id)
         self.check_user(item)
         item.delete()
