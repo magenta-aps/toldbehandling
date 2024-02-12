@@ -23,11 +23,11 @@ class Aktør(models.Model):
         null=True,
         blank=True,
     )
-    postnummer = models.PositiveSmallIntegerField(
+    postnummer = models.PositiveIntegerField(
         db_index=True,
         validators=(
             MinValueValidator(1000),
-            MaxValueValidator(9999),
+            MaxValueValidator(99999999),
         ),
         null=True,
         blank=True,
