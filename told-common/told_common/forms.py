@@ -105,13 +105,19 @@ class TF10Form(BootstrapForm):
     )
     afsender_postnummer = ButtonlessIntegerField(
         min_value=1000,
-        max_value=9999,
+        max_value=99999999,
         required=True,
         label=_("Postnr."),
         error_messages={
-            "invalid": _("Postnummer skal være på 4 cifre og må ikke begynde med 0"),
-            "min_value": _("Postnummer skal være på 4 cifre og må ikke begynde med 0"),
-            "max_value": _("Postnummer skal være på 4 cifre og må ikke begynde med 0"),
+            "invalid": _(
+                "Postnummer skal være på mindst 4 cifre og må ikke begynde med 0"
+            ),
+            "min_value": _(
+                "Postnummer skal være på mindst 4 cifre og må ikke begynde med 0"
+            ),
+            "max_value": _(
+                "Postnummer skal være på højst 8 cifre og må ikke begynde med 0"
+            ),
         },
     )
     afsender_by = forms.CharField(

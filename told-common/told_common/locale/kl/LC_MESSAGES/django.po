@@ -130,8 +130,12 @@ msgid "Postnr."
 msgstr "Postnr."
 
 #: told_common/forms.py
-msgid "Postnummer skal være på 4 cifre og må ikke begynde med 0"
-msgstr "Postnormu 4-nik kisitsiseqassaaq 0-imillu aallartissanani"
+msgid "Postnummer skal være på mindst 4 cifre og må ikke begynde med 0"
+msgstr ""
+
+#: told_common/forms.py
+msgid "Postnummer skal være på højst 8 cifre og må ikke begynde med 0"
+msgstr ""
 
 #: told_common/forms.py told_common/templates/told_common/tf10/view.html
 msgid "By"
@@ -154,6 +158,10 @@ msgid "Opdatér den valgte afsender med de indtastede oplysinger"
 msgstr ""
 "Nassiussisutut toqqarneqartoq paasissutissat immiunneqartut atorlugit "
 "nutarteruk"
+
+#: told_common/forms.py
+msgid "Postnummer skal være på 4 cifre og må ikke begynde med 0"
+msgstr "Postnormu 4-nik kisitsiseqassaaq 0-imillu aallartissanani"
 
 #: told_common/forms.py
 msgid "Opret en ny modtager med de indtastede oplysninger"
