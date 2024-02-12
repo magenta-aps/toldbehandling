@@ -14,6 +14,7 @@ from django.contrib import messages
 from django.http import FileResponse, Http404, JsonResponse
 from django.shortcuts import redirect
 from django.template import loader
+from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from django.views import View
@@ -325,6 +326,27 @@ class TF10FormUpdateView(
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.anmeldelse_id = None
+
+    def check_item(self):
+        if self.item.status not in ("ny", "afvist", "kladde"):
+            return TemplateResponse(
+                request=self.request,
+                template="told_common/access_denied.html",
+                headers={"Cache-Control": "no-cache"},
+                status=403,
+            )
+
+    def get(self, request, *args, **kwargs):
+        response = self.check_item()
+        if response:
+            return response
+        return super().get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        response = self.check_item()
+        if response:
+            return response
+        return super().post(request, *args, **kwargs)
 
     def get_success_url(self):
         """
