@@ -363,7 +363,7 @@ class TestGodkend(PermissionsTest, TestCase):
                     "forsendelsestype": "S",
                     "fragtbrevsnummer": 1,
                     "fragtbrev": "/leverandørfakturaer/1/leverandørfaktura.txt",
-                    "forbindelsesnr": "123",
+                    "forbindelsesnr": "ABCDE1234567",
                     "afgangsdato": "2023-10-01",
                 },
                 "postforsendelse": None,
@@ -404,7 +404,7 @@ class TestGodkend(PermissionsTest, TestCase):
                 "forsendelsestype": "S",
                 "fragtbrevsnummer": 1,
                 "fragtbrev": "/leverandørfakturaer/1/leverandørfaktura.txt",
-                "forbindelsesnr": "123",
+                "forbindelsesnr": "ABCDE1234567",
                 "afgangsdato": "2023-10-01",
             }
 
@@ -721,7 +721,7 @@ class TestPrisme(PermissionsTest, TestCase):
                     "forsendelsestype": "S",
                     "fragtbrevsnummer": 1,
                     "fragtbrev": "/leverandørfakturaer/1/leverandørfaktura.txt",
-                    "forbindelsesnr": "123",
+                    "forbindelsesnr": "ABCDE1234567",
                     "afgangsdato": "2023-10-01",
                 },
                 "postforsendelse": None,
@@ -741,7 +741,7 @@ class TestPrisme(PermissionsTest, TestCase):
                 "forsendelsestype": "S",
                 "fragtbrevsnummer": 1,
                 "fragtbrev": "/leverandørfakturaer/1/leverandørfaktura.txt",
-                "forbindelsesnr": "123",
+                "forbindelsesnr": "ABCDE1234567",
                 "afgangsdato": "2023-10-01",
             }
 
@@ -885,7 +885,7 @@ class FileViewTest(PermissionsTest, TestCase):
                 "forsendelsestype": "S",
                 "fragtbrevsnummer": 1,
                 "fragtbrev": "/fragtbreve/1/fragtbrev.txt",
-                "forbindelsesnr": "123",
+                "forbindelsesnr": "ABCDE1234567",
                 "afgangsdato": "2023-10-01",
             }
         if json_content:
@@ -1482,7 +1482,7 @@ class AnmeldelseNotatTest(PermissionsTest, TestCase):
                 "forsendelsestype": "S",
                 "fragtbrevsnummer": 1,
                 "fragtbrev": "/leverandørfakturaer/1/leverandørfaktura.txt",
-                "forbindelsesnr": "123",
+                "forbindelsesnr": "ABCDE1234567",
                 "afgangsdato": "2023-10-01",
             }
 
@@ -1603,7 +1603,7 @@ class AnmeldelseNotatTest(PermissionsTest, TestCase):
                     "indførselstilladelse": "123",
                     "leverandørfaktura_nummer": "5678",
                     "fragttype": "skibspost",
-                    "forbindelsesnr": "2468",
+                    "forbindelsesnr": "ABCDE1234567",
                     "fragtbrevnr": "1234",
                     "afgangsdato": "2023-11-03",
                     "form-TOTAL_FORMS": "1",
@@ -2329,7 +2329,7 @@ class TF10EditMultipleViewTest(PermissionsTest, TestCase):
                         "forsendelsestype": "S",
                         "fragtbrevsnummer": 1,
                         "fragtbrev": "/leverandørfakturaer/1/leverandørfaktura.txt",
-                        "forbindelsesnr": "123",
+                        "forbindelsesnr": "ABCDE1234567",
                         "afgangsdato": "2023-10-01",
                     },
                     "postforsendelse": None,
@@ -2439,7 +2439,7 @@ class TF10EditMultipleViewTest(PermissionsTest, TestCase):
                 "forsendelsestype": "S",
                 "fragtbrevsnummer": 1,
                 "fragtbrev": "/leverandørfakturaer/1/leverandørfaktura.txt",
-                "forbindelsesnr": "123",
+                "forbindelsesnr": "ABCDE1234567",
                 "afgangsdato": "2023-10-01",
             }
         elif path == expected_prefix + "fragtforsendelse/2":
@@ -2557,11 +2557,11 @@ class TF10CreateTest(TestMixin, HasLogin, TestCase):
         "form-0-mængde": "3",
         "form-0-antal": "6",
         "form-0-fakturabeløb": "100.00",
-        "forbindelsesnr": "1337",
+        "forbindelsesnr": "ABCDE1234567",
         "oprettet_på_vegne_af": 1,
         "betales_af": "afsender",
     }
-    formdata2 = {**formdata1, "fragttype": "luftpost"}
+    formdata2 = {**formdata1, "fragttype": "luftpost", "forbindelsesnr": "1337"}
 
     _formfiles1 = {
         "fragtbrev": SimpleUploadedFile("fragtbrev.txt", "Testtekst".encode("utf-8")),
@@ -2793,7 +2793,6 @@ class TF10CreateTest(TestMixin, HasLogin, TestCase):
 
         response = self.client.get(url)
         self.assertEquals(response.status_code, 200)
-
         soup = BeautifulSoup(response.content, "html.parser")
         input_field_names = set(
             [
@@ -2970,7 +2969,7 @@ class TF10CreateTest(TestMixin, HasLogin, TestCase):
                 {
                     "fragtbrevsnummer": "123",
                     "forsendelsestype": "S",
-                    "forbindelsesnr": "1337",
+                    "forbindelsesnr": "ABCDE1234567",
                     "fragtbrev": base64.b64encode("Testtekst".encode("utf-8")).decode(
                         "ascii"
                     ),
@@ -3031,7 +3030,7 @@ class TF10CreateTest(TestMixin, HasLogin, TestCase):
             [
                 {
                     "fragtbrevsnummer": "123",
-                    "forbindelsesnr": "1337",
+                    "forbindelsesnr": "ABCDE1234567",
                     "forsendelsestype": "S",
                     "fragtbrev": base64.b64encode("Testtekst".encode("utf-8")).decode(
                         "ascii"
