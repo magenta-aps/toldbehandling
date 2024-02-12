@@ -26,7 +26,7 @@
 
     <form method="get" action="{% url 'tf10_list' %}">
         <div class="row align-items-center">
-            <div class="col-4"><label for="{{form.status.name}}" class="form-label">{% translate "Status" %}</label></div>
+            <div class="col-4"><label for="{{form.status.id_for_label}}" class="form-label">{% translate "Status" %}</label></div>
             <div class="col-8">
                 {{form.status}}
             </div>
@@ -42,37 +42,37 @@
             <div class="col-4">{{form.afgangsdato_før}}</div>
         </div>
         <div class="row align-items-center">
-            <div class="col-4"><label for="{{form.afsender.name}}" class="form-label">{% translate "Afsender" %}</label></div>
+            <div class="col-4"><label for="{{form.afsender.id_for_label}}" class="form-label">{% translate "Afsender" %}</label></div>
             <div class="col-8">
                 {{form.afsender}}
             </div>
         </div>
         <div class="row align-items-center">
-            <div class="col-4"><label for="{{form.modtager.name}}" class="form-label">{% translate "Modtager" %}</label></div>
+            <div class="col-4"><label for="{{form.modtager.id_for_label}}" class="form-label">{% translate "Modtager" %}</label></div>
             <div class="col-8">
                 {{form.modtager}}
             </div>
         </div>
         <div class="row align-items-center">
-            <div class="col-4"><label for="{{form.vareart.name}}" class="form-label">{% translate "Varetype" %}</label></div>
+            <div class="col-4"><label for="{{form.vareart.id_for_label}}" class="form-label">{% translate "Varetype" %}</label></div>
             <div class="col-8">
                 {{form.vareart}}
             </div>
         </div>
         <div class="row align-items-center">
-            <div class="col-4"><label for="{{form.id.name}}" class="form-label">{% translate "Anmeldelsesnummer" %}</label></div>
+            <div class="col-4"><label for="{{form.id.id_for_label}}" class="form-label">{% translate "Anmeldelsesnummer" %}</label></div>
             <div class="col-8">
                 {{form.id}}
             </div>
         </div>
         <div class="row align-items-center">
-            <div class="col-4"><label for="{{form.afsenderbykode_or_forbindelsesnr.name}}" class="form-label">{% translate "Afsender bykode/forbindelsesnummer" %}</label></div>
+            <div class="col-4"><label for="{{form.afsenderbykode_or_forbindelsesnr.id_for_label}}" class="form-label">{% translate "Afsender bykode/forbindelsesnummer" %}</label></div>
             <div class="col-8">
                 {{form.afsenderbykode_or_forbindelsesnr}}
             </div>
         </div>
         <div class="row align-items-center">
-            <div class="col-4"><label for="{{form.postforsendelsesnummer_or_fragtbrevsnummer.name}}" class="form-label">{% translate "Postforsendelsesnummer/fragtbrevsnummer" %}</label></div>
+            <div class="col-4"><label for="{{form.postforsendelsesnummer_or_fragtbrevsnummer.id_for_label}}" class="form-label">{% translate "Postforsendelsesnummer/fragtbrevsnummer" %}</label></div>
             <div class="col-8">
                 {{form.postforsendelsesnummer_or_fragtbrevsnummer}}
             </div>
@@ -80,7 +80,7 @@
 
         {% if is_speditør %}
         <div class="row align-items-center">
-            <div class="col-4"><label for="{{form.fuldmagtshaver_isnull.name}}" class="form-label">{% translate "Fuldmagtsstatus" %}</label></div>
+            <div class="col-4"><label for="{{form.fuldmagtshaver_isnull.id_for_label}}" class="form-label">{% translate "Fuldmagtsstatus" %}</label></div>
             <div class="col-8">
                 {{form.fuldmagtshaver_isnull}}
             </div>

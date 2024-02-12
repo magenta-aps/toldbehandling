@@ -31,7 +31,7 @@
                 </div>
                 {% endif %}
 
-                {% if kan_ændre_kladde %}
+                {% if kan_ændre_kladde and form.kladde %}
                 <div class="row align-items-center">
                     <div class="col-4">
                         <label for="{{form.kladde.id_for_label}}">{% translate "Kladde" %}</label>
@@ -344,6 +344,7 @@
                     </div>
                     <div class="col-6">
                         {{form.fragttype}}
+                        {{form.fragttype.errors}}
                     </div>
                 </div>
                 <div class="row align-items-center">
@@ -352,6 +353,7 @@
                     </div>
                     <div class="col-6">
                         {{form.forbindelsesnr}}
+                        {{form.forbindelsesnr.errors}}
                     </div>
                 </div>
                 <div class="row align-items-center">
@@ -360,6 +362,7 @@
                     </div>
                     <div class="col-6">
                         {{form.fragtbrevnr}}
+                        {{form.fragtbrevnr.errors}}
                     </div>
                 </div>
                 <div class="row align-items-center">
@@ -368,6 +371,7 @@
                     </div>
                     <div class="col-6">
                         {{form.afgangsdato}}
+                        {{form.afgangsdato.errors}}
                     </div>
                 </div>
 
@@ -550,4 +554,23 @@
     const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]')
     const popoverList = [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl))
 </script>
+{% if form.forbindelsesnr %}
+<script>
+    $(function () {
+        const forbindelsesnr = $("[name={{form.forbindelsesnr.name}}]");
+        const fragttype = $("[name={{form.fragttype.name}}]");
+        const updateForbindelsesnr = function () {
+            const type = fragttype.val();
+            if (type === "skibsfragt" || type === "skibspost") {
+                forbindelsesnr.attr("pattern", "[a-zA-Z]{5}[0-9]{7}");
+            } else {
+                forbindelsesnr.removeAttr("pattern");
+            }
+            forbindelsesnr.trigger("input");
+        }
+        fragttype.on("change", updateForbindelsesnr);
+        updateForbindelsesnr();
+    });
+</script>
+{% endif %}
 {% endblock %}

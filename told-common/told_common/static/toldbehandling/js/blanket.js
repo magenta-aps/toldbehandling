@@ -113,7 +113,6 @@ $(function () {
                         const newValue = $(aktør["fields"][fieldname]).val();
                         const oldValue = existing[fieldname] === null ? "" : existing[fieldname].toString();
                         if (newValue !== oldValue) {
-                            console.log(fieldname, oldValue, newValue);
                             anyChanged = true;
                             break;
                         }
@@ -439,19 +438,25 @@ $(function () {
 
 $(function () {
     // Custom-fejlbeskeder i klientvalidering
-    const validity_checks = ["rangeUnderflow", "rangeOverflow"];
+    const validity_checks = ["rangeUnderflow", "rangeOverflow", "patternMismatch"];
     const find = validity_checks.map((check) => "input[data-validity-"+check.toLowerCase()+"]").join(",");
-    $(find).on("input", function() {
-        this.checkValidity();
-        for (let check of validity_checks) {
-            if (this.validity[check]) {
-                this.setCustomValidity(this.getAttribute("data-validity-" + check.toLowerCase()));
-                return true;
+    const updateValidity = function() {
+        const valid = this.checkValidity();
+        if (!valid) {
+            for (let check of validity_checks) {
+                if (this.validity[check]) {
+                    this.setCustomValidity(
+                        this.getAttribute("data-validity-" + check.toLowerCase())
+                    );
+                    return true;
+                }
             }
         }
         this.setCustomValidity("");
         return false;
-    });
+    }
+    $(find).on("input", updateValidity);
+    $(find).trigger("input");
 });
 
 $(function (){

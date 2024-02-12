@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: 2023 Magenta ApS <info@magenta.dk>
 #
 # SPDX-License-Identifier: MPL-2.0
+import re
 from datetime import date
 from decimal import Decimal
 from typing import Iterable, List, Optional
@@ -253,6 +254,14 @@ class TF10Form(BootstrapForm):
     )
     forbindelsesnr = forms.CharField(
         required=True,
+        widget=forms.TextInput(
+            attrs={
+                "data-validity-patternmismatch": _(
+                    "Forbindelsesnummer skal bestå af fem "
+                    "bogstaver efterfulgt af syv cifre"
+                )
+            }
+        ),
     )
     fragtbrevnr = forms.CharField(
         required=True,
@@ -298,9 +307,10 @@ class TF10Form(BootstrapForm):
     )
 
     def clean(self):
+        fragttype = self.cleaned_data["fragttype"]
         if (
             self.fragtbrev_required
-            and self.cleaned_data["fragttype"]
+            and fragttype
             in (
                 "skibsfragt",
                 "luftfragt",
@@ -312,6 +322,19 @@ class TF10Form(BootstrapForm):
                     "fragtbrev": _("Mangler fragtbrev"),
                 }
             )
+        if fragttype in (
+            "skibsfragt",
+            "skibspost",
+        ):
+            if not re.match(r"^[a-zA-Z]{5}\d{7}$", self.cleaned_data["forbindelsesnr"]):
+                raise ValidationError(
+                    {
+                        "forbindelsesnr": _(
+                            "Forbindelsesnummer skal bestå af "
+                            "fem bogstaver efterfulgt af syv cifre"
+                        ),
+                    }
+                )
 
     def clean_with_formset(self, formset):
         # Perform validation on form and formset together
