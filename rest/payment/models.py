@@ -112,4 +112,4 @@ class Payment(models.Model):
     """The declaration/anmeldelse the payment is related to."""
 
     status = models.CharField(max_length=128, null=True)
-    """created, paid, declined"""
+    """created, reserved, paid, declined"""
