@@ -167,15 +167,20 @@ class PaymentAPI:
     @route.post("/refresh/{payment_id}", auth=JWTAuth(), url_name="payment_refresh")
     def refresh(self, payment_id: int) -> PaymentResponse:
         payment_local = Payment.objects.get(id=payment_id)
-        if payment_local.status == "created":
-            provider_handler = get_provider_handler("nets")
-            provider_payment = provider_handler.read(payment_local.provider_payment_id)
 
-            # Check if payment have been paid
+        provider_handler = get_provider_handler("nets")
+        provider_payment = provider_handler.read(payment_local.provider_payment_id)
+
+        if payment_local.status != "paid":
+            # Update local payment status based on the summary
             paymentSummary = provider_payment["summary"]
             if "reservedAmount" in paymentSummary:
-                # TODO: refine this when we know how "charged" payments works
                 if paymentSummary["reservedAmount"] == payment_local.amount:
+                    payment_local.status = "reserved"
+                    payment_local.save()
+
+            if "chargedAmount" in paymentSummary:
+                if paymentSummary["chargedAmount"] == payment_local.amount:
                     payment_local.status = "paid"
                     payment_local.save()
 
