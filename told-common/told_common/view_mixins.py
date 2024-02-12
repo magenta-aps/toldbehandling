@@ -116,6 +116,7 @@ class GroupRequiredMixin(LoginRequiredMixin):
             template="told_common/access_denied.html",
             context={"missing_groups": self.allowed_groups},
             headers={"Cache-Control": "no-cache"},
+            status=403,
         )
 
     def get_context_data(self, **kwargs):
