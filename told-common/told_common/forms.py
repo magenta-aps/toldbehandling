@@ -260,17 +260,11 @@ class TF10Form(BootstrapForm):
     )
     forbindelsesnr = forms.CharField(
         required=True,
-        widget=forms.TextInput(
-            attrs={
-                "data-validity-patternmismatch": _(
-                    "Forbindelsesnummer skal bestå af fem "
-                    "bogstaver efterfulgt af syv cifre"
-                )
-            }
-        ),
+        widget=forms.TextInput(attrs={"data-validity-patternmismatch": ""}),
     )
     fragtbrevnr = forms.CharField(
         required=True,
+        widget=forms.TextInput(attrs={"data-validity-patternmismatch": ""}),
     )
     afgangsdato = forms.DateField(
         required=True,
@@ -329,12 +323,29 @@ class TF10Form(BootstrapForm):
                 }
             )
         if fragttype == "skibsfragt":
-            if not re.match(r"^[a-zA-Z]{5}\d{7}$", self.cleaned_data["forbindelsesnr"]):
+            if not re.match(r"^[a-zA-Z]{5}\d{7}$", self.cleaned_data["fragtbrevnr"]):
+                raise ValidationError(
+                    {
+                        "fragtbrevnr": _(
+                            "Ved skibsfragt skal fragtbrevnr bestå af "
+                            "fem bogstaver efterfulgt af syv cifre"
+                        ),
+                    }
+                )
+        if fragttype == "luftfragt":
+            if not re.match(r"^\d{3}$", self.cleaned_data["forbindelsesnr"]):
                 raise ValidationError(
                     {
                         "forbindelsesnr": _(
-                            "Forbindelsesnummer skal bestå af "
-                            "fem bogstaver efterfulgt af syv cifre"
+                            "Ved luftfragt skal forbindelsesnummer bestå af tre cifre"
+                        ),
+                    }
+                )
+            if not re.match(r"^\d{8}$", self.cleaned_data["fragtbrevnr"]):
+                raise ValidationError(
+                    {
+                        "fragtbrevnr": _(
+                            "Ved luftfragt skal fragtbrevnummer bestå af otte cifre"
                         ),
                     }
                 )

@@ -554,23 +554,33 @@
     const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]')
     const popoverList = [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl))
 </script>
-{% if form.forbindelsesnr %}
 <script>
     $(function () {
         const forbindelsesnr = $("[name={{form.forbindelsesnr.name}}]");
+        const fragtbrevnr = $("[name={{form.fragtbrevnr.name}}]");
         const fragttype = $("[name={{form.fragttype.name}}]");
-        const updateForbindelsesnr = function () {
+        const updateFragttype = function () {
             const type = fragttype.val();
             if (type === "skibsfragt") {
-                forbindelsesnr.attr("pattern", "[a-zA-Z]{5}[0-9]{7}");
+                fragtbrevnr.attr("pattern", "[a-zA-Z]{5}[0-9]{7}");
+                fragtbrevnr.attr("data-validity-patternmismatch", "{% translate 'Ved skibsfragt skal fragtbrevnummer bestå af fem bogstaver efterfulgt af syv cifre' %}");
+                forbindelsesnr.removeAttr("data-validity-patternmismatch");
+            } else if (type === "luftfragt") {
+                forbindelsesnr.attr("pattern", "[0-9]{3}");
+                forbindelsesnr.attr("data-validity-patternmismatch", "{% translate 'Ved luftfragt skal forbindelsesnummer bestå af tre cifre' %}");
+                fragtbrevnr.attr("pattern", "[0-9]{8}")
+                fragtbrevnr.attr("data-validity-patternmismatch", "{% translate 'Ved luftfragt skal fragtbrevnummer bestå af otte cifre' %}");
             } else {
                 forbindelsesnr.removeAttr("pattern");
+                fragtbrevnr.removeAttr("pattern");
+                forbindelsesnr.removeAttr("data-validity-patternmismatch");
+                fragtbrevnr.removeAttr("data-validity-patternmismatch");
             }
             forbindelsesnr.trigger("input");
+            fragtbrevnr.trigger("input");
         }
-        fragttype.on("change", updateForbindelsesnr);
-        updateForbindelsesnr();
+        fragttype.on("change", updateFragttype);
+        updateFragttype();
     });
 </script>
-{% endif %}
 {% endblock %}
