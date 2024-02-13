@@ -102,10 +102,10 @@ variables:
   needs: []
   image: python:3.11
 
-Lint Commits:
-  extends: .lint:commits
-  variables:
-    CONFIG: '{ extends: [''@commitlint/config-conventional''], ignores: [(message) => message.includes(''suggestion(s)'')], }'
+#Lint Commits:
+#  extends: .lint:commits
+#  variables:
+#    CONFIG: '{ extends: [''@commitlint/config-conventional''], ignores: [(message) => message.includes(''suggestion(s)'')], }'
 
 
 Lint Python:

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-12 10:22-0200\n"
+"POT-Creation-Date: 2024-02-13 07:52-0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -212,10 +212,6 @@ msgstr "Allakkat umiarsuakkoortitat"
 msgid "Luftpost"
 msgstr "Allakkat timmisartukkoortitat"
 
-#: told_common/forms.py
-msgid "Forbindelsesnummer skal bestå af fem bogstaver efterfulgt af syv cifre"
-msgstr ""
-
 #: told_common/forms.py told_common/templates/told_common/notat/list.html
 msgid "Notat"
 msgstr "Allakkiaq"
@@ -257,6 +253,20 @@ msgstr ""
 #: told_common/forms.py
 msgid "Mangler fragtbrev"
 msgstr "Nassiussat allagartaat amigaataavoq"
+
+#: told_common/forms.py
+msgid ""
+"Ved skibsfragt skal fragtbrevnr bestå af fem bogstaver efterfulgt af syv "
+"cifre"
+msgstr ""
+
+#: told_common/forms.py told_common/templates/told_common/tf10/form.html
+msgid "Ved luftfragt skal forbindelsesnummer bestå af tre cifre"
+msgstr ""
+
+#: told_common/forms.py told_common/templates/told_common/tf10/form.html
+msgid "Ved luftfragt skal fragtbrevnummer bestå af otte cifre"
+msgstr ""
 
 #: told_common/forms.py
 msgid "Indførselstilladelse er påkrævet med de angivne varearter"
@@ -584,6 +594,12 @@ msgstr "ataatsimut %%f kr-it"
 #: told_common/templates/told_common/tf5/form.html
 #, python-format
 msgid "%%f %%"
+msgstr ""
+
+#: told_common/templates/told_common/tf10/form.html
+msgid ""
+"Ved skibsfragt skal fragtbrevnummer bestå af fem bogstaver efterfulgt af syv "
+"cifre"
 msgstr ""
 
 #: told_common/templates/told_common/tf10/list.html

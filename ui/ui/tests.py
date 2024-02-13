@@ -53,7 +53,7 @@ class TF10BlanketTest(TestMixin, HasLogin, TestCase):
         "indførselstilladelse": "123",
         "leverandørfaktura_nummer": "123",
         "fragttype": "skibsfragt",
-        "fragtbrevnr": "123",
+        "fragtbrevnr": "ABCDE1234567",
         "afgangsdato": "2023-11-03",
         "form-TOTAL_FORMS": "1",
         "form-INITIAL_FORMS": "1",
@@ -61,7 +61,7 @@ class TF10BlanketTest(TestMixin, HasLogin, TestCase):
         "form-0-mængde": "3",
         "form-0-antal": "6",
         "form-0-fakturabeløb": "100.00",
-        "forbindelsesnr": "ABCDE1234567",
+        "forbindelsesnr": "1337",
         "betales_af": "afsender",
     }
     formdata2 = {**formdata1, "fragttype": "luftpost", "forbindelsesnr": "1337"}
@@ -246,7 +246,7 @@ class TF10BlanketTest(TestMixin, HasLogin, TestCase):
                 "postforsendelse": {
                     "id": 11,
                     "forsendelsestype": "F",
-                    "postforsendelsesnummer": "10001",
+                    "postforsendelsesnummer": "10000001",
                     "afsenderbykode": "164",
                     "afgangsdato": "2024-03-13",
                     "kladde": False,
@@ -564,9 +564,9 @@ class TF10BlanketTest(TestMixin, HasLogin, TestCase):
             posted_map[prefix + "fragtforsendelse"],
             [
                 {
-                    "fragtbrevsnummer": "123",
+                    "fragtbrevsnummer": "ABCDE1234567",
                     "forsendelsestype": "S",
-                    "forbindelsesnr": "ABCDE1234567",
+                    "forbindelsesnr": "1337",
                     "fragtbrev": base64.b64encode("Testtekst".encode("utf-8")).decode(
                         "ascii"
                     ),
@@ -629,8 +629,8 @@ class TF10BlanketTest(TestMixin, HasLogin, TestCase):
             posted_map[prefix + "fragtforsendelse"],
             [
                 {
-                    "fragtbrevsnummer": "123",
-                    "forbindelsesnr": "ABCDE1234567",
+                    "fragtbrevsnummer": "ABCDE1234567",
+                    "forbindelsesnr": "1337",
                     "forsendelsestype": "S",
                     "fragtbrev": base64.b64encode("Testtekst".encode("utf-8")).decode(
                         "ascii"
@@ -714,7 +714,7 @@ class TF10BlanketTest(TestMixin, HasLogin, TestCase):
             posted_map[prefix + "postforsendelse"],
             [
                 {
-                    "postforsendelsesnummer": "123",
+                    "postforsendelsesnummer": "ABCDE1234567",
                     "forsendelsestype": "F",
                     "afsenderbykode": "1337",
                     "afgangsdato": "2023-11-03",
