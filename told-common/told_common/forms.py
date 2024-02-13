@@ -328,10 +328,7 @@ class TF10Form(BootstrapForm):
                     "fragtbrev": _("Mangler fragtbrev"),
                 }
             )
-        if fragttype in (
-            "skibsfragt",
-            "skibspost",
-        ):
+        if fragttype == "skibsfragt":
             if not re.match(r"^[a-zA-Z]{5}\d{7}$", self.cleaned_data["forbindelsesnr"]):
                 raise ValidationError(
                     {

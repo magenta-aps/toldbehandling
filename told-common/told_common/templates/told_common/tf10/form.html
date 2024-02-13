@@ -561,7 +561,7 @@
         const fragttype = $("[name={{form.fragttype.name}}]");
         const updateForbindelsesnr = function () {
             const type = fragttype.val();
-            if (type === "skibsfragt" || type === "skibspost") {
+            if (type === "skibsfragt") {
                 forbindelsesnr.attr("pattern", "[a-zA-Z]{5}[0-9]{7}");
             } else {
                 forbindelsesnr.removeAttr("pattern");
