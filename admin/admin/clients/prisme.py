@@ -30,6 +30,13 @@ class PrismeHttpException(Exception):
         self.message = message
 
 
+class PrismeConnectionException(Exception):
+    def __init__(self, message, code: int = None, inner_exception: Exception = None):
+        self.message = message
+        self.code = code
+        self.inner_exception = inner_exception
+
+
 class PrismeRequestObject:
     @property
     def method(self):
@@ -249,7 +256,9 @@ class PrismeClient:
                     # settings=Settings(raw_response=True)
                 )
             except Exception as e:
-                raise Exception(f"Failed connecting to prisme: {e}")
+                raise PrismeConnectionException(
+                    f"Failed connecting to prisme: {e}", inner_exception=e
+                )
             self._client.set_ns_prefix(
                 "tns", "http://schemas.datacontract.org/2004/07/Dynamics.Ax.Application"
             )
@@ -359,3 +368,5 @@ def send_afgiftsanmeldelse(
                 "Prisme-fejl: Afsendelse er for stor (for store filer vedhæftet)"
             )
         raise PrismeHttpException(e.status_code, "\n".join(message))
+    except zeep.exceptions.Fault as e:
+        raise PrismeConnectionException(e.message, e.code, e)

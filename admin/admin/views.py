@@ -35,6 +35,7 @@ from told_common.view_mixins import (
 
 from admin import forms
 from admin.clients.prisme import (
+    PrismeConnectionException,
     PrismeException,
     PrismeHttpException,
     send_afgiftsanmeldelse,
@@ -201,7 +202,12 @@ class TF10View(AdminLayoutBaseView, common_views.TF10View, FormView):
                                 ),
                             )
                         )
-                except (PrismeException, PrismeHttpException, ValidationError) as e:
+                except (
+                    PrismeException,
+                    PrismeHttpException,
+                    ValidationError,
+                    PrismeConnectionException,
+                ) as e:
                     messages.add_message(
                         self.request,
                         messages.ERROR,
