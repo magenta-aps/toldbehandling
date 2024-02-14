@@ -83,6 +83,8 @@ class AdminLayoutBaseView(PermissionsRequiredMixin, HasRestClientMixin):
                     request=self.request,
                     required_permissions=self.permissions_view_privatafgiftsanmeldelser,
                 ),
+                "environment": settings.ENVIRONMENT,
+                "version": settings.VERSION,
             }
         )
 

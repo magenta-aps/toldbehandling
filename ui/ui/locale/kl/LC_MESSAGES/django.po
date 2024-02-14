@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-14 08:10-0200\n"
+"POT-Creation-Date: 2024-02-14 10:08-0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -43,10 +43,6 @@ msgstr "Isissut atoreerpoq. Iseqqeriarit."
 msgid "Det anvendte login er udløbet. Prøv at logge ind igen."
 msgstr "Isersimaneq qaangiutereerpoq. Iseqqeriarit."
 
-#: ui/templates/ui/layout.html ui/templates/ui/print.html
-msgid "Toldbehandling"
-msgstr "Ilanngaaserineq"
-
 #: ui/templates/ui/layout.html
 msgid "TF5-anmeldelser"
 msgstr ""
@@ -58,6 +54,14 @@ msgstr ""
 #: ui/templates/ui/layout.html
 msgid "Er du sikker på at du vil logge ud?"
 msgstr "Ilumut aniniarpit?"
+
+#: ui/templates/ui/layout.html
+msgid "Version"
+msgstr ""
+
+#: ui/templates/ui/layout.html
+msgid "Kildekode"
+msgstr ""
 
 #: ui/templates/ui/loggedout.html
 msgid "Logget ud"
@@ -72,6 +76,10 @@ msgstr ""
 #: ui/templates/ui/loggedout.html
 msgid "Log ind igen"
 msgstr "Iseqqigit"
+
+#: ui/templates/ui/print.html
+msgid "Toldbehandling"
+msgstr "Ilanngaaserineq"
 
 #: ui/templates/ui/tf10/actions.html ui/templates/ui/tf5/actions.html
 msgid "Vis"
@@ -222,6 +230,10 @@ msgstr ""
 #: ui/templates/ui/tf5/tilladelse.html
 msgid "DENNE TILLADELSE ER UOVERDRAGELIG"
 msgstr "AKUERSISSUT UNA ALLAMUT TUNNIUNNEQARSINNAANNGILAQ"
+
+#: ui/views.py
+msgid "Godkendt"
+msgstr ""
 
 #: ui/views.py
 #, python-brace-format
