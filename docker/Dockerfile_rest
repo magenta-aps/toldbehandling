@@ -29,6 +29,10 @@ RUN wget --progress=dot:giga "$SUPERCRONIC_URL" \
 RUN mkdir /upload && \
     chown -R toldbehandling /upload && \
     chown -R toldbehandling /var/lib/logrotate
+
+ARG COMMIT_TAG
+ENV COMMIT_TAG=${COMMIT_TAG:-HEAD}
+
 USER toldbehandling
 COPY ./docker/entrypoint_rest.sh /entrypoint.sh
 COPY --chown=toldbehandling:toldbehandling ./rest /app
