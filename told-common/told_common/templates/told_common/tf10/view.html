@@ -12,13 +12,7 @@
         <h1>{% blocktranslate with id=object.id %}Afgiftsanmeldelse {{id}}{% endblocktranslate %}</h1>
 
         {% if object.status == "afsluttet" %}
-        <span class="badge bg-success">
-            {% if ui %}
-            {% translate "Godkendt" %}
-            {% else %}
-            {% translate "Sendt til Prisme" %}
-            {% endif %}
-        </span>
+        <span class="badge bg-success">{% translate "Afsluttet" %}</span>
         {% elif object.status == "godkendt" %}
         <span class="badge bg-success">{% translate "Godkendt" %}</span>
         {% elif object.status == "afvist" %}

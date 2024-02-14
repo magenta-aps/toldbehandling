@@ -732,8 +732,6 @@ class TF10ListView(
             )
         value = getattr(item, key)
         if key == "status":
-            if value == "afsluttet":
-                return _("Sendt til Prisme")
             return _(value.capitalize())
         return value
 

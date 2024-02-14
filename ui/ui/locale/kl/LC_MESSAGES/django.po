@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-30 10:28-0200\n"
+"POT-Creation-Date: 2024-02-14 08:10-0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -222,10 +222,6 @@ msgstr ""
 #: ui/templates/ui/tf5/tilladelse.html
 msgid "DENNE TILLADELSE ER UOVERDRAGELIG"
 msgstr "AKUERSISSUT UNA ALLAMUT TUNNIUNNEQARSINNAANNGILAQ"
-
-#: ui/views.py
-msgid "Godkendt"
-msgstr ""
 
 #: ui/views.py
 #, python-brace-format

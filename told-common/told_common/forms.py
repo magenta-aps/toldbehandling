@@ -508,12 +508,12 @@ class TF10SearchForm(PaginateForm, BootstrapForm):
         ("kladde", _("Kladde")),
         ("afvist", _("Afvist")),
         ("godkendt", _("Godkendt")),
-        ("afsluttet", _("Sendt til Prisme")),
+        ("afsluttet", _("Afsluttet")),
     )
     status_choices_kun_godkendte = (
         (None, _("Alle")),
         ("godkendt", _("Godkendt")),
-        ("afsluttet", _("Sendt til Prisme")),
+        ("afsluttet", _("Afsluttet")),
     )
 
     status = DynamicField(
