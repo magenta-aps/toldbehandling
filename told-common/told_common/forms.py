@@ -307,6 +307,8 @@ class TF10Form(BootstrapForm):
     )
 
     def clean(self):
+        if self.cleaned_data["kladde"]:
+            return
         fragttype = self.cleaned_data["fragttype"]
         if (
             self.fragtbrev_required
