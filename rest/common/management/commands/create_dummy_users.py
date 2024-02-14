@@ -170,6 +170,24 @@ class Command(BaseCommand):
 
         IndberetterProfile.objects.create(cpr=3333333333, cvr=None, user=indberetter3)
 
+        indberetter4, created = User.objects.update_or_create(
+            defaults={
+                "first_name": "Dummybruger",
+                "last_name": "Testersen",
+                "email": "test@magenta.dk",
+                "password": make_password("indberetter4"),
+                "is_active": True,
+                "is_staff": False,
+                "is_superuser": False,
+            },
+            username="0111111111 / 12345678",
+        )
+        indberetter4.groups.add(privatindberettere_group)
+
+        IndberetterProfile.objects.create(
+            cpr=111111111, cvr=12345678, user=indberetter4
+        )
+
         admin_godkender, created = User.objects.update_or_create(
             username="admin_godkender",
             defaults={

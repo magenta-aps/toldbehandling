@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: MPL-2.0
 
 import random
+import string
 from datetime import timedelta
 
 from django.contrib.auth.models import Group, User
@@ -37,8 +38,11 @@ class Command(BaseCommand):
 
             fragtforsendelse = Fragtforsendelse.objects.create(
                 forsendelsestype=fragtforsendelsestype,
-                fragtbrevsnummer=str(i),
-                forbindelsesnr=random.choice(["1337", "7331", "abc123", "def456"]),
+                fragtbrevsnummer="".join(
+                    [random.choice(string.ascii_letters).upper() for i in range(5)]
+                )
+                + str(random.randint(1000000, 9999999)),
+                forbindelsesnr=str(random.randint(100, 999)),
                 oprettet_af=users.order_by("?").first(),
                 afgangsdato=date.today() + timedelta(days=30),
             )

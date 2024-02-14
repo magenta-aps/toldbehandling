@@ -188,6 +188,7 @@ class AfgiftsanmeldelseFilterSchema(FilterSchema):
             "fragtforsendelse__fragtbrevsnummer__iexact",
         ]
     )
+    notat: Optional[str] = Field(q="notat__tekst__icontains")
 
 
 class AfgiftsanmeldelsePermission(RestPermission):
@@ -529,6 +530,7 @@ class PrivatAfgiftsanmeldelseFilterSchema(FilterSchema):
     vareart: Optional[str] = Field(q="varelinje__vareafgiftssats__vareart_da")
     status: Optional[str]
     anonym: Optional[bool]
+    notat: Optional[str] = Field(q="notat__tekst__icontains")
 
 
 class PrivatAfgiftsanmeldelsePermission(RestPermission):

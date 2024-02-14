@@ -576,6 +576,7 @@ class TF10SearchForm(PaginateForm, BootstrapForm):
             (False, _("Afgiftsanmeldelser som jeg har fuldmagt til")),
         ],
     )
+    notat = forms.CharField(required=False)
 
 
 class TF5SearchForm(PaginateForm, BootstrapForm):
