@@ -2,6 +2,13 @@
 {% load i18n %}
 {% block header %}
 <header>
+    {% if environment != "production" %}
+    <nav class="bg-warning">
+        <p class="text-center fw-bold my-0">
+            {{environment|upper}}
+        </p>
+    </nav>
+    {% endif %}
     <nav class="nav flex-column flex-sm-row p-1">
         {% if nav_afgiftstabeller %}
         <a class="p-2 text-muted" href="{% url 'afgiftstabel_list' %}">Afgiftstabeller</a>
@@ -20,7 +27,37 @@
             {{user.first_name}} {{user.last_name}} ({{user.username}})
         </span>
         <a href="{% url 'logout' %}" class="m-1 btn btn-sm btn-primary">Log ud</a>
+        <button type="button" class="btn btn-sm btn-outline-primary mx-1 my-2" data-bs-toggle="modal" data-bs-target="#about_modal">
+            Om
+        </button>
     </nav>
     <hr class="p-0 m-0"/>
 </header>
+{% endblock %}
+{% block modals %}
+<div id="about_modal" class="modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Toldbehandling</h5>
+            </div>
+            <div class="modal-body">
+                <table class="table table-borderless">
+                    <tr>
+                        <th>{% translate 'Version' %}:</th>
+                        <td>{{version}}</td>
+                    </tr>
+                    <tr>
+                        <th>{% translate 'Kildekode' %}:</th>
+                        <td>
+                            <a href="https://github.com/magenta-aps/toldbehandling">
+                                https://github.com/magenta-aps/toldbehandling
+                            </a>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
