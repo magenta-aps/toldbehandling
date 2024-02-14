@@ -253,3 +253,7 @@ class TF5Form(common_forms.TF5Form):
 
 class TF5ViewForm(common_forms.TF5ViewForm):
     betalt = forms.BooleanField(required=False)
+
+
+class TF5SearchForm(common_forms.TF5SearchForm):
+    notat = forms.CharField(required=False)

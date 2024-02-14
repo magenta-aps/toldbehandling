@@ -799,6 +799,7 @@ class AfgiftstabelCreateView(AdminLayoutBaseView, FormView):
 
 class TF5ListView(AdminLayoutBaseView, common_views.TF5ListView):
     actions_template = "admin/blanket/tf5/actions.html"
+    form_class = forms.TF5SearchForm
 
     def get_context_data(self, **context: Dict[str, Any]) -> Dict[str, Any]:
         return super().get_context_data(

@@ -78,6 +78,15 @@
             </div>
         </div>
 
+        {% if form.notat %}
+        <div class="row align-items-center">
+            <div class="col-4"><label for="{{form.notat.id_for_label}}" class="form-label">{% translate "Notat" %}</label></div>
+            <div class="col-8">
+                {{form.notat}}
+            </div>
+        </div>
+        {% endif %}
+
         <div class="row">
             <div class="col-12 cleafix">
                 <button type="submit" class="btn btn-primary float-end ms-1">{% translate "Søg" %}</button>

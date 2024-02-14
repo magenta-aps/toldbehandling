@@ -7,7 +7,13 @@ from datetime import date, datetime, time, timedelta, timezone
 from decimal import Decimal
 
 from aktør.models import Afsender, Modtager, Speditør
-from anmeldelse.models import Afgiftsanmeldelse, PrismeResponse, Varelinje
+from anmeldelse.models import (
+    Afgiftsanmeldelse,
+    PrismeResponse,
+    PrivatAfgiftsanmeldelse,
+    Varelinje,
+)
+from django.contrib.auth.models import Group, User
 from django.core.files.base import ContentFile
 from django.core.management.base import BaseCommand
 from django.db.models import Q
@@ -116,3 +122,46 @@ class Command(BaseCommand):
                         tax_notification_number=random.randint(10000000, 99999999),
                         delivery_date=date.today(),
                     )
+
+        indberetter_group = Group.objects.get(name="PrivatIndberettere")
+        users = User.objects.filter(groups=indberetter_group)
+        if users.count() == 0:
+            users = User.objects.all()
+        for i in range(0, 20):
+            anmeldelse = PrivatAfgiftsanmeldelse.objects.create(
+                cpr=random.randint(1000000000, 9999999999),
+                navn=random.choice(["Jens", "Peter", "Hans", "Søren", "Niels"])
+                + " "
+                + random.choice(
+                    ["Jensen", "Petersen", "Hansen", "Sørensen", "Nielsen"]
+                ),
+                adresse="Ligustervænget " + str(random.randint(1, 100)),
+                postnummer=1234,
+                by="TestBy",
+                telefon=str(random.randint(100000, 999999)),
+                bookingnummer=str(random.randint(100000, 999999)),
+                leverandørfaktura_nummer=str(random.randint(100000, 999999)),
+                indførselstilladelse=None,
+                indleveringsdato=date.today() + timedelta(days=random.randint(10, 30)),
+                status=random.choice(["ny", "afvist", "godkendt"]),
+                oprettet_af=users.order_by("?").first(),
+            )
+            anmeldelse.leverandørfaktura.save(
+                "leverandørfaktura.txt", ContentFile("testdata")
+            )
+            tabel = Afgiftstabel.objects.filter(
+                Q(gyldig_til__gte=anmeldelse.indleveringsdato)
+                | Q(gyldig_til__isnull=True),
+                gyldig_fra__lte=anmeldelse.indleveringsdato,
+            )
+            for j in range(1, 5):
+                Varelinje.objects.create(
+                    privatafgiftsanmeldelse=anmeldelse,
+                    vareafgiftssats=Vareafgiftssats.objects.filter(
+                        overordnet__isnull=True,
+                        afgiftstabel__in=tabel,
+                    ).order_by("?")[0],
+                    mængde=random.randint(1, 400),
+                    antal=random.randint(1, 400),
+                    fakturabeløb=Decimal(random.randint(400, 40000)),
+                )
