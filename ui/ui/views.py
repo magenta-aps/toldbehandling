@@ -97,13 +97,6 @@ class TF10ListView(UiViewMixin, SpeditørMixin, common_views.TF10ListView):
             **{**context, "can_create": True, "is_speditør": self.is_speditør}
         )
 
-    def map_value(self, item, key, context):
-        if key == "status":
-            value = getattr(item, key, None)
-            if value == "afsluttet":
-                return _("Godkendt")
-        return super().map_value(item, key, context)
-
 
 class TF10FormUpdateView(UiViewMixin, SpeditørMixin, common_views.TF10FormUpdateView):
     extend_template = "ui/layout.html"

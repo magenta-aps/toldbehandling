@@ -9,7 +9,7 @@
     <h1>Afgiftsanmeldelse {{object.id}} (version {{index}})</h1>
 
     {% if object.status == "afsluttet" %}
-    <span class="badge bg-success">Sendt til Prisme</span>
+    <span class="badge bg-success">Afsluttet</span>
     {% elif object.status == "godkendt" %}
     <span class="badge bg-success">Godkendt</span>
     {% elif object.status == "afvist" %}
