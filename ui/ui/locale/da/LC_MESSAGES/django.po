@@ -49,7 +49,7 @@ msgstr ""
 
 #: ui/templates/ui/layout.html
 msgid "Er du sikker på at du vil logge ud?"
-msgstr ""
+msgstr "Ilumut aniniarpit?"
 
 #: ui/templates/ui/loggedout.html
 msgid "Logget ud"

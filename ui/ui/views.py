@@ -38,6 +38,8 @@ from ui import forms
 
 
 class UiViewMixin:
+    extend_template = "ui/layout.html"
+
     def get_context_data(self, **context):
         return super().get_context_data(
             **{
@@ -45,6 +47,8 @@ class UiViewMixin:
                 "can_list_tf5": TF5ListView.has_permissions(request=self.request),
                 "can_list_tf10": TF10ListView.has_permissions(request=self.request),
                 "ui": True,
+                "environment": settings.ENVIRONMENT,
+                "version": settings.VERSION,
             }
         )
 
@@ -79,8 +83,6 @@ class SpeditørMixin:
 
 
 class TF10FormCreateView(UiViewMixin, SpeditørMixin, common_views.TF10FormCreateView):
-    extend_template = "ui/layout.html"
-
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         if self.user_cvr is None or not self.is_speditør:
@@ -90,7 +92,6 @@ class TF10FormCreateView(UiViewMixin, SpeditørMixin, common_views.TF10FormCreat
 
 class TF10ListView(UiViewMixin, SpeditørMixin, common_views.TF10ListView):
     actions_template = "ui/tf10/actions.html"
-    extend_template = "ui/layout.html"
 
     def get_context_data(self, **context):
         return super().get_context_data(
@@ -99,8 +100,6 @@ class TF10ListView(UiViewMixin, SpeditørMixin, common_views.TF10ListView):
 
 
 class TF10FormUpdateView(UiViewMixin, SpeditørMixin, common_views.TF10FormUpdateView):
-    extend_template = "ui/layout.html"
-
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         if self.user_cvr is None or not self.is_speditør:
@@ -117,7 +116,7 @@ class TF10LeverandørFakturaView(UiViewMixin, common_views.LeverandørFakturaVie
 class TF10View(
     PermissionsRequiredMixin, HasRestClientMixin, UiViewMixin, common_views.TF10View
 ):
-    extend_template = "ui/layout.html"
+    pass
 
 
 class TF5FormCreateView(
@@ -130,7 +129,6 @@ class TF5FormCreateView(
     form_class = common_forms.TF5Form
     formset_class = common_forms.TF10VareFormSet
     template_name = "told_common/tf5/form.html"
-    extend_template = "ui/layout.html"
     required_permissions = (
         "anmeldelse.view_privatafgiftsanmeldelse",
         "anmeldelse.view_varelinje",
@@ -272,7 +270,6 @@ class TF5FormCreateView(
 
 class TF5ListView(UiViewMixin, common_views.TF5ListView):
     actions_template = "ui/tf5/actions.html"
-    extend_template = "ui/layout.html"
 
     def get_context_data(self, **context: Dict[str, Any]) -> Dict[str, Any]:
         return super().get_context_data(
@@ -285,8 +282,6 @@ class TF5ListView(UiViewMixin, common_views.TF5ListView):
 
 
 class TF5View(UiViewMixin, common_views.TF5View):
-    extend_template = "ui/layout.html"
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         tilladelse_eksisterer = TF5TilladelseView.exists(self.kwargs["id"])
@@ -302,7 +297,7 @@ class TF5View(UiViewMixin, common_views.TF5View):
 
 
 class TF5UpdateView(UiViewMixin, common_views.TF5UpdateView):
-    extend_template = "ui/layout.html"
+    pass
 
 
 class TF5LeverandørFakturaView(UiViewMixin, common_views.LeverandørFakturaView):
@@ -414,7 +409,6 @@ class TF5PaymentCheckoutView(
     TF5Mixin,
     TemplateView,
 ):
-    extend_template = "ui/layout.html"
     template_name = "ui/tf5/payment/checkout.html"
 
     required_permissions = (
@@ -464,7 +458,6 @@ class TF5PaymentDetailsView(
     TF5Mixin,
     TemplateView,
 ):
-    extend_template = "ui/layout.html"
     template_name = "ui/tf5/payment/details.html"
 
     required_permissions = ("payment.view_payment",)

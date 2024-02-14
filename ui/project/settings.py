@@ -28,6 +28,7 @@ SECRET_KEY = os.environ["DJANGO_SECRET_KEY"]
 
 DEBUG = bool(strtobool(os.environ.get("DJANGO_DEBUG", "False")))
 ENVIRONMENT = os.environ.get("ENVIRONMENT", "development")
+VERSION = os.environ.get("COMMIT_TAG", "")
 
 ALLOWED_HOSTS = ["*"]
 

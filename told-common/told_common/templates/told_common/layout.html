@@ -20,5 +20,15 @@
 {% endblock %}
 {% block extra_footers %}
 {% endblock %}
+{% block modals %}
+{% endblock %}
+<script>
+    $("#logout-link").on('click', function () {
+        return confirm("{% translate 'Er du sikker på at du vil logge ud?' %}");
+    });
+    $("[name=language]").on("change", function (){
+        this.form.submit();
+    });
+</script>
 </body>
 </html>

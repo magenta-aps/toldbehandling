@@ -1,23 +1,18 @@
+{% extends "told_common/layout.html" %}
 {% load static %}
 {% load i18n %}
+{% load bootstrap_icons %}
 {% get_current_language as LANGUAGE_CODE %}
 {% load common_tags %}
-<!doctype html>
-<html lang="da">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="{% static 'bootstrap/bootstrap.min.css' %}" >
-    <link rel="stylesheet" href="{% static 'toldbehandling/css/style.css' %}" >
-    <script src="{% static 'jquery/jquery-3.5.1.min.js' %}"></script>
-    <script src="{% static 'bootstrap/bootstrap.bundle.min.js' %}"></script>
-    <title>{% translate 'Toldbehandling' %}</title>
-    {% block extra_headers %}
-    {% endblock %}
-</head>
-<body>
 {% block header %}
 <header>
+    {% if environment != "production" %}
+    <nav class="bg-warning">
+        <p class="text-center fw-bold my-0">
+            {{environment|upper}}
+        </p>
+    </nav>
+    {% endif %}
     <nav class="nav flex-column flex-sm-row p-1">
         {% if can_list_tf5 %}
         <a class="p-2 text-muted" href="{% url 'tf5_list' %}">{% translate "TF5-anmeldelser" %}</a>
@@ -50,6 +45,9 @@
         </button>
         {% endif %}
         <a href="{% url 'login:logout' %}" class="mx-1 my-2 btn btn-primary" id="logout-link">{% translate "Log ud" %}</a>
+        <button type="button" class="btn btn-outline-primary mx-1 my-2" data-bs-toggle="modal" data-bs-target="#about_modal">
+            Om
+        </button>
     </nav>
     <hr class="p-0 m-0"/>
 </header>
@@ -58,25 +56,44 @@
 {% endblock %}
 {% block extra_footers %}
 {% endblock %}
-<script>
-    $("#logout-link").on('click', function () {
-        return confirm("{% translate 'Er du sikker på at du vil logge ud?' %}");
-    });
-    $("[name=language]").on("change", function (){
-        this.form.submit();
-    });
-</script>
-        <div id="apikey_modal" class="modal">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">API-nøgle</h5>
-                    </div>
-                    <div class="modal-body">
-                         {{user.indberetter_data.api_key}}
-                    </div>
-                </div>
+{% block modals %}
+<div id="apikey_modal" class="modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">API-nøgle</h5>
+            </div>
+            <div class="modal-body">
+                 {{user.indberetter_data.api_key}}
             </div>
         </div>
+    </div>
+</div>
+<div id="about_modal" class="modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Toldbehandling</h5>
+            </div>
+            <div class="modal-body">
+                <table class="table table-borderless">
+                    <tr>
+                        <th>{% translate 'Version' %}:</th>
+                        <td>{{version}}</td>
+                    </tr>
+                    <tr>
+                        <th>{% translate 'Kildekode' %}:</th>
+                        <td>
+                            <a href="https://github.com/magenta-aps/toldbehandling">
+                                https://github.com/magenta-aps/toldbehandling
+                            </a>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
 </body>
 </html>
