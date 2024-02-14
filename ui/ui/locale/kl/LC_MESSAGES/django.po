@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-14 10:08-0200\n"
+"POT-Creation-Date: 2024-02-14 10:26-0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -50,10 +50,6 @@ msgstr ""
 #: ui/templates/ui/layout.html
 msgid "TF10-anmeldelser"
 msgstr ""
-
-#: ui/templates/ui/layout.html
-msgid "Er du sikker på at du vil logge ud?"
-msgstr "Ilumut aniniarpit?"
 
 #: ui/templates/ui/layout.html
 msgid "Version"
@@ -230,10 +226,6 @@ msgstr ""
 #: ui/templates/ui/tf5/tilladelse.html
 msgid "DENNE TILLADELSE ER UOVERDRAGELIG"
 msgstr "AKUERSISSUT UNA ALLAMUT TUNNIUNNEQARSINNAANNGILAQ"
-
-#: ui/views.py
-msgid "Godkendt"
-msgstr ""
 
 #: ui/views.py
 #, python-brace-format

@@ -368,7 +368,7 @@ msgstr "Uterit"
 
 #: told_common/templates/told_common/layout.html
 msgid "Er du sikker på at du vil logge ud?"
-msgstr ""
+msgstr "Ilumut aniniarpit?"
 
 #: told_common/templates/told_common/login.html
 msgid "Login"
