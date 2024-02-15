@@ -28,13 +28,13 @@
            data-sortable="true"
            data-pagination="true"
            data-pagination-parts="['pageList']"
-           data-page-size="{{search_data.limit}}"
-           data-page-number="{{search_data.page_number}}"
+           data-page-size="{{search_data.limit|unlocalize}}"
+           data-page-number="{{search_data.page_number|unlocalize}}"
            data-side-pagination="server"
            data-pagination-loop="false"
            data-defer-url="{% url 'tf10_history' id=id %}?json=1"
            data-query-params="queryParams"
-           data-total-rows="{{total}}"
+           data-total-rows="{{total|unlocalize}}"
            data-silent-sort="true" {# vil vi vise en loading-boks? #}
            data-remember-order="true"
     >

@@ -65,9 +65,7 @@
                         <label for="{{form.kladde.id_for_label}}">{% translate "Fuldmagt" %}</label>
                     </div>
                     <div class="col-8">
-                        {% localize off %}
-                        {{ item.fuldmagtshaver.navn }} (CVR: {{ item.fuldmagtshaver.cvr }})
-                        {% endlocalize %}
+                        {{ item.fuldmagtshaver.navn }} (CVR: {{ item.fuldmagtshaver.cvr|unlocalize }})
                     </div>
                 </div>
                 {% endif %}
