@@ -566,6 +566,7 @@
             if (type === "skibsfragt" && !is_kladde) {
                 fragtbrevnr.attr("pattern", "[a-zA-Z]{5}[0-9]{7}");
                 fragtbrevnr.attr("data-validity-patternmismatch", "{% translate 'Ved skibsfragt skal fragtbrevnummer bestå af fem bogstaver efterfulgt af syv cifre' %}");
+                forbindelsesnr.removeAttr("pattern");
                 forbindelsesnr.removeAttr("data-validity-patternmismatch");
             } else if (type === "luftfragt" && !is_kladde) {
                 forbindelsesnr.attr("pattern", "[0-9]{3}");
@@ -574,8 +575,8 @@
                 fragtbrevnr.attr("data-validity-patternmismatch", "{% translate 'Ved luftfragt skal fragtbrevnummer bestå af otte cifre' %}");
             } else {
                 forbindelsesnr.removeAttr("pattern");
-                fragtbrevnr.removeAttr("pattern");
                 forbindelsesnr.removeAttr("data-validity-patternmismatch");
+                fragtbrevnr.removeAttr("pattern");
                 fragtbrevnr.removeAttr("data-validity-patternmismatch");
             }
             forbindelsesnr.trigger("input");
