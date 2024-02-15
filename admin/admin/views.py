@@ -292,7 +292,9 @@ class TF10FormCreateView(AdminLayoutBaseView, common_views.TF10FormCreateView):
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        count, users = self.rest_client.user.list(group="Indberettere", limit=100000)
+        count, users = self.rest_client.user.list(
+            group="ErhvervIndberettere", limit=100000
+        )
         kwargs["oprettet_på_vegne_af_choices"] = tuple(
             (
                 user.id,

@@ -2712,7 +2712,7 @@ class TF10CreateTest(TestMixin, HasLogin, TestCase):
                             "last_name": "Testersen",
                             "email": "",
                             "is_superuser": False,
-                            "groups": ["Indberettere"],
+                            "groups": ["ErhvervIndberettere"],
                             "permissions": [
                                 "aktør.add_afsender",
                                 "aktør.add_modtager",
