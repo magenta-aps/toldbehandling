@@ -119,7 +119,7 @@
             <tr>
                 {% if vareafgiftssats.subsatser %}
                 <td rowspan="{{vareafgiftssats.subsatser|length|add:1}}">
-                    {% localize off %}{{vareafgiftssats.afgiftsgruppenummer}}{% endlocalize %}
+                    {{vareafgiftssats.afgiftsgruppenummer|unlocalize}}
                 </td>
                 <td>{{vareafgiftssats.vareart_da}}</td>
                 <td>{{vareafgiftssats.vareart_kl}}</td>
@@ -128,7 +128,7 @@
                 <td colspan="4"></td>
                 {% else %}
                 <td>
-                    {% localize off %}{{vareafgiftssats.afgiftsgruppenummer}}{% endlocalize %}
+                    {{vareafgiftssats.afgiftsgruppenummer|unlocalize}}
                 </td>
                 <td>{{vareafgiftssats.vareart_da}}</td>
                 <td>{{vareafgiftssats.vareart_kl}}</td>
