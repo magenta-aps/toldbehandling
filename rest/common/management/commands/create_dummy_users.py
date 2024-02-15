@@ -183,6 +183,7 @@ class Command(BaseCommand):
             username="0111111111 / 12345678",
         )
         indberetter4.groups.add(privatindberettere_group)
+        indberetter4.groups.add(erhvervindberettere_group)
 
         IndberetterProfile.objects.create(
             cpr=111111111, cvr=12345678, user=indberetter4

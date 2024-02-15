@@ -92,7 +92,8 @@ class GroupRequiredMixin(LoginRequiredMixin):
     allowed_groups: Iterable[str] = ()
 
     # Skal stemme overens med de grupper der oprettes i create_groups.py
-    INDBERETTERE = "Indberettere"
+    PRIVATINDBERETTERE = "PrivatIndberettere"
+    ERHVERVINDBERETTERE = "ErhvervIndberettere"
     TOLDMEDARBEJDERE = "Toldmedarbejdere"
     AFSTEMMERE_BOGHOLDERE = "Afstemmere/bogholdere"
     DATAANSVARLIGE = "Dataansvarlige"
