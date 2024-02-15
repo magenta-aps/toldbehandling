@@ -50,6 +50,22 @@ class Postnummer(models.Model):
     )
 
 
+class Stedkode(models.Model):
+    kode = models.PositiveSmallIntegerField(
+        db_index=True,
+        validators=(
+            MinValueValidator(1),
+            MaxValueValidator(500)
+        ),
+        null=False,
+        blank=False,
+    )
+    navn = models.CharField(
+        max_length=100,
+        null=False,
+        blank=False,
+    )
+
 class EboksBesked(models.Model):
     titel = models.CharField(max_length=500)
     cpr = models.BigIntegerField(
