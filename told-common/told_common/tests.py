@@ -42,7 +42,7 @@ class TestMixin:
                     errorlist = el.find(class_="errorlist")
                     if errorlist:
                         error_fields[name] = [
-                            li.text for li in errorlist.find_all(name="li")
+                            li.text.strip() for li in errorlist.find_all(name="li")
                         ]
                         break
         all_errors = soup.find(
@@ -51,7 +51,9 @@ class TestMixin:
             and "nonfield" in tag["class"]
         )
         if all_errors:
-            error_fields["__all__"] = [li.text for li in all_errors.find_all(name="li")]
+            error_fields["__all__"] = [
+                li.text.strip() for li in all_errors.find_all(name="li")
+            ]
         return error_fields
 
 
@@ -810,6 +812,7 @@ class AnmeldelseListViewTest(HasLogin):
                         "postbox": "123",
                         "postnummer": 1234,
                         "telefon": "123456",
+                        "stedkode": None,
                     },
                     "modtager": {
                         "adresse": "Testvej 42",
@@ -821,6 +824,7 @@ class AnmeldelseListViewTest(HasLogin):
                         "postbox": "123",
                         "postnummer": 1234,
                         "telefon": "123456",
+                        "stedkode": None,
                     },
                     "status": "Godkendt",
                     "actions": _view_button(1) or "",
@@ -838,6 +842,7 @@ class AnmeldelseListViewTest(HasLogin):
                         "postbox": "123",
                         "postnummer": 1234,
                         "telefon": "123456",
+                        "stedkode": None,
                     },
                     "modtager": {
                         "adresse": "Testvej 42",
@@ -849,6 +854,7 @@ class AnmeldelseListViewTest(HasLogin):
                         "postbox": "123",
                         "postnummer": 1234,
                         "telefon": "123456",
+                        "stedkode": None,
                     },
                     "status": "Afvist",
                     "actions": "\n".join(
@@ -874,6 +880,7 @@ class AnmeldelseListViewTest(HasLogin):
                         "postbox": "123",
                         "postnummer": 1234,
                         "telefon": "123456",
+                        "stedkode": None,
                     },
                     "modtager": {
                         "adresse": "Testvej 42",
@@ -885,6 +892,7 @@ class AnmeldelseListViewTest(HasLogin):
                         "postbox": "123",
                         "postnummer": 1234,
                         "telefon": "123456",
+                        "stedkode": None,
                     },
                     "status": "Ny",
                     "actions": "\n".join(

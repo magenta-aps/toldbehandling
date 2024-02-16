@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-14 10:47-0200\n"
+"POT-Creation-Date: 2024-02-19 11:30-0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -89,6 +89,10 @@ msgstr "{nedre} -t sinnerlugit fakturami akiata {pct} %-ia"
 #, python-brace-format
 msgid "{pct}% af fakturabeløb"
 msgstr "fakturami akiata {pct} %-ia"
+
+#: told_common/form_mixins.py
+msgid "Indtast et heltal, evt. med foranstillede nuller"
+msgstr ""
 
 #: told_common/form_mixins.py
 #, python-format
@@ -709,8 +713,10 @@ msgid "Postnummer"
 msgstr "Postnr."
 
 #: told_common/templates/told_common/tf10/view.html
-#, fuzzy
-#| msgid "Leverandørfaktura"
+msgid "Stedkode"
+msgstr ""
+
+#: told_common/templates/told_common/tf10/view.html
 msgid "Leverandørfaktura"
 msgstr "Pisiffigisamit faktura"
 

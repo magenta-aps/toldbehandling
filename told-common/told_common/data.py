@@ -233,7 +233,7 @@ class Aktør(ToldDataClass):
     postbox: Optional[str]
     telefon: Optional[str]
     cvr: Optional[int]
-    stedkode: Optional[int]
+    stedkode: Optional[int] = None
 
 
 @dataclass_json
@@ -245,7 +245,7 @@ class Afsender(Aktør):
 @dataclass_json
 @dataclass
 class Modtager(Aktør):
-    kreditordning: bool
+    kreditordning: bool = False
 
 
 @dataclass_json

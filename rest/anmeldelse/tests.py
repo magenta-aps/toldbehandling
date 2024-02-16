@@ -89,8 +89,8 @@ class AfgiftsanmeldelseTest(RestTestMixin, TestCase):
     @property
     def data_map(self):
         return {
-            "afsender": self.afsender_data,
-            "modtager": self.modtager_data,
+            "afsender": self.afsender_data_expected,
+            "modtager": self.modtager_data_expected,
             "fragtforsendelse": self.fragtforsendelse_data,
             "postforsendelse": self.postforsendelse_data,
         }

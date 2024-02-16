@@ -50,10 +50,7 @@ class Postnummer(models.Model):
     )
     stedkode = models.PositiveSmallIntegerField(
         db_index=True,
-        validators=(
-            MinValueValidator(1),
-            MaxValueValidator(500)
-        ),
+        validators=(MinValueValidator(1), MaxValueValidator(500)),
         null=True,
         blank=True,
     )

@@ -140,6 +140,7 @@ class TF10View(AdminLayoutBaseView, common_views.TF10View, FormView):
                 "can_view_history": TF10HistoryListView.has_permissions(
                     request=self.request
                 ),
+                "show_stedkode": True,
             }
         )
         return context
@@ -157,6 +158,11 @@ class TF10View(AdminLayoutBaseView, common_views.TF10View, FormView):
         if toldkategori and toldkategori != self.object.toldkategori:
             self.rest_client.afgiftanmeldelse.set_toldkategori(
                 anmeldelse_id, toldkategori
+            )
+        stedkode = form.cleaned_data["modtager_stedkode"]
+        if stedkode and stedkode != self.object.modtager.stedkode:
+            self.rest_client.modtager.update(
+                self.object.modtager.id, {"stedkode": stedkode}
             )
 
         try:

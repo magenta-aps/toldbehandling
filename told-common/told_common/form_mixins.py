@@ -3,9 +3,12 @@
 # SPDX-License-Identifier: MPL-2.0
 
 import re
+from typing import Optional
 
 from django import forms
+from django.core.exceptions import ValidationError
 from django.core.files import File
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.forms import FileField, MultipleChoiceField
 from django.utils.translation import gettext_lazy as _
 from dynamic_forms import DynamicFormMixin
@@ -87,6 +90,53 @@ class ButtonlessDecimalField(ErrorMessagesFieldMixin, forms.DecimalField):
         "min_value": "data-validity-rangeunderflow",
         "max_value": "data-validity-rangeoverflow",
     }
+
+
+class FixedWidthIntegerField(ErrorMessagesFieldMixin, forms.CharField):
+    widget = forms.TextInput()
+    attribute_map = {
+        "min_value": "data-validity-rangeunderflow",
+        "max_value": "data-validity-rangeoverflow",
+    }
+    default_error_messages = {
+        "invalid": _(
+            "Indtast et heltal, evt. med foranstillede nuller"
+        ),  # Kopieret fra Django
+    }
+
+    def __init__(self, width: int = 1, min_value: int = 0, *args, **kwargs):
+        self.width = int(width)
+        self.min_value = int(min_value)
+        super().__init__(*args, **kwargs)
+        self.validators.append(MinValueValidator(min_value))
+        self.validators.append(MaxValueValidator((10**width) - 1))
+
+    def widget_attrs(self, widget):
+        attrs = super().widget_attrs(widget)
+        # HTML-attributter. Hvis vi havde sat max_length og min_length
+        # på `CharField`, var der kommet strengvalidatorer som kører
+        # på vores konverterede int-værdi fra `to_python`
+        attrs["maxlength"] = str(self.width)
+        attrs["minlength"] = str(self.width)
+        attrs["pattern"] = "\\d{" + str(self.width) + "}"
+        return attrs
+
+    def to_python(self, value: str) -> Optional[int]:
+        # Fra formularfeltets value til python-værdi
+        # Validering kører på returværdien
+        value = super().to_python(value)
+        if value in (None, ""):
+            return None
+        try:
+            return int(value)
+        except ValueError:
+            raise ValidationError(self.error_messages["invalid"], code="invalid")
+
+    def prepare_value(self, value: Optional[int]) -> str:
+        # Fra python-værdi til formularfeltets value
+        if value is None:
+            return ""
+        return str(value).zfill(self.width)
 
 
 class MaxSizeFileField(ErrorMessagesFieldMixin, FileField):

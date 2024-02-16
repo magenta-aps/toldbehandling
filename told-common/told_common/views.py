@@ -773,7 +773,6 @@ class TF10View(TF10BaseView, TemplateView):
         "sats.view_vareafgiftssats",
     )
     edit_permissions = ("anmeldelse.change_afgiftsanmeldelse",)
-
     extend_template = "told_common/layout.html"
     template_name = "told_common/tf10/view.html"
 
@@ -807,6 +806,8 @@ class TF10View(TF10BaseView, TemplateView):
             ]
             if kategorier and not self.object.toldkategori:
                 initial["toldkategori"] = kategorier[0]
+        if self.object.modtager.stedkode:
+            initial["modtager_stedkode"] = self.object.modtager.stedkode
         return initial
 
     @cached_property
