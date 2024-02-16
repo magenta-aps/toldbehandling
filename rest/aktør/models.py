@@ -6,6 +6,8 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models import CheckConstraint, Q
 
+from rest.common.models import Postnummer
+
 
 class Aktør(models.Model):
     class Meta:
@@ -28,6 +30,20 @@ class Aktør(models.Model):
         validators=(
             MinValueValidator(1000),
             MaxValueValidator(99999999),
+        ),
+        null=True,
+        blank=True,
+    )
+    postnummer_ref = models.ForeignKey(
+        Postnummer,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+    )
+    eksplicit_stedkode = models.PositiveSmallIntegerField(
+        validators=(
+            MinValueValidator(1),
+            MaxValueValidator(999),
         ),
         null=True,
         blank=True,
@@ -67,6 +83,10 @@ class Aktør(models.Model):
 
     def save(self, *args, **kwargs):
         super().full_clean()
+        if self.postnummer is None and self.postnummer_ref is not None:
+            self.postnummer_ref = None
+        elif self.postnummer_ref is None or self.postnummer_ref.postnummer != self.postnummer:
+            self.postnummer_ref = Postnummer.objects.filter(postnummer=self.postnummer).first()
         super().save(*args, **kwargs)
 
 

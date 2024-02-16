@@ -33,6 +33,7 @@ class AfsenderIn(ModelSchema):
 
 
 class PartialAfsenderIn(ModelSchema):
+    stedkode: Optional[int] = None
     class Config:
         model = Modtager
         model_fields = [
@@ -129,6 +130,8 @@ class AfsenderAPI:
     ):
         item = get_object_or_404(Afsender, id=id)
         data = payload.dict(exclude_unset=True)
+        stedkode = data.pop("stedkode")
+        item.eksplicit_stedkode = stedkode
         for attr, value in data.items():
             if value is not None:
                 setattr(item, attr, value)
@@ -154,6 +157,7 @@ class ModtagerIn(ModelSchema):
 
 
 class PartialModtagerIn(ModelSchema):
+    stedkode: Optional[int] = None
     class Config:
         model = Modtager
         model_fields = [
@@ -253,6 +257,8 @@ class ModtagerAPI:
     ):
         item = get_object_or_404(Modtager, id=id)
         data = payload.dict(exclude_unset=True)
+        stedkode = data.pop("stedkode")
+        item.eksplicit_stedkode = stedkode
         for attr, value in data.items():
             if value is not None:
                 setattr(item, attr, value)

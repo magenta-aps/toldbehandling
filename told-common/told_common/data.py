@@ -233,6 +233,7 @@ class Aktør(ToldDataClass):
     postbox: Optional[str]
     telefon: Optional[str]
     cvr: Optional[int]
+    stedkode: Optional[int]
 
 
 @dataclass_json
