@@ -122,12 +122,6 @@
                     </p>
                     </div>
                     <input style="display: none" type="hidden" name="{{form.afsender_existing_id.name}}"/>
-                    <div class="alert alert-warning changed" style="display: none">
-                        <div>
-                            {% translate "Afsenderoplysninger er ændrede i forhold til den afsender, der allerede er registreret." %}
-                        </div>
-                        {{form.afsender_change_existing}}
-                    </div>
                 </div>
             </div>
                 <div class="row align-items-center">
@@ -216,12 +210,6 @@
                         </p>
                         </div>
                         <input style="display: none" type="hidden" name="{{form.modtager_existing_id.name}}"/>
-                        <div class="alert alert-warning changed" style="display: none">
-                            <div>
-                                {% translate "Modtageroplysninger er ændrede i forhold til den modtager der allerede er registreret." %}
-                            </div>
-                            {{form.modtager_change_existing}}
-                    </div>
                 </div>
             </div>
                 <div class="row align-items-center">
