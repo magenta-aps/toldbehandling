@@ -40,7 +40,12 @@ $(function () {
 
         const updateChoices = function(fieldName, event, callback) {
             const filter = {"kladde": false};
-            filter[fieldName] = this.val();
+            for (let searchfield of aktør["searchfields"]) {
+                const value = $(fields[searchfield]).val();
+                if (value !== "") {
+                    filter[searchfield] = value;
+                }
+            }
             if (filter[fieldName]) {
                 const warning = multi_container.find(".multiple");
                 const hiddenfield = multi_container.find("[type=hidden]");
