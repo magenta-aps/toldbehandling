@@ -315,6 +315,7 @@ class TestGodkend(PermissionsTest, TestCase):
                 "telefon": "123456",
                 "cvr": 12345678,
                 "kreditordning": True,
+                "stedkode": 123,
             }
 
         elif path == expected_prefix + "afgiftsanmeldelse/1":
@@ -618,7 +619,7 @@ class TestGodkend(PermissionsTest, TestCase):
         self.assertEquals(response.status_code, 500)
 
 
-class TestPrisme(PermissionsTest, TestCase):
+class TestPrisme(TestMixin, PermissionsTest, TestCase):
     view = TF10View
 
     check_permissions = (
@@ -628,6 +629,7 @@ class TestPrisme(PermissionsTest, TestCase):
     def setUp(self):
         super().setUp()
         self.posted: List[Tuple[str, str]] = []
+        self.patched: List[Tuple[str, str]] = []
 
     def mock_requests_get(self, path):
         expected_prefix = f"{settings.REST_DOMAIN}/api/"
@@ -819,6 +821,27 @@ class TestPrisme(PermissionsTest, TestCase):
         response.status_code = status_code or 404
         return response
 
+    def mock_requests_patch(self, path, data, headers=None):
+        expected_prefix = f"{settings.REST_DOMAIN}/api/"
+        path = path.rstrip("/")
+        response = Response()
+        json_content = None
+        content = None
+        status_code = None
+        if path == expected_prefix + "modtager/1":
+            json_content = {"id": 1}
+            self.patched.append((path, data))
+        else:
+            print(f"Mock {self.__class__.__name__} got unrecognized path: PATCH {path}")
+        if json_content:
+            content = json.dumps(json_content).encode("utf-8")
+        if content:
+            if not status_code:
+                status_code = 200
+            response._content = content
+        response.status_code = status_code or 404
+        return response
+
     def mock_requests_error(self, path, *args, **kwargs):
         response = Response()
         response.status_code = 500
@@ -832,18 +855,33 @@ class TestPrisme(PermissionsTest, TestCase):
     def mock_prisme_send(self, request_object):
         return prisme_send_dummy(request_object)
 
+    @patch.object(requests.sessions.Session, "patch")
     @patch.object(requests.sessions.Session, "get")
     @patch.object(requests.sessions.Session, "post")
     @patch.object(PrismeClient, "send")
-    def test_post_view_prisme(self, mock_send, mock_post, mock_get):
+    def test_post_view_prisme(self, mock_send, mock_post, mock_get, mock_patch):
         self.login()
         view_url = reverse("tf10_view", kwargs={"id": 1})
         mock_send.side_effect = self.mock_prisme_send
         mock_post.side_effect = self.mock_requests_post
         mock_get.side_effect = self.mock_requests_get
+        mock_patch.side_effect = self.mock_requests_patch
         response = self.client.post(view_url, {"send_til_prisme": "true"})
+        self.assertEquals(response.status_code, 200)
+        self.assertEquals(
+            self.get_errors(response.content)["__all__"],
+            ["Der skal vælges en stedkode når der sendes til Prisme"],
+        )
+
+        response = self.client.post(
+            view_url, {"send_til_prisme": "true", "modtager_stedkode": "123"}
+        )
         self.assertEquals(response.status_code, 302)
         prefix = f"{settings.REST_DOMAIN}/api/"
+        patched = defaultdict(list)
+        for url, data in self.patched:
+            patched[url].append(json.loads(data))
+        self.assertEquals(patched[prefix + "modtager/1"][0]["stedkode"], 123)
         posted = defaultdict(list)
         for url, data in self.posted:
             posted[url].append(json.loads(data))

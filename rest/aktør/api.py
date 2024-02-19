@@ -7,6 +7,7 @@ from typing import Optional
 from aktør.models import Afsender, Modtager, Speditør
 from common.api import get_auth_methods
 from django.core.exceptions import ValidationError
+from django.db.models import Q
 from django.http import HttpResponseBadRequest
 from django.shortcuts import get_object_or_404
 from ninja import Field, FilterSchema, ModelSchema, Query
@@ -17,6 +18,8 @@ from project.util import RestPermission, json_dump
 
 
 class AfsenderIn(ModelSchema):
+    stedkode: Optional[int] = None
+
     class Config:
         model = Afsender
         model_fields = [
@@ -33,6 +36,8 @@ class AfsenderIn(ModelSchema):
 
 
 class PartialAfsenderIn(ModelSchema):
+    stedkode: Optional[int] = None
+
     class Config:
         model = Modtager
         model_fields = [
@@ -49,6 +54,8 @@ class PartialAfsenderIn(ModelSchema):
 
 
 class AfsenderOut(ModelSchema):
+    stedkode: Optional[int]
+
     class Config:
         model = Afsender
         model_fields = [
@@ -63,6 +70,10 @@ class AfsenderOut(ModelSchema):
             "kladde",
         ]
 
+    @staticmethod
+    def resolve_stedkode(obj: Afsender):
+        return obj.stedkode
+
 
 class AfsenderFilterSchema(FilterSchema):
     navn: Optional[str] = Field(q="navn__icontains")
@@ -73,6 +84,12 @@ class AfsenderFilterSchema(FilterSchema):
     telefon: Optional[str]
     cvr: Optional[int]
     kladde: Optional[bool]
+    stedkode: Optional[int]
+
+    def filter_stedkode(self, value: int) -> Q:
+        return Q(eksplicit_stedkode=value) | (
+            Q(eksplicit_stedkode__isnull=True) & Q(postnummer_ref__stedkode=value)
+        )
 
 
 class AfsenderPermission(RestPermission):
@@ -137,6 +154,8 @@ class AfsenderAPI:
 
 
 class ModtagerIn(ModelSchema):
+    stedkode: Optional[int] = None
+
     class Config:
         model = Modtager
         model_fields = [
@@ -154,6 +173,8 @@ class ModtagerIn(ModelSchema):
 
 
 class PartialModtagerIn(ModelSchema):
+    stedkode: Optional[int] = None
+
     class Config:
         model = Modtager
         model_fields = [
@@ -171,6 +192,8 @@ class PartialModtagerIn(ModelSchema):
 
 
 class ModtagerOut(ModelSchema):
+    stedkode: Optional[int]
+
     class Config:
         model = Modtager
         model_fields = [
@@ -186,6 +209,10 @@ class ModtagerOut(ModelSchema):
             "kladde",
         ]
 
+    @staticmethod
+    def resolve_stedkode(obj: Afsender):
+        return obj.stedkode
+
 
 class ModtagerFilterSchema(FilterSchema):
     navn: Optional[str] = Field(q="navn__icontains")
@@ -197,6 +224,12 @@ class ModtagerFilterSchema(FilterSchema):
     cvr: Optional[int]
     kreditordning: Optional[bool]
     kladde: Optional[bool]
+    stedkode: Optional[int]
+
+    def filter_stedkode(self, value: int) -> Q:
+        return Q(eksplicit_stedkode=value) | (
+            Q(eksplicit_stedkode__isnull=True) & Q(postnummer_ref__stedkode=value)
+        )
 
 
 class ModtagerPermission(RestPermission):

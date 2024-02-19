@@ -101,9 +101,10 @@ class CustomDutyRequest(PrismeRequestObject):
         )
 
     @property
-    def afsenderbykode(self):
-        if self.afgiftsanmeldelse.postforsendelse:
-            return self.afgiftsanmeldelse.postforsendelse.afsenderbykode
+    def stedkode(self):
+        stedkode = self.afgiftsanmeldelse.modtager.stedkode
+        if stedkode is not None:
+            return str(stedkode).zfill(3)
         return ""
 
     @property
@@ -155,7 +156,7 @@ class CustomDutyRequest(PrismeRequestObject):
             "BillOfLadingOrPostalNumber": self.forsendelsesnummer,
             "ConnectionNumber": self.empty_if_none(self.forbindelsesnummer),
             "CustomsCategory": self.toldkategori,
-            "LocationCode": self.empty_if_none(self.afsenderbykode),
+            "LocationCode": self.empty_if_none(self.stedkode),
             "PaymentParty": self.betaler,
             "DlvModeId": self.leveringsmåde,
             "DeliveryDate": self.forsendelse.afgangsdato.isoformat(),

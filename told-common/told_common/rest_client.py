@@ -93,26 +93,28 @@ class ModelRestClient:
 
 
 class AfsenderRestClient(ModelRestClient):
+    @staticmethod
+    def map(data: dict) -> Optional[dict]:
+        return filter_dict_none(
+            {
+                key: data.get("afsender_" + key) or data.get(key)
+                for key in (
+                    "navn",
+                    "adresse",
+                    "postnummer",
+                    "by",
+                    "postbox",
+                    "telefon",
+                    "cvr",
+                    "stedkode",
+                )
+            }
+        )
+
     def get_or_create(self, ident: dict, data: Optional[dict] = None) -> int:
         if data is None:
             data = ident
-        mapped = {
-            d: filter_dict_none(
-                {
-                    key: store.get("afsender_" + key) or store.get(key)
-                    for key in (
-                        "navn",
-                        "adresse",
-                        "postnummer",
-                        "by",
-                        "postbox",
-                        "telefon",
-                        "cvr",
-                    )
-                }
-            )
-            for d, store in (("ident", ident), ("data", data))
-        }
+        mapped = {d: self.map(store) for d, store in (("ident", ident), ("data", data))}
         if "kladde" in data:
             mapped["data"]["kladde"] = data["kladde"]
         if mapped["ident"]:
@@ -123,43 +125,34 @@ class AfsenderRestClient(ModelRestClient):
         return resp["id"]
 
     def update(self, id: int, data: dict) -> int:
-        mapped = {
-            key: data.get("afsender_" + key) or data.get(key)
-            for key in (
-                "navn",
-                "adresse",
-                "postnummer",
-                "by",
-                "postbox",
-                "telefon",
-                "cvr",
-            )
-        }
+        mapped = self.map(data)
         self.rest.patch(f"afsender/{id}", mapped)
         return id
 
 
 class ModtagerRestClient(ModelRestClient):
+    @staticmethod
+    def map(data: dict) -> Optional[dict]:
+        return filter_dict_none(
+            {
+                key: data.get("modtager_" + key) or data.get(key)
+                for key in (
+                    "navn",
+                    "adresse",
+                    "postnummer",
+                    "by",
+                    "postbox",
+                    "telefon",
+                    "cvr",
+                    "stedkode",
+                )
+            }
+        )
+
     def get_or_create(self, ident: dict, data: Optional[dict] = None) -> int:
         if data is None:
             data = ident
-        mapped = {
-            d: filter_dict_none(
-                {
-                    key: store.get("modtager_" + key) or store.get(key)
-                    for key in (
-                        "navn",
-                        "adresse",
-                        "postnummer",
-                        "by",
-                        "postbox",
-                        "telefon",
-                        "cvr",
-                    )
-                }
-            )
-            for d, store in (("ident", ident), ("data", data))
-        }
+        mapped = {d: self.map(store) for d, store in (("ident", ident), ("data", data))}
         if "kladde" in data:
             mapped["data"]["kladde"] = data["kladde"]
         if mapped["ident"]:
@@ -170,18 +163,7 @@ class ModtagerRestClient(ModelRestClient):
         return resp["id"]
 
     def update(self, id: int, data: dict) -> int:
-        mapped = {
-            key: data.get("modtager_" + key) or data.get(key)
-            for key in (
-                "navn",
-                "adresse",
-                "postnummer",
-                "by",
-                "postbox",
-                "telefon",
-                "cvr",
-            )
-        }
+        mapped = self.map(data)
         self.rest.patch(f"modtager/{id}", mapped)
         return id
 

@@ -48,6 +48,12 @@ class Postnummer(models.Model):
         null=False,
         default=0,
     )
+    stedkode = models.PositiveSmallIntegerField(
+        db_index=True,
+        validators=(MinValueValidator(1), MaxValueValidator(500)),
+        null=True,
+        blank=True,
+    )
 
 
 class EboksBesked(models.Model):

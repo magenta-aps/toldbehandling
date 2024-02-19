@@ -55,6 +55,7 @@ services:
       - CREATE_SYSTEM_USER=false
       - CREATE_GROUPS=false
       - CREATE_POSTNUMRE=false
+      - CREATE_STEDKODER=false
       - TEST=false
       - DUMMYDATA=false
     network_mode: "host"

@@ -455,6 +455,10 @@ class RestMixin:
             "cvr": 12345678,
             "kladde": False,
         }
+        self.afsender_data_expected = {
+            **self.afsender_data,
+            "stedkode": None,
+        }
         self.modtager_data = {
             "navn": "Testfirma 1",
             "adresse": "Testvej 42",
@@ -465,6 +469,10 @@ class RestMixin:
             "cvr": 12345678,
             "kreditordning": True,
             "kladde": False,
+        }
+        self.modtager_data_expected = {
+            **self.modtager_data,
+            "stedkode": None,
         }
 
         self.fragtforsendelse_data = {

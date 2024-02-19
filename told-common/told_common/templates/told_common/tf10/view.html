@@ -7,8 +7,23 @@
 {% block content %}
 <form method="post">
     {% csrf_token %}
-    {{form.errors}}
+
     <div class="mx-5">
+
+        {% if form.errors %}
+        <div class="alert alert-danger">
+            <ul class="errorlist nonfield">
+            {% for field in form.errors %}
+            {% for error in form.errors|get:field %}
+            <li>
+                {{error}}
+            </li>
+            {% endfor %}
+            {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
         <h1>{% blocktranslate with id=object.id %}Afgiftsanmeldelse {{id}}{% endblocktranslate %}</h1>
 
         {% if object.status == "afsluttet" %}
@@ -148,6 +163,18 @@
                         {{object.modtager.by|default_if_none:""}}
                     </div>
                 </div>
+                {% if show_stedkode %}
+                <div class="row">
+                    <div class="col-4">
+                        <label>{% translate "Stedkode" %}:</label>
+                    </div>
+                    <div class="col-8">
+                        {% if object.modtager.stedkode %}
+                        {{object.modtager.stedkode|zfill:3}}
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
                 <div class="row">
                     <div class="col-4">
                         <label>{% translate "Telefon" %}:</label>
@@ -523,10 +550,19 @@
 
                     <div class="row align-items-center">
                         <div class="col-4">
-                            <label for="{{form.toldkategori.id_for_label}}">{{form.toldkategori.label}}</label>
+                            <label for="{{form.toldkategori.id_for_label}}">{{form.toldkategori.label}}*</label>
                         </div>
                         <div class="col-8">
                             {{form.toldkategori}}
+                        </div>
+                    </div>
+
+                    <div class="row align-items-center">
+                        <div class="col-4">
+                            <label for="{{form.modtager_stedkode.id_for_label}}">{{form.modtager_stedkode.label}}*</label>
+                        </div>
+                        <div class="col-8">
+                            {{form.modtager_stedkode}}
                         </div>
                     </div>
                 </div>
@@ -568,9 +604,11 @@
 <script>
     $(".modal").on("show.bs.modal", function () {
         $(this).find("input,select,textarea").removeAttr("disabled");
+        $(this).find("[data-modal-required=true]").attr("required", "required");
     });
     $(".modal").on("hide.bs.modal", function () {
         $(this).find("input,select,textarea").attr("disabled", "disabled");
+        $(this).find("[data-modal-required=true]").removeAttr("required");
     });
 </script>
 {% endblock %}

@@ -104,7 +104,7 @@ class Command(BaseCommand):
             cvr=20000000,
         )
         Modtager.objects.create(
-            navn="Testfirma2",
+            navn="Testfirma3",
             adresse="Testvej 4",
             postnummer=1234,
             by="Testby",
