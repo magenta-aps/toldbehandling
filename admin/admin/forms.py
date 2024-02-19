@@ -15,7 +15,9 @@ from tempus_dominus.widgets import DateTimePicker
 from told_common import forms as common_forms
 from told_common.form_mixins import (
     BootstrapForm,
+    ButtonlessIntegerField,
     DateInput,
+    FixedWidthIntegerField,
     MaxSizeFileField,
     MultipleSeparatedChoiceField,
 )
@@ -70,17 +72,35 @@ class TF10ViewForm(BootstrapForm):
             (item["kategori"], f"{item['kategori']} - {item['navn']}")
             for item in settings.CVR_TOLDKATEGORI_MAP
         ],
-        widget=forms.Select(attrs={"disabled": "disabled"}),
+        widget=forms.Select(
+            attrs={"disabled": "disabled", "data-modal-required": "true"}
+        ),
+    )
+    modtager_stedkode = FixedWidthIntegerField(
+        required=False,
+        label=_("Stedkode"),
+        width=3,
+        widget=forms.TextInput(
+            attrs={"disabled": "disabled", "data-modal-required": "true"}
+        ),
     )
 
     def clean(self):
-        if (
-            "send_til_prisme" in self.cleaned_data
-            and "toldkategori" not in self.cleaned_data
-        ):
-            raise ValidationError(
-                "Skal vælge en toldkategori når der sendes til Prisme"
-            )
+        if self.cleaned_data.get("send_til_prisme"):
+            if "toldkategori" not in self.cleaned_data:
+                self.add_error(
+                    "toldkategori",
+                    ValidationError(
+                        "Skal vælge en toldkategori når der sendes til Prisme"
+                    ),
+                )
+            if not self.cleaned_data.get("modtager_stedkode"):
+                self.add_error(
+                    "modtager_stedkode",
+                    ValidationError(
+                        "Der skal vælges en stedkode når der sendes til Prisme"
+                    ),
+                )
 
 
 class TF10UpdateForm(common_forms.TF10Form):

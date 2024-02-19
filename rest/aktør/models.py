@@ -2,6 +2,7 @@
 #
 # SPDX-License-Identifier: MPL-2.0
 
+from common.models import Postnummer
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models import CheckConstraint, Q
@@ -28,6 +29,20 @@ class Aktør(models.Model):
         validators=(
             MinValueValidator(1000),
             MaxValueValidator(99999999),
+        ),
+        null=True,
+        blank=True,
+    )
+    postnummer_ref = models.ForeignKey(
+        Postnummer,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+    )
+    eksplicit_stedkode = models.PositiveSmallIntegerField(
+        validators=(
+            MinValueValidator(1),
+            MaxValueValidator(999),
         ),
         null=True,
         blank=True,
@@ -67,7 +82,30 @@ class Aktør(models.Model):
 
     def save(self, *args, **kwargs):
         super().full_clean()
+        if self.postnummer is None and self.postnummer_ref is not None:
+            self.postnummer_ref = None
+        elif (
+            self.postnummer_ref is None
+            or self.postnummer_ref.postnummer != self.postnummer
+        ):
+            self.postnummer_ref = Postnummer.objects.filter(
+                postnummer=self.postnummer
+            ).first()
         super().save(*args, **kwargs)
+
+    @property
+    def stedkode(self):
+        if self.eksplicit_stedkode:
+            return self.eksplicit_stedkode
+        if self.postnummer_ref:
+            return self.postnummer_ref.stedkode
+        return None
+
+    @stedkode.setter
+    def stedkode(self, stedkode):
+        if self.postnummer_ref is not None and self.postnummer_ref.stedkode == stedkode:
+            stedkode = None
+        self.eksplicit_stedkode = stedkode
 
 
 class Afsender(Aktør):

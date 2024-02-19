@@ -14,6 +14,9 @@ class AfsenderTest(RestTestMixin, TestCase):
     def setUp(self) -> None:
         super().setUp()
         self.creation_data = self.afsender_data
+        self.calculated_fields = {
+            "stedkode": None,
+        }
 
     def create_items(self):
         self.precreated_item = self.afsender
@@ -32,6 +35,7 @@ class AfsenderTest(RestTestMixin, TestCase):
         "cvr": 12345670,
     }
     unique_fields = []
+    exclude_fields = ["postnummer_ref", "eksplicit_stedkode"]
 
     @property
     def expected_object_data(self):
@@ -39,7 +43,7 @@ class AfsenderTest(RestTestMixin, TestCase):
 
     @property
     def expected_list_response_dict(self):
-        return {"id": self.afsender.id, **self.creation_data}
+        return {"id": self.afsender.id, **self.creation_data, **self.calculated_fields}
 
     @property
     def update_object_data(self):
@@ -76,6 +80,9 @@ class ModtagerTest(RestTestMixin, TestCase):
     def setUp(self) -> None:
         super().setUp()
         self.creation_data = self.modtager_data
+        self.calculated_fields = {
+            "stedkode": None,
+        }
 
     def create_items(self):
         self.precreated_item = self.modtager
@@ -95,6 +102,7 @@ class ModtagerTest(RestTestMixin, TestCase):
         "cvr": 12345670,
         "kreditordning": False,
     }
+    exclude_fields = ["postnummer_ref", "eksplicit_stedkode"]
 
     @property
     def expected_object_data(self):
@@ -102,7 +110,7 @@ class ModtagerTest(RestTestMixin, TestCase):
 
     @property
     def expected_list_response_dict(self):
-        return {"id": self.modtager.id, **self.creation_data}
+        return {"id": self.modtager.id, **self.creation_data, **self.calculated_fields}
 
     @property
     def update_object_data(self):
