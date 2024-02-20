@@ -156,7 +156,7 @@ class TF5FormCreateView(
     def form_valid(self, form, formset):
         self.anmeldelse_id = self.rest_client.privat_afgiftsanmeldelse.create(
             {**form.cleaned_data, "indførselstilladelse": self.indførselstilladelse},
-            self.request.FILES["leverandørfaktura"],
+            form.cleaned_data["leverandørfaktura"],
         )
         for subform in formset:
             if subform.cleaned_data:
