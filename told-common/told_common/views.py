@@ -256,7 +256,6 @@ class TF10FormCreateView(
                 "kan_ændre_kladde": True,
             }
         )
-        form = context["form"]
 
         context["indberetter_data"] = (
             self.userdata["indberetter_data"]
