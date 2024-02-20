@@ -562,8 +562,8 @@
             const is_kladde = kladde.val() === "True";
             const type = fragttype.val();
             if (type === "skibsfragt" && !is_kladde) {
-                forbindelsesnr.removeAttr("pattern");
-                forbindelsesnr.removeAttr("data-validity-patternmismatch");
+                forbindelsesnr.attr("pattern", ".+ [0-9]{3}");
+                forbindelsesnr.attr("data-validity-patternmismatch", "{% translate 'Ved skibsfragt skal forbindelsesnummer slutte på mellemrum og tre cifre' %}");
                 fragtbrevnr.attr("pattern", "[a-zA-Z]{5}[0-9]{7}");
                 fragtbrevnr.attr("data-validity-patternmismatch", "{% translate 'Ved skibsfragt skal fragtbrevnummer bestå af fem bogstaver efterfulgt af syv cifre' %}");
             } else if (type === "luftfragt" && !is_kladde) {
