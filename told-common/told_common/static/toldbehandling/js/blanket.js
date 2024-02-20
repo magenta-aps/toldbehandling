@@ -24,7 +24,6 @@ $(function () {
         const multi_container = $(aktør["multi_container"]);
         const labels = aktør["multi_label"];
         const multi_select = multi_container.find("select");
-        const preselected_id = aktør["preselected_id"];
         items.push([]);
 
         multi_select.change(function () {

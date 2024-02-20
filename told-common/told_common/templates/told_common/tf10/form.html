@@ -121,7 +121,6 @@
                         {{form.afsender_existing_id}}
                     </p>
                     </div>
-                    <input style="display: none" type="hidden" name="{{form.afsender_existing_id.name}}"/>
                 </div>
             </div>
                 <div class="row align-items-center">
@@ -510,7 +509,6 @@
                 "navn": "#afsender_adresse_container [data-multi=navn]"
             },
             "multi_changed_container": "#afsender_address_changed",
-            "preselected_id": {{afsender_existing_id|default:"null"}},
         },
         {
             "fields": {
@@ -531,7 +529,6 @@
                 "navn": "#modtager_adresse_container [data-multi=navn]"
             },
             "multi_changed_container": "#modtager_address_changed",
-            "preselected_id": {{modtager_existing_id|default:"null"}},
         }
     ];
 </script>

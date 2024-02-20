@@ -257,17 +257,6 @@ class TF10FormCreateView(
             }
         )
         form = context["form"]
-        if hasattr(form, "cleaned_data"):
-            context.update(
-                {
-                    "afsender_existing_id": form.cleaned_data.get(
-                        "afsender_existing_id", None
-                    ),
-                    "modtager_existing_id": form.cleaned_data.get(
-                        "modtager_existing_id", None
-                    ),
-                }
-            )
 
         context["indberetter_data"] = (
             self.userdata["indberetter_data"]
@@ -512,8 +501,6 @@ class TF10FormUpdateView(
                     self.rest_client.varesatser_fra(self.item.dato)
                 ),
                 "item": self.item,
-                "afsender_existing_id": self.item.afsender.id,
-                "modtager_existing_id": self.item.modtager.id,
                 "notater": self.rest_client.notat.list(
                     afgiftsanmeldelse=self.kwargs["id"]
                 ),
