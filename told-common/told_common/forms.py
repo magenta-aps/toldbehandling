@@ -309,6 +309,7 @@ class TF10Form(BootstrapForm):
     def clean(self):
         if self.cleaned_data["kladde"]:
             return
+
         fragttype = self.cleaned_data["fragttype"]
         if (
             self.fragtbrev_required
@@ -320,8 +321,9 @@ class TF10Form(BootstrapForm):
             and not self.files.get("fragtbrev")
         ):
             self.add_error("fragtbrev", ValidationError(_("Mangler fragtbrev")))
+
         if fragttype == "skibsfragt":
-            if not re.match(r"^ \d{3}$", self.cleaned_data["forbindelsesnr"]):
+            if not re.match(r".+ \d{3}$", self.cleaned_data["forbindelsesnr"]):
                 self.add_error(
                     "forbindelsesnr",
                     ValidationError(
@@ -340,6 +342,7 @@ class TF10Form(BootstrapForm):
                         )
                     ),
                 )
+
         if fragttype == "luftfragt":
             if not re.match(r"^\d{3}$", self.cleaned_data["forbindelsesnr"]):
                 self.add_error(
