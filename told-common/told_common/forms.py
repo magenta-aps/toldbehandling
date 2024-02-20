@@ -136,15 +136,6 @@ class TF10Form(BootstrapForm):
         label=_("Tlf."),
     )
     afsender_existing_id = forms.IntegerField(required=False, widget=forms.Select)
-    afsender_change_existing = forms.BooleanField(
-        required=False,
-        widget=forms.RadioSelect(
-            choices=(
-                (False, _("Opret en ny afsender med de indtastede oplysninger")),
-                (True, _("Opdatér den valgte afsender med de indtastede oplysinger")),
-            )
-        ),
-    )
 
     modtager_cvr = ButtonlessIntegerField(
         min_value=10000000,
@@ -195,15 +186,6 @@ class TF10Form(BootstrapForm):
         label=_("Tlf."),
     )
     modtager_existing_id = forms.IntegerField(required=False, widget=forms.Select)
-    modtager_change_existing = forms.BooleanField(
-        required=False,
-        widget=forms.RadioSelect(
-            choices=(
-                (False, _("Opret en ny modtager med de indtastede oplysninger")),
-                (True, _("Opdatér den valgte modtager med de indtastede oplysinger")),
-            )
-        ),
-    )
     indførselstilladelse = DynamicField(
         forms.CharField,
         max_length=12,
