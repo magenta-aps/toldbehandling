@@ -171,7 +171,7 @@ if not EBOKS["mock"]:
 
 # Payments
 
-PAYMENT_PROVIDER = "nets"
+PAYMENT_PROVIDER_NETS = "nets"
 PAYMENT_PROVIDER_NETS_HOST = os.environ.get(
     "PAYMENT_PROVIDER_NETS_HOST", "https://api.dibspayment.eu"
 )
@@ -181,6 +181,10 @@ PAYMENT_PROVIDER_NETS_SECRET_KEY = os.environ.get(
 PAYMENT_PROVIDER_NETS_TERMS_URL = os.environ.get(
     "PAYMENT_PROVIDER_NETS_TERMS_URL", "https://groendland.dk/terms"
 )
+
+PAYMENT_PROVIDER_BANK = "bank"
+
+# Logging
 
 LOGGING = {
     "version": 1,

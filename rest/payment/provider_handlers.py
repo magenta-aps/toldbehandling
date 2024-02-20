@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: MPL-2.0
 
 import requests
-from payment.exceptions import ProviderPaymentNotFound
+from payment.exceptions import InternalPaymentError, ProviderPaymentNotFound
 from payment.schemas import ProviderPaymentPayload
 from payment.utils import convert_keys_to_camel_case
 from project import settings
@@ -93,3 +93,11 @@ class BankProviderHandler(ProviderHandler):
 
     def read(self, payment_id: str):
         return None
+
+
+def get_provider_handler(provider_name: str) -> NetsProviderHandler:
+    if provider_name.lower() == settings.PAYMENT_PROVIDER_NETS:
+        return NetsProviderHandler(secret_key=settings.PAYMENT_PROVIDER_NETS_SECRET_KEY)
+    if provider_name.lower() == settings.PAYMENT_PROVIDER_BANK:
+        return BankProviderHandler()
+    raise InternalPaymentError(f"Unknown provider: {provider_name}")

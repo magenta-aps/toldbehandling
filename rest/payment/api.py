@@ -11,13 +11,13 @@ from django.forms import model_to_dict
 from ninja_extra import api_controller, permissions, route
 from ninja_extra.exceptions import NotFound, PermissionDenied
 from ninja_jwt.authentication import JWTAuth
-from payment.exceptions import InternalPaymentError, PaymentValidationError
+from payment.exceptions import PaymentValidationError
 from payment.models import Item, Payment
 from payment.permissions import PaymentPermission
 from payment.provider_handlers import (
-    BankProviderHandler,
     NetsProviderHandler,
     ProviderHandler,
+    get_provider_handler,
 )
 from payment.schemas import (
     BasePayment,
@@ -41,15 +41,18 @@ class PaymentAPI:
             declaration = PrivatAfgiftsanmeldelse.objects.get(id=payload.declaration_id)
         except PrivatAfgiftsanmeldelse.DoesNotExist:
             raise NotFound(f"Failed to fetch declaration: {payload.declaration_id}")
-        # Get payment provider handler for this declaration
 
-        if payload.provider not in ("nets", "bank"):
+        # Get payment provider handler for this declaration
+        if payload.provider not in (
+            settings.PAYMENT_PROVIDER_NETS,
+            settings.PAYMENT_PROVIDER_BANK,
+        ):
             raise NotFound(
                 f"Failed to get payment provider '{payload.provider}',"
                 " valid are: 'nets', 'bank'"
             )
 
-        if payload.provider == "bank":
+        if payload.provider == settings.PAYMENT_PROVIDER_BANK:
             if not self.context.request.user.has_perm("payment.bank_payment"):
                 raise PermissionDenied
 
@@ -140,7 +143,7 @@ class PaymentAPI:
             else Payment.objects.prefetch_related("items").filter(**payment_filter)
         )
 
-        provider_handler = get_provider_handler("nets")
+        provider_handler = get_provider_handler(settings.PAYMENT_PROVIDER_NETS)
         return [
             payment_model_to_response(
                 payment,
@@ -159,7 +162,7 @@ class PaymentAPI:
         return payment_model_to_response(
             payment_local,
             field_converts=payment_field_converters(
-                get_provider_handler("nets"),
+                get_provider_handler(settings.PAYMENT_PROVIDER_NETS),
                 full=bool(self.context.request.GET.get("full", None)),
             ),
         )
@@ -168,7 +171,7 @@ class PaymentAPI:
     def refresh(self, payment_id: int) -> PaymentResponse:
         payment_local = Payment.objects.get(id=payment_id)
 
-        provider_handler = get_provider_handler("nets")
+        provider_handler = get_provider_handler(settings.PAYMENT_PROVIDER_NETS)
         provider_payment = provider_handler.read(payment_local.provider_payment_id)
 
         if payment_local.status != "paid":
@@ -188,7 +191,7 @@ class PaymentAPI:
         return payment_model_to_response(
             payment_local,
             field_converts=payment_field_converters(
-                get_provider_handler("nets"),
+                get_provider_handler(settings.PAYMENT_PROVIDER_NETS),
                 full=True,
             ),
         )
@@ -226,14 +229,6 @@ def payment_model_to_response(
                 payment_local_dict[field_with_converted_val] = converted_value
 
     return PaymentResponse(**payment_local_dict)
-
-
-def get_provider_handler(provider_name: str) -> NetsProviderHandler:
-    if provider_name.lower() == "nets":
-        return NetsProviderHandler(secret_key=settings.PAYMENT_PROVIDER_NETS_SECRET_KEY)
-    if provider_name.lower() == "bank":
-        return BankProviderHandler()
-    raise InternalPaymentError(f"Unknown provider: {provider_name}")
 
 
 def payment_field_converters(provider_handler: NetsProviderHandler, full: bool):

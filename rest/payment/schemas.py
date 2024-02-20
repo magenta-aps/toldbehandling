@@ -8,6 +8,7 @@ from anmeldelse.models import PrivatAfgiftsanmeldelse
 from ninja import ModelSchema, Schema
 from payment.models import Item, Payment
 from payment.utils import convert_keys_to_snake_case
+from project.settings import PAYMENT_PROVIDER_NETS
 
 # Model schemas for models outside the payment-app (e.g. anmeldelse)
 
@@ -89,7 +90,7 @@ class ContactDetails(Schema):
 
 class PaymentCreatePayload(Schema):
     declaration_id: int
-    provider: str = "nets"
+    provider: str = PAYMENT_PROVIDER_NETS
 
 
 # Provider input schemas / payloads
