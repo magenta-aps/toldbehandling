@@ -364,7 +364,7 @@ class TestGodkend(PermissionsTest, TestCase):
                     "forsendelsestype": "S",
                     "fragtbrevsnummer": "ABCDE1234567",
                     "fragtbrev": "/leverandørfakturaer/1/leverandørfaktura.txt",
-                    "forbindelsesnr": "1337",
+                    "forbindelsesnr": "ABC 337",
                     "afgangsdato": "2023-10-01",
                 },
                 "postforsendelse": None,
@@ -405,7 +405,7 @@ class TestGodkend(PermissionsTest, TestCase):
                 "forsendelsestype": "S",
                 "fragtbrevsnummer": "ABCDE1234567",
                 "fragtbrev": "/leverandørfakturaer/1/leverandørfaktura.txt",
-                "forbindelsesnr": "1337",
+                "forbindelsesnr": "ABC 337",
                 "afgangsdato": "2023-10-01",
             }
 
@@ -723,7 +723,7 @@ class TestPrisme(TestMixin, PermissionsTest, TestCase):
                     "forsendelsestype": "S",
                     "fragtbrevsnummer": "ABCDE1234567",
                     "fragtbrev": "/leverandørfakturaer/1/leverandørfaktura.txt",
-                    "forbindelsesnr": "1337",
+                    "forbindelsesnr": "ABC 337",
                     "afgangsdato": "2023-10-01",
                 },
                 "postforsendelse": None,
@@ -743,7 +743,7 @@ class TestPrisme(TestMixin, PermissionsTest, TestCase):
                 "forsendelsestype": "S",
                 "fragtbrevsnummer": "ABCDE1234567",
                 "fragtbrev": "/leverandørfakturaer/1/leverandørfaktura.txt",
-                "forbindelsesnr": "1337",
+                "forbindelsesnr": "ABC 337",
                 "afgangsdato": "2023-10-01",
             }
 
@@ -923,7 +923,7 @@ class FileViewTest(PermissionsTest, TestCase):
                 "forsendelsestype": "S",
                 "fragtbrevsnummer": "ABCDE1234567",
                 "fragtbrev": "/fragtbreve/1/fragtbrev.txt",
-                "forbindelsesnr": "1337",
+                "forbindelsesnr": "ABC 337",
                 "afgangsdato": "2023-10-01",
             }
         if json_content:
@@ -1520,7 +1520,7 @@ class AnmeldelseNotatTest(PermissionsTest, TestCase):
                 "forsendelsestype": "S",
                 "fragtbrevsnummer": "ABCDE1234567",
                 "fragtbrev": "/leverandørfakturaer/1/leverandørfaktura.txt",
-                "forbindelsesnr": "1337",
+                "forbindelsesnr": "ABC 337",
                 "afgangsdato": "2023-10-01",
             }
 
@@ -2367,7 +2367,7 @@ class TF10EditMultipleViewTest(PermissionsTest, TestCase):
                         "forsendelsestype": "S",
                         "fragtbrevsnummer": "ABCDE1234567",
                         "fragtbrev": "/leverandørfakturaer/1/leverandørfaktura.txt",
-                        "forbindelsesnr": "1337",
+                        "forbindelsesnr": "ABC 337",
                         "afgangsdato": "2023-10-01",
                     },
                     "postforsendelse": None,
@@ -2477,7 +2477,7 @@ class TF10EditMultipleViewTest(PermissionsTest, TestCase):
                 "forsendelsestype": "S",
                 "fragtbrevsnummer": "ABCDE1234567",
                 "fragtbrev": "/leverandørfakturaer/1/leverandørfaktura.txt",
-                "forbindelsesnr": "1337",
+                "forbindelsesnr": "ABC 337",
                 "afgangsdato": "2023-10-01",
             }
         elif path == expected_prefix + "fragtforsendelse/2":
@@ -2595,7 +2595,7 @@ class TF10CreateTest(TestMixin, HasLogin, TestCase):
         "form-0-mængde": "3",
         "form-0-antal": "6",
         "form-0-fakturabeløb": "100.00",
-        "forbindelsesnr": "1337",
+        "forbindelsesnr": "ABC 337",
         "oprettet_på_vegne_af": 1,
         "betales_af": "afsender",
     }
@@ -3007,7 +3007,7 @@ class TF10CreateTest(TestMixin, HasLogin, TestCase):
                 {
                     "fragtbrevsnummer": "ABCDE1234567",
                     "forsendelsestype": "S",
-                    "forbindelsesnr": "1337",
+                    "forbindelsesnr": "ABC 337",
                     "fragtbrev": base64.b64encode("Testtekst".encode("utf-8")).decode(
                         "ascii"
                     ),
@@ -3068,7 +3068,7 @@ class TF10CreateTest(TestMixin, HasLogin, TestCase):
             [
                 {
                     "fragtbrevsnummer": "ABCDE1234567",
-                    "forbindelsesnr": "1337",
+                    "forbindelsesnr": "ABC 337",
                     "forsendelsestype": "S",
                     "fragtbrev": base64.b64encode("Testtekst".encode("utf-8")).decode(
                         "ascii"

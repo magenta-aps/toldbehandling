@@ -320,26 +320,23 @@ class TF10Form(BootstrapForm):
             )
             and not self.files.get("fragtbrev")
         ):
-            self.add_error("fragtbrev", ValidationError(_("Mangler fragtbrev")))
+            self.add_error("fragtbrev", _("Mangler fragtbrev"))
 
         if fragttype == "skibsfragt":
             if not re.match(r".+ \d{3}$", self.cleaned_data["forbindelsesnr"]):
                 self.add_error(
                     "forbindelsesnr",
-                    ValidationError(
-                        _(
-                            "Ved skibsfragt skal forbindelsesnummer slutte på mellemrum og tre cifre"
-                        )
+                    _(
+                        "Ved skibsfragt skal forbindelsesnummer "
+                        "slutte på mellemrum og tre cifre"
                     ),
                 )
             if not re.match(r"^[a-zA-Z]{5}\d{7}$", self.cleaned_data["fragtbrevnr"]):
                 self.add_error(
                     "fragtbrevnr",
-                    ValidationError(
-                        _(
-                            "Ved skibsfragt skal fragtbrevnr bestå af "
-                            "fem bogstaver efterfulgt af syv cifre"
-                        )
+                    _(
+                        "Ved skibsfragt skal fragtbrevnr bestå af "
+                        "fem bogstaver efterfulgt af syv cifre"
                     ),
                 )
 
@@ -347,16 +344,12 @@ class TF10Form(BootstrapForm):
             if not re.match(r"^\d{3}$", self.cleaned_data["forbindelsesnr"]):
                 self.add_error(
                     "forbindelsesnr",
-                    ValidationError(
-                        _("Ved luftfragt skal forbindelsesnummer bestå af tre cifre")
-                    ),
+                    _("Ved luftfragt skal forbindelsesnummer bestå af tre cifre"),
                 )
             if not re.match(r"^\d{8}$", self.cleaned_data["fragtbrevnr"]):
                 self.add_error(
                     "fragtbrevnr",
-                    ValidationError(
-                        _("Ved luftfragt skal fragtbrevnummer bestå af otte cifre")
-                    ),
+                    _("Ved luftfragt skal fragtbrevnummer bestå af otte cifre"),
                 )
 
     def clean_with_formset(self, formset):
