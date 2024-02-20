@@ -291,6 +291,7 @@ class TF10Form(BootstrapForm):
     def clean(self):
         if self.cleaned_data["kladde"]:
             return
+
         fragttype = self.cleaned_data["fragttype"]
         if (
             self.fragtbrev_required
@@ -301,37 +302,36 @@ class TF10Form(BootstrapForm):
             )
             and not self.files.get("fragtbrev")
         ):
-            raise ValidationError(
-                {
-                    "fragtbrev": _("Mangler fragtbrev"),
-                }
-            )
+            self.add_error("fragtbrev", _("Mangler fragtbrev"))
+
         if fragttype == "skibsfragt":
-            if not re.match(r"^[a-zA-Z]{5}\d{7}$", self.cleaned_data["fragtbrevnr"]):
-                raise ValidationError(
-                    {
-                        "fragtbrevnr": _(
-                            "Ved skibsfragt skal fragtbrevnr bestå af "
-                            "fem bogstaver efterfulgt af syv cifre"
-                        ),
-                    }
+            if not re.match(r".+ \d{3}$", self.cleaned_data["forbindelsesnr"]):
+                self.add_error(
+                    "forbindelsesnr",
+                    _(
+                        "Ved skibsfragt skal forbindelsesnummer "
+                        "slutte på mellemrum og tre cifre"
+                    ),
                 )
+            if not re.match(r"^[a-zA-Z]{5}\d{7}$", self.cleaned_data["fragtbrevnr"]):
+                self.add_error(
+                    "fragtbrevnr",
+                    _(
+                        "Ved skibsfragt skal fragtbrevnr bestå af "
+                        "fem bogstaver efterfulgt af syv cifre"
+                    ),
+                )
+
         if fragttype == "luftfragt":
             if not re.match(r"^\d{3}$", self.cleaned_data["forbindelsesnr"]):
-                raise ValidationError(
-                    {
-                        "forbindelsesnr": _(
-                            "Ved luftfragt skal forbindelsesnummer bestå af tre cifre"
-                        ),
-                    }
+                self.add_error(
+                    "forbindelsesnr",
+                    _("Ved luftfragt skal forbindelsesnummer bestå af tre cifre"),
                 )
             if not re.match(r"^\d{8}$", self.cleaned_data["fragtbrevnr"]):
-                raise ValidationError(
-                    {
-                        "fragtbrevnr": _(
-                            "Ved luftfragt skal fragtbrevnummer bestå af otte cifre"
-                        ),
-                    }
+                self.add_error(
+                    "fragtbrevnr",
+                    _("Ved luftfragt skal fragtbrevnummer bestå af otte cifre"),
                 )
 
     def clean_with_formset(self, formset):

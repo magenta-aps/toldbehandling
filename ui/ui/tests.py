@@ -59,7 +59,7 @@ class TF10BlanketTest(TestMixin, HasLogin, TestCase):
         "form-0-mængde": "3",
         "form-0-antal": "6",
         "form-0-fakturabeløb": "100.00",
-        "forbindelsesnr": "1337",
+        "forbindelsesnr": "ABC 337",
         "betales_af": "afsender",
     }
     formdata2 = {**formdata1, "fragttype": "luftpost", "forbindelsesnr": "1337"}
@@ -564,7 +564,7 @@ class TF10BlanketTest(TestMixin, HasLogin, TestCase):
                 {
                     "fragtbrevsnummer": "ABCDE1234567",
                     "forsendelsestype": "S",
-                    "forbindelsesnr": "1337",
+                    "forbindelsesnr": "ABC 337",
                     "fragtbrev": base64.b64encode("Testtekst".encode("utf-8")).decode(
                         "ascii"
                     ),
@@ -628,7 +628,7 @@ class TF10BlanketTest(TestMixin, HasLogin, TestCase):
             [
                 {
                     "fragtbrevsnummer": "ABCDE1234567",
-                    "forbindelsesnr": "1337",
+                    "forbindelsesnr": "ABC 337",
                     "forsendelsestype": "S",
                     "fragtbrev": base64.b64encode("Testtekst".encode("utf-8")).decode(
                         "ascii"
