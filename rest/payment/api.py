@@ -117,7 +117,9 @@ class PaymentAPI:
             f"{settings.HOST_DOMAIN}/payment/checkout/{declaration.id}",
         )
 
-        # Update local payment with external provider payment info
+        # Update local payment with external provider payment info,
+        # after creating the payment at the provider
+        payment_new.provider = payload.provider
         payment_new.provider_host = provider_handler.host
         payment_new.provider_payment_id = provider_payment_new["paymentId"]
         payment_new.status = provider_handler.initial_status
