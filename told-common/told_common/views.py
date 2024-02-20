@@ -142,7 +142,7 @@ class TF10FormCreateView(
         modtager_id = self.rest_client.modtager.get_or_create(form.cleaned_data)
         postforsendelse_id = self.rest_client.postforsendelse.create(form.cleaned_data)
 
-        fragtfil = self.request.FILES.get("fragtbrev")
+        fragtfil = form.cleaned_data.get("fragtbrev")
         if fragtfil:
             log.info(
                 "Bruger '%s' opretter TF10 med fragtbrev %s (%s bytes)",
@@ -157,9 +157,9 @@ class TF10FormCreateView(
             )
 
         fragtforsendelse_id = self.rest_client.fragtforsendelse.create(
-            form.cleaned_data, self.request.FILES.get("fragtbrev")
+            form.cleaned_data, form.cleaned_data.get("fragtbrev")
         )
-        leverandørfakturafil = self.request.FILES.get("leverandørfaktura")
+        leverandørfakturafil = form.cleaned_data.get("leverandørfaktura")
         if leverandørfakturafil:
             log.info(
                 "Bruger '%s' opretter TF10 med leverandørfaktura %s (%s bytes)",
@@ -169,13 +169,13 @@ class TF10FormCreateView(
             )
         else:
             log.info(
-                "Bruger '%s' opretter TF10 uden at sætte fragtbrev",
+                "Bruger '%s' opretter TF10 uden at sætte leverandørfaktura",
                 self.userdata["username"],
             )
 
         self.anmeldelse_id = self.rest_client.afgiftanmeldelse.create(
             form.cleaned_data,
-            self.request.FILES.get("leverandørfaktura"),
+            form.cleaned_data.get("leverandørfaktura"),
             afsender_id,
             modtager_id,
             postforsendelse_id,
@@ -345,7 +345,7 @@ class TF10FormUpdateView(
                 form.cleaned_data
             )
 
-        fragtfil = self.request.FILES.get("fragtbrev")
+        fragtfil = form.cleaned_data.get("fragtbrev")
         if fragtfil:
             log.info(
                 "Bruger '%s' opdaterer TF10 %d med fragtbrev %s (%d bytes)",
@@ -368,16 +368,16 @@ class TF10FormUpdateView(
             fragtforsendelse_id = self.rest_client.fragtforsendelse.update(
                 fragtforsendelse_id,
                 form.cleaned_data,
-                self.request.FILES.get("fragtbrev"),
+                form.cleaned_data.get("fragtbrev"),
                 self.item.fragtforsendelse,
             )
         else:
             # Håndterer oprettelse af ny
             fragtforsendelse_id = self.rest_client.fragtforsendelse.create(
-                form.cleaned_data, self.request.FILES.get("fragtbrev")
+                form.cleaned_data, form.cleaned_data.get("fragtbrev")
             )
 
-        leverandørfakturafil = self.request.FILES.get("leverandørfaktura")
+        leverandørfakturafil = form.cleaned_data.get("leverandørfaktura")
         if leverandørfakturafil:
             log.info(
                 "Bruger '%s' opdaterer TF10 %d med leverandørfaktura %s (%d bytes)",
@@ -395,7 +395,7 @@ class TF10FormUpdateView(
         self.rest_client.afgiftanmeldelse.update(
             self.anmeldelse_id,
             form.cleaned_data,
-            self.request.FILES.get("leverandørfaktura"),
+            form.cleaned_data.get("leverandørfaktura"),
             afsender_id,
             modtager_id,
             postforsendelse_id,
@@ -1036,7 +1036,7 @@ class TF5UpdateView(
         self.rest_client.privat_afgiftsanmeldelse.update(
             self.anmeldelse_id,
             form.cleaned_data,
-            self.request.FILES.get("leverandørfaktura"),
+            form.cleaned_data.get("leverandørfaktura"),
             self.item,
             force_write=True,
         )
