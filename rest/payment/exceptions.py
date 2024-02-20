@@ -16,6 +16,18 @@ class ProviderPaymentNotFound(NotFound):
         super().__init__(self.detail)
 
 
+class ProviderPaymentCreateError(APIException):
+    status_code = status.HTTP_400_BAD_REQUEST
+    default_detail = _("Payment provider create error")
+    default_code = "payment_provider_create"
+
+
+class ProviderPaymentChargeError(APIException):
+    status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+    default_detail = _("Payment provider charge error")
+    default_code = "payment_provider_charge"
+
+
 class PaymentValidationError(APIException):
     status_code = status.HTTP_400_BAD_REQUEST
     default_detail = _("Payment validation error.")

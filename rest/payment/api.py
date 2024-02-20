@@ -78,6 +78,7 @@ class PaymentAPI:
             currency="DKK",
             reference=payload.declaration_id,
             declaration=declaration,
+            provider=payload.provider,
         )
 
         varelinjer = Varelinje.objects.filter(

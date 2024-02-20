@@ -3,7 +3,12 @@
 # SPDX-License-Identifier: MPL-2.0
 
 import requests
-from payment.exceptions import InternalPaymentError, ProviderPaymentNotFound
+from payment.exceptions import (
+    InternalPaymentError,
+    ProviderPaymentChargeError,
+    ProviderPaymentCreateError,
+    ProviderPaymentNotFound,
+)
 from payment.schemas import ProviderPaymentPayload
 from payment.utils import convert_keys_to_camel_case
 from project import settings
@@ -22,6 +27,9 @@ class ProviderHandler:
         raise NotImplementedError()
 
     def read(self, payment_id: str):
+        raise NotImplementedError()
+
+    def charge(self, payment_id: str, amount: int):
         raise NotImplementedError()
 
     @property
@@ -58,7 +66,7 @@ class NetsProviderHandler(ProviderHandler):
         )
 
         if response.status_code != 201:
-            raise Exception("Failed to create payment: " + response.text)
+            raise ProviderPaymentCreateError(detail=response.text)
 
         resp_body = response.json()
         return self.read(resp_body["paymentId"])
@@ -70,10 +78,24 @@ class NetsProviderHandler(ProviderHandler):
         )
 
         if resp.status_code != 200:
-            raise ProviderPaymentNotFound(payment_id)
+            raise ProviderPaymentNotFound(detail=resp.text)
 
         resp_body = resp.json()
         return resp_body["payment"]
+
+    def charge(self, payment_id: str, amount: int):
+        resp = requests.post(
+            f"{self.host}/v1/payments/{payment_id}/charges",
+            headers=self.headers,
+            json={
+                "amount": amount,
+            },
+        )
+
+        if resp.status_code != 201:
+            raise ProviderPaymentChargeError(detail=resp.text)
+
+        return resp.json()
 
     @property
     def headers(self):
