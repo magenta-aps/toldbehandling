@@ -121,13 +121,6 @@
                         {{form.afsender_existing_id}}
                     </p>
                     </div>
-                    <input style="display: none" type="hidden" name="{{form.afsender_existing_id.name}}"/>
-                    <div class="alert alert-warning changed" style="display: none">
-                        <div>
-                            {% translate "Afsenderoplysninger er ændrede i forhold til den afsender, der allerede er registreret." %}
-                        </div>
-                        {{form.afsender_change_existing}}
-                    </div>
                 </div>
             </div>
                 <div class="row align-items-center">
@@ -216,12 +209,6 @@
                         </p>
                         </div>
                         <input style="display: none" type="hidden" name="{{form.modtager_existing_id.name}}"/>
-                        <div class="alert alert-warning changed" style="display: none">
-                            <div>
-                                {% translate "Modtageroplysninger er ændrede i forhold til den modtager der allerede er registreret." %}
-                            </div>
-                            {{form.modtager_change_existing}}
-                    </div>
                 </div>
             </div>
                 <div class="row align-items-center">
@@ -522,7 +509,6 @@
                 "navn": "#afsender_adresse_container [data-multi=navn]"
             },
             "multi_changed_container": "#afsender_address_changed",
-            "preselected_id": {{afsender_existing_id|default:"null"}},
         },
         {
             "fields": {
@@ -543,7 +529,6 @@
                 "navn": "#modtager_adresse_container [data-multi=navn]"
             },
             "multi_changed_container": "#modtager_address_changed",
-            "preselected_id": {{modtager_existing_id|default:"null"}},
         }
     ];
 </script>
