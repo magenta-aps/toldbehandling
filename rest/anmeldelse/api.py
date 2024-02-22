@@ -120,7 +120,6 @@ class AfgiftsanmeldelseOut(ModelSchema):
             beregnet_faktureringsdato = obj.beregnet_faktureringsdato
         else:
             beregnet_faktureringsdato = Afgiftsanmeldelse.beregn_faktureringsdato(obj)
-        print(beregnet_faktureringsdato.isoformat())
         return beregnet_faktureringsdato.isoformat()
 
 
