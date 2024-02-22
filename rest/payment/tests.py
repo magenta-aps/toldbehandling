@@ -50,7 +50,6 @@ class PaymentProviderTest(TestCase):
     @patch("payment.provider_handlers.NetsProviderHandler.read")
     @patch("payment.provider_handlers.requests.post")
     def test_nets_create(self, mock_requests_post, mock_handler_read):
-        # Configure test-data for this test
         user = User.objects.get(username="payment-test-user")
         self.assertNotEqual(user, None)
 
@@ -121,8 +120,25 @@ class PaymentProviderTest(TestCase):
 
         mock_handler_read.assert_called_once_with(db_payment.provider_payment_id)
 
-    def test_nets_read(self):
-        pass
+    @patch("payment.provider_handlers.requests.get")
+    def test_nets_read(self, mock_requests_get):
+        test_provider_payment_id = str(uuid.uuid4()).replace("-", "").lower()
+
+        # Configure mock(s)
+        mock_requests_get.return_value.status_code = 200
+        mock_requests_get.return_value.json.return_value = {
+            "payment": {
+                "paymentId": test_provider_payment_id,
+            }
+        }
+
+        resp = self.handler.read(payment_id=test_provider_payment_id)
+        self.assertNotEqual(resp, None)
+
+        mock_requests_get.assert_called_once_with(
+            f"{self.handler.host}/v1/payments/{test_provider_payment_id}",
+            headers=self.handler.headers,
+        )
 
     def test_nets_charge(self):
         pass
