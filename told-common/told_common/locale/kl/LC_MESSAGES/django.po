@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-20 07:08-0200\n"
+"POT-Creation-Date: 2024-02-22 09:04-0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -154,28 +154,8 @@ msgid "Tlf."
 msgstr "Oqarasuaat"
 
 #: told_common/forms.py
-msgid "Opret en ny afsender med de indtastede oplysninger"
-msgstr "Paasissutissat immiunneqartut atorlugit nassitsisoq nutaaq pilersiguk"
-
-#: told_common/forms.py
-msgid "Opdatér den valgte afsender med de indtastede oplysinger"
-msgstr ""
-"Nassiussisutut toqqarneqartoq paasissutissat immiunneqartut atorlugit "
-"nutarteruk"
-
-#: told_common/forms.py
 msgid "Postnummer skal være på 4 cifre og må ikke begynde med 0"
 msgstr "Postnormu 4-nik kisitsiseqassaaq 0-imillu aallartissanani"
-
-#: told_common/forms.py
-msgid "Opret en ny modtager med de indtastede oplysninger"
-msgstr "Paasissutissat immiunneqartut atorlugit tigusisussaq nutaaq pilersiguk"
-
-#: told_common/forms.py
-msgid "Opdatér den valgte modtager med de indtastede oplysinger"
-msgstr ""
-"Tigusisussatut toqqarneqartoq paasissutissat immiunneqartut atorlugit "
-"nutarteruk"
 
 #: told_common/forms.py
 #, fuzzy
@@ -443,14 +423,6 @@ msgstr ""
 "paasissutissanik nutaanik immersukkit."
 
 #: told_common/templates/told_common/tf10/form.html
-msgid ""
-"Afsenderoplysninger er ændrede i forhold til den afsender, der allerede er "
-"registreret."
-msgstr ""
-"Paasissutissat nassiussisumut tunngasut, nassiussisutut "
-"nalunaarsorneqareersumut tunngatillugu paasissutissanit allaanerupput."
-
-#: told_common/templates/told_common/tf10/form.html
 msgid "Der er mere end én registreret modtager for det angivne CVR-nummer."
 msgstr ""
 "CVR-normumut taaneqartumut tunngatillugu tigusisussat arlallit "
@@ -463,14 +435,6 @@ msgid "Der er mere end én registreret modtager for det angivne navn."
 msgstr ""
 "Atermut taaneqartumut tunngatillugu tigusisussat arlallit "
 "nalunaarsorneqarsimapput."
-
-#: told_common/templates/told_common/tf10/form.html
-msgid ""
-"Modtageroplysninger er ændrede i forhold til den modtager der allerede er "
-"registreret."
-msgstr ""
-"Paasissutissat tigusisussamut tunngasut, tigusisussatut "
-"nalunaarsorneqareersumut tunngatillugu paasissutissanit allaanerupput."
 
 #: told_common/templates/told_common/tf10/form.html
 #: told_common/templates/told_common/tf10/view.html

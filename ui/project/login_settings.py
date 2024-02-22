@@ -61,12 +61,8 @@ SAML = {
     "debug": 1,
     "entityid": os.environ.get("SAML_SP_ENTITY_ID"),
     "idp_entity_id": os.environ.get("SAML_IDP_ENTITY_ID"),
-    "name": base64.b64encode(
-        (os.environ.get("SAML_SP_NAME") or "Toldbehandling").encode("utf-8")
-    ).decode("ascii"),
-    "description": base64.b64encode(
-        (os.environ.get("SAML_SP_DESCRIPTION") or "Toldregistrering").encode("utf-8")
-    ).decode("ascii"),
+    "name": os.environ.get("SAML_SP_NAME") or "Toldbehandling",
+    "description": os.environ.get("SAML_SP_DESCRIPTION") or "Toldregistrering",
     "verify_ssl_cert": False,
     "metadata_remote": os.environ.get("SAML_IDP_METADATA"),
     # Til metadata-fetch mellem containere
