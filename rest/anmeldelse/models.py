@@ -202,10 +202,13 @@ class Afgiftsanmeldelse(models.Model):
         afgangsdato = forsendelse.afgangsdato
         måned_slut = dato_måned_slut(afgangsdato)
         postnummer = afgiftsanmeldelse.modtager.postnummer
-        try:
-            ekstra_dage = Postnummer.objects.get(postnummer=postnummer).dage
-        except Postnummer.DoesNotExist:
-            ekstra_dage = 0
+        if afgiftsanmeldelse.toldkategori == "70":
+            ekstra_dage = 14  # 59830
+        else:
+            try:
+                ekstra_dage = Postnummer.objects.get(postnummer=postnummer).dage
+            except Postnummer.DoesNotExist:
+                ekstra_dage = 0
         return måned_slut + timedelta(days=ekstra_dage)
 
 
