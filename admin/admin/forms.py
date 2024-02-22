@@ -118,17 +118,21 @@ class TF10UpdateMultipleForm(BootstrapForm):
     forbindelsesnr = DynamicField(
         forms.CharField,
         required=False,
-        label=lambda form: _("Forbindelsesnummer")
-        if form.fragttype in ("skibsfragt", "luftfragt")
-        else _("Afsenderbykode"),
+        label=lambda form: (
+            _("Forbindelsesnummer")
+            if form.fragttype in ("skibsfragt", "luftfragt")
+            else _("Afsenderbykode")
+        ),
         disabled=lambda form: form.fragttype not in ("skibsfragt", "luftfragt"),
     )
     fragtbrevnr = DynamicField(
         forms.CharField,
         required=False,
-        label=lambda form: _("Fragtbrevnr")
-        if form.fragttype in ("skibsfragt", "luftfragt")
-        else _("Postforsendelsesnummer"),
+        label=lambda form: (
+            _("Fragtbrevnr")
+            if form.fragttype in ("skibsfragt", "luftfragt")
+            else _("Postforsendelsesnummer")
+        ),
         disabled=lambda form: form.fragttype
         not in ("skibsfragt", "luftfragt", "skibspost", "luftpost"),
     )

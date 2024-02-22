@@ -240,9 +240,11 @@ def payment_field_converters(provider_handler: NetsProviderHandler, full: bool):
     return {
         "declaration": lambda field_value: (
             "declaration",
-            PrivatAfgiftsanmeldelse.objects.get(id=field_value)
-            if full
-            else field_value,
+            (
+                PrivatAfgiftsanmeldelse.objects.get(id=field_value)
+                if full
+                else field_value
+            ),
         ),
         "provider_payment_id": lambda field_value: (
             "provider_payment",
