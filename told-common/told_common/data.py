@@ -329,11 +329,11 @@ class Afgiftsanmeldelse(ToldDataClass):
             mm_field=fields.DateTime(format="iso"),
         ),
     )
-    beregnet_faktureringsdato: datetime = field(
+    beregnet_faktureringsdato: date = field(
         metadata=config(
-            encoder=datetime.isoformat,
-            decoder=datetime.fromisoformat,
-            mm_field=fields.DateTime(format="iso"),
+            encoder=date.isoformat,
+            decoder=date.fromisoformat,
+            mm_field=fields.Date(format="iso"),
         ),
     )
     notater: Optional[List[Notat]]
