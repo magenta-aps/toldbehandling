@@ -826,19 +826,25 @@ class TF10View(TF10BaseView, TemplateView):
         return {
             "type": type_label,
             "navn": f"{user_dict['first_name']} {user_dict['last_name']}",
-            "cpr_cvr": {
-                "cpr": str(user_dict["indberetter_data"]["cpr"]).zfill(10)
-                if "cpr" in user_dict["indberetter_data"]
-                else None,
-                "cvr": str(user_dict["indberetter_data"]["cvr"]).zfill(8)
-                if "cvr" in user_dict["indberetter_data"]
-                else None,
-            }
-            if user_dict.get("indberetter_data")
-            else {
-                "cpr": None,
-                "cvr": None,
-            },
+            "cpr_cvr": (
+                {
+                    "cpr": (
+                        str(user_dict["indberetter_data"]["cpr"]).zfill(10)
+                        if "cpr" in user_dict["indberetter_data"]
+                        else None
+                    ),
+                    "cvr": (
+                        str(user_dict["indberetter_data"]["cvr"]).zfill(8)
+                        if "cvr" in user_dict["indberetter_data"]
+                        else None
+                    ),
+                }
+                if user_dict.get("indberetter_data")
+                else {
+                    "cpr": None,
+                    "cvr": None,
+                }
+            ),
         }
 
 

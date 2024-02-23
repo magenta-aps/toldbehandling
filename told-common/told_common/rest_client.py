@@ -349,9 +349,9 @@ class AfgiftanmeldelseRestClient(ModelRestClient):
             "fragtforsendelse_id": fragtforsendelse_id,
             "toldkategori": data.get("toldkategori"),
             "leverandørfaktura": self.rest._uploadfile_to_base64str(leverandørfaktura),
-            "leverandørfaktura_navn": leverandørfaktura.name
-            if leverandørfaktura
-            else None,
+            "leverandørfaktura_navn": (
+                leverandørfaktura.name if leverandørfaktura else None
+            ),
             "betales_af": data.get("betales_af"),
             "oprettet_på_vegne_af_id": opt_int(data.get("oprettet_på_vegne_af")),
             "kladde": data.get("kladde", False),
@@ -551,9 +551,9 @@ class PrivatAfgiftanmeldelseRestClient(ModelRestClient):
                 "leverandørfaktura": self.rest._uploadfile_to_base64str(
                     leverandørfaktura
                 ),
-                "leverandørfaktura_navn": leverandørfaktura.name
-                if leverandørfaktura
-                else None,
+                "leverandørfaktura_navn": (
+                    leverandørfaktura.name if leverandørfaktura else None
+                ),
             }
         )
         return mapped
@@ -770,9 +770,11 @@ class PrismeResponseRestClient(ModelRestClient):
     @staticmethod
     def map(data: PrismeResponse) -> dict:
         return {
-            "afgiftsanmeldelse_id": data.afgiftsanmeldelse.id
-            if isinstance(data.afgiftsanmeldelse, Afgiftsanmeldelse)
-            else data.afgiftsanmeldelse,
+            "afgiftsanmeldelse_id": (
+                data.afgiftsanmeldelse.id
+                if isinstance(data.afgiftsanmeldelse, Afgiftsanmeldelse)
+                else data.afgiftsanmeldelse
+            ),
             "delivery_date": data.delivery_date,
             "rec_id": data.rec_id,
             "tax_notification_number": data.tax_notification_number,

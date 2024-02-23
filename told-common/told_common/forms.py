@@ -192,18 +192,20 @@ class TF10Form(BootstrapForm):
         required=False,
         label=_("Indførsels­tilladelse nr."),
         widget=lambda form: forms.TextInput(
-            attrs={
-                "data-required-field": "[name$=vareafgiftssats]",
-                "data-required-values": ",".join(
-                    [
-                        str(id)
-                        for id, sats in form.varesatser.items()
-                        if sats.kræver_indførselstilladelse
-                    ]
-                ),
-            }
-            if form.varesatser
-            else {}
+            attrs=(
+                {
+                    "data-required-field": "[name$=vareafgiftssats]",
+                    "data-required-values": ",".join(
+                        [
+                            str(id)
+                            for id, sats in form.varesatser.items()
+                            if sats.kræver_indførselstilladelse
+                        ]
+                    ),
+                }
+                if form.varesatser
+                else {}
+            )
         ),
     )
     leverandørfaktura_nummer = forms.CharField(
@@ -224,12 +226,14 @@ class TF10Form(BootstrapForm):
         label=_("Fragtbrev"),
         max_size=10000000,
         required=False,
-        widget_attrs=lambda form: {
-            "data-required-field": "[name=fragttype]",
-            "data-required-values": "skibsfragt,luftfragt",
-        }
-        if form.fragtbrev_required
-        else None,
+        widget_attrs=lambda form: (
+            {
+                "data-required-field": "[name=fragttype]",
+                "data-required-values": "skibsfragt,luftfragt",
+            }
+            if form.fragtbrev_required
+            else None
+        ),
     )
     fragttype = forms.ChoiceField(
         required=True,
@@ -267,10 +271,12 @@ class TF10Form(BootstrapForm):
     fuldmagtshaver = DynamicField(
         forms.ChoiceField,
         required=False,
-        choices=lambda form: [(None, "---")]
-        + [(speditør.cvr, speditør.navn) for speditør in form.speditører]
-        if form.speditører
-        else [],
+        choices=lambda form: (
+            [(None, "---")]
+            + [(speditør.cvr, speditør.navn) for speditør in form.speditører]
+            if form.speditører
+            else []
+        ),
     )
 
     betales_af = forms.CharField(
@@ -502,10 +508,12 @@ class TF10SearchForm(PaginateForm, BootstrapForm):
 
     status = DynamicField(
         forms.ChoiceField,
-        choices=lambda form: form.status_choices_kun_godkendte
-        if "anmeldelse.view_approved_anmeldelse" in form.permissions
-        and "anmeldelse.view_all_anmeldelse" not in form.permissions
-        else form.status_choices_all,
+        choices=lambda form: (
+            form.status_choices_kun_godkendte
+            if "anmeldelse.view_approved_anmeldelse" in form.permissions
+            and "anmeldelse.view_all_anmeldelse" not in form.permissions
+            else form.status_choices_all
+        ),
         required=False,
         widget=forms.Select(attrs={"onchange": "form.submit();"}),
     )
@@ -689,9 +697,11 @@ class TF5Form(BootstrapForm):
         label=_("Dato for indlevering til forsendelse"),
         required=True,
         widget=lambda form: DateInput(
-            attrs={}
-            if form.indleveringsdato_ubegrænset
-            else {"min": date_next_workdays(date.today(), 6)}
+            attrs=(
+                {}
+                if form.indleveringsdato_ubegrænset
+                else {"min": date_next_workdays(date.today(), 6)}
+            )
         ),
     )
     anonym = forms.BooleanField(

@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2023 Magenta ApS <info@magenta.dk>
 #
 # SPDX-License-Identifier: MPL-2.0
-from datetime import timedelta
+from datetime import date, timedelta
 from decimal import Decimal
 
 from aktør.models import Afsender, Modtager, Speditør
@@ -194,7 +194,7 @@ class Afgiftsanmeldelse(models.Model):
         return self.beregn_faktureringsdato(self)
 
     @staticmethod
-    def beregn_faktureringsdato(afgiftsanmeldelse):
+    def beregn_faktureringsdato(afgiftsanmeldelse) -> date:
         # Splittet fordi historisk model ikke har ovenstående property
         forsendelse = (
             afgiftsanmeldelse.fragtforsendelse or afgiftsanmeldelse.postforsendelse
@@ -202,10 +202,13 @@ class Afgiftsanmeldelse(models.Model):
         afgangsdato = forsendelse.afgangsdato
         måned_slut = dato_måned_slut(afgangsdato)
         postnummer = afgiftsanmeldelse.modtager.postnummer
-        try:
-            ekstra_dage = Postnummer.objects.get(postnummer=postnummer).dage
-        except Postnummer.DoesNotExist:
-            ekstra_dage = 0
+        if afgiftsanmeldelse.toldkategori == "70":
+            ekstra_dage = 14  # 59830
+        else:
+            try:
+                ekstra_dage = Postnummer.objects.get(postnummer=postnummer).dage
+            except Postnummer.DoesNotExist:
+                ekstra_dage = 0
         return måned_slut + timedelta(days=ekstra_dage)
 
 
