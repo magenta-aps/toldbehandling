@@ -589,7 +589,7 @@ class ListView(FormView):
         return {"count": 0, "items": []}
 
     def store_search(self, search_data: dict):
-        if not "list_search" in self.request.session:
+        if "list_search" not in self.request.session:
             self.request.session["list_search"] = {}
         search_data = dict(search_data)
         lenient_del(search_data, "json")
