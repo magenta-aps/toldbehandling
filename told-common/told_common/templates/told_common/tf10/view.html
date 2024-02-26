@@ -24,7 +24,7 @@
         </div>
         {% endif %}
 
-        <h1>{% blocktranslate with id=object.id %}Afgiftsanmeldelse {{id}}{% endblocktranslate %}</h1>
+        <h1>{% blocktranslate with id=object.id|unlocalize %}Afgiftsanmeldelse {{id}}{% endblocktranslate %}</h1>
 
         {% if object.status == "afsluttet" %}
         <span class="badge bg-success">{% translate "Afsluttet" %}</span>
