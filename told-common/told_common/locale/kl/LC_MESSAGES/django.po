@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-26 07:41-0200\n"
+"POT-Creation-Date: 2024-02-26 08:31-0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -666,10 +666,9 @@ msgid "Ingen søgeresultater"
 msgstr "Ujaasineq kinguneqanngilaq"
 
 #: told_common/templates/told_common/tf10/view.html
-#, fuzzy, python-format
-#| msgid "Afgiftsanmeldelse"
-msgid "Afgiftsanmeldelse %(id|unlocalize)s"
-msgstr "Akitsuusigasssanik nalunaaruteqarneq"
+#, python-format
+msgid "Afgiftsanmeldelse %(id)s"
+msgstr ""
 
 #: told_common/templates/told_common/tf10/view.html
 msgid "Oprettelsesdato"
