@@ -37,12 +37,14 @@ class AfsenderTest(RestTestMixin, TestCase):
     unique_fields = []
     exclude_fields = ["postnummer_ref", "eksplicit_stedkode"]
 
+    # Expected object in the database as dict
     @property
     def expected_object_data(self):
         return {"id": self.afsender.id, **self.creation_data}
 
+    # Expected item from REST interface
     @property
-    def expected_list_response_dict(self):
+    def expected_response_dict(self):
         return {"id": self.afsender.id, **self.creation_data, **self.calculated_fields}
 
     @property
@@ -104,13 +106,15 @@ class ModtagerTest(RestTestMixin, TestCase):
     }
     exclude_fields = ["postnummer_ref", "eksplicit_stedkode"]
 
+    # Expected object in the database as dict
     @property
     def expected_object_data(self):
         return {"id": self.modtager.id, **self.creation_data}
 
+    # Expected item from REST interface
     @property
-    def expected_list_response_dict(self):
-        return {"id": self.modtager.id, **self.creation_data, **self.calculated_fields}
+    def expected_response_dict(self):
+        return {**self.expected_object_data, **self.calculated_fields}
 
     @property
     def update_object_data(self):
