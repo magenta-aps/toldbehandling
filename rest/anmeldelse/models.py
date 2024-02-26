@@ -202,7 +202,9 @@ class Afgiftsanmeldelse(models.Model):
         afgangsdato = forsendelse.afgangsdato
         måned_slut = dato_måned_slut(afgangsdato)
         postnummer = afgiftsanmeldelse.modtager.postnummer
-        if afgiftsanmeldelse.toldkategori == "76":
+        if afgiftsanmeldelse.toldkategori == "70":
+            ekstra_dage = 20  # 59830
+        elif afgiftsanmeldelse.toldkategori == "76":
             ekstra_dage = 14  # 59830
         else:
             try:
