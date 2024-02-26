@@ -158,3 +158,10 @@ def tf5_common_context() -> dict:
     return {
         "hide_api_key_btn": True,
     }
+
+
+def lenient_get(item, *keys: str):
+    for key in keys:
+        if item is not None:
+            item = item.get(key)
+    return item

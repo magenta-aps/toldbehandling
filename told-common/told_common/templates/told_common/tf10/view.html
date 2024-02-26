@@ -399,8 +399,8 @@
                     <td>{{indberetter.type}}</td>
                     <td>{{indberetter.navn}}</td>
                     <td>
-                        {% if indberetter.cpr_cvr.cvr %}
-                            {{indberetter.cpr_cvr.cvr|stringformat:"s"}}
+                        {% if indberetter.cvr %}
+                            {{indberetter.cvr|stringformat:"s"}}
                         {% endif %}
                     </td>
                 </tr>
