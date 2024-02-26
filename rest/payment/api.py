@@ -35,7 +35,12 @@ from project import settings
     permissions=[permissions.IsAuthenticated & PaymentPermission],
 )
 class PaymentAPI:
-    @route.post("", auth=get_auth_methods(), url_name="payment_create")
+    @route.post(
+        "",
+        auth=get_auth_methods(),
+        url_name="payment_create",
+        response={201: PaymentResponse},
+    )
     def create(self, payload: PaymentCreatePayload) -> PaymentResponse:
         try:
             declaration = PrivatAfgiftsanmeldelse.objects.get(id=payload.declaration_id)
