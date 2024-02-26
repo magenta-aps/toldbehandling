@@ -42,11 +42,6 @@ class AfsenderTest(RestTestMixin, TestCase):
     def expected_object_data(self):
         return {"id": self.afsender.id, **self.creation_data}
 
-    # Expected item from REST interface
-    @property
-    def expected_response_dict(self):
-        return {"id": self.afsender.id, **self.creation_data, **self.calculated_fields}
-
     @property
     def update_object_data(self):
         if not hasattr(self, "_update_object_data"):
@@ -110,11 +105,6 @@ class ModtagerTest(RestTestMixin, TestCase):
     @property
     def expected_object_data(self):
         return {"id": self.modtager.id, **self.creation_data}
-
-    # Expected item from REST interface
-    @property
-    def expected_response_dict(self):
-        return {**self.expected_object_data, **self.calculated_fields}
 
     @property
     def update_object_data(self):
