@@ -52,8 +52,9 @@ class NetsProviderHandler(ProviderHandler):
         for item in payload.items:
             item.name = f"{item.name[:125]}..."
 
+        url = f"{self.host}/v1/payments"
         response = requests.post(
-            f"{self.host}/v1/payments",
+            url,
             headers=self.headers,
             json={
                 # OBS: NETs requires camelCase keys
@@ -66,19 +67,23 @@ class NetsProviderHandler(ProviderHandler):
         )
 
         if response.status_code != 201:
-            raise ProviderPaymentCreateError(detail=response.text)
+            raise ProviderPaymentCreateError(
+                endpoint=url,
+                endpoint_status=response.status_code,
+                response_text=response.text,
+            )
 
         resp_body = response.json()
         return self.read(resp_body["paymentId"])
 
     def read(self, payment_id: str):
-        resp = requests.get(
-            f"{self.host}/v1/payments/{payment_id}",
-            headers=self.headers,
-        )
+        url = f"{self.host}/v1/payments/{payment_id}"
+        resp = requests.get(url, headers=self.headers)
 
         if resp.status_code != 200:
-            raise ProviderPaymentNotFound(detail=resp.text)
+            raise ProviderPaymentNotFound(
+                payment_id=payment_id, endpoint=url, endpoint_status=resp.status_code
+            )
 
         resp_body = resp.json()
         return resp_body["payment"]
