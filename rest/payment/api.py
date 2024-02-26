@@ -157,7 +157,7 @@ class PaymentAPI:
                 payment,
                 payment_field_converters(
                     provider_handler,
-                    full=bool(self.context.request.GET.get("full", None)),
+                    full=True,
                 ),
             )
             for payment in payments
