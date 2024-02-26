@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-14 10:26-0200\n"
+"POT-Creation-Date: 2024-02-22 11:05-0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -100,8 +100,9 @@ msgid "Varekode"
 msgstr "Nioqqutissap kodea"
 
 #: ui/templates/ui/tf5/payment/checkout.html
-#: ui/templates/ui/tf5/payment/details.html
-msgid "Antal / Mængde"
+#, fuzzy
+#| msgid "Antal / Mængde"
+msgid "Antal/Mængde"
 msgstr "Qassiuneri / Annertussusii"
 
 #: ui/templates/ui/tf5/payment/checkout.html
@@ -140,6 +141,10 @@ msgstr "Akiliinissap paasissutissartai"
 #: ui/templates/ui/tf5/payment/details.html
 msgid "Vareart"
 msgstr "Nioqqutissaq"
+
+#: ui/templates/ui/tf5/payment/details.html
+msgid "Antal / Mængde"
+msgstr "Qassiuneri / Annertussusii"
 
 #: ui/templates/ui/tf5/payment/details.html
 msgid "Info"
