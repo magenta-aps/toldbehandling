@@ -791,7 +791,7 @@ class AnmeldelseListViewTest(HasLogin):
             if self.can_edit:
                 return (
                     f'<a class="btn btn-primary btn-sm" '
-                    f'href="{self.edit_url(id)}">Redigér</a>'
+                    f'href="{self.edit_url(id)}?back=list">Redigér</a>'
                 )
 
         self.maxDiff = None

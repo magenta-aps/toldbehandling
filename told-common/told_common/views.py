@@ -325,6 +325,8 @@ class TF10FormUpdateView(
         """
         Return to previous page. Highlight the updated form and display a success msg.
         """
+        if self.request.GET.get("back") == "view":
+            return reverse("tf10_view", kwargs={"id": self.anmeldelse_id})
         return reverse("tf10_list") + f"?highlight={self.anmeldelse_id}"
 
     def form_valid(self, form, formset):
@@ -444,13 +446,16 @@ class TF10FormUpdateView(
         notat = form.cleaned_data["notat"]
         if notat:
             self.rest_client.notat.create({"tekst": notat}, self.anmeldelse_id)
-        messages.add_message(
-            self.request,
-            messages.INFO,
-            _("Afgiftsanmeldelsen med nummer {id} blev opdateret").format(
-                id=self.anmeldelse_id
-            ),
-        )
+
+        if self.request.GET.get("back") != "view":
+            messages.add_message(
+                self.request,
+                messages.INFO,
+                _("Afgiftsanmeldelsen med nummer {id} blev opdateret").format(
+                    id=self.anmeldelse_id
+                ),
+            )
+
         return super().form_valid(form, formset)
 
     def status(self, item, form):

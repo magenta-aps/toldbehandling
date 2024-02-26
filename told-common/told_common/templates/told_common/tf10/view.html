@@ -474,7 +474,7 @@
 
                 {% if can_edit %}
                     {% if object.status == "ny" or object.status == "kladde" or object.status == "afvist" %}
-                    <a href="{% url 'tf10_edit' id=object.id %}" class="btn btn-primary">{% translate "Redigér" %}</a>
+                    <a href="{% url 'tf10_edit' id=object.id %}?back=view" class="btn btn-primary">{% translate "Redigér" %}</a>
                     {% endif %}
                 {% endif %}
 

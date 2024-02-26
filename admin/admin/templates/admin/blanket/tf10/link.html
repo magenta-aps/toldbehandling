@@ -4,6 +4,6 @@
 {% endif %}
 {% if can_edit %}
 {% if item.status == "ny" or item.status == "kladde" or item.status == "afvist" %}
-<a class="btn btn-primary btn-sm" href="{% url 'tf10_edit' id=item.id %}">{% translate 'Redigér' %}</a>
+<a class="btn btn-primary btn-sm" href="{% url 'tf10_edit' id=item.id %}?back=list">{% translate 'Redigér' %}</a>
 {% endif %}
 {% endif %}
