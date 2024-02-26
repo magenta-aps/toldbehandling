@@ -3,14 +3,16 @@ import dataclasses
 from datetime import date, timedelta
 from decimal import ROUND_HALF_EVEN, Decimal
 from enum import Enum
-from typing import Any, BinaryIO, Callable, Dict, Iterable, Optional, Union
+from typing import Any, BinaryIO, Callable, Dict, Iterable, List, Optional, Union
 
 import holidays
 from django.core.cache import cache
 from django.core.files import File
 from django.core.serializers.json import DjangoJSONEncoder
+from django.http import QueryDict
 from django.template.loader import render_to_string
 from django.utils import translation
+from django.utils.datastructures import MultiValueDict
 from pypdf import PdfWriter
 from weasyprint import CSS, HTML
 from weasyprint.text.fonts import FontConfiguration
@@ -169,3 +171,20 @@ def lenient_get(item, *keys: str):
         if item is not None:
             item = item.get(key)
     return item
+
+
+# Samme som del item[key], men kaster ikke KeyError hvis den ikke findes
+def lenient_del(item: dict, key: str):
+    if key in item:
+        del item[key]
+    return item
+
+
+def multivaluedict_to_querydict(
+    multivaluedict: Optional[Union[MultiValueDict, Dict[str, List]]]
+) -> QueryDict:
+    query_dict = QueryDict(mutable=True)
+    if multivaluedict is not None:
+        for key in multivaluedict:
+            query_dict.setlist(key, multivaluedict[key])
+    return query_dict
