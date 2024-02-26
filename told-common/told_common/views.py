@@ -28,7 +28,12 @@ from told_common.data import (
     Vareafgiftssats,
 )
 from told_common.rest_client import RestClient
-from told_common.util import JSONEncoder, dataclass_map_to_dict, tf5_common_context
+from told_common.util import (
+    JSONEncoder,
+    dataclass_map_to_dict,
+    lenient_get,
+    tf5_common_context,
+)
 from told_common.view_mixins import (
     CustomLayoutMixin,
     FormWithFormsetView,
@@ -763,8 +768,8 @@ class TF10View(TF10BaseView, TemplateView):
         indberetter = self.object.oprettet_på_vegne_af or self.object.oprettet_af
         if self.object.toldkategori:
             initial["toldkategori"] = self.object.toldkategori
-        if indberetter and "indberetter_data" in indberetter:
-            cvr = indberetter["indberetter_data"]["cvr"]
+        cvr = lenient_get(indberetter, "indberetter_data", "cvr")
+        if cvr:
             kategorier = [
                 item["kategori"]
                 for item in settings.CVR_TOLDKATEGORI_MAP
@@ -823,28 +828,11 @@ class TF10View(TF10BaseView, TemplateView):
 
     @staticmethod
     def reportee_from_user_dict(type_label: str, user_dict: dict):
+        cvr = lenient_get(user_dict, "indberetter_data", "cvr")
         return {
             "type": type_label,
             "navn": f"{user_dict['first_name']} {user_dict['last_name']}",
-            "cpr_cvr": (
-                {
-                    "cpr": (
-                        str(user_dict["indberetter_data"]["cpr"]).zfill(10)
-                        if "cpr" in user_dict["indberetter_data"]
-                        else None
-                    ),
-                    "cvr": (
-                        str(user_dict["indberetter_data"]["cvr"]).zfill(8)
-                        if "cvr" in user_dict["indberetter_data"]
-                        else None
-                    ),
-                }
-                if user_dict.get("indberetter_data")
-                else {
-                    "cpr": None,
-                    "cvr": None,
-                }
-            ),
+            "cvr": str(cvr).zfill(8) if cvr else None,
         }
 
 
