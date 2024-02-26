@@ -71,9 +71,7 @@ class PaymentAPI:
             if payment_new.provider_payment_id is not None:
                 return payment_model_to_response(
                     payment_new,
-                    field_converts=payment_field_converters(
-                        provider_handler, full=True
-                    ),
+                    field_converts=payment_field_converters(provider_handler),
                 )
         except Payment.DoesNotExist:
             pass
@@ -133,7 +131,7 @@ class PaymentAPI:
 
         return payment_model_to_response(
             payment_new,
-            field_converts=payment_field_converters(provider_handler, full=True),
+            field_converts=payment_field_converters(provider_handler),
         )
 
     @route.get("", auth=JWTAuth(), url_name="payment_list")
@@ -155,10 +153,7 @@ class PaymentAPI:
         return [
             payment_model_to_response(
                 payment,
-                payment_field_converters(
-                    provider_handler,
-                    full=True,
-                ),
+                payment_field_converters(provider_handler),
             )
             for payment in payments
         ]
@@ -171,7 +166,6 @@ class PaymentAPI:
             payment_local,
             field_converts=payment_field_converters(
                 get_provider_handler(settings.PAYMENT_PROVIDER_NETS),
-                full=bool(self.context.request.GET.get("full", None)),
             ),
         )
 
@@ -200,7 +194,6 @@ class PaymentAPI:
             payment_local,
             field_converts=payment_field_converters(
                 get_provider_handler(settings.PAYMENT_PROVIDER_NETS),
-                full=True,
             ),
         )
 
@@ -239,19 +232,15 @@ def payment_model_to_response(
     return PaymentResponse(**payment_local_dict)
 
 
-def payment_field_converters(provider_handler: NetsProviderHandler, full: bool):
+def payment_field_converters(provider_handler: NetsProviderHandler):
     return {
         "declaration": lambda field_value: (
             "declaration",
-            (
-                PrivatAfgiftsanmeldelse.objects.get(id=field_value)
-                if full
-                else field_value
-            ),
+            PrivatAfgiftsanmeldelse.objects.get(id=field_value),
         ),
         "provider_payment_id": lambda field_value: (
             "provider_payment",
-            provider_handler.read(field_value) if full else None,
+            provider_handler.read(field_value),
         ),
     }
 
