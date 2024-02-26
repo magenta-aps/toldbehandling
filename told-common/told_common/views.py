@@ -11,7 +11,7 @@ from urllib.parse import unquote
 
 from django.conf import settings
 from django.contrib import messages
-from django.http import FileResponse, Http404, JsonResponse, QueryDict
+from django.http import FileResponse, Http404, JsonResponse
 from django.shortcuts import redirect
 from django.template import loader
 from django.template.response import TemplateResponse
@@ -592,8 +592,7 @@ class ListView(FormView):
         if not "list_search" in self.request.session:
             self.request.session["list_search"] = {}
         search_data = dict(search_data)
-        if "json" in search_data:
-            del search_data["json"]
+        lenient_del(search_data, "json")
         self.request.session["list_search"][self.request.path] = search_data
         self.request.session.modified = True
 
