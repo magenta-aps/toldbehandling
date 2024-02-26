@@ -3,6 +3,12 @@
 # SPDX-License-Identifier: MPL-2.0
 
 from django.db import models
+from project import settings
+
+PAYMENT_PROVIDER_CHOICES = {
+    settings.PAYMENT_PROVIDER_NETS: "Nets",
+    settings.PAYMENT_PROVIDER_BANK: "Bankoverførsel",
+}
 
 
 class Item(models.Model):
@@ -97,6 +103,14 @@ class Payment(models.Model):
     Length: 0-128
 
     The following special characters are not supported: <,>,\\,’,”,&,\\\\"""
+
+    provider = models.CharField(
+        max_length=128,
+        null=False,
+        choices=PAYMENT_PROVIDER_CHOICES.items(),
+        default=settings.PAYMENT_PROVIDER_NETS,
+    )
+    """The payment provider, for example 'nets' or 'bank'."""
 
     provider_host = models.CharField(max_length=128, null=True)
     """The hostname of the provider, the payment was made through."""
