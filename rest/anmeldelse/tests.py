@@ -62,6 +62,7 @@ class AfgiftsanmeldelseTest(RestTestMixin, TestCase):
             # "afgift_total": '0',
         }
 
+    # Expected object in the database as dict
     @property
     def expected_object_data(self):
         if not hasattr(self, "_expected_object_data"):
@@ -81,6 +82,26 @@ class AfgiftsanmeldelseTest(RestTestMixin, TestCase):
                 }
             )
         return self._expected_object_data
+
+    # Expected item from REST interface
+    @property
+    def expected_response_dict(self):
+        if not hasattr(self, "_expected_response_dict"):
+            self._expected_response_dict = {}
+            self._expected_response_dict.update(self.strip_id(self.creation_data))
+            self._expected_response_dict.update(
+                {
+                    "id": self.afgiftsanmeldelse.id,
+                    "dato": self.afgiftsanmeldelse.dato.isoformat(),
+                    "afgift_total": "0.00",
+                    "fragtforsendelse": None,
+                    "leverandørfaktura": f"/leverand%C3%B8rfakturaer/{self.afgiftsanmeldelse.id}/leverand%C3%B8rfaktura.pdf",
+                    "status": "ny",
+                    "toldkategori": None,
+                    **self.calculated_fields,
+                }
+            )
+        return self._expected_response_dict
 
     @property
     def sort_fields(self):
@@ -115,29 +136,10 @@ class AfgiftsanmeldelseTest(RestTestMixin, TestCase):
         return self._expected_full_object_data
 
     @property
-    def expected_list_response_dict(self):
-        if not hasattr(self, "_expected_list_response_dict"):
-            self._expected_list_response_dict = {}
-            self._expected_list_response_dict.update(self.strip_id(self.creation_data))
-            self._expected_list_response_dict.update(
-                {
-                    "id": self.afgiftsanmeldelse.id,
-                    "dato": self.afgiftsanmeldelse.dato.isoformat(),
-                    "afgift_total": "0.00",
-                    "fragtforsendelse": None,
-                    "leverandørfaktura": f"/leverand%C3%B8rfakturaer/{self.afgiftsanmeldelse.id}/leverand%C3%B8rfaktura.pdf",
-                    "status": "ny",
-                    "toldkategori": None,
-                    **self.calculated_fields,
-                }
-            )
-        return self._expected_list_response_dict
-
-    @property
     def expected_list_full_response_dict(self):
         if not hasattr(self, "_expected_list_full_response_dict"):
             self._expected_list_full_response_dict = deepcopy(
-                self.expected_list_response_dict
+                self.expected_response_dict
             )
             self.nest_expected_data(self._expected_list_full_response_dict)
         return self._expected_list_full_response_dict
@@ -239,7 +241,7 @@ class AfgiftsanmeldelseTest(RestTestMixin, TestCase):
         data = response.json()
         self.assertEquals(data["count"], 1)
         self.assertEquals(
-            data["items"][0], {**self.expected_list_response_dict, "status": "godkendt"}
+            data["items"][0], {**self.expected_response_dict, "status": "godkendt"}
         )
 
 
@@ -272,6 +274,7 @@ class VarelinjeTest(RestTestMixin, TestCase):
             return str(Decimal(value) + Decimal(15))
         return super().alter_value(key, value)
 
+    # Expected object in the database as dict
     @property
     def expected_object_data(self):
         # Expected dict for object after create
@@ -287,18 +290,19 @@ class VarelinjeTest(RestTestMixin, TestCase):
             )
         return self._expected_object_data
 
+    # Expected item from REST interface
     @property
-    def expected_list_response_dict(self):
-        if not hasattr(self, "_expected_list_response_dict"):
-            self._expected_list_response_dict = {}
-            self._expected_list_response_dict.update(self.strip_id(self.creation_data))
-            self._expected_list_response_dict.update(
+    def expected_response_dict(self):
+        if not hasattr(self, "_expected_response_dict"):
+            self._expected_response_dict = {}
+            self._expected_response_dict.update(self.strip_id(self.creation_data))
+            self._expected_response_dict.update(
                 {
                     "id": self.varelinje.id,
                     "kladde": False,
                 }
             )
-        return self._expected_list_response_dict
+        return self._expected_response_dict
 
     invalid_itemdata = {
         "antal": ["a", -1],

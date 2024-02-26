@@ -193,8 +193,25 @@ class RestMixin:
             self.client = Client()
         self.afgiftsanmeldelse_data["leverandørfaktura"] = self.leverandørfaktura_file
         self.fragtforsendelse_data["fragtbrev"] = self.fragtbrev_file
+
+        # Override in subclasses
         self.calculated_fields = {}
+        self.creation_data = {}
+
         super().setUp()
+
+    # Expected object in the database as dict
+    @property
+    def expected_object_data(self):
+        if not hasattr(self, "_expected_object_data"):
+            self._expected_object_data = {}
+            self._expected_object_data.update(self.strip_id(self.creation_data))
+        return self._expected_object_data
+
+    # Expected item from REST interface
+    @property
+    def expected_response_dict(self):
+        return {**self.expected_object_data, **self.calculated_fields}
 
     def create_items(self):
         pass
@@ -656,7 +673,7 @@ class RestTestMixin(RestMixin):
                 )
                 self.compare_in(
                     response.json()["items"],
-                    self.expected_list_response_dict,
+                    self.expected_response_dict,
                     f"Querying LIST API endpoint, expected data to match for GET {url}",
                 )
 
@@ -703,7 +720,7 @@ class RestTestMixin(RestMixin):
             )
             self.compare_in(
                 response.json()["items"],
-                self.expected_list_response_dict,
+                self.expected_response_dict,
                 f"Querying LIST API endpoint, expected data to match for GET {url}",
             )
 

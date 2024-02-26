@@ -17,6 +17,7 @@ class PostforsendelseTest(RestTestMixin, TestCase):
         super().setUp()
         self.creation_data = self.postforsendelse_data
 
+    # Expected object in the database as dict
     @property
     def expected_object_data(self):
         if not hasattr(self, "_expected_object_data"):
@@ -29,19 +30,6 @@ class PostforsendelseTest(RestTestMixin, TestCase):
                 }
             )
         return self._expected_object_data
-
-    @property
-    def expected_list_response_dict(self):
-        if not hasattr(self, "_expected_list_response_dict"):
-            self._expected_list_response_dict = {}
-            self._expected_list_response_dict.update(self.strip_id(self.creation_data))
-            self._expected_list_response_dict.update(
-                {
-                    "id": self.postforsendelse.id,
-                    "kladde": False,
-                }
-            )
-        return self._expected_list_response_dict
 
     def create_items(self):
         self.precreated_item = self.postforsendelse
@@ -87,6 +75,7 @@ class FragtforsendelseTest(RestTestMixin, TestCase):
         super().setUp()
         self.creation_data = self.fragtforsendelse_data
 
+    # Expected object in the database as dict
     @property
     def expected_object_data(self):
         if not hasattr(self, "_expected_object_data"):
@@ -99,19 +88,6 @@ class FragtforsendelseTest(RestTestMixin, TestCase):
                 }
             )
         return self._expected_object_data
-
-    @property
-    def expected_list_response_dict(self):
-        if not hasattr(self, "_expected_list_response_dict"):
-            self._expected_list_response_dict = {}
-            self._expected_list_response_dict.update(self.strip_id(self.creation_data))
-            self._expected_list_response_dict.update(
-                {
-                    "id": self.fragtforsendelse.id,
-                    "kladde": False,
-                }
-            )
-        return self._expected_list_response_dict
 
     def create_items(self):
         self.precreated_item = self.fragtforsendelse

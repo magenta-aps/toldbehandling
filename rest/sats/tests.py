@@ -67,16 +67,6 @@ class AfgiftstabelTest(RestTestMixin, TestCase):
         }
 
     @property
-    def expected_list_response_dict(self):
-        return {
-            "id": self.afgiftstabel.id,
-            **self.creation_data,
-            "gyldig_fra": self.afgiftstabel.gyldig_fra.isoformat(),
-            "gyldig_til": None,
-            "kladde": True,
-        }
-
-    @property
     def update_object_data(self):
         if not hasattr(self, "_update_object_data"):
             self._update_object_data = {
@@ -200,12 +190,13 @@ class VareafgiftssatsTest(RestTestMixin, TestCase):
             )
         return self._expected_object_data
 
+    # Expected item from REST interface
     @property
-    def expected_list_response_dict(self):
-        if not hasattr(self, "_expected_list_response_dict"):
-            self._expected_list_response_dict = {}
-            self._expected_list_response_dict.update(self.strip_id(self.creation_data))
-            self._expected_list_response_dict.update(
+    def expected_response_dict(self):
+        if not hasattr(self, "_expected_response_dict"):
+            self._expected_response_dict = {}
+            self._expected_response_dict.update(self.strip_id(self.creation_data))
+            self._expected_response_dict.update(
                 {
                     "id": self.vareafgiftssats.id,
                     "minimumsbeløb": None,
@@ -214,7 +205,7 @@ class VareafgiftssatsTest(RestTestMixin, TestCase):
                     "segment_øvre": None,
                 }
             )
-        return self._expected_list_response_dict
+        return self._expected_response_dict
 
     @property
     def update_object_data(self):
