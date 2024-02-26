@@ -415,8 +415,38 @@ class PaymentAPITests(PaymentTest):
             ]
         )
 
-    def test_get_nets(self):
-        pass
+    @patch("payment.api.get_provider_handler")
+    def test_get_nets(self, mock_get_provider_handler):
+        (
+            test_payment,
+            fake_provider_payment,
+        ) = self._create_test_payment_with_fake_provider_payment(
+            status="created",
+            amount=1337,
+            declaration=self.declaration,
+            provider_payment_id="1234",
+        )
+
+        # Configure mock(s)
+        mock_nets_provider = MagicMock(
+            host="http://localhost:8000",
+            initial_status="created",
+            read=MagicMock(return_value=fake_provider_payment),
+        )
+
+        mock_get_provider_handler.return_value = mock_nets_provider
+
+        # Invoke the API endpoint
+        resp = self.client.get(
+            reverse("api-1.0.0:payment_get", kwargs={"payment_id": test_payment.id}),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+        )
+
+        self.assertEqual(resp.status_code, 200)
+        mock_get_provider_handler.assert_called_once_with("nets")
+        mock_nets_provider.read.assert_called_once_with(
+            test_payment.provider_payment_id
+        )
 
     def test_refresh_nets(self):
         pass
