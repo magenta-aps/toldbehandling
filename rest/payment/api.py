@@ -25,6 +25,7 @@ from payment.schemas import (
     PaymentCreatePayload,
     PaymentResponse,
     ProviderPaymentPayload,
+    ProviderPaymentResponse,
 )
 from payment.utils import round_decimal
 
@@ -125,7 +126,7 @@ class PaymentAPI:
         # after creating the payment at the provider
         payment_new.provider = payload.provider
         payment_new.provider_host = provider_handler.host
-        payment_new.provider_payment_id = provider_payment_new["paymentId"]
+        payment_new.provider_payment_id = provider_payment_new.payment_id
         payment_new.status = provider_handler.initial_status
         payment_new.save()
 
@@ -176,25 +177,25 @@ class PaymentAPI:
         provider_handler = get_provider_handler(settings.PAYMENT_PROVIDER_NETS)
         provider_payment = provider_handler.read(payment_local.provider_payment_id)
 
-        if payment_local.status != "paid":
-            # Update local payment status based on the summary
-            paymentSummary = provider_payment["summary"]
-            if "reservedAmount" in paymentSummary:
-                if paymentSummary["reservedAmount"] == payment_local.amount:
-                    payment_local.status = "reserved"
-                    payment_local.save()
+        # Update local payment status based on the summary
+        if (
+            payment_local.status == "created"
+            and provider_payment.summary.reserved_amount == payment_local.amount
+        ):
+            payment_local.status = "reserved"
+            payment_local.save()
 
-            if "chargedAmount" in paymentSummary:
-                if paymentSummary["chargedAmount"] == payment_local.amount:
-                    payment_local.status = "paid"
-                    payment_local.save()
+        if (
+            payment_local.status == "reserved"
+            and provider_payment.summary.charged_amount == payment_local.amount
+        ):
+            payment_local.status = "paid"
+            payment_local.save()
 
         # Default, return the payment without doing anything
         return payment_model_to_response(
             payment_local,
-            field_converts=payment_field_converters(
-                get_provider_handler(settings.PAYMENT_PROVIDER_NETS),
-            ),
+            field_converts=payment_field_converters(provider_handler, provider_payment),
         )
 
 
@@ -232,7 +233,10 @@ def payment_model_to_response(
     return PaymentResponse(**payment_local_dict)
 
 
-def payment_field_converters(provider_handler: NetsProviderHandler):
+def payment_field_converters(
+    provider_handler: NetsProviderHandler,
+    provider_payment: ProviderPaymentResponse | None = None,
+):
     return {
         "declaration": lambda field_value: (
             "declaration",
@@ -240,7 +244,11 @@ def payment_field_converters(provider_handler: NetsProviderHandler):
         ),
         "provider_payment_id": lambda field_value: (
             "provider_payment",
-            provider_handler.read(field_value),
+            (
+                provider_payment
+                if provider_payment
+                else provider_handler.read(field_value)
+            ),
         ),
     }
 
