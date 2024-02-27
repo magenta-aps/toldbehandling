@@ -17,9 +17,11 @@ from payment.schemas import (
     ProviderCompanyResponse,
     ProviderConsumerResponse,
     ProviderOrderDetailsResponse,
+    ProviderPaymentCheckoutResponse,
     ProviderPaymentDetailsResponse,
     ProviderPaymentPayload,
     ProviderPaymentResponse,
+    ProviderPaymentSummaryResponse,
 )
 from payment.utils import convert_keys_to_camel_case
 from project.test_mixins import RestMixin
@@ -155,7 +157,7 @@ class NetsPaymentProviderTests(TestCase):
             + random.choice(["Jensen", "Petersen", "Hansen", "Sørensen", "Nielsen"])
         )
         db_declaration_addr = "Ligustervænget " + str(random.randint(1, 100))
-        PrivatAfgiftsanmeldelse.objects.create(
+        cls.declaration = PrivatAfgiftsanmeldelse.objects.create(
             cpr=random.randint(1000000000, 9999999999),
             navn=db_declaration_name,
             adresse=db_declaration_addr,
@@ -252,6 +254,38 @@ class NetsPaymentProviderTests(TestCase):
         mock_requests_get.return_value.json.return_value = {
             "payment": {
                 "paymentId": test_provider_payment_id,
+                "summary": ProviderPaymentSummaryResponse(
+                    reserved_amount=0,
+                    charged_amount=0,
+                    refunded_amount=0,
+                    cancelled_amount=0,
+                ),
+                "consumer": ProviderConsumerResponse(
+                    shippingAddress={},
+                    company=ProviderCompanyResponse(
+                        contact_details=ContactDetails(
+                            phone_number={},
+                        )
+                    ),
+                    privatePerson=ContactDetails(
+                        phone_number={},
+                    ),
+                    billingAddress={},
+                ),
+                "paymentDetails": ProviderPaymentDetailsResponse(
+                    invoice_details={},
+                    card_details={},
+                ),
+                "orderDetails": ProviderOrderDetailsResponse(
+                    amount=1337,
+                    currency="DKK",
+                    reference="1234",
+                ),
+                "checkout": ProviderPaymentCheckoutResponse(
+                    url=f"{settings.HOST_DOMAIN}/payment/checkout/{self.declaration.id}",
+                    cancel_url=f"{settings.HOST_DOMAIN}/payment/cancel/{self.declaration.id}",
+                ),
+                "created": datetime.now(timezone.utc).isoformat(),
             }
         }
 
@@ -272,18 +306,15 @@ class PaymentAPITests(PaymentTest):
     @patch("payment.api.get_provider_handler")
     def test_create_nets(self, mock_get_provider_handler):
         provider_name = "nets"
-        fake_nets_payment = {
-            "paymentId": "1234",
-            "paymentDetails": ProviderPaymentDetailsResponse(
-                invoice_details={},
-                card_details={},
+        fake_nets_payment = ProviderPaymentResponse(
+            payment_id="1234",
+            summary=ProviderPaymentSummaryResponse(
+                reserved_amount=0,
+                charged_amount=0,
+                refunded_amount=0,
+                cancelled_amount=0,
             ),
-            "orderDetails": ProviderOrderDetailsResponse(
-                amount=1337,
-                currency="DKK",
-                reference="1234",
-            ),
-            "consumer": ProviderConsumerResponse(
+            consumer=ProviderConsumerResponse(
                 shippingAddress={},
                 company=ProviderCompanyResponse(
                     contact_details=ContactDetails(
@@ -295,9 +326,21 @@ class PaymentAPITests(PaymentTest):
                 ),
                 billingAddress={},
             ),
-            "checkout": {},
-            "created": datetime.now(timezone.utc).isoformat(),
-        }
+            payment_details=ProviderPaymentDetailsResponse(
+                invoice_details={},
+                card_details={},
+            ),
+            order_details=ProviderOrderDetailsResponse(
+                amount=1337,
+                currency="DKK",
+                reference="1234",
+            ),
+            checkout=ProviderPaymentCheckoutResponse(
+                url=f"{settings.HOST_DOMAIN}/payment/checkout/{self.declaration.id}",
+                cancel_url=f"{settings.HOST_DOMAIN}/payment/cancel/{self.declaration.id}",
+            ),
+            created=datetime.now(timezone.utc).isoformat(),
+        )
 
         mock_nets_provider = MagicMock(
             initial_status="created",
@@ -448,8 +491,43 @@ class PaymentAPITests(PaymentTest):
             test_payment.provider_payment_id
         )
 
-    def test_refresh_nets(self):
-        pass
+    @patch("payment.api.get_provider_handler")
+    def test_refresh_nets(self, mock_get_provider_handler):
+        # Test data
+        (
+            test_payment,
+            fake_provider_payment,
+        ) = self._create_test_payment_with_fake_provider_payment(
+            status="created",
+            amount=1337,
+            declaration=self.declaration,
+            provider_payment_id="1234",
+        )
+
+        # Configure mock(s)
+        mock_nets_provider = MagicMock(
+            initial_status="created",
+            host=settings.PAYMENT_PROVIDER_NETS_HOST,
+            terms_url=settings.PAYMENT_PROVIDER_NETS_TERMS_URL,
+            read=MagicMock(return_value=fake_provider_payment),
+        )
+
+        mock_get_provider_handler.return_value = mock_nets_provider
+
+        # Invoke the API endpoint
+        resp = self.client.post(
+            reverse(
+                "api-1.0.0:payment_refresh",
+                kwargs={"payment_id": test_payment.id},
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+        )
+
+        self.assertEqual(resp.status_code, 200)
+        mock_get_provider_handler.assert_called_once_with("nets")
+        mock_nets_provider.read.assert_called_once_with(
+            test_payment.provider_payment_id
+        )
 
     def _create_test_payment_with_fake_provider_payment(
         self,
@@ -470,14 +548,11 @@ class PaymentAPITests(PaymentTest):
 
         fake_provider_payment = ProviderPaymentResponse(
             payment_id=provider_payment_id,
-            payment_details=ProviderPaymentDetailsResponse(
-                invoice_details={},
-                card_details={},
-            ),
-            order_details=ProviderOrderDetailsResponse(
-                amount=amount,
-                currency=currency,
-                reference=declaration.id,
+            summary=ProviderPaymentSummaryResponse(
+                reserved_amount=0,
+                charged_amount=0,
+                refunded_amount=0,
+                cancelled_amount=0,
             ),
             consumer=ProviderConsumerResponse(
                 shipping_address={},
@@ -491,7 +566,20 @@ class PaymentAPITests(PaymentTest):
                 ),
                 billing_address={},
             ),
-            checkout={},
+            payment_details=ProviderPaymentDetailsResponse(
+                invoice_details={},
+                card_details={},
+            ),
+            order_details=ProviderOrderDetailsResponse(
+                amount=amount,
+                currency=currency,
+                reference=declaration.id,
+            ),
+            checkout=ProviderPaymentCheckoutResponse(
+                url=f"{settings.HOST_DOMAIN}/payment/checkout/{declaration.id}",
+                cancel_url=f"{settings.HOST_DOMAIN}/payment/cancel/{declaration.id}",
+            ),
+            # checkout={},
             created=datetime.now(timezone.utc).isoformat(),
         )
 
