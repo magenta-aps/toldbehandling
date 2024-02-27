@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: MPL-2.0
 
 import requests
+from django.conf import settings
 from payment.exceptions import (
     InternalPaymentError,
     ProviderPaymentChargeError,
@@ -11,7 +12,6 @@ from payment.exceptions import (
 )
 from payment.schemas import ProviderPaymentPayload
 from payment.utils import convert_keys_to_camel_case
-from project import settings
 
 
 class ProviderHandler:

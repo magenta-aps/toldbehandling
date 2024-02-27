@@ -7,6 +7,7 @@ from typing import Callable, Dict, List, Tuple
 
 from anmeldelse.models import PrivatAfgiftsanmeldelse, Varelinje
 from common.api import get_auth_methods
+from django.conf import settings
 from django.forms import model_to_dict
 from ninja_extra import api_controller, permissions, route
 from ninja_extra.exceptions import NotFound, PermissionDenied
@@ -26,7 +27,6 @@ from payment.schemas import (
     ProviderPaymentPayload,
 )
 from payment.utils import round_decimal
-from project import settings
 
 
 @api_controller(
