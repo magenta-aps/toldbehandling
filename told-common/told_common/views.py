@@ -31,7 +31,6 @@ from told_common.rest_client import RestClient
 from told_common.util import (
     JSONEncoder,
     dataclass_map_to_dict,
-    lenient_del,
     lenient_get,
     multivaluedict_to_querydict,
     tf5_common_context,
@@ -592,7 +591,7 @@ class ListView(FormView):
         if "list_search" not in self.request.session:
             self.request.session["list_search"] = {}
         search_data = dict(search_data)
-        lenient_del(search_data, "json")
+        search_data.pop("json", None)
         self.request.session["list_search"][self.request.path] = search_data
         self.request.session.modified = True
 
@@ -656,7 +655,8 @@ class ListView(FormView):
     def get_form_kwargs(self) -> Dict[str, Any]:
         kwargs = super().get_form_kwargs()
         query_dict = self.request.GET.copy()
-        if not lenient_del(query_dict, "highlight"):
+        query_dict.pop("highlight", None)
+        if not query_dict:
             query_dict = self.load_search()
         else:
             self.store_search(query_dict)

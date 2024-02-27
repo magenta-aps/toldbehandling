@@ -173,13 +173,6 @@ def lenient_get(item, *keys: str):
     return item
 
 
-# Samme som del item[key], men kaster ikke KeyError hvis den ikke findes
-def lenient_del(item: dict, key: str):
-    if key in item:
-        del item[key]
-    return item
-
-
 def multivaluedict_to_querydict(
     multivaluedict: Optional[Union[MultiValueDict, Dict[str, List]]]
 ) -> QueryDict:
