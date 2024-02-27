@@ -10,7 +10,7 @@ from payment.exceptions import (
     ProviderPaymentCreateError,
     ProviderPaymentNotFound,
 )
-from payment.schemas import ProviderPaymentPayload
+from payment.schemas import ProviderPaymentPayload, ProviderPaymentResponse
 from payment.utils import convert_keys_to_camel_case
 
 
@@ -43,7 +43,9 @@ class NetsProviderHandler(ProviderHandler):
         self.terms_url = settings.PAYMENT_PROVIDER_NETS_TERMS_URL
         self.secret_key = secret_key
 
-    def create(self, payload: ProviderPaymentPayload, checkout_url: str):
+    def create(
+        self, payload: ProviderPaymentPayload, checkout_url: str
+    ) -> ProviderPaymentResponse:
         # Modify payload VARCHARS to match Nets requirements of max 128 chars
         # NOTE: The payment models was made using NETs order.item-object, so
         # all VARCHAR fields are 128 chars long, EXCEPT for the `name` field
@@ -76,7 +78,7 @@ class NetsProviderHandler(ProviderHandler):
         resp_body = response.json()
         return self.read(resp_body["paymentId"])
 
-    def read(self, payment_id: str):
+    def read(self, payment_id: str) -> ProviderPaymentResponse:
         url = f"{self.host}/v1/payments/{payment_id}"
         resp = requests.get(url, headers=self.headers)
 
@@ -86,7 +88,7 @@ class NetsProviderHandler(ProviderHandler):
             )
 
         resp_body = resp.json()
-        return resp_body["payment"]
+        return ProviderPaymentResponse(**resp_body["payment"])
 
     def charge(self, payment_id: str, amount: int):
         resp = requests.post(
