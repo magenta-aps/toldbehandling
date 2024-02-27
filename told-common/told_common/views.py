@@ -32,6 +32,7 @@ from told_common.util import (
     JSONEncoder,
     dataclass_map_to_dict,
     lenient_get,
+    multivaluedict_to_querydict,
     tf5_common_context,
 )
 from told_common.view_mixins import (
@@ -586,6 +587,19 @@ class ListView(FormView):
     def get_items(self, search_data: Dict[str, Any]):
         return {"count": 0, "items": []}
 
+    def store_search(self, search_data: dict):
+        if "list_search" not in self.request.session:
+            self.request.session["list_search"] = {}
+        search_data = dict(search_data)
+        search_data.pop("json", None)
+        self.request.session["list_search"][self.request.path] = search_data
+        self.request.session.modified = True
+
+    def load_search(self):
+        return multivaluedict_to_querydict(
+            lenient_get(self.request.session, "list_search", self.request.path)
+        )
+
     def item_to_json_dict(
         self, item: Dict[str, Any], context: Dict[str, Any], index: int
     ) -> Dict[str, Any]:
@@ -641,6 +655,11 @@ class ListView(FormView):
     def get_form_kwargs(self) -> Dict[str, Any]:
         kwargs = super().get_form_kwargs()
         query_dict = self.request.GET.copy()
+        query_dict.pop("highlight", None)
+        if not query_dict:
+            query_dict = self.load_search()
+        else:
+            self.store_search(query_dict)
         kwargs["data"] = query_dict
         return kwargs
 
@@ -713,8 +732,6 @@ class TF10ListView(
 
     def get_form_kwargs(self) -> Dict[str, Any]:
         kwargs = super().get_form_kwargs()
-
-        kwargs["data"] = self.request.GET.copy()
 
         # Will be picked up by TF10SearchForm's constructor
         kwargs["varesatser"] = dict(
@@ -993,8 +1010,6 @@ class TF5ListView(PermissionsRequiredMixin, HasRestClientMixin, TF5Mixin, ListVi
 
     def get_form_kwargs(self) -> Dict[str, Any]:
         kwargs = super().get_form_kwargs()
-
-        kwargs["data"] = self.request.GET.copy()
 
         # Will be picked up by TF10SearchForm's constructor
         kwargs["varesatser"] = dict(
