@@ -297,9 +297,28 @@ class NetsPaymentProviderTests(TestCase):
             headers=self.handler.headers,
         )
 
-    def test_nets_charge(self):
-        # TODO: make this test when the MR with the new 'charge' method is merged
-        pass
+    @patch("payment.provider_handlers.requests.post")
+    def test_nets_charge(self, mock_requests_post):
+        payment_id = str(uuid.uuid4()).replace("-", "").lower()
+        charge_amount = 1337
+
+        mock_requests_post.return_value.status_code = 201
+
+        resp = self.handler.charge(
+            payment_id=payment_id,
+            amount=charge_amount,
+        )
+
+        mock_requests_post.assert_called_once_with(
+            f"{settings.PAYMENT_PROVIDER_NETS_HOST}/v1/payments/{payment_id}/charges",
+            headers={
+                "content-type": "application/*+json",
+                "Authorization": f"Bearer {settings.PAYMENT_PROVIDER_NETS_SECRET_KEY}",
+            },
+            json={
+                "amount": charge_amount,
+            },
+        )
 
 
 class PaymentAPITests(PaymentTest):
