@@ -828,7 +828,9 @@ class TF10View(TF10BaseView, TemplateView):
         reportees = []
         if anmeldelse.oprettet_af:
             reportees.append(
-                TF10View.reportee_from_user_dict(_("Oprettet af"), anmeldelse.oprettet_af)
+                TF10View.reportee_from_user_dict(
+                    _("Oprettet af"), anmeldelse.oprettet_af
+                )
             )
 
         if anmeldelse.oprettet_på_vegne_af:
