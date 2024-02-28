@@ -269,6 +269,10 @@ msgstr ""
 "akuersissuteqartariaqarpoq"
 
 #: told_common/forms.py
+msgid "-- Vælg vareart"
+msgstr ""
+
+#: told_common/forms.py
 msgid "Alle"
 msgstr "Tamarmik/Tamaasa"
 
@@ -963,3 +967,19 @@ msgstr "Akitsuusigassanik nalunaarut {id} -mik normulik nutarterneqarpoq"
 #: told_common/views.py
 msgid "Mine afgiftsanmeldelser"
 msgstr "Akitsuusigassanik nalunaaruteqarnikka"
+
+#: told_common/views.py
+msgid "Afgiftsanmeldelse findes ikke"
+msgstr ""
+
+#: told_common/views.py
+msgid "Oprettet af"
+msgstr ""
+
+#: told_common/views.py
+msgid "Oprettet på vegne af"
+msgstr ""
+
+#: told_common/views.py
+msgid "Fuldmagtshaver"
+msgstr ""

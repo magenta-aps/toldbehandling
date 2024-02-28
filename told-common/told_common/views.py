@@ -820,7 +820,7 @@ class TF10View(TF10BaseView, TemplateView):
             )
         except HTTPError as e:
             if e.response.status_code == 404:
-                raise Http404("Afgiftsanmeldelse findes ikke")
+                raise Http404(_("Afgiftsanmeldelse findes ikke"))
             raise
         return anmeldelse
 
@@ -828,20 +828,20 @@ class TF10View(TF10BaseView, TemplateView):
         reportees = []
         if anmeldelse.oprettet_af:
             reportees.append(
-                TF10View.reportee_from_user_dict("Oprettet af", anmeldelse.oprettet_af)
+                TF10View.reportee_from_user_dict(_("Oprettet af"), anmeldelse.oprettet_af)
             )
 
         if anmeldelse.oprettet_på_vegne_af:
             reportees.append(
                 TF10View.reportee_from_user_dict(
-                    "Oprettet på vegne af", anmeldelse.oprettet_på_vegne_af
+                    _("Oprettet på vegne af"), anmeldelse.oprettet_på_vegne_af
                 )
             )
 
         if anmeldelse.fuldmagtshaver:
             reportees.append(
                 {
-                    "type": "Fuldmagtshaver",
+                    "type": _("Fuldmagtshaver"),
                     "navn": anmeldelse.fuldmagtshaver.navn,
                     "cpr_cvr": {
                         "cpr": None,
@@ -925,7 +925,7 @@ class TF5View(
 
         except HTTPError as e:
             if e.response.status_code == 404:
-                raise Http404("Afgiftsanmeldelse findes ikke")
+                raise Http404(_("Afgiftsanmeldelse findes ikke"))
             raise
         return redirect(reverse("tf5_view", kwargs={"id": anmeldelse_id}))
 
@@ -940,7 +940,7 @@ class TF5View(
             )
         except HTTPError as e:
             if e.response.status_code == 404:
-                raise Http404("Afgiftsanmeldelse findes ikke")
+                raise Http404(_("Afgiftsanmeldelse findes ikke"))
             raise
         return anmeldelse
 
