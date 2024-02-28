@@ -7,6 +7,7 @@ from unittest.mock import MagicMock, call, patch
 from anmeldelse.models import PrivatAfgiftsanmeldelse, Varelinje
 from django.conf import settings
 from django.contrib.auth.models import Permission, User
+from django.core.management import call_command
 from django.test import TestCase
 from django.urls import reverse
 from payment.api import generate_payment_item_from_varelinje
@@ -138,6 +139,70 @@ class PaymentTest(TestCase):
                 afgiftsbeløb=0,
             ),
         ]
+
+    @classmethod
+    def provider_handler_read_mock(cls, payment_id: str, data: dict):
+        return data.get(payment_id)
+
+    def _create_test_payment_with_fake_provider_payment(
+        self,
+        status: str,
+        amount: int,
+        declaration: PrivatAfgiftsanmeldelse,
+        provider_payment_id: str,
+        provider_payment_summary: ProviderPaymentSummaryResponse | None = None,
+        currency: str = "DKK",
+    ) -> tuple[Payment, ProviderPaymentResponse]:
+        test_payment = Payment.objects.create(
+            status=status,
+            amount=amount,
+            currency=currency,
+            reference=declaration.id,
+            declaration=declaration,
+            provider_payment_id=provider_payment_id,
+        )
+
+        fake_provider_payment = ProviderPaymentResponse(
+            payment_id=provider_payment_id,
+            summary=(
+                ProviderPaymentSummaryResponse(
+                    reserved_amount=0,
+                    charged_amount=0,
+                    refunded_amount=0,
+                    cancelled_amount=0,
+                )
+                if provider_payment_summary is None
+                else provider_payment_summary
+            ),
+            consumer=ProviderConsumerResponse(
+                shipping_address={},
+                company=ProviderCompanyResponse(
+                    contact_details=ContactDetails(
+                        phone_number={},
+                    )
+                ),
+                private_person=ContactDetails(
+                    phone_number={},
+                ),
+                billing_address={},
+            ),
+            payment_details=ProviderPaymentDetailsResponse(
+                invoice_details={},
+                card_details={},
+            ),
+            order_details=ProviderOrderDetailsResponse(
+                amount=amount,
+                currency=currency,
+                reference=declaration.id,
+            ),
+            checkout=ProviderPaymentCheckoutResponse(
+                url=f"{settings.HOST_DOMAIN}/payment/checkout/{declaration.id}",
+                cancel_url=f"{settings.HOST_DOMAIN}/payment/cancel/{declaration.id}",
+            ),
+            created=datetime.now(timezone.utc).isoformat(),
+        )
+
+        return test_payment, fake_provider_payment
 
 
 class NetsPaymentProviderTests(TestCase):
@@ -548,58 +613,80 @@ class PaymentAPITests(PaymentTest):
             test_payment.provider_payment_id
         )
 
-    def _create_test_payment_with_fake_provider_payment(
-        self,
-        status: str,
-        amount: int,
-        declaration: PrivatAfgiftsanmeldelse,
-        provider_payment_id: str,
-        currency: str = "DKK",
-    ) -> tuple[Payment, ProviderPaymentResponse]:
-        test_payment = Payment.objects.create(
-            status=status,
-            amount=amount,
-            currency=currency,
-            reference=declaration.id,
-            declaration=declaration,
-            provider_payment_id=provider_payment_id,
-        )
 
-        fake_provider_payment = ProviderPaymentResponse(
-            payment_id=provider_payment_id,
-            summary=ProviderPaymentSummaryResponse(
-                reserved_amount=0,
+class PaymentManagementCommandTests(PaymentTest):
+    @patch("payment.management.commands.payment_charge_reserved.print")
+    @patch("payment.management.commands.payment_charge_reserved.get_provider_handler")
+    def test_charge_reserved(self, mock_get_provider_handler, *args):
+        # test data
+        (
+            test_payment_1,
+            fake_provider_payment_1,
+        ) = self._create_test_payment_with_fake_provider_payment(
+            status="reserved",
+            amount=1337,
+            declaration=self.declaration,
+            provider_payment_id="1234",
+            provider_payment_summary=ProviderPaymentSummaryResponse(
+                reserved_amount=1337,
                 charged_amount=0,
                 refunded_amount=0,
                 cancelled_amount=0,
             ),
-            consumer=ProviderConsumerResponse(
-                shipping_address={},
-                company=ProviderCompanyResponse(
-                    contact_details=ContactDetails(
-                        phone_number={},
-                    )
-                ),
-                private_person=ContactDetails(
-                    phone_number={},
-                ),
-                billing_address={},
-            ),
-            payment_details=ProviderPaymentDetailsResponse(
-                invoice_details={},
-                card_details={},
-            ),
-            order_details=ProviderOrderDetailsResponse(
-                amount=amount,
-                currency=currency,
-                reference=declaration.id,
-            ),
-            checkout=ProviderPaymentCheckoutResponse(
-                url=f"{settings.HOST_DOMAIN}/payment/checkout/{declaration.id}",
-                cancel_url=f"{settings.HOST_DOMAIN}/payment/cancel/{declaration.id}",
-            ),
-            # checkout={},
-            created=datetime.now(timezone.utc).isoformat(),
         )
 
-        return test_payment, fake_provider_payment
+        (
+            test_payment_2,
+            fake_provider_payment_2,
+        ) = self._create_test_payment_with_fake_provider_payment(
+            status="reserved",
+            amount=7331,
+            declaration=self.declaration_2,
+            provider_payment_id="5678",
+            provider_payment_summary=ProviderPaymentSummaryResponse(
+                reserved_amount=7331,
+                charged_amount=0,
+                refunded_amount=0,
+                cancelled_amount=0,
+            ),
+        )
+
+        fake_provider_payments = {
+            fake_provider_payment_1.payment_id: fake_provider_payment_1,
+            fake_provider_payment_2.payment_id: fake_provider_payment_2,
+        }
+
+        # Configure mock(s)
+        mock_nets_provider = MagicMock(
+            host=settings.PAYMENT_PROVIDER_NETS_HOST,
+            terms_url=settings.PAYMENT_PROVIDER_NETS_TERMS_URL,
+            read=MagicMock(
+                side_effect=lambda x: (
+                    fake_provider_payments[x] if x in fake_provider_payments else None
+                )
+            ),
+            charge=MagicMock(side_effect=[None, None]),
+        )
+
+        mock_get_provider_handler.return_value = mock_nets_provider
+
+        # Invoke the management command & refresh payments
+        call_command("payment_charge_reserved")
+        test_payment_1.refresh_from_db()
+        test_payment_2.refresh_from_db()
+
+        # Assert everything happend as expected
+        mock_nets_provider.read.assert_has_calls(
+            [
+                call(test_payment_1.provider_payment_id),
+                call(test_payment_2.provider_payment_id),
+            ]
+        )
+        mock_nets_provider.charge.assert_has_calls(
+            [
+                call(test_payment_1.provider_payment_id, test_payment_1.amount),
+                call(test_payment_2.provider_payment_id, test_payment_2.amount),
+            ]
+        )
+        self.assertEqual(test_payment_1.status, "paid")
+        self.assertEqual(test_payment_2.status, "paid")
