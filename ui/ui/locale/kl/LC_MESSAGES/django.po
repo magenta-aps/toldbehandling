@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-28 13:42-0200\n"
+"POT-Creation-Date: 2024-02-29 10:08-0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -94,6 +94,47 @@ msgid "Slet afgiftsanmeldelse"
 msgstr ""
 
 #: ui/templates/ui/tf10/delete.html
+#, fuzzy
+#| msgid "Afgiftssats"
+msgid "Afgiftsanmeldelse"
+msgstr "Akitsuutip annertussusia"
+
+#: ui/templates/ui/tf10/delete.html ui/templates/ui/tf5/payment/checkout.html
+#: ui/templates/ui/tf5/payment/details.html
+msgid "Afsender"
+msgstr "Nassiussisoq"
+
+#: ui/templates/ui/tf10/delete.html ui/templates/ui/tf5/payment/details.html
+msgid "Modtager"
+msgstr "Tigusisussaq"
+
+#: ui/templates/ui/tf10/delete.html
+msgid "Forsendelsesmåde"
+msgstr ""
+
+#: ui/templates/ui/tf10/delete.html
+msgid "Skibsfragt"
+msgstr ""
+
+#: ui/templates/ui/tf10/delete.html
+msgid "Luftfragt"
+msgstr ""
+
+#: ui/templates/ui/tf10/delete.html
+msgid "Skibspost"
+msgstr ""
+
+#: ui/templates/ui/tf10/delete.html
+msgid "Luftpost"
+msgstr ""
+
+#: ui/templates/ui/tf10/delete.html
+#, fuzzy
+#| msgid "Afgiftssats"
+msgid "Afgift i alt"
+msgstr "Akitsuutip annertussusia"
+
+#: ui/templates/ui/tf10/delete.html
 msgid "Annuller"
 msgstr ""
 
@@ -141,11 +182,6 @@ msgstr "Katillugit"
 msgid "Detaljer"
 msgstr "Paasissutissat"
 
-#: ui/templates/ui/tf5/payment/checkout.html
-#: ui/templates/ui/tf5/payment/details.html
-msgid "Afsender"
-msgstr "Nassiussisoq"
-
 #: ui/templates/ui/tf5/payment/details.html
 msgid "Betalingsdetaljer"
 msgstr "Akiliinissap paasissutissartai"
@@ -169,10 +205,6 @@ msgstr "Akilerneqareerput"
 #: ui/templates/ui/tf5/payment/details.html
 msgid "Ikke betalt"
 msgstr "Akilerneqanngillat"
-
-#: ui/templates/ui/tf5/payment/details.html
-msgid "Modtager"
-msgstr "Tigusisussaq"
 
 #: ui/templates/ui/tf5/tilladelse.html
 msgid "Engangstilladelse til privatindførsel af øl, vin og spiritus"
