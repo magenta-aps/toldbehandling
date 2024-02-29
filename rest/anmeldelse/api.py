@@ -202,6 +202,8 @@ class AfgiftsanmeldelsePermission(RestPermission):
     permissions=[permissions.IsAuthenticated & AfgiftsanmeldelsePermission],
 )
 class AfgiftsanmeldelseAPI:
+    allowed_statuses_delete = ["ny", "kladde"]
+
     @route.post("", auth=get_auth_methods(), url_name="afgiftsanmeldelse_create")
     def create(
         self,
@@ -383,6 +385,24 @@ class AfgiftsanmeldelseAPI:
             else:
                 log.info("Der findes ikke en eksisterende leverandørfaktura")
         item.save()
+        return {"success": True}
+
+    @route.delete(
+        "/{id}",
+        auth=get_auth_methods(),
+        url_name="afgiftsanmeldelse_delete",
+    )
+    def delete(self, id: int):
+        item = get_object_or_404(Afgiftsanmeldelse, id=id)
+        self.check_user(item)
+
+        if item.status not in self.allowed_statuses_delete:
+            raise PermissionDenied(
+                "You are not allowed to delete 'afgiftsanmeldelser' "
+                f"with status: {item.status}"
+            )
+
+        item.delete()
         return {"success": True}
 
     def check_perm(self, permission):
