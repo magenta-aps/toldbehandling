@@ -41,6 +41,11 @@ urlpatterns = [
         views.TF10LeverandørFakturaView.as_view(),
         name="tf10_leverandørfaktura",
     ),
+    path(
+        "blanket/tf10/<int:id>/delete",
+        views.TF10DeleteView.as_view(),
+        name="tf10_delete",
+    ),
 ]
 if settings.TF5_ENABLED:
     urlpatterns += [
