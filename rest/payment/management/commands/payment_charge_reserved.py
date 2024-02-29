@@ -31,10 +31,10 @@ class Command(BaseCommand):
                 continue
 
             # Skip the payment if it's not in sync with the provider
-            if provider_payment["summary"]["reservedAmount"] != payment.amount:
+            if provider_payment.summary.reserved_amount != payment.amount:
                 print(
                     f"WARNING: out of sync with the payment_provider "
-                    f"({provider_payment['summary']['reservedAmount']} != {payment.amount})"  # noqa: E501
+                    f"({provider_payment.summary.reserved_amount} != {payment.amount})"
                 )
                 continue
 

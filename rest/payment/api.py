@@ -7,6 +7,7 @@ from typing import Callable, Dict, List, Tuple
 
 from anmeldelse.models import PrivatAfgiftsanmeldelse, Varelinje
 from common.api import get_auth_methods
+from django.conf import settings
 from django.forms import model_to_dict
 from ninja_extra import api_controller, permissions, route
 from ninja_extra.exceptions import NotFound, PermissionDenied
@@ -24,9 +25,9 @@ from payment.schemas import (
     PaymentCreatePayload,
     PaymentResponse,
     ProviderPaymentPayload,
+    ProviderPaymentResponse,
 )
 from payment.utils import round_decimal
-from project import settings
 
 
 @api_controller(
@@ -35,7 +36,12 @@ from project import settings
     permissions=[permissions.IsAuthenticated & PaymentPermission],
 )
 class PaymentAPI:
-    @route.post("", auth=get_auth_methods(), url_name="payment_create")
+    @route.post(
+        "",
+        auth=get_auth_methods(),
+        url_name="payment_create",
+        response={201: PaymentResponse},
+    )
     def create(self, payload: PaymentCreatePayload) -> PaymentResponse:
         try:
             declaration = PrivatAfgiftsanmeldelse.objects.get(id=payload.declaration_id)
@@ -66,9 +72,7 @@ class PaymentAPI:
             if payment_new.provider_payment_id is not None:
                 return payment_model_to_response(
                     payment_new,
-                    field_converts=payment_field_converters(
-                        provider_handler, full=True
-                    ),
+                    field_converts=payment_field_converters(provider_handler),
                 )
         except Payment.DoesNotExist:
             pass
@@ -122,13 +126,13 @@ class PaymentAPI:
         # after creating the payment at the provider
         payment_new.provider = payload.provider
         payment_new.provider_host = provider_handler.host
-        payment_new.provider_payment_id = provider_payment_new["paymentId"]
+        payment_new.provider_payment_id = provider_payment_new.payment_id
         payment_new.status = provider_handler.initial_status
         payment_new.save()
 
         return payment_model_to_response(
             payment_new,
-            field_converts=payment_field_converters(provider_handler, full=True),
+            field_converts=payment_field_converters(provider_handler),
         )
 
     @route.get("", auth=JWTAuth(), url_name="payment_list")
@@ -150,10 +154,7 @@ class PaymentAPI:
         return [
             payment_model_to_response(
                 payment,
-                payment_field_converters(
-                    provider_handler,
-                    full=bool(self.context.request.GET.get("full", None)),
-                ),
+                payment_field_converters(provider_handler),
             )
             for payment in payments
         ]
@@ -166,7 +167,6 @@ class PaymentAPI:
             payment_local,
             field_converts=payment_field_converters(
                 get_provider_handler(settings.PAYMENT_PROVIDER_NETS),
-                full=bool(self.context.request.GET.get("full", None)),
             ),
         )
 
@@ -177,26 +177,25 @@ class PaymentAPI:
         provider_handler = get_provider_handler(settings.PAYMENT_PROVIDER_NETS)
         provider_payment = provider_handler.read(payment_local.provider_payment_id)
 
-        if payment_local.status != "paid":
-            # Update local payment status based on the summary
-            paymentSummary = provider_payment["summary"]
-            if "reservedAmount" in paymentSummary:
-                if paymentSummary["reservedAmount"] == payment_local.amount:
-                    payment_local.status = "reserved"
-                    payment_local.save()
+        # Update local payment status based on the summary
+        if (
+            payment_local.status == "created"
+            and provider_payment.summary.reserved_amount == payment_local.amount
+        ):
+            payment_local.status = "reserved"
+            payment_local.save()
 
-            if "chargedAmount" in paymentSummary:
-                if paymentSummary["chargedAmount"] == payment_local.amount:
-                    payment_local.status = "paid"
-                    payment_local.save()
+        if (
+            payment_local.status == "reserved"
+            and provider_payment.summary.charged_amount == payment_local.amount
+        ):
+            payment_local.status = "paid"
+            payment_local.save()
 
         # Default, return the payment without doing anything
         return payment_model_to_response(
             payment_local,
-            field_converts=payment_field_converters(
-                get_provider_handler(settings.PAYMENT_PROVIDER_NETS),
-                full=True,
-            ),
+            field_converts=payment_field_converters(provider_handler, provider_payment),
         )
 
 
@@ -234,19 +233,22 @@ def payment_model_to_response(
     return PaymentResponse(**payment_local_dict)
 
 
-def payment_field_converters(provider_handler: NetsProviderHandler, full: bool):
+def payment_field_converters(
+    provider_handler: NetsProviderHandler,
+    provider_payment: ProviderPaymentResponse | None = None,
+):
     return {
         "declaration": lambda field_value: (
             "declaration",
-            (
-                PrivatAfgiftsanmeldelse.objects.get(id=field_value)
-                if full
-                else field_value
-            ),
+            PrivatAfgiftsanmeldelse.objects.get(id=field_value),
         ),
         "provider_payment_id": lambda field_value: (
             "provider_payment",
-            provider_handler.read(field_value) if full else None,
+            (
+                provider_payment
+                if provider_payment
+                else provider_handler.read(field_value)
+            ),
         ),
     }
 
