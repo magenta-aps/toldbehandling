@@ -2,8 +2,8 @@
 #
 # SPDX-License-Identifier: MPL-2.0
 
+from django.conf import settings
 from django.db import models
-from project import settings
 
 PAYMENT_PROVIDER_CHOICES = {
     settings.PAYMENT_PROVIDER_NETS: "Nets",

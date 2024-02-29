@@ -103,6 +103,13 @@ class ProviderPaymentPayload(BasePayment):
 # Provider response schemas
 
 
+class ProviderPaymentSummaryResponse(BaseResponse):
+    reserved_amount: int
+    charged_amount: int
+    refunded_amount: int
+    cancelled_amount: int
+
+
 class ProviderPaymentDetailsResponse(BaseResponse):
     payment_type: str | None
     payment_method: str | None
@@ -127,13 +134,18 @@ class ProviderConsumerResponse(BaseResponse):
     billing_address: dict
 
 
+class ProviderPaymentCheckoutResponse(BaseResponse):
+    url: str
+    cancel_url: str
+
+
 class ProviderPaymentResponse(BaseResponse):
     payment_id: str
+    summary: ProviderPaymentSummaryResponse
+    consumer: ProviderConsumerResponse
     payment_details: ProviderPaymentDetailsResponse
     order_details: ProviderOrderDetailsResponse
-    checkout: ProviderPaymentDetailsResponse
-    consumer: ProviderConsumerResponse
-    checkout: dict
+    checkout: ProviderPaymentCheckoutResponse
     created: str
 
 
