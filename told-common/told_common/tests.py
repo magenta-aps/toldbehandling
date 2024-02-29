@@ -400,6 +400,9 @@ class AnmeldelseListViewTest(HasLogin):
     def view_url(self, id: int):
         raise NotImplementedError("Implement in subclasses")
 
+    def delete_url(self, id: int):
+        raise NotImplementedError("Implement in subclasses")
+
     @staticmethod
     def get_html_list(html: str):
         soup = BeautifulSoup(html, "html.parser")
@@ -765,6 +768,7 @@ class AnmeldelseListViewTest(HasLogin):
                         [
                             "Vis" if self.can_view else None,
                             "Redigér" if self.can_edit else None,
+                            "Slet" if self.can_delete else None,
                         ],
                     )
                 ),
@@ -792,6 +796,13 @@ class AnmeldelseListViewTest(HasLogin):
                 return (
                     f'<a class="btn btn-primary btn-sm" '
                     f'href="{self.edit_url(id)}?back=list">Redigér</a>'
+                )
+
+        def _delete_button(id: int):
+            if self.can_delete:
+                return (
+                    f'<a class="btn btn-danger btn-sm" '
+                    f'href="{self.delete_url(id)}?back=list">Slet</a>'
                 )
 
         self.maxDiff = None
@@ -901,6 +912,7 @@ class AnmeldelseListViewTest(HasLogin):
                             [
                                 _view_button(3),
                                 _edit_button(3),
+                                _delete_button(3),
                             ],
                         )
                     ),

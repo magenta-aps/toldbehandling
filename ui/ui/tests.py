@@ -790,6 +790,7 @@ class UiTemplateTagsTest(TemplateTagsTest, TestCase):
 class UiAnmeldelseListViewTest(AnmeldelseListViewTest, TestCase):
     can_view = True
     can_edit = True
+    can_delete = True
 
     @property
     def login_url(self):
@@ -804,6 +805,9 @@ class UiAnmeldelseListViewTest(AnmeldelseListViewTest, TestCase):
 
     def view_url(self, id: int):
         return str(reverse("tf10_view", kwargs={"id": id}))
+
+    def delete_url(self, id: int):
+        return str(reverse("tf10_delete", kwargs={"id": id}))
 
 
 class UiFileViewTest(FileViewTest, TestCase):
