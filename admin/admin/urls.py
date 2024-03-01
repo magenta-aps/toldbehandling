@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: MPL-2.0
 
 from django.urls import path
-from django.views.generic import TemplateView
 from django.views.generic.base import RedirectView
 from told_common import views as common_views
 

@@ -52,13 +52,16 @@ class JwtTokenInfo:
 
     @staticmethod
     def load(request: HttpRequest):
-        return JwtTokenInfo(
-            access_token=request.session["access_token"],
-            access_token_timestamp=float(request.session["access_token_timestamp"]),
-            refresh_token=request.session["refresh_token"],
-            refresh_token_timestamp=float(request.session["refresh_token_timestamp"]),
-            synchronized=True,
-        )
+        try:
+            return JwtTokenInfo(
+                access_token=request.session["access_token"],
+                access_token_timestamp=float(request.session["access_token_timestamp"]),
+                refresh_token=request.session["refresh_token"],
+                refresh_token_timestamp=float(request.session["refresh_token_timestamp"]),
+                synchronized=True,
+            )
+        except KeyError:
+            return None
 
     def save(self, request: HttpRequest, save_refresh_token: bool = False):
         if not self.synchronized:

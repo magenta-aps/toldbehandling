@@ -21,6 +21,7 @@ from told_common.form_mixins import (
     ButtonlessIntegerField,
     DateInput,
     MaxSizeFileField,
+    FixedWidthIntegerField,
 )
 from told_common.rest_client import RestClient
 from told_common.util import cast_or_none, date_next_workdays

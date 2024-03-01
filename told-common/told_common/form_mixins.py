@@ -9,7 +9,7 @@ from django import forms
 from django.core.exceptions import ValidationError
 from django.core.files import File
 from django.core.validators import MaxValueValidator, MinValueValidator
-from django.forms import FileField, MultipleChoiceField
+from django.forms import FileField, MultipleChoiceField, Form
 from django.utils.translation import gettext_lazy as _
 from dynamic_forms import DynamicFormMixin
 from humanize import naturalsize
@@ -17,11 +17,12 @@ from humanize import naturalsize
 
 class BootstrapForm(DynamicFormMixin, forms.Form):
     def __init__(self, *args, **kwargs):
+        print("BootstrapForm init")
         super(BootstrapForm, self).__init__(*args, **kwargs)
         self.kwargs = kwargs
         for name, field in self.fields.items():
             self.update_field(name, field)
-            self.set_field_classes(name, field)
+            self.set_field_classes(self, name, field)
 
     def full_clean(self):
         result = super(BootstrapForm, self).full_clean()
@@ -29,11 +30,17 @@ class BootstrapForm(DynamicFormMixin, forms.Form):
         return result
 
     def set_all_field_classes(self):
-        for name, field in self.fields.items():
-            self.set_field_classes(name, field, True)
+        self.apply_field_classes(self)
 
-    def set_field_classes(self, name, field, check_for_errors=False):
-        classes = self.split_class(field.widget.attrs.get("class"))
+    @classmethod
+    def apply_field_classes(cls, form: Form):
+        for name, field in form.fields.items():
+            print(name)
+            cls.set_field_classes(form, name, field, True)
+
+    @classmethod
+    def set_field_classes(cls, form, name, field, check_for_errors=False):
+        classes = BootstrapForm.split_class(field.widget.attrs.get("class"))
         classes.append("mr-2")
         if isinstance(field.widget, (forms.CheckboxInput, forms.RadioSelect)):
             pass
@@ -43,7 +50,7 @@ class BootstrapForm(DynamicFormMixin, forms.Form):
                 classes.append("form-select")
 
         if check_for_errors:
-            if self.has_error(name) is True:
+            if form.has_error(name) is True:
                 classes.append("is-invalid")
         field.widget.attrs["class"] = " ".join(set(classes))
 
@@ -104,9 +111,10 @@ class FixedWidthIntegerField(ErrorMessagesFieldMixin, forms.CharField):
         ),  # Kopieret fra Django
     }
 
-    def __init__(self, width: int = 1, min_value: int = 0, *args, **kwargs):
+    def __init__(self, width: int = 1, min_value: int = 0, *args, widget_attrs=None, **kwargs):
         self.width = int(width)
         self.min_value = int(min_value)
+        self.extra_widget_attrs = widget_attrs
         super().__init__(*args, **kwargs)
         self.validators.append(MinValueValidator(min_value))
         self.validators.append(MaxValueValidator((10**width) - 1))
@@ -119,6 +127,8 @@ class FixedWidthIntegerField(ErrorMessagesFieldMixin, forms.CharField):
         attrs["maxlength"] = str(self.width)
         attrs["minlength"] = str(self.width)
         attrs["pattern"] = "\\d{" + str(self.width) + "}"
+        if type(self.extra_widget_attrs) is dict:
+            attrs.update(self.extra_widget_attrs)
         return attrs
 
     def to_python(self, value: str) -> Optional[int]:

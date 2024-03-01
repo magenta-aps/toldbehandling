@@ -11,6 +11,7 @@ from urllib.parse import unquote
 
 from django.conf import settings
 from django.contrib import messages
+from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.http import FileResponse, Http404, JsonResponse
 from django.shortcuts import redirect
 from django.template import loader
@@ -52,7 +53,7 @@ class LoginView(FormView):
     template_name = "told_common/login.html"
 
     def get_success_url(self):
-        next = self.request.GET.get("back")
+        next = self.request.GET.get("back") or self.request.GET.get(REDIRECT_FIELD_NAME)
         if next:
             return next
 

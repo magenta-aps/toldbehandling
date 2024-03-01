@@ -35,6 +35,9 @@ HOST_DOMAIN = os.environ.get("HOST_DOMAIN", "http://akitsuut.aka.gl")
 if os.environ.get("HOST_DOMAIN", False):
     CSRF_TRUSTED_ORIGINS = [os.environ["HOST_DOMAIN"]]
 
+LOGIN_URL = "/admin/login"
+BYPASS_2FA = bool(strtobool(os.environ.get("BYPASS_2FA", "False")))
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -44,9 +47,14 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "told_common",
+    "told_twofactor",
     "admin",
     "django_bootstrap_icons",
     "tempus_dominus",
+    "django_otp",
+    "django_otp.plugins.otp_static",
+    "django_otp.plugins.otp_totp",
+    "two_factor",
 ]
 
 MIDDLEWARE = [
@@ -58,6 +66,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
+    "told_common.middleware.RestTokenUserMiddleware",
 ]
 
 ROOT_URLCONF = "project.urls"

@@ -13,6 +13,7 @@ from django.core.exceptions import ValidationError
 from django.http import Http404, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import redirect
 from django.template import loader
+from django.template.response import TemplateResponse
 from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from django.views import View
@@ -43,6 +44,10 @@ from admin.clients.prisme import (
 from admin.spreadsheet import SpreadsheetExport, VareafgiftssatsSpreadsheetUtil
 
 
+
+
+
+
 class AdminLayoutBaseView(PermissionsRequiredMixin, HasRestClientMixin):
     """Base view for admin pages, using a common layout with navigation.
 
@@ -50,6 +55,7 @@ class AdminLayoutBaseView(PermissionsRequiredMixin, HasRestClientMixin):
     will currently be overridden by the child-views equivalent.. we need a way to
     combine them for if we want default permissions for this view.
     """
+
 
     extend_template = "admin/admin_layout.html"
 
@@ -87,6 +93,15 @@ class AdminLayoutBaseView(PermissionsRequiredMixin, HasRestClientMixin):
                 "version": settings.VERSION,
             }
         )
+
+    @property
+    def two_factor_setup_required(self):
+        return TemplateResponse(
+            request=self.request,
+            status=403,
+            template="two_factor/core/otp_required.html",
+        )
+
 
 
 class IndexView(PermissionsRequiredMixin, HasRestClientMixin, TemplateView):

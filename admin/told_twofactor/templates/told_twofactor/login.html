@@ -22,9 +22,16 @@ Log ind
             {% endif %}
         </div>
         <div class="col-md-3 mb-3">
+            {{form.twofactor}}
+            {% if form.twofactor.errors %}
+            <div class="invalid-feedback">{{ form.twofactor.errors }}</div>
+            {% endif %}
+        </div>
+        <div class="col-md-3 mb-3">
             <button type="submit" class="btn btn-primary">{% translate 'Login' %}</button>
         </div>
     </div>
+    <a href="{% url 'twofactor:setup' %}">{% translate 'Opsæt tofaktor-login' %}</a>
     <input type="hidden" name="next" value="{{ next }}">
 </form>
 {% endblock %}

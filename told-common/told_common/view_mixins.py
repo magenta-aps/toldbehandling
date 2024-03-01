@@ -22,6 +22,9 @@ from django.urls import reverse
 from django.views.generic import FormView
 from requests import HTTPError
 from told_common.rest_client import JwtTokenInfo, RestClient
+from told_common.middleware import RestTokenUserMiddleware
+
+
 
 
 class LoginRequiredMixin:
@@ -34,6 +37,7 @@ class LoginRequiredMixin:
                 request.session["user"] = user
                 # Save token to session
                 token.save(request, save_refresh_token=True)
+                RestTokenUserMiddleware.set_user(request)
                 return None
             else:
                 # Redirect to SAML login
