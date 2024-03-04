@@ -390,6 +390,9 @@ class PermissionsTest(HasLogin):
 
 class AnmeldelseListViewTest(HasLogin):
     can_select_multiple = False
+    can_view = False
+    can_edit = False
+    can_delete = False
 
     def list_url(self):
         raise NotImplementedError("Implement in subclasses")
