@@ -17,7 +17,7 @@ COPY rest/requirements.txt /app/requirements.txt
 RUN pip install --no-cache-dir -r /app/requirements.txt
 # hadolint ignore=DL3008
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends gettext python3-distutils graphviz logrotate postgresql-client-common  && \
+    apt-get install -y --no-install-recommends gettext python3-distutils graphviz logrotate postgresql-client-common && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 RUN curl -fsSLO "$SUPERCRONIC_URL" \
