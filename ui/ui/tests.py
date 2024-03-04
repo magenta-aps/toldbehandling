@@ -4,8 +4,9 @@
 import base64
 import json
 from collections import defaultdict
+from operator import not_
 from typing import List, Tuple
-from unittest.mock import patch
+from unittest.mock import call, patch
 from urllib.parse import quote
 
 import requests
@@ -123,6 +124,105 @@ class TF10BlanketTest(TestMixin, HasLogin, TestCase):
             response.headers["Location"],
             reverse("login:login") + "?back=" + quote(url, safe=""),
         )
+
+    def create_mock_afgiftsanmeldelse(
+        self,
+        **kwargs,
+    ):
+        return {
+            **{
+                "id": 1,
+                "afsender": {
+                    "id": 1,
+                    "navn": "Testfirma 1",
+                    "adresse": "Testvej 42",
+                    "postnummer": 1234,
+                    "by": "TestBy",
+                    "postbox": "123",
+                    "telefon": "123456",
+                    "cvr": 12345678,
+                },
+                "modtager": {
+                    "id": 1,
+                    "navn": "Testfirma 1",
+                    "adresse": "Testvej 42",
+                    "postnummer": 1234,
+                    "by": "TestBy",
+                    "postbox": "123",
+                    "telefon": "123456",
+                    "cvr": 12345678,
+                    "kreditordning": True,
+                },
+                "fragtforsendelse": None,
+                "postforsendelse": {
+                    "id": 11,
+                    "forsendelsestype": "F",
+                    "postforsendelsesnummer": "10000001",
+                    "afsenderbykode": "164",
+                    "afgangsdato": "2024-03-13",
+                    "kladde": False,
+                },
+                "leverandørfaktura_nummer": "5678",
+                "leverandørfaktura": "/leverand%C3%B8rfakturaer/3/leverand%C3%B8rfaktura.txt",
+                "betales_af": "afsender",
+                "indførselstilladelse": "1234",
+                "afgift_total": "658.00",
+                "betalt": True,
+                "dato": "2024-01-01T02:00:00+00:00",
+                "status": "ny",
+                "oprettet_af": {
+                    "id": 5,
+                    "username": "indberetter",
+                    "first_name": "Anders",
+                    "last_name": "And",
+                    "email": "anders@andeby.dk",
+                    "is_superuser": False,
+                    "groups": ["PrivatIndberettere", "ErhvervIndberettere"],
+                    "permissions": [
+                        "aktør.add_afsender",
+                        "aktør.add_modtager",
+                        "aktør.change_afsender",
+                        "aktør.change_modtager",
+                        "aktør.view_afsender",
+                        "aktør.view_modtager",
+                        "aktør.view_speditør",
+                        "anmeldelse.add_afgiftsanmeldelse",
+                        "anmeldelse.add_notat",
+                        "anmeldelse.add_privatafgiftsanmeldelse",
+                        "anmeldelse.add_varelinje",
+                        "anmeldelse.change_afgiftsanmeldelse",
+                        "anmeldelse.change_privatafgiftsanmeldelse",
+                        "anmeldelse.change_varelinje",
+                        "anmeldelse.view_afgiftsanmeldelse",
+                        "anmeldelse.view_notat",
+                        "anmeldelse.view_privatafgiftsanmeldelse",
+                        "anmeldelse.view_varelinje",
+                        "forsendelse.add_fragtforsendelse",
+                        "forsendelse.add_postforsendelse",
+                        "forsendelse.change_fragtforsendelse",
+                        "forsendelse.change_postforsendelse",
+                        "forsendelse.delete_fragtforsendelse",
+                        "forsendelse.delete_postforsendelse",
+                        "forsendelse.view_fragtforsendelse",
+                        "forsendelse.view_postforsendelse",
+                        "payment.add_item",
+                        "payment.add_payment",
+                        "payment.change_item",
+                        "payment.change_payment",
+                        "payment.view_item",
+                        "payment.view_payment",
+                        "sats.view_afgiftstabel",
+                        "sats.view_vareafgiftssats",
+                    ],
+                    "indberetter_data": {"cpr": 1111111111, "cvr": 12345678},
+                },
+                "oprettet_på_vegne_af": None,
+                "toldkategori": None,
+                "fuldmagtshaver": None,
+                "beregnet_faktureringsdato": "2024-04-20",
+            },
+            **kwargs,
+        }
 
     def mock_requests_get(self, path):
         expected_prefix = f"{settings.REST_DOMAIN}/api/"
@@ -781,6 +881,61 @@ class TF10BlanketTest(TestMixin, HasLogin, TestCase):
         mock_get.side_effect = self.mock_requests_get
         response = self.client.get(url)
         self.assertEquals(response.status_code, 403)
+
+    @patch.object(requests.Session, "get")
+    def test_delete_not_allowed(self, mock_get):
+        for status in ["godkendt", "afsluttet", "afvist"]:
+            afgiftsanmeldelse_new = self.create_mock_afgiftsanmeldelse(
+                id=1, status=status
+            )
+            mock_rest_resp = Response()
+            mock_rest_resp.status_code = 200
+            mock_rest_resp._content = json.dumps(afgiftsanmeldelse_new).encode("utf-8")
+            mock_get.side_effect = lambda p: mock_rest_resp
+
+            self.login()
+            url = reverse("tf10_delete", kwargs={"id": 1})
+            response = self.client.get(url)
+            self.assertEquals(response.status_code, 403)
+
+        mock_get.assert_has_calls(
+            [
+                call(f"{settings.REST_DOMAIN}/api/afgiftsanmeldelse/1/full")
+                for _ in range(3)
+            ]
+        )
+
+    @patch.object(requests.Session, "get")
+    def test_delete_new(self, mock_get):
+        mock_rest_resp = Response()
+        mock_rest_resp.status_code = 200
+        mock_rest_resp._content = json.dumps(
+            self.create_mock_afgiftsanmeldelse(id=1, status="ny")
+        ).encode("utf-8")
+        mock_get.side_effect = lambda p: mock_rest_resp
+
+        self.login()
+        url = reverse("tf10_delete", kwargs={"id": 2})
+        response = self.client.get(url)
+
+        mock_get.assert_called_once()
+        self.assertEquals(response.status_code, 200)
+
+    @patch.object(requests.Session, "get")
+    def test_delete_kladde(self, mock_get):
+        mock_resp = Response()
+        mock_resp.status_code = 200
+        mock_resp._content = json.dumps(
+            self.create_mock_afgiftsanmeldelse(id=1, status="kladde")
+        ).encode("utf-8")
+        mock_get.side_effect = lambda path: mock_resp
+
+        self.login()
+        url = reverse("tf10_delete", kwargs={"id": 2})
+        response = self.client.get(url)
+
+        mock_get.assert_called_once()
+        self.assertEquals(response.status_code, 200)
 
 
 class UiTemplateTagsTest(TemplateTagsTest, TestCase):
