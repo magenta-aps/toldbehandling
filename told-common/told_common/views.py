@@ -48,6 +48,7 @@ from told_common.view_mixins import (
 log = logging.getLogger(__name__)
 
 
+
 class LoginView(FormView):
     form_class = forms.LoginForm
     template_name = "told_common/login.html"

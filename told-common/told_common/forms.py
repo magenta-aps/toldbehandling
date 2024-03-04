@@ -7,6 +7,7 @@ from decimal import Decimal
 from typing import Iterable, List, Optional
 
 from django import forms
+from django.contrib.auth.forms import AuthenticationForm
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 from django.forms import CharField, Form, formset_factory
@@ -14,7 +15,7 @@ from django.utils import translation
 from django.utils.translation import gettext_lazy as _
 from dynamic_forms import DynamicField
 from requests import HTTPError
-from told_common.data import Speditør, Vareafgiftssats
+from told_common.data import Speditør, Vareafgiftssats, User
 from told_common.form_mixins import (
     BootstrapForm,
     ButtonlessDecimalField,
@@ -27,7 +28,7 @@ from told_common.rest_client import RestClient
 from told_common.util import cast_or_none, date_next_workdays
 
 
-class LoginForm(BootstrapForm):
+class LoginForm(BootstrapForm, AuthenticationForm):
     username = forms.CharField(
         max_length=150,
         min_length=1,
@@ -52,6 +53,11 @@ class LoginForm(BootstrapForm):
             self.token = RestClient.login(
                 self.cleaned_data["username"], self.cleaned_data["password"]
             )
+            userdata = RestClient(self.token).user.this()
+            self.user_cache = User.from_dict({**userdata, "jwt_token": self.token})
+
+
+
         except HTTPError:
             raise ValidationError(_("Login fejlede"))
 

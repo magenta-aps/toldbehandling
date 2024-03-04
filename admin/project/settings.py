@@ -37,6 +37,7 @@ if os.environ.get("HOST_DOMAIN", False):
 
 LOGIN_URL = "/admin/login"
 BYPASS_2FA = bool(strtobool(os.environ.get("BYPASS_2FA", "False")))
+SYSTEM_USER_PASSWORD = os.environ["SYSTEM_USER_PASSWORD"]
 
 # Application definition
 
@@ -67,6 +68,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "told_common.middleware.RestTokenUserMiddleware",
+    "django_otp.middleware.OTPMiddleware",
 ]
 
 ROOT_URLCONF = "project.urls"

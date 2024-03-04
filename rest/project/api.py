@@ -19,8 +19,10 @@ from payment.api import PaymentAPI
 from project.util import ORJSONRenderer
 from sats.api import AfgiftstabelAPI, VareafgiftssatsAPI
 
+from otp.api import TOTPDeviceAPI, TwoFactorJWTController
+
 api = NinjaExtraAPI(title="Toldbehandling", renderer=ORJSONRenderer(), csrf=False)
-api.register_controllers(NinjaJWTDefaultController)
+api.register_controllers(NinjaJWTDefaultController, TwoFactorJWTController)
 api.register_controllers(AfsenderAPI, ModtagerAPI, SpeditørAPI)
 api.register_controllers(
     AfgiftsanmeldelseAPI,
@@ -34,3 +36,4 @@ api.register_controllers(PostforsendelseAPI, FragtforsendelseAPI)
 api.register_controllers(AfgiftstabelAPI, VareafgiftssatsAPI)
 api.register_controllers(UserAPI, EboksBeskedAPI)
 api.register_controllers(PaymentAPI)
+api.register_controllers(TOTPDeviceAPI)

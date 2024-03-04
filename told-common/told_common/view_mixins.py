@@ -21,7 +21,8 @@ from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.views.generic import FormView
 from requests import HTTPError
-from told_common.rest_client import JwtTokenInfo, RestClient
+from told_common.data import JwtTokenInfo
+from told_common.rest_client import RestClient
 from told_common.middleware import RestTokenUserMiddleware
 
 
@@ -46,7 +47,8 @@ class LoginRequiredMixin:
                 )
         else:
             # Redirect to normal django login
-            return redirect(reverse("login") + "?back=" + quote_plus(request.path))
+            return redirect(reverse("twofactor:login") + "?back=" + quote_plus(request.path))
+            # return redirect(reverse("login") + "?back=" + quote_plus(request.path))
 
     def login_check(self):
         if not self.request.session.get("access_token") or not self.request.session.get(
@@ -185,7 +187,19 @@ class HasRestClientMixin:
     def dispatch(self, request, *args, **kwargs):
         self.rest_client = RestClient(token=JwtTokenInfo.load(request))
         response = super().dispatch(request, *args, **kwargs)
-        self.rest_client.token.save(request)
+        if self.rest_client.token:
+            self.rest_client.token.save(request)
+        return response
+
+
+class HasSystemRestClientMixin:
+    def dispatch(self, request, *args, **kwargs):
+        self.rest_client = RestClient(RestClient.login("system", settings.SYSTEM_USER_PASSWORD))
+        response = super().dispatch(request, *args, **kwargs)
+        # TODO: Gem token et sted? Ikke oveni den eksisterende sat af HasRestClientMixin
+        # TODO: Måske i en class-level cache?
+        # if self.rest_client.token:
+        #     self.rest_client.token.save(request)
         return response
 
 

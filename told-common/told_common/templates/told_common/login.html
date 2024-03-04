@@ -9,19 +9,19 @@ Log ind
 <form action="" method="POST" class="needs-validation">
     {% csrf_token %}
     <div class="row">
-        <div class="col-md-3 mb-3">
+        <div class="col-md-5 mb-3">
             {{form.username}}
             {% if form.username.errors %}
             <div class="invalid-feedback">{{ form.username.errors }}</div>
             {% endif %}
         </div>
-        <div class="col-md-3 mb-3">
+        <div class="col-md-5 mb-3">
             {{form.password}}
             {% if form.password.errors %}
             <div class="invalid-feedback">{{ form.password.errors }}</div>
             {% endif %}
         </div>
-        <div class="col-md-3 mb-3">
+        <div class="col-md-2 mb-3">
             <button type="submit" class="btn btn-primary">{% translate 'Login' %}</button>
         </div>
     </div>

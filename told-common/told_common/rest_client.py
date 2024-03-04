@@ -34,45 +34,13 @@ from told_common.data import (
     User,
     Vareafgiftssats,
     Varelinje,
+    JwtTokenInfo,
+    TOTPDevice,
 )
 from told_common.util import cast_or_none, filter_dict_none, opt_int
 
 log = logging.getLogger(__name__)
 
-
-@dataclass
-class JwtTokenInfo:
-    access_token: str
-    refresh_token: str
-    access_token_timestamp: float = field(
-        default_factory=time.time
-    )  # default to timestamp at instance creation
-    refresh_token_timestamp: float = field(default_factory=time.time)
-    synchronized: bool = False
-
-    @staticmethod
-    def load(request: HttpRequest):
-        try:
-            return JwtTokenInfo(
-                access_token=request.session["access_token"],
-                access_token_timestamp=float(request.session["access_token_timestamp"]),
-                refresh_token=request.session["refresh_token"],
-                refresh_token_timestamp=float(request.session["refresh_token_timestamp"]),
-                synchronized=True,
-            )
-        except KeyError:
-            return None
-
-    def save(self, request: HttpRequest, save_refresh_token: bool = False):
-        if not self.synchronized:
-            request.session["access_token"] = self.access_token
-            request.session["access_token_timestamp"] = self.access_token_timestamp
-            if save_refresh_token:
-                request.session["refresh_token"] = self.refresh_token
-                request.session[
-                    "refresh_token_timestamp"
-                ] = self.refresh_token_timestamp
-            self.synchronized = True
 
 
 class ModelRestClient:
@@ -904,6 +872,21 @@ class UserRestClient(ModelRestClient):
         return data["count"], [User.from_dict(item) for item in data["items"]]
 
 
+class TotpDeviceRestClient(ModelRestClient):
+
+    def create(
+            self,
+            data: dict,
+    ):
+        return self.rest.post("totpdevice", data)
+
+    def get_for_user(
+            self,
+            user: User
+    ):
+        return [TOTPDevice.from_dict(item) for item in self.rest.get("totpdevice", {"user": user.id})]
+
+
 class PaymentRestClient(ModelRestClient):
     def create(self, data: dict) -> dict:
         return self.rest.post("payment", data)
@@ -959,7 +942,8 @@ class RestClient:
     def __init__(self, token: JwtTokenInfo):
         self.session: Session = requests.sessions.Session()
         self.token: JwtTokenInfo = token
-        self.session.headers = {"Authorization": f"Bearer {self.token.access_token}"}
+        if self.token:
+            self.session.headers = {"Authorization": f"Bearer {self.token.access_token}"}
         self.afsender = AfsenderRestClient(self)
         self.modtager = ModtagerRestClient(self)
         self.postforsendelse = PostforsendelseRestClient(self)
@@ -976,6 +960,7 @@ class RestClient:
         self.payment = PaymentRestClient(self)
         self.statistik = StatistikRestClient(self)
         self.speditør = SpeditørRestClient(self)
+        self.totpdevice = TotpDeviceRestClient(self)
 
     def check_access_token_age(self):
         max_age = getattr(settings, "NINJA_JWT", {}).get(
@@ -997,6 +982,19 @@ class RestClient:
         response.raise_for_status()
         data = response.json()
         return JwtTokenInfo(access_token=data["access"], refresh_token=data["refresh"])
+
+    @classmethod
+    def login_twofactor(cls, username: str, password: str, twofactor_token: str) -> JwtTokenInfo:
+        response = requests.post(
+            f"{cls.domain}/api/token/2fa",
+            json={"username": username, "password": password, "twofactor_token": twofactor_token},
+            headers={"Content-Type": "application/json"},
+        )
+        response.raise_for_status()
+        data = response.json()
+        return JwtTokenInfo(access_token=data["access"], refresh_token=data["refresh"])
+
+
 
     def refresh_login(self):
         response = requests.post(
