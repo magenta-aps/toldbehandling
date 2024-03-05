@@ -290,7 +290,7 @@ Unittest REST:
     - coverage run manage.py test
     - coverage report --show-missing
     - mv .coverage "${CI_PROJECT_DIR}/coverage_output/.coverage.${CI_JOB_ID}"
-    - cp -r ./sats ./common ./forsendelse ./anmeldelse ./aktør ./common ./payment ./project "${CI_PROJECT_DIR}/coverage_output/"
+    - cp -r ./sats ./common ./forsendelse ./anmeldelse ./aktør ./common ./otp ./payment ./project "${CI_PROJECT_DIR}/coverage_output/"
 
 Unittest UI:
   <<: *test-ui
