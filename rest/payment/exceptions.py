@@ -52,12 +52,6 @@ class ProviderPaymentChargeError(APIException):
     default_code = "payment_provider_charge"
 
 
-class PaymentValidationError(APIException):
-    status_code = status.HTTP_400_BAD_REQUEST
-    default_detail = _("Payment validation error.")
-    default_code = "payment_validation"
-
-
 class InternalPaymentError(APIException):
     status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
     default_detail = _("An internal payment error occured.")

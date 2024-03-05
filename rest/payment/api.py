@@ -12,7 +12,6 @@ from django.forms import model_to_dict
 from ninja_extra import api_controller, permissions, route
 from ninja_extra.exceptions import PermissionDenied, ValidationError
 from ninja_jwt.authentication import JWTAuth
-from payment.exceptions import PaymentValidationError
 from payment.models import Item, Payment
 from payment.permissions import PaymentPermission
 from payment.provider_handlers import (
@@ -21,7 +20,6 @@ from payment.provider_handlers import (
     get_provider_handler,
 )
 from payment.schemas import (
-    BasePayment,
     PaymentCreatePayload,
     PaymentResponse,
     ProviderPaymentPayload,
@@ -114,7 +112,6 @@ class PaymentAPI:
             declaration_id=payment_new.declaration.id,
             items=[model_to_dict(item) for item in payment_new_items],
         )
-        provider_payment_validation(provider_payment_payload)
 
         provider_payment_new = provider_handler.create(
             provider_payment_payload,
@@ -199,15 +196,6 @@ class PaymentAPI:
 
 
 # Helpers
-
-
-def provider_payment_validation(payment: BasePayment):
-    # Make sure the payment amount is equal to the sum of all items gross_total_amount
-    # https://developer.nexigroup.com/nexi-checkout/en-EU/api/payment-v1/#v1-payments-post-body-order-amount
-    if payment.amount != sum([item.gross_total_amount for item in payment.items]):
-        raise PaymentValidationError(
-            "Payment amount does not match the sum of all items"
-        )
 
 
 def payment_model_to_response(
