@@ -14,6 +14,14 @@ from forsendelse.models import Fragtforsendelse, Postforsendelse
 
 
 class Command(BaseCommand):
+    @staticmethod
+    def random_letters(count):
+        return "".join([random.choice(string.ascii_letters) for x in range(count)])
+
+    @staticmethod
+    def random_digits(count):
+        return "".join([random.choice(string.digits) for x in range(count)])
+
     def handle(self, *args, **kwargs):
         if Fragtforsendelse.objects.exists() or Postforsendelse.objects.exists():
             # Already contains dummy data
@@ -35,14 +43,20 @@ class Command(BaseCommand):
                     Postforsendelse.Forsendelsestype.FLY,
                 ]
             )
+            if fragtforsendelsestype == Fragtforsendelse.Forsendelsestype.SKIB:
+                fragtbrevsnummer = f"{self.random_letters(5)}{self.random_digits(7)}"
+                forbindelsesnummer = f"{self.random_letters(3)} {self.random_digits(3)}"
+            elif fragtforsendelsestype == Fragtforsendelse.Forsendelsestype.FLY:
+                fragtbrevsnummer = self.random_digits(8)
+                forbindelsesnummer = self.random_digits(3)
+            else:
+                fragtbrevsnummer = ""
+                forbindelsesnummer = ""
 
             fragtforsendelse = Fragtforsendelse.objects.create(
                 forsendelsestype=fragtforsendelsestype,
-                fragtbrevsnummer="".join(
-                    [random.choice(string.ascii_letters).upper() for i in range(5)]
-                )
-                + str(random.randint(1000000, 9999999)),
-                forbindelsesnr=str(random.randint(100, 999)),
+                fragtbrevsnummer=fragtbrevsnummer,
+                forbindelsesnr=forbindelsesnummer,
                 oprettet_af=users.order_by("?").first(),
                 afgangsdato=date.today() + timedelta(days=30),
             )
