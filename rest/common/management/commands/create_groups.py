@@ -191,6 +191,7 @@ class Command(BaseCommand):
             ("change", fragtforsendelse_model),
             ("delete", postforsendelse_model),
             ("delete", fragtforsendelse_model),
+            ("delete", afgiftsanmeldelse_model),
         ):
             cvr_indberettere.permissions.add(
                 Permission.objects.get(

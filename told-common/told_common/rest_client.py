@@ -489,6 +489,9 @@ class AfgiftanmeldelseRestClient(ModelRestClient):
             )
         return Afgiftsanmeldelse.from_dict(item)
 
+    def delete(self, id: int):
+        return self.rest.delete(f"afgiftsanmeldelse/{id}")
+
     def list_history(self, id: int) -> Tuple[int, List[HistoricAfgiftsanmeldelse]]:
         data = self.rest.get(f"afgiftsanmeldelse/{id}/history")
         return data["count"], [
