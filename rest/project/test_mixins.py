@@ -494,8 +494,8 @@ class RestMixin:
 
         self.fragtforsendelse_data = {
             "forsendelsestype": Fragtforsendelse.Forsendelsestype.SKIB,
-            "fragtbrevsnummer": "1234",
-            "forbindelsesnr": "1337",
+            "fragtbrevsnummer": "ABCDE1234567",
+            "forbindelsesnr": "ABC 123",
             "afgangsdato": "2023-11-03",
             "kladde": False,
         }
