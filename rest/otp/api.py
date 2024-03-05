@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List
 
 from common.api import get_auth_methods
 from django.contrib.auth.models import User
@@ -10,7 +10,6 @@ from ninja.params import Query
 from ninja.schema import Schema
 from ninja_extra import api_controller, permissions, route
 from ninja_extra.exceptions import AuthenticationFailed
-from ninja_jwt.controller import TokenObtainPairController, schema
 
 
 class TOTPDeviceIn(ModelSchema):
