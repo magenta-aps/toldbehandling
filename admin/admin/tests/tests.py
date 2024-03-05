@@ -203,7 +203,6 @@ class TestLogin(TestMixin, TestCase):
         "post",
     )
     def test_token_refresh(self, mock_post, mock_get):
-        print("test_token_refresh BEGIN")
         mock_get.side_effect = self.mock_requests_get
         mock_post.return_value = self.create_response(
             200, {"access": "123456", "refresh": "abcdef"}
@@ -216,7 +215,6 @@ class TestLogin(TestMixin, TestCase):
         with self.settings(NINJA_JWT={"ACCESS_TOKEN_LIFETIME": timedelta(seconds=1)}):
             response = self.client.get(reverse("rest", kwargs={"path": "afsender"}))
             # Check that token refresh is needed
-            print("END")
             self.assertEquals(self.client.session["access_token"], "7890ab")
 
     @patch.object(requests.sessions.Session, "get")

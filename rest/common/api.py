@@ -114,7 +114,7 @@ class UserOut(ModelSchema):
         return None
 
     @staticmethod
-    def resolve_twofactor_enabled(user: User):
+    def resolve_twofactor_enabled(user: User) -> bool:
         return TOTPDevice.objects.filter(user=user).exists()
 
 
