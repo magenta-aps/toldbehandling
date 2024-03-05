@@ -11,6 +11,7 @@ from django.core.management import call_command
 from django.test import TestCase
 from django.urls import reverse
 from payment.api import generate_payment_item_from_varelinje
+from payment.exceptions import ProviderHandlerNotFound
 from payment.models import Payment
 from payment.provider_handlers import get_provider_handler
 from payment.schemas import (
@@ -144,6 +145,23 @@ class PaymentTest(TestCase):
     def provider_handler_read_mock(cls, payment_id: str, data: dict):
         return data.get(payment_id)
 
+    def _create_test_payment(
+        self,
+        status: str,
+        amount: int,
+        declaration: PrivatAfgiftsanmeldelse,
+        provider_payment_id: str,
+        currency: str = "DKK",
+    ) -> Payment:
+        return Payment.objects.create(
+            status=status,
+            amount=amount,
+            currency=currency,
+            reference=declaration.id,
+            declaration=declaration,
+            provider_payment_id=provider_payment_id,
+        )
+
     def _create_test_payment_with_fake_provider_payment(
         self,
         status: str,
@@ -153,13 +171,12 @@ class PaymentTest(TestCase):
         provider_payment_summary: ProviderPaymentSummaryResponse | None = None,
         currency: str = "DKK",
     ) -> tuple[Payment, ProviderPaymentResponse]:
-        test_payment = Payment.objects.create(
+        test_payment = self._create_test_payment(
             status=status,
             amount=amount,
-            currency=currency,
-            reference=declaration.id,
             declaration=declaration,
             provider_payment_id=provider_payment_id,
+            currency=currency,
         )
 
         fake_provider_payment = ProviderPaymentResponse(
@@ -486,6 +503,108 @@ class PaymentAPITests(PaymentTest):
             ),
             f"{settings.HOST_DOMAIN}/payment/checkout/{self.declaration.id}",
         )
+
+    def test_create_declaration_not_found(self):
+        resp = self.client.post(
+            reverse("api-1.0.0:payment_create"),
+            data=json_dump(
+                {
+                    "declaration_id": 99999,
+                    "provider": "nets",
+                }
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+        )
+
+        self.assertEqual(resp.status_code, 400)
+
+    def test_create_invalid_provider(self):
+        invalid_provider_handler = "invalid"
+        resp = self.client.post(
+            reverse("api-1.0.0:payment_create"),
+            data=json_dump(
+                {
+                    "declaration_id": self.declaration.id,
+                    "provider": invalid_provider_handler,
+                }
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, 400)
+
+        resp_data = resp.json()
+        self.assertEqual(
+            resp_data,
+            {
+                "detail": ProviderHandlerNotFound.default_detail.format(
+                    provider=invalid_provider_handler
+                ),
+            },
+        )
+
+    def test_create_bank_provider_missing_permission(self):
+        resp = self.client.post(
+            reverse("api-1.0.0:payment_create"),
+            data=json_dump(
+                {
+                    "declaration_id": self.declaration.id,
+                    "provider": "bank",
+                }
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+        )
+
+        self.assertEqual(resp.status_code, 403)
+
+    @patch("payment.api.get_provider_handler")
+    def test_create_nets_existing_db_payment(self, mock_get_provider_handler):
+        # Test data
+        (
+            test_payment,
+            fake_provider_payment,
+        ) = self._create_test_payment_with_fake_provider_payment(
+            status="created",
+            amount=1337,
+            declaration=self.declaration,
+            provider_payment_id="1234",
+        )
+
+        # Configure mock(s)
+        mock_nets_provider = MagicMock(
+            host="http://localhost:8000",
+            initial_status="created",
+            read=MagicMock(side_effect=lambda x: fake_provider_payment),
+            create=MagicMock(side_effect=lambda *args: fake_provider_payment),
+        )
+        mock_get_provider_handler.return_value = mock_nets_provider
+
+        # NOTE: It is intentional that Payment.create+save is patched
+        # after test-datacreation
+        with patch(
+            "payment.models.Payment.objects.create"
+        ) as mock_payment_model_create, patch(
+            "payment.models.Payment.save"
+        ) as mock_payment_model_save:
+            mock_payment_model_create.return_value = test_payment
+
+            # Invoke the API endpoint
+            resp = self.client.post(
+                reverse("api-1.0.0:payment_create"),
+                data=json_dump(
+                    {
+                        "declaration_id": self.declaration.id,
+                        "provider": "nets",
+                    }
+                ),
+                HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+                content_type="application/json",
+            )
+            self.assertEqual(resp.status_code, 201)
+            mock_payment_model_create.assert_not_called()
+            mock_payment_model_save.assert_not_called()
 
     @patch("payment.api.get_provider_handler")
     def test_list_nets(self, mock_get_provider_handler):

@@ -10,7 +10,7 @@ from common.api import get_auth_methods
 from django.conf import settings
 from django.forms import model_to_dict
 from ninja_extra import api_controller, permissions, route
-from ninja_extra.exceptions import NotFound, PermissionDenied
+from ninja_extra.exceptions import PermissionDenied, ValidationError
 from ninja_jwt.authentication import JWTAuth
 from payment.exceptions import PaymentValidationError
 from payment.models import Item, Payment
@@ -43,19 +43,18 @@ class PaymentAPI:
         response={201: PaymentResponse},
     )
     def create(self, payload: PaymentCreatePayload) -> PaymentResponse:
-        try:
-            declaration = PrivatAfgiftsanmeldelse.objects.get(id=payload.declaration_id)
-        except PrivatAfgiftsanmeldelse.DoesNotExist:
-            raise NotFound(f"Failed to fetch declaration: {payload.declaration_id}")
-
-        # Get payment provider handler for this declaration
+        # Validate payload
         if payload.provider not in (
             settings.PAYMENT_PROVIDER_NETS,
             settings.PAYMENT_PROVIDER_BANK,
         ):
-            raise NotFound(
-                f"Failed to get payment provider '{payload.provider}',"
-                " valid are: 'nets', 'bank'"
+            raise ValidationError(f"Invalid payment provider: {payload.provider}")
+
+        try:
+            declaration = PrivatAfgiftsanmeldelse.objects.get(id=payload.declaration_id)
+        except PrivatAfgiftsanmeldelse.DoesNotExist:
+            raise ValidationError(
+                f"Failed to fetch declaration: {payload.declaration_id}"
             )
 
         if payload.provider == settings.PAYMENT_PROVIDER_BANK:
