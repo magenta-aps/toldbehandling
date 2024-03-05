@@ -574,7 +574,7 @@ class PaymentAPITests(PaymentTest):
 
         # Configure mock(s)
         mock_nets_provider = MagicMock(
-            host="http://localhost:8000",
+            host=settings.PAYMENT_PROVIDER_NETS_HOST,
             initial_status="created",
             read=MagicMock(side_effect=lambda x: fake_provider_payment),
             create=MagicMock(side_effect=lambda *args: fake_provider_payment),
@@ -636,7 +636,7 @@ class PaymentAPITests(PaymentTest):
 
         # Configure mock(s)
         mock_nets_provider = MagicMock(
-            host="http://localhost:8000",
+            host=settings.PAYMENT_PROVIDER_NETS_HOST,
             initial_status="created",
             read=MagicMock(
                 side_effect=lambda x: (
@@ -691,7 +691,7 @@ class PaymentAPITests(PaymentTest):
 
         # Configure mock(s)
         mock_nets_provider = MagicMock(
-            host="http://localhost:8000",
+            host=settings.PAYMENT_PROVIDER_NETS_HOST,
             initial_status="created",
             read=MagicMock(
                 side_effect=lambda x: (
@@ -729,7 +729,7 @@ class PaymentAPITests(PaymentTest):
 
         # Configure mock(s)
         mock_nets_provider = MagicMock(
-            host="http://localhost:8000",
+            host=settings.PAYMENT_PROVIDER_NETS_HOST,
             initial_status="created",
             read=MagicMock(return_value=fake_provider_payment),
         )
