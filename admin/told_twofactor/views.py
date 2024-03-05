@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.contrib.auth import REDIRECT_FIELD_NAME
+from django.shortcuts import redirect
 from django.views.generic import FormView
 from told_common.view_mixins import HasRestClientMixin
 from told_twofactor import forms
@@ -29,6 +30,11 @@ class TwoFactorSetupView(HasRestClientMixin, twofactor_views.SetupView):
         kwargs = super().get_form_kwargs(step)
         kwargs["view"] = self
         return kwargs
+
+    def done(self, form_list, **kwargs):
+        super().done(form_list, **kwargs)
+        self.request.session["twofactor_authenticated"] = True
+        return redirect(self.get_success_url())
 
 
 class TwofactorLoginView(HasRestClientMixin, FormView):
