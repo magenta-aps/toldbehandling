@@ -1,0 +1,59 @@
+{% extends extend_template %}
+{% load static %}
+{% load i18n %}
+{% load l10n %}
+{% load common_tags %}
+{% load bootstrap_icons %}
+
+{% block content %}
+<div class="container-lg">
+    <h1>{% translate 'Slet afgiftsanmeldelse' %}</h1>
+    <hr />
+
+    <p>{% translate 'Denne afgiftsanmeldelse vil blive slettet' %}:</p>
+    <div class="card mb-3">
+        <div class="card-header">
+            <div class="d-flex">
+                <div class="flex-grow-1">
+                    <strong>{% translate "Afgiftsanmeldelse" %} {{ declaration.id }} ({{ declaration.status }})</strong>
+                </div>
+                <div>{{declaration.dato|date:"c"}}</div>
+            </div>
+        </div>
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item border-0">
+                <strong>{% translate "Afsender" %}:</strong> {{ declaration.afsender.navn }}
+            </li>
+            <li class="list-group-item border-0">
+                <strong>{% translate "Modtager" %}:</strong> {{ declaration.modtager.navn }}
+            </li>
+            <li class="list-group-item border-0">
+                <strong>{% translate "Forsendelsesmåde" %}:</strong>
+                <span>
+                    {% if declaration.fragtforsendelse.forsendelsestype.name == "SKIB" %}
+                    {% translate "Skibsfragt" %}
+                    {% elif declaration.fragtforsendelse.forsendelsestype.name == "FLY" %}
+                    {% translate "Luftfragt" %}
+                    {% elif declaration.postforsendelse.forsendelsestype.name == "SKIB" %}
+                    {% translate "Skibspost" %}
+                    {% elif declaration.postforsendelse.forsendelsestype.name == "FLY" %}
+                    {% translate "Luftpost" %}
+                    {% endif %}
+                </span>
+            </li>
+            <li class="list-group-item border-0">
+                <strong>{% translate "Afgift i alt" %}:</strong> {{ declaration.afgift_total | floatformat:"2g" }}
+            </li>
+        </ul>
+    </div>
+
+    <p>{% translate 'Er du sikker på at du vil slette denne?' %}</p>
+    <div>
+        <form method="post">
+            {% csrf_token %}
+            <input type="submit" value="{% translate 'Slet' %}" class="btn btn-danger">
+            <a href="{% url 'tf10_view' id=declaration.id %}" class="btn btn-secondary">{% translate 'Annuller' %}</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -390,6 +390,9 @@ class PermissionsTest(HasLogin):
 
 class AnmeldelseListViewTest(HasLogin):
     can_select_multiple = False
+    can_view = False
+    can_edit = False
+    can_delete = False
 
     def list_url(self):
         raise NotImplementedError("Implement in subclasses")
@@ -398,6 +401,9 @@ class AnmeldelseListViewTest(HasLogin):
         raise NotImplementedError("Implement in subclasses")
 
     def view_url(self, id: int):
+        raise NotImplementedError("Implement in subclasses")
+
+    def delete_url(self, id: int):
         raise NotImplementedError("Implement in subclasses")
 
     @staticmethod
@@ -765,6 +771,7 @@ class AnmeldelseListViewTest(HasLogin):
                         [
                             "Vis" if self.can_view else None,
                             "Redigér" if self.can_edit else None,
+                            "Slet" if self.can_delete else None,
                         ],
                     )
                 ),
@@ -792,6 +799,13 @@ class AnmeldelseListViewTest(HasLogin):
                 return (
                     f'<a class="btn btn-primary btn-sm" '
                     f'href="{self.edit_url(id)}?back=list">Redigér</a>'
+                )
+
+        def _delete_button(id: int):
+            if self.can_delete:
+                return (
+                    f'<a class="btn btn-danger btn-sm" '
+                    f'href="{self.delete_url(id)}?back=list">Slet</a>'
                 )
 
         self.maxDiff = None
@@ -901,6 +915,7 @@ class AnmeldelseListViewTest(HasLogin):
                             [
                                 _view_button(3),
                                 _edit_button(3),
+                                _delete_button(3),
                             ],
                         )
                     ),
