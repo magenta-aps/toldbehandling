@@ -393,6 +393,11 @@ class AfgiftsanmeldelseAPI:
         url_name="afgiftsanmeldelse_delete",
     )
     def delete(self, id: int):
+        """Delete afgiftsanmeldelse. Only allowed if status is 'ny' or 'kladde'.
+
+        NOTE: Normally DELETE returns 204, but since our existing code returns 200
+        + a dict with a success key, we do the same here.
+        """
         item = get_object_or_404(Afgiftsanmeldelse, id=id)
         self.check_user(item)
 

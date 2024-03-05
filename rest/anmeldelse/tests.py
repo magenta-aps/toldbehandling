@@ -8,6 +8,7 @@ from decimal import Decimal
 from anmeldelse.models import Afgiftsanmeldelse, Varelinje
 from django.test import TestCase
 from django.urls import reverse
+from forsendelse.models import Postforsendelse
 from project.test_mixins import RestMixin, RestTestMixin
 from project.util import json_dump
 from sats.models import Vareafgiftssats
@@ -243,6 +244,73 @@ class AfgiftsanmeldelseTest(RestTestMixin, TestCase):
         self.assertEquals(
             data["items"][0], {**self.expected_response_dict, "status": "godkendt"}
         )
+
+    def test_delete_success(self):
+        # Test delete of "ny"
+        afgiftsanmeldelse_new = Afgiftsanmeldelse.objects.create(
+            **{
+                **self.afgiftsanmeldelse_data,
+                "status": "ny",
+                "oprettet_af": self.authorized_user,
+            }
+        )
+
+        resp_delete_new = self.client.delete(
+            reverse(
+                f"api-1.0.0:{self.delete_function}", args=[afgiftsanmeldelse_new.id]
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.authorized_access_token}",
+        )
+        self.assertEquals(resp_delete_new.status_code, 200)
+
+        # Test delete of "kladde"
+        afgiftsanmeldelse_kladde = Afgiftsanmeldelse.objects.create(
+            **{
+                **self.afgiftsanmeldelse_data,
+                "status": "kladde",
+                "oprettet_af": self.authorized_user,
+            }
+        )
+        resp_delete_kladde = self.client.delete(
+            reverse(
+                f"api-1.0.0:{self.delete_function}", args=[afgiftsanmeldelse_kladde.id]
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.authorized_access_token}",
+        )
+        self.assertEquals(resp_delete_kladde.status_code, 200)
+
+        # Assert that all objects are deleted
+        self.assertEquals(Afgiftsanmeldelse.objects.count(), 0)
+
+    def test_delete_fail(self):
+        invalid_statuses = ["godkendt", "afsluttet", "afvist"]
+        for idx, invalid_status in enumerate(invalid_statuses):
+            postforsendelse = Postforsendelse.objects.create(
+                **{
+                    **self.postforsendelse_data,
+                    "postforsendelsesnummer": f'{self.postforsendelse_data["postforsendelsesnummer"]}{str(idx)}',
+                    "oprettet_af": self.authorized_user,
+                }
+            )
+
+            afgiftsanmeldelse = Afgiftsanmeldelse.objects.create(
+                **{
+                    **self.afgiftsanmeldelse_data,
+                    "status": invalid_status,
+                    "oprettet_af": self.authorized_user,
+                    "postforsendelse_id": postforsendelse.id,
+                }
+            )
+
+            resp_delete = self.client.delete(
+                reverse(
+                    f"api-1.0.0:{self.delete_function}", args=[afgiftsanmeldelse.id]
+                ),
+                HTTP_AUTHORIZATION=f"Bearer {self.authorized_access_token}",
+            )
+            self.assertEquals(resp_delete.status_code, 403)
+
+        self.assertEquals(Afgiftsanmeldelse.objects.count(), len(invalid_statuses))
 
 
 class VarelinjeTest(RestTestMixin, TestCase):
