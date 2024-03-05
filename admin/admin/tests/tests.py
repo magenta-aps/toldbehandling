@@ -410,6 +410,7 @@ class TestGodkend(PermissionsTest, TestCase):
                         "cpr": 1234567890,
                         "cvr": 12345678,
                     },
+                    "twofactor_enabled": False,
                 },
             }
         elif path == expected_prefix + "afgiftsanmeldelse/2/full":
@@ -2792,6 +2793,7 @@ class TF10CreateTest(TestMixin, HasLogin, TestCase):
                                 "cpr": "1234567890",
                                 "cvr": "12345678",
                             },
+                            "twofactor_enabled": False,
                         }
                     ],
                 }
