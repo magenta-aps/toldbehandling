@@ -7,7 +7,7 @@ import logging
 import time
 from base64 import b64encode
 from collections import defaultdict
-from dataclasses import dataclass, field
+from dataclasses import field
 from datetime import datetime, timedelta, timezone
 from functools import cached_property
 from typing import Any, Dict, List, Optional, Tuple, Union
@@ -19,7 +19,6 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core.files import File
 from django.core.files.uploadedfile import InMemoryUploadedFile, UploadedFile
 from django.core.serializers.json import DjangoJSONEncoder
-from django.http import HttpRequest
 from requests import HTTPError, Session
 from told_common.data import (
     Afgiftsanmeldelse,

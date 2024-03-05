@@ -7,7 +7,6 @@ from decimal import Decimal
 from typing import Iterable, List, Optional
 
 from django import forms
-from django.contrib.auth.forms import AuthenticationForm
 from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 from django.forms import CharField, Form, formset_factory
@@ -15,13 +14,12 @@ from django.utils import translation
 from django.utils.translation import gettext_lazy as _
 from dynamic_forms import DynamicField
 from requests import HTTPError
-from told_common.data import Speditør, User, Vareafgiftssats
+from told_common.data import Speditør, Vareafgiftssats
 from told_common.form_mixins import (
     BootstrapForm,
     ButtonlessDecimalField,
     ButtonlessIntegerField,
     DateInput,
-    FixedWidthIntegerField,
     MaxSizeFileField,
 )
 from told_common.rest_client import RestClient
