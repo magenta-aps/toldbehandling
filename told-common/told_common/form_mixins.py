@@ -104,7 +104,9 @@ class FixedWidthIntegerField(ErrorMessagesFieldMixin, forms.CharField):
         ),  # Kopieret fra Django
     }
 
-    def __init__(self, width: int = 1, min_value: int = 0, *args, widget_attrs=None, **kwargs):
+    def __init__(
+        self, width: int = 1, min_value: int = 0, *args, widget_attrs=None, **kwargs
+    ):
         self.width = int(width)
         self.min_value = int(min_value)
         self.extra_widget_attrs = widget_attrs

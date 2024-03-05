@@ -465,7 +465,6 @@ class Indberetter(ToldDataClass):
     cvr: int
 
 
-
 @dataclass
 class JwtTokenInfo:
     access_token: str
@@ -483,7 +482,9 @@ class JwtTokenInfo:
                 access_token=request.session["access_token"],
                 access_token_timestamp=float(request.session["access_token_timestamp"]),
                 refresh_token=request.session["refresh_token"],
-                refresh_token_timestamp=float(request.session["refresh_token_timestamp"]),
+                refresh_token_timestamp=float(
+                    request.session["refresh_token_timestamp"]
+                ),
                 synchronized=True,
             )
         except KeyError:
@@ -501,7 +502,6 @@ class JwtTokenInfo:
             self.synchronized = True
 
 
-
 @dataclass_json
 @dataclass
 class User(ToldDataClass):
@@ -515,6 +515,7 @@ class User(ToldDataClass):
     permissions: List[str]
     indberetter_data: Optional[Indberetter]
     jwt_token: Optional[JwtTokenInfo] = None
+    twofactor_enabled: bool = False
 
     @property
     def cpr(self):

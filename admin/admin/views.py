@@ -6,6 +6,7 @@ from datetime import datetime, timezone
 from decimal import Context, Decimal
 from functools import cached_property
 from typing import Any, Dict, List, Optional, Set, Union
+from urllib.parse import quote_plus
 
 from django.conf import settings
 from django.contrib import messages
@@ -31,6 +32,7 @@ from told_common.view_mixins import (
     FormWithFormsetView,
     GetFormView,
     HasRestClientMixin,
+    LoginRequiredMixin,
     PermissionsRequiredMixin,
 )
 
@@ -44,18 +46,29 @@ from admin.clients.prisme import (
 from admin.spreadsheet import SpreadsheetExport, VareafgiftssatsSpreadsheetUtil
 
 
+class TwofactorAuthRequiredMixin(LoginRequiredMixin):
+    def login_check(self):
+        redir = super().login_check()
+        if redir:
+            return redir
+        if not self.request.session.get("twofactor_authenticated"):
+            next_param = "?back=" + quote_plus(self.request.path)
+            if self.request.user.twofactor_enabled:
+                return redirect(reverse("twofactor:login") + next_param)
+            else:
+                return redirect(reverse("twofactor:setup") + next_param)
+        return None
 
 
-
-
-class AdminLayoutBaseView(PermissionsRequiredMixin, HasRestClientMixin):
+class AdminLayoutBaseView(
+    TwofactorAuthRequiredMixin, PermissionsRequiredMixin, HasRestClientMixin
+):
     """Base view for admin pages, using a common layout with navigation.
 
     NOTE: We do not set default required-permissions in this view, yet, since they
     will currently be overridden by the child-views equivalent.. we need a way to
     combine them for if we want default permissions for this view.
     """
-
 
     extend_template = "admin/admin_layout.html"
 
@@ -93,15 +106,6 @@ class AdminLayoutBaseView(PermissionsRequiredMixin, HasRestClientMixin):
                 "version": settings.VERSION,
             }
         )
-
-    @property
-    def two_factor_setup_required(self):
-        return TemplateResponse(
-            request=self.request,
-            status=403,
-            template="two_factor/core/otp_required.html",
-        )
-
 
 
 class IndexView(PermissionsRequiredMixin, HasRestClientMixin, TemplateView):

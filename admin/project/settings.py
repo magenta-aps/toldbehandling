@@ -36,6 +36,7 @@ if os.environ.get("HOST_DOMAIN", False):
     CSRF_TRUSTED_ORIGINS = [os.environ["HOST_DOMAIN"]]
 
 LOGIN_URL = "/admin/login"
+LOGIN_REDIRECT_URL = "/admin"
 BYPASS_2FA = bool(strtobool(os.environ.get("BYPASS_2FA", "False")))
 SYSTEM_USER_PASSWORD = os.environ["SYSTEM_USER_PASSWORD"]
 

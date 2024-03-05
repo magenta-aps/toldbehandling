@@ -52,7 +52,7 @@ INSTALLED_APPS = [
     "ninja_jwt",
     "simple_history",
     "django_otp",
-    'django_otp.plugins.otp_totp',
+    "django_otp.plugins.otp_totp",
 ]
 
 MIDDLEWARE = [
@@ -64,7 +64,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "simple_history.middleware.HistoryRequestMiddleware",
-    'django_otp.middleware.OTPMiddleware',
+    "django_otp.middleware.OTPMiddleware",
 ]
 
 ROOT_URLCONF = "project.urls"

@@ -48,7 +48,6 @@ from told_common.view_mixins import (
 log = logging.getLogger(__name__)
 
 
-
 class LoginView(FormView):
     form_class = forms.LoginForm
     template_name = "told_common/login.html"
@@ -69,7 +68,7 @@ class LogoutView(RedirectView):
     pattern_name = "login"
 
     def get(self, request, *args, **kwargs):
-        for key in ("access_token", "refresh_token", "user"):
+        for key in ("access_token", "refresh_token", "user", "twofactor_authenticated"):
             if key in request.session:
                 del request.session[key]
         return super().get(request, *args, **kwargs)

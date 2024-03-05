@@ -10,19 +10,7 @@ Log ind
 <form action="" method="POST" class="needs-validation">
     {% csrf_token %}
     <div class="row">
-        <div class="col-md-3 mb-3">
-            {{form.username}}
-            {% if form.username.errors %}
-            <div class="invalid-feedback">{{ form.username.errors }}</div>
-            {% endif %}
-        </div>
-        <div class="col-md-3 mb-3">
-            {{form.password}}
-            {% if form.password.errors %}
-            <div class="invalid-feedback">{{ form.password.errors }}</div>
-            {% endif %}
-        </div>
-        <div class="col-md-3 mb-3">
+        <div class="col-md-9 mb-3">
             {{form.twofactor_token}}
             {% if form.twofactor_token.errors %}
             <div class="invalid-feedback">{{ form.twofactor_token.errors }}</div>
@@ -32,6 +20,10 @@ Log ind
             <button type="submit" class="btn btn-primary">{% translate 'Login' %}</button>
         </div>
     </div>
-    <input type="hidden" name="next" value="{{ next }}">
+    <div class="row">
+        <div class="col-12">
+            <input type="hidden" name="next" value="{{ next }}">
+        </div>
+    </div>
 </form>
 {% endblock %}

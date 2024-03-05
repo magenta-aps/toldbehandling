@@ -1,8 +1,6 @@
 from django.contrib.auth.models import AnonymousUser
 from django.utils.deprecation import MiddlewareMixin
-
-from told_common.data import User
-from told_common.data import JwtTokenInfo
+from told_common.data import JwtTokenInfo, User
 
 
 class RestTokenUser:
@@ -19,7 +17,9 @@ class RestTokenUserMiddleware(MiddlewareMixin):
     @staticmethod
     def set_user(request):
         if "user" in request.session:
-            request.user = User.from_dict({**request.session.get("user"), "jwt_token": JwtTokenInfo.load(request)})
+            request.user = User.from_dict(
+                {**request.session.get("user"), "jwt_token": JwtTokenInfo.load(request)}
+            )
         else:
             # request.user = User(None, None)
             request.user = AnonymousUser()

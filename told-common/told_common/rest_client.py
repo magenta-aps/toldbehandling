@@ -26,21 +26,20 @@ from told_common.data import (
     Afgiftstabel,
     FragtForsendelse,
     HistoricAfgiftsanmeldelse,
+    JwtTokenInfo,
     Notat,
     PostForsendelse,
     PrismeResponse,
     PrivatAfgiftsanmeldelse,
     Speditør,
+    TOTPDevice,
     User,
     Vareafgiftssats,
     Varelinje,
-    JwtTokenInfo,
-    TOTPDevice,
 )
 from told_common.util import cast_or_none, filter_dict_none, opt_int
 
 log = logging.getLogger(__name__)
-
 
 
 class ModelRestClient:
@@ -873,18 +872,17 @@ class UserRestClient(ModelRestClient):
 
 
 class TotpDeviceRestClient(ModelRestClient):
-
     def create(
-            self,
-            data: dict,
+        self,
+        data: dict,
     ):
         return self.rest.post("totpdevice", data)
 
-    def get_for_user(
-            self,
-            user: User
-    ):
-        return [TOTPDevice.from_dict(item) for item in self.rest.get("totpdevice", {"user": user.id})]
+    def get_for_user(self, user: User):
+        return [
+            TOTPDevice.from_dict(item)
+            for item in self.rest.get("totpdevice", {"user": user.id})
+        ]
 
 
 class PaymentRestClient(ModelRestClient):
@@ -943,7 +941,9 @@ class RestClient:
         self.session: Session = requests.sessions.Session()
         self.token: JwtTokenInfo = token
         if self.token:
-            self.session.headers = {"Authorization": f"Bearer {self.token.access_token}"}
+            self.session.headers = {
+                "Authorization": f"Bearer {self.token.access_token}"
+            }
         self.afsender = AfsenderRestClient(self)
         self.modtager = ModtagerRestClient(self)
         self.postforsendelse = PostforsendelseRestClient(self)
@@ -984,17 +984,15 @@ class RestClient:
         return JwtTokenInfo(access_token=data["access"], refresh_token=data["refresh"])
 
     @classmethod
-    def login_twofactor(cls, username: str, password: str, twofactor_token: str) -> JwtTokenInfo:
+    def check_twofactor(cls, user_id: int, twofactor_token: str) -> JwtTokenInfo:
         response = requests.post(
-            f"{cls.domain}/api/token/2fa",
-            json={"username": username, "password": password, "twofactor_token": twofactor_token},
+            f"{cls.domain}/api/2fa/check",
+            json={"user_id": user_id, "twofactor_token": twofactor_token},
             headers={"Content-Type": "application/json"},
         )
         response.raise_for_status()
         data = response.json()
-        return JwtTokenInfo(access_token=data["access"], refresh_token=data["refresh"])
-
-
+        return data
 
     def refresh_login(self):
         response = requests.post(

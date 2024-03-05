@@ -8,6 +8,7 @@ from common.models import EboksBesked, IndberetterProfile
 from django.contrib.auth.models import Group, User
 from django.http import HttpRequest, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404
+from django_otp.plugins.otp_totp.models import TOTPDevice
 from ninja import Field, ModelSchema
 from ninja.errors import ValidationError
 from ninja.filter_schema import FilterSchema
@@ -84,6 +85,7 @@ class UserOut(ModelSchema):
     indberetter_data: Optional[IndberetterProfileOut] = Field(
         None, alias="indberetter_data"
     )
+    twofactor_enabled: bool
 
     class Config:
         model = User
@@ -110,6 +112,10 @@ class UserOut(ModelSchema):
         if hasattr(user, "indberetter_data"):
             return user.indberetter_data
         return None
+
+    @staticmethod
+    def resolve_twofactor_enabled(user: User):
+        return TOTPDevice.objects.filter(user=user).exists()
 
 
 class UserOutWithTokens(Schema):

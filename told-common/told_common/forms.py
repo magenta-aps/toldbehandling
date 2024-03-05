@@ -15,20 +15,20 @@ from django.utils import translation
 from django.utils.translation import gettext_lazy as _
 from dynamic_forms import DynamicField
 from requests import HTTPError
-from told_common.data import Speditør, Vareafgiftssats, User
+from told_common.data import Speditør, User, Vareafgiftssats
 from told_common.form_mixins import (
     BootstrapForm,
     ButtonlessDecimalField,
     ButtonlessIntegerField,
     DateInput,
-    MaxSizeFileField,
     FixedWidthIntegerField,
+    MaxSizeFileField,
 )
 from told_common.rest_client import RestClient
 from told_common.util import cast_or_none, date_next_workdays
 
 
-class LoginForm(BootstrapForm, AuthenticationForm):
+class LoginForm(BootstrapForm):
     username = forms.CharField(
         max_length=150,
         min_length=1,
@@ -53,11 +53,6 @@ class LoginForm(BootstrapForm, AuthenticationForm):
             self.token = RestClient.login(
                 self.cleaned_data["username"], self.cleaned_data["password"]
             )
-            userdata = RestClient(self.token).user.this()
-            self.user_cache = User.from_dict({**userdata, "jwt_token": self.token})
-
-
-
         except HTTPError:
             raise ValidationError(_("Login fejlede"))
 
