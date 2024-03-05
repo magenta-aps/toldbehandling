@@ -19,7 +19,7 @@ class TwofactorLoginForm(BootstrapForm):
         widget_attrs={
             "label": _("Tofaktor-token"),
             "autofocus": "true",
-            "data-validity-patternmismatch": _("Token skal være et tal på seks cifre")
+            "data-validity-patternmismatch": _("Token skal være et tal på seks cifre"),
         },
         width=6,
     )
@@ -35,8 +35,7 @@ class TwofactorLoginForm(BootstrapForm):
 
 
 class TOTPDeviceForm(twofactor_forms.TOTPDeviceForm, BootstrapForm):
-
-    error_messages = {'invalid_token': _("Ugyldig token")}
+    error_messages = {"invalid_token": _("Ugyldig token")}
 
     def __init__(self, key, user, metadata=None, **kwargs):
         self.view = kwargs.pop("view", None)

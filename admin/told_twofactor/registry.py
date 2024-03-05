@@ -8,6 +8,7 @@ class GeneratorMethod(twofactor_registry.GeneratorMethod):
 
     def get_setup_forms(self, *args):
         from told_twofactor.forms import TOTPDeviceForm
+
         return {"generator": TOTPDeviceForm}
 
     def get_action(self, device):
