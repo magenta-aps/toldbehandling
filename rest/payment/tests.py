@@ -786,6 +786,96 @@ class PaymentAPITests(PaymentTest):
             test_payment.provider_payment_id
         )
 
+    @patch("payment.api.get_provider_handler")
+    def test_refresh_created_to_reserved(self, mock_get_provider_handler):
+        # Test data
+        (
+            test_payment,
+            fake_provider_payment,
+        ) = self._create_test_payment_with_fake_provider_payment(
+            status="created",
+            amount=1337,
+            declaration=self.declaration,
+            provider_payment_id="1234",
+            provider_payment_summary=ProviderPaymentSummaryResponse(
+                reserved_amount=1337,
+                charged_amount=0,
+                refunded_amount=0,
+                cancelled_amount=0,
+            ),
+        )
+
+        # Configure mock(s)
+        mock_nets_provider = MagicMock(
+            initial_status="created",
+            host=settings.PAYMENT_PROVIDER_NETS_HOST,
+            terms_url=settings.PAYMENT_PROVIDER_NETS_TERMS_URL,
+            read=MagicMock(return_value=fake_provider_payment),
+        )
+
+        mock_get_provider_handler.return_value = mock_nets_provider
+
+        # Invoke the API endpoint
+        resp = self.client.post(
+            reverse(
+                "api-1.0.0:payment_refresh",
+                kwargs={"payment_id": test_payment.id},
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+        )
+        self.assertEqual(resp.status_code, 200)
+        test_payment.refresh_from_db()
+
+        mock_nets_provider.read.assert_called_once_with(
+            test_payment.provider_payment_id
+        )
+        self.assertEqual(test_payment.status, "reserved")
+
+    @patch("payment.api.get_provider_handler")
+    def test_refresh_reserved_to_paid(self, mock_get_provider_handler):
+        # Test data
+        (
+            test_payment,
+            fake_provider_payment,
+        ) = self._create_test_payment_with_fake_provider_payment(
+            status="reserved",
+            amount=1337,
+            declaration=self.declaration,
+            provider_payment_id="1234",
+            provider_payment_summary=ProviderPaymentSummaryResponse(
+                reserved_amount=0,
+                charged_amount=1337,
+                refunded_amount=0,
+                cancelled_amount=0,
+            ),
+        )
+
+        # Configure mock(s)
+        mock_nets_provider = MagicMock(
+            initial_status="reserved",
+            host=settings.PAYMENT_PROVIDER_NETS_HOST,
+            terms_url=settings.PAYMENT_PROVIDER_NETS_TERMS_URL,
+            read=MagicMock(return_value=fake_provider_payment),
+        )
+
+        mock_get_provider_handler.return_value = mock_nets_provider
+
+        # Invoke the API endpoint
+        resp = self.client.post(
+            reverse(
+                "api-1.0.0:payment_refresh",
+                kwargs={"payment_id": test_payment.id},
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+        )
+        self.assertEqual(resp.status_code, 200)
+        test_payment.refresh_from_db()
+
+        mock_nets_provider.read.assert_called_once_with(
+            test_payment.provider_payment_id
+        )
+        self.assertEqual(test_payment.status, "paid")
+
 
 class PaymentManagementCommandTests(PaymentTest):
     @patch("payment.management.commands.payment_charge_reserved.print")
