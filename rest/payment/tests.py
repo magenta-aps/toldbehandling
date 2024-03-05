@@ -662,6 +662,60 @@ class PaymentAPITests(PaymentTest):
         )
 
     @patch("payment.api.get_provider_handler")
+    def test_list_specifiy_declaration_id(self, mock_get_provider_handler):
+        # Create test data
+        (
+            test_payment_1,
+            fake_provider_payment_1,
+        ) = self._create_test_payment_with_fake_provider_payment(
+            status="created",
+            amount=1337,
+            declaration=self.declaration,
+            provider_payment_id="1234",
+        )
+
+        (
+            test_payment_2,
+            fake_provider_payment_2,
+        ) = self._create_test_payment_with_fake_provider_payment(
+            status="created",
+            amount=7331,
+            declaration=self.declaration_2,
+            provider_payment_id="5678",
+        )
+
+        fake_provider_payments = {
+            fake_provider_payment_1.payment_id: fake_provider_payment_1,
+            fake_provider_payment_2.payment_id: fake_provider_payment_2,
+        }
+
+        # Configure mock(s)
+        mock_nets_provider = MagicMock(
+            host="http://localhost:8000",
+            initial_status="created",
+            read=MagicMock(
+                side_effect=lambda x: (
+                    fake_provider_payments[x] if x in fake_provider_payments else None
+                )
+            ),
+        )
+        mock_get_provider_handler.return_value = mock_nets_provider
+
+        # Invoke the API endpoint
+        resp = self.client.get(
+            reverse("api-1.0.0:payment_list"),
+            QUERY_STRING=f"declaration={self.declaration.id}",
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+        )
+
+        # Assert everything happened as expected
+        self.assertEqual(resp.status_code, 200)
+        mock_get_provider_handler.assert_called_once_with("nets")
+        mock_nets_provider.read.assert_called_once_with(
+            test_payment_1.provider_payment_id
+        )
+
+    @patch("payment.api.get_provider_handler")
     def test_get_nets(self, mock_get_provider_handler):
         (
             test_payment,
