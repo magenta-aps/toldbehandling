@@ -70,7 +70,10 @@ class LogoutView(RedirectView):
     def get(self, request, *args, **kwargs):
         for key in ("access_token", "refresh_token", "user", "twofactor_authenticated"):
             if key in request.session:
+                print(f"Deleting session key {key}")
                 del request.session[key]
+        for key in request.session.keys():
+            print(f"Not deleting session key {key}")
         return super().get(request, *args, **kwargs)
 
 

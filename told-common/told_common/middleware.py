@@ -17,9 +17,21 @@ class RestTokenUserMiddleware(MiddlewareMixin):
     @staticmethod
     def set_user(request):
         if "user" in request.session:
-            request.user = User.from_dict(
-                {**request.session.get("user"), "jwt_token": JwtTokenInfo.load(request)}
-            )
+            try:
+                request.user = User.from_dict(
+                    {
+                        **request.session.get("user"),
+                        "jwt_token": JwtTokenInfo.load(request),
+                    }
+                )
+            except KeyError:
+                print(
+                    {
+                        **request.session.get("user"),
+                        "jwt_token": JwtTokenInfo.load(request),
+                    }
+                )
+                raise
         else:
             # request.user = User(None, None)
             request.user = AnonymousUser()

@@ -967,8 +967,15 @@ class RestClient:
         if int(time.time() - self.token.access_token_timestamp) > (
             max_age.seconds - 10
         ):
+            print(
+                f"token refresh needed (age: {int(time.time() - self.token.access_token_timestamp)} > {max_age.seconds} - 10)"
+            )
             # Access token has expired or will expire within 10 seconds
             self.refresh_login()
+        else:
+            print(
+                f"token refresh not needed (age: {int(time.time() - self.token.access_token_timestamp)} <= {max_age.seconds} - 10)"
+            )
 
     @classmethod
     def login(cls, username: str, password: str) -> JwtTokenInfo:

@@ -513,7 +513,7 @@ class User(ToldDataClass):
     is_superuser: bool
     groups: List[str]
     permissions: List[str]
-    indberetter_data: Optional[Indberetter]
+    indberetter_data: Optional[Indberetter] = None
     jwt_token: Optional[JwtTokenInfo] = None
     twofactor_enabled: bool = False
 

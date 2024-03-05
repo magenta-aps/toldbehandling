@@ -72,24 +72,32 @@ class TestLogin(TestMixin, TestCase):
     def submit_get_errors(self, url, data):
         return self.get_errors(self.client.post(url, data=data).content)
 
-    @staticmethod
-    def mock_requests_get(path):
+    @classmethod
+    def mock_requests_get(cls, path):
         expected_prefix = f"{settings.REST_DOMAIN}/api/"
         path = path.split("?")[0]
         path = path.rstrip("/")
         response = Response()
         status_code = None
-        if path == expected_prefix + "user":
+        json_content = None
+        content = None
+        if path in (expected_prefix + "user", expected_prefix + "user/this"):
             json_content = {
+                "id": 1,
                 "username": "admin",
                 "first_name": "Administrator",
                 "last_name": "",
                 "email": "admin@told.gl",
                 "is_superuser": True,
+                "groups": [],
+                "permissions": [],
             }
-        else:
+        elif path == expected_prefix + "afsender":
             json_content = {"count": 0, "items": []}
-        content = json.dumps(json_content).encode("utf-8")
+        else:
+            raise Exception(f"Mock {cls.__name__} got unrecognized path: GET {path}")
+        if json_content:
+            content = json.dumps(json_content).encode("utf-8")
         if content:
             if not status_code:
                 status_code = 200
@@ -193,10 +201,13 @@ class TestLogin(TestMixin, TestCase):
     @patch.object(
         requests,
         "post",
-        return_value=create_response(200, {"access": "123456", "refresh": "abcdef"}),
     )
     def test_token_refresh(self, mock_post, mock_get):
+        print("test_token_refresh BEGIN")
         mock_get.side_effect = self.mock_requests_get
+        mock_post.return_value = self.create_response(
+            200, {"access": "123456", "refresh": "abcdef"}
+        )
         self.client.post(
             reverse("login"), {"username": "correct", "password": "credentials"}
         )
@@ -205,6 +216,7 @@ class TestLogin(TestMixin, TestCase):
         with self.settings(NINJA_JWT={"ACCESS_TOKEN_LIFETIME": timedelta(seconds=1)}):
             response = self.client.get(reverse("rest", kwargs={"path": "afsender"}))
             # Check that token refresh is needed
+            print("END")
             self.assertEquals(self.client.session["access_token"], "7890ab")
 
     @patch.object(requests.sessions.Session, "get")
@@ -400,6 +412,8 @@ class TestGodkend(PermissionsTest, TestCase):
                     },
                 },
             }
+        elif path == expected_prefix + "afgiftsanmeldelse/2/full":
+            status_code = 404
         elif path == expected_prefix + "fragtforsendelse/1":
             json_content = {
                 "id": 1,
@@ -455,7 +469,9 @@ class TestGodkend(PermissionsTest, TestCase):
                 ],
             }
         else:
-            print(f"Mock {self.__class__.__name__} got unrecognized path: GET {path}")
+            raise Exception(
+                f"Mock {self.__class__.__name__} got unrecognized path: GET {path}"
+            )
         if json_content:
             content = json.dumps(json_content).encode("utf-8")
         if content:
@@ -1309,11 +1325,13 @@ class AnmeldelseHistoryDetailViewTest(PermissionsTest, TestCase):
                         ],
                     },
                     "user": {
+                        "id": 1,
                         "username": "admin",
                         "first_name": "Administrator",
                         "last_name": "",
                         "email": "admin@told.gl",
                         "is_superuser": True,
+                        "groups": [],
                         "permissions": [
                             "auth.add_group",
                             "auth.change_group",
@@ -2780,7 +2798,7 @@ class TF10CreateTest(TestMixin, HasLogin, TestCase):
             else:
                 json_content = empty
         else:
-            print(f"Mock got unrecognized path: {path}")
+            print(f"Mock {self.__class__.__name__} got unrecognized path: GET {path}")
         if json_content:
             content = json.dumps(json_content).encode("utf-8")
         if content:
@@ -3537,7 +3555,6 @@ class TF5NotatTest(HasLogin, TestCase):
         json_content = None
         content = None
         status_code = None
-        empty = {"count": 0, "items": []}
         if path == expected_prefix + "afgiftstabel":
             json_content = {
                 "count": 1,
@@ -3726,7 +3743,6 @@ class TF5BankPaymentTest(HasLogin, TestCase):
         json_content = None
         content = None
         status_code = None
-        empty = {"count": 0, "items": []}
         if path == expected_prefix + "afgiftstabel":
             json_content = {
                 "count": 1,
