@@ -94,8 +94,9 @@ class FragtforsendelseTest(RestTestMixin, TestCase):
 
     invalid_itemdata = {
         "forsendelsestype": [1234, 0, -1, "a", "Q"],
-        "fragtbrevsnummer": ["123456789012345678901"],
+        "fragtbrevsnummer": ["123456789012345678901", "12345"],
         "fragtbrev": ["aaaa"],
+        "forbindelsesnr": ["123", "abc"],
     }
 
     @property
@@ -108,7 +109,8 @@ class FragtforsendelseTest(RestTestMixin, TestCase):
             }
             self._update_object_data.update(
                 {
-                    "fragtbrevsnummer": "5555",
+                    "fragtbrevsnummer": "ABCDE1234567",
+                    "forbindelsesnr": "ABC 123",
                     "fragtbrev": self.fragtforsendelse_data["fragtbrev"],
                 }
             )

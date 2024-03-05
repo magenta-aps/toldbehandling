@@ -1,8 +1,10 @@
 # SPDX-FileCopyrightText: 2023 Magenta ApS <info@magenta.dk>
 #
 # SPDX-License-Identifier: MPL-2.0
+import re
 
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import CheckConstraint, Q
 from django.utils.datetime_safe import date
@@ -127,3 +129,26 @@ class Fragtforsendelse(Forsendelse):
             f"forsendelsestype={slags}, "
             f"forbindelsesnr={forbindelsesnr})"
         )
+
+    def clean(self):
+        super().clean()
+        if self.forsendelsestype == Forsendelse.Forsendelsestype.SKIB:
+            if not re.match(r"[a-zA-Z]{3} \d{3}$", self.forbindelsesnr):
+                raise ValidationError(
+                    "Ved skibsfragt skal forbindelsesnummer bestå "
+                    "af tre bogstaver, mellemrum og tre cifre"
+                )
+            if not re.match(r"^[a-zA-Z]{5}\d{7}$", self.fragtbrevsnummer):
+                raise ValidationError(
+                    "Ved skibsfragt skal fragtbrevnr bestå af "
+                    "fem bogstaver efterfulgt af syv cifre"
+                )
+        if self.forsendelsestype == Forsendelse.Forsendelsestype.FLY:
+            if not re.match(r"^\d{3}$", self.forbindelsesnr):
+                raise ValidationError(
+                    "Ved luftfragt skal forbindelsesnummer bestå af tre cifre"
+                )
+            if not re.match(r"^\d{8}$", self.fragtbrevsnummer):
+                raise ValidationError(
+                    "Ved luftfragt skal fragtbrevnummer bestå af otte cifre"
+                )

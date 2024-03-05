@@ -311,12 +311,12 @@ class TF10Form(BootstrapForm):
             self.add_error("fragtbrev", _("Mangler fragtbrev"))
 
         if fragttype == "skibsfragt":
-            if not re.match(r".+ \d{3}$", self.cleaned_data["forbindelsesnr"]):
+            if not re.match(r"[a-zA-Z]{3} \d{3}$", self.cleaned_data["forbindelsesnr"]):
                 self.add_error(
                     "forbindelsesnr",
                     _(
-                        "Ved skibsfragt skal forbindelsesnummer "
-                        "slutte på mellemrum og tre cifre"
+                        "Ved skibsfragt skal forbindelsesnummer bestå "
+                        "af tre bogstaver, mellemrum og tre cifre"
                     ),
                 )
             if not re.match(r"^[a-zA-Z]{5}\d{7}$", self.cleaned_data["fragtbrevnr"]):
