@@ -175,6 +175,7 @@ class PostforsendelseRestClient(ModelRestClient):
         if fragttype in ("luftpost", "skibspost"):
             return filter_dict_none(
                 {
+                    "kladde": data.get("kladde", False),
                     "postforsendelsesnummer": data.get("fragtbrevnr", None),
                     "afsenderbykode": data.get("forbindelsesnr", None),
                     "forsendelsestype": "S" if fragttype == "skibspost" else "F",
@@ -234,6 +235,7 @@ class FragtforsendelseRestClient(ModelRestClient):
         if fragttype in ("luftfragt", "skibsfragt"):
             return filter_dict_none(
                 {
+                    "kladde": data.get("kladde", False),
                     "fragtbrevsnummer": data.get("fragtbrevnr"),
                     "forsendelsestype": "S" if fragttype == "skibsfragt" else "F",
                     "forbindelsesnr": data.get("forbindelsesnr"),
