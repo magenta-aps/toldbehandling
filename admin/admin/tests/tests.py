@@ -366,6 +366,7 @@ class TestGodkend(PermissionsTest, TestCase):
                     "fragtbrev": "/leverandørfakturaer/1/leverandørfaktura.txt",
                     "forbindelsesnr": "ABC 337",
                     "afgangsdato": "2023-10-01",
+                    "kladde": False,
                 },
                 "postforsendelse": None,
                 "leverandørfaktura_nummer": "1234",
@@ -3011,6 +3012,7 @@ class TF10CreateTest(TestMixin, HasLogin, TestCase):
                     ),
                     "fragtbrev_navn": "fragtbrev.txt",
                     "afgangsdato": "2023-11-03",
+                    "kladde": False,
                 }
             ],
         )
@@ -3073,6 +3075,7 @@ class TF10CreateTest(TestMixin, HasLogin, TestCase):
                     ),
                     "fragtbrev_navn": "fragtbrev.txt",
                     "afgangsdato": "2023-11-03",
+                    "kladde": False,
                 }
             ],
         )
@@ -3151,6 +3154,7 @@ class TF10CreateTest(TestMixin, HasLogin, TestCase):
                     "forsendelsestype": "F",
                     "afsenderbykode": "1337",
                     "afgangsdato": "2023-11-03",
+                    "kladde": False,
                 }
             ],
         )

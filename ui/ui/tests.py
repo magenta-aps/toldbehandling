@@ -670,6 +670,7 @@ class TF10BlanketTest(TestMixin, HasLogin, TestCase):
                     ),
                     "fragtbrev_navn": "fragtbrev.txt",
                     "afgangsdato": "2023-11-03",
+                    "kladde": False,
                 }
             ],
         )
@@ -735,6 +736,7 @@ class TF10BlanketTest(TestMixin, HasLogin, TestCase):
                     ),
                     "fragtbrev_navn": "fragtbrev.txt",
                     "afgangsdato": "2023-11-03",
+                    "kladde": False,
                 }
             ],
         )
@@ -816,6 +818,7 @@ class TF10BlanketTest(TestMixin, HasLogin, TestCase):
                     "forsendelsestype": "F",
                     "afsenderbykode": "1337",
                     "afgangsdato": "2023-11-03",
+                    "kladde": False,
                 }
             ],
         )
