@@ -38,7 +38,6 @@ if [ "${TEST,,}" = true ]; then
 fi
 if [ "${MAKEMESSAGES,,}" = true ]; then
   echo 'making messages'
-  ls "/app/told_common/"
   python manage.py makemessages --locale=kl --no-obsolete --add-location file
   python manage.py makemessages --locale=da --no-obsolete --add-location file
 fi
