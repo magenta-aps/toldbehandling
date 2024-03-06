@@ -333,49 +333,46 @@ class NetsPaymentProviderTests(TestCase):
     @patch("payment.provider_handlers.requests.get")
     def test_nets_read(self, mock_requests_get):
         test_provider_payment_id = str(uuid.uuid4()).replace("-", "").lower()
+        test_provider_payment = {
+            "payment_id": test_provider_payment_id,
+            "summary": {
+                "reserved_amount": 0,
+                "charged_amount": 0,
+                "refunded_amount": 0,
+                "cancelled_amount": 0,
+            },
+            "consumer": {
+                "shipping_address": {},
+                "company": {"contact_details": {"phone_number": {}}},
+                "private_person": {"phone_number": {}},
+                "billing_address": {},
+            },
+            "payment_details": {
+                "payment_type": None,
+                "payment_method": None,
+                "invoice_details": {},
+                "card_details": {},
+            },
+            "order_details": {
+                "amount": 1337,
+                "currency": "DKK",
+                "reference": "1234",
+            },
+            "checkout": {
+                "url": f"{settings.HOST_DOMAIN}/payment/checkout/{self.declaration.id}",
+                "cancel_url": f"{settings.HOST_DOMAIN}/payment/cancel/{self.declaration.id}",
+            },
+            "created": datetime.now(timezone.utc).isoformat(),
+        }
 
         # Configure mock(s)
         mock_requests_get.return_value.status_code = 200
         mock_requests_get.return_value.json.return_value = {
-            "payment": {
-                "paymentId": test_provider_payment_id,
-                "summary": ProviderPaymentSummaryResponse(
-                    reserved_amount=0,
-                    charged_amount=0,
-                    refunded_amount=0,
-                    cancelled_amount=0,
-                ),
-                "consumer": ProviderConsumerResponse(
-                    shippingAddress={},
-                    company=ProviderCompanyResponse(
-                        contact_details=ContactDetails(
-                            phone_number={},
-                        )
-                    ),
-                    privatePerson=ContactDetails(
-                        phone_number={},
-                    ),
-                    billingAddress={},
-                ),
-                "paymentDetails": ProviderPaymentDetailsResponse(
-                    invoice_details={},
-                    card_details={},
-                ),
-                "orderDetails": ProviderOrderDetailsResponse(
-                    amount=1337,
-                    currency="DKK",
-                    reference="1234",
-                ),
-                "checkout": ProviderPaymentCheckoutResponse(
-                    url=f"{settings.HOST_DOMAIN}/payment/checkout/{self.declaration.id}",
-                    cancel_url=f"{settings.HOST_DOMAIN}/payment/cancel/{self.declaration.id}",
-                ),
-                "created": datetime.now(timezone.utc).isoformat(),
-            }
+            "payment": {**test_provider_payment}
         }
 
         resp = self.handler.read(payment_id=test_provider_payment_id)
-        self.assertNotEqual(resp, None)
+        self.assertEqual(resp.dict(), test_provider_payment)
 
         mock_requests_get.assert_called_once_with(
             f"{self.handler.host}/v1/payments/{test_provider_payment_id}",
