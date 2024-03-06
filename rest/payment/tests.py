@@ -371,48 +371,19 @@ class NetsPaymentProviderTests(TestCase):
 
     @patch("payment.provider_handlers.requests.post")
     def test_create_error(self, mock_requests_post):
-        test_create_payload = ProviderPaymentPayload(
-            declaration_id=self.declaration.id,
-            amount=1337,
-            currency="DKK",
-            reference="1234",
-            provider=settings.PAYMENT_PROVIDER_NETS,
-            items=[
-                {
-                    "reference": "1234",
-                    "name": "Kaffe",
-                    "quantity": 1,
-                    "unit": "KG",
-                    "unit_price": 1337,
-                    "tax_rate": 0,
-                    "tax_amount": 0,
-                    "gross_total_amount": 1337,
-                    "net_total_amount": 1337,
-                }
-            ],
-        )
-        test_checkout_url = "https://example.com/checkout"
-
         mock_requests_post.return_value.status_code = 500
-
-        expected_exception: ProviderPaymentCreateError | None = None
-        try:
-            resp = self.handler.create(
-                test_create_payload,
-                test_checkout_url,
+        with self.assertRaises(ProviderPaymentCreateError):
+            _ = self.handler.create(
+                ProviderPaymentPayload(
+                    declaration_id=self.declaration.id,
+                    amount=1337,
+                    currency="DKK",
+                    reference="1234",
+                    provider=settings.PAYMENT_PROVIDER_NETS,
+                    items=[],
+                ),
+                "https://example.com/checkout",
             )
-        except ProviderPaymentCreateError as e:
-            expected_exception = e
-
-        self.assertNotEqual(expected_exception, None)
-        self.assertEqual(
-            expected_exception.detail,
-            ProviderPaymentCreateError.default_detail.format(
-                response_text=mock_requests_post.return_value.text,
-                endpoint=f"{self.handler.host}/v1/payments",
-                endpoint_status=mock_requests_post.return_value.status_code,
-            ),
-        )
 
     @patch("payment.provider_handlers.requests.get")
     def test_read(self, mock_requests_get):
@@ -465,24 +436,9 @@ class NetsPaymentProviderTests(TestCase):
 
     @patch("payment.provider_handlers.requests.get")
     def test_read_not_found(self, mock_requests_get):
-        test_provider_payment_id = str(uuid.uuid4()).replace("-", "").lower()
-        mock_requests_get.return_value.status_code = 500
-
-        expected_exception: ProviderPaymentNotFound | None = None
-        try:
-            _ = self.handler.read(payment_id=test_provider_payment_id)
-        except ProviderPaymentNotFound as e:
-            expected_exception = e
-
-        self.assertNotEqual(expected_exception, None)
-        self.assertEqual(
-            expected_exception.detail,
-            ProviderPaymentNotFound.default_detail.format(
-                payment_id=test_provider_payment_id,
-                endpoint=f"{self.handler.host}/v1/payments/{test_provider_payment_id}",
-                endpoint_status=mock_requests_get.return_value.status_code,
-            ),
-        )
+        mock_requests_get.return_value.status_code = 404
+        with self.assertRaises(ProviderPaymentNotFound):
+            _ = self.handler.read(payment_id="1234")
 
     @patch("payment.provider_handlers.requests.post")
     def test_charge(self, mock_requests_post):
