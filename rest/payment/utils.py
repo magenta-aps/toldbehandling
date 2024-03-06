@@ -4,6 +4,10 @@
 
 import re
 from decimal import ROUND_HALF_EVEN, Decimal
+from typing import List
+
+from anmeldelse.models import Varelinje
+from django.conf import settings
 
 
 def convert_keys_to_camel_case(data):
@@ -60,3 +64,98 @@ def convert_keys_to_snake_case(data):
 
 def round_decimal(d: Decimal, rounding: str = ROUND_HALF_EVEN):
     return Decimal(d.quantize(Decimal(".01"), rounding=rounding))
+
+
+def generate_payment_item_from_varelinje(
+    varelinje: Varelinje, currency_multiplier: int = 100
+):
+    varelinje_name = varelinje.vareafgiftssats.vareart_da
+
+    quantity = varelinje.antal
+    if varelinje.vareafgiftssats.enhed in ["kg", "liter", "l", "sam"]:
+        quantity = float(varelinje.mængde)
+
+    unit = varelinje.vareafgiftssats.enhed
+    unit_price = float(varelinje.vareafgiftssats.afgiftssats * currency_multiplier)
+
+    tax_rate = 0  # DKK is 25 * 100, but greenland is 0
+    tax_amount = unit_price * quantity * tax_rate / 10000
+    net_total_amount = unit_price * quantity
+    gross_total_amount = net_total_amount + tax_amount
+
+    return {
+        "reference": varelinje.vareafgiftssats.afgiftsgruppenummer,
+        "name": varelinje_name,
+        "quantity": quantity,
+        "unit": unit,
+        "unit_price": int(unit_price),
+        "tax_rate": tax_rate,
+        "tax_amount": int(tax_amount),
+        "gross_total_amount": int(gross_total_amount),
+        "net_total_amount": int(net_total_amount),
+    }
+
+
+def create_nets_payment_item(
+    name: str,
+    price: float,
+    unit: str = "ant",
+    quantity: int = 1,
+    reference="",
+    currency_multiplier: int = 100,
+):
+    unit_price = float(price * currency_multiplier)
+
+    tax_rate = 0  # DKK is 25 * 100, but greenland is 0
+    tax_amount = unit_price * quantity * tax_rate / 10000
+
+    net_total_amount = unit_price * quantity
+    gross_total_amount = net_total_amount + tax_amount
+
+    return {
+        "reference": reference,
+        "name": name,
+        "quantity": quantity,
+        "unit": unit,
+        "unit_price": unit_price,
+        "tax_rate": tax_rate,
+        "tax_amount": tax_amount,
+        "gross_total_amount": int(gross_total_amount),
+        "net_total_amount": int(net_total_amount),
+    }
+
+
+def get_payment_fees(varelinjer: List[Varelinje], currency_multiplier: int = 100):
+    tillaegsafgift = round_decimal(
+        Decimal(settings.TILLAEGSAFGIFT_FAKTOR)
+        * sum(
+            [
+                varelinje.afgiftsbeløb
+                for varelinje in varelinjer or []
+                if varelinje.vareafgiftssats.har_privat_tillægsafgift_alkohol
+            ]
+        )
+    )
+
+    # OBS: logic copied from "told_common/util.py::round_decimal", but since rest
+    # dont have access to told_common tools anymore, its needs to be copied here
+    ekspeditionsgebyr = Decimal(
+        Decimal(settings.EKSPEDITIONSGEBYR).quantize(
+            Decimal(".01"), rounding=ROUND_HALF_EVEN
+        )
+    )
+
+    return {
+        "tillægsafgift": create_nets_payment_item(
+            "Tillægsafgift",
+            tillaegsafgift,
+            reference="tillægsafgift",
+            currency_multiplier=currency_multiplier,
+        ),
+        "ekspeditionsgebyr": create_nets_payment_item(
+            "Ekspeditionsgebyr",
+            ekspeditionsgebyr,
+            reference="ekspeditionsgebyr",
+            currency_multiplier=currency_multiplier,
+        ),
+    }

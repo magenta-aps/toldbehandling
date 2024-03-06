@@ -5,7 +5,7 @@
 import requests
 from django.conf import settings
 from payment.exceptions import (
-    InternalPaymentError,
+    ProviderHandlerNotFound,
     ProviderPaymentChargeError,
     ProviderPaymentCreateError,
     ProviderPaymentNotFound,
@@ -124,9 +124,10 @@ class BankProviderHandler(ProviderHandler):
         return None
 
 
-def get_provider_handler(provider_name: str) -> NetsProviderHandler:
+def get_provider_handler(provider_name: str) -> NetsProviderHandler | None:
     if provider_name.lower() == settings.PAYMENT_PROVIDER_NETS:
         return NetsProviderHandler(secret_key=settings.PAYMENT_PROVIDER_NETS_SECRET_KEY)
     if provider_name.lower() == settings.PAYMENT_PROVIDER_BANK:
         return BankProviderHandler()
-    raise InternalPaymentError(f"Unknown provider: {provider_name}")
+
+    raise ProviderHandlerNotFound(provider_name)
