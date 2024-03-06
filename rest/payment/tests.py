@@ -474,6 +474,24 @@ class NetsPaymentProviderTests(TestCase):
             )
 
 
+class BankPaymentProviderTests(TestCase):
+    def setUp(self):
+        self.handler = get_provider_handler("bank")
+
+    def test_create(self):
+        resp = self.handler.create(
+            ProviderPaymentPayload(
+                amount=1337, currency="DKK", declaration_id=1234, items=[]
+            ),
+            "https://example.com/checkout",
+        )
+        self.assertEqual(resp, {"paymentId": "Der er foretaget en bankoverførsel"})
+
+    def test_read(self):
+        resp = self.handler.read("1234")
+        self.assertEqual(resp, None)
+
+
 class PaymentAPITests(PaymentTest):
     @patch("payment.api.get_provider_handler")
     def test_create_nets(self, mock_get_provider_handler):
