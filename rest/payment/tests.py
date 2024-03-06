@@ -297,7 +297,7 @@ class NetsPaymentProviderTests(TestCase):
 
     @patch("payment.provider_handlers.NetsProviderHandler.read")
     @patch("payment.provider_handlers.requests.post")
-    def test_nets_create(self, mock_requests_post, mock_handler_read):
+    def test_create(self, mock_requests_post, mock_handler_read):
         user = User.objects.get(username="payment-test-user")
         self.assertNotEqual(user, None)
 
@@ -369,7 +369,7 @@ class NetsPaymentProviderTests(TestCase):
         mock_handler_read.assert_called_once_with(db_payment.provider_payment_id)
 
     @patch("payment.provider_handlers.requests.post")
-    def test_nets_create_error(self, mock_requests_post):
+    def test_create_error(self, mock_requests_post):
         test_create_payload = ProviderPaymentPayload(
             declaration_id=self.declaration.id,
             amount=1337,
@@ -414,7 +414,7 @@ class NetsPaymentProviderTests(TestCase):
         )
 
     @patch("payment.provider_handlers.requests.get")
-    def test_nets_read(self, mock_requests_get):
+    def test_read(self, mock_requests_get):
         test_provider_payment_id = str(uuid.uuid4()).replace("-", "").lower()
         test_provider_payment = {
             "payment_id": test_provider_payment_id,
@@ -463,7 +463,7 @@ class NetsPaymentProviderTests(TestCase):
         )
 
     @patch("payment.provider_handlers.requests.get")
-    def test_nets_read_not_found(self, mock_requests_get):
+    def test_read_not_found(self, mock_requests_get):
         test_provider_payment_id = str(uuid.uuid4()).replace("-", "").lower()
         mock_requests_get.return_value.status_code = 500
 
@@ -484,7 +484,7 @@ class NetsPaymentProviderTests(TestCase):
         )
 
     @patch("payment.provider_handlers.requests.post")
-    def test_nets_charge(self, mock_requests_post):
+    def test_charge(self, mock_requests_post):
         payment_id = str(uuid.uuid4()).replace("-", "").lower()
         charge_amount = 1337
 
