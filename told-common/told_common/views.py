@@ -64,6 +64,7 @@ class LoginView(FormView):
         return super().form_valid(form)
 
 
+
 class LogoutView(RedirectView):
     pattern_name = "login"
 

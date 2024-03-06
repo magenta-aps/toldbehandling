@@ -33,15 +33,29 @@
             </div>
         </div>
         -->
-        <div class="row">
+        <div class="row align-items-center">
             <div class="col-4">{% translate "Oprettelsesdato mellem" %}</div>
             <div class="col-4">{{form.oprettet_efter}}</div>
             <div class="col-4">{{form.oprettet_før}}</div>
         </div>
-        <div class="row">
+        <div class="row align-items-center">
             <div class="col-4">{% translate "Indleveringsdato mellem" %}</div>
+
+            {% translate "Indleveringsdato mellem - mid" as mid %}
+            {% if mid|strip %}
+            <div class="col-3">{{form.indleveringsdato_efter}}</div>
+            <div class="col-1">{{mid}}</div>
+            {% else %}
             <div class="col-4">{{form.indleveringsdato_efter}}</div>
+            {% endif %}
+
+            {% translate "Indleveringsdato mellem - end" as end %}
+            {% if end|strip %}
+            <div class="col-3">{{form.indleveringsdato_før}}</div>
+            <div class="col-1">{{end}}</div>
+            {% else %}
             <div class="col-4">{{form.indleveringsdato_før}}</div>
+            {% endif %}
         </div>
 
         <!--

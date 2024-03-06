@@ -54,3 +54,8 @@ def divide(value, arg):
         return int(value) / int(arg)
     except (ValueError, ZeroDivisionError):
         return None
+
+
+@register.filter
+def strip(value: str):
+    return value.strip()
