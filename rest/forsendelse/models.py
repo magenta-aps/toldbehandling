@@ -132,24 +132,25 @@ class Fragtforsendelse(Forsendelse):
 
     def clean(self):
         super().clean()
-        if not self.kladde:
-            if self.forsendelsestype == Forsendelse.Forsendelsestype.SKIB:
-                if not re.match(r"[a-zA-Z]{3} \d{3}$", self.forbindelsesnr):
-                    raise ValidationError(
-                        "Ved skibsfragt skal forbindelsesnummer bestå "
-                        "af tre bogstaver, mellemrum og tre cifre"
-                    )
-                if not re.match(r"^[a-zA-Z]{5}\d{7}$", self.fragtbrevsnummer):
-                    raise ValidationError(
-                        "Ved skibsfragt skal fragtbrevnr bestå af "
-                        "fem bogstaver efterfulgt af syv cifre"
-                    )
-            if self.forsendelsestype == Forsendelse.Forsendelsestype.FLY:
-                if not re.match(r"^\d{3}$", self.forbindelsesnr):
-                    raise ValidationError(
-                        "Ved luftfragt skal forbindelsesnummer bestå af tre cifre"
-                    )
-                if not re.match(r"^\d{8}$", self.fragtbrevsnummer):
-                    raise ValidationError(
-                        "Ved luftfragt skal fragtbrevnummer bestå af otte cifre"
-                    )
+        if self.kladde:
+            return
+        if self.forsendelsestype == Forsendelse.Forsendelsestype.SKIB:
+            if not re.match(r"[a-zA-Z]{3} \d{3}$", self.forbindelsesnr):
+                raise ValidationError(
+                    "Ved skibsfragt skal forbindelsesnummer bestå "
+                    "af tre bogstaver, mellemrum og tre cifre"
+                )
+            if not re.match(r"^[a-zA-Z]{5}\d{7}$", self.fragtbrevsnummer):
+                raise ValidationError(
+                    "Ved skibsfragt skal fragtbrevnr bestå af "
+                    "fem bogstaver efterfulgt af syv cifre"
+                )
+        if self.forsendelsestype == Forsendelse.Forsendelsestype.FLY:
+            if not re.match(r"^\d{3}$", self.forbindelsesnr):
+                raise ValidationError(
+                    "Ved luftfragt skal forbindelsesnummer bestå af tre cifre"
+                )
+            if not re.match(r"^\d{8}$", self.fragtbrevsnummer):
+                raise ValidationError(
+                    "Ved luftfragt skal fragtbrevnummer bestå af otte cifre"
+                )
