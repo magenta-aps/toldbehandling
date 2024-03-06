@@ -17,7 +17,7 @@ from payment.exceptions import (
     ProviderPaymentNotFound,
 )
 from payment.models import Payment
-from payment.provider_handlers import get_provider_handler
+from payment.provider_handlers import ProviderHandler, get_provider_handler
 from payment.schemas import (
     ContactDetails,
     ProviderCompanyResponse,
@@ -227,6 +227,40 @@ class PaymentTest(TestCase):
         )
 
         return test_payment, fake_provider_payment
+
+
+class PaymentProviderHandlerTests(TestCase):
+    def setUp(self):
+        self.handler = ProviderHandler()
+
+    def test_create(self):
+        with self.assertRaises(NotImplementedError):
+            self.handler.create(
+                ProviderPaymentPayload(
+                    amount=1337, currency="DKK", declaration_id=1234, items=[]
+                ),
+                "https://example.com/checkout",
+            )
+
+    def test_update(self):
+        with self.assertRaises(NotImplementedError):
+            self.handler.update()
+
+    def test_delete(self):
+        with self.assertRaises(NotImplementedError):
+            self.handler.delete()
+
+    def test_read(self):
+        with self.assertRaises(NotImplementedError):
+            self.handler.read("1234")
+
+    def test_charge(self):
+        with self.assertRaises(NotImplementedError):
+            self.handler.charge("1234", 1337)
+
+    def test_headers(self):
+        with self.assertRaises(NotImplementedError):
+            _ = self.handler.headers
 
 
 class NetsPaymentProviderTests(TestCase):
