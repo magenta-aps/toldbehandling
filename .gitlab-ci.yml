@@ -258,7 +258,6 @@ Build ER image:
     EBOKS_MOCK: 'True'
     SYSTEM_USER_PASSWORD: system
     CVR_TOLDKATEGORI_MAP: '[]'
-    BYPASS_2FA: 'True'
 
   before_script:
     - mkdir "${CI_PROJECT_DIR}/coverage_output"

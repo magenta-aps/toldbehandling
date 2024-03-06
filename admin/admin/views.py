@@ -51,8 +51,6 @@ class TwofactorAuthRequiredMixin(LoginRequiredMixin):
         redir = super().login_check()
         if redir:
             return redir
-        if settings.BYPASS_2FA:
-            return None
         if (
             not self.request.session.get("twofactor_authenticated")
             and self.request.user.twofactor_enabled
