@@ -132,6 +132,8 @@ class Fragtforsendelse(Forsendelse):
 
     def clean(self):
         super().clean()
+        if self.kladde:
+            return
         if self.forsendelsestype == Forsendelse.Forsendelsestype.SKIB:
             if not re.match(r"[a-zA-Z]{3} \d{3}$", self.forbindelsesnr):
                 raise ValidationError(

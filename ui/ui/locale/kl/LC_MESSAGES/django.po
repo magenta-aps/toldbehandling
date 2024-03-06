@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-02-29 10:08-0200\n"
+"POT-Creation-Date: 2024-03-06 10:36-0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -94,6 +94,10 @@ msgid "Slet afgiftsanmeldelse"
 msgstr ""
 
 #: ui/templates/ui/tf10/delete.html
+msgid "Denne afgiftsanmeldelse vil blive slettet"
+msgstr ""
+
+#: ui/templates/ui/tf10/delete.html
 #, fuzzy
 #| msgid "Afgiftssats"
 msgid "Afgiftsanmeldelse"
@@ -133,6 +137,10 @@ msgstr ""
 #| msgid "Afgiftssats"
 msgid "Afgift i alt"
 msgstr "Akitsuutip annertussusia"
+
+#: ui/templates/ui/tf10/delete.html
+msgid "Er du sikker på at du vil slette denne?"
+msgstr ""
 
 #: ui/templates/ui/tf10/delete.html
 msgid "Annuller"
