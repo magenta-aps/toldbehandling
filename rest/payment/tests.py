@@ -11,7 +11,11 @@ from django.core.management import call_command
 from django.test import TestCase
 from django.urls import reverse
 from payment.api import generate_payment_item_from_varelinje
-from payment.exceptions import ProviderHandlerNotFound, ProviderPaymentNotFound
+from payment.exceptions import (
+    ProviderHandlerNotFound,
+    ProviderPaymentCreateError,
+    ProviderPaymentNotFound,
+)
 from payment.models import Payment
 from payment.provider_handlers import get_provider_handler
 from payment.schemas import (
@@ -289,7 +293,7 @@ class NetsPaymentProviderTests(TestCase):
         }
 
         # Create the payment
-        db_model = ProviderPaymentPayload(
+        create_payload = ProviderPaymentPayload(
             declaration_id=db_declaration.id,
             amount=1337,
             currency="DKK",
@@ -312,7 +316,7 @@ class NetsPaymentProviderTests(TestCase):
 
         # Invoke the function we want to test
         resp = self.handler.create(
-            db_model,
+            create_payload,
             checkout_url,
         )
 
@@ -320,7 +324,7 @@ class NetsPaymentProviderTests(TestCase):
             f"{self.handler.host}/v1/payments",
             headers=self.handler.headers,
             json={
-                "order": convert_keys_to_camel_case(db_model.dict()),
+                "order": convert_keys_to_camel_case(create_payload.dict()),
                 "checkout": {
                     "url": checkout_url,
                     "termsUrl": self.handler.terms_url,
@@ -329,6 +333,51 @@ class NetsPaymentProviderTests(TestCase):
         )
 
         mock_handler_read.assert_called_once_with(db_payment.provider_payment_id)
+
+    @patch("payment.provider_handlers.requests.post")
+    def test_nets_create_error(self, mock_requests_post):
+        test_create_payload = ProviderPaymentPayload(
+            declaration_id=self.declaration.id,
+            amount=1337,
+            currency="DKK",
+            reference="1234",
+            provider=settings.PAYMENT_PROVIDER_NETS,
+            items=[
+                {
+                    "reference": "1234",
+                    "name": "Kaffe",
+                    "quantity": 1,
+                    "unit": "KG",
+                    "unit_price": 1337,
+                    "tax_rate": 0,
+                    "tax_amount": 0,
+                    "gross_total_amount": 1337,
+                    "net_total_amount": 1337,
+                }
+            ],
+        )
+        test_checkout_url = "https://example.com/checkout"
+
+        mock_requests_post.return_value.status_code = 500
+
+        expected_exception: ProviderPaymentCreateError | None = None
+        try:
+            resp = self.handler.create(
+                test_create_payload,
+                test_checkout_url,
+            )
+        except ProviderPaymentCreateError as e:
+            expected_exception = e
+
+        self.assertNotEqual(expected_exception, None)
+        self.assertEqual(
+            expected_exception.detail,
+            ProviderPaymentCreateError.default_detail.format(
+                response_text=mock_requests_post.return_value.text,
+                endpoint=f"{self.handler.host}/v1/payments",
+                endpoint_status=mock_requests_post.return_value.status_code,
+            ),
+        )
 
     @patch("payment.provider_handlers.requests.get")
     def test_nets_read(self, mock_requests_get):
