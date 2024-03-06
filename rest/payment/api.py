@@ -40,12 +40,7 @@ class PaymentAPI:
         response={201: PaymentResponse},
     )
     def create(self, payload: PaymentCreatePayload) -> PaymentResponse:
-        # Validate payload
-        if payload.provider not in (
-            settings.PAYMENT_PROVIDER_NETS,
-            settings.PAYMENT_PROVIDER_BANK,
-        ):
-            raise ValidationError(f"Invalid payment provider: {payload.provider}")
+        provider_handler: ProviderHandler = get_provider_handler(payload.provider)
 
         try:
             declaration = PrivatAfgiftsanmeldelse.objects.get(id=payload.declaration_id)
@@ -57,8 +52,6 @@ class PaymentAPI:
         if payload.provider == settings.PAYMENT_PROVIDER_BANK:
             if not self.context.request.user.has_perm("payment.bank_payment"):
                 raise PermissionDenied
-
-        provider_handler: ProviderHandler = get_provider_handler(payload.provider)
 
         # Create payment locally, if it does not exist
         try:
