@@ -13,6 +13,7 @@ from django.urls import reverse
 from payment.api import generate_payment_item_from_varelinje
 from payment.exceptions import (
     ProviderHandlerNotFound,
+    ProviderPaymentChargeError,
     ProviderPaymentCreateError,
     ProviderPaymentNotFound,
 )
@@ -505,6 +506,16 @@ class NetsPaymentProviderTests(TestCase):
                 "amount": charge_amount,
             },
         )
+
+    @patch("payment.provider_handlers.requests.post")
+    def test_charge_error(self, mock_requests_post):
+        mock_requests_post.return_value.status_code = 500
+
+        with self.assertRaises(ProviderPaymentChargeError):
+            _ = self.handler.charge(
+                payment_id="1234",
+                amount=1337,
+            )
 
 
 class PaymentAPITests(PaymentTest):
