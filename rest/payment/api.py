@@ -2,7 +2,6 @@
 #
 # SPDX-License-Identifier: MPL-2.0
 
-from decimal import ROUND_HALF_EVEN, Decimal
 from typing import Callable, Dict, List, Tuple
 
 from anmeldelse.models import PrivatAfgiftsanmeldelse, Varelinje
@@ -25,7 +24,7 @@ from payment.schemas import (
     ProviderPaymentPayload,
     ProviderPaymentResponse,
 )
-from payment.utils import round_decimal
+from payment.utils import generate_payment_item_from_varelinje, get_payment_fees
 
 
 @api_controller(
@@ -67,9 +66,9 @@ class PaymentAPI:
                 declaration_id=payload.declaration_id, provider_payment_id__isnull=False
             )
             if payment_new.provider_payment_id is not None:
-                return payment_model_to_response(
+                return _payment_model_to_response(
                     payment_new,
-                    field_converts=payment_field_converters(provider_handler),
+                    field_converts=_payment_field_converters(provider_handler),
                 )
         except Payment.DoesNotExist:
             pass
@@ -126,9 +125,9 @@ class PaymentAPI:
         payment_new.status = provider_handler.initial_status
         payment_new.save()
 
-        return payment_model_to_response(
+        return _payment_model_to_response(
             payment_new,
-            field_converts=payment_field_converters(provider_handler),
+            field_converts=_payment_field_converters(provider_handler),
         )
 
     @route.get("", auth=JWTAuth(), url_name="payment_list")
@@ -148,9 +147,9 @@ class PaymentAPI:
 
         provider_handler = get_provider_handler(settings.PAYMENT_PROVIDER_NETS)
         return [
-            payment_model_to_response(
+            _payment_model_to_response(
                 payment,
-                payment_field_converters(provider_handler),
+                _payment_field_converters(provider_handler),
             )
             for payment in payments
         ]
@@ -159,9 +158,9 @@ class PaymentAPI:
     def get(self, payment_id: int) -> PaymentResponse:
         payment_local = Payment.objects.prefetch_related("items").get(id=payment_id)
 
-        return payment_model_to_response(
+        return _payment_model_to_response(
             payment_local,
-            field_converts=payment_field_converters(
+            field_converts=_payment_field_converters(
                 get_provider_handler(settings.PAYMENT_PROVIDER_NETS),
             ),
         )
@@ -189,38 +188,15 @@ class PaymentAPI:
             payment_local.save()
 
         # Default, return the payment without doing anything
-        return payment_model_to_response(
+        return _payment_model_to_response(
             payment_local,
-            field_converts=payment_field_converters(provider_handler, provider_payment),
+            field_converts=_payment_field_converters(
+                provider_handler, provider_payment
+            ),
         )
 
 
-# Helpers
-
-
-def payment_model_to_response(
-    payment_model: Payment,
-    field_converts: Dict[str, Callable[[str | int], Tuple[str, str]]] | None,
-) -> PaymentResponse:
-    payment_local_dict = model_to_dict(payment_model)
-
-    if payment_model.items:
-        payment_local_dict["items"] = [
-            model_to_dict(item) for item in payment_model.items.all()
-        ]
-
-    if field_converts and len(field_converts.keys()) > 0:
-        for field, convert in field_converts.items():
-            field_with_converted_val, converted_value = convert(
-                payment_local_dict[field]
-            )
-            if converted_value is not None:
-                payment_local_dict[field_with_converted_val] = converted_value
-
-    return PaymentResponse(**payment_local_dict)
-
-
-def payment_field_converters(
+def _payment_field_converters(
     provider_handler: NetsProviderHandler,
     provider_payment: ProviderPaymentResponse | None = None,
 ):
@@ -240,94 +216,23 @@ def payment_field_converters(
     }
 
 
-def generate_payment_item_from_varelinje(
-    varelinje: Varelinje, currency_multiplier: int = 100
-):
-    varelinje_name = varelinje.vareafgiftssats.vareart_da
+def _payment_model_to_response(
+    payment_model: Payment,
+    field_converts: Dict[str, Callable[[str | int], Tuple[str, str]]] | None,
+) -> PaymentResponse:
+    payment_local_dict = model_to_dict(payment_model)
 
-    quantity = varelinje.antal
-    if varelinje.vareafgiftssats.enhed in ["kg", "liter", "l"]:
-        quantity = float(varelinje.mængde)
+    if payment_model.items:
+        payment_local_dict["items"] = [
+            model_to_dict(item) for item in payment_model.items.all()
+        ]
 
-    unit = varelinje.vareafgiftssats.enhed
-    unit_price = float(varelinje.vareafgiftssats.afgiftssats * currency_multiplier)
+    if field_converts and len(field_converts.keys()) > 0:
+        for field, convert in field_converts.items():
+            field_with_converted_val, converted_value = convert(
+                payment_local_dict[field]
+            )
+            if converted_value is not None:
+                payment_local_dict[field_with_converted_val] = converted_value
 
-    tax_rate = 0  # DKK is 25 * 100, but greenland is 0
-    tax_amount = unit_price * quantity * tax_rate / 10000
-    net_total_amount = unit_price * quantity
-    gross_total_amount = net_total_amount + tax_amount
-
-    return {
-        "reference": varelinje.vareafgiftssats.afgiftsgruppenummer,
-        "name": varelinje_name,
-        "quantity": quantity,
-        "unit": unit,
-        "unit_price": int(unit_price),
-        "tax_rate": tax_rate,
-        "tax_amount": int(tax_amount),
-        "gross_total_amount": int(gross_total_amount),
-        "net_total_amount": int(net_total_amount),
-    }
-
-
-def get_payment_fees(varelinjer: List[Varelinje], currency_multiplier: int = 100):
-    tillaegsafgift = round_decimal(
-        Decimal(settings.TILLAEGSAFGIFT_FAKTOR)
-        * sum(
-            [
-                varelinje.afgiftsbeløb
-                for varelinje in varelinjer or []
-                if varelinje.vareafgiftssats.har_privat_tillægsafgift_alkohol
-            ]
-        )
-    )
-
-    # OBS: logic copied from "told_common/util.py::round_decimal", but since rest
-    # dont have access to told_common tools anymore, its needs to be copied here
-    ekspeditionsgebyr = Decimal(
-        Decimal(settings.EKSPEDITIONSGEBYR).quantize(
-            Decimal(".01"), rounding=ROUND_HALF_EVEN
-        )
-    )
-
-    return {
-        "tillægsafgift": create_nets_payment_item(
-            "Tillægsafgift",
-            tillaegsafgift,
-            reference="tillægsafgift",
-        ),
-        "ekspeditionsgebyr": create_nets_payment_item(
-            "Ekspeditionsgebyr",
-            ekspeditionsgebyr,
-            reference="ekspeditionsgebyr",
-        ),
-    }
-
-
-def create_nets_payment_item(
-    name: str,
-    price: float,
-    unit: str = "ant",
-    quantity: int = 1,
-    reference="",
-    currency_multiplier: int = 100,
-):
-    unit_price = float(price * currency_multiplier)
-
-    tax_rate = 0  # DKK is 25 * 100, but greenland is 0
-    tax_amount = unit_price * quantity * tax_rate / 10000
-
-    net_total_amount = unit_price * quantity
-    gross_total_amount = net_total_amount + tax_amount
-
-    return {
-        "reference": reference,
-        "name": name,
-        "quantity": quantity,
-        "unit": unit,
-        "unit_price": unit_price,
-        "tax_rate": tax_rate,
-        "tax_amount": tax_amount,
-        "gross_total_amount": int(gross_total_amount),
-        "net_total_amount": int(net_total_amount),
-    }
+    return PaymentResponse(**payment_local_dict)

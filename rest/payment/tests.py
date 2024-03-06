@@ -25,7 +25,10 @@ from payment.schemas import (
     ProviderPaymentResponse,
     ProviderPaymentSummaryResponse,
 )
-from payment.utils import convert_keys_to_camel_case
+from payment.utils import (
+    convert_keys_to_camel_case,
+    generate_payment_item_from_varelinje,
+)
 from project.test_mixins import RestMixin
 from project.util import json_dump
 from sats.models import Afgiftstabel, Vareafgiftssats
