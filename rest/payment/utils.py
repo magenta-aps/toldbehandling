@@ -72,7 +72,7 @@ def generate_payment_item_from_varelinje(
     varelinje_name = varelinje.vareafgiftssats.vareart_da
 
     quantity = varelinje.antal
-    if varelinje.vareafgiftssats.enhed in ["kg", "liter", "l"]:
+    if varelinje.vareafgiftssats.enhed in ["kg", "liter", "l", "sam"]:
         quantity = float(varelinje.mængde)
 
     unit = varelinje.vareafgiftssats.enhed
