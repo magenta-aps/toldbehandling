@@ -34,6 +34,7 @@ class TwoFactorSetupView(HasRestClientMixin, twofactor_views.SetupView):
     def done(self, form_list, **kwargs):
         super().done(form_list, **kwargs)
         self.request.session["twofactor_authenticated"] = True
+        self.request.session["user"] = self.rest_client.user.this()
         return redirect(self.get_success_url())
 
 
