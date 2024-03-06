@@ -11,7 +11,7 @@ from django.core.management import call_command
 from django.test import TestCase
 from django.urls import reverse
 from payment.api import generate_payment_item_from_varelinje
-from payment.exceptions import ProviderHandlerNotFound
+from payment.exceptions import ProviderHandlerNotFound, ProviderPaymentNotFound
 from payment.models import Payment
 from payment.provider_handlers import get_provider_handler
 from payment.schemas import (
@@ -377,6 +377,27 @@ class NetsPaymentProviderTests(TestCase):
         mock_requests_get.assert_called_once_with(
             f"{self.handler.host}/v1/payments/{test_provider_payment_id}",
             headers=self.handler.headers,
+        )
+
+    @patch("payment.provider_handlers.requests.get")
+    def test_nets_read_not_found(self, mock_requests_get):
+        test_provider_payment_id = str(uuid.uuid4()).replace("-", "").lower()
+        mock_requests_get.return_value.status_code = 500
+
+        expected_exception: ProviderPaymentNotFound | None = None
+        try:
+            _ = self.handler.read(payment_id=test_provider_payment_id)
+        except ProviderPaymentNotFound as e:
+            expected_exception = e
+
+        self.assertNotEqual(expected_exception, None)
+        self.assertEqual(
+            expected_exception.detail,
+            ProviderPaymentNotFound.default_detail.format(
+                payment_id=test_provider_payment_id,
+                endpoint=f"{self.handler.host}/v1/payments/{test_provider_payment_id}",
+                endpoint_status=mock_requests_get.return_value.status_code,
+            ),
         )
 
     @patch("payment.provider_handlers.requests.post")
