@@ -130,8 +130,7 @@ class FragtforsendelseTest(RestTestMixin, TestCase):
         self.assertIn(self.fragtforsendelse_data["forbindelsesnr"], string)
 
 
-# PostforsendelseAPI
-class ForsendelseAPITests(TestCase):
+class PostforsendelseAPITests(TestCase):
     @classmethod
     def setUpTestData(cls):
         cls.user_permissions = [
@@ -233,12 +232,12 @@ class ForsendelseAPITests(TestCase):
                 "count": 1,
                 "items": [
                     {
-                        "id": 1,
-                        "forsendelsestype": "S",
-                        "postforsendelsesnummer": "1234567890",
-                        "afsenderbykode": "1234",
-                        "afgangsdato": "2023-01-01",
-                        "kladde": False,
+                        "id": postforsendelse.id,
+                        "forsendelsestype": Postforsendelse.Forsendelsestype.SKIB[0],
+                        "postforsendelsesnummer": postforsendelse.postforsendelsesnummer,
+                        "afsenderbykode": postforsendelse.afsenderbykode,
+                        "afgangsdato": postforsendelse.afgangsdato.isoformat(),
+                        "kladde": postforsendelse.kladde,
                     }
                 ],
             },
