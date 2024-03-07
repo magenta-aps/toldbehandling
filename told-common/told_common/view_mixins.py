@@ -21,7 +21,9 @@ from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.views.generic import FormView
 from requests import HTTPError
-from told_common.rest_client import JwtTokenInfo, RestClient
+from told_common.data import JwtTokenInfo
+from told_common.middleware import RestTokenUserMiddleware
+from told_common.rest_client import RestClient
 
 
 class LoginRequiredMixin:
@@ -34,6 +36,7 @@ class LoginRequiredMixin:
                 request.session["user"] = user
                 # Save token to session
                 token.save(request, save_refresh_token=True)
+                RestTokenUserMiddleware.set_user(request)
                 return None
             else:
                 # Redirect to SAML login
@@ -181,7 +184,21 @@ class HasRestClientMixin:
     def dispatch(self, request, *args, **kwargs):
         self.rest_client = RestClient(token=JwtTokenInfo.load(request))
         response = super().dispatch(request, *args, **kwargs)
-        self.rest_client.token.save(request)
+        if self.rest_client.token:
+            self.rest_client.token.save(request)
+        return response
+
+
+class HasSystemRestClientMixin:
+    def dispatch(self, request, *args, **kwargs):
+        self.rest_client = RestClient(
+            RestClient.login("system", settings.SYSTEM_USER_PASSWORD)
+        )
+        response = super().dispatch(request, *args, **kwargs)
+        # TODO: Gem token et sted? Ikke oveni den eksisterende sat af HasRestClientMixin
+        # TODO: Måske i en class-level cache?
+        # if self.rest_client.token:
+        #     self.rest_client.token.save(request)
         return response
 
 

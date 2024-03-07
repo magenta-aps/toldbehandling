@@ -10,11 +10,13 @@ from datetime import date, datetime
 from decimal import Context, Decimal
 from enum import Enum
 from functools import cached_property
+from time import time
 from typing import Callable, List, Optional, Union
 
 from dataclasses_json import config, dataclass_json
 from django.conf import settings
 from django.core.files import File
+from django.http import HttpRequest
 from django.template.defaultfilters import floatformat
 from django.utils.translation import gettext_lazy as _
 from marshmallow import fields
@@ -463,6 +465,43 @@ class Indberetter(ToldDataClass):
     cvr: int
 
 
+@dataclass
+class JwtTokenInfo:
+    access_token: str
+    refresh_token: str
+    access_token_timestamp: float = field(
+        default_factory=time
+    )  # default to timestamp at instance creation
+    refresh_token_timestamp: float = field(default_factory=time)
+    synchronized: bool = False
+
+    @staticmethod
+    def load(request: HttpRequest):
+        try:
+            return JwtTokenInfo(
+                access_token=request.session["access_token"],
+                access_token_timestamp=float(request.session["access_token_timestamp"]),
+                refresh_token=request.session["refresh_token"],
+                refresh_token_timestamp=float(
+                    request.session["refresh_token_timestamp"]
+                ),
+                synchronized=True,
+            )
+        except KeyError:
+            return None
+
+    def save(self, request: HttpRequest, save_refresh_token: bool = False):
+        if not self.synchronized:
+            request.session["access_token"] = self.access_token
+            request.session["access_token_timestamp"] = self.access_token_timestamp
+            if save_refresh_token:
+                request.session["refresh_token"] = self.refresh_token
+                request.session[
+                    "refresh_token_timestamp"
+                ] = self.refresh_token_timestamp
+            self.synchronized = True
+
+
 @dataclass_json
 @dataclass
 class User(ToldDataClass):
@@ -474,7 +513,9 @@ class User(ToldDataClass):
     is_superuser: bool
     groups: List[str]
     permissions: List[str]
-    indberetter_data: Optional[Indberetter]
+    indberetter_data: Optional[Indberetter] = None
+    jwt_token: Optional[JwtTokenInfo] = None
+    twofactor_enabled: bool = False
 
     @property
     def cpr(self):
@@ -485,3 +526,28 @@ class User(ToldDataClass):
     def cvr(self):
         if self.indberetter_data:
             return self.indberetter_data.cvr
+
+    @property
+    def is_authenticated(self):
+        return self.jwt_token is not None
+
+    @property
+    def is_anonymous(self):
+        return self.is_authenticated
+
+    def get_username(self):
+        return self.username
+
+
+@dataclass_json
+@dataclass
+class TOTPDevice(ToldDataClass):
+    user_id: int
+    key: str
+    tolerance: int
+    t0: int
+    step: int
+    drift: int
+    digits: int
+    name: str
+    confirmed: bool
