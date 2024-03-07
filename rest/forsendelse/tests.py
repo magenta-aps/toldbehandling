@@ -2,9 +2,12 @@
 #
 # SPDX-License-Identifier: MPL-2.0
 
+from django.contrib.auth.models import Permission, User
 from django.test import TestCase
+from django.urls import reverse
 from forsendelse.models import Fragtforsendelse, Postforsendelse
-from project.test_mixins import RestTestMixin
+from project.test_mixins import RestMixin, RestTestMixin
+from project.util import json_dump
 
 
 class PostforsendelseTest(RestTestMixin, TestCase):
@@ -121,3 +124,47 @@ class FragtforsendelseTest(RestTestMixin, TestCase):
         self.assertIn(self.fragtforsendelse_data["fragtbrevsnummer"], string)
         self.assertIn(str(self.fragtforsendelse_data["forsendelsestype"].label), string)
         self.assertIn(self.fragtforsendelse_data["forbindelsesnr"], string)
+
+
+class ForsendelseAPITests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.user_permissions = [
+            Permission.objects.get(codename="view_postforsendelse"),
+            Permission.objects.get(codename="add_postforsendelse"),
+        ]
+
+        cls.user, cls.user_token, cls.user_refresh_token = RestMixin.make_user(
+            username="payment-test-user",
+            plaintext_password="testpassword1337",
+            permissions=cls.user_permissions,
+        )
+
+    def test_create_postforsendelse_bad_request(self):
+        resp = self.client.post(
+            reverse("api-1.0.0:postforsendelse_create"),
+            data=json_dump(
+                {
+                    "payload": {
+                        "forsendelsestype": None,
+                        "postforsendelsesnummer": None,
+                        "afsenderbykode": None,
+                        "afgangsdato": None,
+                        "kladde": None,
+                    }
+                }
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+        )
+
+        self.assertEqual(resp.status_code, 400)
+        self.assertEqual(
+            resp.json(),
+            {
+                "__all__": [
+                    "Begrænsning “aktuel_har_postforsendelsesnummer” er overtrådt.",
+                    "Begrænsning “aktuel_har_afsenderbykode” er overtrådt.",
+                ]
+            },
+        )
