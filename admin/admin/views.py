@@ -6,6 +6,7 @@ from datetime import datetime, timezone
 from decimal import Context, Decimal
 from functools import cached_property
 from typing import Any, Dict, List, Optional, Set, Union
+from urllib.parse import quote_plus
 
 from django.conf import settings
 from django.contrib import messages
@@ -13,6 +14,7 @@ from django.core.exceptions import ValidationError
 from django.http import Http404, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import redirect
 from django.template import loader
+from django.template.response import TemplateResponse
 from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from django.views import View
@@ -30,6 +32,7 @@ from told_common.view_mixins import (
     FormWithFormsetView,
     GetFormView,
     HasRestClientMixin,
+    LoginRequiredMixin,
     PermissionsRequiredMixin,
 )
 
@@ -43,7 +46,24 @@ from admin.clients.prisme import (
 from admin.spreadsheet import SpreadsheetExport, VareafgiftssatsSpreadsheetUtil
 
 
-class AdminLayoutBaseView(PermissionsRequiredMixin, HasRestClientMixin):
+class TwofactorAuthRequiredMixin(LoginRequiredMixin):
+    def login_check(self):
+        redir = super().login_check()
+        if redir:
+            return redir
+        if (
+            not self.request.session.get("twofactor_authenticated")
+            and self.request.user.twofactor_enabled
+        ):
+            return redirect(
+                reverse("twofactor:login") + "?back=" + quote_plus(self.request.path)
+            )
+        return None
+
+
+class AdminLayoutBaseView(
+    TwofactorAuthRequiredMixin, PermissionsRequiredMixin, HasRestClientMixin
+):
     """Base view for admin pages, using a common layout with navigation.
 
     NOTE: We do not set default required-permissions in this view, yet, since they

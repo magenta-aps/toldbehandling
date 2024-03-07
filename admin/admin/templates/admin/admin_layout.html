@@ -27,6 +27,11 @@
             {{user.first_name}} {{user.last_name}} ({{user.username}})
         </span>
         <a href="{% url 'logout' %}" class="btn btn-sm btn-primary m-1">Log ud</a>
+
+        {% if not user.twofactor_enabled %}
+        <a href="{% url 'twofactor:setup' %}" class="btn btn-sm btn-primary m-1">Indstil Tofaktor-autentificering</a>
+        {% endif %}
+
         <button type="button" class="btn btn-sm btn-outline-primary m-1" data-bs-toggle="modal" data-bs-target="#about_modal">
             Om
         </button>

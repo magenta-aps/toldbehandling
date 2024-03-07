@@ -104,9 +104,12 @@ class FixedWidthIntegerField(ErrorMessagesFieldMixin, forms.CharField):
         ),  # Kopieret fra Django
     }
 
-    def __init__(self, width: int = 1, min_value: int = 0, *args, **kwargs):
+    def __init__(
+        self, width: int = 1, min_value: int = 0, *args, widget_attrs=None, **kwargs
+    ):
         self.width = int(width)
         self.min_value = int(min_value)
+        self.extra_widget_attrs = widget_attrs
         super().__init__(*args, **kwargs)
         self.validators.append(MinValueValidator(min_value))
         self.validators.append(MaxValueValidator((10**width) - 1))
@@ -119,6 +122,8 @@ class FixedWidthIntegerField(ErrorMessagesFieldMixin, forms.CharField):
         attrs["maxlength"] = str(self.width)
         attrs["minlength"] = str(self.width)
         attrs["pattern"] = "\\d{" + str(self.width) + "}"
+        if type(self.extra_widget_attrs) is dict:
+            attrs.update(self.extra_widget_attrs)
         return attrs
 
     def to_python(self, value: str) -> Optional[int]:

@@ -1,0 +1,54 @@
+{% extends "told_common/card.html" %}
+{% load i18n %}
+{% load common_tags %}
+
+{% block extra_media %}
+{{ form.media }}
+{% endblock %}
+
+
+{% block card_title %}{% translate "Aktivér Tofaktor-autentificering" %}{% endblock %}
+
+{% block card_content %}
+
+
+<p>
+    {% blocktranslate trimmed %}
+    For at opsætte tofaktor-autentificering, skan QR-koden med en
+    autentificerings-app på en smartphone, f.eks. Microsoft Authenticator eller Google Authenticator.
+    {% endblocktranslate %}
+</p>
+<p>
+    <img src="{{ QR_URL }}" alt="QR Code" class="bg-white"/>
+</p>
+<p>
+    {% blocktranslate trimmed %}
+    Indtast derefter koden fra appen i nedenstående felt
+    {% endblocktranslate %}
+</p>
+
+<form action="" method="post">
+    {% csrf_token %}
+    {{ wizard.management_form }}
+    <div class="row align-items-center">
+        <div class="col-2">
+            <label for="{{wizard.form.token.id_for_label}}">
+                {{wizard.form.token.label}}:
+            </label>
+        </div>
+        <div class="col-8">
+            {{wizard.form.token}}
+        </div>
+    </div>
+    {% if wizard.form.token.errors %}
+    <div class="row">
+        <div class="offset-2 col-8">
+            {{wizard.form.token.errors}}
+        </div>
+    </div>
+    {% endif %}
+
+    <a href="{% url 'logout' %}" class="btn btn-outline-primary">{% translate "Tilbage" %}</a>
+    <button type="submit" class="btn btn-primary">{% translate "Næste" %}</button>
+</form>
+{% endblock %}

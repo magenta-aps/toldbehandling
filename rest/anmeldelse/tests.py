@@ -58,6 +58,7 @@ class AfgiftsanmeldelseTest(RestTestMixin, TestCase):
                     "forsendelse.view_all_postforsendelser",
                 ],
                 "indberetter_data": None,
+                "twofactor_enabled": False,
             },
             "oprettet_på_vegne_af": None,
             # "afgift_total": '0',

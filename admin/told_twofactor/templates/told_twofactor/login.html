@@ -1,0 +1,45 @@
+{% extends "told_common/card.html" %}
+{% load i18n %}
+{% load static %}
+{% load two_factor_tags %}
+
+{% block extra_headers %}
+<link rel="stylesheet" href="{% static 'font-awesome/css/all.min.css' %}"/>
+{% endblock %}
+
+{% block card_title %}
+Log ind
+{% endblock %}
+
+{% block card_content %}
+<form action="" method="POST" class="needs-validation">
+    {% csrf_token %}
+    <div class="row align-items-center mb-3">
+        <div class="col-3">
+            <label for="{{form.twofactor_token.id_for_label}}">{{form.twofactor_token.label}}</label>
+        </div>
+        <div class="col-7">
+            <div class="input-group">
+                {{form.twofactor_token}}
+                {% translate "Indtast det seks-cifrede tal som vises på din registrerede telefon i authentikerings-appen" as content %}
+                {% include "told_common/widgets/info.html" with title=form.twofactor_token.label content=content %}
+            </div>
+            {% if form.twofactor_token.errors %}
+            <div>{{ form.twofactor_token.errors }}</div>
+            {% endif %}
+        </div>
+        <div class="col-2">
+            <button type="submit" class="btn btn-primary">{% translate 'Log ind' %}</button>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <a href="javascript:history.back()" class="btn btn-outline btn-outline-primary">Tilbage</a>
+        </div>
+    </div>
+</form>
+<script>
+    const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]');
+    const popoverList = [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl));
+</script>
+{% endblock %}

@@ -11,6 +11,7 @@ from urllib.parse import unquote
 
 from django.conf import settings
 from django.contrib import messages
+from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.http import FileResponse, Http404, JsonResponse
 from django.shortcuts import redirect
 from django.template import loader
@@ -52,7 +53,7 @@ class LoginView(FormView):
     template_name = "told_common/login.html"
 
     def get_success_url(self):
-        next = self.request.GET.get("back")
+        next = self.request.GET.get("back") or self.request.GET.get(REDIRECT_FIELD_NAME)
         if next:
             return next
 
@@ -67,9 +68,12 @@ class LogoutView(RedirectView):
     pattern_name = "login"
 
     def get(self, request, *args, **kwargs):
-        for key in ("access_token", "refresh_token", "user"):
+        for key in ("access_token", "refresh_token", "user", "twofactor_authenticated"):
             if key in request.session:
+                print(f"Deleting session key {key}")
                 del request.session[key]
+        for key in request.session.keys():
+            print(f"Not deleting session key {key}")
         return super().get(request, *args, **kwargs)
 
 

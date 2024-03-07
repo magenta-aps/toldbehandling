@@ -80,24 +80,32 @@ class LoginTest(TestMixin):
         response._content = content
         return response
 
-    @staticmethod
-    def mock_requests_get(path):
+    @classmethod
+    def mock_requests_get(cls, path):
         expected_prefix = f"{settings.REST_DOMAIN}/api/"
         path = path.split("?")[0]
         path = path.rstrip("/")
         response = Response()
         status_code = None
-        if path == expected_prefix + "user":
+        json_content = None
+        content = None
+        if path in (expected_prefix + "user", expected_prefix + "user/this"):
             json_content = {
+                "id": 1,
                 "username": "admin",
                 "first_name": "Administrator",
                 "last_name": "",
                 "email": "admin@told.gl",
                 "is_superuser": True,
+                "groups": [],
+                "permissions": [],
             }
-        else:
+        elif path == expected_prefix + "afsender":
             json_content = {"count": 0, "items": []}
-        content = json.dumps(json_content).encode("utf-8")
+        else:
+            raise Exception(f"Mock {cls.__name__} got unrecognized path: GET {path}")
+        if json_content:
+            content = json.dumps(json_content).encode("utf-8")
         if content:
             if not status_code:
                 status_code = 200
@@ -195,10 +203,12 @@ class LoginTest(TestMixin):
     @patch.object(
         requests,
         "post",
-        return_value=create_response(200, {"access": "123456", "refresh": "abcdef"}),
     )
     def test_token_refresh(self, mock_post, mock_get):
         mock_get.side_effect = self.mock_requests_get
+        mock_post.return_value = self.create_response(
+            200, {"access": "123456", "refresh": "abcdef"}
+        )
         self.client.post(
             reverse("login"), {"username": "correct", "password": "credentials"}
         )
@@ -226,7 +236,7 @@ class LoginTest(TestMixin):
         self.assertEquals(response.headers["Location"], "/")
         self.assertEquals(self.client.session["access_token"], "123456")
         self.assertEquals(self.client.session["refresh_token"], "abcdef")
-        response = self.client.get(reverse("logout"))
+        response = self.client.get(reverse("logout"), follow=False)
         self.assertNotIn("access_token", self.client.session)
         self.assertNotIn("refresh_token", self.client.session)
 
@@ -266,6 +276,7 @@ class HasLogin:
         session = self.client.session
         if not userdata:
             userdata = {
+                "id": 1,
                 "username": "admin",
                 "first_name": "Administrator",
                 "last_name": "",
@@ -275,6 +286,8 @@ class HasLogin:
                     f"{p.content_type.app_label}.{p.codename}"
                     for p in Permission.objects.all()
                 ],
+                "groups": [],
+                "twofactor_enabled": True,
             }
         session.update(
             {
@@ -287,6 +300,7 @@ class HasLogin:
                     "cpr": 1234567890,
                     "cvr": 12345678,
                 },
+                "twofactor_authenticated": True,
             }
         )
         session.save()
@@ -317,11 +331,14 @@ class PermissionsTest(HasLogin):
     @patch.object(FileView, "get")
     def test_permissions_admin(self, mock_fileview, mock_get, *args):
         self.userdata = {
+            "id": 1,
             "username": "admin",
             "first_name": "Administrator",
             "last_name": "",
             "email": "admin@told.gl",
             "is_superuser": True,
+            "groups": [],
+            "permissions": [],
         }
         self.login(self.userdata)
         mock_get.side_effect = self.mock_perm_get
@@ -341,11 +358,14 @@ class PermissionsTest(HasLogin):
     @patch.object(FileView, "get")
     def test_permissions_allowed(self, mock_fileview, mock_get, *args):
         self.userdata = {
+            "id": 1,
             "username": "allowed_user",
             "first_name": "Allowed",
             "last_name": "User",
             "email": "allowed@told.gl",
             "is_superuser": False,
+            "groups": [],
+            "permissions": [],
         }
         mock_get.side_effect = self.mock_perm_get
         mock_fileview.return_value = FileResponse(StringIO("test_data"))
@@ -370,11 +390,14 @@ class PermissionsTest(HasLogin):
             url = item[0]
             permissions = item[1]
             self.userdata = {
+                "id": 1,
                 "username": "disallowed_user",
                 "first_name": "disallowed",
                 "last_name": "User",
                 "email": "disallowed@told.gl",
                 "is_superuser": False,
+                "groups": [],
+                "permissions": [],
             }
             for p in permissions:
                 reduced_permissions = list(filter(lambda x: x != p, permissions))
@@ -562,11 +585,13 @@ class AnmeldelseListViewTest(HasLogin):
         status_code = None
         if path == expected_prefix + "user":
             json_content = {
+                "id": 1,
                 "username": "admin",
                 "first_name": "Administrator",
                 "last_name": "",
                 "email": "admin@told.gl",
                 "is_superuser": True,
+                "groups": [],
             }
         elif path == expected_prefix + "afgiftsanmeldelse/full":
             items = deepcopy(self.testdata)
