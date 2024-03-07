@@ -2,7 +2,11 @@
 #
 # SPDX-License-Identifier: MPL-2.0
 
+from aktør.models import Afsender, Modtager
+from anmeldelse.models import Afgiftsanmeldelse, afgiftsanmeldelse_upload_to
+from common.models import IndberetterProfile
 from django.contrib.auth.models import Permission, User
+from django.forms import model_to_dict
 from django.test import TestCase
 from django.urls import reverse
 from forsendelse.models import Fragtforsendelse, Postforsendelse
@@ -126,6 +130,7 @@ class FragtforsendelseTest(RestTestMixin, TestCase):
         self.assertIn(self.fragtforsendelse_data["forbindelsesnr"], string)
 
 
+# PostforsendelseAPI
 class ForsendelseAPITests(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -166,5 +171,75 @@ class ForsendelseAPITests(TestCase):
                     "Begrænsning “aktuel_har_postforsendelsesnummer” er overtrådt.",
                     "Begrænsning “aktuel_har_afsenderbykode” er overtrådt.",
                 ]
+            },
+        )
+
+    def test_list_postforsendelser_filter_user_query_none(self):
+        # Create some test data to list
+        postforsendelse = Postforsendelse.objects.create(
+            forsendelsestype=Postforsendelse.Forsendelsestype.SKIB,
+            postforsendelsesnummer="1234567890",
+            afsenderbykode="1234",
+            afgangsdato="2023-01-01",
+            kladde=False,
+            oprettet_af=self.user,
+        )
+
+        resp = self.client.get(
+            reverse("api-1.0.0:postforsendelse_list"),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+        )
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.json(), {"count": 0, "items": []})
+
+    def test_list_postforsendelser_filter_user_created_by_indberetter_cvr(self):
+        _ = IndberetterProfile.objects.create(
+            user=self.user,
+            cvr="13371337",
+        )
+
+        postforsendelse = Postforsendelse.objects.create(
+            forsendelsestype=Postforsendelse.Forsendelsestype.SKIB,
+            postforsendelsesnummer="1234567890",
+            afsenderbykode="1234",
+            afgangsdato="2023-01-01",
+            kladde=False,
+            oprettet_af=self.user,
+        )
+
+        _ = Afgiftsanmeldelse.objects.create(
+            **{
+                "status": "kladde",
+                "leverandørfaktura_nummer": "12345",
+                "betales_af": "afsender",
+                "indførselstilladelse": "abcde",
+                "betalt": False,
+                "fuldmagtshaver": None,
+                "oprettet_af": self.user,
+                "postforsendelse": postforsendelse,
+            }
+        )
+
+        resp = self.client.get(
+            reverse("api-1.0.0:postforsendelse_list"),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+        )
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(
+            resp.json(),
+            {
+                "count": 1,
+                "items": [
+                    {
+                        "id": 1,
+                        "forsendelsestype": "S",
+                        "postforsendelsesnummer": "1234567890",
+                        "afsenderbykode": "1234",
+                        "afgangsdato": "2023-01-01",
+                        "kladde": False,
+                    }
+                ],
             },
         )
