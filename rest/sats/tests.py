@@ -4,9 +4,14 @@
 
 from datetime import date, datetime, timedelta, timezone
 from decimal import Decimal
+from unittest.mock import patch
 
+from django.contrib.auth.models import Permission, User
 from django.test import TestCase
-from project.test_mixins import RestTestMixin
+from django.urls import reverse
+from ninja_extra.exceptions import PermissionDenied
+from project.test_mixins import RestMixin, RestTestMixin
+from project.util import json_dump
 from sats.models import Afgiftstabel, Vareafgiftssats
 
 
@@ -222,4 +227,104 @@ class VareafgiftssatsTest(RestTestMixin, TestCase):
         self.assertEqual(
             str(self.vareafgiftssats),
             f"Vareafgiftssats(afgiftsgruppenummer={self.vareafgiftssats_data['afgiftsgruppenummer']}, afgiftssats={self.vareafgiftssats_data['afgiftssats']}, enhed={self.vareafgiftssats_data['enhed'].label})",
+        )
+
+
+class SatsAPITests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.user_permissions = [
+            Permission.objects.get(codename="view_afgiftstabel"),
+            # Permission.objects.get(codename="change_afgiftstabel"),
+        ]
+
+        cls.user, cls.user_token, cls.user_refresh_token = RestMixin.make_user(
+            username="payment-test-user",
+            plaintext_password="testpassword1337",
+            permissions=cls.user_permissions,
+        )
+
+        cls.test_afgiftstabel_1 = Afgiftstabel.objects.create(
+            gyldig_fra=datetime(2022, 1, 1).replace(tzinfo=timezone.utc),
+            gyldig_til=datetime(2023, 12, 31).replace(tzinfo=timezone.utc),
+            kladde=False,
+        )
+
+        cls.test_afgiftstabel_2 = Afgiftstabel.objects.create(
+            gyldig_fra=datetime(2023, 1, 1).replace(tzinfo=timezone.utc),
+            gyldig_til=datetime(2024, 1, 1).replace(tzinfo=timezone.utc),
+            kladde=False,
+        )
+
+    def test_list_afgiftstabeller_filter_gyldig_til__gt(self):
+        endpoint = reverse("api-1.0.0:afgiftstabel_list")
+        resp = self.client.get(
+            f"{endpoint}?gyldig_til__gt=2023-12-31",
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+        )
+
+        # Asserts
+        self.assertEqual(resp.status_code, 200)
+        resp_body = resp.json()
+
+        self.assertEqual(resp_body["count"], 1)
+        self.assertEqual(
+            resp_body["items"],
+            [
+                {
+                    "id": self.test_afgiftstabel_2.id,
+                    "gyldig_fra": self.test_afgiftstabel_2.gyldig_fra.isoformat(),
+                    "gyldig_til": None,  # OBS: see 'Afgiftstabel.on_update' on why this is None
+                    "kladde": self.test_afgiftstabel_2.kladde,
+                }
+            ],
+        )
+
+    def test_list_afgiftstabeller_filter_gyldig_til__gte(self):
+        endpoint = reverse("api-1.0.0:afgiftstabel_list")
+        resp = self.client.get(
+            f"{endpoint}?gyldig_til__gte=2024-01-01",
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+        )
+
+        self.assertEqual(resp.status_code, 200)
+        resp_body = resp.json()
+
+        self.assertEqual(resp_body["count"], 1)
+        self.assertEqual(
+            resp_body["items"],
+            [
+                {
+                    "id": self.test_afgiftstabel_2.id,
+                    "gyldig_fra": self.test_afgiftstabel_2.gyldig_fra.isoformat(),
+                    "gyldig_til": None,  # OBS: see 'Afgiftstabel.on_update' on why this is None
+                    "kladde": self.test_afgiftstabel_2.kladde,
+                }
+            ],
+        )
+
+    @patch("sats.api.get_object_or_404")
+    def test_update_afgiftstabel_draft_change_error(self, mock_get_object_or_404):
+        self.user.user_permissions.add(
+            Permission.objects.get(codename="change_afgiftstabel")
+        )
+
+        mock_get_object_or_404.return_value = self.test_afgiftstabel_1
+
+        resp = self.client.patch(
+            reverse(
+                "api-1.0.0:afgiftstabel_update", args=[self.test_afgiftstabel_1.id]
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+            data=json_dump({"kladde": True}),
+        )
+
+        self.assertEqual(resp.status_code, 403)
+        self.assertEqual(
+            resp.json(),
+            {"detail": "You do not have permission to perform this action."},
+        )
+        mock_get_object_or_404.assert_called_once_with(
+            Afgiftstabel, id=self.test_afgiftstabel_1.id
         )
