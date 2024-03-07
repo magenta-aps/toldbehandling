@@ -242,3 +242,26 @@ class PostforsendelseAPITests(TestCase):
                 ],
             },
         )
+
+    def test_get_postforsendelse_check_user_permission_denied(self):
+        postforsendelse = Postforsendelse.objects.create(
+            forsendelsestype=Postforsendelse.Forsendelsestype.SKIB,
+            postforsendelsesnummer="1234567890",
+            afsenderbykode="1234",
+            afgangsdato="2023-01-01",
+            kladde=False,
+            oprettet_af=self.user,
+        )
+
+        resp = self.client.get(
+            reverse("api-1.0.0:postforsendelse_get", args=[postforsendelse.id]),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+        )
+
+        self.assertEqual(resp.status_code, 403)
+        self.assertEqual(
+            resp.json(),
+            {
+                "detail": "You do not have permission to perform this action.",
+            },
+        )
