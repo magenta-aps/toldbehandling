@@ -1,8 +1,11 @@
 from unittest.mock import patch
 
+import requests
+from django.conf import settings
 from django.test import TestCase
 from django.urls import reverse
 from django_otp.oath import TOTP
+from requests import Response
 from told_common.rest_client import TotpDeviceRestClient, UserRestClient
 from told_common.tests import HasLogin, TestMixin
 
@@ -60,3 +63,50 @@ class TwoFactorSetupViewTest(HasLogin, TestMixin, TestCase):
         }
         self.assertDictEqual(sent, expected)
         self.assertTrue(self.client.session["twofactor_authenticated"])
+
+
+class TwofactorLoginTest(HasLogin, TestMixin, TestCase):
+
+    def setUp(self):
+        self.posted = []
+
+    def mock_requests_post(self, path, status_code):
+        print(f"MOCK POST {path} {data} {status_code}")
+        expected_prefix = f"{settings.REST_DOMAIN}/api/"
+        if path == f"{expected_prefix}/2fa/check":
+            self.posted.append(data)
+            response = Response()
+            response.status_code = status_code
+            return response
+
+    def mock_requests_post_accept(self, path, **kwargs):
+        return self.mock_requests_post(path, data, headers, 200)
+
+    def mock_requests_post_reject(self, path, **kwargs):
+        return self.mock_requests_post(path, data, headers, 401)
+
+    def test_login_missing(self):
+        self.client.login()
+        response = self.client.post(reverse("twofactor:login"))
+        errors = self.get_errors(response.content)
+        self.assertEquals(errors, {"twofactor_token": ["Dette felt er påkrævet."]})
+        self.assertFalse("twofactor_authenticated" in self.client.session)
+
+    @patch.object(requests, "post")
+    def test_login_fail(self, mock_post):
+        mock_post.side_effect = self.mock_requests_post_reject
+        self.client.login()
+        response = self.client.post(reverse("twofactor:login"), {"twofactor_token": "112233"})
+        errors = self.get_errors(response.content)
+        self.assertEquals(errors, {"twofactor_token": ["Ugyldig token"]})
+        self.assertFalse("twofactor_authenticated" in self.client.session)
+
+    @patch.object(requests, "post")
+    def test_login_success(self, mock_post):
+        mock_post.side_effect = self.mock_requests_post_accept
+        self.client.login()
+        response = self.client.post(reverse("twofactor:login"), {"twofactor_token": "112233"})
+        print(response.status_code)
+        print(response.headers)
+        print(response.content)
+        self.assertTrue("twofactor_authenticated" in self.client.session)
