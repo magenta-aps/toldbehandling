@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-03-06 07:37-0200\n"
+"POT-Creation-Date: 2024-03-08 08:44-0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -141,7 +141,7 @@ msgid "Er du sikker på at du vil slette denne?"
 msgstr "Ilumut aniniarpit?"
 
 #: ui/templates/ui/tf10/delete.html
-msgid "Annuller"
+msgid "Annullér"
 msgstr ""
 
 #: ui/templates/ui/tf5/actions.html ui/templates/ui/tf5/payment/checkout.html
