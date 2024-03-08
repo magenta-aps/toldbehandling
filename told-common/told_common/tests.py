@@ -37,7 +37,7 @@ class TestMixin:
             name = element.get("name") or element.get("data-fileinput")
             if name:
                 el = element
-                for i in range(1, 3):
+                for i in range(1, 4):
                     el = el.parent
                     errorlist = el.find(class_="errorlist")
                     if errorlist:
@@ -55,6 +55,15 @@ class TestMixin:
                 li.text.strip() for li in all_errors.find_all(name="li")
             ]
         return error_fields
+
+    @staticmethod
+    def create_response(status_code, content):
+        response = Response()
+        if type(content) == dict:
+            content = json.dumps(content)
+        response._content = content
+        response.status_code = status_code
+        return response
 
 
 class TemplateTagsTest:
