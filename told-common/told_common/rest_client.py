@@ -982,15 +982,13 @@ class RestClient:
         return JwtTokenInfo(access_token=data["access"], refresh_token=data["refresh"])
 
     @classmethod
-    def check_twofactor(cls, user_id: int, twofactor_token: str) -> JwtTokenInfo:
+    def check_twofactor(cls, user_id: int, twofactor_token: str):
         response = requests.post(
             f"{cls.domain}/api/2fa/check",
             json={"user_id": user_id, "twofactor_token": twofactor_token},
             headers={"Content-Type": "application/json"},
         )
         response.raise_for_status()
-        data = response.json()
-        return data
 
     def refresh_login(self):
         response = requests.post(

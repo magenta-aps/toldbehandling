@@ -66,47 +66,50 @@ class TwoFactorSetupViewTest(HasLogin, TestMixin, TestCase):
 
 
 class TwofactorLoginTest(HasLogin, TestMixin, TestCase):
-
     def setUp(self):
         self.posted = []
 
-    def mock_requests_post(self, path, status_code):
-        print(f"MOCK POST {path} {data} {status_code}")
-        expected_prefix = f"{settings.REST_DOMAIN}/api/"
-        if path == f"{expected_prefix}/2fa/check":
+    def mock_requests_post(self, url, data, json, status_code):
+        expected_prefix = f"{settings.REST_DOMAIN}/api"
+        response = Response()
+        if url == f"{expected_prefix}/2fa/check":
             self.posted.append(data)
-            response = Response()
             response.status_code = status_code
-            return response
+        else:
+            response.status_code = 404
+        return response
 
-    def mock_requests_post_accept(self, path, **kwargs):
-        return self.mock_requests_post(path, data, headers, 200)
+    def mock_requests_post_accept(self, url, data=None, json=None, **kwargs):
+        return self.mock_requests_post(url, data, json, 200)
 
-    def mock_requests_post_reject(self, path, **kwargs):
-        return self.mock_requests_post(path, data, headers, 401)
+    def mock_requests_post_reject(self, url, data=None, json=None, **kwargs):
+        return self.mock_requests_post(url, data, json, 401)
 
     def test_login_missing(self):
         self.client.login()
         response = self.client.post(reverse("twofactor:login"))
         errors = self.get_errors(response.content)
         self.assertEquals(errors, {"twofactor_token": ["Dette felt er påkrævet."]})
-        self.assertFalse("twofactor_authenticated" in self.client.session)
+        self.assertFalse(self.client.session.get("twofactor_authenticated", False))
 
     @patch.object(requests, "post")
     def test_login_fail(self, mock_post):
         mock_post.side_effect = self.mock_requests_post_reject
         self.client.login()
-        response = self.client.post(reverse("twofactor:login"), {"twofactor_token": "112233"})
+        response = self.client.post(
+            reverse("twofactor:login"), {"twofactor_token": "112233"}
+        )
         errors = self.get_errors(response.content)
         self.assertEquals(errors, {"twofactor_token": ["Ugyldig token"]})
-        self.assertFalse("twofactor_authenticated" in self.client.session)
+        self.assertFalse(self.client.session.get("twofactor_authenticated", False))
 
     @patch.object(requests, "post")
     def test_login_success(self, mock_post):
         mock_post.side_effect = self.mock_requests_post_accept
         self.client.login()
-        response = self.client.post(reverse("twofactor:login"), {"twofactor_token": "112233"})
-        print(response.status_code)
-        print(response.headers)
-        print(response.content)
-        self.assertTrue("twofactor_authenticated" in self.client.session)
+        response = self.client.post(
+            reverse("twofactor:login"), {"twofactor_token": "112233"}
+        )
+        self.assertTrue(self.client.session.get("twofactor_authenticated", False))
+        self.assertEquals(response.status_code, 302)
+        self.assertEquals(response.headers.get("Location"), "/admin")

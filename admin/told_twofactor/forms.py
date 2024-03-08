@@ -31,7 +31,7 @@ class TwofactorLoginForm(BootstrapForm):
 
     def clean_twofactor_token(self):
         try:
-            self.token = RestClient.check_twofactor(
+            RestClient.check_twofactor(
                 self.user_id, self.cleaned_data["twofactor_token"]
             )
         except HTTPError:
