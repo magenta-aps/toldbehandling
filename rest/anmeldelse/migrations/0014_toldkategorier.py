@@ -10,6 +10,11 @@ kategorier = [
         "kræver_cvr": True,
     },
     {
+        "kategori": "72",
+        "navn": "Øl fra Nuuk Imeq",
+        "kræver_cvr": True,
+    },
+    {
         "kategori": "73A",
         "navn": "Kreditkunder Nan,Qaq,Nar,Kali,Qas,Nuu,Man,Sis,Nars",
         "kræver_cvr": True,
@@ -44,7 +49,13 @@ kategorier = [
         "kategori": "79",
         "navn": "Refusion",
         "kræver_cvr": True,
+    },
+    {
+        "kategori": "90",
+        "navn": "sodavand fra Nuuk Imeq",
+        "kræver_cvr": True,
     }
+
 ]
 
 def opret_toldkategorier(apps, schema_editor):
