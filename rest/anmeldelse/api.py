@@ -15,6 +15,7 @@ from anmeldelse.models import (
     Notat,
     PrismeResponse,
     PrivatAfgiftsanmeldelse,
+    Toldkategori,
     Varelinje,
 )
 from common.api import UserOut, get_auth_methods
@@ -1166,3 +1167,29 @@ class StatistikAPI:
             list(stats) + list(stats_unused), key=lambda x: x["afgiftsgruppenummer"]
         )
         return {"count": len(stats_list), "items": stats_list}
+
+
+class ToldkategoriOut(ModelSchema):
+    class Config:
+        model = Toldkategori
+        model_fields = [
+            "kategori",
+            "navn",
+            "kræver_cvr",
+        ]
+
+
+@api_controller(
+    "/toldkategori",
+    tags=["Toldkategori"],
+    permissions=[permissions.IsAuthenticated],
+)
+class ToldkategoriAPI:
+    @route.get(
+        "",
+        auth=get_auth_methods(),
+        url_name="toldkategori_get",
+        response=List[ToldkategoriOut],
+    )
+    def list(self):
+        return Toldkategori.objects.all()

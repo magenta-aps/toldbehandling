@@ -144,6 +144,10 @@ class TF10View(AdminLayoutBaseView, common_views.TF10View, FormView):
     form_class = forms.TF10ViewForm
     extend_template = "admin/admin_layout.html"
 
+    @cached_property
+    def toldkategorier(self):
+        return self.rest_client.toldkategori.list()
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         can_approve = self.has_permissions(
@@ -164,6 +168,11 @@ class TF10View(AdminLayoutBaseView, common_views.TF10View, FormView):
             }
         )
         return context
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["toldkategorier"] = self.toldkategorier
+        return kwargs
 
     def form_valid(self, form):
         anmeldelse_id = self.kwargs["id"]
@@ -198,9 +207,9 @@ class TF10View(AdminLayoutBaseView, common_views.TF10View, FormView):
 
                 try:
                     kræver_cvr = {
-                        item["kategori"]
-                        for item in settings.CVR_TOLDKATEGORI_MAP
-                        if item.get("kræver_cvr")
+                        item.kategori
+                        for item in self.rest_client.toldkategori.list()
+                        if item.kræver_cvr
                     }
                     if anmeldelse.toldkategori in kræver_cvr:
                         cvr = None
@@ -349,6 +358,15 @@ class TF10FormUpdateView(AdminLayoutBaseView, common_views.TF10FormUpdateView):
         *common_views.TF10FormUpdateView.required_permissions,
     )
 
+    @cached_property
+    def toldkategorier(self):
+        return self.rest_client.toldkategori.list()
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["toldkategorier"] = self.toldkategorier
+        return kwargs
+
     def get_context_data(self, **context):
         return super().get_context_data(
             **{
@@ -361,6 +379,13 @@ class TF10FormUpdateView(AdminLayoutBaseView, common_views.TF10FormUpdateView):
     def status(self, item, form):
         if item.status == "afvist":
             return "ny"
+
+    def get_initial(self):
+        initial = super().get_initial()
+        item = self.item
+        if item:
+            initial["toldkategori"] = item.toldkategori
+        return initial
 
 
 class TF10HistoryListView(AdminLayoutBaseView, common_views.ListView):

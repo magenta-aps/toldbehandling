@@ -471,3 +471,18 @@ def on_delete_prismeresponse(sender, instance, **kwargs):
     if not instance.afgiftsanmeldelse.prismeresponse_set.exists():
         instance.afgiftsanmeldelse.status = "godkendt"
         instance.afgiftsanmeldelse.save()
+
+
+class Toldkategori(models.Model):
+    class Meta:
+        ordering = ["kategori"]
+
+    kategori = models.CharField(
+        max_length=3,
+    )
+    navn = models.CharField(
+        max_length=300,
+    )
+    kræver_cvr = models.BooleanField(
+        default=False,
+    )

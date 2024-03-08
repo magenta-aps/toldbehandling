@@ -38,6 +38,10 @@ class TF10CreateForm(common_forms.TF10Form):
 
 
 class TF10ViewForm(BootstrapForm):
+    def __init__(self, toldkategorier, *args, **kwargs):
+        self.toldkategorier = toldkategorier
+        super().__init__(*args, **kwargs)
+
     status = forms.ChoiceField(
         required=False,
         choices=(
@@ -66,11 +70,12 @@ class TF10ViewForm(BootstrapForm):
         required=False,
     )
     send_til_prisme = forms.BooleanField(required=False)
-    toldkategori = forms.ChoiceField(
+    toldkategori = DynamicField(
+        forms.ChoiceField,
         required=False,
-        choices=[
-            (item["kategori"], f"{item['kategori']} - {item['navn']}")
-            for item in settings.CVR_TOLDKATEGORI_MAP
+        choices=lambda form: [
+            (item.kategori, f"{item.kategori} - {item.navn}")
+            for item in form.toldkategorier
         ],
         widget=forms.Select(
             attrs={"disabled": "disabled", "data-modal-required": "true"}
@@ -104,12 +109,17 @@ class TF10ViewForm(BootstrapForm):
 
 
 class TF10UpdateForm(common_forms.TF10Form):
-    toldkategori = forms.ChoiceField(
+    def __init__(self, toldkategorier, *args, **kwargs):
+        self.toldkategorier = toldkategorier
+        super().__init__(*args, **kwargs)
+
+    toldkategori = DynamicField(
+        forms.ChoiceField,
         required=False,
-        choices=[(None, "---------")]
+        choices=lambda form: [(None, "---------")]
         + [
-            (item["kategori"], f"{item['kategori']} - {item['navn']}")
-            for item in settings.CVR_TOLDKATEGORI_MAP
+            (item.kategori, f"{item.kategori} - {item.navn}")
+            for item in form.toldkategorier
         ],
     )
 
