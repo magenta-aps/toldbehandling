@@ -56,15 +56,6 @@ class TestMixin:
             ]
         return error_fields
 
-    @staticmethod
-    def create_response(status_code, content):
-        response = Response()
-        if type(content) == dict:
-            content = json.dumps(content)
-        response._content = content
-        response.status_code = status_code
-        return response
-
 
 class TemplateTagsTest:
     def test_file_basename(self):
