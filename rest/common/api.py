@@ -119,6 +119,7 @@ class UserOut(ModelSchema):
 
 
 class UserOutWithTokens(Schema):
+    id: int
     username: str
     first_name: str
     last_name: str
@@ -136,6 +137,7 @@ class UserOutWithTokens(Schema):
     def user_to_dict(user: User) -> Dict:
         refresh_token = RefreshToken.for_user(user)
         return {
+            "id": user.pk,
             "username": user.username,
             "first_name": user.first_name,
             "last_name": user.last_name,
