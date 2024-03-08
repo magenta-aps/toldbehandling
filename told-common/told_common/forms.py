@@ -370,7 +370,7 @@ class TF10VareForm(BootstrapForm):
         vareart_key = (
             "vareart_kl" if translation.get_language() == "kl" else "vareart_da"
         )
-        self.varesatser_choices = ((-1, "-- Vælg vareart"),) + tuple(
+        self.varesatser_choices = ((-1, _("-- Vælg vareart")),) + tuple(
             (id, getattr(item, vareart_key)) for id, item in self.varesatser.items()
         )
         super().__init__(*args, **kwargs)

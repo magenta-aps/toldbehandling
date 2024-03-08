@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-12-22 07:56+0000\n"
+"POT-Creation-Date: 2024-03-06 07:37-0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -91,6 +91,10 @@ msgid "{pct}% af fakturabeløb"
 msgstr ""
 
 #: told_common/form_mixins.py
+msgid "Indtast et heltal, evt. med foranstillede nuller"
+msgstr ""
+
+#: told_common/form_mixins.py
 #, python-format
 msgid "Filen er for stor; den må max. være %(max_size_natural)s"
 msgstr ""
@@ -107,7 +111,7 @@ msgstr ""
 msgid "Login fejlede"
 msgstr ""
 
-#: told_common/forms.py
+#: told_common/forms.py told_common/templates/told_common/tf10/view.html
 msgid "CVR"
 msgstr ""
 
@@ -115,12 +119,14 @@ msgstr ""
 msgid "CVR-nummer skal være på 8 cifre og må ikke begynde med 0"
 msgstr ""
 
-#: told_common/forms.py told_common/templates/told_common/tf5/view.html
+#: told_common/forms.py told_common/templates/told_common/tf10/view.html
+#: told_common/templates/told_common/tf5/view.html
 msgid "Navn"
 msgstr ""
 
-#: told_common/forms.py
-msgid "Vej og husnummer"
+#: told_common/forms.py told_common/templates/told_common/tf10/view.html
+#: told_common/templates/told_common/tf5/view.html
+msgid "Adresse"
 msgstr ""
 
 #: told_common/forms.py
@@ -128,14 +134,18 @@ msgid "Postnr."
 msgstr ""
 
 #: told_common/forms.py
-msgid "Postnummer skal være på 4 cifre og må ikke begynde med 0"
+msgid "Postnummer skal være på mindst 4 cifre og må ikke begynde med 0"
 msgstr ""
 
 #: told_common/forms.py
+msgid "Postnummer skal være på højst 8 cifre og må ikke begynde med 0"
+msgstr ""
+
+#: told_common/forms.py told_common/templates/told_common/tf10/view.html
 msgid "By"
 msgstr ""
 
-#: told_common/forms.py
+#: told_common/forms.py told_common/templates/told_common/tf10/view.html
 msgid "Postbox"
 msgstr ""
 
@@ -144,19 +154,7 @@ msgid "Tlf."
 msgstr ""
 
 #: told_common/forms.py
-msgid "Opret en ny afsender med de indtastede oplysninger"
-msgstr ""
-
-#: told_common/forms.py
-msgid "Opdatér den valgte afsender med de indtastede oplysinger"
-msgstr ""
-
-#: told_common/forms.py
-msgid "Opret en ny modtager med de indtastede oplysninger"
-msgstr ""
-
-#: told_common/forms.py
-msgid "Opdatér den valgte modtager med de indtastede oplysinger"
+msgid "Postnummer skal være på 4 cifre og må ikke begynde med 0"
 msgstr ""
 
 #: told_common/forms.py
@@ -172,43 +170,88 @@ msgid "Leverandør­faktura"
 msgstr ""
 
 #: told_common/forms.py told_common/templates/told_common/tf10/form.html
+#: told_common/templates/told_common/tf10/view.html
 msgid "Fragtbrev"
 msgstr ""
 
-#: told_common/forms.py
+#: told_common/forms.py told_common/templates/told_common/tf10/view.html
 msgid "Skibsfragt"
 msgstr ""
 
-#: told_common/forms.py
+#: told_common/forms.py told_common/templates/told_common/tf10/view.html
 msgid "Luftfragt"
 msgstr ""
 
-#: told_common/forms.py
+#: told_common/forms.py told_common/templates/told_common/tf10/view.html
 msgid "Skibspost"
 msgstr ""
 
-#: told_common/forms.py
+#: told_common/forms.py told_common/templates/told_common/tf10/view.html
 msgid "Luftpost"
 msgstr ""
 
-#: told_common/forms.py
+#: told_common/forms.py told_common/templates/told_common/notat/list.html
+#: told_common/templates/told_common/tf10/list.html
+#: told_common/templates/told_common/tf5/list.html
+msgid "Notat"
+msgstr ""
+
+#: told_common/forms.py told_common/templates/told_common/tf10/list.html
+msgid "Nej"
+msgstr ""
+
+#: told_common/forms.py told_common/templates/told_common/tf10/list.html
+msgid "Ja"
+msgstr ""
+
+#: told_common/forms.py told_common/templates/told_common/tf10/view.html
 msgid "Betales af"
 msgstr ""
 
-#: told_common/forms.py told_common/templates/told_common/tf10/form.html
-#: told_common/templates/told_common/tf10/list.html
-#: told_common/templates/told_common/tf5/list.html
-msgid "Modtager"
+#: told_common/forms.py
+msgid "-- Vælg betaler"
 msgstr ""
 
 #: told_common/forms.py told_common/templates/told_common/tf10/form.html
 #: told_common/templates/told_common/tf10/list.html
+#: told_common/templates/told_common/tf10/view.html
 #: told_common/templates/told_common/tf5/list.html
 msgid "Afsender"
 msgstr ""
 
+#: told_common/forms.py told_common/templates/told_common/tf10/form.html
+#: told_common/templates/told_common/tf10/list.html
+#: told_common/templates/told_common/tf10/view.html
+#: told_common/templates/told_common/tf5/list.html
+msgid "Modtager"
+msgstr ""
+
+#: told_common/forms.py told_common/templates/told_common/tf10/view.html
+msgid "Indberetter"
+msgstr ""
+
 #: told_common/forms.py
 msgid "Mangler fragtbrev"
+msgstr ""
+
+#: told_common/forms.py told_common/templates/told_common/tf10/form.html
+msgid ""
+"Ved skibsfragt skal forbindelsesnummer bestå af tre bogstaver, mellemrum og "
+"tre cifre"
+msgstr ""
+
+#: told_common/forms.py
+msgid ""
+"Ved skibsfragt skal fragtbrevnr bestå af fem bogstaver efterfulgt af syv "
+"cifre"
+msgstr ""
+
+#: told_common/forms.py told_common/templates/told_common/tf10/form.html
+msgid "Ved luftfragt skal forbindelsesnummer bestå af tre cifre"
+msgstr ""
+
+#: told_common/forms.py told_common/templates/told_common/tf10/form.html
+msgid "Ved luftfragt skal fragtbrevnummer bestå af otte cifre"
 msgstr ""
 
 #: told_common/forms.py
@@ -216,34 +259,46 @@ msgid "Indførselstilladelse er påkrævet med de angivne varearter"
 msgstr ""
 
 #: told_common/forms.py
-msgid "Alle"
-msgstr ""
-
-#: told_common/forms.py told_common/templates/told_common/tf10/list.html
-#: told_common/templates/told_common/tf5/list.html
-msgid "Ny"
-msgstr ""
-
-#: told_common/forms.py told_common/templates/told_common/tf10/list.html
-#: told_common/templates/told_common/tf5/list.html
-msgid "Afvist"
-msgstr ""
-
-#: told_common/forms.py told_common/templates/told_common/tf10/list.html
-#: told_common/templates/told_common/tf5/list.html
-msgid "Godkendt"
-msgstr ""
-
-#: told_common/forms.py told_common/views.py
-msgid "Sendt til Prisme"
+msgid "-- Vælg vareart"
 msgstr ""
 
 #: told_common/forms.py
+msgid "Alle"
+msgstr ""
+
+#: told_common/forms.py told_common/templates/told_common/tf10/view.html
+#: told_common/templates/told_common/tf5/list.html
+#: told_common/templates/told_common/tf5/view.html
+msgid "Ny"
+msgstr ""
+
+#: told_common/forms.py told_common/templates/told_common/tf10/form.html
+#: told_common/templates/told_common/tf10/view.html
+msgid "Kladde"
+msgstr ""
+
+#: told_common/forms.py told_common/templates/told_common/tf10/view.html
+#: told_common/templates/told_common/tf5/list.html
+#: told_common/templates/told_common/tf5/view.html
+msgid "Afvist"
+msgstr ""
+
+#: told_common/forms.py told_common/templates/told_common/tf10/view.html
+#: told_common/templates/told_common/tf5/list.html
+#: told_common/templates/told_common/tf5/view.html
+msgid "Godkendt"
+msgstr ""
+
+#: told_common/forms.py told_common/templates/told_common/tf10/view.html
 msgid "Afsluttet"
 msgstr ""
 
 #: told_common/forms.py
-msgid "Notat"
+msgid "Mine egne afgiftsanmeldelser"
+msgstr ""
+
+#: told_common/forms.py
+msgid "Afgiftsanmeldelser som jeg har fuldmagt til"
 msgstr ""
 
 #: told_common/forms.py told_common/templates/told_common/tf5/view.html
@@ -254,7 +309,8 @@ msgstr ""
 msgid "CPR-nummer skal være på 10 cifre"
 msgstr ""
 
-#: told_common/forms.py told_common/templates/told_common/tf5/view.html
+#: told_common/forms.py told_common/templates/told_common/tf10/view.html
+#: told_common/templates/told_common/tf5/view.html
 msgid "Telefon"
 msgstr ""
 
@@ -294,8 +350,24 @@ msgstr ""
 msgid "Tilbage"
 msgstr ""
 
+#: told_common/templates/told_common/layout.html
+msgid "Er du sikker på at du vil logge ud?"
+msgstr ""
+
 #: told_common/templates/told_common/login.html
 msgid "Login"
+msgstr ""
+
+#: told_common/templates/told_common/notat/list.html
+msgid "Bruger"
+msgstr ""
+
+#: told_common/templates/told_common/notat/list.html
+msgid "Tidspunkt"
+msgstr ""
+
+#: told_common/templates/told_common/notat/list.html
+msgid "Ingen notater"
 msgstr ""
 
 #: told_common/templates/told_common/tf10/form.html
@@ -303,10 +375,28 @@ msgid "Afgiftsanmeldelse"
 msgstr ""
 
 #: told_common/templates/told_common/tf10/form.html
+#: told_common/templates/told_common/tf10/view.html
 msgid "For indførsel af afgiftspligtige varer i Grønland"
 msgstr ""
 
 #: told_common/templates/told_common/tf10/form.html
+msgid ""
+"En kladde kan redigeres efterfølgende, men bliver først behandlet når den er "
+"færdigudfyldt og ikke længere er en kladde."
+msgstr ""
+
+#: told_common/templates/told_common/tf10/form.html
+msgid "Fuldmagt"
+msgstr ""
+
+#: told_common/templates/told_common/tf10/form.html
+msgid ""
+"Der kan gives fuldmagt til en speditør, til at redigere og indsende "
+"afgiftsanmeldelsen."
+msgstr ""
+
+#: told_common/templates/told_common/tf10/form.html
+#: told_common/templates/told_common/tf5/form.html
 msgid "Gem"
 msgstr ""
 
@@ -323,12 +413,6 @@ msgid "Vælg én fra listen herunder, eller udfyld felterne med nye data."
 msgstr ""
 
 #: told_common/templates/told_common/tf10/form.html
-msgid ""
-"Afsenderoplysninger er ændrede i forhold til den afsender, der allerede er "
-"registreret."
-msgstr ""
-
-#: told_common/templates/told_common/tf10/form.html
 msgid "Der er mere end én registreret modtager for det angivne CVR-nummer."
 msgstr ""
 
@@ -337,12 +421,7 @@ msgid "Der er mere end én registreret modtager for det angivne navn."
 msgstr ""
 
 #: told_common/templates/told_common/tf10/form.html
-msgid ""
-"Modtageroplysninger er ændrede i forhold til den modtager der allerede er "
-"registreret."
-msgstr ""
-
-#: told_common/templates/told_common/tf10/form.html
+#: told_common/templates/told_common/tf10/view.html
 msgid "Oplysninger om fragt"
 msgstr ""
 
@@ -359,15 +438,12 @@ msgid "Fragtbrevnr/postforsendelsesnummer"
 msgstr ""
 
 #: told_common/templates/told_common/tf10/form.html
-#: told_common/templates/told_common/tf5/list.html
+#: told_common/templates/told_common/tf10/view.html
 msgid "Afgangsdato"
 msgstr ""
 
 #: told_common/templates/told_common/tf10/form.html
-msgid "Betales af (kun relevant for luftfragt)"
-msgstr ""
-
-#: told_common/templates/told_common/tf10/form.html
+#: told_common/templates/told_common/tf10/view.html
 msgid "Varelinjer med afgifter"
 msgstr ""
 
@@ -380,13 +456,14 @@ msgstr ""
 
 #: told_common/templates/told_common/tf10/form.html
 #: told_common/templates/told_common/tf5/form.html
-#: told_common/templates/told_common/tf5/view.html
-msgid "Vareart"
+msgid "Vare­kode"
 msgstr ""
 
 #: told_common/templates/told_common/tf10/form.html
+#: told_common/templates/told_common/tf10/view.html
 #: told_common/templates/told_common/tf5/form.html
-msgid "Vare­kode"
+#: told_common/templates/told_common/tf5/view.html
+msgid "Vareart"
 msgstr ""
 
 #: told_common/templates/told_common/tf10/form.html
@@ -395,24 +472,28 @@ msgid "kg | liter i alt"
 msgstr ""
 
 #: told_common/templates/told_common/tf10/form.html
+#: told_common/templates/told_common/tf10/view.html
 #: told_common/templates/told_common/tf5/form.html
 #: told_common/templates/told_common/tf5/view.html
 msgid "Antal"
 msgstr ""
 
 #: told_common/templates/told_common/tf10/form.html
+#: told_common/templates/told_common/tf10/view.html
 #: told_common/templates/told_common/tf5/form.html
 #: told_common/templates/told_common/tf5/view.html
 msgid "Fakturabeløb"
 msgstr ""
 
 #: told_common/templates/told_common/tf10/form.html
+#: told_common/templates/told_common/tf10/view.html
 #: told_common/templates/told_common/tf5/form.html
 #: told_common/templates/told_common/tf5/view.html
 msgid "Afgiftssats"
 msgstr ""
 
 #: told_common/templates/told_common/tf10/form.html
+#: told_common/templates/told_common/tf10/view.html
 #: told_common/templates/told_common/tf5/form.html
 #: told_common/templates/told_common/tf5/view.html
 msgid "Afgiftsbeløb"
@@ -423,9 +504,21 @@ msgid "Slet"
 msgstr ""
 
 #: told_common/templates/told_common/tf10/form.html
+#: told_common/templates/told_common/tf10/view.html
 #: told_common/templates/told_common/tf5/form.html
 #: told_common/templates/told_common/tf5/view.html
 msgid "Afgift i alt"
+msgstr ""
+
+#: told_common/templates/told_common/tf10/form.html
+#: told_common/templates/told_common/tf10/view.html
+#: told_common/templates/told_common/tf5/view.html
+msgid "Notater"
+msgstr ""
+
+#: told_common/templates/told_common/tf10/form.html
+#: told_common/templates/told_common/tf10/view.html
+msgid "Toldkategori"
 msgstr ""
 
 #: told_common/templates/told_common/tf10/form.html
@@ -434,7 +527,6 @@ msgid "Opdatér"
 msgstr ""
 
 #: told_common/templates/told_common/tf10/form.html
-#: told_common/templates/told_common/tf5/form.html
 msgid "Indsend"
 msgstr ""
 
@@ -462,6 +554,12 @@ msgstr ""
 msgid "%%f %%"
 msgstr ""
 
+#: told_common/templates/told_common/tf10/form.html
+msgid ""
+"Ved skibsfragt skal fragtbrevnummer bestå af fem bogstaver efterfulgt af syv "
+"cifre"
+msgstr ""
+
 #: told_common/templates/told_common/tf10/list.html
 #: told_common/templates/told_common/tf5/list.html
 msgid "Status"
@@ -473,7 +571,6 @@ msgid "Oprettelsesdato mellem"
 msgstr ""
 
 #: told_common/templates/told_common/tf10/list.html
-#: told_common/templates/told_common/tf5/list.html
 msgid "Afgangsdato mellem"
 msgstr ""
 
@@ -496,6 +593,10 @@ msgid "Postforsendelsesnummer/fragtbrevsnummer"
 msgstr ""
 
 #: told_common/templates/told_common/tf10/list.html
+msgid "Fuldmagtsstatus"
+msgstr ""
+
+#: told_common/templates/told_common/tf10/list.html
 #: told_common/templates/told_common/tf5/list.html
 msgid "Søg"
 msgstr ""
@@ -506,6 +607,7 @@ msgid "Opret ny"
 msgstr ""
 
 #: told_common/templates/told_common/tf10/list.html
+#: told_common/templates/told_common/tf10/view.html
 #: told_common/templates/told_common/tf5/list.html
 #: told_common/templates/told_common/tf5/view.html
 msgid "Redigér"
@@ -539,12 +641,103 @@ msgstr ""
 msgid "Ingen søgeresultater"
 msgstr ""
 
-#: told_common/templates/told_common/tf10/list.html
-msgid "Ja"
+#: told_common/templates/told_common/tf10/view.html
+#, python-format
+msgid "Afgiftsanmeldelse %(id)s"
 msgstr ""
 
-#: told_common/templates/told_common/tf10/list.html
-msgid "Nej"
+#: told_common/templates/told_common/tf10/view.html
+msgid "Oprettelsesdato"
+msgstr ""
+
+#: told_common/templates/told_common/tf10/view.html
+msgid "Postnummer"
+msgstr ""
+
+#: told_common/templates/told_common/tf10/view.html
+msgid "Stedkode"
+msgstr ""
+
+#: told_common/templates/told_common/tf10/view.html
+msgid "Leverandørfaktura"
+msgstr ""
+
+#: told_common/templates/told_common/tf10/view.html
+msgid "Forsendelsesmåde"
+msgstr ""
+
+#: told_common/templates/told_common/tf10/view.html
+msgid "Forbindelsesnr."
+msgstr ""
+
+#: told_common/templates/told_common/tf10/view.html
+msgid "Afsenderby­kode"
+msgstr ""
+
+#: told_common/templates/told_common/tf10/view.html
+msgid "Fragtbrevnr."
+msgstr ""
+
+#: told_common/templates/told_common/tf10/view.html
+msgid "Post­forsendelses­nr."
+msgstr ""
+
+#: told_common/templates/told_common/tf10/view.html
+msgid "Beregnet faktureringsdato"
+msgstr ""
+
+#: told_common/templates/told_common/tf10/view.html
+#: told_common/templates/told_common/tf5/view.html
+msgid "Varekode"
+msgstr ""
+
+#: told_common/templates/told_common/tf10/view.html
+#: told_common/templates/told_common/tf5/view.html
+msgid "kg | liter"
+msgstr ""
+
+#: told_common/templates/told_common/tf10/view.html
+msgid "Indberetter(e)"
+msgstr ""
+
+#: told_common/templates/told_common/tf10/view.html
+msgid "Type"
+msgstr ""
+
+#: told_common/templates/told_common/tf10/view.html
+msgid "Betaling"
+msgstr ""
+
+#: told_common/templates/told_common/tf10/view.html
+msgid "Ikke angivet"
+msgstr ""
+
+#: told_common/templates/told_common/tf10/view.html
+msgid "Ikke tilgængelig"
+msgstr ""
+
+#: told_common/templates/told_common/tf10/view.html
+msgid "Godkend"
+msgstr ""
+
+#: told_common/templates/told_common/tf10/view.html
+msgid "Afvis"
+msgstr ""
+
+#: told_common/templates/told_common/tf10/view.html
+msgid "Annullér godkendelse"
+msgstr ""
+
+#: told_common/templates/told_common/tf10/view.html
+msgid "Annullér afvisning"
+msgstr ""
+
+#: told_common/templates/told_common/tf10/view.html
+msgid "Send til Prisme"
+msgstr ""
+
+#: told_common/templates/told_common/tf10/view.html
+msgid "Historik"
 msgstr ""
 
 #: told_common/templates/told_common/tf5/form.html
@@ -621,8 +814,33 @@ msgstr ""
 msgid "Ekspeditionsgebyr"
 msgstr ""
 
+#: told_common/templates/told_common/tf5/form.html
+msgid "Betal"
+msgstr ""
+
+#: told_common/templates/told_common/tf5/list.html
+msgid "Indleveringsdato mellem"
+msgstr ""
+
+#: told_common/templates/told_common/tf5/list.html
+msgid "Indleveringsdato mellem - mid"
+msgstr " "
+
+#: told_common/templates/told_common/tf5/list.html
+msgid "Indleveringsdato mellem - end"
+msgstr " "
+
 #: told_common/templates/told_common/tf5/list.html
 msgid "Leverandørfakturanummer"
+msgstr ""
+
+#: told_common/templates/told_common/tf5/list.html
+msgid "Indberetningsdato"
+msgstr ""
+
+#: told_common/templates/told_common/tf5/list.html
+#: told_common/templates/told_common/tf5/view.html
+msgid "Indleveringsdato"
 msgstr ""
 
 #: told_common/templates/told_common/tf5/subform.html
@@ -641,73 +859,24 @@ msgstr ""
 msgid "Fakturabeløb inkl. moms."
 msgstr ""
 
-#: told_common/templates/told_common/tf5/tilladelse.html
-msgid "Engangstilladelse til privatindførsel af øl, vin og spiritus"
-msgstr ""
-
-#: told_common/templates/told_common/tf5/tilladelse.html
-msgid "Indehavers navn"
-msgstr ""
-
-#: told_common/templates/told_common/tf5/tilladelse.html
-msgid "CPR-nummer"
-msgstr ""
-
-#: told_common/templates/told_common/tf5/tilladelse.html
-msgid "Engangstilladelsesnummer"
-msgstr ""
-
-#: told_common/templates/told_common/tf5/tilladelse.html
-msgid "Indehavers adresse"
-msgstr ""
-
-#: told_common/templates/told_common/tf5/tilladelse.html
-msgid "Bookingnr. for forsendelse"
-msgstr ""
-
-#: told_common/templates/told_common/tf5/tilladelse.html
-msgid "Udstedelsesdato"
-msgstr ""
-
-#: told_common/templates/told_common/tf5/tilladelse.html
-msgid "Omfang"
-msgstr ""
-
-#: told_common/templates/told_common/tf5/tilladelse.html
-msgid ""
-"Tilladelsen omfatter indførsel af den mængde øl, vin eller spiritus, der "
-"fremgår af udfyldte ansøgning. Indførsel af de angivne mængder er kun til "
-"privat forbrug."
-msgstr ""
-
-#: told_common/templates/told_common/tf5/tilladelse.html
-msgid "Gyldighedsperiode"
-msgstr ""
-
-#: told_common/templates/told_common/tf5/tilladelse.html
-msgid ""
-"Tilladelsen er gyldig. Tilladelsen frafalder i det øjeblik, de indførte "
-"varer udleveres til tilladelsens indehaver i Grønland"
-msgstr ""
-
-#: told_common/templates/told_common/tf5/tilladelse.html
-msgid "Dokumentation ved udlevering"
-msgstr ""
-
-#: told_common/templates/told_common/tf5/tilladelse.html
-msgid "Ved udlevering skal ansøgning og tilladelse medbringes"
-msgstr ""
-
-#: told_common/templates/told_common/tf5/tilladelse.html
-msgid "DENNE TILLADELSE ER UOVERDRAGELIG"
-msgstr ""
-
 #: told_common/templates/told_common/tf5/view.html
 msgid "Engangstilladelse til privat indførsel af øl, vin og spiritus"
 msgstr ""
 
 #: told_common/templates/told_common/tf5/view.html
-msgid "Adresse"
+msgid "Annulleret"
+msgstr ""
+
+#: told_common/templates/told_common/tf5/view.html
+msgid "Ikke betalt"
+msgstr ""
+
+#: told_common/templates/told_common/tf5/view.html
+msgid "Reserveret"
+msgstr ""
+
+#: told_common/templates/told_common/tf5/view.html
+msgid "Betalt"
 msgstr ""
 
 #: told_common/templates/told_common/tf5/view.html
@@ -716,18 +885,6 @@ msgstr ""
 
 #: told_common/templates/told_common/tf5/view.html
 msgid "Fakturanummer"
-msgstr ""
-
-#: told_common/templates/told_common/tf5/view.html
-msgid "Indleveringsdato"
-msgstr ""
-
-#: told_common/templates/told_common/tf5/view.html
-msgid "Varekode"
-msgstr ""
-
-#: told_common/templates/told_common/tf5/view.html
-msgid "kg | liter"
 msgstr ""
 
 #: told_common/templates/told_common/tf5/view.html
@@ -752,6 +909,11 @@ msgstr ""
 
 #: told_common/views.py
 #, python-brace-format
+msgid "Afgiftsanmeldelsen med nummer {id} blev gemt som kladde."
+msgstr ""
+
+#: told_common/views.py
+#, python-brace-format
 msgid ""
 "Afgiftsanmeldelsen blev indregistreret. Blanket med nummer {id} afventer nu "
 "godkendelse."
@@ -764,4 +926,20 @@ msgstr ""
 
 #: told_common/views.py
 msgid "Mine afgiftsanmeldelser"
+msgstr ""
+
+#: told_common/views.py
+msgid "Afgiftsanmeldelse findes ikke"
+msgstr ""
+
+#: told_common/views.py
+msgid "Oprettet af"
+msgstr ""
+
+#: told_common/views.py
+msgid "Oprettet på vegne af"
+msgstr ""
+
+#: told_common/views.py
+msgid "Fuldmagtshaver"
 msgstr ""

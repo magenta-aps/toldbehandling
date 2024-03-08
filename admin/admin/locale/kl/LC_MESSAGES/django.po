@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-09-15 09:19+0200\n"
+"POT-Creation-Date: 2024-03-08 08:44-0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,3 +17,189 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: admin/forms.py
+msgid "Opret på vegne af"
+msgstr ""
+
+#: admin/forms.py
+msgid "Ny"
+msgstr ""
+
+#: admin/forms.py
+msgid "Godkendt"
+msgstr ""
+
+#: admin/forms.py
+msgid "Afvist"
+msgstr ""
+
+#: admin/forms.py
+msgid "Notat"
+msgstr ""
+
+#: admin/forms.py
+msgid "Stedkode"
+msgstr ""
+
+#: admin/forms.py
+msgid "Forbindelsesnummer"
+msgstr ""
+
+#: admin/forms.py
+msgid "Afsenderbykode"
+msgstr ""
+
+#: admin/forms.py
+msgid "Fragtbrevnr"
+msgstr ""
+
+#: admin/forms.py
+msgid "Postforsendelsesnummer"
+msgstr ""
+
+#: admin/forms.py
+msgid "Afgangsdato"
+msgstr ""
+
+#: admin/forms.py
+msgid "Ja"
+msgstr ""
+
+#: admin/forms.py admin/templates/admin/afgiftstabel/view.html
+msgid "Nej"
+msgstr ""
+
+#: admin/forms.py
+msgid "Dato skal være efter i dag"
+msgstr ""
+
+#: admin/templates/admin/admin_layout.html
+msgid "Version"
+msgstr ""
+
+#: admin/templates/admin/admin_layout.html
+msgid "Kildekode"
+msgstr ""
+
+#: admin/templates/admin/afgiftstabel/handlinger.html
+#: admin/templates/admin/blanket/tf10/history/actions.html
+#: admin/templates/admin/blanket/tf10/link.html
+#: admin/templates/admin/blanket/tf5/actions.html
+msgid "Vis"
+msgstr ""
+
+#: admin/templates/admin/afgiftstabel/view.html
+msgid "Gyldig fra"
+msgstr ""
+
+#: admin/templates/admin/afgiftstabel/view.html
+msgid "Gyldig til"
+msgstr ""
+
+#: admin/templates/admin/afgiftstabel/view.html
+msgid "Kladde"
+msgstr ""
+
+#: admin/templates/admin/afgiftstabel/view.html
+msgid ""
+"Der kan kun ændres tabeller som er kladder eller som begynder i fremtiden"
+msgstr ""
+
+#: admin/templates/admin/afgiftstabel/view.html
+msgid "Der kan kun slettes tabeller som er kladder"
+msgstr ""
+
+#: admin/templates/admin/afgiftstabel/view.html
+msgid ""
+"En aktiv afgiftstabel er gældende fra dens begyndelsestidspunkt frem til "
+"begyndelsen på den næste aktive afgiftstabel"
+msgstr ""
+
+#: admin/templates/admin/afgiftstabel/view.html
+msgid "Afgifts­gruppe­nummer"
+msgstr ""
+
+#: admin/templates/admin/afgiftstabel/view.html
+msgid "Vareart (da)"
+msgstr ""
+
+#: admin/templates/admin/afgiftstabel/view.html
+msgid "Vareart (kl)"
+msgstr ""
+
+#: admin/templates/admin/afgiftstabel/view.html
+msgid "Enhed"
+msgstr ""
+
+#: admin/templates/admin/afgiftstabel/view.html
+msgid "Kræver indførsels­tilladelse"
+msgstr ""
+
+#: admin/templates/admin/afgiftstabel/view.html
+msgid "Minimumsbeløb"
+msgstr ""
+
+#: admin/templates/admin/afgiftstabel/view.html
+msgid "Afgiftssats"
+msgstr ""
+
+#: admin/templates/admin/afgiftstabel/view.html
+msgid "Nedre mængde­grænse"
+msgstr ""
+
+#: admin/templates/admin/afgiftstabel/view.html
+msgid "Øvre mængde­grænse"
+msgstr ""
+
+#: admin/templates/admin/afgiftstabel/view.html
+msgid "Synlig for private"
+msgstr ""
+
+#: admin/templates/admin/afgiftstabel/view.html
+msgid "Har privat tillægsafgift alkohol"
+msgstr ""
+
+#: admin/templates/admin/blanket/tf10/history/list.html
+msgid "Ingen søgeresultater"
+msgstr ""
+
+#: admin/templates/admin/blanket/tf10/history/view.html
+msgid "Oplysninger om fragt"
+msgstr ""
+
+#: admin/templates/admin/blanket/tf10/link.html
+msgid "Redigér"
+msgstr ""
+
+#: admin/templates/admin/statistik.html
+msgid "Anmeldelsestype"
+msgstr ""
+
+#: admin/templates/admin/statistik.html
+msgid "Dato mellem"
+msgstr ""
+
+#: admin/templatetags/admin_tags.py
+msgid "kilogram"
+msgstr ""
+
+#: admin/templatetags/admin_tags.py
+msgid "liter"
+msgstr ""
+
+#: admin/templatetags/admin_tags.py
+msgid "antal"
+msgstr ""
+
+#: admin/templatetags/admin_tags.py
+msgid "procent"
+msgstr ""
+
+#: admin/templatetags/admin_tags.py
+msgid "sammensat"
+msgstr ""
+
+#: admin/views.py
+msgid "Private indførselstilladelser"
+msgstr ""
