@@ -1,5 +1,10 @@
+from binascii import unhexlify
+from time import time
+
 from django.core.exceptions import ValidationError
+from django.forms import forms
 from django.utils.translation import gettext_lazy as _
+from django_otp.oath import totp
 from requests import HTTPError
 from told_common.form_mixins import BootstrapForm, FixedWidthIntegerField
 from told_common.rest_client import RestClient
@@ -26,7 +31,7 @@ class TwofactorLoginForm(BootstrapForm):
 
     def clean_twofactor_token(self):
         try:
-            self.token = RestClient.check_twofactor(
+            RestClient.check_twofactor(
                 self.user_id, self.cleaned_data["twofactor_token"]
             )
         except HTTPError:
