@@ -45,19 +45,19 @@ msgstr "Isersimaneq qaangiutereerpoq. Iseqqeriarit."
 
 #: ui/templates/ui/layout.html
 msgid "TF5-anmeldelser"
-msgstr ""
+msgstr "TF5-imik nalunaarutit"
 
 #: ui/templates/ui/layout.html
 msgid "TF10-anmeldelser"
-msgstr ""
+msgstr "TF10-mik nalunaarutit"
 
 #: ui/templates/ui/layout.html
 msgid "Version"
-msgstr ""
+msgstr "Suliarinerata qassissaat"
 
 #: ui/templates/ui/layout.html
 msgid "Kildekode"
-msgstr ""
+msgstr "Najoqqutarisap kodea"
 
 #: ui/templates/ui/loggedout.html
 msgid "Logget ud"
@@ -68,6 +68,8 @@ msgid ""
 "Du er nu logget ud. Det anbefales at du lukker denne browser-tab for at "
 "fjerne resterende data"
 msgstr ""
+"Maanna anivutit. Paasissutissat sinneruttut peerniarlugit browser-tab-ip "
+"uuma matunissaa inassutigineqarpoq"
 
 #: ui/templates/ui/loggedout.html
 msgid "Log ind igen"
@@ -114,23 +116,23 @@ msgstr "Tigusisussaq"
 
 #: ui/templates/ui/tf10/delete.html
 msgid "Forsendelsesmåde"
-msgstr ""
+msgstr "Qanoq nassiussineq"
 
 #: ui/templates/ui/tf10/delete.html
 msgid "Skibsfragt"
-msgstr ""
+msgstr "Umiarsuakkut nassiussat"
 
 #: ui/templates/ui/tf10/delete.html
 msgid "Luftfragt"
-msgstr ""
+msgstr "Timmisartukkut nassiussat"
 
 #: ui/templates/ui/tf10/delete.html
 msgid "Skibspost"
-msgstr ""
+msgstr "Allakkat umiarsuakkoortitat"
 
 #: ui/templates/ui/tf10/delete.html
 msgid "Luftpost"
-msgstr ""
+msgstr "Allakkat timmisartukkoortitat"
 
 #: ui/templates/ui/tf10/delete.html
 #, fuzzy
@@ -143,7 +145,7 @@ msgid "Er du sikker på at du vil slette denne?"
 msgstr ""
 
 #: ui/templates/ui/tf10/delete.html
-msgid "Annuller"
+msgid "Annullér"
 msgstr ""
 
 #: ui/templates/ui/tf5/actions.html ui/templates/ui/tf5/payment/checkout.html
