@@ -52,7 +52,7 @@
         <form method="post">
             {% csrf_token %}
             <input type="submit" value="{% translate 'Slet' %}" class="btn btn-danger">
-            <a href="{% url 'tf10_view' id=declaration.id %}" class="btn btn-secondary">{% translate 'Annuller' %}</a>
+            <a href="{% url 'tf10_view' id=declaration.id %}" class="btn btn-secondary">{% translate 'Annullér' %}</a>
         </form>
     </div>
 </div>

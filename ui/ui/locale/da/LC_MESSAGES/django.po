@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-12-21 18:45+0000\n"
+"POT-Creation-Date: 2024-03-08 08:44-0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -43,13 +43,21 @@ msgstr ""
 msgid "Det anvendte login er udløbet. Prøv at logge ind igen."
 msgstr ""
 
-#: ui/templates/ui/layout.html ui/templates/ui/print.html
-msgid "Toldbehandling"
+#: ui/templates/ui/layout.html
+msgid "TF5-anmeldelser"
 msgstr ""
 
 #: ui/templates/ui/layout.html
-msgid "Er du sikker på at du vil logge ud?"
-msgstr "Ilumut aniniarpit?"
+msgid "TF10-anmeldelser"
+msgstr ""
+
+#: ui/templates/ui/layout.html
+msgid "Version"
+msgstr ""
+
+#: ui/templates/ui/layout.html
+msgid "Kildekode"
+msgstr ""
 
 #: ui/templates/ui/loggedout.html
 msgid "Logget ud"
@@ -65,12 +73,202 @@ msgstr ""
 msgid "Log ind igen"
 msgstr ""
 
+#: ui/templates/ui/print.html
+msgid "Toldbehandling"
+msgstr ""
+
+#: ui/templates/ui/tf10/actions.html ui/templates/ui/tf5/actions.html
+msgid "Vis"
+msgstr ""
+
 #: ui/templates/ui/tf10/actions.html
 msgid "Redigér"
 msgstr ""
 
-#: ui/templates/ui/tf5/actions.html
-msgid "Vis"
+#: ui/templates/ui/tf10/actions.html ui/templates/ui/tf10/delete.html
+msgid "Slet"
+msgstr ""
+
+#: ui/templates/ui/tf10/delete.html
+msgid "Slet afgiftsanmeldelse"
+msgstr ""
+
+#: ui/templates/ui/tf10/delete.html
+msgid "Denne afgiftsanmeldelse vil blive slettet"
+msgstr ""
+
+#: ui/templates/ui/tf10/delete.html
+msgid "Afgiftsanmeldelse"
+msgstr ""
+
+#: ui/templates/ui/tf10/delete.html ui/templates/ui/tf5/payment/checkout.html
+#: ui/templates/ui/tf5/payment/details.html
+msgid "Afsender"
+msgstr ""
+
+#: ui/templates/ui/tf10/delete.html ui/templates/ui/tf5/payment/details.html
+msgid "Modtager"
+msgstr ""
+
+#: ui/templates/ui/tf10/delete.html
+msgid "Forsendelsesmåde"
+msgstr ""
+
+#: ui/templates/ui/tf10/delete.html
+msgid "Skibsfragt"
+msgstr ""
+
+#: ui/templates/ui/tf10/delete.html
+msgid "Luftfragt"
+msgstr ""
+
+#: ui/templates/ui/tf10/delete.html
+msgid "Skibspost"
+msgstr ""
+
+#: ui/templates/ui/tf10/delete.html
+msgid "Luftpost"
+msgstr ""
+
+#: ui/templates/ui/tf10/delete.html
+msgid "Afgift i alt"
+msgstr ""
+
+#: ui/templates/ui/tf10/delete.html
+#, fuzzy
+#| msgid "Er du sikker på at du vil logge ud?"
+msgid "Er du sikker på at du vil slette denne?"
+msgstr "Ilumut aniniarpit?"
+
+#: ui/templates/ui/tf10/delete.html
+msgid "Annullér"
+msgstr ""
+
+#: ui/templates/ui/tf5/actions.html ui/templates/ui/tf5/payment/checkout.html
+msgid "Betaling"
+msgstr ""
+
+#: ui/templates/ui/tf5/payment/checkout.html
+#: ui/templates/ui/tf5/payment/details.html
+msgid "Varelinjer"
+msgstr ""
+
+#: ui/templates/ui/tf5/payment/checkout.html
+#: ui/templates/ui/tf5/payment/details.html
+msgid "Varekode"
+msgstr ""
+
+#: ui/templates/ui/tf5/payment/checkout.html
+msgid "Antal/Mængde"
+msgstr ""
+
+#: ui/templates/ui/tf5/payment/checkout.html
+#: ui/templates/ui/tf5/payment/details.html
+msgid "Afgiftssats"
+msgstr ""
+
+#: ui/templates/ui/tf5/payment/checkout.html
+#: ui/templates/ui/tf5/payment/details.html
+msgid "Afgiftsbeløb"
+msgstr ""
+
+#: ui/templates/ui/tf5/payment/checkout.html
+#: ui/templates/ui/tf5/payment/details.html
+msgid "Ingen varelinjer"
+msgstr ""
+
+#: ui/templates/ui/tf5/payment/checkout.html
+#: ui/templates/ui/tf5/payment/details.html
+msgid "Total"
+msgstr ""
+
+#: ui/templates/ui/tf5/payment/checkout.html
+msgid "Detaljer"
+msgstr ""
+
+#: ui/templates/ui/tf5/payment/details.html
+msgid "Betalingsdetaljer"
+msgstr ""
+
+#: ui/templates/ui/tf5/payment/details.html
+msgid "Vareart"
+msgstr ""
+
+#: ui/templates/ui/tf5/payment/details.html
+msgid "Antal / Mængde"
+msgstr ""
+
+#: ui/templates/ui/tf5/payment/details.html
+msgid "Info"
+msgstr ""
+
+#: ui/templates/ui/tf5/payment/details.html
+msgid "Betalt"
+msgstr ""
+
+#: ui/templates/ui/tf5/payment/details.html
+msgid "Ikke betalt"
+msgstr ""
+
+#: ui/templates/ui/tf5/tilladelse.html
+msgid "Engangstilladelse til privatindførsel af øl, vin og spiritus"
+msgstr ""
+
+#: ui/templates/ui/tf5/tilladelse.html
+msgid "Indehavers navn"
+msgstr ""
+
+#: ui/templates/ui/tf5/tilladelse.html
+msgid "CPR-nummer"
+msgstr ""
+
+#: ui/templates/ui/tf5/tilladelse.html
+msgid "Engangstilladelsesnummer"
+msgstr ""
+
+#: ui/templates/ui/tf5/tilladelse.html
+msgid "Indehavers adresse"
+msgstr ""
+
+#: ui/templates/ui/tf5/tilladelse.html
+msgid "Bookingnr. for forsendelse"
+msgstr ""
+
+#: ui/templates/ui/tf5/tilladelse.html
+msgid "Udstedelsesdato"
+msgstr ""
+
+#: ui/templates/ui/tf5/tilladelse.html
+msgid "Omfang"
+msgstr ""
+
+#: ui/templates/ui/tf5/tilladelse.html
+msgid ""
+"Tilladelsen omfatter indførsel af den mængde øl, vin eller spiritus, der "
+"fremgår af udfyldte ansøgning. Indførsel af de angivne mængder er kun til "
+"privat forbrug."
+msgstr ""
+
+#: ui/templates/ui/tf5/tilladelse.html
+msgid "Gyldighedsperiode"
+msgstr ""
+
+#: ui/templates/ui/tf5/tilladelse.html
+msgid ""
+"Tilladelsen er gyldig. Tilladelsen frafalder i det øjeblik, de indførte "
+"varer udleveres til tilladelsens indehaver i Grønland"
+msgstr ""
+
+#: ui/templates/ui/tf5/tilladelse.html
+msgid "Dokumentation ved udlevering"
+msgstr ""
+
+#: ui/templates/ui/tf5/tilladelse.html
+msgid "Ved udlevering skal ansøgning og tilladelse medbringes"
+msgstr ""
+
+#: ui/templates/ui/tf5/tilladelse.html
+msgid "DENNE TILLADELSE ER UOVERDRAGELIG"
 msgstr ""
 
 #: ui/views.py
