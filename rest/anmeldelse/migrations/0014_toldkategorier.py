@@ -55,7 +55,6 @@ kategorier = [
         "navn": "sodavand fra Nuuk Imeq",
         "kræver_cvr": True,
     }
-
 ]
 
 def opret_toldkategorier(apps, schema_editor):
