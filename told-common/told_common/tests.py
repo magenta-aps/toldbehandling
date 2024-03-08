@@ -37,7 +37,7 @@ class TestMixin:
             name = element.get("name") or element.get("data-fileinput")
             if name:
                 el = element
-                for i in range(1, 3):
+                for i in range(1, 4):
                     el = el.parent
                     errorlist = el.find(class_="errorlist")
                     if errorlist:

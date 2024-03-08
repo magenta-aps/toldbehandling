@@ -74,31 +74,6 @@ class TOTPDeviceAPI:
         return list(filters.filter(TOTPDevice.objects.all()))
 
 
-#
-# class TwoFactorLoginSchema(schema.obtain_pair_schema):
-#     twofactor_token: str
-#
-#
-# @api_controller('token/2fa', tags=['Auth'])
-# class TwoFactorJWTController(TokenObtainPairController):
-#     @route.post(
-#         "",
-#         response=schema.obtain_pair_schema.get_response_schema(),
-#         url_name="token_obtain_pair",
-#     )
-#     def obtain_token(self, user_token: TwoFactorLoginSchema):
-#         user_token.check_user_authentication_rule()
-#         if user_token is None:
-#             raise AuthenticationFailed("Missing token")
-#         user = User.objects.get(username=user_token.username)
-#         if not any([
-#             verify_token(user, device.persistent_id, user_token.twofactor_token)
-#             for device in TOTPDevice.objects.filter(user=user)
-#         ]):
-#             raise AuthenticationFailed("Token invalid")
-#         return user_token.to_response_schema()
-
-
 class TwoFactorLoginSchema(Schema):
     twofactor_token: str
     user_id: int

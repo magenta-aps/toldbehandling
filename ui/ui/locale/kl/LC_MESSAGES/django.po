@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-03-06 10:36-0200\n"
+"POT-Creation-Date: 2024-03-08 07:13-0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -42,6 +42,11 @@ msgstr "Isissut atoreerpoq. Iseqqeriarit."
 #: ui/templates/ui/error/login_timeout.html
 msgid "Det anvendte login er udløbet. Prøv at logge ind igen."
 msgstr "Isersimaneq qaangiutereerpoq. Iseqqeriarit."
+
+msgid ""
+"Du er nu logget ud. Det anbefales at du lukker denne browser-tab "
+"for at fjerne resterende data"
+msgstr ""
 
 #: ui/templates/ui/layout.html
 msgid "TF5-anmeldelser"
