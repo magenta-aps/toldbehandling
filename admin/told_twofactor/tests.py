@@ -59,3 +59,4 @@ class TwoFactorSetupViewTest(HasLogin, TestMixin, TestCase):
             "name": "default",
         }
         self.assertDictEqual(sent, expected)
+        self.assertTrue(self.client.session["twofactor_authenticated"])
