@@ -21,7 +21,7 @@ The app runs on `localhost:8000`. Locally you can log in with username =
 
 You can find the TF10 form [here](http://localhost:8000/tf10).
 
-And you can find the admin portal [here](http://localhost:8001/index).
+And you can find the admin portal [here](http://localhost:8001/admin).
 
 The app also runs a REST api. It has a Swagger interface which can be
 found [here](http://localhost:7000/api/docs). To use it, first obtain a
