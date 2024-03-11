@@ -207,9 +207,7 @@ class TF10View(AdminLayoutBaseView, common_views.TF10View, FormView):
 
                 try:
                     kræver_cvr = {
-                        item.kategori
-                        for item in self.toldkategorier
-                        if item.kræver_cvr
+                        item.kategori for item in self.toldkategorier if item.kræver_cvr
                     }
                     if anmeldelse.toldkategori in kræver_cvr:
                         cvr = None
