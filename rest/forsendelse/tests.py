@@ -2,14 +2,14 @@
 #
 # SPDX-License-Identifier: MPL-2.0
 
-from aktør.models import Afsender, Modtager
-from anmeldelse.models import Afgiftsanmeldelse, afgiftsanmeldelse_upload_to
+from unittest.mock import ANY
+
+from anmeldelse.models import Afgiftsanmeldelse
 from common.models import IndberetterProfile
-from django.contrib.auth.models import Permission, User
-from django.forms import model_to_dict
+from django.contrib.auth.models import Permission
 from django.test import TestCase
 from django.urls import reverse
-from forsendelse.models import Fragtforsendelse, Postforsendelse
+from forsendelse.models import Forsendelse, Fragtforsendelse, Postforsendelse
 from project.test_mixins import RestMixin, RestTestMixin
 from project.util import json_dump
 
@@ -264,4 +264,131 @@ class PostforsendelseAPITests(TestCase):
             {
                 "detail": "You do not have permission to perform this action.",
             },
+        )
+
+
+class FragtforsendelseAPITests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.user_permissions = [
+            Permission.objects.get(codename="add_fragtforsendelse"),
+        ]
+
+        cls.user, cls.user_token, cls.user_refresh_token = RestMixin.make_user(
+            username="payment-test-user",
+            plaintext_password="testpassword1337",
+            permissions=cls.user_permissions,
+        )
+
+    def test_create_fragtforsendelse_draft(self):
+        resp = self.client.post(
+            reverse("api-1.0.0:fragtforsendelse_create"),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+            data=json_dump(
+                {
+                    "kladde": True,
+                }
+            ),
+        )
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.json(), {"id": ANY})
+
+    def test_create_fragtforsendelse_skib_bad_requests(self):
+        resp_invalid_forbindelsesnr = self.client.post(
+            reverse("api-1.0.0:fragtforsendelse_create"),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+            data=json_dump(
+                {
+                    "forsendelsestype": Forsendelse.Forsendelsestype.SKIB,
+                    "fragtbrevsnummer": 12345678,
+                    "forbindelsesnr": None,
+                    "afgangsdato": "2024-12-31",
+                    "kladde": False,
+                }
+            ),
+        )
+
+        self.assertEqual(resp_invalid_forbindelsesnr.status_code, 400)
+        self.assertEqual(
+            resp_invalid_forbindelsesnr.json(),
+            {
+                "__all__": [
+                    "Ved skibsfragt skal forbindelsesnummer bestå af tre bogstaver, mellemrum og tre cifre",
+                    "Begrænsning “aktuel_har_forbindelsesnr” er overtrådt.",
+                ]
+            },
+        )
+        # OBS: See `forsendelse/models.py::Fragtforsendelse.Meta.constraints` for the last error message
+
+        resp_invalid_fragtbrevsnummer = self.client.post(
+            reverse("api-1.0.0:fragtforsendelse_create"),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+            data=json_dump(
+                {
+                    "forsendelsestype": Forsendelse.Forsendelsestype.SKIB,
+                    "fragtbrevsnummer": None,
+                    "forbindelsesnr": "abc 123",
+                    "afgangsdato": "2024-12-31",
+                    "kladde": False,
+                }
+            ),
+        )
+
+        self.assertEqual(resp_invalid_fragtbrevsnummer.status_code, 400)
+        self.assertEqual(
+            resp_invalid_fragtbrevsnummer.json(),
+            {
+                "__all__": [
+                    "Ved skibsfragt skal fragtbrevnr bestå af fem bogstaver efterfulgt af syv cifre",
+                    "Begrænsning “aktuel_har_fragtbrevsnummer” er overtrådt.",
+                ]
+            },
+        )
+        # OBS: See `forsendelse/models.py::Fragtforsendelse.Meta.constraints` for the last error message
+
+    def test_create_fragtforsendelse_fly_bad_requests(self):
+        resp_invalid_forbindelsesnr = self.client.post(
+            reverse("api-1.0.0:fragtforsendelse_create"),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+            data=json_dump(
+                {
+                    "forsendelsestype": Forsendelse.Forsendelsestype.FLY,
+                    "fragtbrevsnummer": 12345678,
+                    "forbindelsesnr": "abc",
+                    "afgangsdato": "2024-12-31",
+                    "kladde": False,
+                }
+            ),
+        )
+
+        self.assertEqual(resp_invalid_forbindelsesnr.status_code, 400)
+        self.assertEqual(
+            resp_invalid_forbindelsesnr.json(),
+            {"__all__": ["Ved luftfragt skal forbindelsesnummer bestå af tre cifre"]},
+        )
+
+        resp_invalid_fragtbrevsnummer = self.client.post(
+            reverse("api-1.0.0:fragtforsendelse_create"),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+            data=json_dump(
+                {
+                    "forsendelsestype": Forsendelse.Forsendelsestype.FLY,
+                    "fragtbrevsnummer": 666,
+                    "forbindelsesnr": "123",
+                    "afgangsdato": "2024-12-31",
+                    "kladde": False,
+                }
+            ),
+        )
+
+        self.assertEqual(resp_invalid_fragtbrevsnummer.status_code, 400)
+        self.assertEqual(
+            resp_invalid_fragtbrevsnummer.json(),
+            {"__all__": ["Ved luftfragt skal fragtbrevnummer bestå af otte cifre"]},
         )
