@@ -52,7 +52,7 @@ kategorier = [
     },
     {
         "kategori": "90",
-        "navn": "sodavand fra Nuuk Imeq",
+        "navn": "Sodavand fra Nuuk Imeq",
         "kræver_cvr": True,
     }
 ]
