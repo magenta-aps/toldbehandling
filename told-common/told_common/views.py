@@ -401,6 +401,7 @@ class TF10FormUpdateView(
                 self.userdata["username"],
                 self.anmeldelse_id,
             )
+        print(form.cleaned_data)
         self.rest_client.afgiftanmeldelse.update(
             self.anmeldelse_id,
             form.cleaned_data,
@@ -788,18 +789,8 @@ class TF10View(TF10BaseView, TemplateView):
 
     def get_initial(self):
         initial = super().get_initial()
-        indberetter = self.object.oprettet_på_vegne_af or self.object.oprettet_af
         if self.object.toldkategori:
             initial["toldkategori"] = self.object.toldkategori
-        cvr = lenient_get(indberetter, "indberetter_data", "cvr")
-        if cvr:
-            kategorier = [
-                item["kategori"]
-                for item in settings.CVR_TOLDKATEGORI_MAP
-                if cvr in item["cvr"]
-            ]
-            if kategorier and not self.object.toldkategori:
-                initial["toldkategori"] = kategorier[0]
         if self.object.modtager.stedkode:
             initial["modtager_stedkode"] = self.object.modtager.stedkode
         return initial

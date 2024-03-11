@@ -551,3 +551,11 @@ class TOTPDevice(ToldDataClass):
     digits: int
     name: str
     confirmed: bool
+
+
+@dataclass_json
+@dataclass
+class Toldkategori(ToldDataClass):
+    kategori: str
+    navn: str
+    kræver_cvr: bool
