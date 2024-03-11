@@ -145,7 +145,11 @@ msgid "Er du sikker på at du vil slette denne?"
 msgstr ""
 
 #: ui/templates/ui/tf10/delete.html
+<<<<<<< Updated upstream
 msgid "Annullér"
+=======
+msgid "Annuller"
+>>>>>>> Stashed changes
 msgstr ""
 
 #: ui/templates/ui/tf5/actions.html ui/templates/ui/tf5/payment/checkout.html
