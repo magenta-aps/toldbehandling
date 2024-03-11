@@ -220,9 +220,9 @@ class Vareafgiftssats(models.Model):
                 Vareafgiftssats._quantization_source
             )
         if self.enhed == Vareafgiftssats.Enhed.SAMMENSAT:
-            return sum(
-                [
-                    subsats.beregn_afgift(varelinje)
-                    for subsats in self.underordnede.all()
-                ]
-            )
+            afgifter: list[Decimal] = [
+                subsats.beregn_afgift(varelinje) for subsats in self.underordnede.all()
+            ]
+
+            return Decimal(sum(afgifter))
+        raise AttributeError("Invalid unit")

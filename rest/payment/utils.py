@@ -4,7 +4,7 @@
 
 import re
 from decimal import ROUND_HALF_EVEN, Decimal
-from typing import List
+from typing import Iterable
 
 from anmeldelse.models import Varelinje
 from django.conf import settings
@@ -69,9 +69,11 @@ def round_decimal(d: Decimal, rounding: str = ROUND_HALF_EVEN):
 def generate_payment_item_from_varelinje(
     varelinje: Varelinje, currency_multiplier: int = 100
 ):
+    if not varelinje.vareafgiftssats or not varelinje.antal or not varelinje.mængde:
+        raise AttributeError("vareafgiftssats, antal eller mængde er ikke defineret")
     varelinje_name = varelinje.vareafgiftssats.vareart_da
 
-    quantity = varelinje.antal
+    quantity = float(varelinje.antal)
     if varelinje.vareafgiftssats.enhed in ["kg", "liter", "l", "sam"]:
         quantity = float(varelinje.mængde)
 
@@ -98,7 +100,7 @@ def generate_payment_item_from_varelinje(
 
 def create_nets_payment_item(
     name: str,
-    price: float,
+    price: float | Decimal,
     unit: str = "ant",
     quantity: int = 1,
     reference="",
@@ -125,16 +127,17 @@ def create_nets_payment_item(
     }
 
 
-def get_payment_fees(varelinjer: List[Varelinje], currency_multiplier: int = 100):
+def get_payment_fees(varelinjer: Iterable[Varelinje], currency_multiplier: int = 100):
+    afgiftsbeløb: list[Decimal] = [
+        varelinje.afgiftsbeløb
+        for varelinje in varelinjer or []
+        if varelinje.afgiftsbeløb
+        and varelinje.vareafgiftssats
+        and varelinje.vareafgiftssats.har_privat_tillægsafgift_alkohol
+    ]
+
     tillaegsafgift = round_decimal(
-        Decimal(settings.TILLAEGSAFGIFT_FAKTOR)
-        * sum(
-            [
-                varelinje.afgiftsbeløb
-                for varelinje in varelinjer or []
-                if varelinje.vareafgiftssats.har_privat_tillægsafgift_alkohol
-            ]
-        )
+        Decimal(settings.TILLAEGSAFGIFT_FAKTOR) * Decimal(sum(afgiftsbeløb))
     )
 
     # OBS: logic copied from "told_common/util.py::round_decimal", but since rest

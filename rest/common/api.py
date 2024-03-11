@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: 2023 Magenta ApS <info@magenta.dk>
 #
 # SPDX-License-Identifier: MPL-2.0
+# mypy: disable-error-code="call-arg, attr-defined"
 import base64
 from typing import Dict, List, Optional
 
@@ -152,8 +153,8 @@ class UserOutWithTokens(Schema):
 
 
 class UserIn(ModelSchema):
-    groups: List[str] = None
-    indberetter_data: IndberetterProfileIn = None
+    groups: List[str] | None = None
+    indberetter_data: IndberetterProfileIn | None = None
 
     class Config:
         model = User
@@ -210,9 +211,9 @@ class UserAPI:
     )
     def create_user(self, payload: UserIn):
         try:
-            groups = [Group.objects.get(name=g) for g in payload.groups]
+            groups = [Group.objects.get(name=g) for g in payload.groups or []]
         except Group.DoesNotExist:
-            raise ValidationError("Group does not exist")
+            raise ValidationError("Group does not exist")  # type: ignore
         user = User.objects.create(
             username=payload.username,
             first_name=payload.first_name,
@@ -221,11 +222,15 @@ class UserAPI:
             is_superuser=False,
         )
         user.groups.set(groups)
-        IndberetterProfile.objects.create(
-            user=user,
-            cpr=payload.indberetter_data.cpr,
-            cvr=payload.indberetter_data.cvr,
-        )
+        if payload.indberetter_data:
+            IndberetterProfile.objects.create(
+                user=user,
+                cpr=payload.indberetter_data.cpr,
+                cvr=payload.indberetter_data.cvr,
+            )
+        else:
+            raise ValidationError("indberetter_data does not exist")  # type: ignore
+
         return UserOutWithTokens.user_to_dict(user)
 
     @route.get(
@@ -235,7 +240,7 @@ class UserAPI:
         url_name="user_list",
     )
     @paginate()  # https://eadwincode.github.io/django-ninja-extra/tutorial/pagination/
-    def list(self, filters: UserFilterSchema = Query(...)):
+    def list(self, filters: UserFilterSchema = Query(...)):  # type: ignore
         return list(filters.filter(User.objects.all()))
 
     @route.patch(
@@ -247,23 +252,24 @@ class UserAPI:
     def update(self, cpr, payload: UserIn):
         user = get_object_or_404(User, indberetter_data__cpr=cpr)
         try:
-            groups = [Group.objects.get(name=g) for g in payload.groups]
+            groups = [Group.objects.get(name=g) for g in payload.groups or []]
         except Group.DoesNotExist:
-            raise ValidationError("Group does not exist")
+            raise ValidationError("Group does not exist")  # type: ignore
         user.first_name = payload.first_name
         user.last_name = payload.last_name
         user.email = payload.email
         user.is_superuser = False
         user.save()
         user.groups.set(groups)
-        user.indberetter_data.cvr = payload.indberetter_data.cvr
+        if payload.indberetter_data:
+            user.indberetter_data.cvr = payload.indberetter_data.cvr
         user.indberetter_data.save()
         return UserOutWithTokens.user_to_dict(user)
 
 
 class EboksBeskedIn(ModelSchema):
-    afgiftsanmeldelse_id: int = None
-    privat_afgiftsanmeldelse_id: int = None
+    afgiftsanmeldelse_id: int | None = None
+    privat_afgiftsanmeldelse_id: int | None = None
     pdf: str  # base64
 
     class Config:

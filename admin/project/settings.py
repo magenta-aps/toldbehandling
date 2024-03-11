@@ -189,7 +189,7 @@ STORAGES = {
 TILLÆGSAFGIFT_FAKTOR = 0.5
 EKSPEDITIONSGEBYR = 250
 
-LOGGING = {
+LOGGING: dict = {
     "version": 1,
     "disable_existing_loggers": True,
     "filters": {

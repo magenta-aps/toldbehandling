@@ -38,7 +38,7 @@ setuptools.setup(
     author_email="info@magenta.dk",
     packages=setuptools.find_packages(),
     install_requires=[
-        "django==4.2.2",
+        "django==4.2.11",
         "gunicorn==20.1.0",
         "requests==2.31.0",
         "dataclasses-json==0.6.0",

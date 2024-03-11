@@ -3,7 +3,7 @@ import dataclasses
 from datetime import date, timedelta
 from decimal import ROUND_HALF_EVEN, Decimal
 from enum import Enum
-from typing import Any, BinaryIO, Callable, Dict, Iterable, List, Optional, Union
+from typing import Any, BinaryIO, Callable, Dict, Iterable, Optional, Union
 
 import holidays
 from django.core.cache import cache
@@ -12,7 +12,6 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.http import QueryDict
 from django.template.loader import render_to_string
 from django.utils import translation
-from django.utils.datastructures import MultiValueDict
 from pypdf import PdfWriter
 from weasyprint import CSS, HTML
 from weasyprint.text.fonts import FontConfiguration
@@ -80,7 +79,7 @@ class language:
         translation.activate(self.old_lang)
 
 
-def join_words(words: Optional[str], separator: str = " "):
+def join_words(words: list[str], separator: str = " "):
     return separator.join(filter(lambda word: word, words))
 
 
@@ -173,9 +172,7 @@ def lenient_get(item, *keys: str):
     return item
 
 
-def multivaluedict_to_querydict(
-    multivaluedict: Optional[Union[MultiValueDict, Dict[str, List]]]
-) -> QueryDict:
+def multivaluedict_to_querydict(multivaluedict: dict[str, list] | None) -> QueryDict:
     query_dict = QueryDict(mutable=True)
     if multivaluedict is not None:
         for key in multivaluedict:

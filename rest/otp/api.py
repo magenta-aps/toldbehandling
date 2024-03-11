@@ -1,3 +1,4 @@
+# mypy: disable-error-code="call-arg, attr-defined"
 from typing import List
 
 from common.api import get_auth_methods
@@ -69,7 +70,7 @@ class TOTPDeviceAPI:
     )
     def list(
         self,
-        filters: TOTPDeviceFilterSchema = Query(...),
+        filters: TOTPDeviceFilterSchema = Query(...),  # type: ignore
     ):
         return list(filters.filter(TOTPDevice.objects.all()))
 

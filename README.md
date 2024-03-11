@@ -63,6 +63,14 @@ and for the `admin` app:
 docker exec toldbehandling-admin bash -c 'coverage run manage.py test ; coverage report --show-missing'
 ```
 
+You can run the mypy checks with the following command:
+```
+docker exec toldbehandling-ui mypy --config mypy.ini ui/ \
+&& docker exec toldbehandling-admin mypy --config mypy.ini admin/ \
+&& docker exec toldbehandling-rest mypy --config mypy.ini ./
+```
+
+
 
 ## Licensing and copyright
 

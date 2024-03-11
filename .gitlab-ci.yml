@@ -290,6 +290,7 @@ Unittest REST:
     - mv .coverage "${CI_PROJECT_DIR}/coverage_output/.coverage.${CI_JOB_ID}"
     - cp -r ./sats ./common ./forsendelse ./anmeldelse ./aktør ./common ./otp ./payment ./project "${CI_PROJECT_DIR}/coverage_output/"
 
+
 Unittest UI:
   <<: *test-ui
   script:
@@ -314,6 +315,28 @@ Unittest Admin:
     - mv .coverage "${CI_PROJECT_DIR}/coverage_output/.coverage.${CI_JOB_ID}"
     - cp -r ./admin ./told_common ./told_twofactor "${CI_PROJECT_DIR}/coverage_output/"
     - cp .coveragerc "${CI_PROJECT_DIR}/coverage_output/"
+
+Mypy REST:
+  <<: *test-rest
+  script:
+    - cd /app
+    - mypy --config mypy.ini ./
+
+Mypy UI:
+  <<: *test-ui
+  script:
+    - cd /app
+    - cp -r ./told-common/told_common .
+    - python manage.py collectstatic
+    - mypy --config mypy.ini ui/
+
+Mypy Admin:
+  <<: *test-admin
+  script:
+    - cd /app
+    - cp -r ./told-common/told_common .
+    - python manage.py collectstatic
+    - mypy --config mypy.ini admin/
 
 Django check REST:
   <<: *test-rest

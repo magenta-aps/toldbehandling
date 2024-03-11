@@ -52,7 +52,7 @@ class NetsProviderHandler(ProviderHandler):
         # which i modified to 256 chars long, after seeing us use strings
         # of that length internally.
         for item in payload.items:
-            item.name = f"{item.name[:125]}..."
+            item.name = f"{item.name[:125]}..."  # type: ignore
 
         url = f"{self.host}/v1/payments"
         response = requests.post(
@@ -78,7 +78,7 @@ class NetsProviderHandler(ProviderHandler):
         resp_body = response.json()
         return self.read(resp_body["paymentId"])
 
-    def read(self, payment_id: str) -> ProviderPaymentResponse:
+    def read(self, payment_id: str | None) -> ProviderPaymentResponse:
         url = f"{self.host}/v1/payments/{payment_id}"
         resp = requests.get(url, headers=self.headers)
 
@@ -120,11 +120,13 @@ class BankProviderHandler(ProviderHandler):
     def create(self, payload: ProviderPaymentPayload, checkout_url: str):
         return {"paymentId": "Der er foretaget en bankoverførsel"}
 
-    def read(self, payment_id: str):
+    def read(self, payment_id: str | None):
         return None
 
 
-def get_provider_handler(provider_name: str) -> NetsProviderHandler | None:
+def get_provider_handler(
+    provider_name: str,
+) -> NetsProviderHandler | BankProviderHandler:
     if provider_name.lower() == settings.PAYMENT_PROVIDER_NETS:
         return NetsProviderHandler(secret_key=settings.PAYMENT_PROVIDER_NETS_SECRET_KEY)
     if provider_name.lower() == settings.PAYMENT_PROVIDER_BANK:

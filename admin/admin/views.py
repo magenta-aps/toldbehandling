@@ -14,7 +14,6 @@ from django.core.exceptions import ValidationError
 from django.http import Http404, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import redirect
 from django.template import loader
-from django.template.response import TemplateResponse
 from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from django.views import View
@@ -22,6 +21,7 @@ from django.views.generic import FormView, TemplateView
 from requests import HTTPError
 from told_common import views as common_views
 from told_common.data import (
+    Afgiftsanmeldelse,
     Afgiftstabel,
     Forsendelsestype,
     PrismeResponse,
@@ -485,7 +485,7 @@ class TF10EditMultipleView(AdminLayoutBaseView, FormView):
     def dispatch(self, request, *args, **kwargs):
         try:
             self.ids = [int(id) for id in self.request.GET.getlist("id")]
-        except ValueError as e:
+        except ValueError:
             return HttpResponseBadRequest("Invalid id value")
         if not self.ids:
             return HttpResponseBadRequest("Missing id value")
@@ -497,7 +497,7 @@ class TF10EditMultipleView(AdminLayoutBaseView, FormView):
         return super().get(request, *args, **kwargs)
 
     @cached_property
-    def items(self) -> List[Dict]:
+    def items(self) -> List[Afgiftsanmeldelse]:
         if self.ids:
             count, items = self.rest_client.afgiftanmeldelse.list(
                 id=self.ids, full=True
@@ -509,13 +509,13 @@ class TF10EditMultipleView(AdminLayoutBaseView, FormView):
     def fragttyper(self) -> Set[str]:
         fragttyper = set()
         for item in self.items:
-            if item.fragtforsendelse:
+            if item.fragtforsendelse and not isinstance(item.fragtforsendelse, int):
                 fragttyper.add(
                     "skibsfragt"
                     if item.fragtforsendelse.forsendelsestype == Forsendelsestype.SKIB
                     else "luftfragt"
                 )
-            if item.postforsendelse:
+            if item.postforsendelse and not isinstance(item.postforsendelse, int):
                 fragttyper.add(
                     "skibspost"
                     if item.postforsendelse.forsendelsestype == Forsendelsestype.SKIB
@@ -827,7 +827,7 @@ class AfgiftstabelCreateView(AdminLayoutBaseView, FormView):
 
     def save(self, satser: List[Dict[str, Union[str, int, bool]]]) -> int:
         tabel_id = self.rest_client.afgiftstabel.create({})
-        afgiftsgruppenummer_to_id = {}
+        afgiftsgruppenummer_to_id: dict = {}
         by_afgiftsgruppenummer = {x["afgiftsgruppenummer"]: x for x in satser}
 
         # Sørg for at vi opretter alle overordnede før deres underordnede

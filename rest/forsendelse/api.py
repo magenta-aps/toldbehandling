@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2023 Magenta ApS <info@magenta.dk>
 #
 # SPDX-License-Identifier: MPL-2.0
-
+# mypy: disable-error-code="call-arg, attr-defined"
 import base64
 import logging
 from typing import Optional
@@ -178,8 +178,8 @@ class PostforsendelseAPI:
 
 
 class FragtforsendelseIn(ModelSchema):
-    fragtbrev: str = None  # Base64
-    fragtbrev_navn: str = None
+    fragtbrev: str | None = None  # Base64
+    fragtbrev_navn: str | None = None
 
     class Config:
         model = Fragtforsendelse
@@ -194,8 +194,8 @@ class FragtforsendelseIn(ModelSchema):
 
 
 class PartialFragtforsendelseIn(ModelSchema):
-    fragtbrev: str = None  # Base64
-    fragtbrev_navn: str = None
+    fragtbrev: str | None = None  # Base64
+    fragtbrev_navn: str | None = None
 
     class Config:
         model = Fragtforsendelse

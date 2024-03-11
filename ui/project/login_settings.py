@@ -1,4 +1,5 @@
 import os
+from typing import Callable
 
 from django.urls import reverse_lazy
 from told_common.util import strtobool
@@ -26,7 +27,7 @@ MITID_TEST_ENABLED = bool(strtobool(os.environ.get("MITID_TEST_ENABLED", "False"
 SESSION_EXPIRE_SECONDS = int(os.environ.get("SESSION_EXPIRE_SECONDS") or 1800)
 LOGIN_BYPASS_ENABLED = bool(strtobool(os.environ.get("LOGIN_BYPASS_ENABLED", "False")))
 
-
+POPULATE_DUMMY_SESSION: bool | Callable
 if LOGIN_BYPASS_ENABLED:
 
     def POPULATE_DUMMY_SESSION():  # noqa
@@ -42,7 +43,7 @@ else:
     POPULATE_DUMMY_SESSION = False
 
 
-CACHES = {
+CACHES: dict = {
     "default": {
         "BACKEND": "django.core.cache.backends.db.DatabaseCache",
         "LOCATION": "default_cache",

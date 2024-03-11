@@ -43,11 +43,13 @@ class RestPermission(permissions.BasePermission):
         "PATCH": "change",
         "DELETE": "delete",
     }
+    appname: str
+    modelname: str
 
     def has_permission(self, request: HttpRequest, controller: ControllerBase) -> bool:
-        return request.user.has_perm(
-            f"{self.appname}.{self.method_map[request.method]}_{self.modelname}"
-        )
+        method = str(request.method)
+        operation = self.method_map[method]
+        return request.user.has_perm(f"{self.appname}.{operation}_{self.modelname}")
 
 
 # Copied from core python because its containing module `distutils` is deprecated.

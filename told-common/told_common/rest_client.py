@@ -83,7 +83,9 @@ class AfsenderRestClient(ModelRestClient):
     def get_or_create(self, ident: dict, data: Optional[dict] = None) -> int:
         if data is None:
             data = ident
-        mapped = {d: self.map(store) for d, store in (("ident", ident), ("data", data))}
+        mapped: dict = {
+            d: self.map(store) for d, store in (("ident", ident), ("data", data))
+        }
         if "kladde" in data:
             mapped["data"]["kladde"] = data["kladde"]
         if mapped["ident"]:
@@ -121,7 +123,9 @@ class ModtagerRestClient(ModelRestClient):
     def get_or_create(self, ident: dict, data: Optional[dict] = None) -> int:
         if data is None:
             data = ident
-        mapped = {d: self.map(store) for d, store in (("ident", ident), ("data", data))}
+        mapped: dict = {
+            d: self.map(store) for d, store in (("ident", ident), ("data", data))
+        }
         if "kladde" in data:
             mapped["data"]["kladde"] = data["kladde"]
         if mapped["ident"]:
@@ -165,7 +169,11 @@ class PostforsendelseRestClient(ModelRestClient):
             "afsenderbykode",
             "afgangsdato",
         ):
-            if data[x] != getattr(existing, x) if hasattr(existing, x) else existing[x]:
+            if (
+                data[x] != getattr(existing, x)
+                if isinstance(existing, PostForsendelse)
+                else existing[x]
+            ):
                 return False
         return True
 
@@ -174,6 +182,7 @@ class PostforsendelseRestClient(ModelRestClient):
         if mapped:
             response = self.rest.post("postforsendelse", mapped)
             return response["id"]
+        return None
 
     def update(
         self,
@@ -227,7 +236,11 @@ class FragtforsendelseRestClient(ModelRestClient):
             "forbindelsesnr",
             "afgangsdato",
         ):
-            if data[x] != getattr(existing, x) if hasattr(existing, x) else existing[x]:
+            if (
+                data[x] != getattr(existing, x)
+                if isinstance(existing, FragtForsendelse)
+                else existing[x]
+            ):
                 return False
         if data.get("fragtbrev") is not None:
             return False
@@ -245,6 +258,7 @@ class FragtforsendelseRestClient(ModelRestClient):
                 )
             response = self.rest.post("fragtforsendelse", mapped)
             return response["id"]
+        return None
 
     def update(
         self,
@@ -378,7 +392,7 @@ class AfgiftanmeldelseRestClient(ModelRestClient):
             fragtforsendelse_id,
             status,
         )
-        if force_write or not self.compare(mapped, existing):
+        if force_write or (existing and not self.compare(mapped, existing)):
             if mapped.get("leverandørfaktura"):
                 log.info(
                     "rest_client opdaterer TF10 %d med "
@@ -556,7 +570,7 @@ class PrivatAfgiftanmeldelseRestClient(ModelRestClient):
             data,
             leverandørfaktura,
         )
-        if force_write or not self.compare(mapped, existing):
+        if force_write or (existing and not self.compare(mapped, existing)):
             self.rest.patch(f"privat_afgiftsanmeldelse/{id}", mapped)
         return id
 
@@ -796,7 +810,9 @@ class AfgiftstabelRestClient(ModelRestClient):
         response = self.rest.post("afgiftstabel", data)
         return response["id"]
 
-    def update(self, id: int, data: dict, existing: dict = None) -> Optional[int]:
+    def update(
+        self, id: int, data: dict, existing: dict | None = None
+    ) -> Optional[int]:
         if existing is not None and self.compare(data, existing):
             # Data passer, spring opdatering over
             pass
@@ -1047,9 +1063,7 @@ class RestClient:
     def get(
         self,
         path: str,
-        params: Dict[
-            str, Union[str, int, float, bool, List[Union[str, int, float, bool]]]
-        ] = None,
+        params: dict | None = None,
     ) -> dict:
         self.check_access_token_age()
         param_string = (
@@ -1091,7 +1105,7 @@ class RestClient:
     def _uploadfile_to_base64str(file: Optional[UploadedFile]) -> Optional[str]:
         if file is None:
             return None
-        if type(file) is InMemoryUploadedFile:
+        if type(file) is InMemoryUploadedFile and file.file:
             # InmemoryUploadedFile giver alle data i første chunk
             file.file.seek(0)
             return b64encode(file.read()).decode("ascii")

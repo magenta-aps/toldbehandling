@@ -13,7 +13,7 @@ from functools import cached_property
 from time import time
 from typing import Callable, List, Optional, Union
 
-from dataclasses_json import config, dataclass_json
+from dataclasses_json import DataClassJsonMixin, config
 from django.conf import settings
 from django.core.files import File
 from django.http import HttpRequest
@@ -24,10 +24,10 @@ from told_common.util import round_decimal
 
 
 def format_decimal(decimal: Decimal) -> str:
-    decimal = float(str(decimal))
+    decimal_as_float = float(str(decimal))
     # if isinstance(decimal, str):
     #    decimal = float(decimal.replace(".", "").replace(",", "."))
-    d = str(floatformat(text=decimal, arg=2)) + ""
+    d = str(floatformat(text=decimal_as_float, arg=2)) + ""
     return d
 
 
@@ -55,13 +55,12 @@ def format_int(decimal: Union[Decimal, str]) -> int:
     return int(str(decimal).split(".")[0])
 
 
-class ToldDataClass:
+class ToldDataClass(DataClassJsonMixin):
     def items(self):
         for itemfield in dataclasses.fields(self):
             yield itemfield.name, getattr(self, itemfield.name)
 
 
-@dataclass_json
 @dataclass
 class Vareafgiftssats(ToldDataClass):
     class Enhed(Enum):
@@ -88,7 +87,7 @@ class Vareafgiftssats(ToldDataClass):
     subsatser: Optional[list] = None
 
     @cached_property
-    def text(self) -> str:
+    def text(self) -> str | None:
         afgiftssats = format_decimal(self.afgiftssats)
         segment_nedre = self.segment_nedre
         segment_øvre = self.segment_øvre
@@ -165,8 +164,11 @@ class Vareafgiftssats(ToldDataClass):
                     pct=afgiftssats, nedre=format_decimal(segment_nedre)
                 )
             return _("{pct}% af fakturabeløb").format(pct=afgiftssats)
+        return None
 
-    def populate_subs(self, sub_getter: Callable[[int], List[Vareafgiftssats]]) -> None:
+    def populate_subs(
+        self, sub_getter: Callable[[int], List[Vareafgiftssats] | None]
+    ) -> None:
         if self.enhed == Vareafgiftssats.Enhed.SAMMENSAT:
             subs = sub_getter(self.id)
             if subs is not None and len(subs) > 0:
@@ -181,7 +183,6 @@ def encode_optional_isoformat(d):
     return d.isoformat()
 
 
-@dataclass_json
 @dataclass
 class Afgiftstabel(ToldDataClass):
     id: int
@@ -205,7 +206,6 @@ class Afgiftstabel(ToldDataClass):
     vareafgiftssatser: Optional[List[Vareafgiftssats]] = None
 
 
-@dataclass_json
 @dataclass
 class Notat(ToldDataClass):
     id: int
@@ -213,7 +213,7 @@ class Notat(ToldDataClass):
     afgiftsanmeldelse: Optional[int]
     privatafgiftsanmeldelse: Optional[int]
     index: int
-    oprettet: datetime = field(
+    oprettet: datetime | None = field(
         metadata=config(
             encoder=encode_optional_isoformat,
             decoder=datetime.fromisoformat,
@@ -221,10 +221,9 @@ class Notat(ToldDataClass):
         ),
         default=None,
     )
-    navn: str = None
+    navn: str | None = None
 
 
-@dataclass_json
 @dataclass
 class Aktør(ToldDataClass):
     id: int
@@ -238,21 +237,18 @@ class Aktør(ToldDataClass):
     stedkode: Optional[int] = None
 
 
-@dataclass_json
 @dataclass
 class Afsender(Aktør):
     pass
 
 
-@dataclass_json
 @dataclass
 class Modtager(Aktør):
     kreditordning: bool = False
 
 
-@dataclass_json
 @dataclass
-class Speditør:
+class Speditør(DataClassJsonMixin):
     cvr: int
     navn: str
 
@@ -262,7 +258,6 @@ class Forsendelsestype(Enum):
     FLY = "F"
 
 
-@dataclass_json
 @dataclass
 class PostForsendelse(ToldDataClass):
     id: int
@@ -279,7 +274,6 @@ class PostForsendelse(ToldDataClass):
     kladde: bool = False
 
 
-@dataclass_json
 @dataclass
 class FragtForsendelse(ToldDataClass):
     id: int
@@ -297,7 +291,6 @@ class FragtForsendelse(ToldDataClass):
     fragtbrev: Optional[File] = None
 
 
-@dataclass_json
 @dataclass
 class Varelinje(ToldDataClass):
     id: int
@@ -310,7 +303,6 @@ class Varelinje(ToldDataClass):
     antal: Optional[int] = None
 
 
-@dataclass_json
 @dataclass
 class Afgiftsanmeldelse(ToldDataClass):
     id: int
@@ -348,7 +340,7 @@ class Afgiftsanmeldelse(ToldDataClass):
     betales_af: Optional[str] = None
 
     @property
-    def indberetter(self) -> dict:
+    def indberetter(self) -> dict | None:
         return self.oprettet_på_vegne_af or self.oprettet_af
 
     @property
@@ -362,11 +354,10 @@ class Afgiftsanmeldelse(ToldDataClass):
         )
 
 
-@dataclass_json
 @dataclass
 class HistoricAfgiftsanmeldelse(Afgiftsanmeldelse):
     history_username: Optional[str] = None
-    history_date: datetime = field(
+    history_date: datetime | None = field(
         metadata=config(
             encoder=datetime.isoformat,
             decoder=datetime.fromisoformat,
@@ -376,12 +367,11 @@ class HistoricAfgiftsanmeldelse(Afgiftsanmeldelse):
     )
 
 
-@dataclass_json
 @dataclass
 class PrismeResponse(ToldDataClass):
     id: Optional[int]
     afgiftsanmeldelse: Union[int, Afgiftsanmeldelse]
-    delivery_date: datetime = field(
+    delivery_date: datetime | None = field(
         metadata=config(
             encoder=encode_optional_isoformat,
             decoder=datetime.fromisoformat,
@@ -389,11 +379,10 @@ class PrismeResponse(ToldDataClass):
         ),
         default=None,
     )
-    rec_id: int = None
-    tax_notification_number: int = None
+    rec_id: int | None = None
+    tax_notification_number: int | None = None
 
 
-@dataclass_json
 @dataclass
 class PrivatAfgiftsanmeldelse(ToldDataClass):
     id: int
@@ -426,9 +415,9 @@ class PrivatAfgiftsanmeldelse(ToldDataClass):
     )
     oprettet_af: dict
     payment_status: str
-    indførselstilladelse: str = None
-    varelinjer: List[Varelinje] = None
-    notater: Optional[List[Notat]] = None
+    indførselstilladelse: str | None = None
+    varelinjer: List[Varelinje] | None = None
+    notater: Optional[List[Notat]] | None = None
 
     @property
     def afgift_sum(self):
@@ -458,7 +447,6 @@ class PrivatAfgiftsanmeldelse(ToldDataClass):
         return self.afgift_sum + self.tillægsafgift + self.ekspeditionsgebyr
 
 
-@dataclass_json
 @dataclass
 class Indberetter(ToldDataClass):
     cpr: int
@@ -502,7 +490,6 @@ class JwtTokenInfo:
             self.synchronized = True
 
 
-@dataclass_json
 @dataclass
 class User(ToldDataClass):
     id: int
@@ -539,7 +526,6 @@ class User(ToldDataClass):
         return self.username
 
 
-@dataclass_json
 @dataclass
 class TOTPDevice(ToldDataClass):
     user_id: int
@@ -553,7 +539,6 @@ class TOTPDevice(ToldDataClass):
     confirmed: bool
 
 
-@dataclass_json
 @dataclass
 class Toldkategori(ToldDataClass):
     kategori: str
