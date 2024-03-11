@@ -4,6 +4,7 @@
 
 from unittest.mock import ANY
 
+from aktør.models import Afsender, Modtager
 from anmeldelse.models import Afgiftsanmeldelse
 from common.models import IndberetterProfile
 from django.contrib.auth.models import Permission
@@ -272,6 +273,7 @@ class FragtforsendelseAPITests(TestCase):
     def setUpTestData(cls):
         cls.user_permissions = [
             Permission.objects.get(codename="add_fragtforsendelse"),
+            Permission.objects.get(codename="change_fragtforsendelse"),
         ]
 
         cls.user, cls.user_token, cls.user_refresh_token = RestMixin.make_user(
@@ -391,4 +393,109 @@ class FragtforsendelseAPITests(TestCase):
         self.assertEqual(
             resp_invalid_fragtbrevsnummer.json(),
             {"__all__": ["Ved luftfragt skal fragtbrevnummer bestå af otte cifre"]},
+        )
+
+    def test_update_fragtforsendelse_created_by(self):
+        _ = IndberetterProfile.objects.create(
+            user=self.user,
+            cvr="13371337",
+        )
+
+        fragtforsendelse = Fragtforsendelse.objects.create(
+            forsendelsestype=Forsendelse.Forsendelsestype.SKIB,
+            fragtbrevsnummer="abcde1234567",
+            forbindelsesnr="abc 123",
+            afgangsdato="2024-12-31",
+            oprettet_af=self.user,
+        )
+
+        afsender = Afsender.objects.create(
+            navn="Afsender1",
+            adresse="Afsendervej 1",
+            postnummer="1234",
+            by="Afsenderby",
+            postbox="1234",
+            telefon="12345678",
+            cvr="12345678",
+            kladde=False,
+        )
+
+        modtager = Modtager.objects.create(
+            navn="Modtager1",
+            adresse="Modtagervej 1",
+            postnummer="5678",
+            by="Modtagerby",
+            postbox="5678",
+            telefon="87654321",
+            cvr="87654321",
+            kladde=False,
+        )
+
+        # Create test afgiftanmeldesel
+        # OBS: Our permissions check method, FragtforsendelseAPI.checkUser(), requires an Afgiftsanmeldelse to exist
+        # for the fragtforsendelse we want to update
+        afgiftsanmeldelse = Afgiftsanmeldelse.objects.create(
+            afsender=afsender,
+            modtager=modtager,
+            fragtforsendelse=Fragtforsendelse.objects.first(),
+            postforsendelse=None,
+            leverandørfaktura_nummer="1234",
+            betales_af="afsender",
+            indførselstilladelse="5678",
+            betalt=False,
+            oprettet_af=Fragtforsendelse.objects.first().oprettet_af,
+        )
+
+        # Invoke the endpoint
+        resp = self.client.patch(
+            reverse(
+                "api-1.0.0:fragtforsendelse_update", kwargs={"id": fragtforsendelse.id}
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+            data=json_dump(
+                {
+                    "forsendelsestype": Forsendelse.Forsendelsestype.SKIB,
+                    "fragtbrevsnummer": "abcde1234567",
+                    "forbindelsesnr": "abc 123",
+                    "afgangsdato": "2024-12-31",
+                    "kladde": False,
+                }
+            ),
+        )
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.json(), {"success": True})
+
+    def test_update_fragtforsendelse_indberetter_does_not_exist(self):
+        fragtforsendelse = Fragtforsendelse.objects.create(
+            forsendelsestype=Forsendelse.Forsendelsestype.SKIB,
+            fragtbrevsnummer="abcde1234567",
+            forbindelsesnr="abc 123",
+            afgangsdato="2024-12-31",
+            oprettet_af=self.user,
+        )
+
+        # Invoke the endpoint
+        resp = self.client.patch(
+            reverse(
+                "api-1.0.0:fragtforsendelse_update", kwargs={"id": fragtforsendelse.id}
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+            data=json_dump(
+                {
+                    "forsendelsestype": Forsendelse.Forsendelsestype.SKIB,
+                    "fragtbrevsnummer": "abcde1234567",
+                    "forbindelsesnr": "abc 123",
+                    "afgangsdato": "2024-12-31",
+                    "kladde": False,
+                }
+            ),
+        )
+
+        self.assertEqual(resp.status_code, 403)
+        self.assertEqual(
+            resp.json(),
+            {"detail": "You do not have permission to perform this action."},
         )
