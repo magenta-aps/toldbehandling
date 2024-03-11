@@ -135,22 +135,34 @@ class Fragtforsendelse(Forsendelse):
         if self.kladde:
             return
         if self.forsendelsestype == Forsendelse.Forsendelsestype.SKIB:
-            if not re.match(r"[a-zA-Z]{3} \d{3}$", self.forbindelsesnr):
+            if not re.match(
+                r"[a-zA-Z]{3} \d{3}$",
+                self.forbindelsesnr if self.forbindelsesnr is not None else "",
+            ):
                 raise ValidationError(
                     "Ved skibsfragt skal forbindelsesnummer bestå "
                     "af tre bogstaver, mellemrum og tre cifre"
                 )
-            if not re.match(r"^[a-zA-Z]{5}\d{7}$", self.fragtbrevsnummer):
+            if not re.match(
+                r"^[a-zA-Z]{5}\d{7}$",
+                self.fragtbrevsnummer if self.fragtbrevsnummer is not None else "",
+            ):
                 raise ValidationError(
                     "Ved skibsfragt skal fragtbrevnr bestå af "
                     "fem bogstaver efterfulgt af syv cifre"
                 )
         if self.forsendelsestype == Forsendelse.Forsendelsestype.FLY:
-            if not re.match(r"^\d{3}$", self.forbindelsesnr):
+            if not re.match(
+                r"^\d{3}$",
+                self.forbindelsesnr if self.forbindelsesnr is not None else "",
+            ):
                 raise ValidationError(
                     "Ved luftfragt skal forbindelsesnummer bestå af tre cifre"
                 )
-            if not re.match(r"^\d{8}$", self.fragtbrevsnummer):
+            if not re.match(
+                r"^\d{8}$",
+                self.fragtbrevsnummer if self.fragtbrevsnummer is not None else "",
+            ):
                 raise ValidationError(
                     "Ved luftfragt skal fragtbrevnummer bestå af otte cifre"
                 )
