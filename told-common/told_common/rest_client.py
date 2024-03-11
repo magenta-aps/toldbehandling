@@ -30,6 +30,7 @@ from told_common.data import (
     PrismeResponse,
     PrivatAfgiftsanmeldelse,
     Speditør,
+    Toldkategori,
     TOTPDevice,
     User,
     Vareafgiftssats,
@@ -932,6 +933,11 @@ class SpeditørRestClient(ModelRestClient):
         ]
 
 
+class ToldkategoriRestClient(ModelRestClient):
+    def list(self):
+        return [Toldkategori.from_dict(item) for item in self.rest.get("toldkategori")]
+
+
 class RestClient:
     domain = settings.REST_DOMAIN
 
@@ -959,6 +965,7 @@ class RestClient:
         self.statistik = StatistikRestClient(self)
         self.speditør = SpeditørRestClient(self)
         self.totpdevice = TotpDeviceRestClient(self)
+        self.toldkategori = ToldkategoriRestClient(self)
 
     def check_access_token_age(self):
         max_age = getattr(settings, "NINJA_JWT", {}).get(

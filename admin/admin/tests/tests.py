@@ -467,6 +467,14 @@ class TestGodkend(PermissionsTest, TestCase):
                     }
                 ],
             }
+        elif path == expected_prefix + "toldkategori":
+            json_content = [
+                {
+                    "kategori": "70",
+                    "navn": "RAL Royal Arctic Line A/S",
+                    "kræver_cvr": False,
+                }
+            ]
         else:
             raise Exception(
                 f"Mock {self.__class__.__name__} got unrecognized path: GET {path}"
@@ -807,8 +815,18 @@ class TestPrisme(TestMixin, PermissionsTest, TestCase):
                     }
                 ],
             }
+        elif path == expected_prefix + "toldkategori":
+            json_content = [
+                {
+                    "kategori": "70",
+                    "navn": "RAL Royal Arctic Line A/S",
+                    "kræver_cvr": False,
+                }
+            ]
         else:
-            print(f"Mock {self.__class__.__name__} got unrecognized path: {path}")
+            raise Exception(
+                f"Mock {self.__class__.__name__} got unrecognized path: {path}"
+            )
         if json_content:
             content = json.dumps(json_content).encode("utf-8")
         if content:
@@ -1586,8 +1604,16 @@ class AnmeldelseNotatTest(PermissionsTest, TestCase):
                     },
                 ],
             }
+        elif path == expected_prefix + "toldkategori":
+            json_content = [
+                {
+                    "kategori": "70",
+                    "navn": "RAL Royal Arctic Line A/S",
+                    "kræver_cvr": False,
+                }
+            ]
         else:
-            print(f"Mock AnmeldelseNotatTest got unrecognized path: {path}")
+            raise Exception(f"Mock AnmeldelseNotatTest got unrecognized path: {path}")
             traceback.print_stack()
         if json_content:
             content = json.dumps(json_content).encode("utf-8")

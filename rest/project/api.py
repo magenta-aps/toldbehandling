@@ -9,6 +9,7 @@ from anmeldelse.api import (
     PrismeResponseAPI,
     PrivatAfgiftsanmeldelseAPI,
     StatistikAPI,
+    ToldkategoriAPI,
     VarelinjeAPI,
 )
 from common.api import EboksBeskedAPI, UserAPI
@@ -30,6 +31,7 @@ api.register_controllers(
     NotatAPI,
     PrismeResponseAPI,
     StatistikAPI,
+    ToldkategoriAPI,
 )
 api.register_controllers(PostforsendelseAPI, FragtforsendelseAPI)
 api.register_controllers(AfgiftstabelAPI, VareafgiftssatsAPI)
