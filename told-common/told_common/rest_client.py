@@ -814,17 +814,6 @@ class VareafgiftssatsRestClient(ModelRestClient):
         response = self.rest.post("vareafgiftssats", data)
         return response["id"]
 
-    def get_subsatser(self, parent_id: int) -> List[Vareafgiftssats]:
-        response = self.list(overordnet=parent_id)
-        subsatser = []
-        cache = {}
-        for subsats in response["items"]:
-            subsats = Vareafgiftssats.from_dict(subsats)
-            if subsats.id not in cache:
-                cache[subsats.id] = subsats
-            subsatser.append(subsats)
-        return subsatser
-
     def get(self, id: int) -> Vareafgiftssats:
         sats = Vareafgiftssats.from_dict(self.rest.get(f"vareafgiftssats/{id}"))
         if sats.enhed == Vareafgiftssats.Enhed.SAMMENSAT:
