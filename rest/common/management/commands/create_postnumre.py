@@ -22,7 +22,7 @@ class Command(BaseCommand):
             (3920, "Qaqortoq", 20, 20),
             (3921, "Narsaq", 20, 30),
             (3922, "Nanortalik", 20, 10),
-            (3923, "Narsarsuaq", 20, 302),
+            (3923, "Narsarsuaq", 20, 33),
             (3924, "Ikerasassuaq", 20, 331),
             (3930, "Kangilinnguit", 20, 303),
             (3932, "Arsuk", 20, 50),
