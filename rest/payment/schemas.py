@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: MPL-2.0
 
-from typing import List
+from typing import List, Optional
 
 from anmeldelse.models import PrivatAfgiftsanmeldelse
 from ninja import ModelSchema, Schema
@@ -104,10 +104,10 @@ class ProviderPaymentPayload(BasePayment):
 
 
 class ProviderPaymentSummaryResponse(BaseResponse):
-    reserved_amount: int
-    charged_amount: int
-    refunded_amount: int
-    cancelled_amount: int
+    reserved_amount: Optional[int] = 0
+    charged_amount: Optional[int] = 0
+    refunded_amount: Optional[int] = 0
+    cancelled_amount: Optional[int] = 0
 
 
 class ProviderPaymentDetailsResponse(BaseResponse):
@@ -136,7 +136,7 @@ class ProviderConsumerResponse(BaseResponse):
 
 class ProviderPaymentCheckoutResponse(BaseResponse):
     url: str
-    cancel_url: str
+    cancel_url: Optional[str] = None
 
 
 class ProviderPaymentResponse(BaseResponse):
