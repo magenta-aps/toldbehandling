@@ -14,6 +14,8 @@ groupadd -g 75130 -r toldbehandling && \
 groupadd -g 75100 -r certificate_exporter && \
 useradd -u 75130 --no-log-init -r -g toldbehandling -G certificate_exporter toldbehandling
 COPY rest/requirements.txt /app/requirements.txt
+COPY rest/mypy.ini /app/mypy.ini
+
 RUN pip install --no-cache-dir -r /app/requirements.txt
 # hadolint ignore=DL3008
 RUN apt-get update && \

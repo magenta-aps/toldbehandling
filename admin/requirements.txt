@@ -1,4 +1,4 @@
-django==4.2.2
+django==4.2.11
 coverage==7.3.0
 beautifulsoup4==4.12.2
 humanize==4.7.0
@@ -16,3 +16,6 @@ django-forms-dynamic==1.0.0
 django-tempus-dominus==5.1.2.17
 django-two-factor-auth==1.15.5
 django-phonenumber-field[phonenumberslite]==7.2.0
+mypy==1.7.0
+django-stubs[compatible-mypy]==4.2.7
+types-requests==2.31.0.20240218

@@ -126,7 +126,7 @@ class FixedWidthIntegerField(ErrorMessagesFieldMixin, forms.CharField):
             attrs.update(self.extra_widget_attrs)
         return attrs
 
-    def to_python(self, value: str) -> Optional[int]:
+    def to_python(self, value):
         # Fra formularfeltets value til python-værdi
         # Validering kører på returværdien
         value = super().to_python(value)

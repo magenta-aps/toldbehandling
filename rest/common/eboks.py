@@ -120,7 +120,7 @@ class EboksClient(object):
         except HTTPError as e:
             if hasattr(e, "response"):
                 dispatch.status_code = e.response.status_code
-                dispatch.status_message = e.response.content
+                dispatch.status_message = e.response.content  # type: ignore
             besked.save(update_fields=("forsøg",))
             dispatch.save(update_fields=("status_code", "status_message"))
 

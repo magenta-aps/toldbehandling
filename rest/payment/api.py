@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: 2023 Magenta ApS <info@magenta.dk>
 #
 # SPDX-License-Identifier: MPL-2.0
+# mypy: disable-error-code="call-arg, attr-defined"
 
 from typing import Callable, Dict, List, Tuple
 
@@ -14,8 +15,8 @@ from ninja_jwt.authentication import JWTAuth
 from payment.models import Item, Payment
 from payment.permissions import PaymentPermission
 from payment.provider_handlers import (
+    BankProviderHandler,
     NetsProviderHandler,
-    ProviderHandler,
     get_provider_handler,
 )
 from payment.schemas import (
@@ -40,7 +41,7 @@ class PaymentAPI:
         response={201: PaymentResponse},
     )
     def create(self, payload: PaymentCreatePayload) -> PaymentResponse:
-        provider_handler: ProviderHandler = get_provider_handler(payload.provider)
+        provider_handler = get_provider_handler(payload.provider)
 
         try:
             declaration = PrivatAfgiftsanmeldelse.objects.get(id=payload.declaration_id)
@@ -190,7 +191,7 @@ class PaymentAPI:
 
 
 def _payment_field_converters(
-    provider_handler: NetsProviderHandler,
+    provider_handler: NetsProviderHandler | BankProviderHandler,
     provider_payment: ProviderPaymentResponse | None = None,
 ):
     return {

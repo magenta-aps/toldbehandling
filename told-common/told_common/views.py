@@ -6,7 +6,7 @@ import logging
 import os
 from datetime import date
 from functools import cached_property
-from typing import Any, Dict, List
+from typing import Any, Callable, Dict, Iterable, List
 from urllib.parse import unquote
 
 from django.conf import settings
@@ -20,6 +20,7 @@ from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from django.views import View
 from django.views.generic import FormView, RedirectView, TemplateView
+from django_stubs_ext import StrPromise
 from requests import HTTPError
 from told_common import forms
 from told_common.data import (
@@ -94,7 +95,7 @@ class FileView(LoginRequiredMixin, HasRestClientMixin, View):
 
 
 class LeverandørFakturaView(PermissionsRequiredMixin, FileView):
-    required_permissions = ("anmeldelse.view_afgiftsanmeldelse",)
+    required_permissions: Iterable[str] = ("anmeldelse.view_afgiftsanmeldelse",)
     api = "afgiftsanmeldelse"
     key = "leverandørfaktura"
 
@@ -108,11 +109,11 @@ class FragtbrevView(PermissionsRequiredMixin, FileView):
 class TF10FormCreateView(
     PermissionsRequiredMixin, HasRestClientMixin, FormWithFormsetView
 ):
-    form_class = forms.TF10Form
+    form_class: Any = forms.TF10Form
     formset_class = forms.TF10VareFormSet
     template_name = "told_common/tf10/form.html"
     extend_template = "told_common/layout.html"
-    required_permissions = (
+    required_permissions: Iterable[str] = (
         "aktør.view_afsender",
         "aktør.view_modtager",
         "aktør.add_afsender",
@@ -245,15 +246,10 @@ class TF10FormCreateView(
         if "form_kwargs" not in kwargs:
             kwargs["form_kwargs"] = {}
         # Will be picked up by TF10VareForm's constructor
-        kwargs["form_kwargs"]["varesatser"] = dict(
-            filter(
-                lambda pair: pair[1].overordnet is None,
-                self.rest_client.varesatser.items(),
-            )
-        )
+        kwargs["form_kwargs"]["varesatser"] = self.toplevel_varesatser
         return kwargs
 
-    def get_context_data(self, **context: Dict[str, Any]) -> Dict[str, Any]:
+    def get_context_data(self, **context) -> Dict[str, Any]:
         context = super().get_context_data(
             **{
                 **context,
@@ -277,7 +273,7 @@ class TF10FormCreateView(
 class TF10FormUpdateView(
     PermissionsRequiredMixin, HasRestClientMixin, CustomLayoutMixin, FormWithFormsetView
 ):
-    required_permissions = (
+    required_permissions: Iterable[str] = (
         "aktør.view_afsender",
         "aktør.view_modtager",
         "forsendelse.view_postforsendelse",
@@ -495,7 +491,7 @@ class TF10FormUpdateView(
         # Will be picked up by TF10VareForm's constructor
         kwargs["form_kwargs"]["varesatser"] = self.toplevel_varesatser
         initial = []
-        for item in self.item.varelinjer:
+        for item in self.item.varelinjer or []:
             itemdict = dataclasses.asdict(item)
             # Dropdown skal bruge id'er, ikke objekter
             if itemdict["vareafgiftssats"]:
@@ -573,9 +569,9 @@ class TF10FormUpdateView(
 
 
 class ListView(FormView):
-    list_size = 20
+    list_size: int = 20
     form_class = forms.PaginateForm
-    select_template = None
+    select_template: str | None = None
 
     def get(self, request, *args, **kwargs):
         # Søgeform; viser formularen (med evt. fejl) når den er invalid,
@@ -669,7 +665,7 @@ class ListView(FormView):
 class TF10ListView(
     PermissionsRequiredMixin, HasRestClientMixin, CustomLayoutMixin, ListView
 ):
-    required_permissions = (
+    required_permissions: Iterable[str] = (
         "aktør.view_afsender",
         "aktør.view_modtager",
         "forsendelse.view_postforsendelse",
@@ -753,12 +749,14 @@ class TF10ListView(
 
 
 class TF10BaseView:
+    rest_client: RestClient
+
     def get_subsatser(self, parent_id: int) -> List[Vareafgiftssats]:
         return self.rest_client.vareafgiftssats.list(overordnet=parent_id)
 
 
 class TF10View(TF10BaseView, TemplateView):
-    required_permissions = (
+    required_permissions: Iterable[str] = (
         "aktør.view_afsender",
         "aktør.view_modtager",
         "forsendelse.view_postforsendelse",
@@ -770,8 +768,9 @@ class TF10View(TF10BaseView, TemplateView):
     edit_permissions = ("anmeldelse.change_afgiftsanmeldelse",)
     extend_template = "told_common/layout.html"
     template_name = "told_common/tf10/view.html"
+    has_permissions: Callable
 
-    def get_context_data(self, **kwargs):
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
         anmeldelse: Afgiftsanmeldelse = self.object
 
         return super().get_context_data(
@@ -843,7 +842,7 @@ class TF10View(TF10BaseView, TemplateView):
         return reportees
 
     @staticmethod
-    def reportee_from_user_dict(type_label: str, user_dict: dict):
+    def reportee_from_user_dict(type_label: StrPromise, user_dict: dict):
         cvr = lenient_get(user_dict, "indberetter_data", "cvr")
         return {
             "type": type_label,
@@ -855,7 +854,7 @@ class TF10View(TF10BaseView, TemplateView):
 class TF5View(
     PermissionsRequiredMixin, HasRestClientMixin, CustomLayoutMixin, TF5Mixin, FormView
 ):
-    required_permissions = (
+    required_permissions: Iterable[str] = (
         "anmeldelse.view_privatafgiftsanmeldelse",
         "anmeldelse.view_varelinje",
         "sats.view_vareafgiftssats",
@@ -1019,6 +1018,7 @@ class TF5ListView(PermissionsRequiredMixin, HasRestClientMixin, TF5Mixin, ListVi
 class TF5UpdateView(
     PermissionsRequiredMixin, HasRestClientMixin, TF5Mixin, FormWithFormsetView
 ):
+    extend_template: str
     required_permissions = (
         "anmeldelse.view_privatafgiftsanmeldelse",
         "anmeldelse.view_varelinje",
@@ -1119,7 +1119,7 @@ class TF5UpdateView(
         # Will be picked up by TF10VareForm's constructor
         kwargs["form_kwargs"]["varesatser"] = self.toplevel_varesatser
         initial = []
-        for item in self.item.varelinjer:
+        for item in self.item.varelinjer or []:
             itemdict = dataclasses.asdict(item)
             # Dropdown skal bruge id'er, ikke objekter
             itemdict["vareafgiftssats"] = itemdict["vareafgiftssats"]["id"]

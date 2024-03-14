@@ -25,6 +25,8 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends gettext python3-distutils libxmlsec1-dev xmlsec1 && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 COPY ui/requirements.txt /app/requirements.txt
+COPY ui/mypy.ini /app/mypy.ini
+
 RUN pip install --no-cache-dir -r /app/requirements.txt
 # Include & install told-common package
 COPY --chown=toldbehandling:toldbehandling ./told-common /app/told-common

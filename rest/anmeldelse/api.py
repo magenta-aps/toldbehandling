@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: 2023 Magenta ApS <info@magenta.dk>
 #
 # SPDX-License-Identifier: MPL-2.0
+# mypy: disable-error-code="call-arg, attr-defined"
 
 import base64
 import logging
@@ -42,11 +43,11 @@ log = logging.getLogger(__name__)
 class AfgiftsanmeldelseIn(ModelSchema):
     afsender_id: int
     modtager_id: int
-    postforsendelse_id: int = None
-    fragtforsendelse_id: int = None
-    leverandørfaktura: str = None  # Base64
-    leverandørfaktura_navn: str = None
-    oprettet_på_vegne_af_id: int = None
+    postforsendelse_id: int | None = None
+    fragtforsendelse_id: int | None = None
+    leverandørfaktura: str | None = None  # Base64
+    leverandørfaktura_navn: str | None = None
+    oprettet_på_vegne_af_id: int | None = None
     kladde: Optional[bool] = False
     fuldmagtshaver_id: Optional[int] = None
 
@@ -62,14 +63,14 @@ class AfgiftsanmeldelseIn(ModelSchema):
 
 
 class PartialAfgiftsanmeldelseIn(ModelSchema):
-    afsender_id: int = None
-    modtager_id: int = None
-    postforsendelse_id: int = None
-    fragtforsendelse_id: int = None
-    leverandørfaktura: str = None  # Base64
-    leverandørfaktura_navn: str = None
-    betales_af: str = None
-    toldkategori: str = None
+    afsender_id: int | None = None
+    modtager_id: int | None = None
+    postforsendelse_id: int | None = None
+    fragtforsendelse_id: int | None = None
+    leverandørfaktura: str | None = None  # Base64
+    leverandørfaktura_navn: str | None = None
+    betales_af: str | None = None
+    toldkategori: str | None = None
     kladde: Optional[bool] = False
     fuldmagtshaver_id: Optional[int] = None
     status: Optional[str] = None
@@ -255,8 +256,8 @@ class AfgiftsanmeldelseAPI:
     def list(
         self,
         filters: AfgiftsanmeldelseFilterSchema = Query(...),
-        sort: str = None,
-        order: str = None,
+        sort: str | None = None,
+        order: str | None = None,
     ):
         qs = self.filter_user(Afgiftsanmeldelse.objects.all())
         # https://django-ninja.rest-framework.com/guides/input/filtering/
@@ -277,8 +278,8 @@ class AfgiftsanmeldelseAPI:
     def list_full(
         self,
         filters: AfgiftsanmeldelseFilterSchema = Query(...),
-        sort: str = None,
-        order: str = None,
+        sort: str | None = None,
+        order: str | None = None,
     ):
         qs = self.filter_user(Afgiftsanmeldelse.objects.all())
         # https://django-ninja.rest-framework.com/guides/input/filtering/
@@ -459,8 +460,8 @@ class AfgiftsanmeldelseAPI:
 
 
 class PrivatAfgiftsanmeldelseIn(ModelSchema):
-    leverandørfaktura: str = None  # Base64
-    leverandørfaktura_navn: str = None
+    leverandørfaktura: str | None = None  # Base64
+    leverandørfaktura_navn: str | None = None
 
     class Config:
         model = PrivatAfgiftsanmeldelse
@@ -480,8 +481,8 @@ class PrivatAfgiftsanmeldelseIn(ModelSchema):
 
 
 class PartialPrivatAfgiftsanmeldelseIn(ModelSchema):
-    leverandørfaktura: str = None  # Base64
-    leverandørfaktura_navn: str = None
+    leverandørfaktura: str | None = None  # Base64
+    leverandørfaktura_navn: str | None = None
 
     class Config:
         model = PrivatAfgiftsanmeldelse
@@ -533,7 +534,9 @@ class PrivatAfgiftsanmeldelseOut(ModelSchema):
         if qs.exists():
             if qs.filter(status="paid").exists():
                 return "paid"
-            return qs.first().status
+            first = qs.first()
+            if first:
+                return first.status
         return "created"
 
 
@@ -616,8 +619,8 @@ class PrivatAfgiftsanmeldelseAPI:
     def list(
         self,
         filters: PrivatAfgiftsanmeldelseFilterSchema = Query(...),
-        sort: str = None,
-        order: str = None,
+        sort: str | None = None,
+        order: str | None = None,
     ):
         qs = self.filter_user(PrivatAfgiftsanmeldelse.objects.all())
         # https://django-ninja.rest-framework.com/guides/input/filtering/
@@ -703,10 +706,10 @@ class PrivatAfgiftsanmeldelseAPI:
 
 
 class VarelinjeIn(ModelSchema):
-    fakturabeløb: str = None
-    afgiftsanmeldelse_id: int = None
-    privatafgiftsanmeldelse_id: int = None
-    vareafgiftssats_id: int = None
+    fakturabeløb: str | None = None
+    afgiftsanmeldelse_id: int | None = None
+    privatafgiftsanmeldelse_id: int | None = None
+    vareafgiftssats_id: int | None = None
 
     class Config:
         model = Varelinje
@@ -715,8 +718,8 @@ class VarelinjeIn(ModelSchema):
 
 
 class PartialVarelinjeIn(ModelSchema):
-    afgiftsanmeldelse_id: int = None
-    vareafgiftssats_id: int = None
+    afgiftsanmeldelse_id: int | None = None
+    vareafgiftssats_id: int | None = None
 
     class Config:
         model = Varelinje
@@ -811,7 +814,7 @@ class VarelinjeAPI:
                 # `anmeldelse` er nu et historik-objekt
                 qs = anmeldelse.varelinje_set.all()
             except Afgiftsanmeldelse.DoesNotExist:
-                qs = Varelinje.objects.none
+                qs = Varelinje.objects.none()
         else:
             qs = Varelinje.objects.all()
         qs = qs.filter(
@@ -866,8 +869,8 @@ class VarelinjeAPI:
 
 class NotatIn(ModelSchema):
     tekst: str
-    afgiftsanmeldelse_id: int = None
-    privatafgiftsanmeldelse_id: int = None
+    afgiftsanmeldelse_id: int | None = None
+    privatafgiftsanmeldelse_id: int | None = None
 
     class Config:
         model = Notat
@@ -875,7 +878,7 @@ class NotatIn(ModelSchema):
 
 
 class NotatOut(ModelSchema):
-    navn: str = None
+    navn: str | None = None
 
     class Config:
         model = Notat
@@ -917,7 +920,7 @@ class NotatAPI:
                 AfgiftsanmeldelseAPI.get_historical_count(payload.afgiftsanmeldelse_id)
                 - 1
             )
-        else:
+        elif payload.privatafgiftsanmeldelse_id:
             index = (
                 PrivatAfgiftsanmeldelseAPI.get_historical_count(
                     payload.privatafgiftsanmeldelse_id
@@ -964,7 +967,7 @@ class NotatAPI:
                     index__lte=afgiftsanmeldelse_history_index
                 )
             except Afgiftsanmeldelse.DoesNotExist:
-                qs = Notat.objects.none
+                qs = Notat.objects.none()
         if (
             filters.privatafgiftsanmeldelse
             and afgiftsanmeldelse_history_index is not None
@@ -981,7 +984,7 @@ class NotatAPI:
                     index__lte=afgiftsanmeldelse_history_index
                 )
             except Afgiftsanmeldelse.DoesNotExist:
-                qs = Notat.objects.none
+                qs = Notat.objects.none()
         else:
             qs = Notat.objects.all()
         # Inkluderer evt. filtrering på anmeldelse-id
@@ -1024,7 +1027,7 @@ class NotatAPI:
 
 
 class PrismeResponseIn(ModelSchema):
-    afgiftsanmeldelse_id: int = None
+    afgiftsanmeldelse_id: int | None = None
 
     class Config:
         model = PrismeResponse

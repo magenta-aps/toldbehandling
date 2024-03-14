@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: 2023 Magenta ApS <info@magenta.dk>
 #
 # SPDX-License-Identifier: MPL-2.0
+# mypy: disable-error-code="call-arg, attr-defined"
 from datetime import datetime
 from decimal import Decimal
 from typing import Optional
@@ -112,8 +113,8 @@ class AfgiftstabelAPI:
     def list_afgiftstabeller(
         self,
         filters: AfgiftstabelFilterSchema = Query(...),
-        sort: str = None,
-        order: str = None,
+        sort: str | None = None,
+        order: str | None = None,
     ):
         # https://django-ninja.rest-framework.com/guides/input/filtering/
         qs = filters.filter(Afgiftstabel.objects.all())
@@ -159,7 +160,7 @@ class AfgiftstabelAPI:
 
 class VareafgiftssatsIn(ModelSchema):
     afgiftstabel_id: int
-    overordnet_id: int = None
+    overordnet_id: int | None = None
 
     class Config:
         model = Vareafgiftssats
@@ -187,7 +188,7 @@ class VareafgiftssatsIn(ModelSchema):
 
 
 class PartialVareafgiftssatsIn(ModelSchema):
-    afgiftstabel_id: int = None
+    afgiftstabel_id: int | None = None
     overordnet_id: Optional[int] = None
 
     class Config:

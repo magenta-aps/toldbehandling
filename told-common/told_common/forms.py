@@ -394,7 +394,7 @@ class TF10VareForm(BootstrapForm):
             return self.parent_form.cleaned_data.get("kladde", False)
         return False
 
-    def clean_vareafgiftssats(self) -> int:
+    def clean_vareafgiftssats(self) -> int | None:
         # Get 'varekode' for selected vareafgiftssats
         vareafgiftssats_selected_id = self.cleaned_data["vareafgiftssats"]
         for id in self.varesatser.keys():
@@ -406,6 +406,7 @@ class TF10VareForm(BootstrapForm):
                 self.fields["vareafgiftssats"].error_messages["required"],
                 code="required",
             )
+        return None
 
     def clean_mængde(self) -> int:
         mængde = self.cleaned_data["mængde"]

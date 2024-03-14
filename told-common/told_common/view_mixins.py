@@ -93,6 +93,7 @@ class LoginRequiredMixin:
 class GroupRequiredMixin(LoginRequiredMixin):
     # Liste af gruppenavne som har tilladelse til at komme ind
     allowed_groups: Iterable[str] = ()
+    request: HttpRequest
 
     # Skal stemme overens med de grupper der oprettes i create_groups.py
     PRIVATINDBERETTERE = "PrivatIndberettere"
@@ -135,6 +136,7 @@ class GroupRequiredMixin(LoginRequiredMixin):
 class PermissionsRequiredMixin(LoginRequiredMixin):
     # Liste af permissions påkræves for adgang
     required_permissions: Iterable[str] = ()
+    request: HttpRequest
 
     # Som LoginRequiredMixin, men kræver også at brugeren har de rette Permissions
     def check(self) -> Optional[HttpResponse]:
@@ -163,9 +165,9 @@ class PermissionsRequiredMixin(LoginRequiredMixin):
     @classmethod
     def has_permissions(
         cls,
-        userdata: dict = None,
-        request: HttpRequest = None,
-        required_permissions: Iterable[str] = None,
+        userdata: dict | None = None,
+        request: HttpRequest | None = None,
+        required_permissions: Iterable[str] | None = None,
     ) -> bool:
         if userdata is None:
             if request is None:
@@ -203,7 +205,7 @@ class HasSystemRestClientMixin:
 
 
 class FormWithFormsetView(FormView):
-    formset_class = None
+    formset_class: Any = None
 
     def get_formset(self, formset_class=None):
         if formset_class is None:

@@ -4,11 +4,12 @@
 
 from django.template.defaultfilters import register
 from django.utils.translation import gettext_lazy as _
+from django_stubs_ext import StrPromise
 from told_common.data import Vareafgiftssats
 
 
 @register.filter
-def enhedsnavn(item: Vareafgiftssats.Enhed) -> str:
+def enhedsnavn(item: Vareafgiftssats.Enhed) -> StrPromise:
     if item == Vareafgiftssats.Enhed.KILOGRAM:
         return _("kilogram")
     if item == Vareafgiftssats.Enhed.LITER:

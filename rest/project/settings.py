@@ -189,7 +189,7 @@ PAYMENT_PROVIDER_BANK = "bank"
 
 # Logging
 
-LOGGING = {
+LOGGING: dict = {
     "version": 1,
     "disable_existing_loggers": True,
     "filters": {

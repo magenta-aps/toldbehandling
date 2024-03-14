@@ -3,7 +3,7 @@ from __future__ import annotations
 import csv
 from decimal import Context, Decimal
 from io import StringIO
-from typing import Callable, Dict, Iterable, List, Optional, Union
+from typing import Any, Callable, Dict, Iterable, List, Optional, Union
 
 from django.core.files.uploadedfile import UploadedFile
 from django.http import HttpResponse
@@ -21,7 +21,7 @@ class SpreadsheetExport:
     @staticmethod
     def render_xlsx(
         headers: Iterable[str],
-        items: Iterable[Iterable[Union[str, int, bool]]],
+        items: Iterable[Iterable],
         filename: str,
         column_widths: Optional[List[int]] = None,
     ) -> HttpResponse:
@@ -45,7 +45,7 @@ class SpreadsheetExport:
     @staticmethod
     def render_csv(
         headers: Iterable[str],
-        items: Iterable[Iterable[Union[str, int, bool]]],
+        items: Iterable[Iterable],
         filename: str,
     ) -> HttpResponse:
         response = HttpResponse(
@@ -65,7 +65,7 @@ class VareafgiftssatsSpreadsheetUtil:
         sats: Vareafgiftssats,
         headers: List[str],
         lookup_afgiftssats: Callable[[int], Vareafgiftssats],
-    ) -> List[Union[str, int, bool]]:
+    ) -> List:
         row = []
         for header in headers:
             value = getattr(sats, header, None)
@@ -94,7 +94,7 @@ class VareafgiftssatsSpreadsheetUtil:
     def parse_bool(value):
         return value.lower() in ("ja", "aap", "yes", "true", "1")
 
-    header_definitions = [
+    header_definitions: list[dict] = [
         {
             "label": "Afgiftsgruppenummer",
             "field": "afgiftsgruppenummer",
@@ -176,9 +176,7 @@ class VareafgiftssatsSpreadsheetUtil:
                 return x
 
     @staticmethod
-    def from_spreadsheet_row(
-        headers: List[str], row: List[Union[str, int, bool]]
-    ) -> Dict[str, Union[str, int, bool]]:
+    def from_spreadsheet_row(headers: List[str], row: list) -> Dict[str, Any]:
         data = {}
         for i, label in enumerate(headers):
             if label is not None:
@@ -201,7 +199,7 @@ class VareafgiftssatsSpreadsheetUtil:
         return data
 
     @staticmethod
-    def load_csv(data: UploadedFile) -> List[Dict[str, Union[str, int, bool]]]:
+    def load_csv(data: UploadedFile) -> List[dict]:
         d = data.read().decode("utf-8")
         reader = csv.reader(StringIO(d), delimiter=",", quotechar='"')
         headers = next(reader)
@@ -214,7 +212,7 @@ class VareafgiftssatsSpreadsheetUtil:
         return satser
 
     @staticmethod
-    def load_xlsx(data: UploadedFile) -> List[Dict[str, Union[str, int, bool]]]:
+    def load_xlsx(data: UploadedFile) -> List[dict]:
         wb = load_workbook(data, data_only=True)
         sheet = wb.active
         values = sheet.values
@@ -236,7 +234,7 @@ class VareafgiftssatsSpreadsheetUtil:
                 raise SpreadsheetImportException(f"Mangler kolonne med {label}")
 
     @staticmethod
-    def validate_satser(satser: List[Dict[str, Union[str, int, bool]]]):
+    def validate_satser(satser: List[Dict]):
         # Start enumeration ved 2 fordi rækkerne i regneark er
         # 1-indekserede og vi har en header-række
 

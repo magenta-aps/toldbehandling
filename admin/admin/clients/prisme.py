@@ -31,7 +31,9 @@ class PrismeHttpException(Exception):
 
 
 class PrismeConnectionException(Exception):
-    def __init__(self, message, code: int = None, inner_exception: Exception = None):
+    def __init__(
+        self, message, code: int | None = None, inner_exception: Exception | None = None
+    ):
         self.message = message
         self.code = code
         self.inner_exception = inner_exception
@@ -275,10 +277,9 @@ class PrismeClient:
 
     def create_request_body(self, xml: Union[str, List[str]]):
         item_class = self.client.get_type("tns:GWSRequestXMLDCFUJ")
-        if type(xml) is not list:
-            xml = [xml]
+        xml_list: list = [xml] if type(xml) is not list else xml
         container_class = self.client.get_type("tns:ArrayOfGWSRequestXMLDCFUJ")
-        return container_class(list([item_class(xml=x) for x in xml]))
+        return container_class(list([item_class(xml=x) for x in xml_list]))
 
     def send(
         self, request_object: PrismeRequestObject
@@ -356,7 +357,7 @@ def prisme_send_dummy(
 
 def send_afgiftsanmeldelse(
     afgiftsanmeldelse: Afgiftsanmeldelse,
-) -> List[CustomDutyResponse]:
+) -> List[CustomDutyResponse | PrismeResponseObject] | None:
     try:
         request = CustomDutyRequest(afgiftsanmeldelse)
         if settings.ENVIRONMENT != "production":

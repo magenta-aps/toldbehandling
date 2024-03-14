@@ -25,7 +25,7 @@ class ProviderPaymentNotFound(APIException):
     )
     default_code = "payment_provider_payment_not_found"
 
-    def __init__(self, payment_id: str, endpoint: str, endpoint_status: int):
+    def __init__(self, payment_id: str | None, endpoint: str, endpoint_status: int):
         self.detail = self.default_detail.format(
             payment_id=payment_id,
             endpoint=endpoint,
