@@ -29,6 +29,8 @@ from told_common.util import hash_file
 
 log = logging.getLogger(__name__)
 
+log = logging.getLogger(__name__)
+
 
 class LoginRequiredMixin:
     def needs_login(self, request):
