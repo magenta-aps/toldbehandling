@@ -43,6 +43,7 @@ from told_common.view_mixins import (
     HasRestClientMixin,
     LoginRequiredMixin,
     PermissionsRequiredMixin,
+    PreventDoubleSubmitMixin,
     TF5Mixin,
 )
 
@@ -107,7 +108,10 @@ class FragtbrevView(PermissionsRequiredMixin, FileView):
 
 
 class TF10FormCreateView(
-    PermissionsRequiredMixin, HasRestClientMixin, FormWithFormsetView
+    PermissionsRequiredMixin,
+    HasRestClientMixin,
+    PreventDoubleSubmitMixin,
+    FormWithFormsetView,
 ):
     form_class: Any = forms.TF10Form
     formset_class = forms.TF10VareFormSet
@@ -271,7 +275,11 @@ class TF10FormCreateView(
 
 
 class TF10FormUpdateView(
-    PermissionsRequiredMixin, HasRestClientMixin, CustomLayoutMixin, FormWithFormsetView
+    PermissionsRequiredMixin,
+    HasRestClientMixin,
+    CustomLayoutMixin,
+    PreventDoubleSubmitMixin,
+    FormWithFormsetView,
 ):
     required_permissions: Iterable[str] = (
         "aktør.view_afsender",
@@ -1016,7 +1024,11 @@ class TF5ListView(PermissionsRequiredMixin, HasRestClientMixin, TF5Mixin, ListVi
 
 
 class TF5UpdateView(
-    PermissionsRequiredMixin, HasRestClientMixin, TF5Mixin, FormWithFormsetView
+    PermissionsRequiredMixin,
+    HasRestClientMixin,
+    TF5Mixin,
+    PreventDoubleSubmitMixin,
+    FormWithFormsetView,
 ):
     extend_template: str
     required_permissions = (

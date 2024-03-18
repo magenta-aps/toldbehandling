@@ -349,7 +349,7 @@ class TF10Form(BootstrapForm):
             # Hvis vi ikke har en indførselstilladelse,
             # tjek om der er nogle varer der kræver det
             for subform in formset:
-                if self.varesatser:
+                if self.varesatser and "vareafgiftssats" in subform.cleaned_data:
                     varesats_id = subform.cleaned_data["vareafgiftssats"]
                     vareafgiftssats = self.varesatser[int(varesats_id)]
                     if vareafgiftssats.kræver_indførselstilladelse:

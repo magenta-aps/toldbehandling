@@ -4,6 +4,7 @@
 
 from __future__ import annotations
 
+import logging
 import time
 from functools import cached_property
 from typing import Any, Dict, Iterable, Optional
@@ -24,6 +25,9 @@ from requests import HTTPError
 from told_common.data import JwtTokenInfo
 from told_common.middleware import RestTokenUserMiddleware
 from told_common.rest_client import RestClient
+from told_common.util import hash_file
+
+log = logging.getLogger(__name__)
 
 
 class LoginRequiredMixin:
@@ -292,3 +296,34 @@ class TF5Mixin:
                 "hide_api_key_btn": True,
             }
         )
+
+
+class PreventDoubleSubmitMixin:
+    # Inspired by
+    # https://overtag.dk/v2/blog/duplicate-form-submissions-and-how-to-handle-them-in-django/
+    def post(self, request, *args, **kwargs):
+        session_form_hash = f"form-submission+{self.__class__.__name__}"
+
+        # Calculate hash of the POST data
+        excluded = {
+            "csrfmiddlewaretoken",
+        }
+        post_hash = hash(
+            tuple(
+                sorted(
+                    (k, v) for k, v in self.request.POST.items() if k not in excluded
+                )
+                + sorted((k, hash_file(v)) for k, v in self.request.FILES.items())
+            )
+        )
+
+        # Previously calculated hash
+        previous_post_hash = self.request.session.get(session_form_hash)
+
+        # Form has already been processed!
+        if post_hash == previous_post_hash:
+            log.info("Detekterede duplikeret form submission")
+            return HttpResponseRedirect(self.get_success_url())
+        else:
+            self.request.session[session_form_hash] = post_hash
+            return super().post(request, *args, **kwargs)
