@@ -3,10 +3,6 @@ from datetime import timedelta
 from django.utils.datetime_safe import date
 
 
-def dato_måned_start(dato: date) -> date:
-    return date(dato.year, dato.month, 1)
-
-
 def dato_næste_måned_start(dato: date) -> date:
     return date(
         dato.year + (1 if dato.month == 12 else 0),
