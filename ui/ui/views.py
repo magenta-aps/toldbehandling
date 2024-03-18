@@ -32,6 +32,7 @@ from told_common.view_mixins import (
     HasRestClientMixin,
     LoginRequiredMixin,
     PermissionsRequiredMixin,
+    PreventDoubleSubmitMixin,
     TF5Mixin,
 )
 
@@ -177,6 +178,7 @@ class TF5FormCreateView(
     HasRestClientMixin,
     UiViewMixin,
     TF5Mixin,
+    PreventDoubleSubmitMixin,
     FormWithFormsetView,
 ):
     form_class = common_forms.TF5Form

@@ -1,8 +1,10 @@
 import base64
 import dataclasses
+import hashlib
 from datetime import date, timedelta
 from decimal import ROUND_HALF_EVEN, Decimal
 from enum import Enum
+from functools import partial
 from typing import Any, BinaryIO, Callable, Dict, Iterable, Optional, Union
 
 import holidays
@@ -178,3 +180,10 @@ def multivaluedict_to_querydict(multivaluedict: dict[str, list] | None) -> Query
         for key in multivaluedict:
             query_dict.setlist(key, multivaluedict[key])
     return query_dict
+
+
+def hash_file(file):
+    hasher = hashlib.md5()
+    for buf in iter(partial(file.read, 65536), b""):
+        hasher.update(buf)
+    return hasher.hexdigest()
