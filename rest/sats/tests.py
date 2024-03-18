@@ -229,6 +229,11 @@ class VareafgiftssatsTest(RestTestMixin, TestCase):
             f"Vareafgiftssats(afgiftsgruppenummer={self.vareafgiftssats_data['afgiftsgruppenummer']}, afgiftssats={self.vareafgiftssats_data['afgiftssats']}, enhed={self.vareafgiftssats_data['enhed'].label})",
         )
 
+    def test_beregn_afgift_attr_error(self):
+        vareafgiftssats = Vareafgiftssats(enhed="something-invalid-here")
+        with self.assertRaises(AttributeError):
+            vareafgiftssats.beregn_afgift(None)
+
 
 class SatsAPITests(TestCase):
     @classmethod
