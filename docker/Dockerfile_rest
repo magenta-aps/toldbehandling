@@ -20,17 +20,22 @@ RUN pip install --no-cache-dir -r /app/requirements.txt
 # hadolint ignore=DL3008
 RUN apt-get update && \
     apt-get install -y --no-install-recommends gettext python3-distutils graphviz logrotate postgresql-client-common && \
-    apt-get clean && rm -rf /var/lib/apt/lists/* \
-    && curl -fsSLO "$SUPERCRONIC_URL" \
-    && echo "${SUPERCRONIC_SHA1SUM}  ${SUPERCRONIC}" | sha1sum -c - \
-    && chmod +x "$SUPERCRONIC" \
-    && mv "$SUPERCRONIC" "/usr/local/bin/${SUPERCRONIC}" \
-    && ln -s "/usr/local/bin/${SUPERCRONIC}" /usr/local/bin/supercronic \
-    # Postgres client 16 stufff \
-    && sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt bookworm-pgdg main" > /etc/apt/sources.list.d/pgdg.list' \
-    && curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor -o /etc/apt/trusted.gpg.d/postgresql.gpg \
-    && apt-get update \
-    && apt-get install -y --no-install-recommends postgresql-client-16
+    apt-get clean && rm -rf /var/lib/apt/lists/* && \
+    # supercronic
+    curl -fsSLO "$SUPERCRONIC_URL" && \
+    echo "${SUPERCRONIC_SHA1SUM}  ${SUPERCRONIC}" | sha1sum -c - && \
+    chmod +x "$SUPERCRONIC" && \
+    mv "$SUPERCRONIC" "/usr/local/bin/${SUPERCRONIC}" && \
+    ln -s "/usr/local/bin/${SUPERCRONIC}" /usr/local/bin/supercronic && \
+    # Postgres client 16 stuff \
+    sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt bookworm-pgdg main" > /etc/apt/sources.list.d/pgdg.list' && \
+    curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor -o /etc/apt/trusted.gpg.d/postgresql.gpg
+
+# dependencies
+# hadolint ignore=DL3008
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends postgresql-client-16 && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 
 RUN mkdir /upload && \
     chown -R toldbehandling /upload && \
