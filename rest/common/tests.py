@@ -1,5 +1,10 @@
-from common.models import EboksBesked
+from unittest.mock import MagicMock
+from uuid import uuid4
+
+from common.api import APIKeyAuth
+from common.models import EboksBesked, IndberetterProfile
 from django.test import TestCase
+from project.test_mixins import RestMixin
 
 
 class CommonModelsTests(TestCase):
@@ -39,3 +44,26 @@ class CommonModelsTests(TestCase):
                 b"df</FileExtension></Content></Dispatch>"
             ),
         )
+
+
+class CommonAPITests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.user_permissions = []
+        cls.user, cls.user_token, cls.user_refresh_token = RestMixin.make_user(
+            username="payment-test-user",
+            plaintext_password="testpassword1337",
+            permissions=cls.user_permissions,
+        )
+
+        cls.indberetter = IndberetterProfile.objects.create(
+            user=cls.user,
+            cvr="13371337",
+            api_key=uuid4(),
+        )
+
+    def test_APIKeyAuth_authenticate(self):
+        mock_request = MagicMock()
+        resp = APIKeyAuth().authenticate(mock_request, self.indberetter.api_key)
+        self.assertEqual(resp, self.user)
+        self.assertEqual(mock_request.user, self.user)
