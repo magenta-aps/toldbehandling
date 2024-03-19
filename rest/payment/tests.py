@@ -1042,3 +1042,33 @@ class PaymentManagementCommandTests(PaymentTest):
         )
         self.assertEqual(test_payment_1.status, "paid")
         self.assertEqual(test_payment_2.status, "paid")
+
+
+class PaymentUtilityTests(TestCase):
+    def test_generate_payment_item_from_varelinje_attr_error(self):
+        with self.assertRaises(AttributeError):
+            _ = generate_payment_item_from_varelinje(
+                Varelinje(
+                    vareafgiftssats=Vareafgiftssats(),
+                    mængde=None,
+                    antal=None,
+                )
+            )
+
+        with self.assertRaises(AttributeError):
+            _ = generate_payment_item_from_varelinje(
+                Varelinje(
+                    vareafgiftssats=None,
+                    mængde=1,
+                    antal=None,
+                )
+            )
+
+        with self.assertRaises(AttributeError):
+            _ = generate_payment_item_from_varelinje(
+                Varelinje(
+                    vareafgiftssats=None,
+                    mængde=None,
+                    antal=1,
+                )
+            )
