@@ -5,6 +5,7 @@
 from __future__ import annotations
 
 import logging
+import os
 import time
 from functools import cached_property
 from typing import Any, Dict, Iterable, Optional
@@ -322,8 +323,19 @@ class PreventDoubleSubmitMixin:
 
         # Form has already been processed!
         if post_hash == previous_post_hash:
-            log.info("Detekterede duplikeret form submission")
+            log.info(
+                "Detekterede duplikeret form submission (%d) (pid %d)",
+                post_hash,
+                os.getpid(),
+            )
             return HttpResponseRedirect(self.get_success_url())
         else:
+            log.info(
+                "Form submission ikke duplikeret "
+                "(gammel hash: %d, ny hash: %d) (pid: %d)",
+                previous_post_hash,
+                post_hash,
+                os.getpid(),
+            )
             self.request.session[session_form_hash] = post_hash
             return super().post(request, *args, **kwargs)

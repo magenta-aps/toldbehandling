@@ -150,7 +150,7 @@
             {% if can_edit_multiple %}
             <th class="col-1" data-field="select"><input type="checkbox" id="select_all"/></th>
             {% endif %}
-            <th class="col-1" data-sortable="true" data-field="id">{% translate "Nummer" %}</th>
+            <th class="col-1" data-sortable="true" data-field="id" data-formatter="idFormatter">{% translate "Nummer" %}</th>
             <th class="col-2" data-sortable="true" data-field="dato" data-formatter="datoFormatter">{% translate "Dato" %}</th>
             <th class="col-2" data-sortable="true" data-field="afsender" data-formatter="aktørFormatter">{% translate "Afsender" %}</th>
             <th class="col-2" data-sortable="true" data-field="modtager" data-formatter="aktørFormatter">{% translate "Modtager" %}</th>
@@ -166,7 +166,7 @@
                 {% include select_template with item=item %}
             </td>
             {% endif %}
-            <td>{{item.id}}</td>
+            <td>{{item.id|unlocalize}}</td>
             <td>{{item.dato|date:"c"}}</td>
             <td>{{item.afsender.navn|default_if_none:"-"}}</td>
             <td>{{item.modtager.navn|default_if_none:"-"}}</td>
@@ -225,6 +225,9 @@ function queryParams(params){  // Kaldes af bootstrap-table fordi vi peger på d
     }
 
     return params;
+}
+function idFormatter(value) {
+    return new String(value)
 }
 function aktørFormatter(value) {
     if (typeof(value) === "object") {
