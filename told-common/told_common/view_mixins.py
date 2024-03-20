@@ -331,7 +331,8 @@ class PreventDoubleSubmitMixin:
             return HttpResponseRedirect(self.get_success_url())
         else:
             log.info(
-                "Form submission ikke duplikeret (gammel hash: %d, ny hash: %d) (pid: %d)",
+                "Form submission ikke duplikeret "
+                "(gammel hash: %d, ny hash: %d) (pid: %d)",
                 previous_post_hash,
                 post_hash,
                 os.getpid(),
