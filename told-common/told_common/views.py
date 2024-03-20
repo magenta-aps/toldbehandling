@@ -157,15 +157,17 @@ class TF10FormCreateView(
         fragtfil = form.cleaned_data.get("fragtbrev")
         if fragtfil:
             log.info(
-                "Bruger '%s' opretter TF10 med fragtbrev %s (%s bytes)",
+                "Bruger '%s' opretter TF10 med fragtbrev %s (%s bytes) (pid %d)",
                 self.userdata["username"],
                 fragtfil.name,
                 fragtfil.size,
+                os.getpid(),
             )
         else:
             log.info(
-                "Bruger '%s' opretter TF10 uden at sætte fragtbrev",
+                "Bruger '%s' opretter TF10 uden at sætte fragtbrev (pid %d)",
                 self.userdata["username"],
+                os.getpid(),
             )
 
         fragtforsendelse_id = self.rest_client.fragtforsendelse.create(
