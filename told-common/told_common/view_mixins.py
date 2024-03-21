@@ -332,7 +332,7 @@ class PreventDoubleSubmitMixin:
         else:
             log.info(
                 "Form submission ikke duplikeret "
-                "(gammel hash: %d, ny hash: %d) (pid: %d)",
+                "(gammel hash: %s, ny hash: %d) (pid: %d)",
                 previous_post_hash,
                 post_hash,
                 os.getpid(),
