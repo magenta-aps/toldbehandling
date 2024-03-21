@@ -557,10 +557,3 @@ $(function () {
 $("input[readonly]").on("focus", function(){
     this.blur();
 });
-
-
-$(function() {
-    $('form').submit(function() {
-        $(this).find(':submit').attr('disabled', true);
-    });
-});
