@@ -12,6 +12,7 @@ from typing import Any, Dict, Iterable, Optional
 from urllib.parse import quote_plus
 
 from django.conf import settings
+from django.core.cache import cache
 from django.http import (
     HttpRequest,
     HttpResponse,
@@ -303,7 +304,8 @@ class PreventDoubleSubmitMixin:
     # Inspired by
     # https://overtag.dk/v2/blog/duplicate-form-submissions-and-how-to-handle-them-in-django/
     def post(self, request, *args, **kwargs):
-        session_form_hash = f"form-submission+{self.__class__.__name__}"
+        uid = request.session.get("user", {}).get("id", "?")
+        session_form_hash = f"form-submission+{self.__class__.__name__}+{uid}"
 
         # Calculate hash of the POST data
         excluded = {
@@ -319,7 +321,7 @@ class PreventDoubleSubmitMixin:
         )
 
         # Previously calculated hash
-        previous_post_hash = self.request.session.get(session_form_hash)
+        previous_post_hash = cache.get(session_form_hash)
 
         # Form has already been processed!
         if post_hash == previous_post_hash:
@@ -337,5 +339,5 @@ class PreventDoubleSubmitMixin:
                 post_hash,
                 os.getpid(),
             )
-            self.request.session[session_form_hash] = post_hash
+            cache.set(session_form_hash, post_hash, 10)
             return super().post(request, *args, **kwargs)

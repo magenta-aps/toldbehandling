@@ -186,6 +186,13 @@ STORAGES = {
     },
 }
 
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.db.DatabaseCache",
+        "LOCATION": "default_cache",
+    },
+}
+
 TILLÆGSAFGIFT_FAKTOR = 0.5
 EKSPEDITIONSGEBYR = 250
 

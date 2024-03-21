@@ -407,7 +407,6 @@ class TF10FormUpdateView(
                 self.userdata["username"],
                 self.anmeldelse_id,
             )
-        print(form.cleaned_data)
         self.rest_client.afgiftanmeldelse.update(
             self.anmeldelse_id,
             form.cleaned_data,
