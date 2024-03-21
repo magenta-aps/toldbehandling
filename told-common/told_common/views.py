@@ -333,7 +333,7 @@ class TF10FormUpdateView(
         """
         Return to previous page. Highlight the updated form and display a success msg.
         """
-        if self.request.GET.get("back") == "view":
+        if self.request.GET.get("back") == "view" and self.anmeldelse_id is not None:
             return reverse("tf10_view", kwargs={"id": self.anmeldelse_id})
         return reverse("tf10_list") + f"?highlight={self.anmeldelse_id}"
 
