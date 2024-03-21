@@ -106,6 +106,10 @@ LOGGING: dict = {
             "class": "logging.StreamHandler",
         },
     },
+    "root": {
+        "handlers": ["gunicorn"],
+        "level": "INFO",
+    },
     "loggers": {
         "django": {
             "handlers": ["gunicorn"],

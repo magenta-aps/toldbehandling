@@ -24,7 +24,9 @@ if [ "${MIGRATE,,}" = true ]; then
 fi
 
 echo 'collecting static files'
-./manage.py collectstatic --no-input --clear
+python manage.py collectstatic --no-input --clear
+
+python manage.py createcachetable
 
 if [ "${TEST,,}" = true ]; then
   echo 'running tests'
