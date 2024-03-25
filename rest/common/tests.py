@@ -9,6 +9,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase
 from django.urls import reverse
 from project.test_mixins import RestMixin
+from project.util import json_dump
 
 
 class CommonTest:
@@ -184,4 +185,39 @@ class CommonUserAPITests(CommonTest, TestCase):
         self.assertEqual(
             resp.json(),
             {"api_key": str(self.user2.indberetter_data.api_key)},
+        )
+
+    def test_create_user(self):
+        resp = self.client.post(
+            reverse("api-1.0.0:user_create"),
+            data=json_dump(
+                {
+                    "username": "test-user3",
+                    "password": "testpassword1337",
+                    "first_name": "Test",
+                    "last_name": "User",
+                    "email": "testuser3@magenta-aps.dk",
+                    "indberetter_data": {"cpr": 1122334455},
+                }
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+        )
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(
+            resp.json(),
+            {
+                "id": ANY,
+                "username": "test-user3",
+                "first_name": "Test",
+                "last_name": "User",
+                "email": "testuser3@magenta-aps.dk",
+                "is_superuser": False,
+                "groups": [],
+                "permissions": [],
+                "indberetter_data": {"cpr": 1122334455, "cvr": None},
+                "access_token": ANY,
+                "refresh_token": ANY,
+            },
         )
