@@ -1,8 +1,8 @@
-from unittest.mock import MagicMock
+from unittest.mock import ANY, MagicMock, patch
 from uuid import uuid4
 
 from anmeldelse.models import Afgiftsanmeldelse
-from common.api import APIKeyAuth, DjangoPermission
+from common.api import APIKeyAuth, DjangoPermission, UserOut, UserOutWithTokens
 from common.models import EboksBesked, IndberetterProfile
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
@@ -86,4 +86,39 @@ class CommonAPITests(TestCase):
         )
         self.assertEqual(
             permission.has_permission(MagicMock(user=self.user), MagicMock()), True
+        )
+
+    @patch("common.api.User.indberetter_data")
+    def test_UserOut_resolve_indberetter_data_has_attr(
+        self, mock_indberetter_data: MagicMock
+    ):
+        self.assertEqual(
+            UserOut.resolve_indberetter_data(self.user), mock_indberetter_data
+        )
+
+    def test_UserOutWithTokens_user_to_dict(self):
+        user_dict = UserOutWithTokens.user_to_dict(self.user)
+
+        self.assertEqual(
+            user_dict,
+            {
+                "id": self.user.id,
+                "username": "payment-test-user",
+                "first_name": "",
+                "last_name": "",
+                "email": "",
+                "is_superuser": False,
+                "groups": [],
+                "permissions": ["anmeldelse.view_afgiftsanmeldelse"],
+                "indberetter_data": IndberetterProfile(
+                    **{
+                        "id": self.indberetter.id,
+                        "user": self.user,
+                        "cpr": None,
+                        "cvr": "13371337",
+                    }
+                ),
+                "access_token": ANY,
+                "refresh_token": ANY,
+            },
         )
