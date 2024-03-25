@@ -14,6 +14,7 @@ from project.test_mixins import RestMixin
 class CommonTest:
     @classmethod
     def setUpTestData(cls):
+        # User-1 (CVR)
         cls.view_afgiftsanmeldelse_perm = Permission.objects.get(
             codename="view_afgiftsanmeldelse"
         )
@@ -27,6 +28,19 @@ class CommonTest:
         cls.indberetter = IndberetterProfile.objects.create(
             user=cls.user,
             cvr="13371337",
+            api_key=uuid4(),
+        )
+
+        # User-2 (CPR)
+        cls.user2, cls.user2_token, cls.user2_refresh_token = RestMixin.make_user(
+            username="payment-test-user2",
+            plaintext_password="testpassword1337",
+            permissions=[cls.view_afgiftsanmeldelse_perm],
+        )
+
+        cls.indberetter2 = IndberetterProfile.objects.create(
+            user=cls.user2,
+            cpr="1234567890",
             api_key=uuid4(),
         )
 
@@ -100,33 +114,6 @@ class CommonAPITests(CommonTest, TestCase):
             UserOut.resolve_indberetter_data(self.user), mock_indberetter_data
         )
 
-    def test_UserOutWithTokens_user_to_dict(self):
-        user_dict = UserOutWithTokens.user_to_dict(self.user)
-
-        self.assertEqual(
-            user_dict,
-            {
-                "id": self.user.id,
-                "username": "payment-test-user",
-                "first_name": "",
-                "last_name": "",
-                "email": "",
-                "is_superuser": False,
-                "groups": [],
-                "permissions": ["anmeldelse.view_afgiftsanmeldelse"],
-                "indberetter_data": IndberetterProfile(
-                    **{
-                        "id": self.indberetter.id,
-                        "user": self.user,
-                        "cpr": None,
-                        "cvr": "13371337",
-                    }
-                ),
-                "access_token": ANY,
-                "refresh_token": ANY,
-            },
-        )
-
 
 class CommonUserAPITests(CommonTest, TestCase):
     def test_get_user(self):
@@ -150,5 +137,30 @@ class CommonUserAPITests(CommonTest, TestCase):
                 "permissions": ["anmeldelse.view_afgiftsanmeldelse"],
                 "indberetter_data": {"cpr": None, "cvr": 13371337},
                 "twofactor_enabled": False,
+            },
+        )
+
+    def test_get_user_cpr(self):
+        resp = self.client.get(
+            reverse("api-1.0.0:user_cpr_get", args=[self.indberetter2.cpr]),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+        )
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(
+            resp.json(),
+            {
+                "id": 2,
+                "username": "payment-test-user2",
+                "first_name": "",
+                "last_name": "",
+                "email": "",
+                "is_superuser": False,
+                "groups": [],
+                "permissions": ["anmeldelse.view_afgiftsanmeldelse"],
+                "indberetter_data": {"cpr": 1234567890, "cvr": None},
+                "access_token": ANY,
+                "refresh_token": ANY,
             },
         )
