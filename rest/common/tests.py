@@ -7,7 +7,28 @@ from common.models import EboksBesked, IndberetterProfile
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase
+from django.urls import reverse
 from project.test_mixins import RestMixin
+
+
+class CommonTest:
+    @classmethod
+    def setUpTestData(cls):
+        cls.view_afgiftsanmeldelse_perm = Permission.objects.get(
+            codename="view_afgiftsanmeldelse"
+        )
+
+        cls.user, cls.user_token, cls.user_refresh_token = RestMixin.make_user(
+            username="payment-test-user",
+            plaintext_password="testpassword1337",
+            permissions=[cls.view_afgiftsanmeldelse_perm],
+        )
+
+        cls.indberetter = IndberetterProfile.objects.create(
+            user=cls.user,
+            cvr="13371337",
+            api_key=uuid4(),
+        )
 
 
 class CommonModelsTests(TestCase):
@@ -49,24 +70,7 @@ class CommonModelsTests(TestCase):
         )
 
 
-class CommonAPITests(TestCase):
-    @classmethod
-    def setUpTestData(cls):
-        cls.view_afgiftsanmeldelse_perm = Permission.objects.get(
-            codename="view_afgiftsanmeldelse"
-        )
-        cls.user, cls.user_token, cls.user_refresh_token = RestMixin.make_user(
-            username="payment-test-user",
-            plaintext_password="testpassword1337",
-            permissions=[cls.view_afgiftsanmeldelse_perm],
-        )
-
-        cls.indberetter = IndberetterProfile.objects.create(
-            user=cls.user,
-            cvr="13371337",
-            api_key=uuid4(),
-        )
-
+class CommonAPITests(CommonTest, TestCase):
     def test_APIKeyAuth_authenticate(self):
         mock_request = MagicMock()
         resp = APIKeyAuth().authenticate(mock_request, self.indberetter.api_key)
@@ -120,5 +124,31 @@ class CommonAPITests(TestCase):
                 ),
                 "access_token": ANY,
                 "refresh_token": ANY,
+            },
+        )
+
+
+class CommonUserAPITests(CommonTest, TestCase):
+    def test_get_user(self):
+        resp = self.client.get(
+            reverse("api-1.0.0:user_view"),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+        )
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(
+            resp.json(),
+            {
+                "id": self.user.id,
+                "username": "payment-test-user",
+                "first_name": "",
+                "last_name": "",
+                "email": "",
+                "is_superuser": False,
+                "groups": [],
+                "permissions": ["anmeldelse.view_afgiftsanmeldelse"],
+                "indberetter_data": {"cpr": None, "cvr": 13371337},
+                "twofactor_enabled": False,
             },
         )
