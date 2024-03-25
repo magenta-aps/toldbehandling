@@ -2,9 +2,9 @@ from unittest.mock import ANY, MagicMock, patch
 from uuid import uuid4
 
 from anmeldelse.models import Afgiftsanmeldelse
-from common.api import APIKeyAuth, DjangoPermission, UserOut, UserOutWithTokens
+from common.api import APIKeyAuth, DjangoPermission, UserOut
 from common.models import EboksBesked, IndberetterProfile
-from django.contrib.auth.models import Permission
+from django.contrib.auth.models import Permission, User
 from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase
 from django.urls import reverse
@@ -32,10 +32,18 @@ class CommonTest:
         )
 
         # User-2 (CPR)
+        cls.auth_read_apikeys = Permission.objects.create(
+            name="Kan læse API-nøgler",
+            codename="read_apikeys",
+            content_type=ContentType.objects.get_for_model(
+                User, for_concrete_model=False
+            ),
+        )
+
         cls.user2, cls.user2_token, cls.user2_refresh_token = RestMixin.make_user(
             username="payment-test-user2",
             plaintext_password="testpassword1337",
-            permissions=[cls.view_afgiftsanmeldelse_perm],
+            permissions=[cls.view_afgiftsanmeldelse_perm, cls.auth_read_apikeys],
         )
 
         cls.indberetter2 = IndberetterProfile.objects.create(
@@ -143,7 +151,7 @@ class CommonUserAPITests(CommonTest, TestCase):
     def test_get_user_cpr(self):
         resp = self.client.get(
             reverse("api-1.0.0:user_cpr_get", args=[self.indberetter2.cpr]),
-            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            HTTP_AUTHORIZATION=f"Bearer {self.user2_token}",
             content_type="application/json",
         )
 
@@ -151,16 +159,32 @@ class CommonUserAPITests(CommonTest, TestCase):
         self.assertEqual(
             resp.json(),
             {
-                "id": 2,
+                "id": self.user2.id,
                 "username": "payment-test-user2",
                 "first_name": "",
                 "last_name": "",
                 "email": "",
                 "is_superuser": False,
                 "groups": [],
-                "permissions": ["anmeldelse.view_afgiftsanmeldelse"],
+                "permissions": [
+                    "anmeldelse.view_afgiftsanmeldelse",
+                    "auth.read_apikeys",
+                ],
                 "indberetter_data": {"cpr": 1234567890, "cvr": None},
                 "access_token": ANY,
                 "refresh_token": ANY,
             },
+        )
+
+    def test_get_user_cpr_apikey(self):
+        resp = self.client.get(
+            reverse("api-1.0.0:user_cpr_get_apikey", args=[self.indberetter2.cpr]),
+            HTTP_AUTHORIZATION=f"Bearer {self.user2_token}",
+            content_type="application/json",
+        )
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(
+            resp.json(),
+            {"api_key": str(self.user2.indberetter_data.api_key)},
         )
