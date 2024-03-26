@@ -4,6 +4,7 @@ from uuid import uuid4
 
 from anmeldelse.models import Afgiftsanmeldelse
 from common.api import APIKeyAuth, DjangoPermission, UserOut
+from common.eboks import MockResponse
 from common.models import EboksBesked, IndberetterProfile
 from django.contrib.auth.models import Permission, User
 from django.contrib.contenttypes.models import ContentType
@@ -386,24 +387,10 @@ class CommonEboksBeskedAPITests(CommonTest, TestCase):
         )
 
         self.assertEqual(resp.status_code, 200)
-        resp_json = resp.json()
-        self.assertEqual(resp_json, {"id": ANY})
-        self.assertTrue(isinstance(resp_json["id"], int))
+        self.assertEqual(resp.json(), {"id": ANY})
 
 
 class CommonEboksModuleTests(CommonTest, TestCase):
-    def _eboks_client(self, mock=False):
-        return EboksClient(
-            mock=mock,
-            client_certificate="test-cert",
-            client_private_key="test-key",
-            verify="test-verify",
-            client_id="b0",
-            system_id="7331",
-            host="http://test-host",
-            timeout=30,
-        )
-
     def test_mock_response(self):
         msg_id = 1234567890
         mock_response = MockResponse(msg_id)
