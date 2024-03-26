@@ -7,7 +7,7 @@ from typing import Dict, List, Optional
 
 from common.models import EboksBesked, IndberetterProfile
 from django.contrib.auth.models import Group, User
-from django.http import HttpRequest, HttpResponseBadRequest
+from django.http import HttpRequest
 from django.shortcuts import get_object_or_404
 from django_otp.plugins.otp_totp.models import TOTPDevice
 from ninja import Field, ModelSchema
@@ -20,7 +20,6 @@ from ninja_extra import ControllerBase, api_controller, paginate, permissions, r
 from ninja_extra.schemas import NinjaPaginationResponseSchema
 from ninja_jwt.authentication import JWTAuth
 from ninja_jwt.tokens import RefreshToken
-from project.util import json_dump
 
 # Django-ninja har endnu ikke understøttelse for PATCH med filer i multipart/form-data
 # Se https://github.com/vitalik/django-ninja/pull/397
@@ -285,12 +284,7 @@ class EboksBeskedIn(ModelSchema):
 class EboksBeskedAPI:
     @route.post("", auth=get_auth_methods(), url_name="eboksbesked_create")
     def create_eboksbesked(self, payload: EboksBeskedIn):
-        try:
-            data = payload.dict()
-            data["pdf"] = base64.b64decode(payload.pdf)
-            item = EboksBesked.objects.create(**data)
-            return {"id": item.id}
-        except ValidationError as e:
-            return HttpResponseBadRequest(
-                json_dump(e.message_dict), content_type="application/json"
-            )
+        data = payload.dict()
+        data["pdf"] = base64.b64decode(payload.pdf)
+        item = EboksBesked.objects.create(**data)
+        return {"id": item.id}
