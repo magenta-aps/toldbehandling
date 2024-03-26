@@ -4,6 +4,7 @@ from uuid import uuid4
 
 from anmeldelse.models import Afgiftsanmeldelse
 from common.api import APIKeyAuth, DjangoPermission, UserOut
+from common.eboks import MockResponse
 from common.models import EboksBesked, IndberetterProfile
 from django.contrib.auth.models import Permission, User
 from django.contrib.contenttypes.models import ContentType
@@ -382,3 +383,25 @@ class CommonEboksBeskedAPITests(CommonTest, TestCase):
 
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.json(), {"id": ANY})
+
+
+class CommonEboksModuleTests(CommonTest, TestCase):
+    def test_mock_response(self):
+        msg_id = 1234567890
+        mock_response = MockResponse(msg_id)
+        self.assertEqual(
+            mock_response.json(),
+            {
+                "message_id": msg_id,
+                "recipients": [
+                    {
+                        "nr": "",
+                        "recipient_type": "cpr",
+                        "nationality": "Denmark",
+                        "status": "",
+                        "reject_reason": "",
+                        "post_processing_status": "",
+                    }
+                ],
+            },
+        )
