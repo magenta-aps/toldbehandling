@@ -1,3 +1,4 @@
+import base64
 from unittest.mock import ANY, MagicMock, patch
 from uuid import uuid4
 
@@ -6,6 +7,7 @@ from common.api import APIKeyAuth, DjangoPermission, UserOut
 from common.models import EboksBesked, IndberetterProfile
 from django.contrib.auth.models import Permission, User
 from django.contrib.contenttypes.models import ContentType
+from django.core.files import File
 from django.test import TestCase
 from django.urls import reverse
 from project.test_mixins import RestMixin
@@ -384,7 +386,9 @@ class CommonEboksBeskedAPITests(CommonTest, TestCase):
         )
 
         self.assertEqual(resp.status_code, 200)
-        self.assertEqual(resp.json(), {"id": ANY})
+        resp_json = resp.json()
+        self.assertEqual(resp_json, {"id": ANY})
+        self.assertTrue(isinstance(resp_json["id"], int))
 
 
 class CommonEboksModuleTests(CommonTest, TestCase):
