@@ -15,11 +15,12 @@ from project.util import json_dump
 class CommonTest:
     @classmethod
     def setUpTestData(cls):
-        # User-1 (CVR)
+        # PERMISSIONS
         cls.view_afgiftsanmeldelse_perm = Permission.objects.get(
             codename="view_afgiftsanmeldelse"
         )
 
+        # User-1 (CVR)
         cls.user, cls.user_token, cls.user_refresh_token = RestMixin.make_user(
             username="payment-test-user",
             plaintext_password="testpassword1337",
