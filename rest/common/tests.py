@@ -221,3 +221,38 @@ class CommonUserAPITests(CommonTest, TestCase):
                 "refresh_token": ANY,
             },
         )
+
+    def test_create_user_exceptions(self):
+        test_user = {
+            "username": "test-user3",
+            "password": "testpassword1337",
+            "first_name": "Test",
+            "last_name": "User",
+            "email": "testuser3@magenta-aps.dk",
+        }
+
+        resp = self.client.post(
+            reverse("api-1.0.0:user_create"),
+            data=json_dump({**test_user, "groups": ["test-group"]}),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+        )
+
+        self.assertEqual(resp.status_code, 422)
+        self.assertEqual(
+            resp.json(),
+            {"detail": "Group does not exist"},
+        )
+
+        resp = self.client.post(
+            reverse("api-1.0.0:user_create"),
+            data=json_dump(test_user),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+        )
+
+        self.assertEqual(resp.status_code, 422)
+        self.assertEqual(
+            resp.json(),
+            {"detail": "indberetter_data does not exist"},
+        )
