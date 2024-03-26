@@ -15,11 +15,12 @@ from project.util import json_dump
 class CommonTest:
     @classmethod
     def setUpTestData(cls):
-        # User-1 (CVR)
+        # PERMISSIONS
         cls.view_afgiftsanmeldelse_perm = Permission.objects.get(
             codename="view_afgiftsanmeldelse"
         )
 
+        # User-1 (CVR)
         cls.user, cls.user_token, cls.user_refresh_token = RestMixin.make_user(
             username="payment-test-user",
             plaintext_password="testpassword1337",
@@ -255,4 +256,108 @@ class CommonUserAPITests(CommonTest, TestCase):
         self.assertEqual(
             resp.json(),
             {"detail": "indberetter_data does not exist"},
+        )
+
+    def test_list(self):
+        resp = self.client.get(
+            reverse("api-1.0.0:user_list"),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+        )
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(
+            resp.json(),
+            {
+                "count": 2,
+                "items": [
+                    {
+                        "id": self.user.id,
+                        "username": "payment-test-user",
+                        "first_name": "",
+                        "last_name": "",
+                        "email": "",
+                        "is_superuser": False,
+                        "groups": [],
+                        "permissions": ["anmeldelse.view_afgiftsanmeldelse"],
+                        "indberetter_data": {"cpr": None, "cvr": 13371337},
+                        "twofactor_enabled": False,
+                    },
+                    {
+                        "id": self.user2.id,
+                        "username": "payment-test-user2",
+                        "first_name": "",
+                        "last_name": "",
+                        "email": "",
+                        "is_superuser": False,
+                        "groups": [],
+                        "permissions": [
+                            "anmeldelse.view_afgiftsanmeldelse",
+                            "auth.read_apikeys",
+                        ],
+                        "indberetter_data": {"cpr": 1234567890, "cvr": None},
+                        "twofactor_enabled": False,
+                    },
+                ],
+            },
+        )
+
+    def test_update(self):
+        resp = self.client.patch(
+            reverse("api-1.0.0:user_update", args=[self.indberetter2.cpr]),
+            data=json_dump(
+                {
+                    # NOTE: required by the payload, but not used in the handler
+                    "username": self.user2.username,
+                    "first_name": "Test",
+                    "last_name": "User",
+                    "email": self.user2.email,
+                    "indberetter_data": {"cvr": 1337133700},
+                }
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+        )
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(
+            resp.json(),
+            {
+                "id": self.user2.id,
+                "username": "payment-test-user2",
+                "first_name": "Test",
+                "last_name": "User",
+                "email": "",
+                "is_superuser": False,
+                "groups": [],
+                "permissions": [
+                    "anmeldelse.view_afgiftsanmeldelse",
+                    "auth.read_apikeys",
+                ],
+                "indberetter_data": {"cpr": 1234567890, "cvr": 1337133700},
+                "access_token": ANY,
+                "refresh_token": ANY,
+            },
+        )
+
+    def test_update_exceptions(self):
+        resp = self.client.patch(
+            reverse("api-1.0.0:user_update", args=[self.indberetter2.cpr]),
+            data=json_dump(
+                {
+                    # NOTE: required by the payload, but not used in the handler
+                    "username": self.user2.username,
+                    "first_name": "Test",
+                    "last_name": "User",
+                    "email": self.user2.email,
+                    "groups": ["test-group"],
+                }
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+        )
+
+        self.assertEqual(resp.status_code, 422)
+        self.assertEqual(
+            resp.json(),
+            {"detail": "Group does not exist"},
         )
