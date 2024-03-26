@@ -4,7 +4,7 @@ from uuid import uuid4
 
 from anmeldelse.models import Afgiftsanmeldelse
 from common.api import APIKeyAuth, DjangoPermission, UserOut
-from common.eboks import MockResponse
+from common.eboks import EboksClient, MockResponse
 from common.models import EboksBesked, IndberetterProfile
 from django.contrib.auth.models import Permission, User
 from django.contrib.contenttypes.models import ContentType
@@ -405,3 +405,35 @@ class CommonEboksModuleTests(CommonTest, TestCase):
                 ],
             },
         )
+
+    @patch("common.eboks.requests.session")
+    def test_eboks_client_get_client_info(self, mock_requests_session: MagicMock):
+        mock_request_resp = MagicMock(raise_for_status=MagicMock())
+        mock_request = MagicMock(return_value=mock_request_resp)
+        mock_requests_session.return_value = MagicMock(
+            request=mock_request,
+        )
+
+        eboks_client = EboksClient(
+            client_certificate="test-cert",
+            client_private_key="test-key",
+            verify="test-verify",
+            client_id="test-client-id",
+            system_id="test-system-id",
+            host="http://test-host",
+            timeout=30,
+        )
+
+        resp = eboks_client.get_client_info()
+
+        mock_requests_session.assert_called_once()
+        mock_request.assert_called_once_with(
+            "GET",
+            f"{eboks_client.host}/rest/client/{eboks_client.client_id}/",
+            None,
+            None,
+            timeout=eboks_client.timeout,
+        )
+        mock_request_resp.raise_for_status.assert_called_once()
+
+        self.assertEqual(resp, mock_request_resp)
