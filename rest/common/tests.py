@@ -1,3 +1,4 @@
+import base64
 from unittest.mock import ANY, MagicMock, patch
 from uuid import uuid4
 
@@ -6,6 +7,7 @@ from common.api import APIKeyAuth, DjangoPermission, UserOut
 from common.models import EboksBesked, IndberetterProfile
 from django.contrib.auth.models import Permission, User
 from django.contrib.contenttypes.models import ContentType
+from django.core.files import File
 from django.test import TestCase
 from django.urls import reverse
 from project.test_mixins import RestMixin
@@ -361,3 +363,22 @@ class CommonUserAPITests(CommonTest, TestCase):
             resp.json(),
             {"detail": "Group does not exist"},
         )
+
+
+class CommonEboksBeskedAPITests(CommonTest, TestCase):
+    def test_create_eboksbesked(self):
+        resp = self.client.post(
+            reverse("api-1.0.0:eboksbesked_create"),
+            data=json_dump(
+                {
+                    "titel": "test-besked",
+                    "cpr": 1234567890,
+                    "pdf": str(base64.b64encode(b"test-pdf-body")),
+                }
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+        )
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.json(), {"id": ANY})
