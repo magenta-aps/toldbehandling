@@ -4,7 +4,7 @@ from uuid import uuid4
 
 from anmeldelse.models import Afgiftsanmeldelse
 from common.api import APIKeyAuth, DjangoPermission, UserOut
-from common.eboks import MockResponse
+from common.eboks import EboksClient, MockResponse
 from common.models import EboksBesked, IndberetterProfile
 from django.contrib.auth.models import Permission, User
 from django.contrib.contenttypes.models import ContentType
