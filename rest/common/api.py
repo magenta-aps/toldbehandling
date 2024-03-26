@@ -240,7 +240,7 @@ class UserAPI:
     )
     @paginate()  # https://eadwincode.github.io/django-ninja-extra/tutorial/pagination/
     def list(self, filters: UserFilterSchema = Query(...)):  # type: ignore
-        return list(filters.filter(User.objects.all()))
+        return list(filters.filter(User.objects.all().order_by("id")))
 
     @route.patch(
         "/cpr/{cpr}",
