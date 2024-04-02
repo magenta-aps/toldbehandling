@@ -15,6 +15,8 @@ from project.test_mixins import RestMixin
 from project.util import json_dump
 from requests import HTTPError
 
+# Test helpers
+
 
 class CommonTest:
     @classmethod
@@ -57,6 +59,16 @@ class CommonTest:
             cpr="1234567890",
             api_key=uuid4(),
         )
+
+
+class CustomHTTPErrorResponseMock(MagicMock):
+    def __getattr__(self, name: str) -> ANY:
+        if name == "status_code":
+            raise AttributeError("test-attr-error")
+        return super().__getattr__(name)
+
+
+# TestCase(s)
 
 
 class CommonModelsTests(TestCase):
