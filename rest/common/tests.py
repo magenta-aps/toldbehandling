@@ -1,6 +1,6 @@
 import base64
 from unittest.mock import ANY, MagicMock, call, patch
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 from anmeldelse.models import Afgiftsanmeldelse
 from common.api import APIKeyAuth, DjangoPermission, UserOut
@@ -392,8 +392,9 @@ class CommonEboksBeskedAPITests(CommonTest, TestCase):
 
 
 class CommonEboksModuleTests(CommonTest, TestCase):
-    def _eboks_client(self):
+    def _eboks_client(self, mock=False):
         return EboksClient(
+            mock=mock,
             client_certificate="test-cert",
             client_private_key="test-key",
             verify="test-verify",
