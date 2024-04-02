@@ -398,8 +398,8 @@ class CommonEboksModuleTests(CommonTest, TestCase):
             client_certificate="test-cert",
             client_private_key="test-key",
             verify="test-verify",
-            client_id="test-client-id",
-            system_id="test-system-id",
+            client_id="b0",
+            system_id="7331",
             host="http://test-host",
             timeout=30,
         )
