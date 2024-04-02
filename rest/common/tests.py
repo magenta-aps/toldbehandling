@@ -1,5 +1,5 @@
 import base64
-from unittest.mock import ANY, MagicMock, patch
+from unittest.mock import ANY, MagicMock, call, patch
 from uuid import uuid4
 
 from anmeldelse.models import Afgiftsanmeldelse
@@ -13,6 +13,7 @@ from django.test import TestCase
 from django.urls import reverse
 from project.test_mixins import RestMixin
 from project.util import json_dump
+from requests import HTTPError
 
 
 class CommonTest:
@@ -391,6 +392,17 @@ class CommonEboksBeskedAPITests(CommonTest, TestCase):
 
 
 class CommonEboksModuleTests(CommonTest, TestCase):
+    def _eboks_client(self):
+        return EboksClient(
+            client_certificate="test-cert",
+            client_private_key="test-key",
+            verify="test-verify",
+            client_id="test-client-id",
+            system_id="test-system-id",
+            host="http://test-host",
+            timeout=30,
+        )
+
     def test_mock_response(self):
         msg_id = 1234567890
         mock_response = MockResponse(msg_id)
