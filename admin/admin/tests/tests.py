@@ -2085,11 +2085,12 @@ class AfgiftstabelDetailViewTest(PermissionsTest, TestCase):
                 "kladde": True,
             },
         )
+        prefix = f"{settings.REST_DOMAIN}/api/"
         patched_map = defaultdict(list)
         for url, data in self.patched:
             patched_map[url].append(json.loads(data))
         self.assertEquals(
-            patched_map["http://localhost:7000/api/afgiftstabel/1"],
+            patched_map[prefix + "afgiftstabel/1"],
             [
                 {
                     "kladde": "True",

@@ -683,7 +683,7 @@ class AfgiftstabelDetailView(AdminLayoutBaseView, FormView):
     form_class = forms.AfgiftstabelUpdateForm
 
     def get_context_data(self, **kwargs):
-        c = super().get_context_data(
+        return super().get_context_data(
             **{
                 **kwargs,
                 "object": self.item,
@@ -706,7 +706,6 @@ class AfgiftstabelDetailView(AdminLayoutBaseView, FormView):
                 ),
             }
         )
-        return c
 
     def get_initial(self):
         return {
