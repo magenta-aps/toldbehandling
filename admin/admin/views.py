@@ -709,7 +709,9 @@ class AfgiftstabelDetailView(AdminLayoutBaseView, FormView):
 
     def get_initial(self):
         return {
-            "gyldig_fra": self.item.gyldig_fra.strftime(self.form_class.format),
+            "gyldig_fra": self.item.gyldig_fra.strftime(self.form_class.format)
+            if self.item.gyldig_fra
+            else None,
             "kladde": self.item.kladde,
         }
 
