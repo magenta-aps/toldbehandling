@@ -8,7 +8,6 @@ from functools import cached_property
 from typing import Any, Dict, List, Optional, Set, Union
 from urllib.parse import quote_plus
 
-from dateutil.tz import tzoffset
 from django.conf import settings
 from django.contrib import messages
 from django.core.exceptions import ValidationError
