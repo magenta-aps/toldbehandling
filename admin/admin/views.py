@@ -8,6 +8,7 @@ from functools import cached_property
 from typing import Any, Dict, List, Optional, Set, Union
 from urllib.parse import quote_plus
 
+from dateutil.tz import tzoffset
 from django.conf import settings
 from django.contrib import messages
 from django.core.exceptions import ValidationError
@@ -683,7 +684,7 @@ class AfgiftstabelDetailView(AdminLayoutBaseView, FormView):
     form_class = forms.AfgiftstabelUpdateForm
 
     def get_context_data(self, **kwargs):
-        return super().get_context_data(
+        c = super().get_context_data(
             **{
                 **kwargs,
                 "object": self.item,
@@ -706,10 +707,11 @@ class AfgiftstabelDetailView(AdminLayoutBaseView, FormView):
                 ),
             }
         )
+        return c
 
     def get_initial(self):
         return {
-            "gyldig_fra": self.item.gyldig_fra,
+            "gyldig_fra": self.item.gyldig_fra.strftime(self.form_class.format),
             "kladde": self.item.kladde,
         }
 

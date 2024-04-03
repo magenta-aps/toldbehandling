@@ -29,14 +29,38 @@
                         {% if can_edit %}
                         {{form.gyldig_fra}}
                         {{form.gyldig_fra.errors}}
+                        {{form.offset}}
+                        <script>
+                            const gyldig_fra = $("[name={{form.gyldig_fra.name}}]");
+                            const offset = $("[name={{form.offset.name}}]");
+                            const onUpdate = function () {
+                                {# Sometimes the value doesn't get updated if we don't use setTimeout #}
+                                setTimeout(function () {
+                                    const timeObj = gyldig_fra.datetimepicker("viewDate");
+                                    offset.val(timeObj.utcOffset());
+                                }, 0);
+                            };
+                            onUpdate();
+                            gyldig_fra.on("change update.datetimepicker", onUpdate);
+                        </script>
                         {% else %}
-                        {{object.gyldig_fra|default_if_none:"-"}}
+                        {% if object.gyldig_fra is not None %}
+                        <span data-format-time="local">{{object.gyldig_fra|date:'c'}}</span>
+                        {% else %}
+                        -
+                        {% endif %}
                         {% endif %}
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-2"><label>{% translate "Gyldig til" %}</label></div>
-                    <div class="col-10">{{object.gyldig_til|default_if_none:"-"}}</div>
+                    <div class="col-10">
+                        {% if object.gyldig_til is not None %}
+                        <span data-format-time="local">{{object.gyldig_til|date:'c'}}</span>
+                        {% else %}
+                        -
+                        {% endif %}
+                    </div>
                 </div>
                 {% if can_approve_drafts %}
                 <div class="row">
@@ -181,4 +205,5 @@
     </div>
     {% endif %}
 </form>
+
 {% endblock %}
