@@ -44,6 +44,7 @@ from told_common.views import FileView, FragtbrevView
 from admin.clients.prisme import CustomDutyResponse, PrismeClient, prisme_send_dummy
 from admin.forms import TF10CreateForm
 from admin.views import (
+    AfgiftstabelDetailView,
     AfgiftstabelDownloadView,
     AfgiftstabelListView,
     StatistikView,
@@ -1950,6 +1951,154 @@ class AfgiftstabelListViewTest(PermissionsTest, TestCase):
             numbers = [int(item["id"]) for item in response.json()["items"]]
             self.assertEquals(response.status_code, 200)
             self.assertEquals(numbers, expected)
+
+
+class AfgiftstabelDetailViewTest(PermissionsTest, TestCase):
+    view = AfgiftstabelDetailView
+    check_permissions = (
+        (reverse("afgiftstabel_view", kwargs={"id": 1}), view.required_permissions),
+    )
+
+    def setUp(self):
+        super().setUp()
+        self.patched: List[Tuple[str, str]] = []
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.afgiftstabel1 = {
+            "id": 1,
+            "gyldig_fra": "2022-01-01T00:00:00-03:00",
+            "gyldig_til": None,
+            "kladde": True,
+        }
+        cls.afgiftstabel2 = {
+            "id": 1,
+            "gyldig_fra": "2022-01-01T00:00:00-03:00",
+            "gyldig_til": None,
+            "kladde": False,
+        }
+        cls.afgiftssatser = [
+            {
+                "id": 1,
+                "afgiftstabel": 1,
+                "afgiftsgruppenummer": 70,
+                "vareart_da": "FYRVÆRKERI",
+                "vareart_kl": "FYRVÆRKERI",
+                "enhed": "pct",
+                "minimumsbeløb": False,
+                "afgiftssats": "100.00",
+                "kræver_indførselstilladelse": False,
+                "har_privat_tillægsafgift_alkohol": False,
+            },
+        ]
+
+    def mock_requests_get(self, path):
+        expected_prefix = "/api/"
+        p = urlparse(path)
+        path = p.path
+        query = parse_qs(p.query)
+        path = path.rstrip("/")
+        response = Response()
+        json_content = None
+        content = None
+        status_code = None
+        if path == expected_prefix + "afgiftstabel/1":
+            json_content = self.afgiftstabel1
+        if path == expected_prefix + "afgiftstabel/2":
+            json_content = self.afgiftstabel2
+        if path == expected_prefix + "vareafgiftssats":
+            json_content = {
+                "count": len(self.afgiftssatser),
+                "items": self.afgiftssatser,
+            }
+        if json_content:
+            content = json.dumps(json_content).encode("utf-8")
+        if content:
+            if not status_code:
+                status_code = 200
+            response._content = content
+        response.status_code = status_code or 404
+        return response
+
+    def mock_requests_patch(self, path, data, headers=None):
+        print("mock_requests_patch")
+        expected_prefix = f"{settings.REST_DOMAIN}/api/"
+        path = path.rstrip("/")
+        response = Response()
+        json_content = None
+        content = None
+        status_code = None
+        if path == expected_prefix + "afgiftstabel/1":
+            json_content = {"id": 1}
+            self.patched.append((path, data))
+        else:
+            raise Exception(
+                f"Mock {self.__class__.__name__} got unrecognized path: PATCH {path}"
+            )
+        if json_content:
+            content = json.dumps(json_content).encode("utf-8")
+        if content:
+            if not status_code:
+                status_code = 200
+            response._content = content
+        response.status_code = status_code or 404
+        return response
+
+    def parse_form_row(self, soup, class_):
+        row = soup.find("form").find("div", class_=class_)
+        return list(
+            filter(
+                lambda x: len(x),
+                [
+                    [x.strip() for x in cell.strings if x.strip()]
+                    for cell in row.children
+                ],
+            )
+        )
+
+    @patch.object(requests.sessions.Session, "get")
+    def test_datetime_show(self, mock_get):
+        mock_get.side_effect = self.mock_requests_get
+        self.login()
+        response = self.client.get(reverse("afgiftstabel_view", kwargs={"id": 2}))
+        soup = BeautifulSoup(response.content, "html.parser")
+        self.assertEquals(
+            self.parse_form_row(soup, "gyldig_fra"),
+            [["Gyldig fra"], ["2022-01-01T00:00:00-03:00"]],
+        )
+        self.assertEquals(
+            self.parse_form_row(soup, "gyldig_til"), [["Gyldig til"], ["-"]]
+        )
+
+    @patch.object(requests.sessions.Session, "get")
+    @patch.object(requests.sessions.Session, "patch")
+    def test_datetime_update(self, mock_patch, mock_get):
+        mock_get.side_effect = self.mock_requests_get
+        mock_patch.side_effect = self.mock_requests_patch
+        self.login()
+        self.client.post(
+            reverse("afgiftstabel_view", kwargs={"id": 1}),
+            {
+                "gyldig_fra": "11/01/2025 00:00",
+                "offset": "60",
+                "kladde": True,
+            },
+        )
+        patched_map = defaultdict(list)
+        for url, data in self.patched:
+            patched_map[url].append(json.loads(data))
+        self.assertEquals(
+            patched_map["http://localhost:7000/api/afgiftstabel/1"],
+            [
+                {
+                    "kladde": "True",
+                    "gyldig_fra": "2025-01-11T00:00:00+01:00",
+                    "offset": 60,
+                    "delete": False,
+                }
+            ],
+        )
 
 
 class AfgiftstabelDownloadTest(PermissionsTest, TestCase):
