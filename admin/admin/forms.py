@@ -5,8 +5,9 @@
 from datetime import datetime, timezone
 from typing import List
 
+import django.utils.timezone as tz
+from dateutil.tz import tzoffset
 from django import forms
-from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.forms import formset_factory
 from django.utils.translation import gettext_lazy as _
@@ -15,7 +16,6 @@ from tempus_dominus.widgets import DateTimePicker
 from told_common import forms as common_forms
 from told_common.form_mixins import (
     BootstrapForm,
-    ButtonlessIntegerField,
     DateInput,
     FixedWidthIntegerField,
     MaxSizeFileField,
@@ -176,6 +176,8 @@ class AfgiftstabelSearchForm(ListForm):
 
 
 class AfgiftstabelUpdateForm(BootstrapForm):
+    format = "%Y-%m-%dT%H:%M:%S%z"
+
     kladde = forms.ChoiceField(
         required=False, choices=((True, _("Ja")), (False, _("Nej")))
     )
@@ -185,12 +187,14 @@ class AfgiftstabelUpdateForm(BootstrapForm):
         input_formats=["%d/%m/%Y %H:%M"],
         required=False,
         widget=lambda form: DateTimePicker(
+            format=form.format,
             options={
                 "minDate": datetime.now().isoformat(),
                 "sideBySide": True,
-            }
+            },
         ),
     )
+    offset = forms.IntegerField(required=False, widget=forms.HiddenInput)
     delete = forms.BooleanField(required=False)
 
     def clean(self, *args, **kwargs):
@@ -205,6 +209,23 @@ class AfgiftstabelUpdateForm(BootstrapForm):
                             "required",
                         ),
                     )
+        gyldig_fra = data.get("gyldig_fra")
+        if gyldig_fra:
+            # Django modtager en naiv datetime fra klienten,
+            # som den sætter settings.TIME_ZONE på
+            # Vi skal erstatte den tidszone med det offset vi
+            # får i et separat felt, så det kommer til at passe
+            offset = data.get("offset")
+            if offset in (None, ""):
+                zone = tz.get_default_timezone()
+                gyldig_fra = zone.make_aware(gyldig_fra)
+            else:
+                gyldig_fra = datetime.combine(
+                    gyldig_fra.date(),
+                    gyldig_fra.time(),
+                    tzoffset("offset", offset * 60),
+                )
+            data["gyldig_fra"] = gyldig_fra
         return data
 
     def clean_gyldig_fra(self):
