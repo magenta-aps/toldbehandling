@@ -17,7 +17,7 @@ from unittest.mock import mock_open, patch
 from urllib.parse import parse_qs, quote, quote_plus, urlparse
 
 import requests
-from bs4 import BeautifulSoup, NavigableString, Tag
+from bs4 import BeautifulSoup, Tag
 from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.shortcuts import redirect
@@ -39,9 +39,9 @@ from told_common.tests import (
     TestMixin,
     modify_values,
 )
-from told_common.views import FileView, FragtbrevView
+from told_common.views import FragtbrevView
 
-from admin.clients.prisme import CustomDutyResponse, PrismeClient, prisme_send_dummy
+from admin.clients.prisme import PrismeClient, prisme_send_dummy
 from admin.forms import TF10CreateForm
 from admin.views import (
     AfgiftstabelDetailView,
