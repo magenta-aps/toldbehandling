@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: MPL-2.0
 # mypy: disable-error-code="call-arg, attr-defined"
 
-from typing import Callable, Dict, List, Tuple
+from typing import Callable, List, Tuple
 
 from anmeldelse.models import PrivatAfgiftsanmeldelse, Varelinje
 from common.api import get_auth_methods
@@ -212,7 +212,7 @@ def _payment_field_converters(
 
 def _payment_model_to_response(
     payment_model: Payment,
-    field_converts: Dict[str, Callable[[str | int], Tuple[str, str]]] | None,
+    field_converts: dict[str, Callable[[str | int], Tuple[str, str]]] | None,
 ) -> PaymentResponse:
     payment_local_dict = model_to_dict(payment_model)
 

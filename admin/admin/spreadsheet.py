@@ -1,15 +1,13 @@
 from __future__ import annotations
 
 import csv
-from decimal import Context, Decimal
 from io import StringIO
-from typing import Any, Callable, Dict, Iterable, List, Optional, Union
+from typing import Callable, Iterable, List, Optional
 
 from django.core.files.uploadedfile import UploadedFile
 from django.http import HttpResponse
 from openpyxl import Workbook, load_workbook
 from openpyxl.utils import get_column_letter
-from openpyxl.worksheet.dimensions import ColumnDimension, DimensionHolder
 from told_common.data import Vareafgiftssats, format_decimal, unformat_decimal
 
 
@@ -176,7 +174,7 @@ class VareafgiftssatsSpreadsheetUtil:
                 return x
 
     @staticmethod
-    def from_spreadsheet_row(headers: List[str], row: list) -> Dict[str, Any]:
+    def from_spreadsheet_row(headers: List[str], row: list) -> dict:
         data = {}
         for i, label in enumerate(headers):
             if label is not None:
@@ -234,7 +232,7 @@ class VareafgiftssatsSpreadsheetUtil:
                 raise SpreadsheetImportException(f"Mangler kolonne med {label}")
 
     @staticmethod
-    def validate_satser(satser: List[Dict]):
+    def validate_satser(satser: List[dict]):
         # Start enumeration ved 2 fordi rækkerne i regneark er
         # 1-indekserede og vi har en header-række
 

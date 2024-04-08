@@ -5,7 +5,7 @@
 from datetime import datetime, timezone
 from decimal import Context, Decimal
 from functools import cached_property
-from typing import Any, Dict, List, Optional, Set, Union
+from typing import Any, List, Optional, Set, Union
 from urllib.parse import quote_plus
 
 from django.conf import settings
@@ -412,7 +412,7 @@ class TF10HistoryListView(AdminLayoutBaseView, common_views.ListView):
             }
         )
 
-    def get_items(self, search_data: Dict[str, Any]):
+    def get_items(self, search_data: dict):
         id = self.kwargs["id"]
         self.notater = {
             item.index: item
@@ -421,9 +421,7 @@ class TF10HistoryListView(AdminLayoutBaseView, common_views.ListView):
         count, items = self.rest_client.afgiftanmeldelse.list_history(id)
         return {"count": count, "items": items}
 
-    def item_to_json_dict(
-        self, item: Dict[str, Any], context: Dict[str, Any], index: int
-    ) -> Dict[str, Any]:
+    def item_to_json_dict(self, item: dict, context: dict, index: int) -> dict:
         return {
             key: self.map_value(item, key, context, index)
             for key in ("history_username", "history_date", "notat", "actions")
@@ -534,7 +532,7 @@ class TF10EditMultipleView(AdminLayoutBaseView, FormView):
         kwargs["fragttype"] = self.fælles_fragttype
         return kwargs
 
-    def get_context_data(self, **context: Dict[str, Any]) -> Dict[str, Any]:
+    def get_context_data(self, **context: dict) -> dict:
         return super().get_context_data(
             **{
                 **context,
@@ -827,13 +825,13 @@ class AfgiftstabelCreateView(AdminLayoutBaseView, FormView):
         self.save(satser)
         return super().form_valid(form)
 
-    def save(self, satser: List[Dict[str, Union[str, int, bool]]]) -> int:
+    def save(self, satser: List[dict[str, str | int | bool]]) -> int:
         tabel_id = self.rest_client.afgiftstabel.create({})
         afgiftsgruppenummer_to_id: dict = {}
         by_afgiftsgruppenummer = {x["afgiftsgruppenummer"]: x for x in satser}
 
         # Sørg for at vi opretter alle overordnede før deres underordnede
-        def save_one(vareafgiftssats: Dict[str, Union[str, int, bool]]):
+        def save_one(vareafgiftssats: dict[str, str | int | bool]):
             afgiftsgruppenummer = vareafgiftssats["afgiftsgruppenummer"]
             if afgiftsgruppenummer not in afgiftsgruppenummer_to_id:
                 overordnet = vareafgiftssats["overordnet"]
@@ -856,7 +854,7 @@ class TF5ListView(AdminLayoutBaseView, common_views.TF5ListView):
     actions_template = "admin/blanket/tf5/actions.html"
     form_class = forms.TF5SearchForm
 
-    def get_context_data(self, **context: Dict[str, Any]) -> Dict[str, Any]:
+    def get_context_data(self, **context: dict) -> dict:
         return super().get_context_data(
             **{
                 **context,
@@ -952,7 +950,7 @@ class StatistikView(AdminLayoutBaseView, FormWithFormsetView):
     def satser(self):
         return self.rest_client.vareafgiftssats.list()
 
-    def get_formset_kwargs(self) -> Dict[str, Any]:
+    def get_formset_kwargs(self) -> dict:
         kwargs = super().get_formset_kwargs()
         # The form_kwargs dict is passed as kwargs to subforms in the formset
         if "form_kwargs" not in kwargs:

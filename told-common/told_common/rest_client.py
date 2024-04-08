@@ -9,7 +9,7 @@ from base64 import b64encode
 from collections import defaultdict
 from datetime import datetime, timedelta, timezone
 from functools import cached_property
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import List, Optional, Tuple, Union
 from urllib.parse import unquote, urlencode
 
 import requests
@@ -1016,7 +1016,7 @@ class RestClient:
         self.session.headers = {"Authorization": f"Bearer {self.token.access_token}"}
 
     @classmethod
-    def login_saml_user(cls, saml_data: dict) -> Tuple[Dict, JwtTokenInfo]:
+    def login_saml_user(cls, saml_data: dict) -> Tuple[dict, JwtTokenInfo]:
         cpr = saml_data["cpr"]
         cvr = saml_data.get("cvr")
         client = RestClient(RestClient.login("system", settings.SYSTEM_USER_PASSWORD))
@@ -1120,9 +1120,7 @@ class RestClient:
                 [b64encode(chunk).decode("ascii") for chunk in file.chunks(48 * 1024)]
             )
 
-    def get_all_items(
-        self, route: str, filter: Optional[Dict[str, Any]] = None
-    ) -> Dict[int, dict]:
+    def get_all_items(self, route: str, filter: dict | None = None) -> dict[int, dict]:
         limit = 100
         offset = 0
         items = []
@@ -1139,14 +1137,14 @@ class RestClient:
         return {item["id"]: item for item in items}
 
     @cached_property
-    def varesatser(self) -> Dict[int, Vareafgiftssats]:
+    def varesatser(self) -> dict[int, Vareafgiftssats]:
         return self.varesatser_fra(datetime.now(timezone.utc))
 
     @cached_property
-    def varesatser_privat(self) -> Dict[int, Vareafgiftssats]:
+    def varesatser_privat(self) -> dict[int, Vareafgiftssats]:
         return self.varesatser_fra(datetime.now(timezone.utc), synlig_privat=True)
 
-    def varesatser_fra(self, at: datetime, **filter) -> Dict[int, Vareafgiftssats]:
+    def varesatser_fra(self, at: datetime, **filter) -> dict[int, Vareafgiftssats]:
         datestring = at.isoformat()
         afgiftstabeller = self.get(
             "afgiftstabel",
@@ -1169,7 +1167,7 @@ class RestClient:
 
     def varesatser_all(
         self, filter_afgiftstabel=None, filter_varesats=None
-    ) -> Dict[int, Vareafgiftssats]:
+    ) -> dict[int, Vareafgiftssats]:
         if filter_afgiftstabel is None:
             filter_afgiftstabel = {}
         if filter_varesats is None:
@@ -1192,9 +1190,9 @@ class RestClient:
         return varesatser
 
     @cached_property
-    def afsendere(self) -> Dict[int, dict]:
+    def afsendere(self) -> dict[int, dict]:
         return self.get_all_items("afsender")
 
     @cached_property
-    def modtagere(self) -> Dict[int, dict]:
+    def modtagere(self) -> dict[int, dict]:
         return self.get_all_items("modtager")

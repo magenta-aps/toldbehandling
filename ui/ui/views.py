@@ -6,7 +6,6 @@ import os
 from datetime import date, datetime, timezone
 from functools import cached_property
 from io import BytesIO
-from typing import Any, Dict
 
 from django.conf import settings
 from django.contrib import messages
@@ -284,7 +283,7 @@ class TF5FormCreateView(
         initial["anonym"] = False
         return kwargs
 
-    def get_formset_kwargs(self) -> Dict[str, Any]:
+    def get_formset_kwargs(self) -> dict:
         kwargs = super().get_formset_kwargs()
         # The form_kwargs dict is passed as kwargs to subforms in the formset
         if "form_kwargs" not in kwargs:
@@ -293,7 +292,7 @@ class TF5FormCreateView(
         kwargs["form_kwargs"]["varesatser"] = self.toplevel_varesatser
         return kwargs
 
-    def get_context_data(self, **context: Dict[str, Any]) -> Dict[str, Any]:
+    def get_context_data(self, **context: dict) -> dict:
         context = super().get_context_data(
             **{
                 **context,
@@ -326,7 +325,7 @@ class TF5FormCreateView(
 class TF5ListView(UiViewMixin, common_views.TF5ListView):
     actions_template = "ui/tf5/actions.html"
 
-    def get_context_data(self, **context: Dict[str, Any]) -> Dict[str, Any]:
+    def get_context_data(self, **context: dict) -> dict:
         return super().get_context_data(
             **{
                 **context,

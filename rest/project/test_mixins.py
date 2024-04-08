@@ -10,7 +10,7 @@ from datetime import date, datetime, timedelta, timezone
 from decimal import Decimal, InvalidOperation
 from enum import Enum
 from itertools import chain
-from typing import Any, Dict, List, Tuple, Union
+from typing import Any, List, Tuple, Union
 from urllib.parse import unquote, urlencode
 
 from aktør.models import Afsender, Modtager
@@ -221,9 +221,7 @@ class RestMixin:
         return ()
 
     @classmethod
-    def model_to_dict_forced(
-        cls, instance: Model, fields=None, exclude=None
-    ) -> Dict[str, Any]:
+    def model_to_dict_forced(cls, instance: Model, fields=None, exclude=None) -> dict:
         """
         Same as django's model_to_dict, except we include non-editable fields
         """
@@ -264,7 +262,7 @@ class RestMixin:
         return RestMixin.traverse(cls.model_to_dict_forced(item), format_value)
 
     @classmethod
-    def filter_keys(cls, item: Dict[str, Any], keys: List[str]) -> Dict[str, Any]:
+    def filter_keys(cls, item: dict, keys: List[str]) -> dict:
         if not keys:
             return item
         keyset = set(keys)
@@ -311,7 +309,7 @@ class RestMixin:
         raise AssertionError(msg + f" {itemlist}\n vs \n{item}")
 
     @classmethod
-    def strip_id(cls, item: Dict[str, Any]) -> Dict[str, Any]:
+    def strip_id(cls, item: dict) -> dict:
         return {re.sub("_id$", "", key): value for key, value in item.items()}
 
     @classmethod

@@ -12,7 +12,7 @@ from copy import deepcopy
 from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from io import BytesIO, StringIO
-from typing import Dict, List, Tuple
+from typing import List, Tuple
 from unittest.mock import mock_open, patch
 from urllib.parse import parse_qs, quote, quote_plus, urlparse
 
@@ -1891,7 +1891,7 @@ class AfgiftstabelListViewTest(PermissionsTest, TestCase):
         )
 
     @staticmethod
-    def strip_html_tags(data: Dict) -> Dict:
+    def strip_html_tags(data: dict) -> dict:
         # Tag table_data og fjern alle html-tags i alle streng-values. Join med mellemrum.
         return modify_values(
             data,

@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: MPL-2.0
 # mypy: disable-error-code="call-arg, attr-defined"
 import base64
-from typing import Dict, List, Optional
+from typing import List, Optional
 
 from common.models import EboksBesked, IndberetterProfile
 from django.contrib.auth.models import Group, User
@@ -135,7 +135,7 @@ class UserOutWithTokens(Schema):
     refresh_token: Optional[str]
 
     @staticmethod
-    def user_to_dict(user: User) -> Dict:
+    def user_to_dict(user: User) -> dict:
         refresh_token = RefreshToken.for_user(user)
         return {
             "id": user.pk,

@@ -6,7 +6,7 @@ import logging
 import os
 from datetime import date
 from functools import cached_property
-from typing import Any, Callable, Dict, Iterable, List
+from typing import Any, Callable, Iterable, List
 from urllib.parse import unquote
 
 from django.conf import settings
@@ -246,7 +246,7 @@ class TF10FormCreateView(
         )
         return kwargs
 
-    def get_formset_kwargs(self) -> Dict[str, Any]:
+    def get_formset_kwargs(self) -> dict:
         kwargs = super().get_formset_kwargs()
         # The form_kwargs dict is passed as kwargs to subforms in the formset
         if "form_kwargs" not in kwargs:
@@ -255,7 +255,7 @@ class TF10FormCreateView(
         kwargs["form_kwargs"]["varesatser"] = self.toplevel_varesatser
         return kwargs
 
-    def get_context_data(self, **context) -> Dict[str, Any]:
+    def get_context_data(self, **context) -> dict:
         context = super().get_context_data(
             **{
                 **context,
@@ -492,7 +492,7 @@ class TF10FormUpdateView(
         )
         return kwargs
 
-    def get_formset_kwargs(self) -> Dict[str, Any]:
+    def get_formset_kwargs(self) -> dict:
         kwargs = super().get_formset_kwargs()
         # The form_kwargs dict is passed as kwargs to subforms in the formset
         if "form_kwargs" not in kwargs:
@@ -509,7 +509,7 @@ class TF10FormUpdateView(
         kwargs["initial"] = initial
         return kwargs
 
-    def get_context_data(self, **context: Dict[str, Any]) -> Dict[str, Any]:
+    def get_context_data(self, **context: dict) -> dict:
         return super().get_context_data(
             **{
                 **context,
@@ -596,7 +596,7 @@ class ListView(FormView):
         else:
             return self.form_invalid(form)
 
-    def get_items(self, search_data: Dict[str, Any]):
+    def get_items(self, search_data: dict):
         return {"count": 0, "items": []}
 
     def store_search(self, search_data: dict):
@@ -612,9 +612,7 @@ class ListView(FormView):
             lenient_get(self.request.session, "list_search", self.request.path)
         )
 
-    def item_to_json_dict(
-        self, item: Dict[str, Any], context: Dict[str, Any], index: int
-    ) -> Dict[str, Any]:
+    def item_to_json_dict(self, item: dict, context: dict, index: int) -> dict:
         return {**item, "select": item["id"]}
 
     def form_valid(self, form):
@@ -664,7 +662,7 @@ class ListView(FormView):
             )
         return super().form_invalid(form)
 
-    def get_form_kwargs(self) -> Dict[str, Any]:
+    def get_form_kwargs(self) -> dict:
         kwargs = super().get_form_kwargs()
         query_dict = self.request.GET.copy()
         query_dict.pop("highlight", None)
@@ -693,12 +691,12 @@ class TF10ListView(
     form_class = forms.TF10SearchForm
     list_size = 20
 
-    def get_items(self, search_data: Dict[str, Any]):
+    def get_items(self, search_data: dict):
         # return self.rest_client.get("afgiftsanmeldelse/full", search_data)
         count, items = self.rest_client.afgiftanmeldelse.list(full=True, **search_data)
         return {"count": count, "items": items}
 
-    def get_context_data(self, **context: Dict[str, Any]) -> Dict[str, Any]:
+    def get_context_data(self, **context: dict) -> dict:
         return super().get_context_data(
             **{
                 **context,
@@ -708,9 +706,7 @@ class TF10ListView(
             }
         )
 
-    def item_to_json_dict(
-        self, item: Dict[str, Any], context: Dict[str, Any], index: int
-    ) -> Dict[str, Any]:
+    def item_to_json_dict(self, item: dict, context: dict, index: int) -> dict:
         return {
             key: self.map_value(item, key, context)
             for key in (
@@ -742,7 +738,7 @@ class TF10ListView(
             return _(value.capitalize())
         return value
 
-    def get_form_kwargs(self) -> Dict[str, Any]:
+    def get_form_kwargs(self) -> dict:
         kwargs = super().get_form_kwargs()
 
         # Will be picked up by TF10SearchForm's constructor
@@ -959,11 +955,11 @@ class TF5ListView(PermissionsRequiredMixin, HasRestClientMixin, TF5Mixin, ListVi
     form_class = forms.TF5SearchForm
     list_size = 20
 
-    def get_items(self, search_data: Dict[str, Any]):
+    def get_items(self, search_data: dict):
         count, items = self.rest_client.privat_afgiftsanmeldelse.list(**search_data)
         return {"count": count, "items": items}
 
-    def get_context_data(self, **context: Dict[str, Any]) -> Dict[str, Any]:
+    def get_context_data(self, **context: dict) -> dict:
         return super().get_context_data(
             **{
                 **context,
@@ -973,9 +969,7 @@ class TF5ListView(PermissionsRequiredMixin, HasRestClientMixin, TF5Mixin, ListVi
             }
         )
 
-    def item_to_json_dict(
-        self, item: Dict[str, Any], context: Dict[str, Any], index: int
-    ) -> Dict[str, Any]:
+    def item_to_json_dict(self, item: dict, context: dict, index: int) -> dict:
         return {
             key: self.map_value(item, key, context)
             for key in (
@@ -1015,7 +1009,7 @@ class TF5ListView(PermissionsRequiredMixin, HasRestClientMixin, TF5Mixin, ListVi
 
         return value
 
-    def get_form_kwargs(self) -> Dict[str, Any]:
+    def get_form_kwargs(self) -> dict:
         kwargs = super().get_form_kwargs()
 
         # Will be picked up by TF10SearchForm's constructor
@@ -1129,7 +1123,7 @@ class TF5UpdateView(
         kwargs["leverandørfaktura_required"] = not self.item.leverandørfaktura
         return kwargs
 
-    def get_formset_kwargs(self) -> Dict[str, Any]:
+    def get_formset_kwargs(self) -> dict:
         kwargs = super().get_formset_kwargs()
         # The form_kwargs dict is passed as kwargs to subforms in the formset
         if "form_kwargs" not in kwargs:
@@ -1145,7 +1139,7 @@ class TF5UpdateView(
         kwargs["initial"] = initial
         return kwargs
 
-    def get_context_data(self, **context: Dict[str, Any]) -> Dict[str, Any]:
+    def get_context_data(self, **context: dict) -> dict:
         return super().get_context_data(
             **{
                 **context,

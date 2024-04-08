@@ -8,7 +8,7 @@ import logging
 import os
 import time
 from functools import cached_property
-from typing import Any, Dict, Iterable, Optional
+from typing import Any, Iterable, Optional
 from urllib.parse import quote_plus
 
 from django.conf import settings
@@ -276,7 +276,7 @@ class GetFormView(FormView):
         else:
             return self.form_invalid(form)
 
-    def get_form_kwargs(self) -> Dict[str, Any]:
+    def get_form_kwargs(self) -> dict:
         return {**super().get_form_kwargs(), "data": self.request.GET}
 
 

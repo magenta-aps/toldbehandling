@@ -5,7 +5,7 @@ from datetime import date, timedelta
 from decimal import ROUND_HALF_EVEN, Decimal
 from enum import Enum
 from functools import partial
-from typing import Any, BinaryIO, Callable, Dict, Iterable, Optional, Union
+from typing import BinaryIO, Callable, Iterable, Optional, Union
 
 import holidays
 from django.core.cache import cache
@@ -19,11 +19,11 @@ from weasyprint import CSS, HTML
 from weasyprint.text.fonts import FontConfiguration
 
 
-def filter_dict_values(data: Dict[Any, Any], values_to_trim: Iterable):
+def filter_dict_values(data: dict, values_to_trim: Iterable):
     return dict(filter(lambda pair: pair[1] not in values_to_trim, data.items()))
 
 
-def filter_dict_none(data: Dict[Any, Any]):
+def filter_dict_none(data: dict):
     return filter_dict_values(data, (None,))
 
 
@@ -122,7 +122,7 @@ def _asdict_factory(data):
     return dict((k, convert_value(v)) for k, v in data)
 
 
-def dataclass_map_to_dict(data: Dict):
+def dataclass_map_to_dict(data: dict):
     return {
         key: dataclasses.asdict(value, dict_factory=_asdict_factory)
         for key, value in data.items()
@@ -153,7 +153,7 @@ def format_daterange(start: date, end: date, sep: str = " - "):
     return sep.join(range_parts)
 
 
-def join(delimiter: Union[str, int], items: Iterable[Union[Any]]):
+def join(delimiter: Union[str, int], items: Iterable):
     return str(delimiter).join([str(x) for x in items])
 
 
