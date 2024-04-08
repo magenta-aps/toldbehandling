@@ -522,6 +522,11 @@ class TF10FormUpdateView(
                     afgiftsanmeldelse=self.kwargs["id"]
                 ),
                 "kan_ændre_kladde": self.item.status == "kladde",
+                "indberetter_data": {
+                    "cvr": self.item.indberetter.get("indberetter_data", {}).get("cvr")
+                    if self.item.indberetter
+                    else None
+                },
             }
         )
 
