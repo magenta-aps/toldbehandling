@@ -44,7 +44,8 @@
             pad2(d.getHours()),
             pad2(d.getMinutes()),
             pad2(d.getSeconds())
-        ].join(":");
+        ].join(":")
+            + " (" + Intl.DateTimeFormat().resolvedOptions().timeZone + ")";
     });
 </script>
 </body>
