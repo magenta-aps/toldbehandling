@@ -24,7 +24,12 @@
         <div class="row my-1">
             <div class="col-6">
                 <div class="row gyldig_fra">
-                    <div class="col-2"><label for="{{form.gyldig_fra.name}}">{% translate "Gyldig fra" %}</label></div>
+                    <div class="col-2">
+                        <label for="{{form.gyldig_fra.name}}">{% translate "Gyldig fra" %}</label>
+                        {% if can_edit %}
+                        <div class="small">({% translate "Din lokale tidszone" %})</div>
+                        {% endif %}
+                    </div>
                     <div class="col-10">
                         {% if can_edit %}
                         {{form.gyldig_fra}}
