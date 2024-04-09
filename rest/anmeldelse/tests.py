@@ -5,7 +5,11 @@
 from copy import deepcopy
 from decimal import Decimal
 
-from anmeldelse.models import Afgiftsanmeldelse, Varelinje
+from anmeldelse.models import (
+    Afgiftsanmeldelse,
+    Varelinje,
+    privatafgiftsanmeldelse_upload_to,
+)
 from django.test import TestCase
 from django.urls import reverse
 from forsendelse.models import Postforsendelse
@@ -312,6 +316,12 @@ class AfgiftsanmeldelseTest(RestTestMixin, TestCase):
             self.assertEquals(resp_delete.status_code, 403)
 
         self.assertEquals(Afgiftsanmeldelse.objects.count(), len(invalid_statuses))
+
+    def test_afgiftsanmeldelse_upload_to(self):
+        result = privatafgiftsanmeldelse_upload_to(self.afgiftsanmeldelse, "test.pdf")
+        self.assertEquals(
+            result, f"privatfakturaer/{self.afgiftsanmeldelse.id}/test.pdf"
+        )
 
 
 class VarelinjeTest(RestTestMixin, TestCase):
