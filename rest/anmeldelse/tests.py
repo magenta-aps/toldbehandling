@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: MPL-2.0
 
 from copy import deepcopy
+from datetime import date
 from decimal import Decimal
 
 from anmeldelse.models import (
@@ -322,6 +323,15 @@ class AfgiftsanmeldelseTest(RestTestMixin, TestCase):
         self.assertEquals(
             result, f"privatfakturaer/{self.afgiftsanmeldelse.id}/test.pdf"
         )
+
+    def test_beregn_faktureringsdato_told_categories(self):
+        self.afgiftsanmeldelse.toldkategori = "70"
+        result = Afgiftsanmeldelse.beregn_faktureringsdato(self.afgiftsanmeldelse)
+        self.assertEqual(result, date(2023, 12, 20))
+
+        self.afgiftsanmeldelse.toldkategori = "76"
+        result = Afgiftsanmeldelse.beregn_faktureringsdato(self.afgiftsanmeldelse)
+        self.assertEqual(result, date(2023, 12, 14))
 
 
 class VarelinjeTest(RestTestMixin, TestCase):
