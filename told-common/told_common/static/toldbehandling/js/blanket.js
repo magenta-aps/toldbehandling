@@ -356,10 +356,22 @@ $(function () {
         if (this.files.length) {
             const maxsize = this.getAttribute("max_size");
             const filesize = this.files[0].size;
+            const associated = $("input[data-fileinput="+this.name+"]");
             if (maxsize && filesize > maxsize) {
-                this.setCustomValidity(this.getAttribute("data-validity-sizeoverflow"));
+                const message = this.getAttribute("data-validity-sizeoverflow")
+                this.setCustomValidity(message);
+                associated.each(function () {
+                    this.setCustomValidity(message);
+                })
+                associated.addClass("is-invalid");
+                associated.attr("title", message)
             } else {
                 this.setCustomValidity("");
+                associated.each(function () {
+                    this.setCustomValidity("");
+                })
+                associated.removeClass("is-invalid");
+                associated.attr("title", "");
             }
         }
     };
