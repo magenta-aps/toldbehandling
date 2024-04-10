@@ -17,7 +17,7 @@ from unittest.mock import mock_open, patch
 from urllib.parse import parse_qs, quote, quote_plus, urlparse
 
 import requests
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Tag
 from django.conf import settings
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.shortcuts import redirect
@@ -39,9 +39,9 @@ from told_common.tests import (
     TestMixin,
     modify_values,
 )
-from told_common.views import FileView, FragtbrevView
+from told_common.views import FragtbrevView
 
-from admin.clients.prisme import CustomDutyResponse, PrismeClient, prisme_send_dummy
+from admin.clients.prisme import PrismeClient, prisme_send_dummy
 from admin.forms import TF10CreateForm
 from admin.views import (
     AfgiftstabelDetailView,
@@ -2022,11 +2022,9 @@ class AfgiftstabelDetailViewTest(PermissionsTest, TestCase):
         return response
 
     def mock_requests_patch(self, path, data, headers=None):
-        print("mock_requests_patch")
         expected_prefix = f"{settings.REST_DOMAIN}/api/"
         path = path.rstrip("/")
         response = Response()
-        json_content = None
         content = None
         status_code = None
         if path == expected_prefix + "afgiftstabel/1":
@@ -2047,15 +2045,21 @@ class AfgiftstabelDetailViewTest(PermissionsTest, TestCase):
 
     def parse_form_row(self, soup, class_):
         row = soup.find("form").find("div", class_=class_)
-        return list(
-            filter(
-                lambda x: len(x),
-                [
-                    [x.strip() for x in cell.strings if x.strip()]
-                    for cell in row.children
-                ],
-            )
-        )
+        items = []
+        for cell in row.children:
+            strings = list(cell.stripped_strings)
+            if isinstance(cell, Tag):
+                for element in cell.children:
+                    if isinstance(element, Tag):
+                        if element.get("value"):
+                            strings.append(element.get("value"))
+            for x in strings:
+                subitems = []
+                if x:
+                    subitems.append(x)
+                if subitems:
+                    items.append(subitems)
+        return items
 
     @patch.object(requests.sessions.Session, "get")
     def test_datetime_show(self, mock_get):

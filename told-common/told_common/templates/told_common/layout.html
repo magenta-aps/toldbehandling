@@ -33,9 +33,15 @@
         return String(d).padStart(2, "0");
     }
     $("[data-format-time='local']").each(function(){
+        let value;
+        if (this.tagName === "INPUT") {
+            value = this.value;
+        } else {
+            value = this.innerHTML;
+        }
         // Parse innerHTML som en timezone-aware datetime, og formatér den efter lokal tid
-        const d = new Date(this.innerHTML);
-        this.innerHTML = [
+        const d = new Date(value);
+        value = [
             pad2(d.getDate()),
             pad2(d.getMonth()+1),
             d.getFullYear()
@@ -46,6 +52,11 @@
             pad2(d.getSeconds())
         ].join(":")
             + " (" + Intl.DateTimeFormat().resolvedOptions().timeZone + ")";
+        if (this.tagName === "INPUT") {
+            this.value = value;
+        } else {
+            this.innerHTML = value;
+        }
     });
 </script>
 </body>
