@@ -2022,11 +2022,9 @@ class AfgiftstabelDetailViewTest(PermissionsTest, TestCase):
         return response
 
     def mock_requests_patch(self, path, data, headers=None):
-        print("mock_requests_patch")
         expected_prefix = f"{settings.REST_DOMAIN}/api/"
         path = path.rstrip("/")
         response = Response()
-        json_content = None
         content = None
         status_code = None
         if path == expected_prefix + "afgiftstabel/1":

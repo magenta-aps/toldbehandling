@@ -23,7 +23,7 @@
         {% csrf_token %}
         <div class="row my-1">
             <div class="col-6">
-                <div class="row gyldig_fra">
+                <div class="row gyldig_fra align-items-center">
                     <div class="col-2">
                         <label for="{{form.gyldig_fra.name}}">{% translate "Gyldig fra" %}</label>
                         {% if can_edit %}
@@ -50,32 +50,32 @@
                         </script>
                         {% else %}
                         {% if object.gyldig_fra is not None %}
-                        <span data-format-time="local">{{object.gyldig_fra|date:'c'}}</span>
+                        <input class="form-control display" readonly value="{{object.gyldig_fra|date:'c'}}" tabindex="-1" data-format-time="local"/>
                         {% else %}
-                        -
+                        <input class="form-control display" readonly value="-" tabindex="-1"/>
                         {% endif %}
                         {% endif %}
                     </div>
                 </div>
-                <div class="row gyldig_til">
+                <div class="row gyldig_til align-items-center">
                     <div class="col-2"><label>{% translate "Gyldig til" %}</label></div>
                     <div class="col-10">
                         {% if object.gyldig_til is not None %}
-                        <span data-format-time="local">{{object.gyldig_til|date:'c'}}</span>
+                        <input class="form-control display" readonly value="{{object.gyldig_til|date:'c'}}" tabindex="-1" data-format-time="local"/>
                         {% else %}
-                        -
+                        <input class="form-control display" readonly value="-" tabindex="-1"/>
                         {% endif %}
                     </div>
                 </div>
                 {% if can_approve_drafts %}
-                <div class="row kladde">
+                <div class="row kladde align-items-center">
                     <div class="col-2"><label for="{{form.kladde.name}}">{% translate "Kladde" %}</label></div>
                     <div class="col-10">
                         {% if can_edit %}
                         {{form.kladde}}
                         {{form.kladde.errors}}
                         {% elif not object.kladde %}
-                        {% translate "Nej" %}
+                        <input class="form-control display" readonly value="{% translate 'Nej' %}" tabindex="-1"/>
                         {% endif %}
                     </div>
                 </div>
