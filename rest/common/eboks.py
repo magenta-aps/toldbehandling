@@ -157,10 +157,6 @@ class EboksClient(object):
             pass
         return error
 
-    def close(self):
-        if hasattr(self, "_session"):
-            self.session.close()
-
     @classmethod
     def from_settings(cls):
         eboks_settings = dict(settings.EBOKS)
