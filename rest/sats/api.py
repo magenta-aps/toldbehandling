@@ -113,8 +113,8 @@ class AfgiftstabelAPI:
     def list_afgiftstabeller(
         self,
         filters: AfgiftstabelFilterSchema = Query(...),
-        sort: str | None = None,
-        order: str | None = None,
+        sort: Optional[str] = None,
+        order: Optional[str] = None,
     ):
         # https://django-ninja.rest-framework.com/guides/input/filtering/
         qs = filters.filter(Afgiftstabel.objects.all())
@@ -160,7 +160,7 @@ class AfgiftstabelAPI:
 
 class VareafgiftssatsIn(ModelSchema):
     afgiftstabel_id: int
-    overordnet_id: int | None = None
+    overordnet_id: Optional[int] = None
 
     class Config:
         model = Vareafgiftssats
@@ -188,7 +188,7 @@ class VareafgiftssatsIn(ModelSchema):
 
 
 class PartialVareafgiftssatsIn(ModelSchema):
-    afgiftstabel_id: int | None = None
+    afgiftstabel_id: Optional[int] = None
     overordnet_id: Optional[int] = None
 
     class Config:

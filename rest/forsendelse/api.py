@@ -178,8 +178,8 @@ class PostforsendelseAPI:
 
 
 class FragtforsendelseIn(ModelSchema):
-    fragtbrev: str | None = None  # Base64
-    fragtbrev_navn: str | None = None
+    fragtbrev: Optional[str] = None  # Base64
+    fragtbrev_navn: Optional[str] = None
 
     class Config:
         model = Fragtforsendelse
@@ -194,8 +194,8 @@ class FragtforsendelseIn(ModelSchema):
 
 
 class PartialFragtforsendelseIn(ModelSchema):
-    fragtbrev: str | None = None  # Base64
-    fragtbrev_navn: str | None = None
+    fragtbrev: Optional[str] = None  # Base64
+    fragtbrev_navn: Optional[str] = None
 
     class Config:
         model = Fragtforsendelse

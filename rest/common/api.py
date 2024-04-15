@@ -152,8 +152,8 @@ class UserOutWithTokens(Schema):
 
 
 class UserIn(ModelSchema):
-    groups: List[str] | None = None
-    indberetter_data: IndberetterProfileIn | None = None
+    groups: Optional[List[str]] = None
+    indberetter_data: Optional[IndberetterProfileIn] = None
 
     class Config:
         model = User
@@ -267,8 +267,8 @@ class UserAPI:
 
 
 class EboksBeskedIn(ModelSchema):
-    afgiftsanmeldelse_id: int | None = None
-    privat_afgiftsanmeldelse_id: int | None = None
+    afgiftsanmeldelse_id: Optional[int] = None
+    privat_afgiftsanmeldelse_id: Optional[int] = None
     pdf: str  # base64
 
     class Config:

@@ -811,7 +811,7 @@ class AfgiftstabelRestClient(ModelRestClient):
         return response["id"]
 
     def update(
-        self, id: int, data: dict, existing: dict | None = None
+        self, id: int, data: dict, existing: Optional[dict] = None
     ) -> Optional[int]:
         if existing is not None and self.compare(data, existing):
             # Data passer, spring opdatering over
@@ -1063,7 +1063,7 @@ class RestClient:
     def get(
         self,
         path: str,
-        params: dict | None = None,
+        params: Optional[dict] = None,
     ) -> dict:
         self.check_access_token_age()
         param_string = (

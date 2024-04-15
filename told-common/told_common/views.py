@@ -6,7 +6,7 @@ import logging
 import os
 from datetime import date
 from functools import cached_property
-from typing import Any, Callable, Dict, Iterable, List
+from typing import Any, Callable, Dict, Iterable, List, Optional
 from urllib.parse import unquote
 
 from django.conf import settings
@@ -585,7 +585,7 @@ class TF10FormUpdateView(
 class ListView(FormView):
     list_size: int = 20
     form_class = forms.PaginateForm
-    select_template: str | None = None
+    select_template: Optional[str] = None
 
     def get(self, request, *args, **kwargs):
         # Søgeform; viser formularen (med evt. fejl) når den er invalid,
