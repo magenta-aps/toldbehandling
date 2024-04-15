@@ -3,14 +3,17 @@
 # SPDX-License-Identifier: MPL-2.0
 
 from copy import deepcopy
-from datetime import date
+from datetime import UTC, date, datetime, timedelta
 from decimal import Decimal
 
 from anmeldelse.models import (
     Afgiftsanmeldelse,
+    PrismeResponse,
     Varelinje,
+    on_add_prismeresponse,
     privatafgiftsanmeldelse_upload_to,
 )
+from django.db.models.signals import post_save
 from django.test import TestCase
 from django.urls import reverse
 from forsendelse.models import Postforsendelse
@@ -332,6 +335,32 @@ class AfgiftsanmeldelseTest(RestTestMixin, TestCase):
         self.afgiftsanmeldelse.toldkategori = "76"
         result = Afgiftsanmeldelse.beregn_faktureringsdato(self.afgiftsanmeldelse)
         self.assertEqual(result, date(2023, 12, 14))
+
+    def test_receiver_on_add_prismeresponse(self):
+        # Connect the signal manually to ensure it's being tested
+        post_save.connect(
+            on_add_prismeresponse,
+            sender=PrismeResponse,
+            dispatch_uid="test_on_add_prismeresponse",
+        )
+
+        prismeresponse = PrismeResponse.objects.create(
+            afgiftsanmeldelse=self.afgiftsanmeldelse,
+            rec_id=123456,
+            tax_notification_number=654321,
+            delivery_date=datetime.now(UTC) + timedelta(days=30),
+        )
+
+        self.afgiftsanmeldelse.refresh_from_db()
+
+        self.assertEqual(self.afgiftsanmeldelse.status, "afsluttet")
+
+        # Disconnect signal after test to clean up
+        post_save.disconnect(
+            on_add_prismeresponse,
+            sender=PrismeResponse,
+            dispatch_uid="test_on_add_prismeresponse",
+        )
 
 
 class VarelinjeTest(RestTestMixin, TestCase):
