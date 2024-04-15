@@ -11,9 +11,10 @@ from anmeldelse.models import (
     PrismeResponse,
     Varelinje,
     on_add_prismeresponse,
+    on_delete_prismeresponse,
     privatafgiftsanmeldelse_upload_to,
 )
-from django.db.models.signals import post_save
+from django.db.models.signals import post_delete, post_save
 from django.test import TestCase
 from django.urls import reverse
 from forsendelse.models import Postforsendelse
@@ -360,6 +361,31 @@ class AfgiftsanmeldelseTest(RestTestMixin, TestCase):
             on_add_prismeresponse,
             sender=PrismeResponse,
             dispatch_uid="test_on_add_prismeresponse",
+        )
+
+    def test_receiver_on_delete_prismeresponse(self):
+        prismeresponse_1 = PrismeResponse.objects.create(
+            afgiftsanmeldelse=self.afgiftsanmeldelse,
+            rec_id=123456,
+            tax_notification_number=654321,
+            delivery_date=datetime.now(UTC) + timedelta(days=30),
+        )
+
+        post_delete.connect(
+            on_delete_prismeresponse,
+            sender=PrismeResponse,
+            dispatch_uid="test_on_delete_prismeresponse",
+        )
+
+        prismeresponse_1.delete()
+
+        self.afgiftsanmeldelse.refresh_from_db()
+        self.assertEqual(self.afgiftsanmeldelse.status, "godkendt")
+
+        post_delete.disconnect(
+            on_delete_prismeresponse,
+            sender=PrismeResponse,
+            dispatch_uid="test_on_delete_prismeresponse",
         )
 
 
