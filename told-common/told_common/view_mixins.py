@@ -171,9 +171,9 @@ class PermissionsRequiredMixin(LoginRequiredMixin):
     @classmethod
     def has_permissions(
         cls,
-        userdata: dict | None = None,
-        request: HttpRequest | None = None,
-        required_permissions: Iterable[str] | None = None,
+        userdata: Optional[dict] = None,
+        request: Optional[HttpRequest] = None,
+        required_permissions: Optional[Iterable[str]] = None,
     ) -> bool:
         if userdata is None:
             if request is None:

@@ -174,7 +174,7 @@ def lenient_get(item, *keys: str):
     return item
 
 
-def multivaluedict_to_querydict(multivaluedict: dict[str, list] | None) -> QueryDict:
+def multivaluedict_to_querydict(multivaluedict: Optional[dict[str, list]]) -> QueryDict:
     query_dict = QueryDict(mutable=True)
     if multivaluedict is not None:
         for key in multivaluedict:

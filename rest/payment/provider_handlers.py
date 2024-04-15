@@ -2,6 +2,8 @@
 #
 # SPDX-License-Identifier: MPL-2.0
 
+from typing import Optional
+
 import requests
 from django.conf import settings
 from payment.exceptions import (
@@ -78,7 +80,7 @@ class NetsProviderHandler(ProviderHandler):
         resp_body = response.json()
         return self.read(resp_body["paymentId"])
 
-    def read(self, payment_id: str | None) -> ProviderPaymentResponse:
+    def read(self, payment_id: Optional[str]) -> ProviderPaymentResponse:
         url = f"{self.host}/v1/payments/{payment_id}"
         resp = requests.get(url, headers=self.headers)
 
@@ -120,7 +122,7 @@ class BankProviderHandler(ProviderHandler):
     def create(self, payload: ProviderPaymentPayload, checkout_url: str):
         return {"paymentId": "Der er foretaget en bankoverførsel"}
 
-    def read(self, payment_id: str | None):
+    def read(self, payment_id: Optional[str]):
         return None
 
 

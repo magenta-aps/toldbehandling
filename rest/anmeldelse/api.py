@@ -43,11 +43,11 @@ log = logging.getLogger(__name__)
 class AfgiftsanmeldelseIn(ModelSchema):
     afsender_id: int
     modtager_id: int
-    postforsendelse_id: int | None = None
-    fragtforsendelse_id: int | None = None
-    leverandørfaktura: str | None = None  # Base64
-    leverandørfaktura_navn: str | None = None
-    oprettet_på_vegne_af_id: int | None = None
+    postforsendelse_id: Optional[int] = None
+    fragtforsendelse_id: Optional[int] = None
+    leverandørfaktura: Optional[str] = None  # Base64
+    leverandørfaktura_navn: Optional[str] = None
+    oprettet_på_vegne_af_id: Optional[int] = None
     kladde: Optional[bool] = False
     fuldmagtshaver_id: Optional[int] = None
 
@@ -63,14 +63,14 @@ class AfgiftsanmeldelseIn(ModelSchema):
 
 
 class PartialAfgiftsanmeldelseIn(ModelSchema):
-    afsender_id: int | None = None
-    modtager_id: int | None = None
-    postforsendelse_id: int | None = None
-    fragtforsendelse_id: int | None = None
-    leverandørfaktura: str | None = None  # Base64
-    leverandørfaktura_navn: str | None = None
-    betales_af: str | None = None
-    toldkategori: str | None = None
+    afsender_id: Optional[int] = None
+    modtager_id: Optional[int] = None
+    postforsendelse_id: Optional[int] = None
+    fragtforsendelse_id: Optional[int] = None
+    leverandørfaktura: Optional[str] = None  # Base64
+    leverandørfaktura_navn: Optional[str] = None
+    betales_af: Optional[str] = None
+    toldkategori: Optional[str] = None
     kladde: Optional[bool] = False
     fuldmagtshaver_id: Optional[int] = None
     status: Optional[str] = None
@@ -256,8 +256,8 @@ class AfgiftsanmeldelseAPI:
     def list(
         self,
         filters: AfgiftsanmeldelseFilterSchema = Query(...),
-        sort: str | None = None,
-        order: str | None = None,
+        sort: Optional[str] = None,
+        order: Optional[str] = None,
     ):
         qs = self.filter_user(Afgiftsanmeldelse.objects.all())
         # https://django-ninja.rest-framework.com/guides/input/filtering/
@@ -278,8 +278,8 @@ class AfgiftsanmeldelseAPI:
     def list_full(
         self,
         filters: AfgiftsanmeldelseFilterSchema = Query(...),
-        sort: str | None = None,
-        order: str | None = None,
+        sort: Optional[str] = None,
+        order: Optional[str] = None,
     ):
         qs = self.filter_user(Afgiftsanmeldelse.objects.all())
         # https://django-ninja.rest-framework.com/guides/input/filtering/
@@ -460,8 +460,8 @@ class AfgiftsanmeldelseAPI:
 
 
 class PrivatAfgiftsanmeldelseIn(ModelSchema):
-    leverandørfaktura: str | None = None  # Base64
-    leverandørfaktura_navn: str | None = None
+    leverandørfaktura: Optional[str] = None  # Base64
+    leverandørfaktura_navn: Optional[str] = None
 
     class Config:
         model = PrivatAfgiftsanmeldelse
@@ -481,8 +481,8 @@ class PrivatAfgiftsanmeldelseIn(ModelSchema):
 
 
 class PartialPrivatAfgiftsanmeldelseIn(ModelSchema):
-    leverandørfaktura: str | None = None  # Base64
-    leverandørfaktura_navn: str | None = None
+    leverandørfaktura: Optional[str] = None  # Base64
+    leverandørfaktura_navn: Optional[str] = None
 
     class Config:
         model = PrivatAfgiftsanmeldelse
@@ -619,8 +619,8 @@ class PrivatAfgiftsanmeldelseAPI:
     def list(
         self,
         filters: PrivatAfgiftsanmeldelseFilterSchema = Query(...),
-        sort: str | None = None,
-        order: str | None = None,
+        sort: Optional[str] = None,
+        order: Optional[str] = None,
     ):
         qs = self.filter_user(PrivatAfgiftsanmeldelse.objects.all())
         # https://django-ninja.rest-framework.com/guides/input/filtering/
@@ -706,10 +706,10 @@ class PrivatAfgiftsanmeldelseAPI:
 
 
 class VarelinjeIn(ModelSchema):
-    fakturabeløb: str | None = None
-    afgiftsanmeldelse_id: int | None = None
-    privatafgiftsanmeldelse_id: int | None = None
-    vareafgiftssats_id: int | None = None
+    fakturabeløb: Optional[str] = None
+    afgiftsanmeldelse_id: Optional[int] = None
+    privatafgiftsanmeldelse_id: Optional[int] = None
+    vareafgiftssats_id: Optional[int] = None
 
     class Config:
         model = Varelinje
@@ -718,8 +718,8 @@ class VarelinjeIn(ModelSchema):
 
 
 class PartialVarelinjeIn(ModelSchema):
-    afgiftsanmeldelse_id: int | None = None
-    vareafgiftssats_id: int | None = None
+    afgiftsanmeldelse_id: Optional[int] = None
+    vareafgiftssats_id: Optional[int] = None
 
     class Config:
         model = Varelinje
@@ -869,8 +869,8 @@ class VarelinjeAPI:
 
 class NotatIn(ModelSchema):
     tekst: str
-    afgiftsanmeldelse_id: int | None = None
-    privatafgiftsanmeldelse_id: int | None = None
+    afgiftsanmeldelse_id: Optional[int] = None
+    privatafgiftsanmeldelse_id: Optional[int] = None
 
     class Config:
         model = Notat
@@ -878,7 +878,7 @@ class NotatIn(ModelSchema):
 
 
 class NotatOut(ModelSchema):
-    navn: str | None = None
+    navn: Optional[str] = None
 
     class Config:
         model = Notat
@@ -1027,7 +1027,7 @@ class NotatAPI:
 
 
 class PrismeResponseIn(ModelSchema):
-    afgiftsanmeldelse_id: int | None = None
+    afgiftsanmeldelse_id: Optional[int] = None
 
     class Config:
         model = PrismeResponse

@@ -32,7 +32,10 @@ class PrismeHttpException(Exception):
 
 class PrismeConnectionException(Exception):
     def __init__(
-        self, message, code: int | None = None, inner_exception: Exception | None = None
+        self,
+        message,
+        code: Optional[int] = None,
+        inner_exception: Optional[Exception] = None,
     ):
         self.message = message
         self.code = code
@@ -357,7 +360,7 @@ def prisme_send_dummy(
 
 def send_afgiftsanmeldelse(
     afgiftsanmeldelse: Afgiftsanmeldelse,
-) -> List[CustomDutyResponse | PrismeResponseObject] | None:
+) -> Optional[List[CustomDutyResponse | PrismeResponseObject]]:
     try:
         request = CustomDutyRequest(afgiftsanmeldelse)
         if settings.ENVIRONMENT != "production":

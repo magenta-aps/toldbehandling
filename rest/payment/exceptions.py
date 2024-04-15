@@ -2,6 +2,8 @@
 #
 # SPDX-License-Identifier: MPL-2.0
 
+from typing import Optional
+
 from django.utils.translation import gettext_lazy as _
 from ninja_extra import status
 from ninja_extra.exceptions import APIException
@@ -25,7 +27,7 @@ class ProviderPaymentNotFound(APIException):
     )
     default_code = "payment_provider_payment_not_found"
 
-    def __init__(self, payment_id: str | None, endpoint: str, endpoint_status: int):
+    def __init__(self, payment_id: Optional[str], endpoint: str, endpoint_status: int):
         self.detail = self.default_detail.format(
             payment_id=payment_id,
             endpoint=endpoint,

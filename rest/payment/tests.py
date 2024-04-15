@@ -2,6 +2,7 @@ import random
 import uuid
 from datetime import date, datetime, timedelta, timezone
 from decimal import Decimal
+from typing import Optional
 from unittest.mock import MagicMock, call, patch
 
 from anmeldelse.models import PrivatAfgiftsanmeldelse, Varelinje
@@ -176,7 +177,7 @@ class PaymentTest(TestCase):
         amount: int,
         declaration: PrivatAfgiftsanmeldelse,
         provider_payment_id: str,
-        provider_payment_summary: ProviderPaymentSummaryResponse | None = None,
+        provider_payment_summary: Optional[ProviderPaymentSummaryResponse] = None,
         currency: str = "DKK",
     ) -> tuple[Payment, ProviderPaymentResponse]:
         test_payment = self._create_test_payment(

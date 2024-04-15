@@ -87,7 +87,7 @@ class Vareafgiftssats(ToldDataClass):
     subsatser: Optional[list] = None
 
     @cached_property
-    def text(self) -> str | None:
+    def text(self) -> Optional[str]:
         afgiftssats = format_decimal(self.afgiftssats)
         segment_nedre = self.segment_nedre
         segment_øvre = self.segment_øvre
@@ -167,7 +167,7 @@ class Vareafgiftssats(ToldDataClass):
         return None
 
     def populate_subs(
-        self, sub_getter: Callable[[int], List[Vareafgiftssats] | None]
+        self, sub_getter: Callable[[int], Optional[List[Vareafgiftssats]]]
     ) -> None:
         if self.enhed == Vareafgiftssats.Enhed.SAMMENSAT:
             subs = sub_getter(self.id)
@@ -213,7 +213,7 @@ class Notat(ToldDataClass):
     afgiftsanmeldelse: Optional[int]
     privatafgiftsanmeldelse: Optional[int]
     index: int
-    oprettet: datetime | None = field(
+    oprettet: Optional[datetime] = field(
         metadata=config(
             encoder=encode_optional_isoformat,
             decoder=datetime.fromisoformat,
@@ -221,7 +221,7 @@ class Notat(ToldDataClass):
         ),
         default=None,
     )
-    navn: str | None = None
+    navn: Optional[str] = None
 
 
 @dataclass
@@ -340,7 +340,7 @@ class Afgiftsanmeldelse(ToldDataClass):
     betales_af: Optional[str] = None
 
     @property
-    def indberetter(self) -> dict | None:
+    def indberetter(self) -> Optional[dict]:
         return self.oprettet_på_vegne_af or self.oprettet_af
 
     @property
@@ -357,7 +357,7 @@ class Afgiftsanmeldelse(ToldDataClass):
 @dataclass
 class HistoricAfgiftsanmeldelse(Afgiftsanmeldelse):
     history_username: Optional[str] = None
-    history_date: datetime | None = field(
+    history_date: Optional[datetime] = field(
         metadata=config(
             encoder=datetime.isoformat,
             decoder=datetime.fromisoformat,
@@ -371,7 +371,7 @@ class HistoricAfgiftsanmeldelse(Afgiftsanmeldelse):
 class PrismeResponse(ToldDataClass):
     id: Optional[int]
     afgiftsanmeldelse: Union[int, Afgiftsanmeldelse]
-    delivery_date: datetime | None = field(
+    delivery_date: Optional[datetime] = field(
         metadata=config(
             encoder=encode_optional_isoformat,
             decoder=datetime.fromisoformat,
@@ -379,8 +379,8 @@ class PrismeResponse(ToldDataClass):
         ),
         default=None,
     )
-    rec_id: int | None = None
-    tax_notification_number: int | None = None
+    rec_id: Optional[int] = None
+    tax_notification_number: Optional[int] = None
 
 
 @dataclass
@@ -415,9 +415,9 @@ class PrivatAfgiftsanmeldelse(ToldDataClass):
     )
     oprettet_af: dict
     payment_status: str
-    indførselstilladelse: str | None = None
-    varelinjer: List[Varelinje] | None = None
-    notater: Optional[List[Notat]] | None = None
+    indførselstilladelse: Optional[str] = None
+    varelinjer: Optional[List[Varelinje]] = None
+    notater: Optional[List[Notat]] = None
 
     @property
     def afgift_sum(self):
