@@ -5,6 +5,8 @@
 from copy import deepcopy
 from datetime import UTC, date, datetime, timedelta
 from decimal import Decimal
+from unittest.mock import ANY
+from uuid import uuid4
 
 from aktør.models import Afsender, Modtager
 from anmeldelse.api import (
@@ -20,6 +22,7 @@ from anmeldelse.models import (
     on_delete_prismeresponse,
     privatafgiftsanmeldelse_upload_to,
 )
+from common.models import IndberetterProfile
 from django.contrib.auth.models import Permission
 from django.db.models.signals import post_delete, post_save
 from django.test import TestCase
@@ -43,13 +46,25 @@ class AnmeldelsesTestDataMixin:
             codename="add_afgiftsanmeldelse"
         )
 
+        cls.view_historicalafgiftsanmeldelse = Permission.objects.get(
+            codename="view_historicalafgiftsanmeldelse"
+        )
+
+        # User-1 (CVR)
         cls.user, cls.user_token, cls.user_refresh_token = RestMixin.make_user(
             username="payment-test-user",
             plaintext_password="testpassword1337",
             permissions=[
                 cls.view_afgiftsanmeldelse_perm,
                 cls.add_afgiftsanmeldelse_perm,
+                cls.view_historicalafgiftsanmeldelse,
             ],
+        )
+
+        cls.indberetter = IndberetterProfile.objects.create(
+            user=cls.user,
+            cvr="13371337",
+            api_key=uuid4(),
         )
 
         cls.afsender = Afsender.objects.create(
@@ -78,14 +93,6 @@ class AnmeldelsesTestDataMixin:
                 "kladde": False,
             }
         )
-
-        post_data = {
-            "forsendelsestype": Postforsendelse.Forsendelsestype.SKIB,
-            "postforsendelsesnummer": "1234",
-            "afsenderbykode": "8200",
-            "afgangsdato": "2023-11-03",
-            "kladde": False,
-        }
 
         cls.postforsendelse, _ = Postforsendelse.objects.get_or_create(
             postforsendelsesnummer="1234",
@@ -739,3 +746,77 @@ class AfgiftsanmeldelseAPITest(AnmeldelsesTestDataMixin, TestCase):
         new_row_id = int(resp.json()["id"])
         afgiftsanmeldelse = Afgiftsanmeldelse.objects.get(id=new_row_id)
         self.assertEqual(afgiftsanmeldelse.betales_af, None)
+
+    def test_get_history(self):
+        new_afgiftsanmeldelse = Afgiftsanmeldelse.objects.create(
+            **{
+                "afsender_id": self.afsender.id,
+                "modtager_id": self.modtager.id,
+                "postforsendelse_id": self.postforsendelse.id,
+                "leverandørfaktura_nummer": "12345",
+                "betales_af": "afsender",
+                "indførselstilladelse": "abcde",
+                "betalt": False,
+                "fuldmagtshaver": None,
+                "status": "ny",
+                "oprettet_af": self.user,
+            }
+        )
+
+        # Invoke the endpoint
+        resp = self.client.get(
+            reverse(
+                "api-1.0.0:afgiftsanmeldelse_get_history",
+                args=[new_afgiftsanmeldelse.id],
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(
+            resp.json(),
+            {
+                "count": 1,
+                "items": [
+                    {
+                        "id": new_afgiftsanmeldelse.id,
+                        "afsender": self.afsender.id,
+                        "modtager": self.modtager.id,
+                        "fragtforsendelse": None,
+                        "postforsendelse": self.postforsendelse.id,
+                        "leverandørfaktura_nummer": "12345",
+                        "leverandørfaktura": "",
+                        "betales_af": "afsender",
+                        "indførselstilladelse": "abcde",
+                        "afgift_total": "0.00",
+                        "betalt": False,
+                        "dato": ANY,
+                        "status": "ny",
+                        "oprettet_af": {
+                            "id": self.user.id,
+                            "username": "payment-test-user",
+                            "first_name": "",
+                            "last_name": "",
+                            "email": "",
+                            "is_superuser": False,
+                            "groups": [],
+                            "permissions": [
+                                "anmeldelse.add_afgiftsanmeldelse",
+                                "anmeldelse.view_afgiftsanmeldelse",
+                                "anmeldelse.view_historicalafgiftsanmeldelse",
+                            ],
+                            "indberetter_data": {"cpr": None, "cvr": 13371337},
+                            "twofactor_enabled": False,
+                        },
+                        "oprettet_på_vegne_af": None,
+                        "toldkategori": None,
+                        "fuldmagtshaver": None,
+                        "beregnet_faktureringsdato": Afgiftsanmeldelse.beregn_faktureringsdato(
+                            new_afgiftsanmeldelse
+                        ).isoformat(),
+                        "history_username": None,
+                        "history_date": ANY,
+                    }
+                ],
+            },
+        )
