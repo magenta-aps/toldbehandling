@@ -6,6 +6,12 @@ from copy import deepcopy
 from datetime import UTC, date, datetime, timedelta
 from decimal import Decimal
 
+from aktør.models import Afsender, Modtager
+from anmeldelse.api import (
+    AfgiftsanmeldelseHistoryOut,
+    AfgiftsanmeldelseIn,
+    AfgiftsanmeldelseOut,
+)
 from anmeldelse.models import (
     Afgiftsanmeldelse,
     PrismeResponse,
@@ -14,6 +20,7 @@ from anmeldelse.models import (
     on_delete_prismeresponse,
     privatafgiftsanmeldelse_upload_to,
 )
+from django.contrib.auth.models import Permission
 from django.db.models.signals import post_delete, post_save
 from django.test import TestCase
 from django.urls import reverse
@@ -21,6 +28,78 @@ from forsendelse.models import Postforsendelse
 from project.test_mixins import RestMixin, RestTestMixin
 from project.util import json_dump
 from sats.models import Vareafgiftssats
+
+# asd
+
+
+class AnmeldelsesTestDataMixin:
+    @classmethod
+    def setUpTestData(cls):
+        cls.view_afgiftsanmeldelse_perm = Permission.objects.get(
+            codename="view_afgiftsanmeldelse"
+        )
+
+        cls.add_afgiftsanmeldelse_perm = Permission.objects.get(
+            codename="add_afgiftsanmeldelse"
+        )
+
+        cls.user, cls.user_token, cls.user_refresh_token = RestMixin.make_user(
+            username="payment-test-user",
+            plaintext_password="testpassword1337",
+            permissions=[
+                cls.view_afgiftsanmeldelse_perm,
+                cls.add_afgiftsanmeldelse_perm,
+            ],
+        )
+
+        cls.afsender = Afsender.objects.create(
+            **{
+                "navn": "Testfirma 1",
+                "adresse": "Testvej 42",
+                "postnummer": 1234,
+                "by": "TestBy",
+                "postbox": "123",
+                "telefon": "123456",
+                "cvr": 12345678,
+                "kladde": False,
+            }
+        )
+
+        cls.modtager = Modtager.objects.create(
+            **{
+                "navn": "Testfirma 1",
+                "adresse": "Testvej 42",
+                "postnummer": 1234,
+                "by": "TestBy",
+                "postbox": "123",
+                "telefon": "123456",
+                "cvr": 12345678,
+                "kreditordning": True,
+                "kladde": False,
+            }
+        )
+
+        post_data = {
+            "forsendelsestype": Postforsendelse.Forsendelsestype.SKIB,
+            "postforsendelsesnummer": "1234",
+            "afsenderbykode": "8200",
+            "afgangsdato": "2023-11-03",
+            "kladde": False,
+        }
+
+        cls.postforsendelse, _ = Postforsendelse.objects.get_or_create(
+            postforsendelsesnummer="1234",
+            oprettet_af=cls.user,
+            defaults={
+                "forsendelsestype": Postforsendelse.Forsendelsestype.SKIB,
+                "afsenderbykode": "8200",
+                "afgangsdato": "2023-11-03",
+                "kladde": False,
+            },
+        )
+
+
+# Tests
 
 
 class AfgiftsanmeldelseTest(RestTestMixin, TestCase):
@@ -617,3 +696,27 @@ class StatistikTest(RestMixin, TestCase):
                 "sum_mængde": "1400.000",
             },
         )
+
+
+class AfgiftsanmeldelseAPITest(AnmeldelsesTestDataMixin, TestCase):
+    def test_create_kladde(self):
+        payload = {
+            "afsender_id": self.afsender.id,
+            "modtager_id": self.modtager.id,
+            "kladde": True,
+            "postforsendelse_id": self.postforsendelse.id,
+        }
+
+        # Invoke endpoint
+        resp = self.client.post(
+            reverse("api-1.0.0:afgiftsanmeldelse_create"),
+            data=json_dump(payload),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, 200)
+        new_row_id = int(resp.json()["id"])
+
+        # Fetch + verify now afiftsanmeldelse is a draft/kladde
+        afgiftsanmeldelse = Afgiftsanmeldelse.objects.get(id=new_row_id)
+        self.assertEqual(afgiftsanmeldelse.status, "kladde")
