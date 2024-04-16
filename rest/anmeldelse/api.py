@@ -137,24 +137,10 @@ class AfgiftsanmeldelseHistoryOut(AfgiftsanmeldelseOut):
     history_username: Optional[str]
     history_date: datetime
 
-    @staticmethod
-    def resolve_history_username(historical_afgiftsanmeldelse):
-        return (
-            historical_afgiftsanmeldelse.history_user
-            and historical_afgiftsanmeldelse.history_user.username
-        )
-
 
 class AfgiftsanmeldelseHistoryFullOut(AfgiftsanmeldelseFullOut):
     history_username: Optional[str]
     history_date: datetime
-
-    @staticmethod
-    def resolve_history_username(historical_afgiftsanmeldelse):
-        return (
-            historical_afgiftsanmeldelse.history_user
-            and historical_afgiftsanmeldelse.history_user.username
-        )
 
 
 class AfgiftsanmeldelseFilterSchema(FilterSchema):
