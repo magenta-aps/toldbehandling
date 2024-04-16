@@ -700,23 +700,42 @@ class StatistikTest(RestMixin, TestCase):
 
 class AfgiftsanmeldelseAPITest(AnmeldelsesTestDataMixin, TestCase):
     def test_create_kladde(self):
-        payload = {
-            "afsender_id": self.afsender.id,
-            "modtager_id": self.modtager.id,
-            "kladde": True,
-            "postforsendelse_id": self.postforsendelse.id,
-        }
-
-        # Invoke endpoint
         resp = self.client.post(
             reverse("api-1.0.0:afgiftsanmeldelse_create"),
-            data=json_dump(payload),
+            data=json_dump(
+                {
+                    "afsender_id": self.afsender.id,
+                    "modtager_id": self.modtager.id,
+                    "postforsendelse_id": self.postforsendelse.id,
+                    "kladde": True,
+                }
+            ),
             HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
             content_type="application/json",
         )
         self.assertEqual(resp.status_code, 200)
-        new_row_id = int(resp.json()["id"])
 
-        # Fetch + verify now afiftsanmeldelse is a draft/kladde
+        new_row_id = int(resp.json()["id"])
         afgiftsanmeldelse = Afgiftsanmeldelse.objects.get(id=new_row_id)
         self.assertEqual(afgiftsanmeldelse.status, "kladde")
+
+    def test_create_betales_af_blank(self):
+        resp = self.client.post(
+            reverse("api-1.0.0:afgiftsanmeldelse_create"),
+            data=json_dump(
+                {
+                    "afsender_id": self.afsender.id,
+                    "modtager_id": self.modtager.id,
+                    "postforsendelse_id": self.postforsendelse.id,
+                    "leverandørfaktura_nummer": "12345678901234567890",
+                    "betales_af": "",
+                }
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, 200)
+
+        new_row_id = int(resp.json()["id"])
+        afgiftsanmeldelse = Afgiftsanmeldelse.objects.get(id=new_row_id)
+        self.assertEqual(afgiftsanmeldelse.betales_af, None)
