@@ -67,6 +67,7 @@ class AnmeldelsesTestDataMixin:
             api_key=uuid4(),
         )
 
+        # Afsender & Modtager
         cls.afsender = Afsender.objects.create(
             **{
                 "navn": "Testfirma 1",
@@ -94,6 +95,8 @@ class AnmeldelsesTestDataMixin:
             }
         )
 
+        #  Postforsendelse
+
         cls.postforsendelse, _ = Postforsendelse.objects.get_or_create(
             postforsendelsesnummer="1234",
             oprettet_af=cls.user,
@@ -103,6 +106,22 @@ class AnmeldelsesTestDataMixin:
                 "afgangsdato": "2023-11-03",
                 "kladde": False,
             },
+        )
+
+        # Afgiftsanmeldelse
+        cls.afgiftsanmeldelse = Afgiftsanmeldelse.objects.create(
+            **{
+                "afsender_id": cls.afsender.id,
+                "modtager_id": cls.modtager.id,
+                "postforsendelse_id": cls.postforsendelse.id,
+                "leverandørfaktura_nummer": "12345",
+                "betales_af": "afsender",
+                "indførselstilladelse": "abcde",
+                "betalt": False,
+                "fuldmagtshaver": None,
+                "status": "ny",
+                "oprettet_af": cls.user,
+            }
         )
 
 
@@ -706,14 +725,27 @@ class StatistikTest(RestMixin, TestCase):
 
 
 class AfgiftsanmeldelseAPITest(AnmeldelsesTestDataMixin, TestCase):
+    maxDiff = None
+
     def test_create_kladde(self):
+        postforsendelse_local, _ = Postforsendelse.objects.get_or_create(
+            postforsendelsesnummer="112233",
+            oprettet_af=self.user,
+            defaults={
+                "forsendelsestype": Postforsendelse.Forsendelsestype.SKIB,
+                "afsenderbykode": "8200",
+                "afgangsdato": "2023-11-03",
+                "kladde": False,
+            },
+        )
+
         resp = self.client.post(
             reverse("api-1.0.0:afgiftsanmeldelse_create"),
             data=json_dump(
                 {
                     "afsender_id": self.afsender.id,
                     "modtager_id": self.modtager.id,
-                    "postforsendelse_id": self.postforsendelse.id,
+                    "postforsendelse_id": postforsendelse_local.id,
                     "kladde": True,
                 }
             ),
@@ -727,13 +759,24 @@ class AfgiftsanmeldelseAPITest(AnmeldelsesTestDataMixin, TestCase):
         self.assertEqual(afgiftsanmeldelse.status, "kladde")
 
     def test_create_betales_af_blank(self):
+        postforsendelse_local, _ = Postforsendelse.objects.get_or_create(
+            postforsendelsesnummer="223344",
+            oprettet_af=self.user,
+            defaults={
+                "forsendelsestype": Postforsendelse.Forsendelsestype.SKIB,
+                "afsenderbykode": "8200",
+                "afgangsdato": "2023-11-03",
+                "kladde": False,
+            },
+        )
+
         resp = self.client.post(
             reverse("api-1.0.0:afgiftsanmeldelse_create"),
             data=json_dump(
                 {
                     "afsender_id": self.afsender.id,
                     "modtager_id": self.modtager.id,
-                    "postforsendelse_id": self.postforsendelse.id,
+                    "postforsendelse_id": postforsendelse_local.id,
                     "leverandørfaktura_nummer": "12345678901234567890",
                     "betales_af": "",
                 }
@@ -748,26 +791,11 @@ class AfgiftsanmeldelseAPITest(AnmeldelsesTestDataMixin, TestCase):
         self.assertEqual(afgiftsanmeldelse.betales_af, None)
 
     def test_get_history(self):
-        new_afgiftsanmeldelse = Afgiftsanmeldelse.objects.create(
-            **{
-                "afsender_id": self.afsender.id,
-                "modtager_id": self.modtager.id,
-                "postforsendelse_id": self.postforsendelse.id,
-                "leverandørfaktura_nummer": "12345",
-                "betales_af": "afsender",
-                "indførselstilladelse": "abcde",
-                "betalt": False,
-                "fuldmagtshaver": None,
-                "status": "ny",
-                "oprettet_af": self.user,
-            }
-        )
-
         # Invoke the endpoint
         resp = self.client.get(
             reverse(
                 "api-1.0.0:afgiftsanmeldelse_get_history",
-                args=[new_afgiftsanmeldelse.id],
+                args=[self.afgiftsanmeldelse.id],
             ),
             HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
             content_type="application/json",
@@ -779,7 +807,7 @@ class AfgiftsanmeldelseAPITest(AnmeldelsesTestDataMixin, TestCase):
                 "count": 1,
                 "items": [
                     {
-                        "id": new_afgiftsanmeldelse.id,
+                        "id": self.afgiftsanmeldelse.id,
                         "afsender": self.afsender.id,
                         "modtager": self.modtager.id,
                         "fragtforsendelse": None,
@@ -812,11 +840,96 @@ class AfgiftsanmeldelseAPITest(AnmeldelsesTestDataMixin, TestCase):
                         "toldkategori": None,
                         "fuldmagtshaver": None,
                         "beregnet_faktureringsdato": Afgiftsanmeldelse.beregn_faktureringsdato(
-                            new_afgiftsanmeldelse
+                            self.afgiftsanmeldelse
                         ).isoformat(),
                         "history_username": None,
                         "history_date": ANY,
                     }
                 ],
+            },
+        )
+
+    def test_get_afgiftsanmeldelse_history_item(self):
+        # Invoke the endpoint
+        resp = self.client.get(
+            reverse(
+                "api-1.0.0:afgiftsanmeldelse_get_history_item",
+                args=[self.afgiftsanmeldelse.id, 0],
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+        )
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(
+            resp.json(),
+            {
+                "id": self.afgiftsanmeldelse.id,
+                "afsender": {
+                    "id": self.afsender.id,
+                    "navn": "Testfirma 1",
+                    "adresse": "Testvej 42",
+                    "postnummer": 1234,
+                    "by": "TestBy",
+                    "postbox": "123",
+                    "telefon": "123456",
+                    "cvr": 12345678,
+                    "kladde": False,
+                    "stedkode": None,
+                },
+                "modtager": {
+                    "id": self.modtager.id,
+                    "navn": "Testfirma 1",
+                    "adresse": "Testvej 42",
+                    "postnummer": 1234,
+                    "by": "TestBy",
+                    "postbox": "123",
+                    "telefon": "123456",
+                    "cvr": 12345678,
+                    "kreditordning": True,
+                    "kladde": False,
+                    "stedkode": None,
+                },
+                "fragtforsendelse": None,
+                "postforsendelse": {
+                    "id": self.postforsendelse.id,
+                    "forsendelsestype": Postforsendelse.Forsendelsestype.SKIB,
+                    "postforsendelsesnummer": "1234",
+                    "afsenderbykode": "8200",
+                    "afgangsdato": "2023-11-03",
+                    "kladde": False,
+                },
+                "leverandørfaktura_nummer": "12345",
+                "leverandørfaktura": "",
+                "betales_af": "afsender",
+                "indførselstilladelse": "abcde",
+                "afgift_total": "0.00",
+                "betalt": False,
+                "dato": ANY,
+                "status": "ny",
+                "oprettet_af": {
+                    "id": self.user.id,
+                    "username": "payment-test-user",
+                    "first_name": "",
+                    "last_name": "",
+                    "email": "",
+                    "is_superuser": False,
+                    "groups": [],
+                    "permissions": [
+                        "anmeldelse.add_afgiftsanmeldelse",
+                        "anmeldelse.view_afgiftsanmeldelse",
+                        "anmeldelse.view_historicalafgiftsanmeldelse",
+                    ],
+                    "indberetter_data": {"cpr": None, "cvr": 13371337},
+                    "twofactor_enabled": False,
+                },
+                "oprettet_på_vegne_af": None,
+                "toldkategori": None,
+                "fuldmagtshaver": None,
+                "beregnet_faktureringsdato": Afgiftsanmeldelse.beregn_faktureringsdato(
+                    self.afgiftsanmeldelse
+                ).isoformat(),
+                "history_username": None,
+                "history_date": ANY,
             },
         )
