@@ -782,3 +782,27 @@ class Command(BaseCommand):
                 kræver_indførselstilladelse=False,
                 har_privat_tillægsafgift_alkohol=False,
             )
+            Vareafgiftssats.objects.create(
+                afgiftstabel=tabel,
+                afgiftsgruppenummer=101,
+                vareart_da="PANTBELAGT EMBALLAGE - PANT",
+                vareart_kl="PANTBELAGT EMBALLAGE - PANT",
+                enhed=Vareafgiftssats.Enhed.ANTAL,
+                minimumsbeløb=False,
+                afgiftssats=Decimal("2.0"),
+                kræver_indførselstilladelse=False,
+                har_privat_tillægsafgift_alkohol=False,
+                synlig_privat=True,
+            )
+            Vareafgiftssats.objects.create(
+                afgiftstabel=tabel,
+                afgiftsgruppenummer=102,
+                vareart_da="PANTBELAGT EMBALLAGE - GEBYR",
+                vareart_kl="PANTBELAGT EMBALLAGE - GEBYR",
+                enhed=Vareafgiftssats.Enhed.ANTAL,
+                minimumsbeløb=False,
+                afgiftssats=Decimal("0.6"),
+                kræver_indførselstilladelse=False,
+                har_privat_tillægsafgift_alkohol=False,
+                synlig_privat=True,
+            )

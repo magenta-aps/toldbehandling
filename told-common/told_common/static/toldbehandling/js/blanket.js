@@ -226,6 +226,71 @@ $(function () {
 
     const container = $("#formset_container");
 
+    // Check Varelinjer med pant og pantgebyr (https://redmine.magenta.dk/issues/60243)
+    // --------------------------------------------------------------------------------     
+    const error_messages = window.error_messages;
+    const error_101_not_found = error_messages["101_not_found"];
+    const error_102_not_found = error_messages["102_not_found"];
+    const error_101_and_102_do_not_match = error_messages["101_and_102_do_not_match"];
+
+    const checkPant = function (event) {
+       
+        //  Get all formsets
+        const formsets = $("#formset_container");
+
+        //  Loop over all of them and get amounts       
+        var antal_101 = 0;
+        var antal_102 = 0;
+        container.find(".row").each(function () {
+            const subform = $(this);
+            const varekode = subform.find("[data-value=varekode]").val();
+            const antal = parseInt(subform.find("[name$=antal]").val());
+            
+            if (varekode==101){
+                antal_101 = antal_101 + antal;
+            }
+            else if (varekode==102){
+                antal_102 = antal_102 + antal;
+            }            
+        });
+        
+        //  Compare amounts and formulate error if appropriate
+        var error_message = "";
+        if (antal_101==0 && antal_102>0){
+            error_message = error_101_not_found;
+        } else if (antal_102==0 && antal_101>0){
+            error_message = error_102_not_found;
+        } else if (antal_102 != antal_101){
+            error_message = error_101_and_102_do_not_match;
+        } else {
+            error_message = "";
+        }             
+
+        // Invalidate fields if there is an error
+        container.find(".row").each(function () {
+            const subform = $(this);
+            const varekode = subform.find("[data-value=varekode]").val();
+            const antal_field = subform.find("[name$=antal]");   
+
+            if (varekode==101 || varekode==102){
+                if (error_message){
+                    antal_field.addClass("is-invalid");
+                    antal_field.attr("title", error_message);
+                } else {
+                    antal_field.removeClass("is-invalid");
+                    antal_field.attr("title", "");
+                }
+            }
+        });
+              
+        // Do not submit the form if there is an error
+        if (error_message){
+            event.preventDefault();
+        }
+    }
+
+    const submit_button = $("button[type=submit]");
+    submit_button.on("click", checkPant)
 
     const calcSubAfgift = function(varesats, kg_l, antal, beløb) {
         const afgiftssats = varesats["afgiftssats"]
