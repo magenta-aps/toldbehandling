@@ -39,7 +39,7 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     install_requires=[
         "django==4.2.11",
-        "gunicorn==20.1.0",
+        "gunicorn==22.0.0",
         "requests==2.31.0",
         "dataclasses-json==0.6.0",
         "WeasyPrint==60.1",
