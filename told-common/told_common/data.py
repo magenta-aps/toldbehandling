@@ -353,6 +353,11 @@ class Afgiftsanmeldelse(ToldDataClass):
             ]
         )
 
+    @property
+    def forbindelsesnummer(self):
+        if self.fragtforsendelse:
+            return self.fragtforsendelse.forbindelsesnr
+
 
 @dataclass
 class HistoricAfgiftsanmeldelse(Afgiftsanmeldelse):

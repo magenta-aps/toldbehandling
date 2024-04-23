@@ -154,7 +154,8 @@
             <th class="col-2" data-sortable="true" data-field="dato" data-formatter="datoFormatter">{% translate "Dato" %}</th>
             <th class="col-2" data-sortable="true" data-field="afsender" data-formatter="aktørFormatter">{% translate "Afsender" %}</th>
             <th class="col-2" data-sortable="true" data-field="modtager" data-formatter="aktørFormatter">{% translate "Modtager" %}</th>
-            <th class="col-2" data-sortable="true" data-field="status">{% translate "Status" %}</th>
+            <th class="col-1" data-sortable="true" data-field="forbindelsesnummer" data-formatter="baseFormatter">{% translate "Forbindelsesnummer" %}</th>
+            <th class="col-1" data-sortable="true" data-field="status">{% translate "Status" %}</th>
             <th class="col-2" data-field="actions">{% translate "Handlinger" %}</th>
         </tr>
         </thead>
@@ -170,6 +171,7 @@
             <td>{{item.dato|date:"c"}}</td>
             <td>{{item.afsender.navn|default_if_none:"-"}}</td>
             <td>{{item.modtager.navn|default_if_none:"-"}}</td>
+            <td>{{item.forbindelsesnummer|default_if_none:"-"}}</td>
             <td>{% translate item.status|capfirst %}</td>
             <td>
                 {{item.actions}}
@@ -178,9 +180,9 @@
         {% empty %}
         <tr>
             {% if can_edit_multiple %}
-            <td colspan="7">
+            <td colspan="8">
                 {% else %}
-            <td colspan="6">
+            <td colspan="7">
             {% endif %}
                 {% translate "Ingen søgeresultater" %}
             </td>
@@ -234,6 +236,12 @@ function aktørFormatter(value) {
         return value["navn"];
     }
     return value;
+}
+function baseFormatter(value) {
+    if (value !== null) {
+        return value;
+    }
+    return "-";
 }
 function janejFormatter(value) {
     if (value === true) {

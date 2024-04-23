@@ -340,7 +340,11 @@ class AfgiftsanmeldelseAPI:
             if hasattr(Afgiftsanmeldelse, sort):
                 if sort in ("afsender", "modtager"):
                     sort += "__navn"
-                return ("-" if order == "desc" else "") + sort
+            elif sort == "forbindelsesnummer":
+                sort = "fragtforsendelse__forbindelsesnr"
+            else:
+                return None
+            return ("-" if order == "desc" else "") + sort
         return None
 
     @route.patch("/{id}", auth=get_auth_methods(), url_name="afgiftsanmeldelse_update")

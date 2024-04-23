@@ -719,6 +719,7 @@ class TF10ListView(
                 "dato",
                 "afsender",
                 "modtager",
+                "forbindelsesnummer",
                 "status",
                 "actions",
             )
