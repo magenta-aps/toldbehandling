@@ -9,7 +9,7 @@ import django.utils.timezone as tz
 from dateutil.tz import tzoffset
 from django import forms
 from django.core.exceptions import ValidationError
-from django.forms import formset_factory
+from django.forms import Select, formset_factory
 from django.utils.translation import gettext_lazy as _
 from dynamic_forms import DynamicField
 from tempus_dominus.widgets import DateTimePicker
@@ -29,7 +29,8 @@ class TF10CreateForm(common_forms.TF10Form):
     oprettet_på_vegne_af = DynamicField(
         forms.ChoiceField,
         label=_("Opret på vegne af"),
-        choices=lambda form: form.oprettet_på_vegne_af_choices,
+        widget=Select(attrs={"autocomplete": "off"}),
+        choices=lambda form: [(None, "---")] + list(form.oprettet_på_vegne_af_choices),
     )
 
     def __init__(self, oprettet_på_vegne_af_choices: List[dict], **kwargs):
