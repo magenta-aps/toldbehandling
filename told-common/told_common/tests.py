@@ -765,6 +765,7 @@ class AnmeldelseListViewTest(HasLogin):
                 "Dato": "2023-09-03T00:00:00-02:00",
                 "Afsender": "Testfirma 5",
                 "Modtager": "Testfirma 3",
+                "Forbindelsesnummer": "-",
                 "Status": "Godkendt",
                 "Handlinger": "Vis" if self.can_view else "",
             },
@@ -773,6 +774,7 @@ class AnmeldelseListViewTest(HasLogin):
                 "Dato": "2023-09-02T00:00:00-02:00",
                 "Afsender": "Testfirma 4",
                 "Modtager": "Testfirma 1",
+                "Forbindelsesnummer": "-",
                 "Status": "Afvist",
                 "Handlinger": "\n".join(
                     filter(
@@ -789,6 +791,7 @@ class AnmeldelseListViewTest(HasLogin):
                 "Dato": "2023-09-01T00:00:00-02:00",
                 "Afsender": "Testfirma 6",
                 "Modtager": "Testfirma 2",
+                "Forbindelsesnummer": "-",
                 "Status": "Ny",
                 "Handlinger": "\n".join(
                     filter(
@@ -865,6 +868,7 @@ class AnmeldelseListViewTest(HasLogin):
                         "telefon": "123456",
                         "stedkode": None,
                     },
+                    "forbindelsesnummer": None,
                     "status": "Godkendt",
                     "actions": _view_button(1) or "",
                 },
@@ -895,6 +899,7 @@ class AnmeldelseListViewTest(HasLogin):
                         "telefon": "123456",
                         "stedkode": None,
                     },
+                    "forbindelsesnummer": None,
                     "status": "Afvist",
                     "actions": "\n".join(
                         filter(
@@ -933,6 +938,7 @@ class AnmeldelseListViewTest(HasLogin):
                         "telefon": "123456",
                         "stedkode": None,
                     },
+                    "forbindelsesnummer": None,
                     "status": "Ny",
                     "actions": "\n".join(
                         filter(
