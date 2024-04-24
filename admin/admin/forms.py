@@ -29,7 +29,7 @@ class TF10CreateForm(common_forms.TF10Form):
     oprettet_på_vegne_af = DynamicField(
         forms.ChoiceField,
         label=_("Opret på vegne af"),
-        widget=Select(attrs={"autocomplete": "off"}),
+        widget=Select(attrs={"autocomplete": "off", "required-on-draft": "true"}),
         choices=lambda form: [(None, "---")] + list(form.oprettet_på_vegne_af_choices),
     )
 

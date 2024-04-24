@@ -603,7 +603,7 @@ $(function (){
         });
     });
 
-    const required_fields = $("input,select,textarea").filter("[required]").not("[data-required-field]");
+    const required_fields = $("input,select,textarea").filter("[required]").not("[data-required-field],[required-on-draft]");
 
     const draftChanged = function () {
         const draft = draftField && draftField.val() && draftField.val().toLowerCase() === "true";
