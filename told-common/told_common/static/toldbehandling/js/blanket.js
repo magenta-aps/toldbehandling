@@ -1,7 +1,7 @@
 $(function () {
     // Afsender/modtager opdatering
     // ----------------------------
-
+    var foobar;
     const items = [];
     const aktører = window.aktører;
     if (!aktører) {
@@ -28,7 +28,7 @@ $(function () {
 
         multi_select.change(function () {
             const id = $(this).val();
-            if (id === "") {
+            if (id == "") {
                 fillForm(i, {});
             } else {
                 const item = items[i][id];
