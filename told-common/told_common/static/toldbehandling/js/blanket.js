@@ -234,33 +234,29 @@ $(function () {
     const error_101_and_102_do_not_match = error_messages["101_and_102_do_not_match"];
 
     const checkPant = function (event) {
-       
-        //  Get all formsets
-        const formsets = $("#formset_container");
 
         //  Loop over all of them and get amounts       
-        var antal_101 = 0;
-        var antal_102 = 0;
+        let antal_101 = 0;
+        let antal_102 = 0;
         container.find(".row").each(function () {
             const subform = $(this);
             const varekode = subform.find("[data-value=varekode]").val();
             const antal = parseInt(subform.find("[name$=antal]").val());
-            
-            if (varekode==101){
+
+            if (varekode === "101") {
                 antal_101 = antal_101 + antal;
-            }
-            else if (varekode==102){
+            } else if (varekode === "102") {
                 antal_102 = antal_102 + antal;
-            }            
+            }
         });
         
         //  Compare amounts and formulate error if appropriate
-        var error_message = "";
-        if (antal_101==0 && antal_102>0){
+        let error_message = "";
+        if (antal_101 === 0 && antal_102>0) {
             error_message = error_101_not_found;
-        } else if (antal_102==0 && antal_101>0){
+        } else if (antal_102 === 0 && antal_101>0) {
             error_message = error_102_not_found;
-        } else if (antal_102 != antal_101){
+        } else if (antal_102 !== antal_101) {
             error_message = error_101_and_102_do_not_match;
         } else {
             error_message = "";
@@ -272,7 +268,7 @@ $(function () {
             const varekode = subform.find("[data-value=varekode]").val();
             const antal_field = subform.find("[name$=antal]");   
 
-            if (varekode==101 || varekode==102){
+            if (varekode === "101" || varekode === "102") {
                 if (error_message){
                     antal_field.addClass("is-invalid");
                     antal_field.attr("title", error_message);
@@ -284,13 +280,12 @@ $(function () {
         });
               
         // Do not submit the form if there is an error
-        if (error_message){
+        if (error_message) {
             event.preventDefault();
         }
     }
 
-    const submit_button = $("button[type=submit]");
-    submit_button.on("click", checkPant)
+    $("form").on("submit", checkPant);
 
     const calcSubAfgift = function(varesats, kg_l, antal, beløb) {
         const afgiftssats = varesats["afgiftssats"]
