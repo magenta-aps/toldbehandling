@@ -10,3 +10,10 @@ services:
   toldbehandling-admin:
     environment:
       - TEST=true
+
+  eslint-fixer:
+    # Kører ESLint med --fix, så JS-problemer rettes
+    image: registry.gitlab.com/pipeline-components/eslint:latest
+    volumes:
+      - .:/code
+    command: eslint --config .eslintrc --color --fix --stats told-common/told_common/static/toldbehandling/js/*.js
