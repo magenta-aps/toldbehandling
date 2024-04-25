@@ -1,7 +1,8 @@
+/* eslint-env jquery */
+/* global $ */
 $(function () {
     // Afsender/modtager opdatering
     // ----------------------------
-
     const items = [];
     const aktører = window.aktører;
     if (!aktører) {
@@ -11,11 +12,11 @@ $(function () {
     const fillForm = function(i, item) {
         const aktør = aktører[i];
         const fields = aktør["fields"];
-        for (let name in fields) {
-            let jqElement = $(fields[name]);
+        for (const name in fields) {
+            const jqElement = $(fields[name]);
             jqElement.val(item[name] || "");
         }
-    }
+    };
 
     for (let i = 0; i < aktører.length; i++) {
         const aktør = aktører[i];
@@ -39,7 +40,7 @@ $(function () {
 
         const updateChoices = function(fieldName, event, callback) {
             const filter = {"kladde": false};
-            for (let searchfield of aktør["searchfields"]) {
+            for (const searchfield of aktør["searchfields"]) {
                 const value = $(fields[searchfield]).val();
                 if (value !== "") {
                     filter[searchfield] = value;
@@ -54,23 +55,23 @@ $(function () {
                     "success": function (response_data) {
                         const count = response_data["count"];
                         const response_items = response_data["items"];
-                        items[i] = {}
-                        for (let item of response_items) {
+                        items[i] = {};
+                        for (const item of response_items) {
                             items[i][item["id"]] = item;
                         }
                         if (count > 1) {
                             multi_select.empty();
                             multi_select.append('<option value=""></option>');
-                            for (let id in items[i]) {
+                            for (const id in items[i]) {
                                 const item = items[i][id];
-                                let text = [
+                                const text = [
                                     item["navn"],
                                     item["adresse"],
                                     [item["postnummer"], item["by"]].filter((x) => x !== null && x !== undefined).join(" ")
                                 ].filter((x) => x !== null && x !== undefined).join(', ');
                                 multi_select.append('<option value="' + id + '">' + text + '</option>');
                             }
-                            for (let label in labels) {
+                            for (const label in labels) {
                                 const element = $(labels[label]);
                                 element.toggle(label === fieldName);
                             }
@@ -94,7 +95,7 @@ $(function () {
                 });
             }
         };
-        for (let searchfield of aktør["searchfields"]) {
+        for (const searchfield of aktør["searchfields"]) {
             $(fields[searchfield]).on("change", updateChoices.bind($(fields[searchfield]), searchfield));
         }
 
@@ -113,7 +114,7 @@ $(function () {
             if (id !== null) {
                 const existing = items[i][id];
                 if (existing) {
-                    for (let fieldname in aktør["fields"]) {
+                    for (const fieldname in aktør["fields"]) {
                         const newValue = $(aktør["fields"][fieldname]).val();
                         const oldValue = existing[fieldname] === null ? "" : existing[fieldname].toString();
                         if (newValue !== oldValue) {
@@ -125,7 +126,7 @@ $(function () {
             }
             multi_container.find(".changed").toggle(anyChanged);
         };
-        for (let fieldname in aktør["fields"]) {
+        for (const fieldname in aktør["fields"]) {
             const field = $(aktør["fields"][fieldname]);
             field.change(updateChangeWarning);
         }
@@ -147,9 +148,9 @@ $(function () {
     const tillægsafgift_faktor = konstanter["tillægsafgift_faktor"] || 0;
     const ekspeditionsgebyr = konstanter["ekspeditionsgebyr"] || 0;
     const decimal_fields = ["afgiftssats", "segment_nedre", "segment_øvre"];
-    for (key in varesatser) {
+    for (let key in varesatser) {
         const varesats = varesatser[key];
-        for (let fieldname of decimal_fields) {
+        for (const fieldname of decimal_fields) {
             if (varesats[fieldname]) {
                 varesats[fieldname] = parseFloat(varesats[fieldname]);
             }
@@ -168,14 +169,14 @@ $(function () {
     const get_sub_varesatser = function (varesats) {
         const subs = [];
         const id = varesats["id"];
-        for (let kode in varesatser) {
-            subsats = varesatser[kode]
+        for (const kode in varesatser) {
+            const subsats = varesatser[kode];
             if (subsats["overordnet"] === id) {
                 subs.push(subsats);
             }
         }
         return subs;
-    }
+    };
 
     const get_afgiftssats_text = function (varesats) {
         const enhed = varesats["enhed"];
@@ -186,8 +187,8 @@ $(function () {
             }
             return tekster.join(" + ");
         }*/
-        return window.satsTekster[enhed].replace("%f", formatMoney(varesats["afgiftssats"]))
-    }
+        return window.satsTekster[enhed].replace("%f", formatMoney(varesats["afgiftssats"]));
+    };
 
     const formatMoney = function(value) {
         if (typeof(value) !== "number") {
@@ -196,9 +197,9 @@ $(function () {
         let intPart = String(Math.floor(value));
         let floatPart = String((value - Math.floor(value)).toPrecision(2));
         intPart = replace_repeat(intPart, /^(-?\d+)(\d\d\d)(\.|,|$)/, '$1.$2$3');  // Starting from the right, prefix groups of 3 digits with a dot
-        floatPart = floatPart.substring(2, 4).padEnd(2, "0")  // Get the two first digits of the decimal
+        floatPart = floatPart.substring(2, 4).padEnd(2, "0");  // Get the two first digits of the decimal
         return intPart + "," + floatPart;
-    }
+    };
 
     // Vis varekode ved ændring i dropdown
     // -----------------------------------
@@ -212,7 +213,7 @@ $(function () {
         const vareafgiftssats = subform.find("[name$=vareafgiftssats]");
         const varesats = varesatser[vareafgiftssats.val()];
         if (varesats === undefined) {
-            return
+            return;
         }
 
         const enhed = varesats["enhed"];
@@ -283,12 +284,12 @@ $(function () {
         if (error_message) {
             event.preventDefault();
         }
-    }
+    };
 
     $("form").on("submit", checkPant);
 
     const calcSubAfgift = function(varesats, kg_l, antal, beløb) {
-        const afgiftssats = varesats["afgiftssats"]
+        const afgiftssats = varesats["afgiftssats"];
         if (varesats["segment_øvre"]) {
             beløb = Math.min(beløb, varesats["segment_øvre"]);
         }
@@ -304,13 +305,13 @@ $(function () {
             case "pct":
                 return beløb * 0.01 * afgiftssats;
             case "sam":
-                let afgift = 0
-                for (let subsats of get_sub_varesatser(varesats)) {
-                    afgift += calcSubAfgift(subsats, kg_l, antal, beløb)
+                let afgift = 0;
+                for (const subsats of get_sub_varesatser(varesats)) {
+                    afgift += calcSubAfgift(subsats, kg_l, antal, beløb);
                 }
                 return afgift;
         }
-    }
+    };
 
     const calcAfgift = function (subform) {
         if (!(subform instanceof $)) {
@@ -319,14 +320,14 @@ $(function () {
         const vareafgiftssats = subform.find("[name$=vareafgiftssats]");
         const varesats = varesatser[vareafgiftssats.val()];
         if (varesats === undefined) {
-            return
+            return;
         }
 
         const afgift = calcSubAfgift(
             varesats,
             parseFloat(subform.find("[name$=mængde]").val()),
             parseFloat(subform.find("[name$=antal]").val()),
-            parseFloat(subform.find("[name$=fakturabeløb]").val()),
+            parseFloat(subform.find("[name$=fakturabeløb]").val())
         );
 
         subform.find("[data-value=afgiftsbeløb]").val(
@@ -343,7 +344,7 @@ $(function () {
             const vareafgiftssats = subform.find("[name$=vareafgiftssats]");
             const varesats = varesatser[vareafgiftssats.val()];
             if (varesats === undefined) {
-                return
+                return;
             }
 
             const afgift = subform.data("afgift");
@@ -376,10 +377,10 @@ $(function () {
         addButton.click(addForm);
         subformsUpdated();
     };
-    const subformRemoved = function(subform) {
+    const subformRemoved = function() {
         calcAfgiftSum();
         const rows = container.find(".row");
-        rows.each(function (index, element) {
+        rows.each(function (index) {
             $(this).find("input[name],select[name]").each(function (){
                 this.id = this.id.replace(/-\d+-/, "-"+index+"-");
                 this.name = this.name.replace(/-\d+-/, "-"+index+"-");
@@ -397,7 +398,7 @@ $(function () {
             rows.find(".remove-row").show();
             rows.not(lastRow).find(".add-row").hide();
         }
-    }
+    };
 
     const addForm = function () {
         const newForm = formset.addForm();
@@ -407,7 +408,7 @@ $(function () {
         formset.removeForm(subform, true);
         subformRemoved(subform);
     };
-    container.find(".row").each(function (){subformAdded(this)});
+    container.find(".row").each(function (){subformAdded(this);});
 
     // Filefield
     // ---------
@@ -418,18 +419,18 @@ $(function () {
             const filesize = this.files[0].size;
             const associated = $("input[data-fileinput="+this.name+"]");
             if (maxsize && filesize > maxsize) {
-                const message = this.getAttribute("data-validity-sizeoverflow")
+                const message = this.getAttribute("data-validity-sizeoverflow");
                 this.setCustomValidity(message);
                 associated.each(function () {
                     this.setCustomValidity(message);
-                })
+                });
                 associated.addClass("is-invalid");
-                associated.attr("title", message)
+                associated.attr("title", message);
             } else {
                 this.setCustomValidity("");
                 associated.each(function () {
                     this.setCustomValidity("");
-                })
+                });
                 associated.removeClass("is-invalid");
                 associated.attr("title", "");
             }
@@ -443,11 +444,11 @@ $(function () {
     // TF5: Når indleveringsdato opdateres, brug den rigtige afgiftstabel
     $("[name=indleveringsdato]").on("change", function () {
         const date = Date.parse($(this).val());
-        for (let afgiftstabel of afgiftstabeller) {
+        for (const afgiftstabel of afgiftstabeller) {
             if (Date.parse(afgiftstabel["gyldig_fra"]) <= date && (afgiftstabel["gyldig_til"] == null || Date.parse(afgiftstabel["gyldig_til"]) > date)) {
                 const varesatser_by_afgiftsgruppenummer = {};
-                for (let key in varesatser) {
-                    let varesats = varesatser[key];
+                for (const key in varesatser) {
+                    const varesats = varesatser[key];
                     if (varesats["afgiftstabel"] === afgiftstabel["id"]) {
                         varesatser_by_afgiftsgruppenummer[varesats["afgiftsgruppenummer"]] = varesats;
                     }
@@ -456,13 +457,13 @@ $(function () {
                     const $this = $(this);
                     const currentValue = $this.val();
                     $(this).find("option").not("[value=-1]").remove();
-                    for (let key in varesatser_by_afgiftsgruppenummer) {
+                    for (const key in varesatser_by_afgiftsgruppenummer) {
                         const item = varesatser_by_afgiftsgruppenummer[key];
                         $(this).append($('<option value="' + item["id"] + '">' + item["vareart_da"] + '</option>'));
                     }
                     if (!$this.parents("#formset_prototype").length && currentValue !== "-1") {  // Not the prototype row, and not if nothing is selected
                         const old_sats = varesatser[currentValue];
-                        const new_sats = varesatser_by_afgiftsgruppenummer[old_sats["afgiftsgruppenummer"]]
+                        const new_sats = varesatser_by_afgiftsgruppenummer[old_sats["afgiftsgruppenummer"]];
                         $this.val(new_sats["id"]);
                     }
                     const subform = $(this).parents(".row");
@@ -475,7 +476,7 @@ $(function () {
     });
 
     $("form").on("input", "[data-value=varekode]", function () {
-        $this = $(this);
+        const $this = $(this);
         const varekode = $this.val();
 
         // convert varekode zero-padded string to integer
@@ -485,14 +486,14 @@ $(function () {
         }
 
         // Update the entered varekode with leading zeros
-        const varekode_str = String(varekode_int).padStart(3, "0")
+        const varekode_str = String(varekode_int).padStart(3, "0");
         $this.val(varekode_str);
 
         // Update vareafgiftssats select-dropdown
         const vareafgiftssats = $this.parents(".row").find("[name$=vareafgiftssats]");
 
         let foundVaresats = null;
-        for(let key in varesatser) {
+        for(const key in varesatser) {
             const varesats = varesatser[key];
             if (varekode_int === varesats["afgiftsgruppenummer"]) {
                 foundVaresats = varesats;
@@ -519,7 +520,7 @@ $(function () {
     const updateValidity = function() {
         const valid = this.checkValidity();
         if (!valid) {
-            for (let check of validity_checks) {
+            for (const check of validity_checks) {
                 if (this.validity[check]) {
                     this.setCustomValidity(
                         this.getAttribute("data-validity-" + check.toLowerCase())
@@ -530,7 +531,7 @@ $(function () {
         }
         this.setCustomValidity("");
         return false;
-    }
+    };
     $(find).on("input", updateValidity);
     $(find).trigger("input");
 });
@@ -554,7 +555,7 @@ $(function (){
                 label.text(text);
             });
         });
-    }
+    };
 
     $("[data-required-field]").each(function () {
         const $this = $(this);
@@ -570,14 +571,14 @@ $(function (){
                     // Hent feltets værdi hvis det er i DOM
                     fieldValues.add($(this).val());
                 }
-            })
+            });
             const draft = draftField && draftField.val() && draftField.val().toLowerCase() === "true";
             if (draft) {
                 setRequired($this, false);
             } else {
                 // Tjek om der er sammenfald mellem values of fieldValues
                 let found = false;
-                for (let value of values) {
+                for (const value of values) {
                     if (fieldValues.has(value)) {
                         found = true;
                         break;
@@ -585,7 +586,7 @@ $(function (){
                 }
                 setRequired($this, found);
             }
-        }
+        };
         $(fieldExpr).on("change", updateRequired);
         draftField.on("change", updateRequired);
         updateRequired();
@@ -611,20 +612,20 @@ $(function (){
 $(function () {
     if ($('#indberetter_data').length) {
         const indberetter_data = JSON.parse($('#indberetter_data').text());
-        let $betales_af_select = $("#id_betales_af")
+        const $betales_af_select = $("#id_betales_af");
 
         if (indberetter_data !== null && $betales_af_select.length > 0) {
-            let options = $betales_af_select.find("option");
+            const options = $betales_af_select.find("option");
             for (let i = 0; i < options.length; i++) {
-                let option = $(options[i]);
+                const option = $(options[i]);
                 if (option.val() === "indberetter") {
-                    option.text(option.text() + ` (CVR: ${indberetter_data["cvr"]})`)
+                    option.text(option.text() + ` (CVR: ${indberetter_data["cvr"]})`);
                     break;
                 }
             }
         }
     }
-})
+});
 
 $("input[readonly]").on("focus", function(){
     this.blur();

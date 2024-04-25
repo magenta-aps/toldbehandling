@@ -145,6 +145,13 @@ Lint REUSE compliance:
   script:
     - reuse lint
 
+Lint Javascript:
+  extends: .lint-default
+  image: registry.gitlab.com/pipeline-components/eslint:latest
+  script:
+    - sh -c "cp .eslint/package.json package.json && npm install @eslint/js && eslint --config .eslint/eslint.config.js --color --stats told-common/told_common/static/toldbehandling/js/*.js || rm package.json"
+
+
 # Build stage
 #############
 
@@ -167,7 +174,7 @@ Build REST image:
 
 Build UI image:
   stage: build
-  needs: ["Lint Python", "Lint Dockerfiles", "Lint REUSE compliance"]
+  needs: ["Lint Python", "Lint Dockerfiles", "Lint REUSE compliance", "Lint Javascript"]
   dependencies: []
   image:
     name: gcr.io/kaniko-project/executor:debug-v0.16.0
@@ -184,7 +191,7 @@ Build UI image:
 
 Build Admin image:
   stage: build
-  needs: ["Lint Python", "Lint Dockerfiles", "Lint REUSE compliance"]
+  needs: ["Lint Python", "Lint Dockerfiles", "Lint REUSE compliance", "Lint Javascript"]
   dependencies: []
   image:
     name: gcr.io/kaniko-project/executor:debug-v0.16.0
