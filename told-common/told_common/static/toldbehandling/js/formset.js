@@ -46,7 +46,7 @@ $(function(){
             return {
                 'addForm': addForm,
                 'removeForm': removeForm
-            }
+            };
         }
     });
 });

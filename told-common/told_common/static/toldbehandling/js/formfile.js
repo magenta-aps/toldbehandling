@@ -31,7 +31,7 @@ $(function(){
         const acceptList = accept && accept.split(",");
         const dataTransfer = new DataTransfer();
 
-        for (let item of event.originalEvent.dataTransfer.items) {
+        for (const item of event.originalEvent.dataTransfer.items) {
             if (item.kind === "file") {
                 const file = item.getAsFile();
                 if (acceptList) {
