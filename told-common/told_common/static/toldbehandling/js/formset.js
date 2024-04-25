@@ -1,3 +1,5 @@
+/* eslint-env jquery */
+/* global $ */
 $(function(){
     $.fn.extend({
         'formset': function(name, formPrototypeContainer) {
@@ -46,7 +48,7 @@ $(function(){
             return {
                 'addForm': addForm,
                 'removeForm': removeForm
-            }
+            };
         }
     });
 });

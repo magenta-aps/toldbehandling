@@ -1,3 +1,5 @@
+/* eslint-env jquery */
+/* global $ */
 $(function(){
     const controls = $('.file-input span, .file-input input[type=text]');
     controls.click(function () {
@@ -13,14 +15,14 @@ $(function(){
         $(".file-input [type=text][data-fileinput="+this.name+"]").val(this.value.replace(/C:\\fakepath\\/i, ""));
     });
     const fileInputContainer = $(".file-input");
-    fileInputContainer.on("dragenter", function (event) {
+    fileInputContainer.on("dragenter", function () {
         $(this).addClass("dragover");
     });
     fileInputContainer.on("dragover", function (event) {
         event.preventDefault();
         $(this).addClass("dragover");
     });
-    fileInputContainer.on("dragleave", function (event) {
+    fileInputContainer.on("dragleave", function () {
         $(this).removeClass("dragover");
     });
     fileInputContainer.on("drop", function (event){
@@ -31,7 +33,7 @@ $(function(){
         const acceptList = accept && accept.split(",");
         const dataTransfer = new DataTransfer();
 
-        for (let item of event.originalEvent.dataTransfer.items) {
+        for (const item of event.originalEvent.dataTransfer.items) {
             if (item.kind === "file") {
                 const file = item.getAsFile();
                 if (acceptList) {
