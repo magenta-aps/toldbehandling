@@ -1,7 +1,8 @@
+/* eslint-env jquery */
+/* global $ */
 $(function () {
     // Afsender/modtager opdatering
     // ----------------------------
-    var foobar;
     const items = [];
     const aktører = window.aktører;
     if (!aktører) {
@@ -147,7 +148,7 @@ $(function () {
     const tillægsafgift_faktor = konstanter["tillægsafgift_faktor"] || 0;
     const ekspeditionsgebyr = konstanter["ekspeditionsgebyr"] || 0;
     const decimal_fields = ["afgiftssats", "segment_nedre", "segment_øvre"];
-    for (key in varesatser) {
+    for (let key in varesatser) {
         const varesats = varesatser[key];
         for (const fieldname of decimal_fields) {
             if (varesats[fieldname]) {
@@ -169,7 +170,7 @@ $(function () {
         const subs = [];
         const id = varesats["id"];
         for (const kode in varesatser) {
-            subsats = varesatser[kode];
+            const subsats = varesatser[kode];
             if (subsats["overordnet"] === id) {
                 subs.push(subsats);
             }
@@ -326,7 +327,7 @@ $(function () {
             varesats,
             parseFloat(subform.find("[name$=mængde]").val()),
             parseFloat(subform.find("[name$=antal]").val()),
-            parseFloat(subform.find("[name$=fakturabeløb]").val()),
+            parseFloat(subform.find("[name$=fakturabeløb]").val())
         );
 
         subform.find("[data-value=afgiftsbeløb]").val(
@@ -376,10 +377,10 @@ $(function () {
         addButton.click(addForm);
         subformsUpdated();
     };
-    const subformRemoved = function(subform) {
+    const subformRemoved = function() {
         calcAfgiftSum();
         const rows = container.find(".row");
-        rows.each(function (index, element) {
+        rows.each(function (index) {
             $(this).find("input[name],select[name]").each(function (){
                 this.id = this.id.replace(/-\d+-/, "-"+index+"-");
                 this.name = this.name.replace(/-\d+-/, "-"+index+"-");
@@ -475,7 +476,7 @@ $(function () {
     });
 
     $("form").on("input", "[data-value=varekode]", function () {
-        $this = $(this);
+        const $this = $(this);
         const varekode = $this.val();
 
         // convert varekode zero-padded string to integer
