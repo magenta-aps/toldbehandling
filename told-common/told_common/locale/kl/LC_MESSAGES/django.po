@@ -468,7 +468,7 @@ msgstr "Nassiussat allagartaat"
 
 #: told_common/templates/told_common/tf10/form.html
 msgid "Forbindelsesnr/afsenderbykode"
-msgstr "Attavigisap normua/nassiussisup illoqarfiata kodea"
+msgstr "Angallavigisap normua/nassiussisup illoqarfiata kodea"
 
 #: told_common/templates/told_common/tf10/form.html
 msgid "Fragtbrevnr/postforsendelsesnummer"
@@ -645,7 +645,7 @@ msgstr "Nalunaarutip normua"
 
 #: told_common/templates/told_common/tf10/list.html
 msgid "Afsender bykode/forbindelsesnummer"
-msgstr "Nassiussisup illoqarfiata kodea/attavigisap normua"
+msgstr "Nassiussisup illoqarfiata kodea/angallavigisap normua"
 
 #: told_common/templates/told_common/tf10/list.html
 msgid "Postforsendelsesnummer/fragtbrevsnummer"
@@ -699,7 +699,7 @@ msgstr "Ulloq"
 #, fuzzy
 #| msgid "Forbindelsesnr."
 msgid "Forbindelsesnummer"
-msgstr "Attavigisap normua"
+msgstr "Angallavigisap normua"
 
 #: told_common/templates/told_common/tf10/list.html
 #: told_common/templates/told_common/tf5/list.html
@@ -740,7 +740,7 @@ msgstr "Qanoq nassiussineq"
 
 #: told_common/templates/told_common/tf10/view.html
 msgid "Forbindelsesnr."
-msgstr "Attavigisap normua"
+msgstr "Angallavigisap normua"
 
 #: told_common/templates/told_common/tf10/view.html
 msgid "Afsenderby­kode"
