@@ -29,7 +29,7 @@ $(function () {
 
         multi_select.change(function () {
             const id = $(this).val();
-            if (id == "") {
+            if (id === "") {
                 fillForm(i, {});
             } else {
                 const item = items[i][id];
