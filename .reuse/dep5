@@ -2,7 +2,7 @@ Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
 Upstream-Name: Toldbehandling
 Upstream-Contact: Magenta ApS <info@magenta.dk>
 
-Files: told-common/* rest/* ui/* admin/* log/* dev-environment/* docker/* mockup/* dev-idp/* docker-compose.yml docker-compose.override.template.yml SUMMARY README.md .gitignore .gitlab-ci.yml .eslintrc package.json
+Files: told-common/* rest/* ui/* admin/* log/* dev-environment/* docker/* mockup/* dev-idp/* docker-compose.yml docker-compose.override.template.yml SUMMARY README.md .gitignore .gitlab-ci.yml .eslintrc .eslint-package.json
 Copyright: 2023 Magenta ApS <info@magenta.dk>
 License: MPL-2.0
 

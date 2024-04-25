@@ -149,7 +149,7 @@ Lint Javascript:
   extends: .lint-default
   image: registry.gitlab.com/pipeline-components/eslint:latest
   script:
-    - sh -c "npm install @eslint/js && eslint --config .eslintrc --color --stats told-common/told_common/static/toldbehandling/js/*.js"
+    - sh -c "cp .eslint-package.json package.json && npm install @eslint/js && eslint --config .eslintrc --color --stats told-common/told_common/static/toldbehandling/js/*.js && rm package.json"
 
 
 # Build stage
