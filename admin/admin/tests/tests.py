@@ -262,11 +262,11 @@ class TestLogin(TestMixin, TestCase):
         }
         self.client.cookies[session_cookie].update(cookie_data)
 
-        response = self.client.get(reverse("index"))
+        response = self.client.get(reverse("tf10_list"))
         self.assertEquals(response.status_code, 302)
         self.assertEquals(
             response.headers["Location"],
-            "/admin/login?back=" + quote_plus(reverse("index")),
+            "/admin/login?back=" + quote_plus(reverse("tf10_list")),
         )
 
 
@@ -542,7 +542,7 @@ class TestGodkend(PermissionsTest, TestCase):
         return response
 
     def test_requires_login(self):
-        url = str(reverse("index"))
+        url = str(reverse("tf10_list"))
         response = self.client.get(url)
         self.assertEquals(response.status_code, 302)
         self.assertEquals(
