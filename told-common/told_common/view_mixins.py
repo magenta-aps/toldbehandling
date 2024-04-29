@@ -14,19 +14,20 @@ from urllib.parse import quote_plus
 from django.conf import settings
 from django.core.cache import cache
 from django.http import (
+    Http404,
     HttpRequest,
     HttpResponse,
     HttpResponseRedirect,
     HttpResponseServerError,
 )
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.views.generic import FormView
 from requests import HTTPError
 from told_common.data import JwtTokenInfo
 from told_common.middleware import RestTokenUserMiddleware
-from told_common.rest_client import RestClient
+from told_common.rest_client import RestClient, RestClientException
 from told_common.util import hash_file
 
 log = logging.getLogger(__name__)
@@ -75,18 +76,11 @@ class LoginRequiredMixin:
             return redir
         try:
             return super().dispatch(request, *args, **kwargs)
-        except HTTPError as e:
-            if e.response.status_code == 401:
+        except RestClientException as e:
+            if e.status_code == 401:
                 # Refresh failed, must re-login
                 return self.needs_login(request)
-            try:
-                content = e.response.json()
-            except ValueError:
-                content = e.response.content
-            return HttpResponseServerError(
-                f"Failure in REST API request; "
-                f"got http {e.response.status_code} from API. Response: {content}"
-            )
+            raise
 
     def get_context_data(self, **context):
         return super().get_context_data(**{**context, "user": self.userdata})
@@ -341,3 +335,27 @@ class PreventDoubleSubmitMixin:
             )
             cache.set(session_form_hash, post_hash, 10)
             return super().post(request, *args, **kwargs)
+
+
+class CatchErrorsMixin:
+    def dispatch(self, request, *args, **kwargs):
+        try:
+            return super().dispatch(request, *args, **kwargs)
+        except Exception as e:
+            if hasattr(e, "status_code"):
+                status = getattr(e, "status_code")
+            elif type(e) in (Http404,):
+                status = 404
+            else:
+                status = 500
+            return render(
+                request,
+                template_name="told_common/error.html",
+                context={"message": str(e)},
+                status=status,
+            )
+
+    def get(self, request, *args, **kwargs):
+        if "provoke_error" in request.GET:
+            raise Exception("Oh how you provoke me!")
+        return super().get(request, *args, **kwargs)

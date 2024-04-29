@@ -29,6 +29,7 @@ from told_common.data import (
 )
 from told_common.util import filter_dict_values, format_daterange, join, join_words
 from told_common.view_mixins import (
+    CatchErrorsMixin,
     FormWithFormsetView,
     GetFormView,
     HasRestClientMixin,
@@ -62,7 +63,10 @@ class TwofactorAuthRequiredMixin(LoginRequiredMixin):
 
 
 class AdminLayoutBaseView(
-    TwofactorAuthRequiredMixin, PermissionsRequiredMixin, HasRestClientMixin
+    CatchErrorsMixin,
+    TwofactorAuthRequiredMixin,
+    PermissionsRequiredMixin,
+    HasRestClientMixin,
 ):
     """Base view for admin pages, using a common layout with navigation.
 
