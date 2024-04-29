@@ -13,18 +13,11 @@ from urllib.parse import quote_plus
 
 from django.conf import settings
 from django.core.cache import cache
-from django.http import (
-    Http404,
-    HttpRequest,
-    HttpResponse,
-    HttpResponseRedirect,
-    HttpResponseServerError,
-)
+from django.http import Http404, HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect, render
 from django.template.response import TemplateResponse
 from django.urls import reverse
 from django.views.generic import FormView
-from requests import HTTPError
 from told_common.data import JwtTokenInfo
 from told_common.middleware import RestTokenUserMiddleware
 from told_common.rest_client import RestClient, RestClientException
