@@ -10,7 +10,6 @@ from urllib.parse import quote_plus
 
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.sessions.models import Session
 from django.core.exceptions import ValidationError
 from django.http import Http404, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import redirect
@@ -46,14 +45,12 @@ from admin.clients.prisme import (
 )
 from admin.spreadsheet import SpreadsheetExport, VareafgiftssatsSpreadsheetUtil
 
-Session
+
 class TwofactorAuthRequiredMixin(LoginRequiredMixin):
     def login_check(self):
         redir = super().login_check()
-        print(f"Login_check produced {redir}")
         if redir:
             return redir
-        print(f"self.request.session: {self.request.session}")
         if (
             not self.request.session.get("twofactor_authenticated")
             and self.request.user.twofactor_enabled
