@@ -627,11 +627,11 @@ msgstr "Killiffik"
 #: told_common/templates/told_common/tf10/list.html
 #: told_common/templates/told_common/tf5/list.html
 msgid "Oprettelsesdato mellem"
-msgstr "-t akornanni pilersinneqarpoq"
+msgstr "Ullut akornanni pilersinneqarpoq"
 
 #: told_common/templates/told_common/tf10/list.html
 msgid "Afgangsdato mellem"
-msgstr "-t akornanni nassiunneqarpoq"
+msgstr "Ullut akornanni nassiunneqarpoq"
 
 #: told_common/templates/told_common/tf10/list.html
 #: told_common/templates/told_common/tf5/list.html
