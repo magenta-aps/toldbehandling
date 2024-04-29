@@ -109,35 +109,6 @@ class AdminLayoutBaseView(
         )
 
 
-class IndexView(PermissionsRequiredMixin, HasRestClientMixin, TemplateView):
-    template_name = "admin/index.html"
-    required_permissions = ("auth.admin",)
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-
-        tf10_forms = [
-            {
-                "date": "2023-01-01 08:00",
-                "status": "open",
-                "id": 1,
-            },
-            {
-                "date": "2023-01-01 08:00",
-                "status": "needs review",
-                "id": 2,
-            },
-            {
-                "date": "2023-01-01 08:00",
-                "status": "closed",
-                "id": 3,
-            },
-        ]
-
-        context["tf10_forms"] = tf10_forms
-        return context
-
-
 class TF10View(AdminLayoutBaseView, common_views.TF10View, FormView):
     required_permissions = ("auth.admin", *common_views.TF10View.required_permissions)
     prisme_permissions = ("anmeldelse.prisme_afgiftsanmeldelse",)
