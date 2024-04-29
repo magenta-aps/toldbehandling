@@ -30,7 +30,7 @@ VERSION = os.environ.get("COMMIT_TAG", "")
 
 ALLOWED_HOSTS = ["*"]
 
-HOST_DOMAIN = os.environ.get("HOST_DOMAIN", "http://akitsuut.aka.gl")
+HOST_DOMAIN = os.environ.get("HOST_DOMAIN", "https://akitsuut.aka.gl")
 
 if os.environ.get("HOST_DOMAIN", False):
     CSRF_TRUSTED_ORIGINS = [os.environ["HOST_DOMAIN"]]
@@ -179,6 +179,7 @@ SESSION_COOKIE_PATH = "/admin"
 SESSION_COOKIE_SAMESITE = "Strict"
 SESSION_COOKIE_SECURE = True
 SESSION_COOKIE_NAME = "admin_sessionid"
+SESSION_COOKIE_AGE = 604800  # One week, in seconds
 
 STORAGES = {
     "staticfiles": {
