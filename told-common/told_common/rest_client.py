@@ -41,6 +41,27 @@ from told_common.util import cast_or_none, filter_dict_none, opt_int
 log = logging.getLogger(__name__)
 
 
+class RestClientException(Exception):
+    def __init__(self, status_code, content):
+        self.status_code = status_code
+        self.content = content
+
+    @classmethod
+    def from_http_error(cls, error: HTTPError):
+        response = error.response
+        try:
+            content = response.json()
+        except ValueError:
+            content = response.content
+        return cls(response.status_code, content)
+
+    def __str__(self):
+        return (
+            f"Failure in REST API request; got http "
+            f"{self.status_code} from API. Response: {self.content}"
+        )
+
+
 class ModelRestClient:
     def __init__(self, rest):
         self.rest = rest
@@ -1039,7 +1060,7 @@ class RestClient:
             if e.response.status_code == 404:
                 user = client.post("user", mapped_data)
             else:
-                raise
+                raise RestClientException.from_http_error(e)
         if (
             saml_data.get("firstname") != user["first_name"]
             or saml_data.get("lastname") != user["last_name"]
@@ -1069,37 +1090,49 @@ class RestClient:
         param_string = (
             ("?" + urlencode(params, doseq=True)) if params is not None else ""
         )
-        response = self.session.get(f"{self.domain}/api/{path}{param_string}")
-        response.raise_for_status()
-        return response.json()
+        try:
+            response = self.session.get(f"{self.domain}/api/{path}{param_string}")
+            response.raise_for_status()
+            return response.json()
+        except HTTPError as e:
+            raise RestClientException.from_http_error(e)
 
     def post(self, path: str, data):
         self.check_access_token_age()
-        response = self.session.post(
-            f"{self.domain}/api/{path}",
-            json.dumps(data, cls=DjangoJSONEncoder),
-            headers={"Content-Type": "application/json"},
-        )
-        response.raise_for_status()
-        return response.json()
+        try:
+            response = self.session.post(
+                f"{self.domain}/api/{path}",
+                json.dumps(data, cls=DjangoJSONEncoder),
+                headers={"Content-Type": "application/json"},
+            )
+            response.raise_for_status()
+            return response.json()
+        except HTTPError as e:
+            raise RestClientException.from_http_error(e)
 
     def patch(self, path: str, data):
         self.check_access_token_age()
-        response = self.session.patch(
-            f"{self.domain}/api/{path}",
-            json.dumps(data, cls=DjangoJSONEncoder),
-            headers={"Content-Type": "application/json"},
-        )
-        response.raise_for_status()
-        return response.json()
+        try:
+            response = self.session.patch(
+                f"{self.domain}/api/{path}",
+                json.dumps(data, cls=DjangoJSONEncoder),
+                headers={"Content-Type": "application/json"},
+            )
+            response.raise_for_status()
+            return response.json()
+        except HTTPError as e:
+            raise RestClientException.from_http_error(e)
 
     def delete(self, path: str):
         self.check_access_token_age()
-        response = self.session.delete(
-            f"{self.domain}/api/{path}",
-        )
-        response.raise_for_status()
-        return response.json()
+        try:
+            response = self.session.delete(
+                f"{self.domain}/api/{path}",
+            )
+            response.raise_for_status()
+            return response.json()
+        except HTTPError as e:
+            raise RestClientException.from_http_error(e)
 
     @staticmethod
     def _uploadfile_to_base64str(file: Optional[UploadedFile]) -> Optional[str]:
