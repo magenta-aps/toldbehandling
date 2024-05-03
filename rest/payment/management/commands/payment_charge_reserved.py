@@ -55,14 +55,15 @@ class Command(BaseCommand):
             payment.status = "paid"
             payment.save()
 
-            prom_registry = CollectorRegistry()
-            metric_payment_charge_reserved = get_job_metric(
-                "payment_charge_reserved", prom_registry
-            )
-            metric_payment_charge_reserved.set_to_current_time()
+        # Push a metric to prometheus
+        prom_registry = CollectorRegistry()
+        metric_payment_charge_reserved = get_job_metric(
+            "payment_charge_reserved", prom_registry
+        )
+        metric_payment_charge_reserved.set_to_current_time()
 
-            push_to_gateway(
-                settings.PROMETHEUS_PUSHGATEWAY_HOST,
-                job="payment_charge_reserved",
-                registry=prom_registry,
-            )
+        push_to_gateway(
+            settings.PROMETHEUS_PUSHGATEWAY_HOST,
+            job="payment_charge_reserved",
+            registry=prom_registry,
+        )
