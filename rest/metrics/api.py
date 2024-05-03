@@ -1,3 +1,8 @@
+# SPDX-FileCopyrightText: 2023 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: MPL-2.0
+# mypy: disable-error-code="call-arg, attr-defined"
+
 from django.http import HttpResponse
 from ninja_extra import api_controller, permissions, route
 from ninja_jwt.authentication import JWTAuth
