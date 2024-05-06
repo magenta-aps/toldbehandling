@@ -2,10 +2,11 @@
 #
 # SPDX-License-Identifier: MPL-2.0
 
+import base64
 from copy import deepcopy
 from datetime import UTC, date, datetime, timedelta
 from decimal import Decimal
-from unittest.mock import ANY, patch
+from unittest.mock import ANY, MagicMock, call, patch
 from uuid import uuid4
 
 from aktør.models import Afsender, Modtager
@@ -25,6 +26,7 @@ from anmeldelse.models import (
 )
 from common.models import IndberetterProfile
 from django.contrib.auth.models import Permission
+from django.core.files.base import ContentFile
 from django.db.models.signals import post_delete, post_save
 from django.test import TestCase
 from django.urls import reverse
@@ -1011,6 +1013,72 @@ class AfgiftsanmeldelseAPITest(AnmeldelsesTestDataMixin, TestCase):
         # Verify the status was changed from "kladde" to "ny"
         afgiftsanmeldelse_kladde.refresh_from_db()
         self.assertEqual(afgiftsanmeldelse_kladde.status, "ny")
+
+    @patch("anmeldelse.api.log.info")
+    @patch("anmeldelse.api.AfgiftsanmeldelseAPI.check_user")
+    def test_update_leverandoerfaktura_already_exists(
+        self, mock_check_user, mock_log_info
+    ):
+        postforsendelse_kladde, _ = Postforsendelse.objects.get_or_create(
+            postforsendelsesnummer="1338",
+            oprettet_af=self.user,
+            defaults={
+                "forsendelsestype": Postforsendelse.Forsendelsestype.SKIB,
+                "afsenderbykode": "8200",
+                "afgangsdato": "2024-05-06",
+                "kladde": False,
+            },
+        )
+
+        afgiftsanmeldelse_kladde = Afgiftsanmeldelse.objects.create(
+            **{
+                "afsender_id": self.afsender.id,
+                "modtager_id": self.modtager.id,
+                "postforsendelse_id": postforsendelse_kladde.id,
+                "leverandørfaktura": ContentFile(
+                    "test_leverandoerfaktura_content",
+                    name="test_leverandoerfaktura_content.txt",
+                ),
+                "leverandørfaktura_nummer": "12345",
+                "betales_af": "afsender",
+                "indførselstilladelse": "abcde",
+                "betalt": False,
+                "fuldmagtshaver": None,
+                "status": "kladde",
+                "oprettet_af": self.user,
+            }
+        )
+
+        resp = self.client.patch(
+            reverse(
+                "api-1.0.0:afgiftsanmeldelse_update", args=[afgiftsanmeldelse_kladde.id]
+            ),
+            data=json_dump(
+                {
+                    "leverandørfaktura_nummer": "11223",
+                }
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+        )
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.json(), {"success": True})
+
+        mock_check_user.assert_called_once_with(afgiftsanmeldelse_kladde)
+        mock_log_info.assert_has_calls(
+            [
+                call(
+                    "Rest API opdaterer TF10 %d uden at sætte leverandørfaktura",
+                    afgiftsanmeldelse_kladde.id,
+                ),
+                call(
+                    "Der findes allerede leverandørfaktura '%s' (%d bytes)",
+                    afgiftsanmeldelse_kladde.leverandørfaktura.name,
+                    afgiftsanmeldelse_kladde.leverandørfaktura.size,
+                ),
+            ]
+        )
 
     def test_map_sort(self):
         result = AfgiftsanmeldelseAPI.map_sort("forbindelsesnummer", "desc")
