@@ -10,6 +10,7 @@ from uuid import uuid4
 
 from aktør.models import Afsender, Modtager
 from anmeldelse.api import (
+    AfgiftsanmeldelseAPI,
     AfgiftsanmeldelseHistoryOut,
     AfgiftsanmeldelseIn,
     AfgiftsanmeldelseOut,
@@ -961,3 +962,7 @@ class AfgiftsanmeldelseAPITest(AnmeldelsesTestDataMixin, TestCase):
         # Verify the normal permission check was called, which we have mocked out
         # so we are sure its not the one raising PermissionDenied
         mock_check_user.assert_called_once_with(self.afgiftsanmeldelse)
+
+    def test_map_sort(self):
+        result = AfgiftsanmeldelseAPI.map_sort("forbindelsesnummer", "desc")
+        self.assertEqual(result, "-fragtforsendelse__forbindelsesnr")
