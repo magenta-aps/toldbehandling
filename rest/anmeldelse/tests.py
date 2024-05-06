@@ -963,6 +963,55 @@ class AfgiftsanmeldelseAPITest(AnmeldelsesTestDataMixin, TestCase):
         # so we are sure its not the one raising PermissionDenied
         mock_check_user.assert_called_once_with(self.afgiftsanmeldelse)
 
+    @patch("anmeldelse.api.AfgiftsanmeldelseAPI.check_user")
+    def test_update_status_kladde(self, mock_check_user):
+        postforsendelse_kladde, _ = Postforsendelse.objects.get_or_create(
+            postforsendelsesnummer="1337",
+            oprettet_af=self.user,
+            defaults={
+                "forsendelsestype": Postforsendelse.Forsendelsestype.SKIB,
+                "afsenderbykode": "8200",
+                "afgangsdato": "2024-05-06",
+                "kladde": True,
+            },
+        )
+
+        afgiftsanmeldelse_kladde = Afgiftsanmeldelse.objects.create(
+            **{
+                "afsender_id": self.afsender.id,
+                "modtager_id": self.modtager.id,
+                "postforsendelse_id": postforsendelse_kladde.id,
+                "leverandørfaktura_nummer": "12345",
+                "betales_af": "afsender",
+                "indførselstilladelse": "abcde",
+                "betalt": False,
+                "fuldmagtshaver": None,
+                "status": "kladde",
+                "oprettet_af": self.user,
+            }
+        )
+
+        resp = self.client.patch(
+            reverse(
+                "api-1.0.0:afgiftsanmeldelse_update", args=[afgiftsanmeldelse_kladde.id]
+            ),
+            data=json_dump(
+                {
+                    "leverandørfaktura_nummer": "54321",
+                }
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+        )
+
+        mock_check_user.assert_called_once_with(afgiftsanmeldelse_kladde)
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.json(), {"success": True})
+
+        # Verify the status was changed from "kladde" to "ny"
+        afgiftsanmeldelse_kladde.refresh_from_db()
+        self.assertEqual(afgiftsanmeldelse_kladde.status, "ny")
+
     def test_map_sort(self):
         result = AfgiftsanmeldelseAPI.map_sort("forbindelsesnummer", "desc")
         self.assertEqual(result, "-fragtforsendelse__forbindelsesnr")
