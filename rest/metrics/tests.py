@@ -8,7 +8,7 @@ from django.urls import reverse
 from project.test_mixins import RestMixin
 
 
-class MetricsTest(TestCase):
+class MetricsTest:
     @classmethod
     def setUpTestData(cls):
         cls.user_permissions = [
@@ -28,7 +28,7 @@ class MetricsTest(TestCase):
         )
 
 
-class MetricsAPITest(MetricsTest):
+class MetricsAPITest(MetricsTest, TestCase):
     def test_get_all(self):
         resp = self.client.get(
             reverse("api-1.0.0:metrics_get_all"),
