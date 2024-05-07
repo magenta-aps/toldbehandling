@@ -2,7 +2,6 @@
 #
 # SPDX-License-Identifier: MPL-2.0
 
-import base64
 from copy import deepcopy
 from datetime import UTC, date, datetime, timedelta
 from decimal import Decimal
@@ -10,12 +9,7 @@ from unittest.mock import ANY, MagicMock, call, patch
 from uuid import uuid4
 
 from aktør.models import Afsender, Modtager
-from anmeldelse.api import (
-    AfgiftsanmeldelseAPI,
-    AfgiftsanmeldelseHistoryOut,
-    AfgiftsanmeldelseIn,
-    AfgiftsanmeldelseOut,
-)
+from anmeldelse.api import AfgiftsanmeldelseAPI
 from anmeldelse.models import (
     Afgiftsanmeldelse,
     PrismeResponse,
@@ -34,8 +28,6 @@ from forsendelse.models import Postforsendelse
 from project.test_mixins import RestMixin, RestTestMixin
 from project.util import json_dump
 from sats.models import Vareafgiftssats
-
-# asd
 
 
 class AnmeldelsesTestDataMixin:
@@ -943,6 +935,35 @@ class AfgiftsanmeldelseAPITest(AnmeldelsesTestDataMixin, TestCase):
                 "history_date": ANY,
             },
         )
+
+    @patch("django.db.models.QuerySet.none")
+    def test_list_filter_user_no_cvr(self, mock_queryset_none):
+        user_private, user_private_token, _ = RestMixin.make_user(
+            username="payment-test-user-private",
+            plaintext_password="testpassword1337",
+            permissions=[
+                self.view_afgiftsanmeldelse_perm,
+                self.add_afgiftsanmeldelse_perm,
+                self.change_afgiftsanmeldelse_perm,
+                self.view_historicalafgiftsanmeldelse,
+            ],
+        )
+
+        _ = IndberetterProfile.objects.create(
+            user=user_private,
+            cpr="13371337",
+            api_key=uuid4(),
+        )
+
+        resp = self.client.get(
+            reverse(
+                "api-1.0.0:afgiftsanmeldelse_list",
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {user_private_token}",
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, 200)
+        mock_queryset_none.assert_called_once()
 
     @patch("anmeldelse.api.AfgiftsanmeldelseAPI.check_user")
     def test_update_missing_approve_reject_anmeldelse_perm(self, mock_check_user):
