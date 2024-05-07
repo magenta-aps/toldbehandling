@@ -26,6 +26,10 @@ from payment.schemas import (
     ProviderPaymentResponse,
 )
 from payment.utils import generate_payment_item_from_varelinje, get_payment_fees
+from project.metrics import (
+    metric_payment_provider_payments_created,
+    metric_payment_provider_payments_reserved,
+)
 
 
 @api_controller(
@@ -119,6 +123,8 @@ class PaymentAPI:
         payment_new.status = provider_handler.initial_status
         payment_new.save()
 
+        metric_payment_provider_payments_created.inc()
+
         return _payment_model_to_response(
             payment_new,
             field_converts=_payment_field_converters(provider_handler),
@@ -173,6 +179,7 @@ class PaymentAPI:
         ):
             payment_local.status = "reserved"
             payment_local.save()
+            metric_payment_provider_payments_reserved.inc()
 
         if (
             payment_local.status == "reserved"

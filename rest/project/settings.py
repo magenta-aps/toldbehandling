@@ -237,3 +237,10 @@ if os.path.isfile(log_filename) and ENVIRONMENT != "development":
 
 TILLAEGSAFGIFT_FAKTOR = 0.5
 EKSPEDITIONSGEBYR = 250
+
+
+# Metrics
+
+PROMETHEUS_PUSHGATEWAY_HOST = os.environ.get(
+    "PROMETHEUS_PUSHGATEWAY", "pushgateway:9091"
+)
