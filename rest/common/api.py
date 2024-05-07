@@ -226,6 +226,7 @@ class UserAPI:
                 user=user,
                 cpr=payload.indberetter_data.cpr,
                 cvr=payload.indberetter_data.cvr,
+                api_key=IndberetterProfile.create_api_key(),
             )
         else:
             raise ValidationError("indberetter_data does not exist")  # type: ignore

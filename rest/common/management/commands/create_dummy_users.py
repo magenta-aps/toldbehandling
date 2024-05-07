@@ -132,7 +132,10 @@ class Command(BaseCommand):
         indberetter.groups.add(privatindberettere_group)
 
         IndberetterProfile.objects.create(
-            cpr=1111111111, cvr=12345678, user=indberetter
+            cpr=1111111111,
+            cvr=12345678,
+            user=indberetter,
+            api_key=IndberetterProfile.create_api_key(),
         )
 
         indberetter2, created = User.objects.update_or_create(
@@ -151,7 +154,10 @@ class Command(BaseCommand):
         indberetter.groups.add(privatindberettere_group)
 
         IndberetterProfile.objects.create(
-            cpr=2222222222, cvr=12345679, user=indberetter2
+            cpr=2222222222,
+            cvr=12345679,
+            user=indberetter2,
+            api_key=IndberetterProfile.create_api_key(),
         )
 
         indberetter3, created = User.objects.update_or_create(
@@ -168,7 +174,12 @@ class Command(BaseCommand):
         )
         indberetter3.groups.add(privatindberettere_group)
 
-        IndberetterProfile.objects.create(cpr=3333333333, cvr=None, user=indberetter3)
+        IndberetterProfile.objects.create(
+            cpr=3333333333,
+            cvr=None,
+            user=indberetter3,
+            api_key=IndberetterProfile.create_api_key(),
+        )
 
         indberetter4, created = User.objects.update_or_create(
             defaults={
@@ -186,7 +197,10 @@ class Command(BaseCommand):
         indberetter4.groups.add(erhvervindberettere_group)
 
         IndberetterProfile.objects.create(
-            cpr=111111111, cvr=12345678, user=indberetter4
+            cpr=111111111,
+            cvr=12345678,
+            user=indberetter4,
+            api_key=IndberetterProfile.create_api_key(),
         )
 
         admin_godkender, created = User.objects.update_or_create(
