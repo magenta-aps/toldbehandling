@@ -107,7 +107,6 @@ class CommonModelsTests(TestCase):
         )
 
         def test_APIKeys_different(self):
-
             self.assertTrue(self.indberetter.api_key != self.indberetter2.api_key)
 
 
