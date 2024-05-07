@@ -28,7 +28,12 @@ class IndberetterProfile(models.Model):
         validators=[MinValueValidator(10000000), MaxValueValidator(99999999)],
         db_index=True,
     )
-    api_key = models.UUIDField(default=uuid.uuid4, editable=False)
+
+    @staticmethod
+    def create_api_key():
+        return uuid.uuid4()
+
+    api_key = models.CharField(max_length=128, editable=False, unique=True)
 
 
 class Postnummer(models.Model):

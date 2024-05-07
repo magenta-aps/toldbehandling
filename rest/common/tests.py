@@ -33,9 +33,7 @@ class CommonTest:
         )
 
         cls.indberetter = IndberetterProfile.objects.create(
-            user=cls.user,
-            cvr="13371337",
-            api_key=uuid4(),
+            user=cls.user, cvr="13371337", api_key=IndberetterProfile.create_api_key()
         )
 
         # User-2 (CPR)
@@ -56,7 +54,7 @@ class CommonTest:
         cls.indberetter2 = IndberetterProfile.objects.create(
             user=cls.user2,
             cpr="1234567890",
-            api_key=uuid4(),
+            api_key=IndberetterProfile.create_api_key(),
         )
 
 
@@ -107,6 +105,9 @@ class CommonModelsTests(TestCase):
                 b"df</FileExtension></Content></Dispatch>"
             ),
         )
+
+        def test_APIKeys_different(self):
+            self.assertTrue(self.indberetter.api_key != self.indberetter2.api_key)
 
 
 class CommonAPITests(CommonTest, TestCase):
