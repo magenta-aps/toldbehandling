@@ -3,12 +3,10 @@
 # SPDX-License-Identifier: MPL-2.0
 
 from django.contrib.auth.models import Permission
-from django.test import TestCase
-from django.urls import reverse
 from project.test_mixins import RestMixin
 
 
-class MetricsTest(TestCase):
+class MetricsTest:
     @classmethod
     def setUpTestData(cls):
         cls.user_permissions = [
