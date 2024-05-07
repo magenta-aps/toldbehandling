@@ -195,8 +195,7 @@ class PostforsendelseAPITests(TestCase):
 
     def test_list_postforsendelser_filter_user_created_by_indberetter_cvr(self):
         _ = IndberetterProfile.objects.create(
-            user=self.user,
-            cvr="13371337",
+            user=self.user, cvr="13371337", api_key=IndberetterProfile.create_api_key()
         )
 
         postforsendelse = Postforsendelse.objects.create(
@@ -397,8 +396,7 @@ class FragtforsendelseAPITests(TestCase):
 
     def test_update_fragtforsendelse_created_by(self):
         _ = IndberetterProfile.objects.create(
-            user=self.user,
-            cvr="13371337",
+            user=self.user, cvr="13371337", api_key=IndberetterProfile.create_api_key()
         )
 
         fragtforsendelse = Fragtforsendelse.objects.create(

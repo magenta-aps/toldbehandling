@@ -33,9 +33,7 @@ class CommonTest:
         )
 
         cls.indberetter = IndberetterProfile.objects.create(
-            user=cls.user,
-            cvr="13371337",
-            api_key=uuid4(),
+            user=cls.user, cvr="13371337", api_key=IndberetterProfile.create_api_key()
         )
 
         # User-2 (CPR)
@@ -56,7 +54,7 @@ class CommonTest:
         cls.indberetter2 = IndberetterProfile.objects.create(
             user=cls.user2,
             cpr="1234567890",
-            api_key=uuid4(),
+            api_key=IndberetterProfile.create_api_key(),
         )
 
 
