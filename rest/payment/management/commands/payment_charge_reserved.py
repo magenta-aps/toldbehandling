@@ -62,8 +62,17 @@ class Command(BaseCommand):
         )
         metric_payment_charge_reserved.set_to_current_time()
 
-        push_to_gateway(
-            settings.PROMETHEUS_PUSHGATEWAY_HOST,
-            job="payment_charge_reserved",
-            registry=prom_registry,
-        )
+        try:
+            push_to_gateway(
+                settings.PROMETHEUS_PUSHGATEWAY_HOST,
+                job="payment_charge_reserved",
+                registry=prom_registry,
+            )
+        except Exception as e:
+            print(
+                (
+                    "Unable to push metrics to "
+                    f"prometheus-pushgateway: {settings.PROMETHEUS_PUSHGATEWAY_HOST}"
+                )
+            )
+            raise e
