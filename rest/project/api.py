@@ -14,6 +14,7 @@ from anmeldelse.api import (
 )
 from common.api import EboksBeskedAPI, UserAPI
 from forsendelse.api import FragtforsendelseAPI, PostforsendelseAPI
+from metrics.api import MetricsAPI
 from ninja_extra import NinjaExtraAPI
 from ninja_jwt.controller import NinjaJWTDefaultController
 from otp.api import TOTPDeviceAPI, TwoFactorLoginAPI
@@ -38,3 +39,4 @@ api.register_controllers(AfgiftstabelAPI, VareafgiftssatsAPI)
 api.register_controllers(UserAPI, EboksBeskedAPI)
 api.register_controllers(PaymentAPI)
 api.register_controllers(TOTPDeviceAPI, TwoFactorLoginAPI)
+api.register_controllers(MetricsAPI)

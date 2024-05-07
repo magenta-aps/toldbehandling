@@ -2,6 +2,9 @@ from django.core.management.base import BaseCommand
 from payment.exceptions import ProviderPaymentNotFound
 from payment.models import Payment
 from payment.provider_handlers import get_provider_handler
+from project import settings
+from project.metrics import get_job_metric
+from prometheus_client import CollectorRegistry, push_to_gateway
 
 
 class Command(BaseCommand):
@@ -9,7 +12,10 @@ class Command(BaseCommand):
     Command which goes through all reserved payments and charges them
     """
 
+    help = "Charge payments that have been reserved"
+
     def handle(self, *args, **kwargs):
+        # Check if there is payments to charge
         reserved_payments = Payment.objects.filter(status="reserved")
         if not reserved_payments.exists():
             print("No reserved payments found, exiting...")
@@ -48,3 +54,16 @@ class Command(BaseCommand):
             print("SUCCESS")
             payment.status = "paid"
             payment.save()
+
+        # Push a metric to prometheus
+        prom_registry = CollectorRegistry()
+        metric_payment_charge_reserved = get_job_metric(
+            "payment_charge_reserved", prom_registry
+        )
+        metric_payment_charge_reserved.set_to_current_time()
+
+        push_to_gateway(
+            settings.PROMETHEUS_PUSHGATEWAY_HOST,
+            job="payment_charge_reserved",
+            registry=prom_registry,
+        )

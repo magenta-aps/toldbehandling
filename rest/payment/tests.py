@@ -3,7 +3,7 @@ import uuid
 from datetime import date, datetime, timedelta, timezone
 from decimal import Decimal
 from typing import Optional
-from unittest.mock import MagicMock, call, patch
+from unittest.mock import ANY, MagicMock, call, patch
 
 from anmeldelse.models import PrivatAfgiftsanmeldelse, Varelinje
 from django.conf import settings
@@ -968,9 +968,12 @@ class PaymentAPITests(PaymentTest):
 
 
 class PaymentManagementCommandTests(PaymentTest):
+    @patch("payment.management.commands.payment_charge_reserved.push_to_gateway")
     @patch("payment.management.commands.payment_charge_reserved.print")
     @patch("payment.management.commands.payment_charge_reserved.get_provider_handler")
-    def test_charge_reserved(self, mock_get_provider_handler, *args):
+    def test_charge_reserved(
+        self, mock_get_provider_handler, mock_print, mock_push_to_gateway, *args
+    ):
         # test data
         (
             test_payment_1,
@@ -1043,6 +1046,12 @@ class PaymentManagementCommandTests(PaymentTest):
         )
         self.assertEqual(test_payment_1.status, "paid")
         self.assertEqual(test_payment_2.status, "paid")
+
+        mock_push_to_gateway.assert_called_once_with(
+            settings.PROMETHEUS_PUSHGATEWAY_HOST,
+            job="payment_charge_reserved",
+            registry=ANY,
+        )
 
 
 class PaymentUtilityTests(TestCase):
