@@ -17,12 +17,8 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
         # Check if there is payments to charge
         reserved_payments = Payment.objects.filter(status="reserved")
-        if not reserved_payments.exists():
-            print("No reserved payments found, exiting...")
-            return
-
-        print(f"Charging {reserved_payments.count()} reserved payments...")
-        for payment in Payment.objects.filter(status="reserved"):
+        print(f"{reserved_payments.count()} reserved payments to charge...")
+        for payment in reserved_payments:
             print(f"- Charging payment {payment.id} ({payment.provider_payment_id})...")
             provider_handler = get_provider_handler(payment.provider)
 
@@ -33,13 +29,13 @@ class Command(BaseCommand):
                 provider_payment = None
 
             if provider_payment is None:
-                print(f"Payment {payment.id} not found at provider, skipping!")
+                print(f"  Payment {payment.id} not found at provider, skipping!")
                 continue
 
             # Skip the payment if it's not in sync with the provider
             if provider_payment.summary.reserved_amount != payment.amount:
                 print(
-                    f"WARNING: out of sync with the payment_provider "
+                    f"  WARNING: out of sync with the payment_provider "
                     f"({provider_payment.summary.reserved_amount} != {payment.amount})"
                 )
                 continue
@@ -51,9 +47,10 @@ class Command(BaseCommand):
                 print(f"ERROR: {e}")
                 continue
 
-            print("SUCCESS")
             payment.status = "paid"
             payment.save()
+
+            print("  Successfully charged!")
 
         # Push a metric to prometheus
         prom_registry = CollectorRegistry()
@@ -62,8 +59,19 @@ class Command(BaseCommand):
         )
         metric_payment_charge_reserved.set_to_current_time()
 
-        push_to_gateway(
-            settings.PROMETHEUS_PUSHGATEWAY_HOST,
-            job="payment_charge_reserved",
-            registry=prom_registry,
-        )
+        try:
+            push_to_gateway(
+                settings.PROMETHEUS_PUSHGATEWAY_HOST,
+                job="payment_charge_reserved",
+                registry=prom_registry,
+            )
+        except Exception as e:
+            print(
+                (
+                    "Unable to push metrics to "
+                    f"prometheus-pushgateway: {settings.PROMETHEUS_PUSHGATEWAY_HOST}"
+                )
+            )
+            raise e
+
+        print("job finished!")
