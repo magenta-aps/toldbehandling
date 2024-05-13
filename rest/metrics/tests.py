@@ -27,7 +27,7 @@ class MetricsTest(TestCase):
 class MetricsAPITest(MetricsTest):
     def test_get_all(self):
         resp = self.client.get(
-            reverse("api-1.0.0:metrics_get_all"),
+            reverse("api-1.0.0:metrics_prometheus"),
             HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
             content_type="application/json",
         )
