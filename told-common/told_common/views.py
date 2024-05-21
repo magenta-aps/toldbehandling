@@ -523,7 +523,7 @@ class TF10FormUpdateView(
                 ),
                 "kan_ændre_kladde": self.item.status == "kladde",
                 "indberetter_data": {
-                    "cvr": self.item.indberetter.get("indberetter_data", {}).get("cvr")
+                    "cvr": lenient_get(self.item.indberetter, "indberetter_data", "cvr")
                     if self.item.indberetter
                     else None
                 },
