@@ -341,6 +341,12 @@ class CatchErrorsMixin:
                 status = 404
             else:
                 status = 500
+            log.error(
+                "Internal Server Error: %s",
+                request.path,
+                exc_info=e,
+                extra={"status_code": 500, "request": request},
+            )
             return render(
                 request,
                 template_name="told_common/error.html",
