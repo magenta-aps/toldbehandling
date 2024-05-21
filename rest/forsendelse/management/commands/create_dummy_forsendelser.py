@@ -60,7 +60,7 @@ class Command(BaseCommand):
                 oprettet_af=users.order_by("?").first(),
                 afgangsdato=date.today() + timedelta(days=30),
             )
-            # fragtforsendelse.fragtbrev.save("fragtbrev.txt", ContentFile("testdata"))
+            fragtforsendelse.fragtbrev.save("fragtbrev.txt", ContentFile("testdata"))
 
             Postforsendelse.objects.create(
                 forsendelsestype=postforsendelsestype,
