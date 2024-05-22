@@ -961,6 +961,13 @@ class FileViewTest(PermissionsTest, TestCase):
                 "forbindelsesnr": "ABC 337",
                 "afgangsdato": "2023-10-01",
             }
+        if path == expected_prefix + "fragtforsendelse/2":
+            json_content = {
+                "id": 2,
+                "forsendelsestype": "S",
+                "fragtbrevsnummer": 2,
+                "fragtbrev": None,
+            }
         if json_content:
             content = json.dumps(json_content).encode("utf-8")
         if content:
@@ -1718,6 +1725,10 @@ class AdminFileViewTest(FileViewTest, TestCase):
     @property
     def file_view_url(self):
         return str(reverse("fragtbrev_view", kwargs={"id": 1}))
+
+    @property
+    def file_view_url_2(self):
+        return str(reverse("fragtbrev_view", kwargs={"id": 2}))
 
 
 class AfgiftstabelListViewTest(PermissionsTest, TestCase):

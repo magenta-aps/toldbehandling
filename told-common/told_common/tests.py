@@ -1079,7 +1079,12 @@ class AnmeldelseListViewTest(HasLogin):
 
 
 class FileViewTest(HasLogin):
+    @property
     def file_view_url(self):
+        raise NotImplementedError("Implement in subclasses")
+
+    @property
+    def file_view_url_2(self):
         raise NotImplementedError("Implement in subclasses")
 
     def mock_requests_get(self, path):
@@ -1096,6 +1101,13 @@ class FileViewTest(HasLogin):
                 "forsendelsestype": "S",
                 "fragtbrevsnummer": 1,
                 "fragtbrev": "/leverandørfakturaer/1/leverandørfaktura.txt",
+            }
+        if path == expected_prefix + "fragtforsendelse/2":
+            json_content = {
+                "id": 2,
+                "forsendelsestype": "S",
+                "fragtbrevsnummer": 2,
+                "fragtbrev": None,
             }
         if json_content:
             content = json.dumps(json_content).encode("utf-8")
@@ -1118,6 +1130,16 @@ class FileViewTest(HasLogin):
             self.assertEquals(response.status_code, 200)
             content = list(response.streaming_content)[0]
             self.assertEquals(content, b"test_data")
+
+    @patch.object(requests.Session, "get")
+    @patch.object(os.path, "exists")
+    def test_fileview_no_file(self, mock_exists, mock_get):
+        self.login()
+        url = self.file_view_url_2
+        mock_get.side_effect = self.mock_requests_get
+        mock_exists.return_value = True
+        response = self.client.get(url)
+        self.assertEquals(response.status_code, 404)
 
 
 def modify_values(item: Any, types: Tuple, action: Callable) -> Any:

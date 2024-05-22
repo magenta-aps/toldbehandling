@@ -977,6 +977,10 @@ class UiFileViewTest(FileViewTest, TestCase):
     def file_view_url(self):
         return str(reverse("fragtbrev_view", kwargs={"id": 1}))
 
+    @property
+    def file_view_url_2(self):
+        return str(reverse("fragtbrev_view", kwargs={"id": 2}))
+
 
 class TF5BlanketTest(TestMixin, HasLogin, TestCase):
     @property
