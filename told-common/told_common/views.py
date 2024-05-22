@@ -89,7 +89,10 @@ class FileView(LoginRequiredMixin, HasRestClientMixin, View):
         # settings.MEDIA_ROOT er monteret i Docker så det deles mellem
         # containerne REST og UI.
         # Derfor kan vi læse filer der er skrevet af den anden container
-        path = os.path.join(settings.MEDIA_ROOT, unquote(object[self.key]).lstrip("/"))
+        path = object[self.key]
+        if not path:
+            raise Http404
+        path = os.path.join(settings.MEDIA_ROOT, unquote(path).lstrip("/"))
         if not os.path.exists(path):
             raise Http404
         return FileResponse(open(path, "rb"))
