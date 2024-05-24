@@ -2,9 +2,7 @@
 #
 # SPDX-License-Identifier: MPL-2.0
 
-from prometheus_client import Counter, Gauge, Histogram
-
-HEALTH_CHECK = Gauge("health_check", "Health status for Toldbehandling")
+from prometheus_client import Counter, Histogram
 
 REQUEST_LATENCY = Histogram(
     "request_latency_seconds",

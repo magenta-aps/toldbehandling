@@ -3,10 +3,16 @@
 # SPDX-License-Identifier: MPL-2.0
 # mypy: disable-error-code="call-arg, attr-defined"
 
+import logging
+import tempfile
+
+from django.conf import settings
+from django.db import connection
 from django.http import HttpResponse
 from ninja_extra import api_controller, route
-from ninja_jwt.authentication import JWTAuth
 from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
+
+log = logging.getLogger(__name__)
 
 
 @api_controller(
@@ -18,9 +24,29 @@ class MetricsAPI:
     def get_all(self):
         return HttpResponse(generate_latest(), content_type=CONTENT_TYPE_LATEST)
 
-    @route.get("/health", auth=JWTAuth(), url_name="metrics_health")
-    def health(self):
-        # TODO: Check DB connection
-        # TODO: Check external services
+    @route.get("/health/storage", url_name="metrics_health_storage")
+    def health_storage(self):
+        try:
+            with tempfile.NamedTemporaryFile(
+                dir=settings.MEDIA_ROOT, delete=True
+            ) as temp_file:
+                temp_file.write(b"Test")
+                temp_file.flush()
 
-        return HttpResponse("OK")
+            return HttpResponse("OK")
+        except Exception:
+            log.exception("Storage health check failed")
+            return HttpResponse("ERROR", status=500)
+
+    @route.get("/health/database", url_name="metrics_health_database")
+    def health_database(self):
+        try:
+            connection.ensure_connection()
+            return HttpResponse("OK")
+        except Exception:
+            log.exception("Database health check failed")
+            return HttpResponse("ERROR", status=500)
+
+    @route.get("/health/payment_providers", url_name="metrics_health_payment_providers")
+    def health_payment_providers(self):
+        return HttpResponse("ERROR", status=500)
