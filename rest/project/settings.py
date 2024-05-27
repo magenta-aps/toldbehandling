@@ -209,18 +209,12 @@ LOGGING: dict = {
     "handlers": {
         "console": {
             "class": "logging.StreamHandler",
-            "stream": sys.stdout,
-            "formatter": "simple",
-        },
-        "console-err": {
-            "class": "logging.StreamHandler",
-            "stream": sys.stderr,
             "formatter": "simple",
         },
     },
     "root": {
         "handlers": ["console"],
-        "level": "WARNING",
+        "level": "INFO",
     },
     "loggers": {
         "django": {
@@ -230,6 +224,20 @@ LOGGING: dict = {
         },
     },
 }
+
+# Logging to files (legacy)
+disable_file_logging = strtobool(os.environ.get("DISABLE_FILE_LOGGING", "False"))
+log_filename = "/rest.log"
+if not disable_file_logging:
+    if os.path.isfile(log_filename) and ENVIRONMENT != "development":
+        LOGGING["handlers"]["file"] = {
+            "class": "logging.FileHandler",  # eller WatchedFileHandler
+            "formatter": "simple",
+            "filename": log_filename,
+        }
+
+        LOGGING["root"]["handlers"].append("file")
+        LOGGING["loggers"]["django"]["handlers"].append("file")
 
 
 TILLAEGSAFGIFT_FAKTOR = 0.5
