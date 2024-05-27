@@ -1060,7 +1060,7 @@ class RestClient:
             if e.status_code == 404:
                 user = client.post("user", mapped_data)
             else:
-                raise RestClientException.from_http_error(e)
+                raise
         if (
             saml_data.get("firstname") != user["first_name"]
             or saml_data.get("lastname") != user["last_name"]
