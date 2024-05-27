@@ -15,7 +15,6 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 import json
 import os
-import sys
 from pathlib import Path
 
 from project.util import strtobool
@@ -66,7 +65,6 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "simple_history.middleware.HistoryRequestMiddleware",
     "django_otp.middleware.OTPMiddleware",
-    "metrics.middleware.MetricsMiddleware",
 ]
 
 ROOT_URLCONF = "project.urls"
@@ -191,7 +189,6 @@ PAYMENT_PROVIDER_BANK = "bank"
 
 # Logging
 
-
 LOGGING: dict = {
     "version": 1,
     "disable_existing_loggers": True,
@@ -202,42 +199,40 @@ LOGGING: dict = {
     },
     "formatters": {
         "simple": {
-            "format": "[{asctime}] [{levelname}] {message}",
+            "format": "{levelname} {message}",
             "style": "{",
         },
     },
     "handlers": {
-        "console": {
+        "gunicorn": {
             "class": "logging.StreamHandler",
-            "formatter": "simple",
         },
     },
     "root": {
-        "handlers": ["console"],
+        "handlers": ["gunicorn"],
         "level": "INFO",
     },
     "loggers": {
         "django": {
-            "handlers": ["console"],
+            "handlers": ["gunicorn"],
             "level": "INFO",
             "propagate": False,
         },
     },
 }
 
-# Logging to files (legacy)
-disable_file_logging = strtobool(os.environ.get("DISABLE_FILE_LOGGING", "False"))
 log_filename = "/rest.log"
-if not disable_file_logging:
-    if os.path.isfile(log_filename) and ENVIRONMENT != "development":
-        LOGGING["handlers"]["file"] = {
-            "class": "logging.FileHandler",  # eller WatchedFileHandler
-            "formatter": "simple",
-            "filename": log_filename,
-        }
-
-        LOGGING["root"]["handlers"].append("file")
-        LOGGING["loggers"]["django"]["handlers"].append("file")
+if os.path.isfile(log_filename) and ENVIRONMENT != "development":
+    LOGGING["handlers"]["file"] = {
+        "class": "logging.FileHandler",  # eller WatchedFileHandler
+        "filename": log_filename,
+        "formatter": "simple",
+    }
+    LOGGING["root"] = {
+        "handlers": ["gunicorn", "file"],
+        "level": "INFO",
+    }
+    LOGGING["loggers"]["django"]["handlers"].append("file")
 
 
 TILLAEGSAFGIFT_FAKTOR = 0.5

@@ -19,7 +19,7 @@ services:
       - ./rest/:/app
       - ./data/er:/static/er
       - file-data:/upload
-      - ./log/rest.log:/rest.log:rw
+      - ./log/rest.log:/log/rest.log:rw
     depends_on:
       - toldbehandling-db
     environment:
