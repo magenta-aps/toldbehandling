@@ -149,9 +149,11 @@ class EboksBesked(models.Model):
 
     def __str__(self):
         anmeldelse = self.afgiftsanmeldelse or self.privat_afgiftsanmeldelse
-        return (f"EboksBesked(id={self.id}, "
-                f"anmeldelse={anmeldelse.id}, "
-                f"oprettet={self.oprettet})")
+        return (
+            f"EboksBesked(id={self.id}, "
+            f"anmeldelse={anmeldelse.id}, "
+            f"oprettet={self.oprettet})"
+        )
 
 
 class EboksDispatch(models.Model):
