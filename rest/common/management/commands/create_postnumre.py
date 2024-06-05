@@ -13,7 +13,7 @@ class Command(BaseCommand):
         postnumre = (
             (3900, "Nuuk", 20, 60),
             (3905, "Nuussuaq", 20, 60),
-            (3910, "Kangerlussuaq", 110, 280),
+            (3910, "Kangerlussuaq", 110, 82),
             (3911, "Sisimiut", 20, 80),
             (3912, "Maniitsoq", 20, 70),
             (3913, "Tasiilaq", 110, 180),
