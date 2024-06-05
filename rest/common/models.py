@@ -151,7 +151,7 @@ class EboksBesked(models.Model):
         anmeldelse = self.afgiftsanmeldelse or self.privat_afgiftsanmeldelse
         return (
             f"EboksBesked(id={self.id}, "
-            f"anmeldelse={anmeldelse.id}, "
+            f"anmeldelse={anmeldelse.id if anmeldelse else None}, "
             f"oprettet={self.oprettet})"
         )
 
