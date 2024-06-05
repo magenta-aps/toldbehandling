@@ -311,6 +311,9 @@ class PrivatAfgiftsanmeldelse(models.Model):
         default="ny",
     )
 
+    def __str__(self):
+        return f"PrivatAfgiftsanmeldelse(id={self.id})"
+
 
 class Varelinje(models.Model):
     class Meta:
@@ -441,6 +444,12 @@ class Notat(models.Model):
         default=0,
     )
 
+    def __str__(self):
+        if self.afgiftsanmeldelse:
+            return f"Notat(tf10={self.afgiftsanmeldelse.id}, index={self.index})"
+        if self.privatafgiftsanmeldelse:
+            return f"Notat(tf5={self.privatafgiftsanmeldelse.id}, index={self.index})"
+
 
 # Vis alle gældende notater i view
 # Historisk: vis ikke fremtidige notater
@@ -455,6 +464,9 @@ class PrismeResponse(models.Model):
     rec_id = models.BigIntegerField(null=False)
     tax_notification_number = models.BigIntegerField(null=False)
     delivery_date = models.DateTimeField(null=False)
+
+    def __str__(self):
+        return f"PrismeResponse(tf10={self.afgiftsanmeldelse.id})"
 
 
 @receiver(post_save, sender=PrismeResponse, dispatch_uid="on_add_prismeresponse")
@@ -486,3 +498,6 @@ class Toldkategori(models.Model):
     kræver_cvr = models.BooleanField(
         default=False,
     )
+
+    def __str__(self):
+        return f"Toldkategori(kategori={self.kategori}, navn={self.navn})"

@@ -76,6 +76,9 @@ class Item(models.Model):
     )
     """The payment the item is related to."""
 
+    def __str__(self):
+        return f"PaymentItem(payment={self.payment.id}, name={self.name})"
+
 
 class Payment(models.Model):
     """The payment model.
@@ -127,3 +130,8 @@ class Payment(models.Model):
 
     status = models.CharField(max_length=128, null=True)
     """created, reserved, paid, declined"""
+
+    def __str__(self):
+        return (f"Payment(id={self.payment.id}, "
+                f"tf5={self.declaration.id}, "
+                f"status={self.status})")

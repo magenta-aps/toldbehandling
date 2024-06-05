@@ -168,3 +168,6 @@ class Speditør(models.Model):
         blank=False,
     )
     navn = models.CharField(max_length=100, null=False, blank=False, unique=True)
+
+    def __str__(self):
+        return f"Speditør({self.navn})"
