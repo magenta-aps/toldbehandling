@@ -148,8 +148,9 @@ class EboksBesked(models.Model):
         return etree.tostring(root, xml_declaration=True, encoding="UTF-8")
 
     def __str__(self):
+        anmeldelse = self.afgiftsanmeldelse or self.privat_afgiftsanmeldelse
         return (f"EboksBesked(id={self.id}, "
-                f"anmeldelse={(self.afgiftsanmeldelse or self.privat_afgiftsanmeldelse).id}, "
+                f"anmeldelse={anmeldelse.id}, "
                 f"oprettet={self.oprettet})")
 
 
