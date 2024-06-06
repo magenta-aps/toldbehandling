@@ -133,7 +133,7 @@ class Payment(models.Model):
 
     def __str__(self):
         return (
-            f"Payment(id={self.payment.id}, "
+            f"Payment(id={self.id}, "
             f"tf5={self.declaration.id}, "
             f"status={self.status})"
         )
