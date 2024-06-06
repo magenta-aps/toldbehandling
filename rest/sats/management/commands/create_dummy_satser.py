@@ -105,7 +105,7 @@ class Command(BaseCommand):
                 "med et ethanol indhold)- 3,10 - 4,09 volumenprocent.",
                 enhed=Vareafgiftssats.Enhed.LITER,
                 minimumsbeløb=False,
-                afgiftssats=faktor * Decimal("8.00"),
+                afgiftssats=faktor * Decimal("8.80"),
                 kræver_indførselstilladelse=True,
                 har_privat_tillægsafgift_alkohol=True,
                 synlig_privat=True,

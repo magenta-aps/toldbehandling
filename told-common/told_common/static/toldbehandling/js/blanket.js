@@ -194,10 +194,12 @@ $(function () {
         if (typeof(value) !== "number") {
             value = parseFloat(value);
         }
-        let intPart = String(Math.floor(value));
-        let floatPart = String((value - Math.floor(value)).toPrecision(2));
+        value = String(value);
+        let decindex = value.indexOf(".");
+        let intPart = decindex === -1 ? value : value.substring(0, decindex);
+        let floatPart = decindex === -1 ? "00" : value.substring(decindex+1);
         intPart = replace_repeat(intPart, /^(-?\d+)(\d\d\d)(\.|,|$)/, '$1.$2$3');  // Starting from the right, prefix groups of 3 digits with a dot
-        floatPart = floatPart.substring(2, 4).padEnd(2, "0");  // Get the two first digits of the decimal
+        floatPart = floatPart.substring(0, 2).padEnd(2, "0");  // Get the two first digits of the decimal
         return intPart + "," + floatPart;
     };
 
