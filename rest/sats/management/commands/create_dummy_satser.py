@@ -15,6 +15,11 @@ class Command(BaseCommand):
             # Don't create dummy data more than once
             return
         tz = timezone(-timedelta(seconds=2 * 3600))
+        tabel0 = Afgiftstabel.objects.create(
+            gyldig_fra=datetime(1970, 1, 1, 0, 0, 0, tzinfo=tz),
+            gyldig_til=datetime(date.today().year, 1, 1, 0, 0, 0, tzinfo=tz),
+            kladde=False,
+        )
         tabel1 = Afgiftstabel.objects.create(
             gyldig_fra=datetime(date.today().year, 1, 1, 0, 0, 0, tzinfo=tz),
             gyldig_til=datetime(date.today().year + 1, 1, 1, 0, 0, 0, tzinfo=tz),
@@ -30,7 +35,7 @@ class Command(BaseCommand):
             gyldig_til=None,
             kladde=True,
         )
-        for tabel, faktor in ((tabel1, 1), (tabel2, 2), (tabel3, 3)):
+        for tabel, faktor in ((tabel0, 1), (tabel1, 2), (tabel2, 3), (tabel3, 4)):
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
                 afgiftsgruppenummer=1,

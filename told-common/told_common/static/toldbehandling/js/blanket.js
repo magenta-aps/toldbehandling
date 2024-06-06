@@ -441,8 +441,8 @@ $(function () {
     fileInputs.each(fileUpdate);
 
 
-    // TF5: Når indleveringsdato opdateres, brug den rigtige afgiftstabel
-    $("[name=indleveringsdato]").on("change", function () {
+    // Når indleveringsdato opdateres, brug den rigtige afgiftstabel
+    $("[name=indleveringsdato],[name=afgangsdato]").on("change", function () {
         const date = Date.parse($(this).val());
         for (const afgiftstabel of afgiftstabeller) {
             if (Date.parse(afgiftstabel["gyldig_fra"]) <= date && (afgiftstabel["gyldig_til"] == null || Date.parse(afgiftstabel["gyldig_til"]) > date)) {
@@ -495,7 +495,7 @@ $(function () {
         let foundVaresats = null;
         for(const key in varesatser) {
             const varesats = varesatser[key];
-            if (varekode_int === varesats["afgiftsgruppenummer"]) {
+            if (varekode_int === varesats["afgiftsgruppenummer"] && vareafgiftssats.find("[value="+varesats["id"]+"]").length) {
                 foundVaresats = varesats;
                 break;
             }

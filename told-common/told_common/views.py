@@ -231,11 +231,15 @@ class TF10FormCreateView(
         return super().form_valid(form, formset)
 
     @cached_property
-    def toplevel_varesatser(self):
+    def varesatser(self):
+        return self.rest_client.varesatser_all()
+
+    @cached_property
+    def toplevel_current_varesatser(self):
         return dict(
             filter(
                 lambda pair: pair[1].overordnet is None,
-                self.rest_client.varesatser.items(),
+                self.rest_client.varesatser_fra(date.today()).items(),
             )
         )
 
@@ -244,7 +248,7 @@ class TF10FormCreateView(
         kwargs.update(
             {
                 "fragtbrev_required": False,
-                "varesatser": self.toplevel_varesatser,
+                "varesatser": self.toplevel_current_varesatser,
             }
         )
         return kwargs
@@ -255,14 +259,18 @@ class TF10FormCreateView(
         if "form_kwargs" not in kwargs:
             kwargs["form_kwargs"] = {}
         # Will be picked up by TF10VareForm's constructor
-        kwargs["form_kwargs"]["varesatser"] = self.toplevel_varesatser
+        kwargs["form_kwargs"]["varesatser"] = self.toplevel_current_varesatser
         return kwargs
 
     def get_context_data(self, **context) -> Dict[str, Any]:
         context = super().get_context_data(
             **{
                 **context,
-                "varesatser": dataclass_map_to_dict(self.rest_client.varesatser),
+                "varesatser": dataclass_map_to_dict(self.varesatser),
+                "afgiftstabeller": [
+                    dataclasses.asdict(item)
+                    for item in self.rest_client.afgiftstabel.list(kladde=False)
+                ],
                 "extend_template": self.extend_template,
                 "highlight": self.request.GET.get("highlight"),
                 "kan_ændre_kladde": True,
@@ -473,11 +481,17 @@ class TF10FormUpdateView(
         return None  # override in subclasses. None means "no change"
 
     @cached_property
-    def toplevel_varesatser(self):
+    def varesatser(self):
+        return self.rest_client.varesatser_all()
+
+    @cached_property
+    def toplevel_current_varesatser(self):
         return dict(
             filter(
                 lambda pair: pair[1].overordnet is None,
-                self.rest_client.varesatser_fra(self.item.dato).items(),
+                self.rest_client.varesatser_fra(
+                    self.item.afgangsdato or date.today()
+                ).items(),
             )
         )
 
@@ -490,7 +504,7 @@ class TF10FormUpdateView(
                 # Hvis vi allerede har en fragtforsendelse, har vi også et
                 # fragtbrev, og det er ikke påkrævet at formularen indeholder ét
                 "fragtbrev_required": False,
-                "varesatser": self.toplevel_varesatser,
+                "varesatser": self.toplevel_current_varesatser,
             }
         )
         return kwargs
@@ -501,7 +515,7 @@ class TF10FormUpdateView(
         if "form_kwargs" not in kwargs:
             kwargs["form_kwargs"] = {}
         # Will be picked up by TF10VareForm's constructor
-        kwargs["form_kwargs"]["varesatser"] = self.toplevel_varesatser
+        kwargs["form_kwargs"]["varesatser"] = self.toplevel_current_varesatser
         initial = []
         for item in self.item.varelinjer or []:
             itemdict = dataclasses.asdict(item)
@@ -517,9 +531,11 @@ class TF10FormUpdateView(
             **{
                 **context,
                 "vis_notater": True,
-                "varesatser": dataclass_map_to_dict(
-                    self.rest_client.varesatser_fra(self.item.dato)
-                ),
+                "varesatser": dataclass_map_to_dict(self.varesatser),
+                "afgiftstabeller": [
+                    dataclasses.asdict(item)
+                    for item in self.rest_client.afgiftstabel.list(kladde=False)
+                ],
                 "item": self.item,
                 "notater": self.rest_client.notat.list(
                     afgiftsanmeldelse=self.kwargs["id"]
