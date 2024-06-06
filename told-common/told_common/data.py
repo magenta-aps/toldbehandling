@@ -358,6 +358,13 @@ class Afgiftsanmeldelse(ToldDataClass):
         if self.fragtforsendelse:
             return self.fragtforsendelse.forbindelsesnr
 
+    @property
+    def afgangsdato(self):
+        if self.fragtforsendelse:
+            return self.fragtforsendelse.afgangsdato
+        if self.postforsendelse:
+            return self.postforsendelse.afgangsdato
+
 
 @dataclass
 class HistoricAfgiftsanmeldelse(Afgiftsanmeldelse):

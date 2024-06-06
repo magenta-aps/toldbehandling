@@ -84,24 +84,25 @@ class Command(BaseCommand):
             )
             if anmeldelse.oprettet_af.indberetter_data.cvr == 12345679:
                 anmeldelse.fuldmagtshaver = Speditør.objects.get(cvr=12345678)
-            anmeldelse.dato = datetime.combine(
-                date.today(), time(6, 0, 0), tzinfo=timezone.utc
-            ) - timedelta(days=random.randint(0, 1000))
+            dato = datetime.combine(
+                (fragtforsendelse or postforsendelse).afgangsdato,
+                time(12, 0, 0, tzinfo=timezone.utc),
+            )
+
             earliest_tabel = (
                 Afgiftstabel.objects.filter(kladde=False)
                 .order_by("gyldig_fra")
                 .first()
                 .gyldig_fra
             )
-            if anmeldelse.dato < earliest_tabel:
-                anmeldelse.dato = earliest_tabel
-            anmeldelse.save(update_fields=["dato"])
+            if dato < earliest_tabel:
+                dato = earliest_tabel
             anmeldelse.leverandørfaktura.save(
                 "leverandørfaktura.txt", ContentFile("testdata")
             )
             tabel = Afgiftstabel.objects.filter(
-                Q(gyldig_til__gte=anmeldelse.dato) | Q(gyldig_til__isnull=True),
-                gyldig_fra__lte=anmeldelse.dato,
+                Q(gyldig_til__gte=dato) | Q(gyldig_til__isnull=True),
+                gyldig_fra__lte=dato,
                 kladde=False,
             )
             Varelinje.objects.create(
