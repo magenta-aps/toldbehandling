@@ -226,7 +226,11 @@ class VareafgiftssatsTest(RestTestMixin, TestCase):
     def test_str(self):
         self.assertEqual(
             str(self.vareafgiftssats),
-            f"Vareafgiftssats(afgiftsgruppenummer={self.vareafgiftssats_data['afgiftsgruppenummer']}, afgiftssats={self.vareafgiftssats_data['afgiftssats']}, enhed={self.vareafgiftssats_data['enhed'].label})",
+            "Vareafgiftssats("
+            f"afgiftsgruppenummer={self.vareafgiftssats_data['afgiftsgruppenummer']}, "
+            f"afgiftssats={self.vareafgiftssats_data['afgiftssats']}, "
+            f"enhed={self.vareafgiftssats_data['enhed'].label}"
+            ")",
         )
 
     def test_beregn_afgift_attr_error(self):

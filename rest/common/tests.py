@@ -1,11 +1,12 @@
 import base64
+from datetime import datetime
 from unittest.mock import ANY, MagicMock, call, patch
 from uuid import uuid4
 
 from anmeldelse.models import Afgiftsanmeldelse
 from common.api import APIKeyAuth, DjangoPermission, UserOut
 from common.eboks import EboksClient, MockResponse
-from common.models import EboksBesked, IndberetterProfile
+from common.models import EboksBesked, EboksDispatch, IndberetterProfile, Postnummer
 from django.contrib.auth.models import Permission, User
 from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase
@@ -68,7 +69,7 @@ class CustomHTTPErrorResponseMock(MagicMock):
 # TestCase(s)
 
 
-class CommonModelsTests(TestCase):
+class CommonModelsTests(CommonTest, TestCase):
     def test_eboks_besked_content(self):
         db_model = EboksBesked()
         self.assertEqual(db_model.content, None)
@@ -106,8 +107,50 @@ class CommonModelsTests(TestCase):
             ),
         )
 
-        def test_APIKeys_different(self):
-            self.assertTrue(self.indberetter.api_key != self.indberetter2.api_key)
+    def test_APIKeys_different(self):
+        self.assertTrue(self.indberetter.api_key != self.indberetter2.api_key)
+
+
+class CommonStringTests(CommonTest, RestMixin, TestCase):
+    def test_indberetter_str(self):
+        self.assertEqual(
+            str(self.indberetter),
+            f"IndberetterProfile(user=payment-test-user)",
+        )
+
+    def test_postnummer_str(self):
+        post = Postnummer(postnummer=3900, navn="Nuuk", stedkode=123)
+        self.assertEqual(str(post), f"Postnummer(nr=3900, navn=Nuuk)")
+
+    def test_eboksbesked_str(self):
+        opr = datetime(2024, 6, 5, 14, 33, 0)
+        msg = EboksBesked(
+            id=1,
+            titel="Test",
+            cpr="123456789",
+            afgiftsanmeldelse=self.afgiftsanmeldelse,
+            oprettet=opr,
+        )
+        self.assertEqual(
+            str(msg),
+            f"EboksBesked(id=1, anmeldelse={self.afgiftsanmeldelse.id}, oprettet=2024-06-05 14:33:00)",
+        )
+
+    def test_eboksdispatch_str(self):
+        opr = datetime(2024, 6, 5, 14, 33, 0)
+        dispatch = EboksDispatch(
+            besked=EboksBesked(
+                id=1,
+                titel="Test",
+                cpr="123456789",
+                afgiftsanmeldelse=self.afgiftsanmeldelse,
+                oprettet=opr,
+            )
+        )
+        self.assertEqual(
+            str(dispatch),
+            f"EboksDispatch(besked=1)",
+        )
 
 
 class CommonAPITests(CommonTest, TestCase):
