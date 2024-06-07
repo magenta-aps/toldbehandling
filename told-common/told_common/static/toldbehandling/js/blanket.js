@@ -492,10 +492,11 @@ $(function () {
         $this.val(varekode_str);
 
         // Update vareafgiftssats select-dropdown
-        const vareafgiftssats = $this.parents(".row").find("[name$=vareafgiftssats]");
+        const row = $this.parents(".row");
+        const vareafgiftssats = row.find("[name$=vareafgiftssats]");
 
         let foundVaresats = null;
-        for(const key in varesatser) {
+        for (const key in varesatser) {
             const varesats = varesatser[key];
             if (varekode_int === varesats["afgiftsgruppenummer"] && vareafgiftssats.find("[value="+varesats["id"]+"]").length) {
                 foundVaresats = varesats;
@@ -512,6 +513,8 @@ $(function () {
             $this.addClass("is-invalid");
             $this.attr("title", "Ukendt varekode");
         }
+        updateVareart(row);
+        calcAfgift(row);
     });
 });
 
