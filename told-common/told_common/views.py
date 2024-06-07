@@ -521,7 +521,16 @@ class TF10FormUpdateView(
             itemdict = dataclasses.asdict(item)
             # Dropdown skal bruge id'er, ikke objekter
             if itemdict["vareafgiftssats"]:
-                itemdict["vareafgiftssats"] = itemdict["vareafgiftssats"]["id"]
+                vareafgiftssats_id = itemdict["vareafgiftssats"]["id"]
+                if vareafgiftssats_id not in self.toplevel_current_varesatser:
+                    afgiftsgruppenummer = itemdict["vareafgiftssats"][
+                        "afgiftsgruppenummer"
+                    ]
+                    for vareafgiftssats in self.toplevel_current_varesatser.values():
+                        if vareafgiftssats.afgiftsgruppenummer == afgiftsgruppenummer:
+                            vareafgiftssats_id = vareafgiftssats.id
+                            break
+                itemdict["vareafgiftssats"] = vareafgiftssats_id
             initial.append(itemdict)
         kwargs["initial"] = initial
         return kwargs

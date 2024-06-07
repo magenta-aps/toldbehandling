@@ -58,7 +58,7 @@ class Command(BaseCommand):
                 fragtbrevsnummer=fragtbrevsnummer,
                 forbindelsesnr=forbindelsesnummer,
                 oprettet_af=users.order_by("?").first(),
-                afgangsdato=date.today() + timedelta(days=30),
+                afgangsdato=date.today() + timedelta(days=random.randint(-600, 600)),
             )
             fragtforsendelse.fragtbrev.save("fragtbrev.txt", ContentFile("testdata"))
 
@@ -181,5 +181,5 @@ class Command(BaseCommand):
                     ]
                 ),
                 oprettet_af=users.order_by("?").first(),
-                afgangsdato=date.today() + timedelta(days=30),
+                afgangsdato=date.today() + timedelta(days=random.randint(-600, 600)),
             )
