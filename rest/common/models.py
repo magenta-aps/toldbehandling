@@ -35,6 +35,9 @@ class IndberetterProfile(models.Model):
 
     api_key = models.CharField(max_length=128, editable=False, unique=True)
 
+    def __str__(self):
+        return f"IndberetterProfile(user={self.user})"
+
 
 class Postnummer(models.Model):
     postnummer = models.PositiveSmallIntegerField(
@@ -59,6 +62,9 @@ class Postnummer(models.Model):
         null=True,
         blank=True,
     )
+
+    def __str__(self):
+        return f"Postnummer(nr={self.postnummer}, navn={self.navn})"
 
 
 class EboksBesked(models.Model):
@@ -141,6 +147,14 @@ class EboksBesked(models.Model):
 
         return etree.tostring(root, xml_declaration=True, encoding="UTF-8")
 
+    def __str__(self):
+        anmeldelse = self.afgiftsanmeldelse or self.privat_afgiftsanmeldelse
+        return (
+            f"EboksBesked(id={self.id}, "
+            f"anmeldelse={anmeldelse.id if anmeldelse else None}, "
+            f"oprettet={self.oprettet})"
+        )
+
 
 class EboksDispatch(models.Model):
     oprettet = models.DateTimeField(auto_now_add=True)
@@ -154,3 +168,6 @@ class EboksDispatch(models.Model):
         null=True,
     )
     status_message = models.CharField(max_length=500, null=True)
+
+    def __str__(self):
+        return f"EboksDispatch(besked={self.besked.id})"

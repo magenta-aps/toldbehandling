@@ -230,6 +230,20 @@ class PaymentTest(TestCase):
 
         return test_payment, fake_provider_payment
 
+    def test_payment_str(self):
+        test_payment, _ = self._create_test_payment_with_fake_provider_payment(
+            status="created",
+            amount=1337,
+            declaration=self.declaration,
+            provider_payment_id="1234",
+        )
+        self.assertEqual(
+            str(test_payment),
+            f"Payment(id={test_payment.id}, "
+            f"tf5={self.declaration.id}, "
+            f"status=created)",
+        )
+
 
 class PaymentProviderHandlerTests(TestCase):
     def setUp(self):
