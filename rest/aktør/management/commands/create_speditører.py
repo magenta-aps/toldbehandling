@@ -11,7 +11,7 @@ class Command(BaseCommand):
         speditører = {
             16545538: "Royal Arctic Line",
             40516611: "Blue Water Shipping",
-            40016310: "Leman",
+            41955619: "Leman",
             27048226: "NTG",
             16474606: "DHL",
             25827198: "Eimskip",
