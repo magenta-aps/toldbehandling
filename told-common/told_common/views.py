@@ -236,10 +236,18 @@ class TF10FormCreateView(
 
     @cached_property
     def toplevel_current_varesatser(self):
+        dato = date.today()
+        if self.request.POST and "afgangsdato" in self.request.POST:
+            try:
+                dato = date.fromisoformat(self.request.POST["afgangsdato"])
+            except ValueError:
+                log.warning(
+                    "Could not parse input date", self.request.POST["afgangsdato"]
+                )
         return dict(
             filter(
                 lambda pair: pair[1].overordnet is None,
-                self.rest_client.varesatser_fra(date.today()).items(),
+                self.rest_client.varesatser_fra(dato).items(),
             )
         )
 
@@ -486,12 +494,18 @@ class TF10FormUpdateView(
 
     @cached_property
     def toplevel_current_varesatser(self):
+        dato = self.item.afgangsdato or date.today()
+        if self.request.POST and "afgangsdato" in self.request.POST:
+            try:
+                dato = date.fromisoformat(self.request.POST["afgangsdato"])
+            except ValueError:
+                log.warning(
+                    "Could not parse input date", self.request.POST["afgangsdato"]
+                )
         return dict(
             filter(
                 lambda pair: pair[1].overordnet is None,
-                self.rest_client.varesatser_fra(
-                    self.item.afgangsdato or date.today()
-                ).items(),
+                self.rest_client.varesatser_fra(dato).items(),
             )
         )
 
