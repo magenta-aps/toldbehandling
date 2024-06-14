@@ -188,7 +188,6 @@ PAYMENT_PROVIDER_NETS_TERMS_URL = os.environ.get(
     (
         "https://www.sullissivik.gl/Emner/B_SKAT/Afgifter/"
         "Privat-indfoersel-af-oel-vin-og-spiritus-til-Groenland_Som-fragt"
-        "?sc_lang=da"
     ),
 )
 
