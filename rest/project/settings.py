@@ -184,7 +184,12 @@ PAYMENT_PROVIDER_NETS_SECRET_KEY = os.environ.get(
     "PAYMENT_PROVIDER_NETS_SECRET_KEY", "secret_key"
 )
 PAYMENT_PROVIDER_NETS_TERMS_URL = os.environ.get(
-    "PAYMENT_PROVIDER_NETS_TERMS_URL", "https://groendland.dk/terms"
+    "PAYMENT_PROVIDER_NETS_TERMS_URL",
+    (
+        "https://www.sullissivik.gl/Emner/B_SKAT/Afgifter/"
+        "Privat-indfoersel-af-oel-vin-og-spiritus-til-Groenland_Som-fragt"
+        "?sc_lang=da"
+    ),
 )
 
 PAYMENT_PROVIDER_BANK = "bank"
