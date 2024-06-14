@@ -76,6 +76,20 @@ class Item(models.Model):
     )
     """The payment the item is related to."""
 
+    created = models.DateTimeField(auto_now_add=True)
+    """The time the row was created.
+
+    OBS: "auto_now_add" is used to set the field to now when the object is first created:
+    https://docs.djangoproject.com/en/dev/ref/models/fields/#django.db.models.DateField.auto_now_add # noqa
+    """
+
+    updated = models.DateTimeField(auto_now=True)
+    """The time the row was last updated.
+
+    OBS: "auto_now" is used to set the field to now every time the object is saved:
+    https://docs.djangoproject.com/en/dev/ref/models/fields/#django.db.models.DateField.auto_now # noqa
+    """
+
     def __str__(self):
         return f"PaymentItem(payment={self.payment.id}, name={self.name})"
 
@@ -130,6 +144,20 @@ class Payment(models.Model):
 
     status = models.CharField(max_length=128, null=True)
     """created, reserved, paid, declined"""
+
+    created = models.DateTimeField(auto_now_add=True)
+    """The time the row was created.
+
+    OBS: "auto_now_add" is used to set the field to now when the object is first created:
+    https://docs.djangoproject.com/en/dev/ref/models/fields/#django.db.models.DateField.auto_now_add # noqa
+    """
+
+    updated = models.DateTimeField(auto_now=True)
+    """The time the row was last updated.
+
+    OBS: "auto_now" is used to set the field to now every time the object is saved:
+    https://docs.djangoproject.com/en/dev/ref/models/fields/#django.db.models.DateField.auto_now # noqa
+    """
 
     def __str__(self):
         return (
