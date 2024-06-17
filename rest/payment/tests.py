@@ -1073,26 +1073,26 @@ class PaymentUtilityTests(TestCase):
         with self.assertRaises(AttributeError):
             _ = generate_payment_item_from_varelinje(
                 Varelinje(
-                    vareafgiftssats=Vareafgiftssats(),
+                    vareafgiftssats=None,
                     mængde=None,
                     antal=None,
                 )
             )
 
-        with self.assertRaises(AttributeError):
+        with self.assertRaises(TypeError):
             _ = generate_payment_item_from_varelinje(
                 Varelinje(
-                    vareafgiftssats=None,
-                    mængde=1,
-                    antal=None,
+                    vareafgiftssats=Vareafgiftssats(
+                        enhed=Vareafgiftssats.Enhed.KILOGRAM
+                    ),
+                    mængde=None,
                 )
             )
 
-        with self.assertRaises(AttributeError):
+        with self.assertRaises(TypeError):
             _ = generate_payment_item_from_varelinje(
                 Varelinje(
-                    vareafgiftssats=None,
-                    mængde=None,
-                    antal=1,
+                    vareafgiftssats=Vareafgiftssats(enhed=Vareafgiftssats.Enhed.ANTAL),
+                    antal=None,
                 )
             )

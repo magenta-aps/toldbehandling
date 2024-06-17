@@ -69,14 +69,21 @@ def round_decimal(d: Decimal, rounding: str = ROUND_HALF_EVEN):
 def generate_payment_item_from_varelinje(
     varelinje: Varelinje, currency_multiplier: int = 100
 ):
-    if not varelinje.vareafgiftssats or not varelinje.antal or not varelinje.mængde:
-        raise AttributeError("vareafgiftssats, antal eller mængde er ikke defineret")
+    if not varelinje.vareafgiftssats or not varelinje.vareafgiftssats.enhed:
+        raise AttributeError(
+            (
+                "varelinje.vareafgiftssats or varelinje.vareafgiftssats.enhed "
+                "is not defined"
+            )
+        )
+
+    quantity = (
+        float(varelinje.mængde)  # type: ignore[arg-type]
+        if varelinje.vareafgiftssats.enhed in ["kg", "liter", "l", "sam"]
+        else float(varelinje.antal)  # type: ignore[arg-type]
+    )
+
     varelinje_name = varelinje.vareafgiftssats.vareart_da
-
-    quantity = float(varelinje.antal)
-    if varelinje.vareafgiftssats.enhed in ["kg", "liter", "l", "sam"]:
-        quantity = float(varelinje.mængde)
-
     unit = varelinje.vareafgiftssats.enhed
     unit_price = float(varelinje.vareafgiftssats.afgiftssats * currency_multiplier)
 
