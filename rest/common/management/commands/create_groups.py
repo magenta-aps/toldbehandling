@@ -281,7 +281,7 @@ class Command(BaseCommand):
             se_alle_postforsendelser,
             se_alle_private_afgiftsanmeldelser,
         ):
-            toldmedarbejdere.permissions.add(permission)
+            afstemmere_bogholdere.permissions.add(permission)
 
         for action, model in (
             ("view", afgiftstabel_model),
