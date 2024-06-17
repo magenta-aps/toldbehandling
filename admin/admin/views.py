@@ -115,7 +115,16 @@ class AdminLayoutBaseView(
 
 class TF10View(AdminLayoutBaseView, common_views.TF10View, FormView):
     required_permissions = ("auth.admin", *common_views.TF10View.required_permissions)
-    prisme_permissions = ("anmeldelse.prisme_afgiftsanmeldelse",)
+    prisme_permissions = (
+        "anmeldelse.prisme_afgiftsanmeldelse",
+        "aktør.change_modtager",
+        "aktør.view_afsender",
+        "aktør.view_modtager",
+        "forsendelse.view_postforsendelse",
+        "forsendelse.view_fragtforsendelse",
+        "anmeldelse.view_afgiftsanmeldelse",
+        "anmeldelse.view_varelinje",
+    )
     form_class = forms.TF10ViewForm
     extend_template = "admin/admin_layout.html"
 
