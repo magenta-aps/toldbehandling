@@ -21,7 +21,7 @@ Log ind
         <div class="col-7">
             <div class="input-group">
                 {{form.twofactor_token}}
-                {% translate "Indtast det seks-cifrede tal som vises på din registrerede telefon i authentikerings-appen HOPLA" as content %}
+                {% translate "Indtast det seks-cifrede tal som vises på din registrerede telefon i authentikerings-appen" as content %}
                 {% include "told_common/widgets/info.html" with title=form.twofactor_token.label content=content %}
             </div>
             {% if form.twofactor_token.errors %}
