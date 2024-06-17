@@ -2,6 +2,7 @@
 #
 # SPDX-License-Identifier: MPL-2.0
 
+from datetime import datetime, timedelta, timezone
 from typing import Optional
 
 import requests
@@ -11,6 +12,7 @@ from payment.exceptions import (
     ProviderPaymentChargeError,
     ProviderPaymentCreateError,
     ProviderPaymentNotFound,
+    ProviderPingError,
 )
 from payment.schemas import ProviderPaymentPayload, ProviderPaymentResponse
 from payment.utils import convert_keys_to_camel_case
@@ -32,6 +34,9 @@ class ProviderHandler:
         raise NotImplementedError()
 
     def charge(self, payment_id: str, amount: int):
+        raise NotImplementedError()
+
+    def ping(self) -> timedelta:
         raise NotImplementedError()
 
     @property
@@ -106,6 +111,27 @@ class NetsProviderHandler(ProviderHandler):
 
         return resp.json()
 
+    def ping(self) -> timedelta:
+        """Pings the provider to check if it's up and running.
+
+        NOTE: NETs does not have a ping endpoint, so we use the "GET /v1/payments"
+        and check if we get a 405 status code, which is the expected status code when
+        using GET on this endpoint
+        """
+
+        now = datetime.now(timezone.utc)
+        resp = requests.get(f"{self.host}/v1/payments", headers=self.headers)
+        req_resp_time = datetime.now(timezone.utc) - now
+
+        if resp.status_code != 405:
+            raise ProviderPingError(
+                provider_name=self.__class__.__name__,
+                expected_status_code=405,
+                actual_status_code=resp.status_code,
+            )
+
+        return req_resp_time
+
     @property
     def headers(self):
         return {
@@ -124,6 +150,9 @@ class BankProviderHandler(ProviderHandler):
 
     def read(self, payment_id: Optional[str]):
         return None
+
+    def ping(self) -> timedelta:
+        return timedelta(seconds=0)
 
 
 def get_provider_handler(
