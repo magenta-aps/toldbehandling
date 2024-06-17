@@ -115,7 +115,16 @@ class AdminLayoutBaseView(
 
 class TF10View(AdminLayoutBaseView, common_views.TF10View, FormView):
     required_permissions = ("auth.admin", *common_views.TF10View.required_permissions)
-    prisme_permissions = ("anmeldelse.prisme_afgiftsanmeldelse",)
+    prisme_permissions = (
+        "anmeldelse.prisme_afgiftsanmeldelse",
+        "aktør.change_modtager",
+        "aktør.view_afsender",
+        "aktør.view_modtager",
+        "forsendelse.view_postforsendelse",
+        "forsendelse.view_fragtforsendelse",
+        "anmeldelse.view_afgiftsanmeldelse",
+        "anmeldelse.view_varelinje",
+    )
     form_class = forms.TF10ViewForm
     extend_template = "admin/admin_layout.html"
 
@@ -685,7 +694,7 @@ class AfgiftstabelDetailView(AdminLayoutBaseView, FormView):
     def get_initial(self):
         return {
             "gyldig_fra": self.item.gyldig_fra.strftime(self.form_class.format)
-            if self.item.gyldig_fra
+                if self.item.gyldig_fra
             else None,
             "kladde": self.item.kladde,
         }

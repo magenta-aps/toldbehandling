@@ -225,6 +225,8 @@ class Command(BaseCommand):
             ("add", notat_model),
             ("change", afgiftsanmeldelse_model),
             ("change", privatafgiftsanmeldelse_model),
+            ("change", afsender_model),
+            ("change", modtager_model),
             ("change", varelinje_model),
             ("change", postforsendelse_model),
             ("change", fragtforsendelse_model),
