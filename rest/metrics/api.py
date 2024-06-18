@@ -10,6 +10,7 @@ from django.conf import settings
 from django.db import connection
 from django.http import HttpResponse
 from ninja_extra import api_controller, route
+from payment.provider_handlers import get_provider_handler
 from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 
 log = logging.getLogger(__name__)
@@ -49,4 +50,13 @@ class MetricsAPI:
 
     @route.get("/health/payment_providers", url_name="metrics_health_payment_providers")
     def health_payment_providers(self):
-        return HttpResponse("ERROR", status=500)
+        providers = [settings.PAYMENT_PROVIDER_NETS, settings.PAYMENT_PROVIDER_BANK]
+
+        for provider in providers:
+            try:
+                _ = get_provider_handler(provider).ping()
+            except Exception:
+                log.exception(f"Unable to ping provider: {provider}")
+                return HttpResponse("ERROR", status=500)
+
+        return HttpResponse("OK")

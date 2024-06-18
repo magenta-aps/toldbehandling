@@ -9,6 +9,31 @@ from ninja_extra import status
 from ninja_extra.exceptions import APIException
 
 
+class ProviderPingError(APIException):
+    status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+    default_detail = _(
+        (
+            "Unable to ping payment provider: {provider_name}, "
+            "expected HTTP response code: {expected_status_code}, "
+            "but got {actual_status_code}"
+        )
+    )
+
+    def __init__(
+        self,
+        provider_name: str,
+        expected_status_code: int,
+        actual_status_code: int,
+    ):
+        super().__init__(
+            self.default_detail.format(
+                provider_name=provider_name,
+                expected_status_code=expected_status_code,
+                actual_status_code=actual_status_code,
+            )
+        )
+
+
 class ProviderHandlerNotFound(APIException):
     status_code = status.HTTP_400_BAD_REQUEST
     default_detail = _("Payment provider handler not found for: {provider}")
