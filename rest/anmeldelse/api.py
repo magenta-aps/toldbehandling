@@ -1137,12 +1137,15 @@ class StatistikAPI:
         url_name="statistik_get",
     )
     def get(self, filters: StatistikFilterSchema = Query(...)):
-        varelinjer = Varelinje.objects.select_related("vareafgiftssats").filter(
-            filters.get_filter_expression()
-        ).exclude(afgiftsanmeldelse__status="kladde")
+        varelinjer = (
+            Varelinje.objects.select_related("vareafgiftssats")
+            .filter(filters.get_filter_expression())
+            .exclude(afgiftsanmeldelse__status="kladde")
+        )
 
         stats = list(
-            varelinjer.values("vareafgiftssats").annotate(
+            varelinjer.values("vareafgiftssats")
+            .annotate(
                 sum_afgiftsbeløb=Sum("afgiftsbeløb", default=0),
                 sum_mængde=Sum("mængde", default=0),
                 sum_antal=Sum("antal", default=0),
@@ -1150,7 +1153,8 @@ class StatistikAPI:
                 vareart_da=F("vareafgiftssats__vareart_da"),
                 vareart_kl=F("vareafgiftssats__vareart_kl"),
                 enhed=F("vareafgiftssats__enhed"),
-            ).filter(afgiftsgruppenummer__isnull=False)
+            )
+            .filter(afgiftsgruppenummer__isnull=False)
         )
 
         stats_unused = (
