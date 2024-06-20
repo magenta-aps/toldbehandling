@@ -1139,7 +1139,7 @@ class StatistikAPI:
     def get(self, filters: StatistikFilterSchema = Query(...)):
         varelinjer = Varelinje.objects.select_related("vareafgiftssats").filter(
             filters.get_filter_expression()
-        )
+        ).exclude(afgiftsanmeldelse__status="kladde")
 
         stats = list(
             varelinjer.values("vareafgiftssats").annotate(
@@ -1150,7 +1150,7 @@ class StatistikAPI:
                 vareart_da=F("vareafgiftssats__vareart_da"),
                 vareart_kl=F("vareafgiftssats__vareart_kl"),
                 enhed=F("vareafgiftssats__enhed"),
-            )
+            ).filter(afgiftsgruppenummer__isnull=False)
         )
 
         stats_unused = (
