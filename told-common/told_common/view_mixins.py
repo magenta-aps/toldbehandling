@@ -310,7 +310,9 @@ class PreventDoubleSubmitMixin:
         # Previously calculated hash
         previous_post_hash = cache.get(session_form_hash)
         cache.set(session_form_hash, post_hash, 300)
-        log.info(f"Gemte {cache.get(session_form_hash)} i cache under {session_form_hash}")
+        log.info(
+            f"Gemte {cache.get(session_form_hash)} i cache under {session_form_hash}"
+        )
 
         # Form has already been processed!
         if post_hash == previous_post_hash:
