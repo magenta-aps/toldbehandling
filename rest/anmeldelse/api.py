@@ -1141,8 +1141,8 @@ class StatistikAPI:
             Varelinje.objects.select_related("vareafgiftssats")
             .filter(filters.get_filter_expression())
             .filter(
-                Q(afgiftsanmeldelse__status__in=("ny", "godkendt", "afsluttet"))
-                | Q(privatafgiftsanmeldelse__status__in=("ny", "godkendt", "afsluttet"))
+                Q(afgiftsanmeldelse__status="afsluttet")
+                | Q(privatafgiftsanmeldelse__status="afsluttet")
             )
         )
 
