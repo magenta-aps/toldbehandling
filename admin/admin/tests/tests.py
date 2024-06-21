@@ -19,6 +19,7 @@ from urllib.parse import parse_qs, quote, quote_plus, urlparse
 import requests
 from bs4 import BeautifulSoup, Tag
 from django.conf import settings
+from django.core.cache import cache
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.shortcuts import redirect
 from django.template.response import TemplateResponse
@@ -3252,17 +3253,21 @@ class TF10CreateTest(TestMixin, HasLogin, TestCase):
     @patch.object(requests.Session, "get")
     @patch.object(requests.Session, "post")
     def test_form_successful_duplicate(self, mock_post, mock_get):
+        print("test_form_successful_duplicate")
+        cache.clear()
         self.login()
         url = reverse("tf10_create")
         mock_get.side_effect = self.mock_requests_get
         mock_post.side_effect = self.mock_requests_post
         response = self.client.post(url, data={**self.formdata1, **self.formfiles1})
         response = self.client.post(url, data={**self.formdata1, **self.formfiles1})
+        print("POSTED")
         self.assertEquals(response.status_code, 302)
         prefix = f"{settings.REST_DOMAIN}/api/"
         posted_map = defaultdict(list)
         for url, data in self.posted:
             posted_map[url].append(json.loads(data))
+            print(data)
         self.assertEquals(len(posted_map[prefix + "afsender"]), 1)
         self.assertEquals(len(posted_map[prefix + "modtager"]), 1)
         self.assertEquals(len(posted_map[prefix + "fragtforsendelse"]), 1)
