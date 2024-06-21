@@ -1,0 +1,4 @@
+{% load i18n %}
+{% translate "Adgang nægtet" as header %}
+{% translate 'Der er logget ind med utilstrækkeligt sikringsniveau. Prøv at logge ind igen.' as body %}
+{% include 'ui/error/error.html' with header=header body=body logout=True %}

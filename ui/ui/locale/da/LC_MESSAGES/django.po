@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-03-08 08:44-0200\n"
+"POT-Creation-Date: 2024-06-21 12:58-0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -30,9 +30,15 @@ msgstr ""
 msgid "Log ind"
 msgstr ""
 
+#: ui/templates/ui/error/login_assurance.html
 #: ui/templates/ui/error/login_repeat.html
 #: ui/templates/ui/error/login_timeout.html
 msgid "Adgang nægtet"
+msgstr ""
+
+#: ui/templates/ui/error/login_assurance.html
+msgid ""
+"Der er logget ind med utilstrækkeligt sikringsniveau. Prøv at logge ind igen."
 msgstr ""
 
 #: ui/templates/ui/error/login_repeat.html

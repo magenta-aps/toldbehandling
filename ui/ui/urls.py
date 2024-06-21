@@ -104,6 +104,11 @@ urlpatterns += [
         name="login-repeat",
     ),
     path(
+        "error/login-login_assurance/",
+        AccessDeniedView.as_view(template_name="ui/error/login_assurance.html"),
+        name="login-assurance-level",
+    ),
+    path(
         "logged-out/",
         TemplateView.as_view(template_name="ui/loggedout.html"),
         name="logged-out",

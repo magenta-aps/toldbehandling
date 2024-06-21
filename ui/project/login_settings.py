@@ -15,6 +15,7 @@ LOGIN_NAMESPACE = "login"
 LOGIN_SESSION_KEYS = ["user", "access_token", "refresh_token"]
 LOGIN_TIMEOUT_URL = reverse_lazy("login-timeout")
 LOGIN_REPEATED_URL = reverse_lazy("login-repeat")
+LOGIN_ASSURANCE_LEVEL_URL = reverse_lazy("login-assurance-level")
 LOGIN_WHITELISTED_URLS = [
     "/favicon.ico",
     "/_ht/",
@@ -22,6 +23,7 @@ LOGIN_WHITELISTED_URLS = [
     LOGIN_TIMEOUT_URL,
     LOGIN_REPEATED_URL,
     LOGOUT_REDIRECT_URL,
+    LOGIN_ASSURANCE_LEVEL_URL,
 ]
 MITID_TEST_ENABLED = bool(strtobool(os.environ.get("MITID_TEST_ENABLED", "False")))
 SESSION_EXPIRE_SECONDS = int(os.environ.get("SESSION_EXPIRE_SECONDS") or 1800)
