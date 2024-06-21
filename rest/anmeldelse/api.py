@@ -1159,6 +1159,8 @@ class StatistikAPI:
             )
             .filter(afgiftsgruppenummer__isnull=False)
         )
+        for stat in stats:
+            del stat["vareafgiftssats__afgiftsgruppenummer"]
 
         stats_unused = (
             Vareafgiftssats.objects.filter(

@@ -471,6 +471,8 @@ class VarelinjeTest(RestTestMixin, TestCase):
 class StatistikTest(RestMixin, TestCase):
     def setUp(self):
         super().setUp()
+        self.afgiftsanmeldelse.status = "afsluttet"
+        self.afgiftsanmeldelse.save()
         self.varelinje
         self.vareafgiftssats2 = Vareafgiftssats.objects.create(
             afgiftstabel=self.afgiftstabel,
@@ -519,7 +521,6 @@ class StatistikTest(RestMixin, TestCase):
             data[0],
             {
                 # self.varelinje3 + self.varelinje_data
-                "vareafgiftssats": self.vareafgiftssats.id,
                 "sum_afgiftsbeløb": "1787.50",
                 "afgiftsgruppenummer": 1234,
                 "vareart_da": "Kaffe",
@@ -532,7 +533,6 @@ class StatistikTest(RestMixin, TestCase):
         self.assertEquals(
             data[1],
             {
-                "vareafgiftssats": self.vareafgiftssats2.id,
                 "sum_afgiftsbeløb": "1400000.00",
                 "afgiftsgruppenummer": 5678,
                 "vareart_da": "Te",
