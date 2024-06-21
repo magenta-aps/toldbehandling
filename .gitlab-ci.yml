@@ -230,6 +230,8 @@ Build ER image:
   services:
     - name: postgres:13
       alias: toldbehandling-db
+    - name: memcached
+      alias: toldbehandling-cache
   variables:
     # Simulate development environment while running tests so we use mockup data
     DJANGO_SECRET_KEY: e$s6@0(hs5ja79-&!l7vt^onoe4h^*bv_e4hj&wt5^8*&x76-$
@@ -243,7 +245,7 @@ Build ER image:
     DISABLE_METRICS: 'True'
     DJANGO_LANGUAGE_COOKIE_DOMAIN: localhost
     REST_DOMAIN: http://toldbehandling-rest:7000
-    CACHE_ENDPOINT: localhost:11211
+    CACHE_ENDPOINT: toldbehandling-cache:11211
     SAML_SP_ENTITY_ID: http://localhost:8000/saml/metadata/
     SAML_SP_LOGIN_CALLBACK_URI: http://localhost:8000/login/callback/
     SAML_SP_LOGOUT_CALLBACK_URI: http://localhost:8000/logout/callback/
