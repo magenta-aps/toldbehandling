@@ -19,6 +19,7 @@ from urllib.parse import parse_qs, quote, quote_plus, urlparse
 import requests
 from bs4 import BeautifulSoup, Tag
 from django.conf import settings
+from django.core.cache import cache
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.shortcuts import redirect
 from django.template.response import TemplateResponse
@@ -3252,6 +3253,7 @@ class TF10CreateTest(TestMixin, HasLogin, TestCase):
     @patch.object(requests.Session, "get")
     @patch.object(requests.Session, "post")
     def test_form_successful_duplicate(self, mock_post, mock_get):
+        cache.clear()
         self.login()
         url = reverse("tf10_create")
         mock_get.side_effect = self.mock_requests_get

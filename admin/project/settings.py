@@ -189,8 +189,8 @@ STORAGES = {
 
 CACHES = {
     "default": {
-        "BACKEND": "django.core.cache.backends.db.DatabaseCache",
-        "LOCATION": "default_cache",
+        "BACKEND": "django.core.cache.backends.memcached.PyMemcacheCache",
+        "LOCATION": os.environ["CACHE_ENDPOINT"],
     },
 }
 
