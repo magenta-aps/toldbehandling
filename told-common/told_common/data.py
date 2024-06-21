@@ -496,9 +496,9 @@ class JwtTokenInfo:
             request.session["access_token_timestamp"] = self.access_token_timestamp
             if save_refresh_token:
                 request.session["refresh_token"] = self.refresh_token
-                request.session[
-                    "refresh_token_timestamp"
-                ] = self.refresh_token_timestamp
+                request.session["refresh_token_timestamp"] = (
+                    self.refresh_token_timestamp
+                )
             self.synchronized = True
 
 
