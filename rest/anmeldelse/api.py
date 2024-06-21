@@ -1140,11 +1140,14 @@ class StatistikAPI:
         varelinjer = (
             Varelinje.objects.select_related("vareafgiftssats")
             .filter(filters.get_filter_expression())
-            .exclude(afgiftsanmeldelse__status="kladde")
+            .filter(
+                Q(afgiftsanmeldelse__status__in=("ny", "godkendt", "afsluttet"))
+                | Q(privatafgiftsanmeldelse__status__in=("ny", "godkendt", "afsluttet"))
+            )
         )
 
         stats = list(
-            varelinjer.values("vareafgiftssats")
+            varelinjer.values("vareafgiftssats__afgiftsgruppenummer")
             .annotate(
                 sum_afgiftsbeløb=Sum("afgiftsbeløb", default=0),
                 sum_mængde=Sum("mængde", default=0),
@@ -1173,7 +1176,6 @@ class StatistikAPI:
                 sum_antal=Value(0),
             )
         )
-
         stats_list = sorted(
             list(stats) + list(stats_unused), key=lambda x: x["afgiftsgruppenummer"]
         )
