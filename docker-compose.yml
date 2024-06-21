@@ -166,6 +166,10 @@ services:
       - ./dev-idp/authsources.php:/var/www/simplesamlphp/config/authsources.php:ro
       - ./dev-idp/saml20-sp-remote.php:/var/www/simplesamlphp/metadata/saml20-sp-remote.php:ro
 
+  toldbehandling-cache:
+    image: memcached
+    container_name: toldbehandling-cache
+    network_mode: "host"
 
 volumes:
   postgres-data:
