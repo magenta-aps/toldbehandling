@@ -484,6 +484,10 @@ class AnmeldelseListViewTest(HasLogin):
                 "afgift_total": None,
                 "fragtforsendelse": None,
                 "status": "godkendt",
+                "fuldmagtshaver": {
+                    "cvr": 12345678,
+                    "navn": "HepHey A/S"
+                }
             },
             {
                 "id": 2,
@@ -527,6 +531,10 @@ class AnmeldelseListViewTest(HasLogin):
                 "afgift_total": None,
                 "fragtforsendelse": None,
                 "status": "afvist",
+                "fuldmagtshaver": {
+                    "cvr": 12345678,
+                    "navn": "HepHey A/S"
+                }
             },
             {
                 "id": 3,
@@ -570,6 +578,10 @@ class AnmeldelseListViewTest(HasLogin):
                 "afgift_total": None,
                 "fragtforsendelse": None,
                 "status": "ny",
+                "fuldmagtshaver": {
+                    "cvr": 12345678,
+                    "navn": "HepHey A/S"
+                }
             },
         ]
 
