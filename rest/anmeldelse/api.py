@@ -91,6 +91,7 @@ class PartialAfgiftsanmeldelseIn(ModelSchema):
 class AfgiftsanmeldelseOut(ModelSchema):
     oprettet_af: Optional[UserOut]
     oprettet_på_vegne_af: Optional[UserOut]
+    fuldmagtshaver: Optional[SpeditørOut]
 
     class Config:
         model = Afgiftsanmeldelse
