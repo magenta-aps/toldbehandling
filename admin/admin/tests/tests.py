@@ -2590,10 +2590,7 @@ class TF10EditMultipleViewTest(PermissionsTest, TestCase):
                     "dato": "2023-08-22T00:00:00-02:00",
                     "beregnet_faktureringsdato": "2023-10-10",
                     "status": "afvist",
-                    "fuldmagtshaver": {
-                        "cvr": 12345678,
-                        "navn": "HepHey A/S"
-                    }
+                    "fuldmagtshaver": {"cvr": 12345678, "navn": "HepHey A/S"},
                 },
                 2: {
                     "id": 2,
@@ -2636,10 +2633,7 @@ class TF10EditMultipleViewTest(PermissionsTest, TestCase):
                     "dato": "2023-08-22T00:00:00-02:00",
                     "beregnet_faktureringsdato": "2023-10-10",
                     "status": "afvist",
-                    "fuldmagtshaver": {
-                        "cvr": 12345678,
-                        "navn": "HepHey A/S"
-                    }
+                    "fuldmagtshaver": {"cvr": 12345678, "navn": "HepHey A/S"},
                 },
                 3: {
                     "id": 3,
@@ -2682,10 +2676,7 @@ class TF10EditMultipleViewTest(PermissionsTest, TestCase):
                     "dato": "2023-08-22T00:00:00-02:00",
                     "beregnet_faktureringsdato": "2023-10-10",
                     "status": "afvist",
-                    "fuldmagtshaver": {
-                        "cvr": 12345678,
-                        "navn": "HepHey A/S"
-                    }
+                    "fuldmagtshaver": {"cvr": 12345678, "navn": "HepHey A/S"},
                 },
             }
             items = list(filter(None, [data.get(int(id)) for id in query["id"]]))
