@@ -6,7 +6,7 @@ from prometheus_client import CollectorRegistry, Gauge
 
 JOB_EXEC_TIME_REGISTRY = CollectorRegistry()
 JOB_EXEC_TIME = Gauge(
-    "toldbehandling_job",
+    "groenland_job",
     "Latest execution time",
     registry=JOB_EXEC_TIME_REGISTRY,
 )
