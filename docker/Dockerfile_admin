@@ -20,7 +20,16 @@ RUN mkdir /app && \
     groupadd -g 75130 -r toldbehandling && \
     groupadd -g 75100 -r certificate_exporter && \
     useradd -u 75130 --no-log-init -r -g toldbehandling -G certificate_exporter toldbehandling && \
-    chown toldbehandling:toldbehandling /static
+    chown toldbehandling:toldbehandling /static && \
+    # Postgres client 16 stuff \
+    sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt bookworm-pgdg main" > /etc/apt/sources.list.d/pgdg.list' && \
+    curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor -o /etc/apt/trusted.gpg.d/postgresql.gpg
+
+# dependencies
+# hadolint ignore=DL3008
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends postgresql-client-16 && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Font cache for pdf generation
 RUN mkdir -p /home/toldbehandling/.cache/fontconfig && \
