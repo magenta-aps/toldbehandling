@@ -819,9 +819,15 @@ class VarelinjeAPI:
                 dato = privatafgiftsanmeldelse.indleveringsdato
             if dato:
                 return Vareafgiftssats.objects.get(
-                    afgiftsgruppenummer=kode,
-                    afgiftstabel__gyldig_fra__lte=dato,
-                    afgiftstabel__gyldig_til__gte=dato,
+                    Q(
+                        afgiftsgruppenummer=kode,
+                        afgiftstabel__gyldig_fra__lte=dato,
+                        afgiftstabel__kladde=False,
+                    )
+                    & (
+                        Q(afgiftstabel__gyldig_til__gte=dato)
+                        | Q(afgiftstabel__gyldig_til__isnull=True)
+                    )
                 ).id
         except (
             Afgiftsanmeldelse.DoesNotExist,
