@@ -781,10 +781,10 @@ class VarelinjeAPI:
     def create(self, payload: VarelinjeIn):
         try:
             data = payload.dict()
-            if "vareafgiftssats_afgiftsgruppenummer" in data:
-                vareafgiftssats_afgiftsgruppenummer = data.pop(
-                    "vareafgiftssats_afgiftsgruppenummer"
-                )
+            vareafgiftssats_afgiftsgruppenummer = data.pop(
+                "vareafgiftssats_afgiftsgruppenummer"
+            )
+            if vareafgiftssats_afgiftsgruppenummer:
                 vareafgiftssats_id = self.get_varesats_id_by_kode(
                     data.get("afgiftsanmeldelse_id"),
                     data.get("privatafgiftsanmeldelse_id"),
