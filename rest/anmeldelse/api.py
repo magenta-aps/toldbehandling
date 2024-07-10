@@ -813,10 +813,10 @@ class VarelinjeAPI:
                 )
                 dato = afgiftsanmeldelse.afgangsdato
             elif privatafgiftsanmeldelse_id:
-                afgiftsanmeldelse: PrivatAfgiftsanmeldelse = (
+                privatafgiftsanmeldelse: PrivatAfgiftsanmeldelse = (
                     PrivatAfgiftsanmeldelse.objects.get(id=privatafgiftsanmeldelse_id)
                 )
-                dato = afgiftsanmeldelse.indleveringsdato
+                dato = privatafgiftsanmeldelse.indleveringsdato
             if dato:
                 return Vareafgiftssats.objects.get(
                     afgiftsgruppenummer=kode,
