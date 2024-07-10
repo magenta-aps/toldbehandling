@@ -716,6 +716,8 @@ class VarelinjeIn(ModelSchema):
     privatafgiftsanmeldelse_id: Optional[int] = None
     vareafgiftssats_id: Optional[int] = None
 
+    vareafgiftssats_afgiftsgruppenummer: Optional[int] = None
+
     class Config:
         model = Varelinje
         model_fields = ["mængde", "antal", "kladde", "fakturabeløb"]
@@ -778,12 +780,55 @@ class VarelinjeAPI:
     @route.post("", auth=get_auth_methods(), url_name="varelinje_create")
     def create(self, payload: VarelinjeIn):
         try:
-            item = Varelinje.objects.create(**payload.dict())
+            data = payload.dict()
+            vareafgiftssats_afgiftsgruppenummer = data.pop(
+                "vareafgiftssats_afgiftsgruppenummer"
+            )
+            if vareafgiftssats_afgiftsgruppenummer:
+                vareafgiftssats_id = self.get_varesats_id_by_kode(
+                    data.get("afgiftsanmeldelse_id"),
+                    data.get("privatafgiftsanmeldelse_id"),
+                    vareafgiftssats_afgiftsgruppenummer,
+                )
+                if vareafgiftssats_id:
+                    data["vareafgiftssats_id"] = vareafgiftssats_id
+            item = Varelinje.objects.create(**data)
         except ValidationError as e:
             return HttpResponseBadRequest(
                 json_dump(e.message_dict), content_type="application/json"
             )
         return {"id": item.id}
+
+    @staticmethod
+    def get_varesats_id_by_kode(
+        afgiftsanmeldelse_id: Optional[int],
+        privatafgiftsanmeldelse_id: Optional[int],
+        kode: int,
+    ):
+        dato = None
+        try:
+            if afgiftsanmeldelse_id:
+                afgiftsanmeldelse: Afgiftsanmeldelse = Afgiftsanmeldelse.objects.get(
+                    id=afgiftsanmeldelse_id
+                )
+                dato = afgiftsanmeldelse.afgangsdato
+            elif privatafgiftsanmeldelse_id:
+                privatafgiftsanmeldelse: PrivatAfgiftsanmeldelse = (
+                    PrivatAfgiftsanmeldelse.objects.get(id=privatafgiftsanmeldelse_id)
+                )
+                dato = privatafgiftsanmeldelse.indleveringsdato
+            if dato:
+                return Vareafgiftssats.objects.get(
+                    afgiftsgruppenummer=kode,
+                    afgiftstabel__gyldig_fra__lte=dato,
+                    afgiftstabel__gyldig_til__gte=dato,
+                ).id
+        except (
+            Afgiftsanmeldelse.DoesNotExist,
+            PrivatAfgiftsanmeldelse.DoesNotExist,
+            Vareafgiftssats.DoesNotExist,
+        ):
+            raise Http404
 
     @route.get(
         "/{id}",
