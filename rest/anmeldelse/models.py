@@ -191,9 +191,7 @@ class Afgiftsanmeldelse(models.Model):
 
     @property
     def afgangsdato(self):
-        forsendelse = (
-            self.fragtforsendelse or self.postforsendelse
-        )
+        forsendelse = self.fragtforsendelse or self.postforsendelse
         return forsendelse.afgangsdato
 
     @property

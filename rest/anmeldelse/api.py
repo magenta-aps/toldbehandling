@@ -782,11 +782,13 @@ class VarelinjeAPI:
         try:
             data = payload.dict()
             if "vareafgiftssats_afgiftsgruppenummer" in data:
-                vareafgiftssats_afgiftsgruppenummer = data.pop("vareafgiftssats_afgiftsgruppenummer")
+                vareafgiftssats_afgiftsgruppenummer = data.pop(
+                    "vareafgiftssats_afgiftsgruppenummer"
+                )
                 vareafgiftssats_id = self.get_varesats_id_by_kode(
                     data.get("afgiftsanmeldelse_id"),
                     data.get("privatafgiftsanmeldelse_id"),
-                    vareafgiftssats_afgiftsgruppenummer
+                    vareafgiftssats_afgiftsgruppenummer,
                 )
                 if vareafgiftssats_id:
                     data["vareafgiftssats_id"] = vareafgiftssats_id
@@ -798,16 +800,35 @@ class VarelinjeAPI:
         return {"id": item.id}
 
     @staticmethod
-    def get_varesats_id_by_kode(afgiftsanmeldelse_id: Optional[int], privatafgiftsanmeldelse_id: Optional[int], kode: int):
+    def get_varesats_id_by_kode(
+        afgiftsanmeldelse_id: Optional[int],
+        privatafgiftsanmeldelse_id: Optional[int],
+        kode: int,
+    ):
         dato = None
-        if afgiftsanmeldelse_id:
-            afgiftsanmeldelse: Afgiftsanmeldelse = Afgiftsanmeldelse.objects.get(id=afgiftsanmeldelse_id)
-            dato = afgiftsanmeldelse.afgangsdato
-        elif privatafgiftsanmeldelse_id:
-            afgiftsanmeldelse: PrivatAfgiftsanmeldelse = PrivatAfgiftsanmeldelse.objects.get(id=privatafgiftsanmeldelse_id)
-            dato = afgiftsanmeldelse.indleveringsdato
-        if dato:
-            return Vareafgiftssats.objects.get(afgiftsgruppenummer=kode, afgiftstabel__gyldig_fra__lte=dato, afgiftstabel__gyldig_til__gte=dato).id
+        try:
+            if afgiftsanmeldelse_id:
+                afgiftsanmeldelse: Afgiftsanmeldelse = Afgiftsanmeldelse.objects.get(
+                    id=afgiftsanmeldelse_id
+                )
+                dato = afgiftsanmeldelse.afgangsdato
+            elif privatafgiftsanmeldelse_id:
+                afgiftsanmeldelse: PrivatAfgiftsanmeldelse = (
+                    PrivatAfgiftsanmeldelse.objects.get(id=privatafgiftsanmeldelse_id)
+                )
+                dato = afgiftsanmeldelse.indleveringsdato
+            if dato:
+                return Vareafgiftssats.objects.get(
+                    afgiftsgruppenummer=kode,
+                    afgiftstabel__gyldig_fra__lte=dato,
+                    afgiftstabel__gyldig_til__gte=dato,
+                ).id
+        except (
+            Afgiftsanmeldelse.DoesNotExist,
+            PrivatAfgiftsanmeldelse.DoesNotExist,
+            Vareafgiftssats.DoesNotExist,
+        ):
+            raise Http404
 
     @route.get(
         "/{id}",
