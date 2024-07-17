@@ -982,12 +982,9 @@ class PaymentAPITests(PaymentTest):
 
 
 class PaymentManagementCommandTests(PaymentTest):
-    @patch("payment.management.commands.payment_charge_reserved.push_to_gateway")
     @patch("payment.management.commands.payment_charge_reserved.print")
     @patch("payment.management.commands.payment_charge_reserved.get_provider_handler")
-    def test_charge_reserved(
-        self, mock_get_provider_handler, mock_print, mock_push_to_gateway, *args
-    ):
+    def test_charge_reserved(self, mock_get_provider_handler, mock_print, *args):
         # test data
         (
             test_payment_1,
@@ -1060,12 +1057,6 @@ class PaymentManagementCommandTests(PaymentTest):
         )
         self.assertEqual(test_payment_1.status, "paid")
         self.assertEqual(test_payment_2.status, "paid")
-
-        mock_push_to_gateway.assert_called_once_with(
-            settings.PROMETHEUS_PUSHGATEWAY_HOST,
-            job="payment_charge_reserved",
-            registry=ANY,
-        )
 
 
 class PaymentUtilityTests(TestCase):
