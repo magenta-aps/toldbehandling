@@ -22,18 +22,3 @@ class MetricsTest(TestCase):
         cls.user.user_permissions.add(
             Permission.objects.get(codename="view_privatafgiftsanmeldelse"),
         )
-
-
-class MetricsAPITest(MetricsTest):
-    def test_get_all(self):
-        resp = self.client.get(
-            reverse("api-1.0.0:metrics_prometheus"),
-            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
-            content_type="application/json",
-        )
-
-        self.assertEqual(resp.status_code, 200)
-        self.assertEqual(
-            resp["Content-Type"], "text/plain; version=0.0.4; charset=utf-8"
-        )
-        self.assertGreater(len(resp.content), 0)

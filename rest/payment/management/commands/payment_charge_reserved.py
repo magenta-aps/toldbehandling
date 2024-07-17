@@ -1,10 +1,7 @@
 from django.core.management.base import BaseCommand
-from metrics.job import JOB_EXEC_TIME, JOB_EXEC_TIME_REGISTRY
 from payment.exceptions import ProviderPaymentNotFound
 from payment.models import Payment
 from payment.provider_handlers import get_provider_handler
-from project import settings
-from prometheus_client import push_to_gateway
 
 
 class Command(BaseCommand):
@@ -51,22 +48,5 @@ class Command(BaseCommand):
             payment.save()
 
             print("  Successfully charged!")
-
-        # Push a metric to prometheus
-        try:
-            JOB_EXEC_TIME.set_to_current_time()
-            push_to_gateway(
-                settings.PROMETHEUS_PUSHGATEWAY_HOST,
-                job="payment_charge_reserved",
-                registry=JOB_EXEC_TIME_REGISTRY,
-            )
-        except Exception as e:
-            print(
-                (
-                    "Unable to push metrics to "
-                    f"prometheus-pushgateway: {settings.PROMETHEUS_PUSHGATEWAY_HOST}"
-                )
-            )
-            raise e
 
         print("job finished!")
