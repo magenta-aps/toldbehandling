@@ -66,7 +66,6 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "simple_history.middleware.HistoryRequestMiddleware",
     "django_otp.middleware.OTPMiddleware",
-    "metrics.middleware.MetricsMiddleware",
 ]
 
 ROOT_URLCONF = "project.urls"

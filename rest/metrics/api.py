@@ -11,7 +11,6 @@ from django.db import connection
 from django.http import HttpResponse
 from ninja_extra import api_controller, route
 from payment.provider_handlers import get_provider_handler
-from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 
 log = logging.getLogger(__name__)
 
@@ -21,10 +20,6 @@ log = logging.getLogger(__name__)
     tags=["metrics"],
 )
 class MetricsAPI:
-    @route.get("", url_name="metrics_prometheus")
-    def get_all(self):
-        return HttpResponse(generate_latest(), content_type=CONTENT_TYPE_LATEST)
-
     @route.get("/health/storage", url_name="metrics_health_storage")
     def health_storage(self):
         try:
