@@ -17,6 +17,7 @@ from payment.exceptions import (
     ProviderPaymentChargeError,
     ProviderPaymentCreateError,
     ProviderPaymentNotFound,
+    ProviderPingError,
 )
 from payment.models import Item, Payment
 from payment.provider_handlers import ProviderHandler, get_provider_handler
@@ -507,6 +508,13 @@ class NetsPaymentProviderTests(TestCase):
                 payment_id="1234",
                 amount=1337,
             )
+
+    @patch("payment.provider_handlers.requests.get")
+    def test_ping_error(self, mock_requests_get):
+        mock_requests_get.return_value.status_code = 500
+
+        with self.assertRaises(ProviderPingError):
+            _ = self.handler.ping()
 
 
 class BankPaymentProviderTests(TestCase):
