@@ -201,7 +201,9 @@ class Afgiftsanmeldelse(models.Model):
     @staticmethod
     def beregn_faktureringsdato(afgiftsanmeldelse) -> date:
         # Splittet fordi historisk model ikke har ovenstående property
-        afgangsdato = afgiftsanmeldelse.afgangsdato
+        afgangsdato = (
+            afgiftsanmeldelse.fragtforsendelse or afgiftsanmeldelse.postforsendelse
+        ).afgangsdato
         måned_slut = dato_måned_slut(afgangsdato)
         postnummer = afgiftsanmeldelse.modtager.postnummer
         if afgiftsanmeldelse.toldkategori == "70":

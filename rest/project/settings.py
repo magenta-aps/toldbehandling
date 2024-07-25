@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     "forsendelse",
     "sats",
     "payment",
+    "metrics",
     "ninja_extra",
     "ninja_jwt",
     "simple_history",
