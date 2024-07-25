@@ -299,6 +299,10 @@ class PaymentProviderHandlerTests(TestCase):
         with self.assertRaises(NotImplementedError):
             _ = self.handler.headers
 
+    def test_ping(self):
+        with self.assertRaises(NotImplementedError):
+            self.handler.ping()
+
 
 class NetsPaymentProviderTests(TestCase):
     def setUp(self):
