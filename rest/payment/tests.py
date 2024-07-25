@@ -17,8 +17,9 @@ from payment.exceptions import (
     ProviderPaymentChargeError,
     ProviderPaymentCreateError,
     ProviderPaymentNotFound,
+    ProviderPingError,
 )
-from payment.models import Payment
+from payment.models import Item, Payment
 from payment.provider_handlers import ProviderHandler, get_provider_handler
 from payment.schemas import (
     ContactDetails,
@@ -230,6 +231,11 @@ class PaymentTest(TestCase):
 
         return test_payment, fake_provider_payment
 
+    def _create_test_payment_item(self, payment: Payment):
+        varelinje = Varelinje.objects.filter().first()
+        item_data = generate_payment_item_from_varelinje(varelinje)
+        return Item.objects.create(**item_data, payment=payment)
+
     def test_payment_str(self):
         test_payment, _ = self._create_test_payment_with_fake_provider_payment(
             status="created",
@@ -237,11 +243,26 @@ class PaymentTest(TestCase):
             declaration=self.declaration,
             provider_payment_id="1234",
         )
+
         self.assertEqual(
             str(test_payment),
             f"Payment(id={test_payment.id}, "
             f"tf5={self.declaration.id}, "
             f"status=created)",
+        )
+
+    def test_item_str(self):
+        test_payment, _ = self._create_test_payment_with_fake_provider_payment(
+            status="created",
+            amount=1337,
+            declaration=self.declaration,
+            provider_payment_id="1234",
+        )
+
+        test_item = self._create_test_payment_item(test_payment)
+        self.assertEqual(
+            str(test_item),
+            f"PaymentItem(payment={test_payment.id}, name={test_item.name})",
         )
 
 
@@ -277,6 +298,10 @@ class PaymentProviderHandlerTests(TestCase):
     def test_headers(self):
         with self.assertRaises(NotImplementedError):
             _ = self.handler.headers
+
+    def test_ping(self):
+        with self.assertRaises(NotImplementedError):
+            self.handler.ping()
 
 
 class NetsPaymentProviderTests(TestCase):
@@ -487,6 +512,13 @@ class NetsPaymentProviderTests(TestCase):
                 payment_id="1234",
                 amount=1337,
             )
+
+    @patch("payment.provider_handlers.requests.get")
+    def test_ping_error(self, mock_requests_get):
+        mock_requests_get.return_value.status_code = 500
+
+        with self.assertRaises(ProviderPingError):
+            _ = self.handler.ping()
 
 
 class BankPaymentProviderTests(TestCase):
