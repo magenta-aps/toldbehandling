@@ -48,6 +48,17 @@ class MetricsAPITest(TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.content.decode(), "OK")
 
+    @patch("metrics.api.tempfile.NamedTemporaryFile")
+    def test_health_storage_error(self, mock_named_temporary_file):
+        mock_named_temporary_file.side_effect = Exception("Test")
+
+        resp = self.client.get(
+            reverse("api-1.0.0:metrics_health_storage"),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+        )
+        self.assertEqual(resp.status_code, 500)
+        self.assertEqual(resp.content.decode(), "ERROR")
+
     def test_health_database(self):
         resp = self.client.get(
             reverse("api-1.0.0:metrics_health_database"),
