@@ -2,11 +2,13 @@
 #
 # SPDX-License-Identifier: MPL-2.0
 
+from unittest.mock import ANY
+
 from django.test import TestCase
 from django.urls import reverse
+from django_otp.plugins.otp_totp.models import TOTPDevice
 from otp.api import TOTPDeviceIn
 from project.test_mixins import RestMixin
-from project.util import json_dump
 
 
 class TOTPDeviceAPITests(TestCase):
@@ -24,7 +26,7 @@ class TOTPDeviceAPITests(TestCase):
             reverse("api-1.0.0:totpdevice_create"),
             TOTPDeviceIn(
                 user_id=self.user.id,
-                name="test-otp-device",
+                name="test-otp-create-device",
             ).json(),
             HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
             content_type="application/json",
@@ -32,3 +34,33 @@ class TOTPDeviceAPITests(TestCase):
 
         self.assertEqual(resp.status_code, 204)
         self.assertEqual(resp.content.decode(), "")
+
+    def test_list(self):
+        TOTPDevice.objects.create(
+            user_id=self.user.id,
+            name="test-otp-list-devices",
+        )
+
+        resp = self.client.get(
+            reverse("api-1.0.0:totpdevice_list"),
+            {"user": self.user.id},
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+        )
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(
+            resp.json(),
+            [
+                {
+                    "key": ANY,
+                    "tolerance": 1,
+                    "t0": 0,
+                    "step": 30,
+                    "drift": 0,
+                    "digits": 6,
+                    "name": "test-otp-list-devices",
+                    "confirmed": True,
+                    "user_id": self.user.id,
+                }
+            ],
+        )
