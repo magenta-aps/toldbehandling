@@ -57,7 +57,9 @@ class TOTPDeviceFilterSchema(FilterSchema):
     permissions=[permissions.IsAuthenticated],
 )
 class TOTPDeviceAPI:
-    @route.post("", auth=get_auth_methods(), url_name="totpdevice_create")
+    @route.post(
+        "", response={204: None}, auth=get_auth_methods(), url_name="totpdevice_create"
+    )
     # TODO: foretag tjeks så dette ikke kan misbruges
     def create(self, payload: TOTPDeviceIn):
         TOTPDevice.objects.create(**payload.dict())
