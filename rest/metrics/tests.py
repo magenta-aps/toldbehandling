@@ -87,3 +87,14 @@ class MetricsAPITest(TestCase):
         )
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.content.decode(), "OK")
+
+    @patch("metrics.api.get_provider_handler")
+    def test_health_payment_providers_error(self, mock_get_provider_handler):
+        mock_get_provider_handler.side_effect = Exception("Test")
+
+        resp = self.client.get(
+            reverse("api-1.0.0:metrics_health_payment_providers"),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+        )
+        self.assertEqual(resp.status_code, 500)
+        self.assertEqual(resp.content.decode(), "ERROR")
