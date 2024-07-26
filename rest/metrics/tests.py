@@ -67,6 +67,17 @@ class MetricsAPITest(TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.content.decode(), "OK")
 
+    @patch("metrics.api.connection.ensure_connection")
+    def test_health_database_error(self, mock_ensure_connection):
+        mock_ensure_connection.side_effect = Exception("Test")
+
+        resp = self.client.get(
+            reverse("api-1.0.0:metrics_health_database"),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+        )
+        self.assertEqual(resp.status_code, 500)
+        self.assertEqual(resp.content.decode(), "ERROR")
+
     @patch("payment.provider_handlers.requests.get")
     def test_health_payment_providers(self, mock_requests_get):
         mock_requests_get.return_value.status_code = 405
