@@ -135,6 +135,12 @@ class Vareafgiftssats(models.Model):
     kræver_indførselstilladelse = models.BooleanField(
         default=False,
     )
+    tobak = models.BooleanField(
+        default=False,
+    )
+    alkohol = models.BooleanField(
+        default=False,
+    )
     minimumsbeløb = models.DecimalField(
         null=True,
         blank=True,

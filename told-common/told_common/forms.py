@@ -208,6 +208,33 @@ class TF10Form(BootstrapForm):
             )
         ),
     )
+    ekstra_indførselstilladelse = DynamicField(
+        forms.CharField,
+        max_length=12,
+        required=False,
+        label=_("Supplerende indførsels tilladelse nr."),
+        hidden=(
+            lambda hidden: any(sats.alkohol for sats in form.varesatser.items())
+            and any(sats.tobak for sats in form.varesatser.items())
+        ),
+        widget=lambda form: forms.TextInput(
+            attrs=(
+                {
+                    "data-required-field": "[name$=vareafgiftssats]",
+                    "data-required-values": ",".join(
+                        [
+                            str(id)
+                            for id, sats in form.varesatser.items()
+                            if sats.kræver_indførselstilladelse
+                        ]
+                    ),
+                }
+                if form.varesatser
+                else {}
+            )
+        ),
+    )
+
     leverandørfaktura_nummer = forms.CharField(
         label=_("Leverandør­faktura nr."),
         max_length=20,

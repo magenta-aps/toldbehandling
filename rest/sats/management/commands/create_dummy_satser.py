@@ -94,6 +94,7 @@ class Command(BaseCommand):
                 afgiftssats=faktor * Decimal("3.50"),
                 kræver_indførselstilladelse=True,
                 har_privat_tillægsafgift_alkohol=True,
+				alkohol=True,
                 synlig_privat=True,
             )
             Vareafgiftssats.objects.create(
@@ -108,6 +109,7 @@ class Command(BaseCommand):
                 afgiftssats=faktor * Decimal("8.80"),
                 kræver_indførselstilladelse=True,
                 har_privat_tillægsafgift_alkohol=True,
+				alkohol=True,
                 synlig_privat=True,
             )
             Vareafgiftssats.objects.create(
@@ -122,6 +124,7 @@ class Command(BaseCommand):
                 afgiftssats=faktor * Decimal("21.00"),
                 kræver_indførselstilladelse=True,
                 har_privat_tillægsafgift_alkohol=True,
+				alkohol=True,
                 synlig_privat=True,
             )
             Vareafgiftssats.objects.create(
@@ -136,6 +139,7 @@ class Command(BaseCommand):
                 afgiftssats=faktor * Decimal("30.00"),
                 kræver_indførselstilladelse=True,
                 har_privat_tillægsafgift_alkohol=True,
+				alkohol=True,
                 synlig_privat=True,
             )
             Vareafgiftssats.objects.create(
@@ -150,6 +154,7 @@ class Command(BaseCommand):
                 afgiftssats=faktor * Decimal("43.00"),
                 kræver_indførselstilladelse=True,
                 har_privat_tillægsafgift_alkohol=True,
+				alkohol=True,
                 synlig_privat=True,
             )
             Vareafgiftssats.objects.create(
@@ -164,6 +169,7 @@ class Command(BaseCommand):
                 afgiftssats=faktor * Decimal("56.00"),
                 kræver_indførselstilladelse=True,
                 har_privat_tillægsafgift_alkohol=True,
+				alkohol=True,
                 synlig_privat=True,
             )
             Vareafgiftssats.objects.create(
@@ -178,6 +184,7 @@ class Command(BaseCommand):
                 afgiftssats=faktor * Decimal("66.00"),
                 kræver_indførselstilladelse=True,
                 har_privat_tillægsafgift_alkohol=True,
+				alkohol=True,
                 synlig_privat=True,
             )
             Vareafgiftssats.objects.create(
@@ -192,6 +199,7 @@ class Command(BaseCommand):
                 afgiftssats=faktor * Decimal("92.00"),
                 kræver_indførselstilladelse=True,
                 har_privat_tillægsafgift_alkohol=True,
+				alkohol=True,
                 synlig_privat=True,
             )
             Vareafgiftssats.objects.create(
@@ -206,6 +214,7 @@ class Command(BaseCommand):
                 afgiftssats=faktor * Decimal("114.00"),
                 kræver_indførselstilladelse=True,
                 har_privat_tillægsafgift_alkohol=True,
+				alkohol=True,
                 synlig_privat=True,
             )
             Vareafgiftssats.objects.create(
@@ -220,6 +229,7 @@ class Command(BaseCommand):
                 afgiftssats=faktor * Decimal("147.00"),
                 kræver_indførselstilladelse=True,
                 har_privat_tillægsafgift_alkohol=True,
+				alkohol=True,
                 synlig_privat=True,
             )
             Vareafgiftssats.objects.create(
@@ -234,6 +244,7 @@ class Command(BaseCommand):
                 afgiftssats=faktor * Decimal("187.00"),
                 kræver_indførselstilladelse=True,
                 har_privat_tillægsafgift_alkohol=True,
+				alkohol=True,
                 synlig_privat=True,
             )
             Vareafgiftssats.objects.create(
@@ -248,6 +259,7 @@ class Command(BaseCommand):
                 afgiftssats=faktor * Decimal("230.00"),
                 kræver_indførselstilladelse=True,
                 har_privat_tillægsafgift_alkohol=True,
+				alkohol=True,
                 synlig_privat=True,
             )
             Vareafgiftssats.objects.create(
@@ -262,6 +274,7 @@ class Command(BaseCommand):
                 afgiftssats=faktor * Decimal("280.00"),
                 kræver_indførselstilladelse=True,
                 har_privat_tillægsafgift_alkohol=True,
+				alkohol=True,
                 synlig_privat=True,
             )
             Vareafgiftssats.objects.create(
@@ -276,6 +289,7 @@ class Command(BaseCommand):
                 afgiftssats=faktor * Decimal("361.00"),
                 kræver_indførselstilladelse=True,
                 har_privat_tillægsafgift_alkohol=True,
+				alkohol=True,
                 synlig_privat=True,
             )
             Vareafgiftssats.objects.create(
@@ -290,6 +304,7 @@ class Command(BaseCommand):
                 afgiftssats=faktor * Decimal("495.00"),
                 kræver_indførselstilladelse=True,
                 har_privat_tillægsafgift_alkohol=True,
+				alkohol=True,
                 synlig_privat=True,
             )
             Vareafgiftssats.objects.create(
@@ -304,6 +319,7 @@ class Command(BaseCommand):
                 afgiftssats=faktor * Decimal("591.00"),
                 kræver_indførselstilladelse=True,
                 har_privat_tillægsafgift_alkohol=True,
+				alkohol=True,
                 synlig_privat=True,
             )
             Vareafgiftssats.objects.create(
@@ -435,6 +451,7 @@ class Command(BaseCommand):
                 afgiftssats=faktor * Decimal("492.00"),
                 kræver_indførselstilladelse=True,
                 har_privat_tillægsafgift_alkohol=False,
+                tobak=True,
             )
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
@@ -446,6 +463,7 @@ class Command(BaseCommand):
                 afgiftssats=faktor * Decimal("1165.00"),
                 kræver_indførselstilladelse=True,
                 har_privat_tillægsafgift_alkohol=False,
+                tobak=True,
             )
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
@@ -457,6 +475,7 @@ class Command(BaseCommand):
                 afgiftssats=faktor * Decimal("300.00"),
                 kræver_indførselstilladelse=True,
                 har_privat_tillægsafgift_alkohol=False,
+                tobak=True,
             )
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
