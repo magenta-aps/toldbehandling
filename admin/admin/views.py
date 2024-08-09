@@ -52,13 +52,17 @@ class TwofactorAuthRequiredMixin(LoginRequiredMixin):
         redir = super().login_check()
         if redir:
             return redir
-        if (
-            not self.request.session.get("twofactor_authenticated")
-            and self.request.user.twofactor_enabled
+        # settings.REQUIRE_2FA can be removed after September 1.
+        user = self.request.user
+        if settings.REQUIRE_2FA and not user.twofactor_enabled:
+            return redirect(reverse("twofactor:setup"))
+        elif user.twofactor_enabled and not self.request.session.get(
+            "twofactor_authenticated"
         ):
             return redirect(
                 reverse("twofactor:login") + "?back=" + quote_plus(self.request.path)
             )
+
         return None
 
 
