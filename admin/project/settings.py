@@ -38,6 +38,7 @@ if os.environ.get("HOST_DOMAIN", False):
 LOGIN_URL = "/admin/login"
 LOGIN_REDIRECT_URL = "/admin"
 SYSTEM_USER_PASSWORD = os.environ["SYSTEM_USER_PASSWORD"]
+REQUIRE_2FA = bool(strtobool(os.environ.get("REQUIRE_2FA", "False")))
 
 # Application definition
 
