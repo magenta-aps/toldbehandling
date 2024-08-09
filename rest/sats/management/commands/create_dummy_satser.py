@@ -405,6 +405,7 @@ class Command(BaseCommand):
                 afgiftssats=faktor * Decimal("1.30"),
                 kræver_indførselstilladelse=True,
                 har_privat_tillægsafgift_alkohol=False,
+                tobak=True,
             )
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
@@ -416,6 +417,7 @@ class Command(BaseCommand):
                 afgiftssats=faktor * Decimal("1.58"),
                 kræver_indførselstilladelse=True,
                 har_privat_tillægsafgift_alkohol=False,
+                tobak=True,
             )
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
@@ -427,6 +429,7 @@ class Command(BaseCommand):
                 afgiftssats=faktor * Decimal("2.23"),
                 kræver_indførselstilladelse=True,
                 har_privat_tillægsafgift_alkohol=False,
+                tobak=True,
             )
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,
@@ -438,6 +441,7 @@ class Command(BaseCommand):
                 afgiftssats=faktor * Decimal("0.48"),
                 kræver_indførselstilladelse=True,
                 har_privat_tillægsafgift_alkohol=False,
+                tobak=True,
             )
             Vareafgiftssats.objects.create(
                 afgiftstabel=tabel,

@@ -69,6 +69,7 @@ class TF10Form(BootstrapForm):
         self.leverandørfaktura_required = leverandørfaktura_required
         self.fragtbrev_required = fragtbrev_required
         self.speditører = speditører
+        self.include_hidden = True
         super().__init__(*args, **kwargs)
 
     def full_clean(self):
@@ -208,15 +209,15 @@ class TF10Form(BootstrapForm):
             )
         ),
     )
-    ekstra_indførselstilladelse = DynamicField(
+    supplerende_indførselstilladelse = DynamicField(
         forms.CharField,
         max_length=12,
         required=False,
         label=_("Supplerende indførsels tilladelse nr."),
-        hidden=(
-            lambda hidden: any(sats.alkohol for sats in form.varesatser.items())
-            and any(sats.tobak for sats in form.varesatser.items())
-        ),
+        #hidden=(
+        #    lambda hidden: any(sats.kræver_indførselstilladelse for id, sats in hidden.varesatser.items())
+        #    and any(sats.kræver_indførselstilladelse for id, sats in hidden.varesatser.items())
+        #),
         widget=lambda form: forms.TextInput(
             attrs=(
                 {
@@ -225,7 +226,10 @@ class TF10Form(BootstrapForm):
                         [
                             str(id)
                             for id, sats in form.varesatser.items()
-                            if sats.kræver_indførselstilladelse
+                            if (
+                                any(sats.tobak for id, sats in form.varesatser.items())
+                                and any(sats.alkohol for id, sats in form.varesatser.items())
+                            )
                         ]
                     ),
                 }

@@ -79,6 +79,8 @@ class Vareafgiftssats(ToldDataClass):
     afgiftssats: Decimal
     har_privat_tillægsafgift_alkohol: bool = False
     kræver_indførselstilladelse: Optional[bool] = False
+    alkohol: Optional[bool] = False
+    tobak: Optional[bool] = False
     synlig_privat: bool = False
     minimumsbeløb: Optional[Decimal] = None
     overordnet: Optional[int] = None
