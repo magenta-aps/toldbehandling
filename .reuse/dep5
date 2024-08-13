@@ -18,7 +18,7 @@ Files: told-common/told_common/static/jquery/*
 Copyright: OpenJS Foundation and other contributors, https://openjsf.org/
 License: MIT
 
-Files: told-common/told_common/static/font-awesome/webfonts/*.eot kas/kas/static/font-awesome/webfonts/*.ttf kas/kas/static/font-awesome/webfonts/*.woff kas/kas/static/font-awesome/webfonts/*.woff2
+Files: told-common/told_common/static/font-awesome/webfonts/*.eot told-common/told_common/static/font-awesome/webfonts/*.ttf told-common/told_common/static/font-awesome/webfonts/*.woff told-common/told_common/static/font-awesome/webfonts/*.woff2
 Copyright: 2011-2021 @fontawesome (https://fontawesome.com)
 License: OFL-1.1
 
