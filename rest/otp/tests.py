@@ -111,6 +111,7 @@ class TOTPDeviceAPITests(TestCase):
 class AuthenticationBackendTests(TestCase):
     @classmethod
     def setUpTestData(cls):
+        cls.mock_request = MagicMock()
         cls.user_pwd = "testpassword1337"
         cls.user_permissions = []
         cls.user, cls.user_token, cls.user_refresh_token = RestMixin.make_user(
@@ -120,8 +121,6 @@ class AuthenticationBackendTests(TestCase):
         )
 
     def test_authenticate(self):
-        mock_request = MagicMock()
-
         totp_device = TOTPDevice.objects.create(
             user=self.user,
             name="test-otp-check-2fa",
@@ -132,9 +131,19 @@ class AuthenticationBackendTests(TestCase):
         self.assertEqual(
             self.user,
             AuthenticationBackend().authenticate(
-                mock_request,
+                self.mock_request,
                 self.user.username,
                 self.user_pwd,
                 twofactor_token=valid_token,
+            ),
+        )
+
+    def test_authenticate_no_2fa_token(self):
+        self.assertEqual(
+            None,
+            AuthenticationBackend().authenticate(
+                self.mock_request,
+                self.user.username,
+                self.user_pwd,
             ),
         )
