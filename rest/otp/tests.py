@@ -6,9 +6,11 @@ from unittest.mock import ANY
 
 from django.test import TestCase
 from django.urls import reverse
+from django_otp.oath import TOTP
 from django_otp.plugins.otp_totp.models import TOTPDevice
 from otp.api import TOTPDeviceIn
 from project.test_mixins import RestMixin
+from project.util import json_dump
 
 
 class TOTPDeviceAPITests(TestCase):
@@ -64,3 +66,27 @@ class TOTPDeviceAPITests(TestCase):
                 }
             ],
         )
+
+    def test_check(self):
+        totp_device = TOTPDevice.objects.create(
+            user=self.user,
+            name="test-otp-check-2fa",
+        )
+
+        # Generate a valid OTP token
+        totp = TOTP(key=totp_device.bin_key, step=totp_device.step, t0=totp_device.t0)
+        valid_token = totp.token()
+
+        resp = self.client.post(
+            reverse("api-1.0.0:twofactor_check"),
+            content_type="application/json",
+            data=json_dump(
+                {
+                    "user_id": self.user.id,
+                    "twofactor_token": valid_token,
+                }
+            ),
+        )
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.json(), True)
