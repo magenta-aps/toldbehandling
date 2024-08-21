@@ -90,3 +90,18 @@ class TOTPDeviceAPITests(TestCase):
 
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.json(), True)
+
+    def test_check_error(self):
+        resp = self.client.post(
+            reverse("api-1.0.0:twofactor_check"),
+            content_type="application/json",
+            data=json_dump(
+                {
+                    "user_id": self.user.id,
+                    "twofactor_token": "1234",
+                }
+            ),
+        )
+
+        self.assertEqual(resp.status_code, 401)
+        self.assertEqual(resp.json(), {"detail": "Token invalid"})
