@@ -10,6 +10,6 @@ class AuthenticationBackend(ModelBackend):
         if twofactor_token is None:
             return
         for device in TOTPDevice.objects.filter(user=user):
-            accepting_device = verify_token(user, device, twofactor_token)
+            accepting_device = verify_token(user, device.persistent_id, twofactor_token)
             if accepting_device:
                 return user
