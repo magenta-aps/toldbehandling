@@ -180,7 +180,7 @@ class CustomDutyRequest(PrismeRequestObject):
                             varelinje.vareafgiftssats.afgiftsgruppenummer
                         ).zfill(3),
                         "Qty": self.qty(varelinje),
-                        "BillAmount": str(self.empty_if_none(varelinje.fakturabeløb)),
+                        "BillAmount": str(varelinje.fakturabeløb or ""),
                         "LineAmount": str(varelinje.afgiftsbeløb),
                     }
                 }
