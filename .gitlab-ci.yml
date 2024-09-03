@@ -6,7 +6,6 @@ stages:
 variables:
   IMAGE_DEV: ${CI_REGISTRY_IMAGE}:develop
 
-
 # Lint stage
 #############
 .lint-default: &lint-default
@@ -16,13 +15,13 @@ variables:
   tags:
     - docker
 
-Lint Python:
+Pre-commit:
   <<: *lint-default
+  stage: lint
   before_script:
-    - pip3 install flake8
-    #- pip3 install -r django/requirements.txt
+    - pip install pre-commit && pre-commit install
   script:
-    - flake8 --ignore E501,E226 src/tenQ/
+    - pre-commit run --all-files --verbose
 
 Lint Dockerfiles:
   <<: *lint-default
