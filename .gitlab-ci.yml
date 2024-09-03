@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: Magenta ApS <https://magenta.dk>
+# SPDX-License-Identifier: MPL-2.0
+
 stages:
   - sync
   - lint
@@ -8,11 +11,12 @@ stages:
   - deploy
   - docs
 
-variables:
-  IMAGE_DEV: ${CI_REGISTRY_IMAGE}:develop
 
-# Conditions
-#############
+variables:
+  DOCKERFILE: docker/Dockerfile
+  IMAGE_SHA: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHA}
+
+
 # Global Conditions
 .if-default-branch-refs: &if-default-branch-refs
   if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
@@ -20,84 +24,40 @@ variables:
 .if-tag: &if-tag
   if: '$CI_COMMIT_TAG'
 
-.if-tag-semver: &if-tag-semver
-  if: '$CI_COMMIT_TAG =~ /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/'
-
 .if-merge-request: &if-merge-request
   if: '$CI_MERGE_REQUEST_IID'
 
-.if-schedule: &if-schedule
-  if: '$CI_PIPELINE_SOURCE == "schedule"'
 
-# Includes
-##########
 include:
   - project: labs/salt-automation
     file:
       - gitlab-ci-templates/common/no-interrupt-meta.v1.yml
+      - gitlab-ci-templates/common/pre-commit.v1.yml
       - gitlab-ci-templates/common/conventional-commits.v1.yml
-      - gitlab-ci-templates/common/conventional-commits-changelog-meta.v1.yml
-      - gitlab-ci-templates/common/docker-build-meta.v2.yml
-      - gitlab-ci-templates/common/docker-release-meta.v1.yml
-  - project: labs/salt-automation
-    file: gitlab-ci-templates/common/pre-commit.v1.yml
-    rules:
-      - <<: *if-merge-request
+      - gitlab-ci-templates/common/conventional-commits-changelog.v1.yml
+      - gitlab-ci-templates/common/docker-build.v1.yml
+      - gitlab-ci-templates/common/docker-release.v1.yml
+      - gitlab-ci-templates/common/config-updater-flux.v1.yml
+      - gitlab-ci-templates/common/config-updater-salt.v1.yml
 
-# Lint stage
-#############
-.lint-default: &lint-default
-  stage: lint
-  needs: []
-  image: python:3.8
-  tags:
-    - docker
 
-# Pre-commit:
-#   <<: *lint-default
-#   stage: lint
-#   before_script:
-#     - pip install pre-commit && pre-commit install
-#   script:
-#     - pre-commit run --all-files --verbose
+workflow:
+  rules:
+    - <<: *if-tag
+      variables:
+        # Override the IMAGE_SHA variable on tag pipelines to avoid both the default
+        # branch pipeline and tag pipeline overriding each other's images arbitrarily when
+        # they are both running at the same time on master.
+        IMAGE_SHA: ${CI_REGISTRY_IMAGE}:${CI_COMMIT_TAG}
+    - <<: *if-default-branch-refs
+    - <<: *if-merge-request
 
-Lint Dockerfiles:
-  <<: *lint-default
-  image: hadolint/hadolint:latest-debian
-  before_script:
-    - apt-get -y update
-    - apt-get -y install --no-install-recommends git
-  script:
-    - git ls-files --exclude='Dockerfile*' --ignored | xargs --max-lines=1 hadolint
-
-# Build stage
-#############
-
-# Build image:
-#   stage: build
-#   needs: []
-#   dependencies: []
-#   image:
-#     name: gcr.io/kaniko-project/executor:debug-v0.16.0
-#     entrypoint: [""]
-#   script:
-#     # Login to GitLab registry
-#     - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
-#     - /kaniko/executor
-#       --cache
-#       --context=$CI_PROJECT_DIR
-#       --dockerfile=$CI_PROJECT_DIR/docker/Dockerfile
-#       --destination=${IMAGE_DEV}
-
-# Test stage
-############
-.test-default: &test-default
-  stage: test
-  dependencies: []
 
 # Unittest:
-#   <<: *test-default
-#   needs: ["Build"]
-#   image: ${IMAGE_DEV}
+#   stage: test
+#   needs: [Build]
+# #   rules:
+# #     - <<: *if-merge-request
+#   image: ${IMAGE_SHA}
 #   script:
 #     - cd /app && python -m unittest
