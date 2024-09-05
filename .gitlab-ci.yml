@@ -49,30 +49,31 @@ include:
       cat <<EOF > .releaserc.yaml
       branches:
         - master
-      tagFormat: "\${version}-rc1"
+      preset: angular
+      tagFormat: "/${version}-rc1"
       plugins:
         - local: "/gitlab-ci-templates/common/docker-build-meta.v2.yml"
         - "@semantic-release/commit-analyzer"
-          preset: angular
-          releaseRules:
-            - type: chore
-              scope: deps-dev
-              release: patch
-            - type: chore
-              scope: deps
-              release: patch
-            - type: build
-              scope: deps-dev
-              release: patch
-            - type: build
-              scope: deps
-              release: patch
         - "@semantic-release/release-notes-generator"
         - "@semantic-release/changelog"
         - "@semantic-release/gitlab"
-          assets:
+        - assets:
             - path: CHANGELOG.md
               label: Changelog
+      analyzeCommits:
+        releaseRules:
+          - type: chore
+            scope: deps-dev
+            release: patch
+          - type: chore
+            scope: deps
+            release: patch
+          - type: build
+            scope: deps-dev
+            release: patch
+          - type: build
+            scope: deps
+            release: patch
       EOF
 
 
