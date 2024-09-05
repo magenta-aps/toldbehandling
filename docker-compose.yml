@@ -9,4 +9,6 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile
+    volumes:
+      - ./src/:/app:rw
     command: python -m unittest
