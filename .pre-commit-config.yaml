@@ -3,7 +3,7 @@ repos:
   # General repo-wide checks
 
   - repo: https://github.com/fsfe/reuse-tool
-    rev: v3.0.2
+    rev: v4.0.3
     hooks:
       - id: reuse
 
@@ -20,7 +20,7 @@ repos:
         exclude: "tenQ.egg-info/"
 
   - repo: https://github.com/commitizen-tools/commitizen
-    rev: v2.37.1
+    rev: v3.29.0
     hooks:
       - id: commitizen
       - id: commitizen-branch

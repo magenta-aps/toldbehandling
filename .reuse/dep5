@@ -1,7 +1,0 @@
-Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
-Upstream-Name: tenQ
-Upstream-Contact: Magenta ApS <info@magenta.dk>
-
-Files: requirements.txt .pre-commit-config.yaml src/tenQ.egg-info/* dist/*
-Copyright: 2023 Magenta ApS <info@magenta.dk>
-License: MPL-2.0
