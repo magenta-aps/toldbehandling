@@ -6,10 +6,10 @@
 
 from datetime import date, timedelta
 
-
 # Dates for final statements and their charges are defined by law. This
 # module contains methods that makes it easy to calculate the dates correctly
 # given a reference input date.
+
 
 # Due date is defined as 1st of next month plus 3 months relative to the
 # reference date. Here it is calculated by taking the first of the reference
@@ -23,10 +23,12 @@ def get_due_date(reference_date: date):
     add_months = 4
 
     # Add months, making sure to adjust year as neccessary
-    if due_date.month+add_months <= 12:
-        due_date = due_date.replace(month=due_date.month+add_months)
+    if due_date.month + add_months <= 12:
+        due_date = due_date.replace(month=due_date.month + add_months)
     else:
-        due_date = due_date.replace(year=due_date.year+1, month=due_date.month+add_months-12)
+        due_date = due_date.replace(
+            year=due_date.year + 1, month=due_date.month + add_months - 12
+        )
 
     # Create the target date, but with the same time input as the reference
     # datetime.
@@ -53,6 +55,4 @@ def get_last_payment_date_from_due_date(due_date: date):
 
 
 def get_last_payment_date(reference_date: date):
-    return get_last_payment_date_from_due_date(
-        get_due_date(reference_date)
-    )
+    return get_last_payment_date_from_due_date(get_due_date(reference_date))
