@@ -471,10 +471,10 @@ class G69TransactionWriter(object):
                     raise KeyError(name)
             else:
                 value = kwargs[name]
-                if type(value) != required_type:
-                    if required_type == Decimal and type(value) == int:
+                if not isinstance(value, required_type):
+                    if required_type is Decimal and isinstance(value, int):
                         value = Decimal(value)
-                    elif required_type == str and type(value) == int:
+                    elif required_type is str and isinstance(value, int):
                         value = str(value)
                     else:
                         raise ValueError(

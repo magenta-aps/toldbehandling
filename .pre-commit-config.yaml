@@ -28,11 +28,11 @@ repos:
 
   # Python-specific checks
 
-#   - repo: https://github.com/pycqa/flake8
-#     rev: 7.1.1
-#     hooks:
-#       - id: flake8
-#         args: ["--extend-ignore=E501,E226,E203"]
+  - repo: https://github.com/pycqa/flake8
+    rev: 7.1.1
+    hooks:
+      - id: flake8
+        args: ["--extend-ignore=E501,E226,E203"]
 
   - repo: https://github.com/psf/black
     rev: 24.8.0

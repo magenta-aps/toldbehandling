@@ -77,7 +77,7 @@ def save_to_excel(data: List[Dict], filename: str):
         row = []
         for header in headers:
             value = item.get(header, "")
-            if type(value) == list:
+            if isinstance(value, list):
                 value = ",".join(map(str, value))
             row.append(value)
         ws.append(row)

@@ -46,7 +46,7 @@ def put_file_in_prisme_folder(
             port=settings.get("port", 22),
             cnopts=cnopts,
         ) as client:
-            if type(source_file_name_or_object) == str:
+            if isinstance(source_file_name_or_object, str):
                 client.put(
                     source_file_name_or_object,
                     remotepath=remote_path,

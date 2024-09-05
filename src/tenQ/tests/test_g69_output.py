@@ -84,7 +84,7 @@ class OutputTest(unittest.TestCase):
         invalid = ["test", 123, date(2022, 3, 11), Decimal("100.25")]
         for key, value in defaults.items():
             for invalid_value in invalid:
-                if type(invalid_value) != type(value):
+                if type(invalid_value) != type(value):  # noqa: E721
                     with self.assertRaises(ValueError):
                         self.transaction_writer.serialize_transaction(
                             **{
