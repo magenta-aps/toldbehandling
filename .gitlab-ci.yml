@@ -53,11 +53,11 @@ workflow:
     - <<: *if-merge-request
 
 
-# Unittest:
-#   stage: test
-#   needs: [Build]
-# #   rules:
-# #     - <<: *if-merge-request
-#   image: ${IMAGE_SHA}
-#   script:
-#     - cd /app && python -m unittest
+Unittest:
+  stage: test
+  needs: [Build]
+#   rules:
+#     - <<: *if-merge-request
+  image: ${IMAGE_SHA}
+  script:
+    - cd /app && python -m unittest

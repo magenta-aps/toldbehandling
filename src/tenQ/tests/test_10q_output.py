@@ -8,6 +8,7 @@ from tenQ.writer import TenQTransactionWriter
 
 
 class OutputTest(unittest.TestCase):
+    maxDiff = None
 
     def setUp(self):
         self.transaction_writers = [
@@ -44,9 +45,9 @@ class OutputTest(unittest.TestCase):
                     '202202102022010120221231                                                   '
                     '                                                        '
                     'e688d6a6fc65424483819520bbbe7745',
-                    ' 10Q2602022021812350900022209202212345678900020999000Testing',
-                    ' 10Q2602022021812350900022209202212345678900020999001with',
-                    ' 10Q2602022021812350900022209202212345678900020999002lines'
+                    ' 10Q2602022021812350900022209202212345678900020999001Testing',
+                    ' 10Q2602022021812350900022209202212345678900020999002with',
+                    ' 10Q2602022021812350900022209202212345678900020999003lines'
                 ])
             )
 
