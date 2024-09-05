@@ -50,7 +50,7 @@ include:
       branches:
         - master
       tagFormat: "\${version}-rc1"
-      plugins:
+      plugins:  - local: "/gitlab-ci-templates/common/docker-build-meta.v2.yml"
         - - "@semantic-release/commit-analyzer"
           - preset: angular
             releaseRules:
@@ -99,7 +99,7 @@ variables:
 #############
 .lint-default: &lint-default
   stage: lint
-  needs: []
+  needs: [ ]
   image: python:3.11
 
 Lint Commits:
@@ -141,7 +141,7 @@ Lint REUSE compliance:
   extends: .lint-default
   image:
     name: fsfe/reuse:latest
-    entrypoint: [""]
+    entrypoint: [ "" ]
   script:
     - reuse lint
 
@@ -155,78 +155,37 @@ Lint Javascript:
 # Build stage
 #############
 
+
 Build REST image:
-  stage: build
-  needs: ["Lint Python", "Lint Dockerfiles", "Lint REUSE compliance"]
-  dependencies: []
-  image:
-    name: gcr.io/kaniko-project/executor:debug-v0.16.0
-    entrypoint: [""]
-  script:
-    # Login to GitLab registry
-    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
-    - /kaniko/executor
-      --cache
-      --context=$CI_PROJECT_DIR
-      --dockerfile=$CI_PROJECT_DIR/docker/Dockerfile_rest
-      --destination=${REST_IMAGE_SHA}
-      --build-arg=COMMIT_TAG=${CI_COMMIT_TAG}
+  extends: .build-docker
+  variables:
+    CI_IMAGE: ${REST_IMAGE_SHA}
+    DOCKERFILE: $CI_PROJECT_DIR/docker/Dockerfile_rest
 
 Build UI image:
-  stage: build
-  needs: ["Lint Python", "Lint Dockerfiles", "Lint REUSE compliance", "Lint Javascript"]
-  dependencies: []
-  image:
-    name: gcr.io/kaniko-project/executor:debug-v0.16.0
-    entrypoint: [""]
-  script:
-    # Login to GitLab registry
-    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
-    - /kaniko/executor
-      --cache
-      --context=$CI_PROJECT_DIR
-      --dockerfile=$CI_PROJECT_DIR/docker/Dockerfile_ui
-      --destination=${UI_IMAGE_SHA}
-      --build-arg=COMMIT_TAG=${CI_COMMIT_TAG}
+  extends: .build-docker
+  variables:
+    CI_IMAGE: ${UI_IMAGE_SHA}
+    DOCKERFILE: $CI_PROJECT_DIR/docker/Dockerfile_ui
 
 Build Admin image:
-  stage: build
-  needs: ["Lint Python", "Lint Dockerfiles", "Lint REUSE compliance", "Lint Javascript"]
-  dependencies: []
-  image:
-    name: gcr.io/kaniko-project/executor:debug-v0.16.0
-    entrypoint: [""]
-  script:
-    # Login to GitLab registry
-    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
-    - /kaniko/executor
-      --cache
-      --context=$CI_PROJECT_DIR
-      --dockerfile=$CI_PROJECT_DIR/docker/Dockerfile_admin
-      --destination=${ADMIN_IMAGE_SHA}
-      --build-arg=COMMIT_TAG=${CI_COMMIT_TAG}
+  extends: .build-docker
+  variables:
+    CI_IMAGE: ${ADMIN_IMAGE_SHA}
+    DOCKERFILE: $CI_PROJECT_DIR/docker/Dockerfile_admin
 
 Build ER image:
-  stage: build
-  dependencies: []
-  image:
-    name: gcr.io/kaniko-project/executor:debug-v0.16.0
-    entrypoint: [""]
-  script:
-    # Login to GitLab registry
-    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
-    - /kaniko/executor
-      --cache
-      --context=$CI_PROJECT_DIR
-      --dockerfile=$CI_PROJECT_DIR/docker/Dockerfile_er
-      --destination=${ER_IMAGE_SHA}
+  extends: .build-docker
+  variables:
+    CI_IMAGE: ${ER_IMAGE_SHA}
+    DOCKERFILE: $CI_PROJECT_DIR/docker/Dockerfile_er
 
 
 # Test stage
 ############
 .test-default: &test-default
   stage: test
-  dependencies: []
+  dependencies: [ ]
   services:
     - name: postgres:13
       alias: toldbehandling-db
@@ -234,6 +193,7 @@ Build ER image:
       alias: toldbehandling-cache
   variables:
     # Simulate development environment while running tests so we use mockup data
+    KANIKO_VERSION: v1.6.0-debug
     DJANGO_SECRET_KEY: e$s6@0(hs5ja79-&!l7vt^onoe4h^*bv_e4hj&wt5^8*&x76-$
     DJANGO_TIMEZONE: Europe/Copenhagen
     HOST_DOMAIN: http://localhost
@@ -369,7 +329,7 @@ Django check Admin:
 
 .coverage-default: &coverage-default
   stage: coverage
-  needs: ["Unittest REST", "Unittest Admin", "Unittest UI"]
+  needs: [ "Unittest REST", "Unittest Admin", "Unittest UI" ]
   image: ${ADMIN_IMAGE_SHA}
 
 Check coverage:
@@ -396,7 +356,7 @@ Check coverage:
   image: alpine
   variables:
     GIT_STRATEGY: none # We do not need the source code
-  dependencies: []
+  dependencies: [ ]
   before_script:
     # install skopeo
     - apk add skopeo
@@ -407,7 +367,7 @@ Release REST image:
     - .rules:semver-all
     - .release-toldbehandling
   needs:
-    ["Build REST image", "Unittest REST", "Django check REST"]
+    [ "Build REST image", "Unittest REST", "Django check REST" ]
   script:
     - skopeo copy
       --src-creds=${CI_REGISTRY_USER}:${CI_REGISTRY_PASSWORD}
@@ -421,7 +381,7 @@ Release UI image:
     - .rules:semver-all
     - .release-toldbehandling
   needs:
-    ["Build UI image", "Unittest UI", "Django check UI"]
+    [ "Build UI image", "Unittest UI", "Django check UI" ]
   script:
     - skopeo copy
       --src-creds=${CI_REGISTRY_USER}:${CI_REGISTRY_PASSWORD}
@@ -434,7 +394,7 @@ Release ER image:
     - .rules:semver-all
     - .release-toldbehandling
   needs:
-    ["Build ER image"]
+    [ "Build ER image" ]
   script:
     - skopeo copy
       --src-creds=${CI_REGISTRY_USER}:${CI_REGISTRY_PASSWORD}
@@ -447,7 +407,7 @@ Release Admin image:
     - .rules:semver-all
     - .release-toldbehandling
   needs:
-    ["Build Admin image"]
+    [ "Build Admin image" ]
   script:
     - skopeo copy
       --src-creds=${CI_REGISTRY_USER}:${CI_REGISTRY_PASSWORD}
@@ -478,7 +438,7 @@ Configure Test:
   extends:
     - .rules:semver-all
     - .config:endpoint-with-tag
-  needs: ["Release REST image", "Release UI image", "Release ER image", "Release Admin image"]
+  needs: [ "Release REST image", "Release UI image", "Release ER image", "Release Admin image" ]
   variables:
     ENDPOINT: toldbehandling/salt/update-test
 
@@ -487,7 +447,7 @@ Configure Production:
   extends:
     - .rules:semver-core
     - .config:endpoint-with-tag
-  needs: ["Release REST image", "Release UI image", "Release ER image", "Release Admin image"]
+  needs: [ "Release REST image", "Release UI image", "Release ER image", "Release Admin image" ]
   variables:
     ENDPOINT: toldbehandling/salt/update-production
 
@@ -496,10 +456,10 @@ Configure Production:
 
 Deploy to Test:
   stage: deploy
-  extends: 
+  extends:
     - .rules:semver-all
     - .saltbert
-  needs: ["Configure Test"]
+  needs: [ "Configure Test" ]
   variables:
     SALTBERT_ORCHESTRATION: groenland.toldbehandling.service-test
     SALTBERT_URL: https://saltmaster.groenland.magentahosted.dk
@@ -515,10 +475,10 @@ Deploy to Test:
 
 Deploy to Production:
   stage: deploy
-  extends: 
+  extends:
     - .rules:semver-core
     - .saltbert
-  needs: ["Configure Production"]
+  needs: [ "Configure Production" ]
   variables:
     SALTBERT_ORCHESTRATION: groenland.toldbehandling.service-prod
     SALTBERT_URL: https://saltmaster.groenland.magentahosted.dk
