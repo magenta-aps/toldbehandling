@@ -50,28 +50,29 @@ include:
       branches:
         - master
       tagFormat: "\${version}-rc1"
-      plugins:  - local: "/gitlab-ci-templates/common/docker-build-meta.v2.yml"
-        - - "@semantic-release/commit-analyzer"
-          - preset: angular
-            releaseRules:
-              - type: chore
-                scope: deps-dev
-                release: patch
-              - type: chore
-                scope: deps
-                release: patch
-              - type: build
-                scope: deps-dev
-                release: patch
-              - type: build
-                scope: deps
-                release: patch
+      plugins:
+        - local: "/gitlab-ci-templates/common/docker-build-meta.v2.yml"
+        - "@semantic-release/commit-analyzer"
+          preset: angular
+          releaseRules:
+            - type: chore
+              scope: deps-dev
+              release: patch
+            - type: chore
+              scope: deps
+              release: patch
+            - type: build
+              scope: deps-dev
+              release: patch
+            - type: build
+              scope: deps
+              release: patch
         - "@semantic-release/release-notes-generator"
         - "@semantic-release/changelog"
-        - - "@semantic-release/gitlab"
-          - assets:
-              - path: CHANGELOG.md
-                label: Changelog
+        - "@semantic-release/gitlab"
+          assets:
+            - path: CHANGELOG.md
+              label: Changelog
       EOF
 
 
