@@ -1,0 +1,55 @@
+repos:
+
+  # General repo-wide checks
+
+  - repo: https://github.com/fsfe/reuse-tool
+    rev: v4.0.3
+    hooks:
+      - id: reuse
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks.git
+    rev: v4.6.0
+    hooks:
+      - id: check-merge-conflict
+      - id: check-toml
+      - id: check-xml
+      - id: check-yaml
+      - id: end-of-file-fixer
+        exclude: "tenQ.egg-info/"
+      - id: trailing-whitespace
+        exclude: "tenQ.egg-info/"
+
+  - repo: https://github.com/commitizen-tools/commitizen
+    rev: v3.29.0
+    hooks:
+      - id: commitizen
+      - id: commitizen-branch
+        stages: [ push ]
+
+  # Python-specific checks
+
+#   - repo: https://github.com/pycqa/flake8
+#     rev: 6.1.0
+#     hooks:
+#       - id: flake8
+#         args: ["--extend-ignore=E501,E226,E203"]
+#
+#   - repo: https://github.com/psf/black
+#     rev: 24.1.1
+#     hooks:
+#       - id: black
+#
+#   - repo: https://github.com/pycqa/isort
+#     rev: 5.12.0
+#     hooks:
+#       - id: isort
+#         name: isort (python)
+#         args: ["--profile", "black"]
+#
+#   - repo: https://github.com/pre-commit/mirrors-mypy
+#     rev: v1.10.1
+#     hooks:
+#       - id: mypy
+#         args: [ --config-file=pyproject.toml ]
+#         additional_dependencies:
+#         - mypy

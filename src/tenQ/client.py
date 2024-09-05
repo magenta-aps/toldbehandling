@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: MPL-2.0
+
 from ftplib import all_errors as all_ftp_errors
 from io import IOBase
 from typing import Callable

@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: MPL-2.0
+
 # Utility module containing date calculation methods for the 10Q format
 
 from datetime import date, timedelta

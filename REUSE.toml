@@ -1,0 +1,14 @@
+version = 1
+SPDX-PackageName = "10Q"
+SPDX-PackageSupplier = "Magenta ApS <info@magenta.dk>"
+
+[[annotations]]
+path = [
+    "src/tenQ.egg-info/**",
+    "dist/**",
+    "requirements.txt",
+    ".pre-commit-config.yaml",
+    "REUSE.toml"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2024 Magenta ApS <info@magenta.dk>"
+SPDX-License-Identifier = "MPL-2.0"
