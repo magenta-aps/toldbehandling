@@ -11,4 +11,4 @@ services:
       dockerfile: docker/Dockerfile
     volumes:
       - ./src/:/app:rw
-    command: python -m unittest
+      - ./coverage-results/:/coverage-results/:rw
