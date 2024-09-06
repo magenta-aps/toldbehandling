@@ -50,7 +50,7 @@ include:
       branches:
         - master
       preset: angular
-      tagFormat: "/${version}-rc1"
+      tagFormat: "\${version}-rc1"
       plugins:
         - local: "/gitlab-ci-templates/common/docker-build-meta.v2.yml"
         - "@semantic-release/commit-analyzer"
