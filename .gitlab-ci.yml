@@ -59,5 +59,19 @@ Unittest:
 #   rules:
 #     - <<: *if-merge-request
   image: ${IMAGE_SHA}
+  before_script:
+    - mkdir -p /coverage-results
+    - cd /app
   script:
-    - cd /app && python -m unittest
+    - TEST=true ../entrypoint.sh
+  after_script:
+    - mkdir -p ${CI_PROJECT_DIR}/coverage-results.${CI_JOB_ID}/
+    - mv /coverage-results/* ${CI_PROJECT_DIR}/coverage-results.${CI_JOB_ID}/
+  coverage: '/^TOTAL.+?(\d+\%)$/'
+  artifacts:
+    when: always
+    reports:
+      junit: ${CI_PROJECT_DIR}/coverage-results.${CI_JOB_ID}/junit.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: ${CI_PROJECT_DIR}/coverage-results.${CI_JOB_ID}/coverage.xml

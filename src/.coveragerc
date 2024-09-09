@@ -1,0 +1,11 @@
+# SPDX-FileCopyrightText: 2024 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: MPL-2.0
+[run]
+branch = True
+relative_files = True
+source = .
+omit = **/tests/**
+parallel = true
+concurrency = multiprocessing
+data_file = /coverage-results/coverage.coverage
