@@ -7,7 +7,7 @@
 set -eu
 
 TEST=${TEST:=true}
-MIN_COVERAGE=63
+MIN_COVERAGE=76
 
 if [ "${TEST,,}" = true ]; then
   coverage run -m pytest --junit-xml=/coverage-results/junit.xml
