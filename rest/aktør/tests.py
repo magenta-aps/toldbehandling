@@ -142,13 +142,15 @@ class ModtagerTest(RestTestMixin, TestCase):
 class AfsenderAPITest(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.add_aktoer_afsender_perm = Permission.objects.get(codename="add_afsender")
+        cls.add_afsender_perm = Permission.objects.get(codename="add_afsender")
+        cls.add_modtager_perm = Permission.objects.get(codename="add_modtager")
 
         cls.user, cls.user_token, cls.user_refresh_token = RestMixin.make_user(
             username="aktoer-test-user",
             plaintext_password="testpassword1337",
             permissions=[
-                cls.add_aktoer_afsender_perm,
+                cls.add_afsender_perm,
+                cls.add_modtager_perm,
             ],
         )
 
@@ -182,6 +184,41 @@ class AfsenderAPITest(TestCase):
                     "Begrænsning “aktuel_afsender_har_adresse” er overtrådt.",
                     "Begrænsning “aktuel_afsender_har_postnummer” er overtrådt.",
                     "Begrænsning “aktuel_afsender_har_by” er overtrådt.",
+                ]
+            },
+        )
+
+    def test_create_modtager_error(self):
+        resp = self.client.post(
+            reverse("api-1.0.0:modtager_create"),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+            data=json_dump(
+                {
+                    "payload": {
+                        "navn": None,
+                        "adresse": None,
+                        "postnummer": None,
+                        "by": None,
+                        "postbox": None,
+                        "telefon": None,
+                        "cvr": None,
+                        "kreditordning": None,
+                        "kladde": None,
+                    }
+                }
+            ),
+        )
+
+        self.assertEqual(resp.status_code, 400)
+        self.assertEqual(
+            resp.json(),
+            {
+                "__all__": [
+                    "Begrænsning “aktuel_modtager_har_navn” er overtrådt.",
+                    "Begrænsning “aktuel_modtager_har_adresse” er overtrådt.",
+                    "Begrænsning “aktuel_modtager_har_postnummer” er overtrådt.",
+                    "Begrænsning “aktuel_modtager_har_by” er overtrådt.",
                 ]
             },
         )
