@@ -4,13 +4,42 @@
 
 from unittest.mock import MagicMock, patch
 
-from aktør.models import Afsender, Modtager, Speditør
+from aktør.models import Afsender, Aktør, Modtager, Speditør
+from common.models import Postnummer
 from django.contrib.auth.models import Permission
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 from django.urls import reverse
 from project.test_mixins import RestMixin, RestTestMixin
 from project.util import json_dump
+
+
+class AktoerTest(TestCase):
+    def test_aktoer_model_save_postnr_ref_exists_postnr_does_not(self):
+        new_postnr_model = Postnummer(
+            postnummer=8000,
+            navn="Aarhus C",
+            dage=0,
+            stedkode=1,
+        )
+
+        # We use the "Afsender" model, since "Aktør" is an abstraction-model
+        new_model = Afsender(
+            navn=None,
+            adresse=None,
+            postnummer=None,
+            postnummer_ref=new_postnr_model,
+            eksplicit_stedkode=None,
+            by=None,
+            postbox=None,
+            telefon=None,
+            cvr=None,
+            kladde=True,
+        )
+
+        new_model.save()
+
+        self.assertEqual(new_model.postnummer_ref, None)
 
 
 class AfsenderTest(RestTestMixin, TestCase):
