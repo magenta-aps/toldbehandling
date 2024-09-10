@@ -4,7 +4,7 @@
 
 from unittest.mock import MagicMock, patch
 
-from aktør.models import Afsender, Modtager
+from aktør.models import Afsender, Modtager, Speditør
 from django.contrib.auth.models import Permission
 from django.core.exceptions import ValidationError
 from django.test import TestCase
@@ -221,4 +221,34 @@ class AfsenderAPITest(TestCase):
                     "Begrænsning “aktuel_modtager_har_by” er overtrådt.",
                 ]
             },
+        )
+
+
+class SpeditørAPITest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.view_speeditoer = Permission.objects.get(codename="view_speditør")
+
+        cls.user, cls.user_token, cls.user_refresh_token = RestMixin.make_user(
+            username="aktoer-speeditør-test-user",
+            plaintext_password="testpassword1337",
+            permissions=[cls.view_speeditoer],
+        )
+
+        # Create some test data
+        cls.speeditoer = Speditør.objects.create(
+            cvr=10001337,
+            navn="speeditoer1337",
+        )
+
+    def test_list(self):
+        resp = self.client.get(
+            reverse("api-1.0.0:speditør_list"),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+        )
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(
+            resp.json(),
+            {"count": 1, "items": [{"cvr": 10001337, "navn": "speeditoer1337"}]},
         )
