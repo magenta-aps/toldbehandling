@@ -2,9 +2,15 @@
 #
 # SPDX-License-Identifier: MPL-2.0
 
+from unittest.mock import MagicMock, patch
+
 from aktør.models import Afsender, Modtager
+from django.contrib.auth.models import Permission
+from django.core.exceptions import ValidationError
 from django.test import TestCase
-from project.test_mixins import RestTestMixin
+from django.urls import reverse
+from project.test_mixins import RestMixin, RestTestMixin
+from project.util import json_dump
 
 
 class AfsenderTest(RestTestMixin, TestCase):
@@ -130,4 +136,52 @@ class ModtagerTest(RestTestMixin, TestCase):
         self.assertEqual(
             str(self.modtager),
             f"Modtager(navn={self.modtager_data['navn']}, cvr={self.modtager_data['cvr']})",
+        )
+
+
+class AfsenderAPITest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.add_aktoer_afsender_perm = Permission.objects.get(codename="add_afsender")
+
+        cls.user, cls.user_token, cls.user_refresh_token = RestMixin.make_user(
+            username="aktoer-test-user",
+            plaintext_password="testpassword1337",
+            permissions=[
+                cls.add_aktoer_afsender_perm,
+            ],
+        )
+
+    def test_create_afsender_error(self):
+        resp = self.client.post(
+            reverse("api-1.0.0:afsender_create"),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+            data=json_dump(
+                {
+                    "payload": {
+                        "navn": None,
+                        "adresse": None,
+                        "postnummer": None,
+                        "by": None,
+                        "postbox": None,
+                        "telefon": None,
+                        "cvr": None,
+                        "kladde": None,
+                    }
+                }
+            ),
+        )
+
+        self.assertEqual(resp.status_code, 400)
+        self.assertEqual(
+            resp.json(),
+            {
+                "__all__": [
+                    "Begrænsning “aktuel_afsender_har_navn” er overtrådt.",
+                    "Begrænsning “aktuel_afsender_har_adresse” er overtrådt.",
+                    "Begrænsning “aktuel_afsender_har_postnummer” er overtrådt.",
+                    "Begrænsning “aktuel_afsender_har_by” er overtrådt.",
+                ]
+            },
         )
