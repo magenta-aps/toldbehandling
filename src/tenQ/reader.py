@@ -7,7 +7,7 @@ from typing import Dict, List
 
 from openpyxl import Workbook
 
-from .writer import (
+from tenQ.writer.tenq import (
     TenQFixWidthFieldLineTransactionType10,
     TenQFixWidthFieldLineTransactionType24,
     TenQFixWidthFieldLineTransactionType26,
