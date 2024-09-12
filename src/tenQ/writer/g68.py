@@ -1,12 +1,11 @@
 # SPDX-FileCopyrightText: 2024 Magenta ApS <info@magenta.dk>
 #
 # SPDX-License-Identifier: MPL-2.0
-
-from datetime import date
+from datetime import date, datetime
 from enum import Enum
 from operator import attrgetter
 from textwrap import wrap
-from typing import List, Optional, Type, Union
+from typing import Generator, List, Optional, Type, Union
 
 _not_implemented = NotImplementedError("must be implemented by subclass")
 
@@ -41,6 +40,22 @@ class Field(Serializable):
     @property
     def val(self):
         return self._val
+
+    @classmethod
+    def from_str(cls, val: str) -> "Field":
+        assert isinstance(cls.datatype, type)
+        return cls(cls.datatype(val))
+
+    @classmethod
+    def parse(cls, line: str, *expected_fields: Type["Field"]) -> Generator:
+        start = 0
+        end = 0
+        for field in expected_fields:
+            assert isinstance(field.length, int)
+            end += field.length
+            val = line[start:end]
+            yield field.from_str(val)
+            start += field.length
 
 
 class NumericField(Field):
@@ -92,16 +107,22 @@ class DateField(Field):
     datatype = date
     length = 8  # length of serialized output
 
+    _format = "%Y%m%d"
+
     def __init__(self, val: date):
         if not isinstance(val, date):
             raise TypeError(f"{val!r} is not a `date` instance")
         self._val = val
-        self._formatted_val = val.strftime("%Y%m%d")
+        self._formatted_val = val.strftime(self._format)
         assert len(self._formatted_val) == self.length
 
     @property
     def serialized_value(self) -> str:
         return self._formatted_val
+
+    @classmethod
+    def from_str(cls, val: str) -> "DateField":
+        return cls(datetime.strptime(val, cls._format).date())
 
 
 class EnumField(ZeroPaddedNumericField):
@@ -121,6 +142,10 @@ class EnumField(ZeroPaddedNumericField):
         # Use the numeric value of the `Enum` member for the serialized output
         self._val = self._val.value
 
+    @classmethod
+    def from_str(cls, val: str) -> "EnumField":
+        return cls(int(val))
+
 
 class FloatingFieldMixin:
     """Represents a "floating field" on a G68 transaction.
@@ -136,6 +161,7 @@ class FloatingFieldMixin:
     # These class attributes are private and used for internal bookkeeping
     _id_cls_map: dict = dict()
     _required: set = set()
+    _id_length = 2
 
     @property
     def serialized_value(self) -> str:
@@ -143,7 +169,7 @@ class FloatingFieldMixin:
         # (`NumericField`, `StringField`, etc.)
         val = super().serialized_value  # type: ignore[misc]
         # Field IDs are serialized as zero-padded two-digit numbers
-        field_id: str = str(self.id).zfill(2)
+        field_id: str = str(self.id).zfill(self._id_length)
         return f"&{field_id}{val}"
 
     def __init_subclass__(cls, **kwargs):
@@ -175,6 +201,18 @@ class FloatingFieldMixin:
         if missing:
             raise ValueError(f"The following required fields are missing: {missing}")
 
+    @classmethod
+    def parse(cls, line: str, *expected_fields: Type[Field]) -> Generator:
+        remainder = line[line.index("&") :]
+        for val in remainder.split("&"):
+            if val != "":
+                field_id = int(val[0 : cls._id_length])
+                if 1 <= field_id < 40:
+                    field = cls._id_cls_map[field_id]
+                    yield field.from_str(val[cls._id_length :])
+                else:
+                    yield BetalingstekstLinje(val[cls._id_length :], field_id)
+
 
 # Domain models: enums
 
@@ -200,6 +238,12 @@ class Registreringssted(ZeroPaddedNumericField):
 
 class Snitfladetype(StringField):
     length = 3
+
+    _constant = "G68"
+
+    def __init__(self, val: str):
+        assert val == self._constant, f"{val!r} is not {self._constant!r}"
+        super().__init__(val)
 
 
 class Linjeløbenummer(ZeroPaddedNumericField):
@@ -304,6 +348,16 @@ class Posteringshenvisning(FloatingFieldMixin, StringField):
                 )
             )
         )
+
+    @classmethod
+    def from_str(cls, val: str) -> "Posteringshenvisning":
+        posting_date: Posteringsdato
+        machine_id: Maskinnummer
+        line_no: Linjeløbenummer
+        posting_date, machine_id, line_no = Field.parse(
+            val, Posteringsdato, Maskinnummer, Linjeløbenummer
+        )
+        return cls(posting_date, machine_id, line_no)
 
 
 class BetalingstekstLinje(FloatingFieldMixin, StringField):
@@ -458,3 +512,17 @@ class G68Transaction(Serializable):
             self._writer.machine_id,
             self.line_no,
         )
+
+    @classmethod
+    def parse(cls, line: str) -> Generator[Field, None, None]:
+        # Read fixed fields
+        yield from Field.parse(
+            line,
+            Registreringssted,
+            Snitfladetype,
+            Linjeløbenummer,
+            Transaktionstype,
+            FlydendeEllerFast,
+        )
+        # Read floating fields
+        yield from FloatingFieldMixin.parse(line)
