@@ -13,19 +13,29 @@ from tenQ.writer.g68 import (
     EnumField,
     Field,
     FloatingFieldMixin,
+    FlydendeEllerFast,
     Fortegnsmarkering,
+    G68Transaction,
     G68TransactionWriter,
     Linjeløbenummer,
     Maskinnummer,
     NumericField,
     Organisationsenhed,
+    Organisationstype,
     Posteringsdato,
     Posteringshenvisning,
+    Registreringssted,
     Serializable,
+    Snitfladetype,
     StringField,
+    Transaktionstype,
     TransaktionstypeEnum,
     Udbetalingsbeløb,
+    Udbetalingsberettiget,
+    UdbetalingsberettigetIdentKode,
     UdbetalingsberettigetIdentKodeEnum,
+    Udbetalingsdato,
+    UdIdent,
     ZeroPaddedNumericField,
 )
 
@@ -53,6 +63,16 @@ class TestField(TestCase):
         # Instantiating a `FieldImpl` with a list of length 4 should fail
         with self.assertRaises(ValueError):
             self.FieldImpl([1, 2, 3, 4])
+
+    def test_from_str(self):
+        instance = self.FieldImpl("abc")
+        self.assertEqual(instance.val, ["a", "b", "c"])
+
+    def test_parse(self):
+        line = "000G68"
+        reg, interface_type = Field.parse(line, Registreringssted, Snitfladetype)
+        self.assertIsInstance(reg, Registreringssted)
+        self.assertIsInstance(interface_type, Snitfladetype)
 
 
 class TestNumericField(TestCase):
@@ -126,13 +146,17 @@ class TestDateField(TestCase):
 
     def test_val_arg_is_checked(self):
         with self.assertRaises(TypeError):
-            self.DateFieldImpl(42)
+            self.DateFieldImpl(42)  # type: ignore[arg-type]
 
     def test_serializes_to_string(self):
         self.assertEqual(self.instance.serialized_value, "20200229")
 
     def test_repr(self):
         self.assertEqual(repr(self.instance), "<DateFieldImpl: 20200229>")
+
+    def test_from_str(self):
+        instance = self.DateFieldImpl.from_str("20200229")
+        self.assertEqual(instance.val, date(2020, 2, 29))
 
 
 class EnumA(Enum):
@@ -157,6 +181,10 @@ class TestEnumField(TestCase):
 
     def test_repr(self):
         self.assertEqual(repr(self.instance), "<EnumFieldImpl: 0002>")
+
+    def test_from_str(self):
+        instance = self.EnumFieldImpl.from_str("0002")
+        self.assertEqual(instance.val, EnumA.Option2.value)
 
 
 class TestFloatingFieldMixin(TestCase):
@@ -190,6 +218,35 @@ class TestFloatingFieldMixin(TestCase):
         with self.assertRaises(ValueError):
             FloatingFieldMixin.validate_required_fields([Organisationsenhed(0)])
 
+    def test_parse(self):
+        line = "000G68&020001&1011&40Betalingstekstlinje"
+        org, ident, text_line = FloatingFieldMixin.parse(line)
+        self._assert_type_val(org, Organisationsenhed, 1)
+        self._assert_type_val(
+            ident,
+            UdbetalingsberettigetIdentKode,
+            UdbetalingsberettigetIdentKodeEnum.CVR.value,
+        )
+        self._assert_type_val(
+            text_line,
+            BetalingstekstLinje,
+            "Betalingstekstlinje",
+        )
+
+    def _assert_type_val(self, obj, expected_type, expected_value):
+        self.assertIsInstance(obj, expected_type)
+        self.assertEqual(obj.val, expected_value)
+
+
+class TestSnitfladetype(TestCase):
+    def test_accepts_valid_value(self):
+        instance = Snitfladetype("G68")
+        self.assertEqual(instance.val, instance._constant)
+
+    def test_raises_on_invalid_value(self):
+        with self.assertRaises(AssertionError):
+            Snitfladetype("")
+
 
 class TestUdbetalingsbeløb(TestCase):
     def test_val_arg_is_assumed_kr(self):
@@ -219,6 +276,11 @@ class TestPosteringshenvisning(TestCase):
             "&16202001010004200100",
         )
 
+    def test_from_str(self):
+        val = "202002290005000100"
+        instance = Posteringshenvisning.from_str(val)
+        self.assertEqual(instance.val, val)
+
 
 class TestBetalingstekstLinje(TestCase):
     def test_id_arg_is_checked(self):
@@ -238,7 +300,7 @@ class TestBetalingstekstLinje(TestCase):
         # Assert that a maximum of 35 lines are produced
         self.assertEqual(len(instances), (cls._max_id - cls._min_id) + 1)
         # Assert that each line is no longer than 81 characters
-        self.assertTrue(all(len(instance.val) <= cls.length) for instance in instances)
+        self.assertTrue(all(len(instance.val) <= cls.length for instance in instances))
         # Assert that each line has a sequential ID, beginning at 40
         self.assertEqual(
             [instance.id for instance in instances],
@@ -269,4 +331,38 @@ class TestG8TransactionWriter(TestCase):
             "&1002&1100000101012222&1220200127&16202002010000000001"
             "&40Denne måneds udbetaling af beskæftigelsestilskud sker ud fra en forventet samlet "
             "&41årsindkomst på 324.178 kr. og er baseret på din A- og B-indkomst i 2023.",
+        )
+
+
+class TestG68Transaction(TestCase):
+    maxDiff = None
+
+    def test_parse(self):
+        line = (
+            "000G6800001011&020000&0300&07000000000000000000&0800000123400&09+"
+            "&1002&1100000101012222&1220200127&16202002010000000001"
+            "&40Denne måneds udbetaling af beskæftigelsestilskud sker ud fra en forventet samlet "
+            "&41årsindkomst på 324.178 kr. og er baseret på din A- og B-indkomst i 2023."
+        )
+        fields = list(G68Transaction.parse(line))
+        self.assertEqual(
+            [type(field) for field in fields],
+            [
+                Registreringssted,
+                Snitfladetype,
+                Linjeløbenummer,
+                Transaktionstype,
+                FlydendeEllerFast,
+                Organisationsenhed,
+                Organisationstype,
+                UdIdent,
+                Udbetalingsbeløb,
+                Fortegnsmarkering,
+                UdbetalingsberettigetIdentKode,
+                Udbetalingsberettiget,
+                Udbetalingsdato,
+                Posteringshenvisning,
+                BetalingstekstLinje,
+                BetalingstekstLinje,
+            ],
         )
