@@ -41,6 +41,32 @@ class AktoerTest(TestCase):
 
         self.assertEqual(new_model.postnummer_ref, None)
 
+    def test_aktoer_model_stedkode_property(self):
+        new_postnr_model = Postnummer(
+            postnummer=8000,
+            navn="Aarhus C",
+            dage=0,
+            stedkode=1,
+        )
+
+        new_model = Afsender(
+            navn=None,
+            adresse=None,
+            postnummer=None,
+            postnummer_ref=new_postnr_model,
+            eksplicit_stedkode="lorem ipsum",
+            by=None,
+            postbox=None,
+            telefon=None,
+            cvr=None,
+            kladde=True,
+        )
+
+        self.assertEqual(new_model.stedkode, "lorem ipsum")
+
+        new_model.eksplicit_stedkode = None
+        self.assertEqual(new_model.stedkode, new_postnr_model.stedkode)
+
 
 class AfsenderTest(RestTestMixin, TestCase):
     __test__ = True
