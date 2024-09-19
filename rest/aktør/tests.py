@@ -303,21 +303,27 @@ class AfsenderAPITest(TestCase):
         )
 
 
+class SpeditørTest(TestCase):
+    def test_speditoer_to_string(self):
+        new_model = Speditør(cvr=13371337, navn="En 1337 speditoer")
+        self.assertEqual(str(new_model), f"Speditør(En 1337 speditoer)")
+
+
 class SpeditørAPITest(TestCase):
     @classmethod
     def setUpTestData(cls):
-        cls.view_speeditoer = Permission.objects.get(codename="view_speditør")
+        cls.view_speditoer = Permission.objects.get(codename="view_speditør")
 
         cls.user, cls.user_token, cls.user_refresh_token = RestMixin.make_user(
-            username="aktoer-speeditør-test-user",
+            username="aktoer-speditoer-test-user",
             plaintext_password="testpassword1337",
-            permissions=[cls.view_speeditoer],
+            permissions=[cls.view_speditoer],
         )
 
         # Create some test data
-        cls.speeditoer = Speditør.objects.create(
+        cls.speditoer = Speditør.objects.create(
             cvr=10001337,
-            navn="speeditoer1337",
+            navn="speditoer1337",
         )
 
     def test_list(self):
@@ -329,5 +335,5 @@ class SpeditørAPITest(TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(
             resp.json(),
-            {"count": 1, "items": [{"cvr": 10001337, "navn": "speeditoer1337"}]},
+            {"count": 1, "items": [{"cvr": 10001337, "navn": "speditoer1337"}]},
         )
