@@ -39,7 +39,7 @@ class AktoerTest(TestCase):
 
         new_model.save()
 
-        self.assertEqual(new_model.postnummer_ref, None)
+        self.assertIsNone(new_model.postnummer_ref)
 
     def test_aktoer_model_stedkode_property(self):
         new_postnr_model = Postnummer(
@@ -66,6 +66,30 @@ class AktoerTest(TestCase):
 
         new_model.eksplicit_stedkode = None
         self.assertEqual(new_model.stedkode, new_postnr_model.stedkode)
+
+    def test_aktoer_model_stedkode_property_setter(self):
+        new_postnr_model = Postnummer(
+            postnummer=8000,
+            navn="Aarhus C",
+            dage=0,
+            stedkode=1,
+        )
+
+        new_model = Afsender(
+            navn=None,
+            adresse=None,
+            postnummer=None,
+            postnummer_ref=new_postnr_model,
+            eksplicit_stedkode="lorem ipsum",
+            by=None,
+            postbox=None,
+            telefon=None,
+            cvr=None,
+            kladde=True,
+        )
+
+        new_model.stedkode = 1
+        self.assertIsNone(new_model.eksplicit_stedkode)
 
 
 class AfsenderTest(RestTestMixin, TestCase):
