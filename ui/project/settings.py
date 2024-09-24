@@ -265,6 +265,9 @@ TF5_ENABLED = bool(strtobool(os.environ.get("TF5_ENABLED", "True")))
 CSP_DEFAULT_SRC = (
     "'self'",
     "localhost:8000" if DEBUG else HOST_DOMAIN,
+    # origins used by NETs Payment JS SDK
+    "test.checkout.dibspayment.eu" if DEBUG else "checkout.dibspayment.eu",
+    "applepay.cdn-apple.com",
 )
 CSP_SCRIPT_SRC_ATTR = (
     "'self'",
