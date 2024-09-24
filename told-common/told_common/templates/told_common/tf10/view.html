@@ -593,7 +593,7 @@
             </div>
         </div>
     </div>
-    <script>
+    <script nonce="{{ request.csp_nonce }}">
         const modal = new bootstrap.Modal('#message_modal', {});
         modal.show();
     </script>
@@ -601,7 +601,7 @@
     {% endif %}
 
 </form>
-<script>
+<script nonce="{{ request.csp_nonce }}">
     $(".modal").on("show.bs.modal", function () {
         $(this).find("input,select,textarea").removeAttr("disabled");
         $(this).find("[data-modal-required=true]").attr("required", "required");

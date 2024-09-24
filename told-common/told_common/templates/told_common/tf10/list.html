@@ -11,9 +11,9 @@
 <link rel="stylesheet" href="{% static 'bootstrap-table/bootstrap-table-sticky-header.min.css' %}">
 {% endblock %}
 {% block extra_footers %}
-<script src="{% static 'bootstrap-table/bootstrap-table.min.js' %}"></script>
-<script src="{% static 'bootstrap-table/bootstrap-table-sticky-header.min.js' %}"></script>
-<script src="{% static 'bootstrap-table/bootstrap-table-defer-url.min.js' %}"></script>
+<script src="{% static 'bootstrap-table/bootstrap-table.min.js' %}" nonce="{{ request.csp_nonce }}"></script>
+<script src="{% static 'bootstrap-table/bootstrap-table-sticky-header.min.js' %}" nonce="{{ request.csp_nonce }}"></script>
+<script src="{% static 'bootstrap-table/bootstrap-table-defer-url.min.js' %}" nonce="{{ request.csp_nonce }}"></script>
 {% endblock %}
 
 {% block content %}
@@ -209,7 +209,7 @@
 {{multiedit_url|json_script:"multiedit_url"}}
 {% endif %}
 {{highlight|json_script:"highlight_id"}}
-<script>
+<script nonce="{{ request.csp_nonce }}">
 const highlight_id = JSON.parse($("#highlight_id").text());
 function queryParams(params){  // Kaldes af bootstrap-table fordi vi peger på den med data-query-params
     if (params["offset"] < 0) {
@@ -278,7 +278,7 @@ function datoFormatter(value) {
 </script>
 
 {% if can_edit_multiple %}
-<script>
+<script nonce="{{ request.csp_nonce }}">
     const editUrl = JSON.parse($("#multiedit_url").text());
     let shiftPressed = false;
     $(document).on("keydown", function (event){

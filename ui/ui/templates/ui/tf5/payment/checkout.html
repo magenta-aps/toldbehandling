@@ -83,8 +83,8 @@
 {% endblock %}
 
 {% block extra_footers %}
-<script src="{{ nets_js_sdk_url }}"></script>
-<script>
+<script src="{{ nets_js_sdk_url }}" nonce="{{ request.csp_nonce }}"></script>
+<script nonce="{{ request.csp_nonce }}">
     const current_payment_status = "{{ payment.status }}";
 
     // Handle cookies for CSRF protection

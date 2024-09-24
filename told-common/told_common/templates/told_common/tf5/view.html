@@ -348,13 +348,13 @@
 </div>
 
 </form>
-<script>
+<script nonce="{{ request.csp_nonce }}">
     const modal = new bootstrap.Modal('#message_modal', {});
     modal.show();
 </script>
 {% endif %}
 
-<script>
+<script nonce="{{ request.csp_nonce }}">
     $(".modal").on("show.bs.modal", function () {
         $(this).find("input,select,textarea").removeAttr("disabled");
     });
