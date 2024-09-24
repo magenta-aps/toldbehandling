@@ -57,3 +57,14 @@ textarea {
 .helptext {
     /*margin-left: auto;*/
 }
+
+/* Classes created for CSP complicance */
+
+.csp-w-40rem {
+    width: 40rem;
+}
+
+.csp-err-pre {
+    border: 1px solid var(--bs-border-color-translucent);
+    padding: 2px;
+}
