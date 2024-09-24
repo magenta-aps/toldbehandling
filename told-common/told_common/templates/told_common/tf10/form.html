@@ -107,7 +107,7 @@
                 </div>
                 <div class="row" id="afsender_adresse_container" >
                 <div class="col-12">
-                    <div class="alert alert-warning multiple" style="display: none">
+                    <div class="alert alert-warning multiple d-none">
                         <label for="{{form.afsender_existing_id.id_for_label}}">
                         <span data-multi="cvr">
                         {% translate "Der er mere end én registreret afsender for det angivne CVR-nummer." %}
@@ -194,7 +194,7 @@
 
                 <div class="row" id="modtager_adresse_container" >
                 <div class="col-12">
-                        <div class="alert alert-warning multiple" style="display: none">
+                        <div class="alert alert-warning multiple d-none">
                             <label for="{{form.modtager_existing_id.id_for_label}}">
                             <span data-multi="cvr">
                             {% translate "Der er mere end én registreret modtager for det angivne CVR-nummer." %}
@@ -208,7 +208,7 @@
                                 {{form.modtager_existing_id}}
                         </p>
                         </div>
-                        <input style="display: none" type="hidden" name="{{form.modtager_existing_id.name}}"/>
+                        <input type="hidden" class="d-none" name="{{form.modtager_existing_id.name}}"/>
                 </div>
             </div>
                 <div class="row align-items-center">
@@ -407,7 +407,7 @@
             </div>
         </div>
 
-        <div id="formset_prototype" style="display: none">
+        <div id="formset_prototype" class="d-none">
             {% include "told_common/tf10/subform.html" with subform=formset.empty_form %}
         </div>
 
