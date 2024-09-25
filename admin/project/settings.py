@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     "django_otp.plugins.otp_static",
     "django_otp.plugins.otp_totp",
     "two_factor",
+    "csp_helpers",
 ]
 
 MIDDLEWARE = [
@@ -70,6 +71,7 @@ MIDDLEWARE = [
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "told_common.middleware.RestTokenUserMiddleware",
     "django_otp.middleware.OTPMiddleware",
+    "csp.middleware.CSPMiddleware",
 ]
 
 ROOT_URLCONF = "project.urls"
@@ -254,3 +256,18 @@ if os.path.isfile(log_filename) and ENVIRONMENT != "development":
     LOGGING["loggers"]["django"]["handlers"].append("file")
 
 TEMPUS_DOMINUS_DATETIME_FORMAT = "DD/MM/YYYY HH:mm"
+
+# django-csp
+
+CSP_DEFAULT_SRC = (
+    "'self'",
+    "localhost:8000" if DEBUG else HOST_DOMAIN,
+    "cdnjs.cloudflare.com",
+)
+CSP_SCRIPT_SRC_ATTR = (
+    "'self'",
+    "localhost:8000" if DEBUG else HOST_DOMAIN,
+    "cdnjs.cloudflare.com",
+)
+CSP_STYLE_SRC_ATTR = ("'self'",)
+CSP_IMG_SRC = ("'self'", "data:")
