@@ -2,6 +2,7 @@
 #
 # SPDX-License-Identifier: MPL-2.0
 
+from django import template
 from django.template.defaultfilters import register
 from django.utils.translation import gettext_lazy as _
 from django_stubs_ext import StrPromise
@@ -20,3 +21,22 @@ def enhedsnavn(item: Vareafgiftssats.Enhed) -> StrPromise:
         return _("procent")
     if item == Vareafgiftssats.Enhed.SAMMENSAT:
         return _("sammensat")
+
+
+@register.tag(name="nonced")
+def nonced(parser, token):
+    nodelist = parser.parse(("endnonced",))
+    parser.delete_first_token()
+    return NonceInsertionNode(nodelist)
+
+
+class NonceInsertionNode(template.Node):
+    def __init__(self, nodelist, **kwargs):
+        self.nodelist = nodelist
+
+    def render(self, context):
+        output = self.nodelist.render(context)
+        request = context.get("request")
+        if hasattr(request, "csp_nonce"):
+            output = output.replace("<script ", f'<script nonce="{request.csp_nonce}" ')
+        return output
