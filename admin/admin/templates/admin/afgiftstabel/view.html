@@ -9,7 +9,11 @@
 {% block extra_headers %}
 <link rel="stylesheet" href="{% static 'bootstrap-table/bootstrap-table.min.css' %}">
 <link rel="stylesheet" href="{% static 'bootstrap-table/bootstrap-table-sticky-header.min.css' %}">
+
+{% nonced %}
 {{ form.media }}
+{% endnonced %}
+
 {% endblock %}
 {% block extra_footers %}
 <script src="{% static 'bootstrap-table/bootstrap-table.min.js' %}" nonce="{{ request.csp_nonce }}"></script>
@@ -32,19 +36,21 @@
                     </div>
                     <div class="col-10">
                         {% if can_edit %}
+                        {% nonced %}
                         {{form.gyldig_fra}}
+                        {% endnonced %}
                         {{form.gyldig_fra.errors}}
                         {{form.offset}}
                         <script nonce="{{ request.csp_nonce }}">
                             const gyldig_fra = $("[name={{form.gyldig_fra.name}}]");
                             const offset = $("[name={{form.offset.name}}]");
                             const onUpdate = function () {
-                                {# Sometimes the value doesn't get updated if we don't use setTimeout #}
-                                setTimeout(function () {
-                                    const timeObj = gyldig_fra.datetimepicker("viewDate");
-                                    offset.val(timeObj.utcOffset());
-                                }, 0);
-                            };
+                                    {# Sometimes the value doesn't get updated if we don't use setTimeout #}
+                                    setTimeout(function () {
+                                            const timeObj = gyldig_fra.datetimepicker("viewDate");
+                                            offset.val(timeObj.utcOffset());
+                                        }, 0);
+                                };
                             onUpdate();
                             gyldig_fra.on("change update.datetimepicker", onUpdate);
                         </script>

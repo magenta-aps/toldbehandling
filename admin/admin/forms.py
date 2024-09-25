@@ -218,8 +218,11 @@ class AfgiftstabelUpdateForm(BootstrapForm):
             # får i et separat felt, så det kommer til at passe
             offset = data.get("offset")
             if offset in (None, ""):
-                zone = tz.get_default_timezone()
-                gyldig_fra = zone.make_aware(gyldig_fra)
+                gyldig_fra = datetime.combine(
+                    gyldig_fra.date(),
+                    gyldig_fra.time(),
+                    tz.get_default_timezone(),
+                )
             else:
                 gyldig_fra = datetime.combine(
                     gyldig_fra.date(),
