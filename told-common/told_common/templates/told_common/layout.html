@@ -58,6 +58,9 @@
             this.innerHTML = value;
         }
     });
+    $("select[data-submit-onchange=true]").on("change", function (){
+        this.form.submit();
+    })
 </script>
 </body>
 </html>
