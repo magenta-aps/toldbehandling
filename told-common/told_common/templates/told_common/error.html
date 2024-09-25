@@ -2,14 +2,14 @@
 {% load i18n %}
 {% block content %}
 <div class="justify-content-md-center d-flex align-items-center vh-100">
-    <div class="card" style="width: 40rem;">
+    <div class="card csp-w-40rem">
         <h5 class="card-header">{% translate 'Fejl' %}</h5>
         <div class="card-body">
             <p>
             {% translate 'Der er opstået en fejl' %}
             </p>
             <p>{% translate 'Fejlbesked:' %}
-            <pre style="border: 1px solid var(--bs-border-color-translucent); padding: 2px;">{{message}}</pre>
+            <pre class="csp-err-pre">{{message}}</pre>
             </p>
             <p>
             <a class="btn btn-primary" href="javascript:history.back()">{% translate 'Tilbage' %}</a>

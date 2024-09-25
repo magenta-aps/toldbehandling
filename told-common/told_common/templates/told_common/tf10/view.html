@@ -376,7 +376,7 @@
             <tfoot>
                 <tr>
                     <td colspan="5"></td>
-                    <td style="font-weight: bold">{% translate "Afgift i alt" %}</td>
+                    <td><strong>{% translate "Afgift i alt" %}</strong></td>
                     <td>{{object.afgift_sum}}</td>
                 </tr>
             </tfoot>
@@ -499,7 +499,7 @@
         </div>
     </div>
 
-    <div class="modal" id="godkend_modal" tabindex="-1" style="display: none">
+    <div class="modal d-none" id="godkend_modal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -518,7 +518,7 @@
         </div>
     </div>
 
-    <div class="modal" id="afvis_modal" tabindex="-1" style="display: none">
+    <div class="modal d-none" id="afvis_modal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -537,7 +537,7 @@
         </div>
     </div>
 
-    <div class="modal" id="prisme_modal" tabindex="-1" style="display: none">
+    <div class="modal d-none" id="prisme_modal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -593,7 +593,7 @@
             </div>
         </div>
     </div>
-    <script>
+    <script nonce="{{ request.csp_nonce }}">
         const modal = new bootstrap.Modal('#message_modal', {});
         modal.show();
     </script>
@@ -601,7 +601,7 @@
     {% endif %}
 
 </form>
-<script>
+<script nonce="{{ request.csp_nonce }}">
     $(".modal").on("show.bs.modal", function () {
         $(this).find("input,select,textarea").removeAttr("disabled");
         $(this).find("[data-modal-required=true]").attr("required", "required");

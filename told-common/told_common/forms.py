@@ -516,7 +516,7 @@ class TF10SearchForm(PaginateForm, BootstrapForm):
             else form.status_choices_all
         ),
         required=False,
-        widget=forms.Select(attrs={"onchange": "form.submit();"}),
+        widget=forms.Select(attrs={"data-submit-onchange": "true"}),
     )
 
     dato_efter = forms.DateField(required=False, widget=DateInput)

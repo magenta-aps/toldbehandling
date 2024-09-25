@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     "django_mitid_auth",
     "django_bootstrap_icons",
     "mitid_test",
+    "csp_helpers",
 ]
 
 MIDDLEWARE = [
@@ -64,6 +65,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django_session_timeout.middleware.SessionTimeoutMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
+    "csp.middleware.CSPMiddleware",
 ]
 
 ROOT_URLCONF = "project.urls"
@@ -256,3 +258,21 @@ PAYMENT_PROVIDER_NETS_JS_SDK_URL = os.environ.get(
 )
 
 TF5_ENABLED = bool(strtobool(os.environ.get("TF5_ENABLED", "True")))
+
+
+# django-csp
+
+CSP_DEFAULT_SRC = (
+    "'self'",
+    "localhost:8000" if DEBUG else HOST_DOMAIN,
+    # origins used by NETs Payment JS SDK
+    "test.checkout.dibspayment.eu" if DEBUG else "checkout.dibspayment.eu",
+    "applepay.cdn-apple.com",
+)
+CSP_SCRIPT_SRC_ATTR = (
+    "'self'",
+    "localhost:8000" if DEBUG else HOST_DOMAIN,
+    "cdnjs.cloudflare.com",
+)
+CSP_STYLE_SRC_ATTR = ("'self'",)
+CSP_IMG_SRC = ("'self'", "data:")

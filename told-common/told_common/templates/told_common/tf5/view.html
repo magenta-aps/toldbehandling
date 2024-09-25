@@ -219,19 +219,19 @@
             <tfoot>
             <tr>
                 <td colspan="5" rowspan="4"></td>
-                <td style="font-weight: bold">{% translate "Indførselsafgift" %}</td>
+                <td><strong>{% translate "Indførselsafgift" %}</strong></td>
                 <td>{{object.afgift_sum}}</td>
             </tr>
             <tr>
-                <td style="font-weight: bold">{% translate "Tillægsafgift alkohol" %}</td>
+                <td><strong>{% translate "Tillægsafgift alkohol" %}</strong></td>
                 <td>{{object.tillægsafgift}}</td>
             </tr>
             <tr>
-                <td style="font-weight: bold">{% translate "Ekspeditionsgebyr" %}</td>
+                <td><strong>{% translate "Ekspeditionsgebyr" %}</strong></td>
                 <td>{{object.ekspeditionsgebyr}}</td>
             </tr>
             <tr>
-                <td style="font-weight: bold">{% translate "Afgift i alt" %}</td>
+                <td><strong>{% translate "Afgift i alt" %}</strong></td>
                 <td>{{object.afgift_total}}</td>
             </tr>
             </tfoot>
@@ -284,7 +284,7 @@
         {% endif %}
     </div>
 
-    <div class="modal" id="annuller_modal" tabindex="-1" style="display: none">
+    <div class="modal d-none" id="annuller_modal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -303,7 +303,7 @@
     </div>
 
 {% if can_opret_betaling %}
-<div class="modal" id="betal_modal" tabindex="-1" style="display: none">
+<div class="modal d-none" id="betal_modal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -348,13 +348,13 @@
 </div>
 
 </form>
-<script>
+<script nonce="{{ request.csp_nonce }}">
     const modal = new bootstrap.Modal('#message_modal', {});
     modal.show();
 </script>
 {% endif %}
 
-<script>
+<script nonce="{{ request.csp_nonce }}">
     $(".modal").on("show.bs.modal", function () {
         $(this).find("input,select,textarea").removeAttr("disabled");
     });

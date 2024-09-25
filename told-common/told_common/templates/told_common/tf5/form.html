@@ -5,8 +5,8 @@
 {% load common_tags %}
 
 {% block extra_headers %}
-<script type="text/javascript" src="{% static 'toldbehandling/js/formset.js' %}"></script>
-<script type="text/javascript" src="{% static 'toldbehandling/js/formfile.js' %}"></script>
+<script type="text/javascript" src="{% static 'toldbehandling/js/formset.js' %}" nonce="{{ request.csp_nonce }}"></script>
+<script type="text/javascript" src="{% static 'toldbehandling/js/formfile.js' %}" nonce="{{ request.csp_nonce }}"></script>
 <link rel="stylesheet" type="text/css" href="{% static 'toldbehandling/css/formfile.css' %}"/>
 <link rel="stylesheet" href="{% static 'font-awesome/css/all.min.css' %}" >
 {% endblock %}
@@ -196,7 +196,7 @@
             {% endfor %}
             </div>
         </div>
-        <div id="formset_prototype" style="display: none">
+        <div id="formset_prototype" class="d-none">
             {% include "told_common/tf5/subform.html" with subform=formset.empty_form %}
         </div>
 
@@ -259,7 +259,7 @@
 {{ varesatser|json_script:"varesatser" }}
 {{ afgiftstabeller|json_script:"afgiftstabeller" }}
 {{ konstanter|json_script:"konstanter" }}
-<script>
+<script nonce="{{ request.csp_nonce }}">
     window.error_messages = {
         "101_not_found": "{% translate 'Varelinje med varekode 101 mangler' %}",
         "102_not_found": "{% translate 'Varelinje med varekode 102 mangler' %}",
@@ -273,8 +273,8 @@
         "sam": "",
     };
 </script>
-<script src="{% static 'toldbehandling/js/blanket.js' %}"></script>
-<script>
+<script src="{% static 'toldbehandling/js/blanket.js' %}" nonce="{{ request.csp_nonce }}"></script>
+<script nonce="{{ request.csp_nonce }}">
     const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]')
     const popoverList = [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl))
 </script>
