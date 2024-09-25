@@ -12,8 +12,8 @@
 {{ form.media }}
 {% endblock %}
 {% block extra_footers %}
-<script src="{% static 'bootstrap-table/bootstrap-table.min.js' %}"></script>
-<script src="{% static 'bootstrap-table/bootstrap-table-sticky-header.min.js' %}"></script>
+<script src="{% static 'bootstrap-table/bootstrap-table.min.js' %}" nonce="{{ request.csp_nonce }}"></script>
+<script src="{% static 'bootstrap-table/bootstrap-table-sticky-header.min.js' %}" nonce="{{ request.csp_nonce }}"></script>
 {% endblock %}
 
 {% block content %}
@@ -35,7 +35,7 @@
                         {{form.gyldig_fra}}
                         {{form.gyldig_fra.errors}}
                         {{form.offset}}
-                        <script>
+                        <script nonce="{{ request.csp_nonce }}">
                             const gyldig_fra = $("[name={{form.gyldig_fra.name}}]");
                             const offset = $("[name={{form.offset.name}}]");
                             const onUpdate = function () {

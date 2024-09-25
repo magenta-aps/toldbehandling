@@ -4,7 +4,7 @@
 {% load l10n %}
 
 {% block extra_headers %}
-<script type="text/javascript" src="{% static 'toldbehandling/js/formfile.js' %}"></script>
+<script type="text/javascript" src="{% static 'toldbehandling/js/formfile.js' %}" nonce="{{ request.csp_nonce }}"></script>
 <link rel="stylesheet" type="text/css" href="{% static 'toldbehandling/css/formfile.css' %}"/>
 {% endblock %}
 
@@ -27,7 +27,7 @@
     </form>
 </div>
 
-<script>
+<script nonce="{{ request.csp_nonce }}">
     $(function () {
         // Filefield
         // ---------

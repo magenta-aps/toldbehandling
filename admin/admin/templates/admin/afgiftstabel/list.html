@@ -11,9 +11,9 @@
 <link rel="stylesheet" href="{% static 'bootstrap-table/bootstrap-table-sticky-header.min.css' %}">
 {% endblock %}
 {% block extra_footers %}
-<script src="{% static 'bootstrap-table/bootstrap-table.min.js' %}"></script>
-<script src="{% static 'bootstrap-table/bootstrap-table-sticky-header.min.js' %}"></script>
-<script src="{% static 'bootstrap-table/bootstrap-table-defer-url.min.js' %}"></script>
+<script src="{% static 'bootstrap-table/bootstrap-table.min.js' %}" nonce="{{ request.csp_nonce }}"></script>
+<script src="{% static 'bootstrap-table/bootstrap-table-sticky-header.min.js' %}" nonce="{{ request.csp_nonce }}"></script>
+<script src="{% static 'bootstrap-table/bootstrap-table-defer-url.min.js' %}" nonce="{{ request.csp_nonce }}"></script>
 {% endblock %}
 
 {% block content %}
@@ -87,7 +87,7 @@
     </table>
 </div>
 
-<script>
+<script nonce="{{ request.csp_nonce }}">
     function queryParams(params){  // Kaldes af bootstrap-table fordi vi peger på den med data-query-params
         if (params["offset"] < 0) {
             params["offset"] = 0;

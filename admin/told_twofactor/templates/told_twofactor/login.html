@@ -38,7 +38,7 @@ Log ind
         </div>
     </div>
 </form>
-<script>
+<script nonce="{{ request.csp_nonce }}">
     const popoverTriggerList = document.querySelectorAll('[data-bs-toggle="popover"]');
     const popoverList = [...popoverTriggerList].map(popoverTriggerEl => new bootstrap.Popover(popoverTriggerEl));
 </script>
