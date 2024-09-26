@@ -34,13 +34,11 @@ if [ "${TEST,,}" = true ]; then
 fi
 if [ "${MAKEMESSAGES,,}" = true ]; then
   echo 'making messages'
-  python manage.py makemessages --locale=kl --no-obsolete --ignore=/app/told_common/* --add-location file
-  python manage.py makemessages --locale=da --no-obsolete --ignore=/app/told_common/* --add-location file
+  python manage.py makemessages --locale=kl --locale=da --no-obsolete --ignore=/app/told_common/* --add-location file
 fi
 if [ "${COMPILEMESSAGES,,}" = true ]; then
   echo 'compiling messages'
-  python manage.py compilemessages --locale=kl
-  python manage.py compilemessages --locale=da
+  python manage.py compilemessages --locale=kl --locale=da
 fi
 
 exec "$@"
