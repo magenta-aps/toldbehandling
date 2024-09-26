@@ -5,9 +5,9 @@
 {% load common_tags %}
 
 {% block extra_headers %}
-<script type="text/javascript" src="{% static 'toldbehandling/js/formset.js' %}"></script>
+<script type="text/javascript" src="{% static 'toldbehandling/js/formset.js' %}" nonce="{{ request.csp_nonce }}"></script>
 <link rel="stylesheet" href="{% static 'font-awesome/css/all.min.css' %}" >
-<script>
+<script nonce="{{ request.csp_nonce }}">
     $(function (){
         const container = $("#formset_container");
 
@@ -98,7 +98,7 @@
         </div>
         {% endfor %}
     </div>
-    <div id="formset_prototype" style="display: none">
+    <div id="formset_prototype" class="d-none">
         <div class="row">
             <div class="col-4">
                 <label for="{{formset.empty_form.gruppe.name}}">Gruppe:</label>
@@ -166,12 +166,4 @@
     </tbody>
 </table>
 </div>
-
-<script>
-    // $(function(){
-    //     $("form input, form select").on("change", function (){
-    //         this.form.submit();
-    //     })
-    // });
-</script>
 {% endblock %}

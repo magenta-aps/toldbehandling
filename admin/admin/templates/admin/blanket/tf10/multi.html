@@ -5,7 +5,7 @@
 {% load common_tags %}
 
 {% block extra_headers %}
-<script type="text/javascript" src="{% static 'toldbehandling/js/formset.js' %}"></script>
+<script type="text/javascript" src="{% static 'toldbehandling/js/formset.js' %}" nonce="{{ request.csp_nonce }}"></script>
 {% endblock %}
 
 {% block content %}
