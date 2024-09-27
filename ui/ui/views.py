@@ -51,6 +51,7 @@ class UiViewMixin:
                 "ui": True,
                 "environment": settings.ENVIRONMENT,
                 "version": settings.VERSION,
+                "api_doc_url": f"{settings.HOST_DOMAIN}/api/docs",
             }
         )
 
