@@ -44,7 +44,7 @@ setuptools.setup(
         "dataclasses-json==0.6.0",
         "WeasyPrint==60.1",
         "holidays==0.38",
-        "pypdf==3.17.3",
+        "pypdf==5.0.1",
         "django-forms-dynamic==1.0.0",
     ],
     classifiers=[
