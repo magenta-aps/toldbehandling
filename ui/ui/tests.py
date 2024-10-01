@@ -694,6 +694,7 @@ class TF10BlanketTest(TestMixin, HasLogin, TestCase):
                     "toldkategori": None,
                     "kladde": False,
                     "status": None,
+                    "tf3": False,
                 }
             ],
         )
@@ -760,6 +761,7 @@ class TF10BlanketTest(TestMixin, HasLogin, TestCase):
                     "toldkategori": None,
                     "kladde": False,
                     "status": None,
+                    "tf3": False,
                 }
             ],
         )
@@ -842,6 +844,7 @@ class TF10BlanketTest(TestMixin, HasLogin, TestCase):
                     "toldkategori": None,
                     "kladde": False,
                     "status": None,
+                    "tf3": False,
                 }
             ],
         )

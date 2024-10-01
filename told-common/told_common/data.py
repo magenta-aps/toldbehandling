@@ -338,6 +338,7 @@ class Afgiftsanmeldelse(ToldDataClass):
     toldkategori: Optional[str] = None
     fuldmagtshaver: Optional[Speditør] = None
     betales_af: Optional[str] = None
+    tf3: Optional[bool] = False
 
     @property
     def indberetter(self) -> Optional[dict]:

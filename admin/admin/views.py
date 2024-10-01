@@ -118,7 +118,9 @@ class AdminLayoutBaseView(
         )
 
 
-class TF10View(AdminLayoutBaseView, PreventDoubleSubmitMixin, common_views.TF10View, FormView):
+class TF10View(
+    AdminLayoutBaseView, PreventDoubleSubmitMixin, common_views.TF10View, FormView
+):
     required_permissions = ("auth.admin", *common_views.TF10View.required_permissions)
     prisme_permissions = (
         "anmeldelse.prisme_afgiftsanmeldelse",
