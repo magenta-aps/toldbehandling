@@ -35,6 +35,7 @@ from told_common.view_mixins import (
     HasRestClientMixin,
     LoginRequiredMixin,
     PermissionsRequiredMixin,
+    PreventDoubleSubmitMixin,
 )
 
 from admin import forms
@@ -117,7 +118,7 @@ class AdminLayoutBaseView(
         )
 
 
-class TF10View(AdminLayoutBaseView, common_views.TF10View, FormView):
+class TF10View(AdminLayoutBaseView, PreventDoubleSubmitMixin, common_views.TF10View, FormView):
     required_permissions = ("auth.admin", *common_views.TF10View.required_permissions)
     prisme_permissions = (
         "anmeldelse.prisme_afgiftsanmeldelse",
@@ -282,7 +283,10 @@ class TF10View(AdminLayoutBaseView, common_views.TF10View, FormView):
             if e.response.status_code == 404:
                 raise Http404("Afgiftsanmeldelse findes ikke")
             raise
-        return redirect(reverse("tf10_view", kwargs={"id": anmeldelse_id}))
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse("tf10_view", kwargs={"id": self.kwargs["id"]})
 
 
 class TF10ListView(AdminLayoutBaseView, common_views.TF10ListView):
