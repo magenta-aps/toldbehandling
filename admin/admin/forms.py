@@ -32,6 +32,11 @@ class TF10CreateForm(common_forms.TF10Form):
         widget=Select(attrs={"autocomplete": "off", "required-on-draft": "true"}),
         choices=lambda form: [(None, "---")] + list(form.oprettet_på_vegne_af_choices),
     )
+    tf3 = forms.BooleanField(
+        label=_("TF3"),
+        widget=forms.CheckboxInput(),
+        required=False,
+    )
 
     def __init__(self, oprettet_på_vegne_af_choices: List[dict], **kwargs):
         self.oprettet_på_vegne_af_choices = oprettet_på_vegne_af_choices
@@ -122,6 +127,11 @@ class TF10UpdateForm(common_forms.TF10Form):
             (item.kategori, f"{item.kategori} - {item.navn}")
             for item in form.toldkategorier
         ],
+    )
+    tf3 = forms.BooleanField(
+        label=_("TF3"),
+        widget=forms.CheckboxInput(),
+        required=False,
     )
 
 

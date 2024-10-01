@@ -69,6 +69,16 @@
                     </div>
                 </div>
                 {% endif %}
+
+                {% if form.tf3 %}
+                <div class="row align-items-center">
+                    <div class="col-12">
+                        {{form.tf3}}
+                        <label for="{{form.kladde.id_for_label}}">{% translate "TF3" %}</label>
+                    </div>
+                </div>
+                {% endif %}
+
                 {% if gem_top %}
                     <button type="submit" class="btn btn-success float-end">{% translate "Gem" %}</button>
                 {% endif %}

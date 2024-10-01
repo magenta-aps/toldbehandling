@@ -118,7 +118,9 @@ class AdminLayoutBaseView(
         )
 
 
-class TF10View(AdminLayoutBaseView, PreventDoubleSubmitMixin, common_views.TF10View, FormView):
+class TF10View(
+    AdminLayoutBaseView, PreventDoubleSubmitMixin, common_views.TF10View, FormView
+):
     required_permissions = ("auth.admin", *common_views.TF10View.required_permissions)
     prisme_permissions = (
         "anmeldelse.prisme_afgiftsanmeldelse",
@@ -164,6 +166,7 @@ class TF10View(AdminLayoutBaseView, PreventDoubleSubmitMixin, common_views.TF10V
         return kwargs
 
     def form_valid(self, form):
+        print("form_valid")
         anmeldelse_id = self.kwargs["id"]
         send_til_prisme = form.cleaned_data["send_til_prisme"]
         status = form.cleaned_data["status"]
@@ -239,11 +242,14 @@ class TF10View(AdminLayoutBaseView, PreventDoubleSubmitMixin, common_views.TF10V
                     )
 
             elif status is not None:
+                print("status is set")
                 # Yderligere tjek for om brugeren må ændre noget.
                 # Vi kan have en situation hvor brugeren må se siden men ikke submitte formularen
                 response = self.check_permissions(self.edit_permissions)
                 if response:
+                    print("permissions fail")
                     return response
+                print("setting status")
                 self.rest_client.afgiftanmeldelse.set_status(anmeldelse_id, status)
                 """
                 if status == "afvist":

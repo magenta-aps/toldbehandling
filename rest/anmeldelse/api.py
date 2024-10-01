@@ -50,6 +50,7 @@ class AfgiftsanmeldelseIn(ModelSchema):
     oprettet_på_vegne_af_id: Optional[int] = None
     kladde: Optional[bool] = False
     fuldmagtshaver_id: Optional[int] = None
+    tf3: Optional[bool] = False
 
     class Config:
         model = Afgiftsanmeldelse
@@ -74,6 +75,7 @@ class PartialAfgiftsanmeldelseIn(ModelSchema):
     kladde: Optional[bool] = False
     fuldmagtshaver_id: Optional[int] = None
     status: Optional[str] = None
+    tf3: Optional[bool] = None
 
     class Config:
         model = Afgiftsanmeldelse
@@ -113,6 +115,7 @@ class AfgiftsanmeldelseOut(ModelSchema):
             "oprettet_på_vegne_af",
             "toldkategori",
             "fuldmagtshaver",
+            "tf3",
         ]
 
     beregnet_faktureringsdato: str
@@ -192,6 +195,7 @@ class AfgiftsanmeldelseFilterSchema(FilterSchema):
         ]
     )
     notat: Optional[str] = Field(q="notat__tekst__icontains")
+    tf3: Optional[bool]
 
 
 class AfgiftsanmeldelsePermission(RestPermission):

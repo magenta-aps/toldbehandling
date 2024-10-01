@@ -363,6 +363,7 @@ class AfgiftanmeldelseRestClient(ModelRestClient):
             "kladde": data.get("kladde", False),
             "fuldmagtshaver_id": data.get("fuldmagtshaver") or None,
             "status": status,
+            "tf3": data.get("tf3", False),
         }
 
     def create(

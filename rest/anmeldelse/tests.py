@@ -121,6 +121,7 @@ class AnmeldelsesTestDataMixin:
                 "fuldmagtshaver": None,
                 "status": "ny",
                 "oprettet_af": cls.user,
+                "tf3": False,
             }
         )
 
@@ -195,6 +196,7 @@ class AfgiftsanmeldelseTest(RestTestMixin, TestCase):
                     "status": "ny",
                     "oprettet_på_vegne_af": None,
                     "toldkategori": None,
+                    "tf3": False,
                 }
             )
         return self._expected_object_data
@@ -214,6 +216,7 @@ class AfgiftsanmeldelseTest(RestTestMixin, TestCase):
                     "leverandørfaktura": f"/leverand%C3%B8rfakturaer/{self.afgiftsanmeldelse.id}/leverand%C3%B8rfaktura.pdf",
                     "status": "ny",
                     "toldkategori": None,
+                    "tf3": False,
                     **self.calculated_fields,
                 }
             )
@@ -820,6 +823,7 @@ class AfgiftsanmeldelseAPITest(AnmeldelsesTestDataMixin, TestCase):
                         "betalt": False,
                         "dato": ANY,
                         "status": "ny",
+                        "tf3": False,
                         "oprettet_af": {
                             "id": self.user.id,
                             "username": "payment-test-user",
@@ -908,6 +912,7 @@ class AfgiftsanmeldelseAPITest(AnmeldelsesTestDataMixin, TestCase):
                 "betalt": False,
                 "dato": ANY,
                 "status": "ny",
+                "tf3": False,
                 "oprettet_af": {
                     "id": self.user.id,
                     "username": "payment-test-user",

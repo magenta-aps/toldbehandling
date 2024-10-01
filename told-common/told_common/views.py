@@ -623,6 +623,7 @@ class TF10FormUpdateView(
                 initial["afgangsdato"] = postforsendelse.afgangsdato
             if item.fuldmagtshaver:
                 initial["fuldmagtshaver"] = getattr(item.fuldmagtshaver, "cvr")
+            initial["tf3"] = item.tf3
         return initial
 
 

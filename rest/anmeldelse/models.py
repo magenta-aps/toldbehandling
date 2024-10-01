@@ -165,6 +165,10 @@ class Afgiftsanmeldelse(models.Model):
         default=BETALES_AF_BLANK,
     )
 
+    tf3 = models.BooleanField(
+        default=False,
+    )
+
     def clean(self):
         if self.fragtforsendelse is None and self.postforsendelse is None:
             raise ValidationError(
