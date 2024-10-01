@@ -33,7 +33,7 @@ class TF10CreateForm(common_forms.TF10Form):
         choices=lambda form: [(None, "---")] + list(form.oprettet_på_vegne_af_choices),
     )
     tf3 = forms.BooleanField(
-        label=_("TF3"),
+        label=_("Indførsel fra tredjeland"),
         widget=forms.CheckboxInput(),
         required=False,
     )
@@ -129,7 +129,7 @@ class TF10UpdateForm(common_forms.TF10Form):
         ],
     )
     tf3 = forms.BooleanField(
-        label=_("TF3"),
+        label=_("Indførsel fra tredjeland"),
         widget=forms.CheckboxInput(),
         required=False,
     )
