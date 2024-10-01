@@ -32,10 +32,10 @@ class TF10CreateForm(common_forms.TF10Form):
         widget=Select(attrs={"autocomplete": "off", "required-on-draft": "true"}),
         choices=lambda form: [(None, "---")] + list(form.oprettet_på_vegne_af_choices),
     )
-    tf3 = forms.ChoiceField(
+    tf3 = forms.BooleanField(
+        required=False,
         label=_("Indførsel fra tredjeland"),
-        widget=forms.Select(),
-        choices=[(False, _("Nej")), (True, _("Ja"))],
+        widget=forms.Select(choices=[(False, _("Nej")), (True, _("Ja"))]),
     )
 
     def __init__(self, oprettet_på_vegne_af_choices: List[dict], **kwargs):
@@ -128,10 +128,10 @@ class TF10UpdateForm(common_forms.TF10Form):
             for item in form.toldkategorier
         ],
     )
-    tf3 = forms.ChoiceField(
+    tf3 = forms.BooleanField(
+        required=False,
         label=_("Indførsel fra tredjeland"),
-        widget=forms.Select(),
-        choices=[(False, _("Nej")), (True, _("Ja"))],
+        widget=forms.Select(choices=[(False, _("Nej")), (True, _("Ja"))]),
     )
 
 

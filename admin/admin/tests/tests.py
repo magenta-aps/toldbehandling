@@ -606,13 +606,11 @@ class TestGodkend(TestMixin, PermissionsTest, TestCase):
     @patch.object(requests.sessions.Session, "patch")
     @patch.object(requests.sessions.Session, "get")
     def test_post_view_not_found(self, mock_get, mock_patch):
-        print("test_post_view_not_found")
         self.login()
         view_url = reverse("tf10_view", kwargs={"id": 2})
         mock_patch.side_effect = self.mock_requests_patch
         mock_get.side_effect = self.mock_requests_get
         response = self.client.post(view_url, {"status": "godkendt"})
-        print(response.headers)
         self.assertEqual(response.status_code, 404)
         prefix = f"{settings.REST_DOMAIN}/api/"
         patched_map = defaultdict(list)
@@ -639,13 +637,11 @@ class TestGodkend(TestMixin, PermissionsTest, TestCase):
     @patch.object(requests.sessions.Session, "patch")
     @patch.object(requests.sessions.Session, "get")
     def test_post_view_rest_error(self, mock_get, mock_patch):
-        print("test_post_view_rest_error")
         self.login()
         view_url = reverse("tf10_view", kwargs={"id": 1})
         mock_get.side_effect = self.mock_requests_get
         mock_patch.side_effect = self.mock_requests_error
         response = self.client.post(view_url, {"status": "godkendt"})
-        print(response.headers)
         self.assertEqual(response.status_code, 500)
 
 
@@ -2815,7 +2811,7 @@ class TF10CreateTest(TestMixin, HasLogin, TestCase):
         "forbindelsesnr": "ABC 337",
         "oprettet_på_vegne_af": 1,
         "betales_af": "afsender",
-        "tf3": "",
+        "tf3": "False",
     }
     formdata2 = {**formdata1, "fragttype": "luftpost", "forbindelsesnr": "1337"}
 
