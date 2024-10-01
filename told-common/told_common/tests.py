@@ -10,7 +10,6 @@ from datetime import datetime, timedelta
 from decimal import Decimal
 from io import StringIO
 from typing import Any, Callable, Tuple
-from unittest import TestCase
 from unittest.mock import mock_open, patch
 from urllib.parse import parse_qs, quote, quote_plus, urlparse
 
@@ -18,8 +17,9 @@ import requests
 from bs4 import BeautifulSoup
 from django.conf import settings
 from django.contrib.auth.models import Permission
+from django.core.cache import cache
 from django.http import FileResponse
-from django.test import override_settings
+from django.test import TestCase, override_settings
 from django.urls import reverse
 from requests import Response
 from told_common.data import unformat_decimal
@@ -55,6 +55,10 @@ class TestMixin:
                 li.text.strip() for li in all_errors.find_all(name="li")
             ]
         return error_fields
+
+    def tearDown(self):
+        super().tearDown()
+        cache.clear()
 
 
 class TemplateTagsTest:

@@ -19,7 +19,7 @@ from urllib.parse import parse_qs, quote, quote_plus, urlparse
 import requests
 from bs4 import BeautifulSoup, Tag
 from django.conf import settings
-from django.core.cache import cache
+from django.core.cache import cache, caches
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.shortcuts import redirect
 from django.template.response import TemplateResponse
@@ -271,7 +271,7 @@ class TestLogin(TestMixin, TestCase):
         )
 
 
-class TestGodkend(PermissionsTest, TestCase):
+class TestGodkend(TestMixin, PermissionsTest, TestCase):
     view = TF10View
 
     check_permissions = (
@@ -611,12 +611,12 @@ class TestGodkend(PermissionsTest, TestCase):
         mock_patch.side_effect = self.mock_requests_patch
         mock_get.side_effect = self.mock_requests_get
         response = self.client.post(view_url, {"status": "godkendt"})
-        self.assertEquals(response.status_code, 404)
+        self.assertEqual(response.status_code, 404)
         prefix = f"{settings.REST_DOMAIN}/api/"
         patched_map = defaultdict(list)
         for url, data in self.patched:
             patched_map[url].append(json.loads(data))
-        self.assertEquals(patched_map[prefix + "afgiftsanmeldelse/2"], [])
+        self.assertEqual(patched_map[prefix + "afgiftsanmeldelse/2"], [])
 
     @patch.object(requests.sessions.Session, "get")
     def test_get_view_rest_error(self, mock_get):
@@ -642,7 +642,7 @@ class TestGodkend(PermissionsTest, TestCase):
         mock_get.side_effect = self.mock_requests_get
         mock_patch.side_effect = self.mock_requests_error
         response = self.client.post(view_url, {"status": "godkendt"})
-        self.assertEquals(response.status_code, 500)
+        self.assertEqual(response.status_code, 500)
 
 
 class TestPrisme(TestMixin, PermissionsTest, TestCase):
@@ -1192,6 +1192,7 @@ class AnmeldelseHistoryDetailViewTest(PermissionsTest, TestCase):
                 "status": "ny",
                 "history_username": "admin",
                 "history_date": "2023-10-01T00:00:00.000000+00:00",
+                "tf3": False,
             }
         elif path == expected_prefix + "varelinje":
             json_content = {
@@ -1310,6 +1311,7 @@ class AnmeldelseHistoryDetailViewTest(PermissionsTest, TestCase):
                         "dato": "2023-10-06T00:00:00-02:00",
                         "beregnet_faktureringsdato": "2023-10-10",
                         "status": "ny",
+                        "tf3": False,
                         "history_username": "admin",
                         "history_date": "2023-10-01T00:00:00.000000+00:00",
                         "varelinjer": [
@@ -2809,6 +2811,7 @@ class TF10CreateTest(TestMixin, HasLogin, TestCase):
         "forbindelsesnr": "ABC 337",
         "oprettet_på_vegne_af": 1,
         "betales_af": "afsender",
+        "tf3": "False",
     }
     formdata2 = {**formdata1, "fragttype": "luftpost", "forbindelsesnr": "1337"}
 
@@ -3075,6 +3078,7 @@ class TF10CreateTest(TestMixin, HasLogin, TestCase):
             "leverandørfaktura_nummer",
             "fragtbrev",
             "afgangsdato",
+            "tf3",
             "form-0-vareafgiftssats",
             "form-0-antal",
             "form-0-mængde",
@@ -3249,6 +3253,7 @@ class TF10CreateTest(TestMixin, HasLogin, TestCase):
                     "toldkategori": None,
                     "kladde": False,
                     "status": None,
+                    "tf3": False,
                 }
             ],
         )
@@ -3332,6 +3337,7 @@ class TF10CreateTest(TestMixin, HasLogin, TestCase):
                     "toldkategori": None,
                     "kladde": False,
                     "status": None,
+                    "tf3": False,
                 }
             ],
         )
@@ -3411,6 +3417,7 @@ class TF10CreateTest(TestMixin, HasLogin, TestCase):
                     "toldkategori": None,
                     "kladde": False,
                     "status": None,
+                    "tf3": False,
                 }
             ],
         )

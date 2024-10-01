@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-04-08 09:02-0100\n"
+"POT-Creation-Date: 2024-10-01 12:43-0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -20,6 +20,18 @@ msgstr ""
 
 #: admin/forms.py
 msgid "Opret på vegne af"
+msgstr ""
+
+#: admin/forms.py
+msgid "Indførsel fra tredjeland"
+msgstr ""
+
+#: admin/forms.py admin/templates/admin/afgiftstabel/view.html
+msgid "Nej"
+msgstr ""
+
+#: admin/forms.py
+msgid "Ja"
 msgstr ""
 
 #: admin/forms.py
@@ -60,14 +72,6 @@ msgstr ""
 
 #: admin/forms.py
 msgid "Afgangsdato"
-msgstr ""
-
-#: admin/forms.py
-msgid "Ja"
-msgstr ""
-
-#: admin/forms.py admin/templates/admin/afgiftstabel/view.html
-msgid "Nej"
 msgstr ""
 
 #: admin/forms.py

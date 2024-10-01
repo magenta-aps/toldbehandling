@@ -49,7 +49,7 @@
                 {% if form.speditører %}
                 <div class="row align-items-center">
                     <div class="col-4">
-                        <label for="{{form.kladde.id_for_label}}">{% translate "Fuldmagt" %}</label>
+                        <label for="{{form.fuldmagtshaver.id_for_label}}">{% translate "Fuldmagt" %}</label>
                     </div>
                     <div class="col-8">
                         <div class="col-8 input-group">
@@ -62,13 +62,25 @@
                 {% elif item.fuldmagtshaver %}
                 <div class="row align-items-center">
                     <div class="col-4">
-                        <label for="{{form.kladde.id_for_label}}">{% translate "Fuldmagt" %}</label>
+                        <label>{% translate "Fuldmagt" %}</label>
                     </div>
                     <div class="col-8">
                         {{ item.fuldmagtshaver.navn }} (CVR: {{ item.fuldmagtshaver.cvr|unlocalize }})
                     </div>
                 </div>
                 {% endif %}
+
+                {% if form.tf3 %}
+                <div class="row align-items-center">
+                    <div class="col-4">
+                        <label>{% translate "Indførsel fra tredjeland" %}</label>
+                    </div>
+                    <div class="col-8">
+                        {{form.tf3}}
+                    </div>
+                </div>
+                {% endif %}
+
                 {% if gem_top %}
                     <button type="submit" class="btn btn-success float-end">{% translate "Gem" %}</button>
                 {% endif %}
