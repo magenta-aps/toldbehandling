@@ -1044,7 +1044,17 @@ class RestClient:
         client = RestClient(RestClient.login("system", settings.SYSTEM_USER_PASSWORD))
         mapped_data = {
             "indberetter_data": {"cpr": cpr, "cvr": cvr},
-            "username": " / ".join(filter(None, [cpr, cvr])),
+            "username": saml_data.get("email")
+            or " ".join(
+                filter(
+                    None,
+                    [
+                        saml_data["firstname"],
+                        saml_data["lastname"],
+                        f"/ {cvr}" if cvr else None,
+                    ],
+                )
+            ),
             "first_name": saml_data["firstname"],
             "last_name": saml_data["lastname"],
             "email": saml_data.get("email") or "",
@@ -1063,10 +1073,11 @@ class RestClient:
             else:
                 raise
         if (
-            saml_data.get("firstname") != user["first_name"]
-            or saml_data.get("lastname") != user["last_name"]
-            or saml_data.get("email") != user["email"]
-            or saml_data.get("cvr") != user["indberetter_data"]["cvr"]
+            mapped_data["username"] != user["username"]
+            or mapped_data["first_name"] != user["first_name"]
+            or mapped_data["last_name"] != user["last_name"]
+            or mapped_data["email"] != user["email"]
+            or cvr != user["indberetter_data"]["cvr"]
         ):
             user = client.patch(f"user/cpr/{int(cpr)}", mapped_data)
 

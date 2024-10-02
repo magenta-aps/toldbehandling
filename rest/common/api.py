@@ -255,6 +255,7 @@ class UserAPI:
             groups = [Group.objects.get(name=g) for g in payload.groups or []]
         except Group.DoesNotExist:
             raise ValidationError("Group does not exist")  # type: ignore
+        user.username = payload.username
         user.first_name = payload.first_name
         user.last_name = payload.last_name
         user.email = payload.email
