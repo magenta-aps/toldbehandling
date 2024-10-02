@@ -669,6 +669,7 @@ class PrivatAfgiftsanmeldelseAPI:
             .first()
         )
         if anmeldelse:
+            self.check_user(anmeldelse)
             return anmeldelse.pk
         return None
 

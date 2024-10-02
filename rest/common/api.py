@@ -7,6 +7,7 @@ from typing import Dict, List, Optional
 
 from common.models import EboksBesked, IndberetterProfile
 from django.contrib.auth.models import Group, User
+from django.db.models import QuerySet
 from django.http import HttpRequest
 from django.shortcuts import get_object_or_404
 from django_otp.plugins.otp_totp.models import TOTPDevice
@@ -17,6 +18,7 @@ from ninja.params import Query
 from ninja.schema import Schema
 from ninja.security import APIKeyHeader
 from ninja_extra import ControllerBase, api_controller, paginate, permissions, route
+from ninja_extra.exceptions import PermissionDenied
 from ninja_extra.schemas import NinjaPaginationResponseSchema
 from ninja_jwt.authentication import JWTAuth
 from ninja_jwt.tokens import RefreshToken
@@ -64,7 +66,7 @@ def get_auth_methods():
 class IndberetterProfileOut(ModelSchema):
     class Config:
         model = IndberetterProfile
-        model_fields = ["cpr", "cvr"]
+        model_fields = ["cvr"]
 
 
 class IndberetterProfileApiKeyOut(ModelSchema):
@@ -175,6 +177,17 @@ class UserFilterSchema(FilterSchema):
     permissions=[permissions.IsAuthenticated],
 )
 class UserAPI:
+
+    def check_user(self, item: User):
+        if not self.filter_user(User.objects.filter(id=item.id)).exists():
+            raise PermissionDenied
+
+    def filter_user(self, qs: QuerySet) -> QuerySet:
+        user = self.context.request.user
+        if user.is_superuser:
+            return qs
+        return qs.filter(pk=user.pk)
+
     @route.get(
         "/this",
         response=UserOut,
@@ -188,21 +201,23 @@ class UserAPI:
         "/cpr/{cpr}",
         response=UserOutWithTokens,
         auth=JWTAuth(),
-        url_name="user_cpr_get",
+        url_name="user_get",
     )
     def get_user_cpr(self, cpr: int):
         user = get_object_or_404(User, indberetter_data__cpr=cpr)
+        self.check_user(user)
         return UserOutWithTokens.user_to_dict(user)
 
     @route.get(
         "/cpr/{cpr}/apikey",
         response=IndberetterProfileApiKeyOut,
         auth=JWTAuth(),
-        url_name="user_cpr_get_apikey",
+        url_name="user_get_apikey",
         permissions=[DjangoPermission("auth.read_apikeys")],
     )
     def get_user_cpr_apikey(self, cpr: int):
         user = get_object_or_404(User, indberetter_data__cpr=cpr)
+        self.check_user(user)
         return user.indberetter_data
 
     @route.post(
@@ -250,22 +265,29 @@ class UserAPI:
         url_name="user_update",
     )
     def update(self, cpr, payload: UserIn):
-        user = get_object_or_404(User, indberetter_data__cpr=cpr)
+        cpr = int(cpr)
+        item = get_object_or_404(User, indberetter_data__cpr=cpr)
+        user = self.context.request.user
+        if not (
+            user.has_perm("common.modify_user")
+            or (user.indberetter_data and user.indberetter_data.cpr == cpr)
+        ):
+            raise PermissionDenied
         try:
             groups = [Group.objects.get(name=g) for g in payload.groups or []]
         except Group.DoesNotExist:
             raise ValidationError("Group does not exist")  # type: ignore
-        user.username = payload.username
-        user.first_name = payload.first_name
-        user.last_name = payload.last_name
-        user.email = payload.email
-        user.is_superuser = False
-        user.save()
-        user.groups.set(groups)
+        item.username = payload.username
+        item.first_name = payload.first_name
+        item.last_name = payload.last_name
+        item.email = payload.email
+        item.is_superuser = False
+        item.save()
+        item.groups.set(groups)
         if payload.indberetter_data:
-            user.indberetter_data.cvr = payload.indberetter_data.cvr
-        user.indberetter_data.save()
-        return UserOutWithTokens.user_to_dict(user)
+            item.indberetter_data.cvr = payload.indberetter_data.cvr
+        item.indberetter_data.save()
+        return UserOutWithTokens.user_to_dict(item)
 
 
 class EboksBeskedIn(ModelSchema):

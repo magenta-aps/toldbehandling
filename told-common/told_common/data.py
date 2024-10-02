@@ -462,7 +462,6 @@ class PrivatAfgiftsanmeldelse(ToldDataClass):
 
 @dataclass
 class Indberetter(ToldDataClass):
-    cpr: int
     cvr: int
 
 
@@ -516,11 +515,6 @@ class User(ToldDataClass):
     indberetter_data: Optional[Indberetter] = None
     jwt_token: Optional[JwtTokenInfo] = None
     twofactor_enabled: bool = False
-
-    @property
-    def cpr(self):
-        if self.indberetter_data:
-            return self.indberetter_data.cpr
 
     @property
     def cvr(self):
