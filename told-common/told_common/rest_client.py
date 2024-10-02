@@ -1061,10 +1061,10 @@ class RestClient:
             "is_superuser": False,
             "groups": [],
         }
-        if cpr:
-            mapped_data["groups"].append("PrivatIndberettere")
         if cvr:
             mapped_data["groups"].append("ErhvervIndberettere")
+        elif cpr:
+            mapped_data["groups"].append("PrivatIndberettere")
         try:
             user = client.get(f"user/cpr/{int(cpr)}")
         except RestClientException as e:
