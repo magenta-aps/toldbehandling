@@ -186,6 +186,8 @@ class UserAPI:
         user = self.context.request.user
         if user.is_superuser:
             return qs
+        if user.has_perm("auth.view_user"):
+            return qs
         return qs.filter(pk=user.pk)
 
     @route.get(
@@ -269,8 +271,12 @@ class UserAPI:
         item = get_object_or_404(User, indberetter_data__cpr=cpr)
         user = self.context.request.user
         if not (
-            user.has_perm("common.modify_user")
-            or (user.indberetter_data and user.indberetter_data.cpr == cpr)
+            user.has_perm("auth.change_user")
+            or (
+                hasattr(user, "indberetter_data")
+                and user.indberetter_data
+                and user.indberetter_data.cpr == cpr
+            )
         ):
             raise PermissionDenied
         try:

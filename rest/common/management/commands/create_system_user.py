@@ -24,6 +24,10 @@ class Command(BaseCommand):
             codename="change_user",
             content_type=user_model,
         )
+        can_view_users = Permission.objects.get(
+            codename="view_user",
+            content_type=user_model,
+        )
 
         system, created = User.objects.update_or_create(
             defaults={
@@ -40,3 +44,4 @@ class Command(BaseCommand):
         system.save()
         system.user_permissions.add(can_read_apikeys)
         system.user_permissions.add(can_update_users)
+        system.user_permissions.add(can_view_users)
