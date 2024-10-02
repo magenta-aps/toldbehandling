@@ -1044,8 +1044,16 @@ class RestClient:
         client = RestClient(RestClient.login("system", settings.SYSTEM_USER_PASSWORD))
         mapped_data = {
             "indberetter_data": {"cpr": cpr, "cvr": cvr},
-            "username": " ".join(
-                filter(None, [saml_data["firstname"], saml_data["lastname"], "/", cvr])
+            "username": saml_data.get("email")
+            or " ".join(
+                filter(
+                    None,
+                    [
+                        saml_data["firstname"],
+                        saml_data["lastname"],
+                        f"/ {cvr}" if cvr else None,
+                    ],
+                )
             ),
             "first_name": saml_data["firstname"],
             "last_name": saml_data["lastname"],
