@@ -202,7 +202,7 @@ class UserAPI:
     @route.get(
         "/cpr/{cpr}",
         response=UserOutWithTokens,
-        auth=JWTAuth(),
+        auth=get_auth_methods(),
         url_name="user_get",
     )
     def get_user_cpr(self, cpr: int):
