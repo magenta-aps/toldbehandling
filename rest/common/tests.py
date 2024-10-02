@@ -204,14 +204,14 @@ class CommonUserAPITests(CommonTest, TestCase):
                 "is_superuser": False,
                 "groups": [],
                 "permissions": ["anmeldelse.view_afgiftsanmeldelse"],
-                "indberetter_data": {"cpr": None, "cvr": 13371337},
+                "indberetter_data": {"cvr": 13371337},
                 "twofactor_enabled": False,
             },
         )
 
     def test_get_user_cpr(self):
         resp = self.client.get(
-            reverse("api-1.0.0:user_cpr_get", args=[self.indberetter2.cpr]),
+            reverse("api-1.0.0:user_get", args=[self.indberetter2.cpr]),
             HTTP_AUTHORIZATION=f"Bearer {self.user2_token}",
             content_type="application/json",
         )
@@ -231,7 +231,7 @@ class CommonUserAPITests(CommonTest, TestCase):
                     "anmeldelse.view_afgiftsanmeldelse",
                     "auth.read_apikeys",
                 ],
-                "indberetter_data": {"cpr": 1234567890, "cvr": None},
+                "indberetter_data": {"cvr": None},
                 "access_token": ANY,
                 "refresh_token": ANY,
             },
@@ -239,7 +239,7 @@ class CommonUserAPITests(CommonTest, TestCase):
 
     def test_get_user_cpr_apikey(self):
         resp = self.client.get(
-            reverse("api-1.0.0:user_cpr_get_apikey", args=[self.indberetter2.cpr]),
+            reverse("api-1.0.0:user_get_apikey", args=[self.indberetter2.cpr]),
             HTTP_AUTHORIZATION=f"Bearer {self.user2_token}",
             content_type="application/json",
         )
@@ -281,7 +281,7 @@ class CommonUserAPITests(CommonTest, TestCase):
                 "is_superuser": False,
                 "groups": [],
                 "permissions": [],
-                "indberetter_data": {"cpr": 1122334455, "cvr": None},
+                "indberetter_data": {"cvr": None},
                 "access_token": ANY,
                 "refresh_token": ANY,
             },
@@ -343,7 +343,7 @@ class CommonUserAPITests(CommonTest, TestCase):
                         "is_superuser": False,
                         "groups": [],
                         "permissions": ["anmeldelse.view_afgiftsanmeldelse"],
-                        "indberetter_data": {"cpr": None, "cvr": 13371337},
+                        "indberetter_data": {"cvr": 13371337},
                         "twofactor_enabled": False,
                     },
                     {
@@ -358,7 +358,7 @@ class CommonUserAPITests(CommonTest, TestCase):
                             "anmeldelse.view_afgiftsanmeldelse",
                             "auth.read_apikeys",
                         ],
-                        "indberetter_data": {"cpr": 1234567890, "cvr": None},
+                        "indberetter_data": {"cvr": None},
                         "twofactor_enabled": False,
                     },
                 ],
@@ -378,7 +378,7 @@ class CommonUserAPITests(CommonTest, TestCase):
                     "indberetter_data": {"cvr": 1337133700},
                 }
             ),
-            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            HTTP_AUTHORIZATION=f"Bearer {self.user2_token}",
             content_type="application/json",
         )
 
@@ -397,7 +397,7 @@ class CommonUserAPITests(CommonTest, TestCase):
                     "anmeldelse.view_afgiftsanmeldelse",
                     "auth.read_apikeys",
                 ],
-                "indberetter_data": {"cpr": 1234567890, "cvr": 1337133700},
+                "indberetter_data": {"cvr": 1337133700},
                 "access_token": ANY,
                 "refresh_token": ANY,
             },
@@ -416,7 +416,7 @@ class CommonUserAPITests(CommonTest, TestCase):
                     "groups": ["test-group"],
                 }
             ),
-            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            HTTP_AUTHORIZATION=f"Bearer {self.user2_token}",
             content_type="application/json",
         )
 

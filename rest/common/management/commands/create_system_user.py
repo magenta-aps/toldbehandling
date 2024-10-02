@@ -20,6 +20,10 @@ class Command(BaseCommand):
             codename="read_apikeys",
             content_type=user_model,
         )
+        can_update_users = Permission.objects.get(
+            codename="change_user",
+            content_type=user_model,
+        )
 
         system, created = User.objects.update_or_create(
             defaults={
@@ -35,3 +39,4 @@ class Command(BaseCommand):
         system.set_password(os.environ["SYSTEM_USER_PASSWORD"])
         system.save()
         system.user_permissions.add(can_read_apikeys)
+        system.user_permissions.add(can_update_users)

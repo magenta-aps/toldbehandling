@@ -214,7 +214,7 @@ class TF10BlanketTest(TestMixin, HasLogin, TestCase):
                         "sats.view_afgiftstabel",
                         "sats.view_vareafgiftssats",
                     ],
-                    "indberetter_data": {"cpr": 1111111111, "cvr": 12345678},
+                    "indberetter_data": {"cvr": 12345678},
                 },
                 "oprettet_på_vegne_af": None,
                 "toldkategori": None,
@@ -401,7 +401,7 @@ class TF10BlanketTest(TestMixin, HasLogin, TestCase):
                         "sats.view_afgiftstabel",
                         "sats.view_vareafgiftssats",
                     ],
-                    "indberetter_data": {"cpr": 1111111111, "cvr": 12345678},
+                    "indberetter_data": {"cvr": 12345678},
                 },
                 "oprettet_på_vegne_af": None,
                 "toldkategori": None,
@@ -1081,6 +1081,10 @@ class TF5BlanketTest(TestMixin, HasLogin, TestCase):
                     }
                 ],
             }
+        elif path.startswith(
+            expected_prefix + "privat_afgiftsanmeldelse/seneste_indførselstilladelse/"
+        ):
+            content = b"null"
         else:
             print(f"Mock got unrecognized path: {path}")
         if json_content:

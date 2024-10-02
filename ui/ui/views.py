@@ -253,9 +253,11 @@ class TF5FormCreateView(
 
     @property
     def indførselstilladelse(self):
-        if self.userdata.get("indberetter_data"):
-            cpr = self.userdata["indberetter_data"]["cpr"]
-            return self.get_seneste_indførselstilladelse(cpr)
+        sessiondata = self.request.session.get(settings.LOGIN_SESSION_DATA_KEY)
+        if sessiondata:
+            cpr = sessiondata.get("cpr")
+            if cpr:
+                return self.get_seneste_indførselstilladelse(int(cpr))
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -268,10 +270,13 @@ class TF5FormCreateView(
             initial = kwargs["initial"]
         else:
             initial = kwargs["initial"] = {}
-        if self.userdata:
-            if self.userdata.get("indberetter_data"):
-                cpr = self.userdata["indberetter_data"]["cpr"]
+
+        sessiondata = self.request.session.get(settings.LOGIN_SESSION_DATA_KEY)
+        if sessiondata:
+            cpr = sessiondata.get("cpr")
+            if cpr:
                 initial["cpr"] = str(cpr).zfill(10)
+        if self.userdata:
             if "first_name" in self.userdata or "last_name" in self.userdata:
                 initial["navn"] = " ".join(
                     filter(
