@@ -1,5 +1,7 @@
+from anmeldelse.models import PrivatAfgiftsanmeldelse
+from django.conf import settings
 from django.core.management.base import BaseCommand
-from payment.exceptions import ProviderPaymentNotFound
+from payment.exceptions import ProviderPaymentChargeError, ProviderPaymentNotFound
 from payment.models import Payment
 from payment.provider_handlers import get_provider_handler
 
@@ -18,6 +20,7 @@ class Command(BaseCommand):
         for payment in reserved_payments:
             print(f"- Charging payment {payment.id} ({payment.provider_payment_id})...")
             provider_handler = get_provider_handler(payment.provider)
+            payment_tf5 = PrivatAfgiftsanmeldelse.objects.get(id=payment.declaration.id)
 
             # Fetch the payment from third party, and verify they are in sync
             try:
@@ -40,12 +43,35 @@ class Command(BaseCommand):
             # Charge the payment
             try:
                 _ = provider_handler.charge(payment.provider_payment_id, payment.amount)
+            except ProviderPaymentChargeError as e:
+                if (
+                    f"cannot overcharge payment. reserved amount: {payment.amount}. "
+                    f"previously charged amount: {payment.amount}. "
+                    f"tried to charge: {payment.amount}"
+                ) in e.detail.lower():
+                    print(
+                        (
+                            f'  Payment "{payment.id}", for TF5 '
+                            f'"{payment.declaration.id}", '
+                            f"have already been charged. Setting payment.status to "
+                            f'"{settings.PAYMENT_PAYMENT_STATUS_PAID}" and TF5 status '
+                            'to "afsluttet"'
+                        )
+                    )
+                    # NOTE: We just let the logic continue as if successfull
+                else:
+                    print(f"ProviderPaymentChargeError: {e}")
+                    continue
             except Exception as e:
-                print(f"ERROR: {e}")
+                print(f"Unkown ERROR: {e}")
                 continue
 
-            payment.status = "paid"
+            payment.status = settings.PAYMENT_PAYMENT_STATUS_PAID
             payment.save()
+
+            if payment_tf5.status != "afsluttet":
+                payment_tf5.status = "afsluttet"
+                payment_tf5.save()
 
             print("  Successfully charged!")
 
