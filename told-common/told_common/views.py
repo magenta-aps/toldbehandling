@@ -944,7 +944,7 @@ class TF5View(
                 "tillægsafgift": self.object.tillægsafgift,
                 # Opret en path i admin/urls.py ved navn "tf5_tilladelse"
                 # hvis denne sættes til True
-                "can_create_tilladelse": False,
+                "can_create_tilladelse": True,
                 "show_notater": self.show_notater,
                 "can_opret_betaling": False,
                 "can_cancel": can_edit,
