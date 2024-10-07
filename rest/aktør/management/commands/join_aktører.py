@@ -38,14 +38,17 @@ class Command(BaseCommand):
         aktørtype = kwargs["type"]
         id1 = kwargs["id1"]
         id2 = kwargs["id2"]
+        if id1 == id2:
+            print("The two ids may not be equal")
+            return
         try:
-        if aktørtype == "afsender":
-            item1 = Afsender.objects.get(id=id1)
-            item2 = Afsender.objects.get(id=id2)
-        elif aktørtype == "modtager":
-            item1 = Modtager.objects.get(id=id1)
-            item2 = Modtager.objects.get(id=id2)
-        else:
+            if aktørtype == "afsender":
+                item1 = Afsender.objects.get(id=id1)
+                item2 = Afsender.objects.get(id=id2)
+            elif aktørtype == "modtager":
+                item1 = Modtager.objects.get(id=id1)
+                item2 = Modtager.objects.get(id=id2)
+            else:
                 print(f"Invalid type '{aktørtype}', must be 'afsender' or 'modtager'")
                 return
         except (Afsender.DoesNotExist, Modtager.DoesNotExist) as e:
