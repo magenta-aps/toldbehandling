@@ -162,24 +162,35 @@ class PaymentAPI:
     @route.post("/refresh/{payment_id}", auth=JWTAuth(), url_name="payment_refresh")
     def refresh(self, payment_id: int) -> PaymentResponse:
         payment_local = Payment.objects.get(id=payment_id)
+        payment_tf5 = PrivatAfgiftsanmeldelse.objects.get(
+            id=payment_local.declaration.id
+        )
 
         provider_handler = get_provider_handler(settings.PAYMENT_PROVIDER_NETS)
         provider_payment = provider_handler.read(payment_local.provider_payment_id)
 
         # Update local payment status based on the summary
         if (
-            payment_local.status == "created"
+            payment_local.status == settings.PAYMENT_PAYMENT_STATUS_CREATED
             and provider_payment.summary.reserved_amount == payment_local.amount
         ):
-            payment_local.status = "reserved"
+            payment_local.status = settings.PAYMENT_PAYMENT_STATUS_RESERVED
             payment_local.save()
 
         if (
-            payment_local.status == "reserved"
+            payment_local.status == settings.PAYMENT_PAYMENT_STATUS_RESERVED
             and provider_payment.summary.charged_amount == payment_local.amount
         ):
-            payment_local.status = "paid"
+            payment_local.status = settings.PAYMENT_PAYMENT_STATUS_PAID
             payment_local.save()
+
+        # Update/finish the TF5 when a payment have been received
+        if payment_tf5.status != "afsluttet" and payment_local.status in [
+            settings.PAYMENT_PAYMENT_STATUS_RESERVED,
+            settings.PAYMENT_PAYMENT_STATUS_PAID,
+        ]:
+            payment_tf5.status = "afsluttet"
+            payment_tf5.save()
 
         # Default, return the payment without doing anything
         return _payment_model_to_response(
