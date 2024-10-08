@@ -1039,10 +1039,14 @@ class RestClient:
         self.session.headers = {"Authorization": f"Bearer {self.token.access_token}"}
 
     @classmethod
+    def get_system_rest_client(cls) -> "RestClient":
+        return RestClient(RestClient.login("system", settings.SYSTEM_USER_PASSWORD))
+
+    @classmethod
     def login_saml_user(cls, saml_data: dict) -> Tuple[Dict, JwtTokenInfo]:
         cpr = saml_data["cpr"]
         cvr = saml_data.get("cvr")
-        client = RestClient(RestClient.login("system", settings.SYSTEM_USER_PASSWORD))
+        client = cls.get_system_rest_client()
 
         # If email is provided, use that as username (which must be unique.)
         # If email is not provided, use the full name and CVR (if provided.)

@@ -4,11 +4,11 @@
 
 import json
 import os
-import random
 import time
 from copy import deepcopy
 from datetime import datetime, timedelta
 from decimal import Decimal
+from functools import partial
 from io import StringIO
 from typing import Any, Callable, Tuple
 from unittest.mock import mock_open, patch
@@ -24,8 +24,8 @@ from django.test import TestCase, override_settings
 from django.test.testcases import SimpleTestCase
 from django.urls import reverse
 from requests import Response
-from told_common.data import unformat_decimal
-from told_common.rest_client import RestClient
+from told_common.data import JwtTokenInfo, unformat_decimal
+from told_common.rest_client import RestClient, RestClientException
 from told_common.templatetags.common_tags import file_basename, zfill
 from told_common.views import FileView
 
@@ -274,38 +274,107 @@ class LoginTest(TestMixin):
 
 
 class TestRestClient(SimpleTestCase):
-    # This test creates `User` objects by calling the REST API of the "real" application
-    # and thus creates `User` objects in the "real" database, rather than the test
-    # database created by Django when running unittests.
-    # This test is stateful and does not know how to clean up after itself.
+    first_name = "Navn"
+    last_name = "Navnesen"
+
+    class MockJwtTokenInfo:
+        access_token = None
+        access_token_timestamp = time.time()
+
+        def __bool__(self):
+            return False
 
     def test_login_saml_without_email_creates_unique_username(self):
-        # Arrange
-        full_name = "Testnavn Navnesen"
-        first_name, last_name = full_name.split(" ")
-        num_users_to_create = 3
-        # Act: call the `create_user` multiple times with the same first name and last
-        # name (but different CPRs.)
-        results = [
-            RestClient.login_saml_user(
-                {
-                    "firstname": first_name,
-                    "lastname": last_name,
-                    "cvr": 10000000,
-                    # `cpr` key must be present, and value must be an integer
-                    # Use random integer to not trigger "update" logic rather than
-                    # "create" logic.
-                    "cpr": random.randint(101000000, 3112999999),
+        # Call the `login_saml_user` method multiple times with the same values for
+        # `first_name`, `last_name` and `cvr`.
+        # Each call should return in a new (unique) username being generated from the
+        # `first_name`, `last_name` and `cvr` values.
+        user1 = self._call_login_saml_user(iteration=0)
+        self.assertEquals(user1["username"], f"{self.first_name} {self.last_name}")
+        user2 = self._call_login_saml_user(iteration=1)
+        self.assertEquals(user2["username"], f"{self.first_name} {self.last_name} (1)")
+        user3 = self._call_login_saml_user(iteration=2)
+        self.assertEquals(user3["username"], f"{self.first_name} {self.last_name} (2)")
+
+    def _call_login_saml_user(self, iteration: int = 0):
+        client = RestClient(self.MockJwtTokenInfo())
+        with patch(
+            "told_common.rest_client.RestClient.get_system_rest_client",
+            return_value=client,
+        ):
+            with patch.object(
+                client, "get", side_effect=partial(self._response_for_get, iteration)
+            ):
+                with patch.object(
+                    client,
+                    "post",
+                    side_effect=partial(self._response_for_post, iteration),
+                ):
+                    with patch.object(
+                        client, "patch", side_effect=ValueError
+                    ) as mock_client_patch:
+                        user, token = client.login_saml_user(
+                            {
+                                "firstname": self.first_name,
+                                "lastname": self.last_name,
+                                "cvr": 0,
+                                # `cpr` key must be present, and value must be an
+                                # integer.
+                                "cpr": 0,
+                            }
+                        )
+                        mock_client_patch.assert_not_called()
+                        self.assertIsInstance(user, dict)
+                        self.assertIsInstance(token, JwtTokenInfo)
+                        return user
+
+    def _response_for_get(self, iteration: int, path: str, *args, **kwargs):
+        if path.startswith("user?username_startswith="):
+            # GET to fetch all users whose usernames start with parameter
+            if iteration == 0:
+                return {"count": 0}
+            else:
+                return {
+                    "count": 1,
+                    "items": [{"username": self._get_username(iteration - 1)}],
                 }
-            )
-            for _ in range(num_users_to_create)
-        ]
-        # Assert: we created as many users as we intended to
-        self.assertEqual(len(results), num_users_to_create)
-        # Assert: we created a unique username for each user
-        self.assertEqual(
-            len(set(result[0]["username"] for result in results)), num_users_to_create
-        )
+        elif path.startswith("user/cpr/"):
+            if path.endswith("apikey"):
+                # GET to fetch API key by CPR
+                return {"api_key": "mocked"}
+            else:
+                # GET to look up user by CPR
+                if iteration == 0:
+                    raise RestClientException(404, "content")
+                else:
+                    return self._user_response(iteration)
+        else:
+            raise NotImplementedError(f"cannot mock GET to unknown path '{path}'")
+
+    def _response_for_post(self, iteration: int, path: str, *args, **kwargs):
+        if path == "user":
+            # POST to create user
+            return self._user_response(iteration)
+        else:
+            raise NotImplementedError(f"cannot mock POST to unknown path '{path}'")
+
+    def _user_response(self, iteration: int) -> dict:
+        return {
+            "username": self._get_username(iteration),
+            "first_name": self.first_name,
+            "last_name": self.last_name,
+            "email": "",
+            "is_superuser": False,
+            "indberetter_data": {"cpr": 0, "cvr": 0},
+            "access_token": None,
+            "refresh_token": None,
+        }
+
+    def _get_username(self, iteration: int):
+        result = f"{self.first_name} {self.last_name}"
+        if iteration > 0:
+            result = f"{result} ({iteration})"
+        return result
 
 
 class HasLogin:
@@ -1000,9 +1069,9 @@ class AnmeldelseListViewTest(HasLogin):
         if self.can_select_multiple:
             for item in expected["items"]:
                 id = item["id"]
-                item["select"] = (
-                    f'<input type="checkbox" id="select_{id}" name="id" value="{id}"/>'
-                )
+                item[
+                    "select"
+                ] = f'<input type="checkbox" id="select_{id}" name="id" value="{id}"/>'
 
         self.assertEquals(
             modify_values(data, (str,), lambda s: collapse_newlines(s)), expected
