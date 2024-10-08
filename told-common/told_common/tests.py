@@ -4,6 +4,7 @@
 
 import json
 import os
+import random
 import time
 from copy import deepcopy
 from datetime import datetime, timedelta
@@ -20,6 +21,7 @@ from django.contrib.auth.models import Permission
 from django.core.cache import cache
 from django.http import FileResponse
 from django.test import TestCase, override_settings
+from django.test.testcases import SimpleTestCase
 from django.urls import reverse
 from requests import Response
 from told_common.data import unformat_decimal
@@ -269,6 +271,41 @@ class LoginTest(TestMixin):
         mock_get.return_value = self.create_response(500, "")
         response = self.client.get(self.restricted_url)
         self.assertEquals(response.status_code, 302)
+
+
+class TestRestClient(SimpleTestCase):
+    # This test creates `User` objects by calling the REST API of the "real" application
+    # and thus creates `User` objects in the "real" database, rather than the test
+    # database created by Django when running unittests.
+    # This test is stateful and does not know how to clean up after itself.
+
+    def test_login_saml_without_email_creates_unique_username(self):
+        # Arrange
+        full_name = "Testnavn Navnesen"
+        first_name, last_name = full_name.split(" ")
+        num_users_to_create = 3
+        # Act: call the `create_user` multiple times with the same first name and last
+        # name (but different CPRs.)
+        results = [
+            RestClient.login_saml_user(
+                {
+                    "firstname": first_name,
+                    "lastname": last_name,
+                    "cvr": 10000000,
+                    # `cpr` key must be present, and value must be an integer
+                    # Use random integer to not trigger "update" logic rather than
+                    # "create" logic.
+                    "cpr": random.randint(101000000, 3112999999),
+                }
+            )
+            for _ in range(num_users_to_create)
+        ]
+        # Assert: we created as many users as we intended to
+        self.assertEqual(len(results), num_users_to_create)
+        # Assert: we created a unique username for each user
+        self.assertEqual(
+            len(set(result[0]["username"] for result in results)), num_users_to_create
+        )
 
 
 class HasLogin:
