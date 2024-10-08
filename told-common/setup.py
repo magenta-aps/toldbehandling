@@ -42,9 +42,9 @@ setuptools.setup(
         "gunicorn==22.0.0",
         "requests==2.31.0",
         "dataclasses-json==0.6.0",
-        "WeasyPrint==60.1",
+        "WeasyPrint==62.3",
         "holidays==0.38",
-        "pypdf==3.17.3",
+        "pypdf==5.0.1",
         "django-forms-dynamic==1.0.0",
     ],
     classifiers=[
