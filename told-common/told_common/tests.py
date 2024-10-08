@@ -1069,9 +1069,9 @@ class AnmeldelseListViewTest(HasLogin):
         if self.can_select_multiple:
             for item in expected["items"]:
                 id = item["id"]
-                item[
-                    "select"
-                ] = f'<input type="checkbox" id="select_{id}" name="id" value="{id}"/>'
+                item["select"] = (
+                    f'<input type="checkbox" id="select_{id}" name="id" value="{id}"/>'
+                )
 
         self.assertEquals(
             modify_values(data, (str,), lambda s: collapse_newlines(s)), expected
