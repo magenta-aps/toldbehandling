@@ -94,13 +94,33 @@ class Command(BaseCommand):
             telefon=str(random.randint(100000, 999999)),
             cvr=10000000,
         )
+        tlf = str(random.randint(100000, 999999))
         Modtager.objects.create(
             navn="Testfirma2",
             adresse="Testvej 3",
             postnummer=1234,
             by="Testby",
             postbox=None,
-            telefon=str(random.randint(100000, 999999)),
+            telefon=tlf,
+            cvr=20000000,
+        )
+        Modtager.objects.create(
+            navn="Testfirma2",
+            adresse="Testvej 3",
+            postnummer=1234,
+            by="Testby",
+            postbox="222",
+            telefon=tlf,
+            cvr=20000000,
+        )
+        tlf = str(random.randint(100000, 999999))
+        Modtager.objects.create(
+            navn="Testfirma3",
+            adresse="Testvej 4",
+            postnummer=1234,
+            by="Testby",
+            postbox=None,
+            telefon=tlf,
             cvr=20000000,
         )
         Modtager.objects.create(
@@ -109,7 +129,16 @@ class Command(BaseCommand):
             postnummer=1234,
             by="Testby",
             postbox=None,
-            telefon=str(random.randint(100000, 999999)),
-            cvr=20000000,
+            telefon=tlf,
+            cvr=None,
+        )
+        Modtager.objects.create(
+            navn="Testfirma3",
+            adresse="Testvej 4",
+            postnummer=1234,
+            by="Testby",
+            postbox="1234",
+            telefon=tlf,
+            cvr=None,
         )
         Speditør.objects.create(cvr=12345678, navn="TestSpeditør")
