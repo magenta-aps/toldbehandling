@@ -961,11 +961,13 @@ class PaymentAPITests(PaymentTest):
         )
         self.assertEqual(resp.status_code, 200)
         test_payment.refresh_from_db()
+        self.declaration.refresh_from_db()
 
         mock_nets_provider.read.assert_called_once_with(
             test_payment.provider_payment_id
         )
         self.assertEqual(test_payment.status, "reserved")
+        self.assertEqual(self.declaration.status, "afsluttet")
 
     @patch("payment.api.get_provider_handler")
     def test_refresh_reserved_to_paid(self, mock_get_provider_handler):
@@ -1006,11 +1008,13 @@ class PaymentAPITests(PaymentTest):
         )
         self.assertEqual(resp.status_code, 200)
         test_payment.refresh_from_db()
+        self.declaration.refresh_from_db()
 
         mock_nets_provider.read.assert_called_once_with(
             test_payment.provider_payment_id
         )
         self.assertEqual(test_payment.status, "paid")
+        self.assertEqual(self.declaration.status, "afsluttet")
 
 
 class PaymentManagementCommandTests(PaymentTest):

@@ -193,8 +193,12 @@ PAYMENT_PROVIDER_NETS_TERMS_URL = os.environ.get(
 
 PAYMENT_PROVIDER_BANK = "bank"
 
-# Logging
+PAYMENT_PAYMENT_STATUS_CREATED = "created"
+PAYMENT_PAYMENT_STATUS_RESERVED = "reserved"
+PAYMENT_PAYMENT_STATUS_DECLINED = "declined"
+PAYMENT_PAYMENT_STATUS_PAID = "paid"
 
+# Logging
 
 LOGGING: dict = {
     "version": 1,
