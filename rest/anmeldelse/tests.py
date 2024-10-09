@@ -20,6 +20,7 @@ from anmeldelse.models import (
 )
 from common.models import IndberetterProfile
 from django.contrib.auth.models import Permission
+from django.contrib.contenttypes.models import ContentType
 from django.core.files.base import ContentFile
 from django.db.models.signals import post_delete, post_save
 from django.test import TestCase
@@ -47,6 +48,16 @@ class AnmeldelsesTestDataMixin:
 
         cls.view_historicalafgiftsanmeldelse = Permission.objects.get(
             codename="view_historicalafgiftsanmeldelse"
+        )
+
+        cls.view_all_anmeldelse_76, _ = Permission.objects.get_or_create(
+            codename="view_all_anmeldelse_76",
+            content_type=ContentType.objects.get_for_model(
+                Afgiftsanmeldelse, for_concrete_model=False
+            ),
+            defaults={
+                "name": "Kan se alle afgiftsanmeldelser i toldkategori 76, ikke kun egne",
+            },
         )
 
         # User-1 (CVR)
@@ -107,6 +118,16 @@ class AnmeldelsesTestDataMixin:
                 "kladde": False,
             },
         )
+        cls.postforsendelse2, _ = Postforsendelse.objects.get_or_create(
+            postforsendelsesnummer="1235",
+            oprettet_af=cls.user,
+            defaults={
+                "forsendelsestype": Postforsendelse.Forsendelsestype.SKIB,
+                "afsenderbykode": "8200",
+                "afgangsdato": "2023-11-03",
+                "kladde": False,
+            },
+        )
 
         # Afgiftsanmeldelse
         cls.afgiftsanmeldelse = Afgiftsanmeldelse.objects.create(
@@ -122,6 +143,33 @@ class AnmeldelsesTestDataMixin:
                 "status": "ny",
                 "oprettet_af": cls.user,
                 "tf3": False,
+            }
+        )
+
+        # User-2 (Tusass)
+        cls.tusass, cls.tusass_token, cls.tusass_refresh_token = RestMixin.make_user(
+            username="tusass-test-user",
+            plaintext_password="testpassword1337",
+            permissions=[
+                cls.view_afgiftsanmeldelse_perm,
+                cls.view_all_anmeldelse_76,
+            ],
+        )
+
+        cls.afgiftsanmeldelse2 = Afgiftsanmeldelse.objects.create(
+            **{
+                "afsender_id": cls.afsender.id,
+                "modtager_id": cls.modtager.id,
+                "postforsendelse_id": cls.postforsendelse2.id,
+                "leverandørfaktura_nummer": "12345",
+                "betales_af": "afsender",
+                "indførselstilladelse": "abcde",
+                "betalt": False,
+                "fuldmagtshaver": None,
+                "status": "ny",
+                "oprettet_af": cls.user,
+                "tf3": False,
+                "toldkategori": "76",
             }
         )
 
@@ -1109,3 +1157,13 @@ class AfgiftsanmeldelseAPITest(AnmeldelsesTestDataMixin, TestCase):
     def test_map_sort(self):
         result = AfgiftsanmeldelseAPI.map_sort("forbindelsesnummer", "desc")
         self.assertEqual(result, "-fragtforsendelse__forbindelsesnr")
+
+    def test_tusass(self):
+        url = reverse(f"api-1.0.0:afgiftsanmeldelse_list")
+        response = self.client.get(
+            url, HTTP_AUTHORIZATION=f"Bearer {self.tusass_token}"
+        )
+        data = response.json()
+        self.assertEqual(data["count"], 1)
+        self.assertEqual(len(data["items"]), 1)
+        self.assertEqual(data["items"][0]["id"], self.afgiftsanmeldelse2.id)

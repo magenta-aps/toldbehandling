@@ -926,7 +926,7 @@ class VarelinjeAPI:
         q = qs.none()
         if user.has_perm("anmeldelse.view_all_anmeldelse_76"):
             # Hvis brugeren må se alle i kategori 76, filtrer på dem
-            q |= Q(afgiftsanmeldelse__toldkategori="76")
+            q |= qs.filter(afgiftsanmeldelse__toldkategori="76")
 
         for a, c in (
             ("afgiftsanmeldelse", "cvr"),
