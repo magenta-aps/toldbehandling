@@ -1167,3 +1167,12 @@ class AfgiftsanmeldelseAPITest(AnmeldelsesTestDataMixin, TestCase):
         self.assertEqual(data["count"], 1)
         self.assertEqual(len(data["items"]), 1)
         self.assertEqual(data["items"][0]["id"], self.afgiftsanmeldelse2.id)
+
+        url = reverse(f"api-1.0.0:afgiftsanmeldelse_list_full")
+        response = self.client.get(
+            url, HTTP_AUTHORIZATION=f"Bearer {self.tusass_token}"
+        )
+        data = response.json()
+        self.assertEqual(data["count"], 1)
+        self.assertEqual(len(data["items"]), 1)
+        self.assertEqual(data["items"][0]["id"], self.afgiftsanmeldelse2.id)
