@@ -83,7 +83,7 @@ class Command(BaseCommand):
             by="Andeby",
             postbox=None,
             telefon=str(random.randint(100000, 999999)),
-            cvr=10000000,
+            cvr=None,
         )
         Afsender.objects.create(
             navn="Testfirma1",
@@ -92,7 +92,7 @@ class Command(BaseCommand):
             by="Gåserød",
             postbox=None,
             telefon=str(random.randint(100000, 999999)),
-            cvr=10000000,
+            cvr=17516345,
         )
         tlf = str(random.randint(100000, 999999))
         Modtager.objects.create(
@@ -140,5 +140,6 @@ class Command(BaseCommand):
             postbox="1234",
             telefon=tlf,
             cvr=None,
+            kreditordning=True,
         )
         Speditør.objects.create(cvr=12345678, navn="TestSpeditør")
