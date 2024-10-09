@@ -437,11 +437,18 @@ class AfgiftsanmeldelseAPI:
 
     def filter_user(self, qs: QuerySet) -> QuerySet:
         user = self.context.request.user
-        if self.check_perm("anmeldelse.view_all_anmeldelse"):
+
+        if user.has_perm("anmeldelse.view_all_anmeldelse"):
             return qs
-        if self.check_perm("anmeldelse.view_approved_anmeldelse"):
+
+        if user.has_perm("anmeldelse.view_approved_anmeldelse"):
             # Hvis brugeren må se alle godkendte, filtrer på dem
             return qs.filter(status__in=("godkendt", "afsluttet"))
+
+        if user.has_perm("anmeldelse.view_all_anmeldelse_76"):
+            # Hvis brugeren må se alle i kategori 76, filtrer på dem
+            return qs.filter(toldkategori="76")
+
         # Hvis brugeren hverken må se alle eller godkendte, filtrér på opretteren
         try:
             cvr = user.indberetter_data.cvr
@@ -915,7 +922,12 @@ class VarelinjeAPI:
         user = self.context.request.user
         if user.has_perm("anmeldelse.view_all_anmeldelse"):
             return qs
+
         q = qs.none()
+        if user.has_perm("anmeldelse.view_all_anmeldelse_76"):
+            # Hvis brugeren må se alle i kategori 76, filtrer på dem
+            q |= Q(afgiftsanmeldelse__toldkategori="76")
+
         for a, c in (
             ("afgiftsanmeldelse", "cvr"),
             ("privatafgiftsanmeldelse", "cpr"),

@@ -11,6 +11,7 @@ from anmeldelse.models import (
     Afgiftsanmeldelse,
     PrismeResponse,
     PrivatAfgiftsanmeldelse,
+    Toldkategori,
     Varelinje,
 )
 from django.contrib.auth.models import Group, User
@@ -81,6 +82,12 @@ class Command(BaseCommand):
                 betalt=random.choice([False, True]),
                 status=random.choice(["ny", "afvist", "godkendt"]),
                 oprettet_af=(fragtforsendelse or postforsendelse).oprettet_af,
+                toldkategori=random.choice(
+                    [None]
+                    + list(
+                        Toldkategori.objects.all().values_list("kategori", flat=True)
+                    )
+                ),
             )
             if anmeldelse.oprettet_af.indberetter_data.cvr == 12345679:
                 anmeldelse.fuldmagtshaver = Speditør.objects.get(cvr=12345678)

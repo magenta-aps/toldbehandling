@@ -21,16 +21,24 @@ class Command(BaseCommand):
         if settings.ENVIRONMENT in ("production",):
             print(f"Will not create dummy users in {settings.ENVIRONMENT}")
             return
+
         try:
             toldmedarbejder_group = Group.objects.get(name="Toldmedarbejdere")
         except Group.DoesNotExist:
             toldmedarbejder_group = None
+
+        try:
+            tusass_group = Group.objects.get(name="Tusass-medarbejdere")
+        except Group.DoesNotExist:
+            tusass_group = None
+
         try:
             afstemmere_bogholdere_group = Group.objects.get(
                 name="Afstemmere/bogholdere"
             )
         except Group.DoesNotExist:
             afstemmere_bogholdere_group = None
+
         try:
             dataansvarlige_group = Group.objects.get(name="Dataansvarlige")
         except Group.DoesNotExist:
@@ -40,6 +48,7 @@ class Command(BaseCommand):
             erhvervindberettere_group = Group.objects.get(name="ErhvervIndberettere")
         except Group.DoesNotExist:
             erhvervindberettere_group = None
+
         try:
             privatindberettere_group = Group.objects.get(name="PrivatIndberettere")
         except Group.DoesNotExist:
@@ -83,6 +92,20 @@ class Command(BaseCommand):
             username="toldmedarbejder",
         )
         toldmedarbejder.groups.add(toldmedarbejder_group)
+
+        tusass, created = User.objects.update_or_create(
+            defaults={
+                "first_name": "Tusass",
+                "last_name": "",
+                "email": "",
+                "password": make_password(os.environ.get("TUSASS_PASSWORD", "tusass")),
+                "is_active": True,
+                "is_staff": False,
+                "is_superuser": False,
+            },
+            username="tusass",
+        )
+        tusass.groups.add(tusass_group)
 
         afstemmer, created = User.objects.update_or_create(
             defaults={

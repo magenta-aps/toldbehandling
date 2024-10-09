@@ -32,6 +32,9 @@ class Command(BaseCommand):
         toldmedarbejdere, _ = Group.objects.update_or_create(
             name="Toldmedarbejdere",
         )
+        toldmedarbejdere_tusass, _ = Group.objects.update_or_create(
+            name="Tusass-medarbejdere",
+        )
         afstemmere_bogholdere, _ = Group.objects.update_or_create(
             name="Afstemmere/bogholdere",
         )
@@ -94,6 +97,13 @@ class Command(BaseCommand):
             name="Kan se alle afgiftsanmeldelser, ikke kun egne",
             codename="view_all_anmeldelse",
             content_type=afgiftsanmeldelse_model,
+        )
+        se_alle_afgiftsanmeldelser_i_kategori_76, _ = (
+            Permission.objects.update_or_create(
+                name="Kan se alle afgiftsanmeldelser i toldkategori 76, ikke kun egne",
+                codename="view_all_anmeldelse_76",
+                content_type=afgiftsanmeldelse_model,
+            )
         )
         se_alle_godkendte_afgiftsanmeldelser, _ = Permission.objects.update_or_create(
             name="Kan se alle godkendte afgiftsanmeldelser",
@@ -241,6 +251,11 @@ class Command(BaseCommand):
                     codename=f"{action}_{model.model}", content_type=model
                 )
             )
+            toldmedarbejdere_tusass.permissions.add(
+                Permission.objects.get(
+                    codename=f"{action}_{model.model}", content_type=model
+                )
+            )
         for permission in (
             send_til_prisme,
             admin_site_access,
@@ -252,6 +267,18 @@ class Command(BaseCommand):
             se_alle_private_afgiftsanmeldelser,
         ):
             toldmedarbejdere.permissions.add(permission)
+
+        for permission in (
+            send_til_prisme,
+            admin_site_access,
+            se_alle_afgiftsanmeldelser_i_kategori_76,
+            se_alle_fragtforsendelser,
+            se_alle_postforsendelser,
+            godkend_afgiftsanmeldelser,
+            bank_transfer,
+            se_alle_private_afgiftsanmeldelser,
+        ):
+            toldmedarbejdere_tusass.permissions.add(permission)
 
         for action, model in (
             ("view", afsender_model),

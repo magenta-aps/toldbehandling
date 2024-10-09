@@ -156,7 +156,11 @@ class PostforsendelseAPI:
         user = self.context.request.user
         if user.has_perm("forsendelse.view_all_postforsendelser"):
             return qs
+
         q = qs.none()
+        if user.has_perm("anmeldelse.view_all_anmeldelse_76"):
+            # Hvis brugeren må se alle i kategori 76, filtrer på dem
+            q |= qs.filter(afgiftsanmeldelse__toldkategori="76")
         try:
             cvr = getattr(user.indberetter_data, "cvr")
         except IndberetterProfile.DoesNotExist:
@@ -346,7 +350,11 @@ class FragtforsendelseAPI:
         user = self.context.request.user
         if user.has_perm("forsendelse.view_all_fragtforsendelser"):
             return qs
+
         q = qs.none()
+        if user.has_perm("anmeldelse.view_all_anmeldelse_76"):
+            # Hvis brugeren må se alle i kategori 76, filtrer på dem
+            q |= qs.filter(afgiftsanmeldelse__toldkategori="76")
         try:
             cvr = getattr(user.indberetter_data, "cvr")
         except IndberetterProfile.DoesNotExist:
