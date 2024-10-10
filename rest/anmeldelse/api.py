@@ -26,7 +26,6 @@ from django.core.files.base import ContentFile
 from django.db.models import Q, QuerySet, Sum
 from django.db.models.expressions import F, Value
 from django.http import Http404, HttpResponseBadRequest
-from django.http.multipartparser import FIELD
 from django.shortcuts import get_object_or_404
 from forsendelse.api import FragtforsendelseOut, PostforsendelseOut
 from ninja import Field, FilterSchema, ModelSchema, Query

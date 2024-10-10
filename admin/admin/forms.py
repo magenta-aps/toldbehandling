@@ -182,10 +182,12 @@ class TF10SearchForm(common_forms.TF10SearchForm):
 
     toldkategori = DynamicField(
         forms.MultipleChoiceField,
-        choices=lambda form: [("no_category", _("Ingen kategori"))] + [
+        choices=lambda form: [("no_category", _("Ingen kategori"))]
+        + [
             (toldkategori.kategori, f"{toldkategori.kategori} - {toldkategori.navn}")
             for toldkategori in form.toldkategorier
         ],
+        required=False,
     )
 
 

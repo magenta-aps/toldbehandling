@@ -709,7 +709,7 @@ class ListView(FormView):
             )
         return super().form_invalid(form)
 
-    def get_initial(self) -> Dict[str, str|int|List[str|int]]:
+    def get_initial(self) -> Dict[str, str | Iterable[str]]:
         return {}
 
     def get_form_kwargs(self) -> Dict[str, Any]:
