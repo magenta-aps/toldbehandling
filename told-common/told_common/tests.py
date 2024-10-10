@@ -851,6 +851,15 @@ class AnmeldelseListViewTest(HasLogin):
                     }
                 ],
             }
+
+        elif path == expected_prefix + "toldkategori":
+            json_content = [
+                {
+                    "kategori": "80",
+                    "navn": "TestKategori",
+                    "kræver_cvr": False,
+                }
+            ]
         else:
             print(f"Mock got unrecognized path: {path}")
         if json_content:

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-10-01 12:30-0100\n"
+"POT-Creation-Date: 2024-10-10 07:16-0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -534,6 +534,7 @@ msgid "Notater"
 msgstr ""
 
 #: told_common/templates/told_common/tf10/form.html
+#: told_common/templates/told_common/tf10/list.html
 #: told_common/templates/told_common/tf10/view.html
 msgid "Toldkategori"
 msgstr ""
@@ -626,6 +627,10 @@ msgstr ""
 
 #: told_common/templates/told_common/tf10/list.html
 msgid "Fuldmagtsstatus"
+msgstr ""
+
+#: told_common/templates/told_common/tf10/list.html
+msgid "Brug shift eller ctrl/cmd for at vælge flere"
 msgstr ""
 
 #: told_common/templates/told_common/tf10/list.html
