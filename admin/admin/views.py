@@ -430,7 +430,8 @@ class TF10HistoryListView(AdminLayoutBaseView, common_views.ListView):
     ) -> Dict[str, Any]:
         return {
             key: self.map_value(item, key, context, index)
-            for key in ("history_username", "history_date", "notat", "actions")
+            for key in
+            ("history_username", "history_date", "notat", "status", "actions")
         }
 
     def map_value(self, item, key, context, index):
@@ -449,6 +450,8 @@ class TF10HistoryListView(AdminLayoutBaseView, common_views.ListView):
             if type(value) is str:
                 value = datetime.fromisoformat(value)
             return value.astimezone().strftime("%Y-%m-%d %H:%M:%S")
+        if key == "status":
+            return value.capitalize()
 
         if value is None:
             value = ""
