@@ -301,42 +301,51 @@ class TestRestClient(SimpleTestCase):
         with patch(
             "told_common.rest_client.RestClient.get_system_rest_client",
             return_value=client,
-        ):
-            with patch.object(
-                client, "get", side_effect=partial(self._response_for_get, iteration)
-            ):
-                with patch.object(
-                    client,
-                    "post",
-                    side_effect=partial(self._response_for_post, iteration),
-                ):
-                    with patch.object(
-                        client, "patch", side_effect=ValueError
-                    ) as mock_client_patch:
-                        user, token = client.login_saml_user(
-                            {
-                                "firstname": self.first_name,
-                                "lastname": self.last_name,
-                                "cvr": 0,
-                                # `cpr` key must be present, and value must be an
-                                # integer.
-                                "cpr": 0,
-                            }
-                        )
-                        mock_client_patch.assert_not_called()
-                        self.assertIsInstance(user, dict)
-                        self.assertIsInstance(token, JwtTokenInfo)
-                        return user
+        ), patch.object(
+            client, "get", side_effect=partial(self._response_for_get, iteration)
+        ), patch.object(
+            client,
+            "post",
+            side_effect=partial(self._response_for_post, iteration),
+        ), patch.object(
+            client, "patch", side_effect=ValueError
+        ) as mock_client_patch:
+            user, token = client.login_saml_user(
+                {
+                    "firstname": self.first_name,
+                    "lastname": self.last_name,
+                    "cvr": 0,
+                    # `cpr` key must be present, and value must be an
+                    # integer.
+                    "cpr": 0,
+                }
+            )
+            mock_client_patch.assert_not_called()
+            self.assertIsInstance(user, dict)
+            self.assertIsInstance(token, JwtTokenInfo)
+            return user
 
     def _response_for_get(self, iteration: int, path: str, *args, **kwargs):
-        if path.startswith("user?username_startswith="):
+        query = args[0] if args else None
+        if (path == "user") and ("username_startswith" in query):
             # GET to fetch all users whose usernames start with parameter
             if iteration == 0:
-                return {"count": 0}
+                return {"count": 0, "items": []}
             else:
                 return {
                     "count": 1,
-                    "items": [{"username": self._get_username(iteration - 1)}],
+                    "items": [
+                        {
+                            "id": iteration,
+                            "username": self._get_username(iteration - 1),
+                            "first_name": "",
+                            "last_name": "",
+                            "email": "",
+                            "is_superuser": False,
+                            "groups": [],
+                            "permissions": [],
+                        }
+                    ],
                 }
         elif path.startswith("user/cpr/"):
             if path.endswith("apikey"):

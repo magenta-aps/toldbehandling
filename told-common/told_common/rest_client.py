@@ -1064,14 +1064,17 @@ class RestClient:
 
         if not saml_data.get("email"):
             # Check if a user already exists for the `non_email_username` (any suffix)
-            query = urlencode(dict(username_startswith=non_email_username))
-            other_users = client.get(f"user?{query}")
-            if other_users and other_users["count"] > 0:
+            count, other_users = client.user.list(
+                username_startswith=non_email_username
+            )
+            if other_users and count > 0:
                 # Other users exist with the same name (but have different suffixes.)
                 # Find the highest suffix and add 1 to get the next available suffix.
+
+                # Find "42" in "Name Surname (42)"
+                pattern = re.compile(r"^.*\((?P<val>\d+)\)$")
+
                 def find_suffix(username: str) -> int:
-                    # Find "42" in "Name Surname (42)"
-                    pattern = re.compile(r"^.*\((?P<val>\d+)\)$")
                     match = pattern.match(username)
                     if match is not None:
                         return int(match.group("val"))
@@ -1079,10 +1082,7 @@ class RestClient:
                         return 0
 
                 highest_suffix = max(
-                    [
-                        find_suffix(other_user["username"])
-                        for other_user in other_users["items"]
-                    ]
+                    [find_suffix(other_user.username) for other_user in other_users]
                 )
 
                 # Add suffix to `non_email_username`
