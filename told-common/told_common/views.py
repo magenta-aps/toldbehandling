@@ -709,7 +709,7 @@ class ListView(FormView):
             )
         return super().form_invalid(form)
 
-    def get_initial(self) -> Dict[str, str | Iterable[str]]:
+    def get_initial(self) -> Dict[str, str | List[str]]:
         return {}
 
     def get_form_kwargs(self) -> Dict[str, Any]:
@@ -722,7 +722,7 @@ class ListView(FormView):
             self.store_search(query_dict)
         if not query_dict:
             for key, value in self.get_initial().items():
-                if type(value) is list:
+                if isinstance(value, list):
                     query_dict.setlist(key, value)
                 else:
                     query_dict[key] = value
