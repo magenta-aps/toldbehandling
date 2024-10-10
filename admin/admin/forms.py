@@ -174,6 +174,23 @@ class TF10UpdateMultipleForm(BootstrapForm):
         super().__init__(**kwargs)
 
 
+class TF10SearchForm(common_forms.TF10SearchForm):
+
+    def __init__(self, toldkategorier, *args, **kwargs):
+        self.toldkategorier = toldkategorier
+        super().__init__(*args, **kwargs)
+
+    toldkategori = DynamicField(
+        forms.MultipleChoiceField,
+        choices=lambda form: [("no_category", _("Ingen kategori"))]
+        + [
+            (toldkategori.kategori, f"{toldkategori.kategori} - {toldkategori.navn}")
+            for toldkategori in form.toldkategorier
+        ],
+        required=False,
+    )
+
+
 class ListForm(forms.Form):
     json = forms.BooleanField(required=False)
     offset = forms.IntegerField(required=False)

@@ -11,7 +11,7 @@ from django.template.defaultfilters import register
 
 
 @register.filter
-def file_basename(item: Union[str, File]) -> str:
+def file_basename(item: str | File | None) -> str:
     if isinstance(item, File):
         item = item.name
     if isinstance(item, str):
