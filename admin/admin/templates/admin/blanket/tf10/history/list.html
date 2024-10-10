@@ -43,6 +43,7 @@
             <th data-field="history_date" class="col-2">Dato</th>
             <th data-field="history_username" class="col-2">Ændret af</th>
             <th data-field="history_notat" class="col-6">Notat</th>
+            <th data-field="status" class="col-6">Status</th>
             <th data-field="actions" class="col-2">Handlinger</th>
         </tr>
         </thead>
@@ -52,6 +53,7 @@
             <td>{{item.history_date}}</td>
             <td>{{item.history_username}}</td>
             <td>{{item.notat}}</td>
+            <td>{{item.status}}</td>
             <td>
                 {% include actions_template with item=item index=forloop.counter0 %}
             </td>
