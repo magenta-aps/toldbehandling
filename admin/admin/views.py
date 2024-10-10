@@ -308,15 +308,6 @@ class TF10ListView(AdminLayoutBaseView, common_views.TF10ListView):
         kwargs["toldkategorier"] = self.toldkategorier
         return kwargs
 
-    def get_initial(self):
-        initial = super().get_initial()
-        initial["toldkategori"] = [
-            toldkategori.kategori
-            for toldkategori in self.toldkategorier
-            if toldkategori.kategori != "76"
-        ]
-        return initial
-
     def get_context_data(self, **kwargs):
         context = super(TF10ListView, self).get_context_data(**kwargs)
         context["title"] = "Afgiftsanmeldelser"
