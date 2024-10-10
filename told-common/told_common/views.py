@@ -709,6 +709,9 @@ class ListView(FormView):
             )
         return super().form_invalid(form)
 
+    def get_initial(self) -> Dict[str, str|int|List[str|int]]:
+        return {}
+
     def get_form_kwargs(self) -> Dict[str, Any]:
         kwargs = super().get_form_kwargs()
         query_dict = self.request.GET.copy()
@@ -717,6 +720,12 @@ class ListView(FormView):
             query_dict = self.load_search()
         else:
             self.store_search(query_dict)
+        if not query_dict:
+            for key, value in self.get_initial().items():
+                if type(value) is list:
+                    query_dict.setlist(key, value)
+                else:
+                    query_dict[key] = value
         kwargs["data"] = query_dict
         return kwargs
 

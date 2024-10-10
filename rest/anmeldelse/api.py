@@ -26,6 +26,7 @@ from django.core.files.base import ContentFile
 from django.db.models import Q, QuerySet, Sum
 from django.db.models.expressions import F, Value
 from django.http import Http404, HttpResponseBadRequest
+from django.http.multipartparser import FIELD
 from django.shortcuts import get_object_or_404
 from forsendelse.api import FragtforsendelseOut, PostforsendelseOut
 from ninja import Field, FilterSchema, ModelSchema, Query
@@ -195,7 +196,18 @@ class AfgiftsanmeldelseFilterSchema(FilterSchema):
         ]
     )
     notat: Optional[str] = Field(q="notat__tekst__icontains")
+    toldkategori: Optional[List[str]]
     tf3: Optional[bool]
+
+    def filter_toldkategori(self, value: List[str]) -> Q | None:
+        if value is None:
+            return None
+        include_none = "no_category" in value
+        if include_none:
+            value.remove("no_category")
+            return Q(toldkategori__in=value) | Q(toldkategori__isnull=True)
+        else:
+            return Q(toldkategori__in=value)
 
 
 class AfgiftsanmeldelsePermission(RestPermission):

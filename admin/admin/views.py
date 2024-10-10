@@ -11,7 +11,7 @@ from urllib.parse import quote_plus
 from django.conf import settings
 from django.contrib import messages
 from django.core.exceptions import ValidationError
-from django.http import Http404, HttpResponseBadRequest, JsonResponse
+from django.http import Http404, HttpResponseBadRequest, JsonResponse, QueryDict
 from django.shortcuts import redirect
 from django.template import loader
 from django.urls import reverse, reverse_lazy
@@ -297,6 +297,25 @@ class TF10ListView(AdminLayoutBaseView, common_views.TF10ListView):
         "auth.admin",
         *common_views.TF10ListView.required_permissions,
     )
+    form_class = forms.TF10SearchForm
+
+    @cached_property
+    def toldkategorier(self):
+        return self.rest_client.toldkategori.list()
+
+    def get_form_kwargs(self) -> Dict[str, Any]:
+        kwargs = super().get_form_kwargs()
+        kwargs["toldkategorier"] = self.toldkategorier
+        return kwargs
+
+    def get_initial(self):
+        initial = super().get_initial()
+        initial["toldkategori"] = [
+            toldkategori.kategori
+            for toldkategori in self.toldkategorier
+            if toldkategori.kategori != "76"
+        ]
+        return initial
 
     def get_context_data(self, **kwargs):
         context = super(TF10ListView, self).get_context_data(**kwargs)
