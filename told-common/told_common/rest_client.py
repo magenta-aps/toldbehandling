@@ -4,6 +4,7 @@
 import base64
 import json
 import logging
+import re
 import time
 from base64 import b64encode
 from collections import defaultdict
@@ -1038,23 +1039,58 @@ class RestClient:
         self.session.headers = {"Authorization": f"Bearer {self.token.access_token}"}
 
     @classmethod
+    def get_system_rest_client(cls) -> "RestClient":
+        return RestClient(RestClient.login("system", settings.SYSTEM_USER_PASSWORD))
+
+    @classmethod
     def login_saml_user(cls, saml_data: dict) -> Tuple[Dict, JwtTokenInfo]:
         cpr = saml_data["cpr"]
         cvr = saml_data.get("cvr")
-        client = RestClient(RestClient.login("system", settings.SYSTEM_USER_PASSWORD))
+        client = cls.get_system_rest_client()
+
+        # If email is provided, use that as username (which must be unique.)
+        # If email is not provided, use the full name and CVR (if provided.)
+        # We store this potential username in `non_email_username`.
+        non_email_username = " ".join(
+            filter(
+                None,
+                [
+                    saml_data["firstname"],
+                    saml_data["lastname"],
+                    f"/ {cvr}" if cvr else None,
+                ],
+            )
+        )
+
+        if not saml_data.get("email"):
+            # Check if a user already exists for the `non_email_username` (any suffix)
+            count, other_users = client.user.list(
+                username_startswith=non_email_username
+            )
+            if other_users and count > 0:
+                # Other users exist with the same name (but have different suffixes.)
+                # Find the highest suffix and add 1 to get the next available suffix.
+
+                # Find "42" in "Name Surname (42)"
+                pattern = re.compile(r"^.*\((?P<val>\d+)\)$")
+
+                def find_suffix(username: str) -> int:
+                    match = pattern.match(username)
+                    if match is not None:
+                        return int(match.group("val"))
+                    else:
+                        return 0
+
+                highest_suffix = max(
+                    [find_suffix(other_user.username) for other_user in other_users]
+                )
+
+                # Add suffix to `non_email_username`
+                non_email_username = f"{non_email_username} ({highest_suffix + 1})"
+
         mapped_data = {
             "indberetter_data": {"cpr": cpr, "cvr": cvr},
-            "username": saml_data.get("email")
-            or " ".join(
-                filter(
-                    None,
-                    [
-                        saml_data["firstname"],
-                        saml_data["lastname"],
-                        f"/ {cvr}" if cvr else None,
-                    ],
-                )
-            ),
+            "username": saml_data.get("email") or non_email_username,
             "first_name": saml_data["firstname"],
             "last_name": saml_data["lastname"],
             "email": saml_data.get("email") or "",

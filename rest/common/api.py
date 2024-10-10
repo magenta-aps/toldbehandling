@@ -164,6 +164,7 @@ class UserIn(ModelSchema):
 
 class UserFilterSchema(FilterSchema):
     username: Optional[str] = Field(q="username__icontains")
+    username_startswith: Optional[str] = Field(q="username__istartswith")
     first_name: Optional[str] = Field(q="first_name__icontains")
     last_name: Optional[str] = Field(q="last_name__icontains")
     email: Optional[str] = Field(q="email__icontains")
