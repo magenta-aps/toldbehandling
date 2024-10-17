@@ -430,8 +430,13 @@ class TF10HistoryListView(AdminLayoutBaseView, common_views.ListView):
     ) -> Dict[str, Any]:
         return {
             key: self.map_value(item, key, context, index)
-            for key in
-            ("history_username", "history_date", "notat", "status", "actions")
+            for key in (
+                "history_username",
+                "history_date",
+                "notat",
+                "status",
+                "actions",
+            )
         }
 
     def map_value(self, item, key, context, index):
