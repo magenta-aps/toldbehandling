@@ -1154,7 +1154,8 @@ class RestClient:
                 headers={"Content-Type": "application/json"},
             )
             response.raise_for_status()
-            return response.json()
+            if response.status_code != 204:
+                return response.json()
         except HTTPError as e:
             raise RestClientException.from_http_error(e)
 
