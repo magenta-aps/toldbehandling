@@ -97,6 +97,95 @@
         </div>
     </div>
 </div>
+{% if not user.is_anonymous and user.email|length < 1 %}
+{{user|json_script:"user_data"}}
+<div id="user_email_modal" class="modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{% translate 'Indtast bruger e-mail' %}</h5>
+            </div>
+
+            <form method="post" id="user_email_modal_form" class="needs-validation" novalidate>
+                <div class="modal-body">
+                    <div class="alert alert-warning" role="alert">
+                        {% translate 'Din bruger har ikke en associeret e-mail adresse og kan derfor ikke modtage notifikationer.' %}
+                    </div>
+
+                    <div class="row">
+                        <div class="col-auto">
+                            <label for="userEmailInput" class="col-form-label">{% translate 'E-mail' %}:</label>
+                        </div>
+                        <div class="col-10">
+                            <input type="email" id="userEmailInput" class="form-control"
+                                pattern="^[a-zA-Z0-9\._\%\-]+@[a-zA-Z0-9\.\-]+\.[a-zA-Z]{2,}$"
+                                placeholder="{% translate 'Indtast manglende e-mail her...' %}" required />
+
+                            <div class="invalid-feedback">
+                                {% translate 'Ikke valid e-mail adresse!' %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-warning" data-bs-dismiss="modal">
+                        {% translate 'Ignorér'%}
+                    </button>
+                    <button type="submit" class="btn btn-success">{% translate 'Opdatér' %}</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script nonce="{{ request.csp_nonce }}">
+    const user_data = JSON.parse($("#user_data").text());
+    const modal = new bootstrap.Modal('#user_email_modal', {});
+    modal.show();
+
+    // Form submit & validation
+    const csrf_token = "{{ csrf_token }}"
+
+    var forms = document.querySelectorAll('.needs-validation')
+    Array.prototype.slice.call(forms)
+        .forEach(function (form) {
+            form.addEventListener('submit', function (event) {
+                event.preventDefault()
+
+                if (!form.checkValidity()) {
+                    event.stopPropagation()
+
+                    form.classList.add('was-validated')
+                    return
+                }
+                form.classList.add('was-validated')
+
+                // Update the user email through the REST-app
+                $.ajax({
+                    url: "/rest/user/" + user_data.id,
+                    type: "PATCH",
+                    headers: { "X-CSRFToken": csrf_token },
+                    contentType: "application/json",
+                    data: JSON.stringify({
+                        "username": user_data.username,
+                        "first_name": user_data.first_name,
+                        "last_name": user_data.last_name,
+                        "groups": user_data.groups,
+                        "email": $("#userEmailInput").val(),
+                    }),
+                    success: function (response) {
+                        modal.hide()
+                    },
+                    error: function (err) {
+                        console.log("Error updating user email:")
+                        console.log(err)
+                    },
+                });
+            }, false)
+        })
+</script>
+{% endif %}
+
 {% endblock %}
 </body>
 </html>
