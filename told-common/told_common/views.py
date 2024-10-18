@@ -12,7 +12,7 @@ from urllib.parse import unquote
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import REDIRECT_FIELD_NAME
-from django.http import FileResponse, Http404, JsonResponse
+from django.http import FileResponse, Http404, JsonResponse, QueryDict
 from django.shortcuts import redirect
 from django.template import loader
 from django.template.response import TemplateResponse
@@ -79,6 +79,12 @@ class LogoutView(RedirectView):
 class RestView(LoginRequiredMixin, HasRestClientMixin, View):
     def get(self, request, *args, **kwargs) -> JsonResponse:
         data = self.rest_client.get(kwargs["path"], request.GET)
+        return JsonResponse(data)
+
+    def patch(self, request, *args, **kwargs) -> JsonResponse:
+        data = self.rest_client.patch(
+            kwargs["path"], QueryDict(request.body.decode("utf-8")).dict()
+        )
         return JsonResponse(data)
 
 
