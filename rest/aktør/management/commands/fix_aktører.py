@@ -173,6 +173,9 @@ class Command(BaseCommand):
                 count = tf10s.count()
                 ids = [str(id) for id in tf10s.values_list("pk", flat=True)]
                 tf10s.update(**{aktørtype: master})
+                Afgiftsanmeldelse.history.filter(
+                    **{f"{aktørtype}__in": filtered_match_qs}
+                ).update(**{aktørtype: master})
                 print(
                     f"Opdaterede {count} anmeldelse{'r' if len(ids) > 1 else ''} "
                     f"({','.join(ids)}) til at pege på {aktørtype} {master.pk}"
