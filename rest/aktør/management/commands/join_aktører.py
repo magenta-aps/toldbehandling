@@ -38,6 +38,9 @@ class Command(BaseCommand):
         aktørtype = kwargs["type"]
         id1 = kwargs["id1"]
         id2 = kwargs["id2"]
+        if id1 == id2:
+            print("The two ids may not be equal")
+            return
         try:
             if aktørtype == "afsender":
                 item1 = Afsender.objects.get(id=id1)
