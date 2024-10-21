@@ -64,6 +64,10 @@ class Command(BaseCommand):
             qs = Afgiftsanmeldelse.objects.filter(**{aktørtype: item2})
             ids = list(qs.values_list("id", flat=True))
             qs.update(**{aktørtype: item1})
+
+            hqs = Afgiftsanmeldelse.history.filter(**{aktørtype: item2})
+            hqs.update(**{aktørtype: item1})
+
             item2.delete()
             print(f"Updated TF10 ids: {ids}")
             print(f"Deleted {aktørtype}: {id2}")
