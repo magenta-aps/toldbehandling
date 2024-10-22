@@ -21,12 +21,12 @@ def dato_måned_slut(dato: date) -> date:
 def send_email(
     subject: str,
     template: str,
-    context: Optional[dict[str, Any]],
-    from_email: Optional[str],
-    to: Optional[List[str]],
-    bcc: Optional[List[str]],
-    cc: Optional[List[str]],
-    html_template: Optional[str],
+    to: List[str],
+    context: Optional[dict[str, Any]] = None,
+    from_email: Optional[str] = None,
+    bcc: Optional[List[str]] = None,
+    cc: Optional[List[str]] = None,
+    html_template: Optional[str] = None,
 ):
     msg = EmailMultiAlternatives(
         subject,

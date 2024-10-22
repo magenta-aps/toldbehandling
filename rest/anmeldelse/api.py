@@ -21,6 +21,7 @@ from anmeldelse.models import (
 )
 from common.api import UserOut, get_auth_methods
 from common.models import IndberetterProfile
+from common.util import send_email
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.db.models import Q, QuerySet, Sum
@@ -371,21 +372,30 @@ class AfgiftsanmeldelseAPI:
     ):
         item = get_object_or_404(Afgiftsanmeldelse, id=id)
         self.check_user(item)
-        data = payload.dict(exclude_unset=True)
+
         if payload.status in ("godkendt", "afvist", "afsluttet"):
             if not self.check_perm("anmeldelse.approve_reject_anmeldelse"):
                 raise PermissionDenied
+
+        data = payload.dict(exclude_unset=True)
+
+        # Draft double-check
+        kladde = data.pop("kladde", False)
+        if not kladde and item.status == "kladde":
+            data["status"] = "ny"
+
+        # Assign the payload values to the item
+        status_old = item.status
+        for attr, value in data.items():
+            if value is not None:
+                setattr(item, attr, value)
+
+        # Handle invoices - after payload-handling
         leverandørfaktura = data.pop("leverandørfaktura", None)
         leverandørfaktura_navn = data.pop("leverandørfaktura_navn", None) or (
             str(uuid4()) + ".pdf"
         )
-        kladde = data.pop("kladde", False)
 
-        if not kladde and item.status == "kladde":
-            data["status"] = "ny"
-        for attr, value in data.items():
-            if value is not None:
-                setattr(item, attr, value)
         if leverandørfaktura is not None:
             item.leverandørfaktura = ContentFile(
                 base64.b64decode(leverandørfaktura), name=leverandørfaktura_navn
@@ -406,6 +416,26 @@ class AfgiftsanmeldelseAPI:
                 )
             else:
                 log.info("Der findes ikke en eksisterende leverandørfaktura")
+
+        # Send email notification in specific scenarios
+        if (
+            item.oprettet_af
+            and item.oprettet_af.email
+            and len(item.oprettet_af.email) > 0
+        ):
+            if status_old != "afvist" and item.status == "afvist":
+                send_email(
+                    f"Afgiftsanmeldelse {item.id} er blevet afvist",
+                    "common/emails/afgiftsanmeldelse_status_change.txt",
+                    [item.oprettet_af.email],
+                    context={
+                        "id": item.id,
+                        "status_old": status_old,
+                        "status_new": item.status,
+                    },
+                )
+
+        # Persist data & return
         item.save()
         return {"success": True}
 
