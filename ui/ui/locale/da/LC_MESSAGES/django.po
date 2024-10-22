@@ -70,6 +70,12 @@ msgid "Indtast bruger e-mail"
 msgstr ""
 
 #: ui/templates/ui/layout.html
+msgid ""
+"Din bruger har ikke en associeret e-mail adresse og kan derfor ikke modtage "
+"notifikationer."
+msgstr ""
+
+#: ui/templates/ui/layout.html
 msgid "E-mail"
 msgstr ""
 
@@ -79,6 +85,10 @@ msgstr ""
 
 #: ui/templates/ui/layout.html
 msgid "Ikke valid e-mail adresse!"
+msgstr ""
+
+#: ui/templates/ui/layout.html
+msgid "Ignorer"
 msgstr ""
 
 #: ui/templates/ui/layout.html
