@@ -52,10 +52,13 @@
     <hr class="p-0 m-0"/>
 </header>
 {% endblock %}
+
 {% block content %}
 {% endblock %}
+
 {% block extra_footers %}
 {% endblock %}
+
 {% block modals %}
 <div id="apikey_modal" class="modal">
     <div class="modal-dialog">
@@ -72,6 +75,7 @@
         </div>
     </div>
 </div>
+
 <div id="about_modal" class="modal">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -97,6 +101,7 @@
         </div>
     </div>
 </div>
+
 {% if not user.is_anonymous and user.email|length < 1 %}
 {{user|json_script:"user_data"}}
 <div id="user_email_modal" class="modal">
@@ -108,10 +113,15 @@
 
             <form method="post" id="user_email_modal_form" class="needs-validation" novalidate>
                 <div class="modal-body">
+                    <!-- Alerts -->
                     <div class="alert alert-warning" role="alert">
                         {% translate 'Din bruger har ikke en associeret e-mail adresse og kan derfor ikke modtage notifikationer.' %}
                     </div>
+                    <div id="user_email_modal_form-error" class="alert alert-danger d-none" role="alert">
+                        {% translate 'Der skete en ukendt fejl, kontakt venligst en administrator.' %}
+                    </div>
 
+                    <!-- Input -->
                     <div class="row">
                         <div class="col-auto">
                             <label for="userEmailInput" class="col-form-label">{% translate 'E-mail' %}:</label>
@@ -146,46 +156,39 @@
     // Form submit & validation
     const csrf_token = "{{ csrf_token }}"
 
-    var forms = document.querySelectorAll('.needs-validation')
-    Array.prototype.slice.call(forms)
-        .forEach(function (form) {
-            form.addEventListener('submit', function (event) {
-                event.preventDefault()
+    $(".needs-validation").on("submit", function (e) {
+        e.preventDefault()
+        const $this = $(this)
 
-                if (!form.checkValidity()) {
-                    event.stopPropagation()
+        // Run BS validation
+        if (!this.checkValidity()) {
+            event.stopPropagation()
+            $this.addClass('was-validated') // So errors are shown
+            return
+        }
+        $this.addClass('was-validated')
 
-                    form.classList.add('was-validated')
-                    return
-                }
-                form.classList.add('was-validated')
-
-                // Update the user email through the REST-app
-                $.ajax({
-                    url: "/rest/user/" + user_data.id,
-                    type: "PATCH",
-                    headers: { "X-CSRFToken": csrf_token },
-                    contentType: "application/json",
-                    data: JSON.stringify({
-                        "username": user_data.username,
-                        "first_name": user_data.first_name,
-                        "last_name": user_data.last_name,
-                        "groups": user_data.groups,
-                        "email": $("#userEmailInput").val(),
-                    }),
-                    success: function (response) {
-                        modal.hide()
-                    },
-                    error: function (err) {
-                        console.log("Error updating user email:")
-                        console.log(err)
-                    },
-                });
-            }, false)
-        })
+        // Update the user email through the REST-app
+        $.ajax({
+            url: "/rest/user/" + user_data.id,
+            type: "PATCH",
+            headers: { "X-CSRFToken": csrf_token },
+            contentType: "application/json",
+            data: JSON.stringify({
+                "username": user_data.username,
+                "first_name": user_data.first_name,
+                "last_name": user_data.last_name,
+                "groups": user_data.groups,
+                "email": $("#userEmailInput").val(),
+            }),
+            success: function (response) {
+                modal.hide()
+            },
+            error: function (err) {
+                $("#user_email_modal_form-error").removeClass("d-none")
+            },
+        });
+    })
 </script>
 {% endif %}
-
 {% endblock %}
-</body>
-</html>
