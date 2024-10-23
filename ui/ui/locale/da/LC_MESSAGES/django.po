@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-06-21 12:58-0100\n"
+"POT-Creation-Date: 2024-10-23 11:40-0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -63,6 +63,36 @@ msgstr ""
 
 #: ui/templates/ui/layout.html
 msgid "Kildekode"
+msgstr ""
+
+#: ui/templates/ui/layout.html
+msgid "Indtast bruger e-mail"
+msgstr ""
+
+#: ui/templates/ui/layout.html
+msgid ""
+"Din bruger har ikke en associeret e-mail adresse og kan derfor ikke modtage "
+"notifikationer."
+msgstr ""
+
+#: ui/templates/ui/layout.html
+msgid "E-mail"
+msgstr ""
+
+#: ui/templates/ui/layout.html
+msgid "Indtast manglende e-mail her..."
+msgstr ""
+
+#: ui/templates/ui/layout.html
+msgid "Ikke valid e-mail adresse!"
+msgstr ""
+
+#: ui/templates/ui/layout.html
+msgid "Ignorér"
+msgstr ""
+
+#: ui/templates/ui/layout.html
+msgid "Opdatér"
 msgstr ""
 
 #: ui/templates/ui/loggedout.html

@@ -178,7 +178,6 @@ class UserFilterSchema(FilterSchema):
     permissions=[permissions.IsAuthenticated],
 )
 class UserAPI:
-
     def check_user(self, item: User):
         if not self.filter_user(User.objects.filter(id=item.id)).exists():
             raise PermissionDenied
@@ -295,6 +294,44 @@ class UserAPI:
             item.indberetter_data.cvr = payload.indberetter_data.cvr
         item.indberetter_data.save()
         return UserOutWithTokens.user_to_dict(item)
+
+    @route.patch(
+        "/{id}",
+        response=UserOutWithTokens,
+        auth=get_auth_methods(),
+        url_name="user_update_by_id",
+    )
+    def update_by_id(self, id: int, payload: UserIn):
+        user_signedin = self.context.request.user
+        user = get_object_or_404(User, id=id)
+
+        if user_signedin.id != user.id and not user_signedin.has_perm(
+            "auth.change_user"
+        ):
+            raise PermissionDenied
+
+        user.username = payload.username
+        user.first_name = payload.first_name
+        user.last_name = payload.last_name
+        user.email = payload.email
+        user.save()
+
+        try:
+            user_groups = [Group.objects.get(name=g) for g in payload.groups or []]
+            user.groups.set(user_groups)
+        except Group.DoesNotExist:
+            raise ValidationError("Group does not exist")  # type: ignore
+
+        if payload.indberetter_data:
+            if payload.indberetter_data.cpr:
+                user.indberetter_data.cpr = payload.indberetter_data.cpr
+
+            if payload.indberetter_data.cvr:
+                user.indberetter_data.cvr = payload.indberetter_data.cvr
+
+            user.indberetter_data.save()
+
+        return UserOutWithTokens.user_to_dict(user)
 
 
 class EboksBeskedIn(ModelSchema):

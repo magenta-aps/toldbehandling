@@ -170,6 +170,13 @@ services:
     container_name: toldbehandling-cache
     network_mode: "host"
 
+  toldbehandling-mailhog:
+    container_name: toldbehandling-mailhog
+    image: mailhog/mailhog
+    ports:
+      - "1025:1025" # SMTP
+      - "8025:8025" # HTTP
+
 volumes:
   postgres-data:
   file-data:

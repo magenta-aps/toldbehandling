@@ -2,6 +2,7 @@
 #
 # SPDX-License-Identifier: MPL-2.0
 import dataclasses
+import json
 import logging
 import os
 from datetime import date
@@ -78,8 +79,14 @@ class LogoutView(RedirectView):
 
 class RestView(LoginRequiredMixin, HasRestClientMixin, View):
     def get(self, request, *args, **kwargs) -> JsonResponse:
-        data = self.rest_client.get(kwargs["path"], request.GET)
-        return JsonResponse(data)
+        return JsonResponse(self.rest_client.get(kwargs["path"], request.GET))
+
+    def patch(self, request, *args, **kwargs) -> JsonResponse:
+        return JsonResponse(
+            self.rest_client.patch(
+                kwargs["path"], json.loads(request.body.decode("utf-8"))
+            )
+        )
 
 
 class FileView(LoginRequiredMixin, HasRestClientMixin, View):
