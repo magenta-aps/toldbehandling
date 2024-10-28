@@ -10,7 +10,7 @@ from datetime import date, datetime, timedelta, timezone
 from decimal import Decimal, InvalidOperation
 from enum import Enum
 from itertools import chain
-from typing import Any, Dict, List, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 from urllib.parse import unquote, urlencode
 
 from aktør.models import Afsender, Modtager
@@ -38,11 +38,17 @@ class RestMixin:
 
     @classmethod
     def make_user(
-        cls, username, plaintext_password, permissions: Union[List[Permission], None]
+        cls,
+        username,
+        plaintext_password,
+        permissions: Union[List[Permission], None],
+        email: Optional[str] = None,
     ) -> Tuple[User, str, str]:
         user = User.objects.create(username=username)
+        user.email = email if email else user.email
         user.set_password(plaintext_password)
         user.save()
+
         if permissions is not None:
             user.user_permissions.set(permissions)
         else:
