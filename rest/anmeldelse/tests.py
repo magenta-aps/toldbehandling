@@ -988,27 +988,6 @@ class AfgiftsanmeldelseAPITest(AnmeldelsesTestDataMixin, TestCase):
         mock_queryset_none.assert_called_once()
 
     @patch("anmeldelse.api.AfgiftsanmeldelseAPI.check_user")
-    def test_update_missing_approve_reject_anmeldelse_perm(self, mock_check_user):
-        resp = self.client.patch(
-            reverse(
-                "api-1.0.0:afgiftsanmeldelse_update", args=[self.afgiftsanmeldelse.id]
-            ),
-            data=json_dump(
-                {
-                    "status": "godkendt",
-                }
-            ),
-            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
-            content_type="application/json",
-        )
-
-        self.assertEqual(resp.status_code, 403)
-
-        # Verify the normal permission check was called, which we have mocked out
-        # so we are sure its not the one raising PermissionDenied
-        mock_check_user.assert_called_once_with(self.afgiftsanmeldelse)
-
-    @patch("anmeldelse.api.AfgiftsanmeldelseAPI.check_user")
     def test_update_status_kladde(self, mock_check_user):
         postforsendelse_kladde, _ = Postforsendelse.objects.get_or_create(
             postforsendelsesnummer="1337",
@@ -1158,6 +1137,32 @@ class AfgiftsanmeldelseAPITest(AnmeldelsesTestDataMixin, TestCase):
                 "status_new": "afvist",
             },
         )
+
+    def test_update_status_invalid_permissions(self):
+        self.user.user_permissions.remove(
+            self.approve_reject_anmeldelse_afgiftanmeldelse_perm
+        )
+
+        for new_status in ("godkendt", "afvist", "afsluttet"):
+            resp = self.client.patch(
+                reverse(
+                    "api-1.0.0:afgiftsanmeldelse_update",
+                    args=[self.afgiftsanmeldelse.id],
+                ),
+                data=json_dump(
+                    {
+                        "status": new_status,
+                    }
+                ),
+                HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+                content_type="application/json",
+            )
+
+            self.assertEqual(resp.status_code, 403)
+            self.assertEqual(
+                resp.json(),
+                {"detail": "You do not have permission to perform this action."},
+            )
 
 
 class AfgiftsanmeldelseFilterSchemaTest(TestCase):
