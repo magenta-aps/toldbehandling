@@ -20,6 +20,7 @@ from anmeldelse.models import (
 )
 from common.models import IndberetterProfile
 from django.contrib.auth.models import Permission
+from django.contrib.contenttypes.models import ContentType
 from django.core.files.base import ContentFile
 from django.db.models import Q
 from django.db.models.signals import post_delete, post_save
@@ -50,15 +51,28 @@ class AnmeldelsesTestDataMixin:
             codename="view_historicalafgiftsanmeldelse"
         )
 
+        (
+            cls.approve_reject_anmeldelse_afgiftanmeldelse_perm,
+            _,
+        ) = Permission.objects.update_or_create(
+            name="Kan godkende og afvise afgiftsanmeldelser",
+            codename="approve_reject_anmeldelse",
+            content_type=ContentType.objects.get_for_model(
+                Afgiftsanmeldelse, for_concrete_model=False
+            ),
+        )
+
         # User-1 (CVR)
         cls.user, cls.user_token, cls.user_refresh_token = RestMixin.make_user(
             username="payment-test-user",
             plaintext_password="testpassword1337",
+            email="test@magenta-aps.dk",
             permissions=[
                 cls.view_afgiftsanmeldelse_perm,
                 cls.add_afgiftsanmeldelse_perm,
                 cls.change_afgiftsanmeldelse_perm,
                 cls.view_historicalafgiftsanmeldelse,
+                cls.approve_reject_anmeldelse_afgiftanmeldelse_perm,
             ],
         )
 
@@ -830,11 +844,12 @@ class AfgiftsanmeldelseAPITest(AnmeldelsesTestDataMixin, TestCase):
                             "username": "payment-test-user",
                             "first_name": "",
                             "last_name": "",
-                            "email": "",
+                            "email": self.user.email,
                             "is_superuser": False,
                             "groups": [],
                             "permissions": [
                                 "anmeldelse.add_afgiftsanmeldelse",
+                                "anmeldelse.approve_reject_anmeldelse",
                                 "anmeldelse.change_afgiftsanmeldelse",
                                 "anmeldelse.view_afgiftsanmeldelse",
                                 "anmeldelse.view_historicalafgiftsanmeldelse",
@@ -919,11 +934,12 @@ class AfgiftsanmeldelseAPITest(AnmeldelsesTestDataMixin, TestCase):
                     "username": "payment-test-user",
                     "first_name": "",
                     "last_name": "",
-                    "email": "",
+                    "email": self.user.email,
                     "is_superuser": False,
                     "groups": [],
                     "permissions": [
                         "anmeldelse.add_afgiftsanmeldelse",
+                        "anmeldelse.approve_reject_anmeldelse",
                         "anmeldelse.change_afgiftsanmeldelse",
                         "anmeldelse.view_afgiftsanmeldelse",
                         "anmeldelse.view_historicalafgiftsanmeldelse",
@@ -1110,6 +1126,38 @@ class AfgiftsanmeldelseAPITest(AnmeldelsesTestDataMixin, TestCase):
     def test_map_sort(self):
         result = AfgiftsanmeldelseAPI.map_sort("forbindelsesnummer", "desc")
         self.assertEqual(result, "-fragtforsendelse__forbindelsesnr")
+
+    @patch("anmeldelse.api.send_email")
+    def test_update_status_afvist(self, mock_send_email: MagicMock):
+        resp = self.client.patch(
+            reverse(
+                "api-1.0.0:afgiftsanmeldelse_update", args=[self.afgiftsanmeldelse.id]
+            ),
+            data=json_dump(
+                {
+                    "status": "afvist",
+                }
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+        )
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.json(), {"success": True})
+
+        self.afgiftsanmeldelse.refresh_from_db()
+        self.assertEqual(self.afgiftsanmeldelse.status, "afvist")
+
+        mock_send_email.assert_called_once_with(
+            f"Afgiftsanmeldelse {self.afgiftsanmeldelse.id} er blevet afvist",
+            "common/emails/afgiftsanmeldelse_status_change.txt",
+            [self.user.email],
+            context={
+                "id": self.afgiftsanmeldelse.id,
+                "status_old": "ny",
+                "status_new": "afvist",
+            },
+        )
 
 
 class AfgiftsanmeldelseFilterSchemaTest(TestCase):
