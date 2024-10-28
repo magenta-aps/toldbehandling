@@ -9,7 +9,7 @@ from unittest.mock import ANY, MagicMock, call, patch
 from uuid import uuid4
 
 from aktør.models import Afsender, Modtager
-from anmeldelse.api import AfgiftsanmeldelseAPI
+from anmeldelse.api import AfgiftsanmeldelseAPI, AfgiftsanmeldelseFilterSchema
 from anmeldelse.models import (
     Afgiftsanmeldelse,
     PrismeResponse,
@@ -21,6 +21,7 @@ from anmeldelse.models import (
 from common.models import IndberetterProfile
 from django.contrib.auth.models import Permission
 from django.core.files.base import ContentFile
+from django.db.models import Q
 from django.db.models.signals import post_delete, post_save
 from django.test import TestCase
 from django.urls import reverse
@@ -1109,3 +1110,18 @@ class AfgiftsanmeldelseAPITest(AnmeldelsesTestDataMixin, TestCase):
     def test_map_sort(self):
         result = AfgiftsanmeldelseAPI.map_sort("forbindelsesnummer", "desc")
         self.assertEqual(result, "-fragtforsendelse__forbindelsesnr")
+
+
+class AfgiftsanmeldelseFilterSchemaTest(TestCase):
+    def test_filter_toldkategori(self):
+        schema = AfgiftsanmeldelseFilterSchema()
+
+        test_value = ["blah"]
+        query = schema.filter_toldkategori(test_value)
+        self.assertEqual(query, Q(toldkategori__in=test_value))
+
+        test_value.append("no_category")
+        query = schema.filter_toldkategori(test_value)
+        self.assertEqual(
+            query, Q(toldkategori__in=test_value) | Q(toldkategori__isnull=True)
+        )
