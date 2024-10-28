@@ -24,6 +24,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.files.base import ContentFile
 from django.db.models import Q
 from django.db.models.signals import post_delete, post_save
+from django.http import Http404
 from django.test import TestCase
 from django.urls import reverse
 from forsendelse.models import Postforsendelse
@@ -1163,6 +1164,33 @@ class AfgiftsanmeldelseAPITest(AnmeldelsesTestDataMixin, TestCase):
                 resp.json(),
                 {"detail": "You do not have permission to perform this action."},
             )
+
+    @patch("anmeldelse.api.datetime")
+    def test_get_historical(self, mock_datetime: MagicMock):
+        # Mocking
+        mock_datetime.now = MagicMock(return_value=datetime.now(UTC))
+
+        # Test invalid usage
+        with self.assertRaises(Http404):
+            resp = AfgiftsanmeldelseAPI.get_historical(self.afgiftsanmeldelse.id, 2)
+
+        # Test single-history record(s)
+        resp = AfgiftsanmeldelseAPI.get_historical(self.afgiftsanmeldelse.id, 0)
+        self.assertEqual(resp, (self.afgiftsanmeldelse, mock_datetime.now.return_value))
+
+        # Test multiple-history record(s)
+        self.afgiftsanmeldelse.status = "afvist"
+        self.afgiftsanmeldelse.save()
+        history_records = self.afgiftsanmeldelse.history.order_by("-history_date")
+
+        resp = AfgiftsanmeldelseAPI.get_historical(self.afgiftsanmeldelse.id, 0)
+        self.assertEqual(
+            resp,
+            (
+                self.afgiftsanmeldelse,
+                history_records[0].history_date - timedelta(microseconds=1),
+            ),
+        )
 
 
 class AfgiftsanmeldelseFilterSchemaTest(TestCase):
