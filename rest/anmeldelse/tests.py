@@ -1192,6 +1192,10 @@ class AfgiftsanmeldelseAPITest(AnmeldelsesTestDataMixin, TestCase):
             ),
         )
 
+    def test_get_historical_count(self):
+        resp = AfgiftsanmeldelseAPI.get_historical_count(self.afgiftsanmeldelse.id)
+        self.assertEqual(resp, 1)
+
 
 class AfgiftsanmeldelseFilterSchemaTest(TestCase):
     def test_filter_toldkategori(self):
