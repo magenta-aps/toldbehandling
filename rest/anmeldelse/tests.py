@@ -149,7 +149,7 @@ class AnmeldelsesTestDataMixin:
         )
 
 
-# Tests
+# Afgiftsanmeldelser
 
 
 class AfgiftsanmeldelseTest(RestTestMixin, TestCase):
@@ -517,236 +517,6 @@ class AfgiftsanmeldelseTest(RestTestMixin, TestCase):
             on_delete_prismeresponse,
             sender=PrismeResponse,
             dispatch_uid="test_on_delete_prismeresponse",
-        )
-
-
-class VarelinjeTest(RestTestMixin, TestCase):
-    plural_classname = "varelinjer"
-    object_class = Varelinje
-    unique_fields = []
-    readonly_fields = []
-    has_delete = True
-
-    def setUp(self) -> None:
-        super().setUp()
-        self.varelinje_data.update(
-            {
-                "afgiftsanmeldelse_id": self.afgiftsanmeldelse.id,
-                "privatafgiftsanmeldelse_id": None,
-                "vareafgiftssats_id": self.vareafgiftssats.id,
-            }
-        )
-        self.creation_data = {**self.varelinje_data}
-
-    def create_items(self):
-        self.precreated_item = self.varelinje
-
-    @classmethod
-    def alter_value(cls, key, value):
-        # Change value a little for lookup, so it's incorrect but still the right type
-        # This is used to check that the changed value does not find the object
-        if key in ("fakturabeløb", "afgiftsbeløb"):
-            return str(Decimal(value) + Decimal(15))
-        return super().alter_value(key, value)
-
-    # Expected object in the database as dict
-    @property
-    def expected_object_data(self):
-        # Expected dict for object after create
-        if not hasattr(self, "_expected_object_data"):
-            self._expected_object_data = {}
-            self._expected_object_data.update(self.strip_id(self.creation_data))
-            self._expected_object_data.update(
-                {
-                    "id": self.varelinje.id,
-                    "afgiftsbeløb": "37.50",
-                    "kladde": False,
-                }
-            )
-        return self._expected_object_data
-
-    # Expected item from REST interface
-    @property
-    def expected_response_dict(self):
-        if not hasattr(self, "_expected_response_dict"):
-            self._expected_response_dict = {}
-            self._expected_response_dict.update(self.strip_id(self.creation_data))
-            self._expected_response_dict.update(
-                {
-                    "id": self.varelinje.id,
-                    "kladde": False,
-                }
-            )
-        return self._expected_response_dict
-
-    invalid_itemdata = {
-        "antal": ["a", -1],
-        "fakturabeløb": ["a", -1],
-        "afgiftsanmeldelse_id": ["a", -1, 9999],
-        "vareafgiftssats_id": ["a", -1, 9999],
-    }
-
-    @property
-    def update_object_data(self):
-        if not hasattr(self, "_update_object_data"):
-            self._update_object_data = {
-                key: value
-                for key, value in self.expected_object_data.items()
-                if value is not None
-            }
-        return self._update_object_data
-
-    def test_str(self):
-        self.assertEqual(
-            str(self.varelinje),
-            f"Varelinje(vareafgiftssats=Vareafgiftssats(afgiftsgruppenummer={self.vareafgiftssats_data['afgiftsgruppenummer']}, afgiftssats={self.vareafgiftssats_data['afgiftssats']}, enhed={self.vareafgiftssats_data['enhed'].label}), fakturabeløb={self.varelinje_data['fakturabeløb']})",
-        )
-
-    def test_sammensat(self):
-        personbiler = Vareafgiftssats.objects.create(
-            afgiftstabel=self.afgiftstabel,
-            afgiftsgruppenummer=72,
-            vareart_da="PERSONBILER Afgiften svares med et fast beløb på 50.000 + 100 % af den del af fakturaværdien der overstiger 50.000 men ikke 150.000 + 125 % af resten.",
-            vareart_kl="PERSONBILER Afgiften svares med et fast beløb på 50.000 + 100 % af den del af fakturaværdien der overstiger 50.000 men ikke 150.000 + 125 % af resten.",
-            enhed=Vareafgiftssats.Enhed.SAMMENSAT,
-            minimumsbeløb=None,
-            afgiftssats=Decimal(0),
-            kræver_indførselstilladelse=False,
-        )
-        Vareafgiftssats.objects.create(
-            overordnet=personbiler,
-            afgiftstabel=self.afgiftstabel,
-            afgiftsgruppenummer=7201,
-            vareart_da="PERSONBILER, fast beløb på 50.000",
-            vareart_kl="PERSONBILER, fast beløb på 50.000",
-            enhed=Vareafgiftssats.Enhed.ANTAL,
-            minimumsbeløb=None,
-            afgiftssats=Decimal(50_000),
-            kræver_indførselstilladelse=False,
-        )
-        Vareafgiftssats.objects.create(
-            overordnet=personbiler,
-            afgiftstabel=self.afgiftstabel,
-            afgiftsgruppenummer=7202,
-            vareart_da="PERSONBILER, 100% af den del af fakturaværdien der overstiger 50.000 men ikke 150.000",
-            vareart_kl="PERSONBILER, 100% af den del af fakturaværdien der overstiger 50.000 men ikke 150.000",
-            enhed=Vareafgiftssats.Enhed.PROCENT,
-            segment_nedre=Decimal(50_000),
-            segment_øvre=Decimal(150_000),
-            minimumsbeløb=None,
-            afgiftssats=Decimal(100),
-            kræver_indførselstilladelse=False,
-        )
-        Vareafgiftssats.objects.create(
-            overordnet=personbiler,
-            afgiftstabel=self.afgiftstabel,
-            afgiftsgruppenummer=7202,
-            vareart_da="PERSONBILER, 125% af fakturaværdien der overstiger 150.000",
-            vareart_kl="PERSONBILER, 125% af fakturaværdien der overstiger 150.000",
-            enhed=Vareafgiftssats.Enhed.PROCENT,
-            segment_nedre=Decimal(150_000),
-            minimumsbeløb=None,
-            afgiftssats=Decimal(150),
-            kræver_indførselstilladelse=False,
-        )
-        varelinje1 = Varelinje.objects.create(
-            vareafgiftssats=personbiler,
-            afgiftsanmeldelse=self.afgiftsanmeldelse,
-            antal=1,
-            fakturabeløb=30_000,
-        )
-        self.assertEquals(varelinje1.afgiftsbeløb, Decimal(50_000))
-        varelinje2 = Varelinje.objects.create(
-            vareafgiftssats=personbiler,
-            afgiftsanmeldelse=self.afgiftsanmeldelse,
-            antal=1,
-            fakturabeløb=65_000,
-        )
-        self.assertEquals(varelinje2.afgiftsbeløb, Decimal(50_000 + 1.0 * 15_000))
-        varelinje3 = Varelinje.objects.create(
-            vareafgiftssats=personbiler,
-            afgiftsanmeldelse=self.afgiftsanmeldelse,
-            antal=1,
-            fakturabeløb=500_000,
-        )
-        self.assertEquals(
-            varelinje3.afgiftsbeløb, Decimal(50_000 + 1.0 * 100_000 + 1.5 * 350_000)
-        )
-
-
-class StatistikTest(RestMixin, TestCase):
-    def setUp(self):
-        super().setUp()
-        self.afgiftsanmeldelse.status = "afsluttet"
-        self.afgiftsanmeldelse.save()
-        self.varelinje
-        self.vareafgiftssats2 = Vareafgiftssats.objects.create(
-            afgiftstabel=self.afgiftstabel,
-            afgiftsgruppenummer=5678,
-            vareart_da="Te",
-            vareart_kl="Te",
-            enhed=Vareafgiftssats.Enhed.KILOGRAM,
-            minimumsbeløb=None,
-            afgiftssats=Decimal(1000),
-            kræver_indførselstilladelse=False,
-        )
-        self.varelinje2 = Varelinje.objects.create(
-            vareafgiftssats=self.vareafgiftssats2,
-            afgiftsanmeldelse=self.afgiftsanmeldelse,
-            mængde=500,
-            fakturabeløb=5000,
-        )
-        self.varelinje3 = Varelinje.objects.create(
-            vareafgiftssats=self.vareafgiftssats,
-            afgiftsanmeldelse=self.afgiftsanmeldelse,
-            mængde=700,
-            fakturabeløb=5000,
-            antal=10,
-        )
-        self.varelinje4 = Varelinje.objects.create(
-            vareafgiftssats=self.vareafgiftssats2,
-            afgiftsanmeldelse=self.afgiftsanmeldelse,
-            mængde=900,
-            fakturabeløb=9000,
-        )
-
-    def test_statistik_access(self):
-        url = reverse(f"api-1.0.0:statistik_get")
-        response = self.client.get(url)
-        self.assertEquals(response.status_code, 401)
-
-    def test_statistik(self):
-        url = reverse(f"api-1.0.0:statistik_get")
-        response = self.client.get(
-            url, HTTP_AUTHORIZATION=f"Bearer {self.authorized_access_token}"
-        )
-        data = response.json()["items"]
-        self.assertEquals(len(data), 2)
-        # Sorteret efter afgiftsgruppenummer
-        self.assertEquals(
-            data[0],
-            {
-                # self.varelinje3 + self.varelinje_data
-                "sum_afgiftsbeløb": "1787.50",
-                "afgiftsgruppenummer": 1234,
-                "vareart_da": "Kaffe",
-                "vareart_kl": "Kaffe",
-                "enhed": "kg",
-                "sum_antal": 11,
-                "sum_mængde": "715.000",
-            },
-        )
-        self.assertEquals(
-            data[1],
-            {
-                "sum_afgiftsbeløb": "1400000.00",
-                "afgiftsgruppenummer": 5678,
-                "vareart_da": "Te",
-                "vareart_kl": "Te",
-                "enhed": "kg",
-                "sum_antal": 0,
-                "sum_mængde": "1400.000",
-            },
         )
 
 
@@ -1219,6 +989,9 @@ class AfgiftsanmeldelseFilterSchemaTest(TestCase):
         )
 
 
+# PrivateAfgiftsanmeldelser
+
+
 class PrivatAfgiftsanmeldelseOutTest(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -1279,3 +1052,240 @@ class PrivatAfgiftsanmeldelseOutTest(TestCase):
             self.privat_afgiftsanmeldelse
         )
         self.assertEqual(resp, "paid")
+
+
+class PrivatAfgiftsanmeldelseAPITest(TestCase):
+    pass
+
+
+# Other tests of the "anmeldelse"-module
+
+
+class VarelinjeTest(RestTestMixin, TestCase):
+    plural_classname = "varelinjer"
+    object_class = Varelinje
+    unique_fields = []
+    readonly_fields = []
+    has_delete = True
+
+    def setUp(self) -> None:
+        super().setUp()
+        self.varelinje_data.update(
+            {
+                "afgiftsanmeldelse_id": self.afgiftsanmeldelse.id,
+                "privatafgiftsanmeldelse_id": None,
+                "vareafgiftssats_id": self.vareafgiftssats.id,
+            }
+        )
+        self.creation_data = {**self.varelinje_data}
+
+    def create_items(self):
+        self.precreated_item = self.varelinje
+
+    @classmethod
+    def alter_value(cls, key, value):
+        # Change value a little for lookup, so it's incorrect but still the right type
+        # This is used to check that the changed value does not find the object
+        if key in ("fakturabeløb", "afgiftsbeløb"):
+            return str(Decimal(value) + Decimal(15))
+        return super().alter_value(key, value)
+
+    # Expected object in the database as dict
+    @property
+    def expected_object_data(self):
+        # Expected dict for object after create
+        if not hasattr(self, "_expected_object_data"):
+            self._expected_object_data = {}
+            self._expected_object_data.update(self.strip_id(self.creation_data))
+            self._expected_object_data.update(
+                {
+                    "id": self.varelinje.id,
+                    "afgiftsbeløb": "37.50",
+                    "kladde": False,
+                }
+            )
+        return self._expected_object_data
+
+    # Expected item from REST interface
+    @property
+    def expected_response_dict(self):
+        if not hasattr(self, "_expected_response_dict"):
+            self._expected_response_dict = {}
+            self._expected_response_dict.update(self.strip_id(self.creation_data))
+            self._expected_response_dict.update(
+                {
+                    "id": self.varelinje.id,
+                    "kladde": False,
+                }
+            )
+        return self._expected_response_dict
+
+    invalid_itemdata = {
+        "antal": ["a", -1],
+        "fakturabeløb": ["a", -1],
+        "afgiftsanmeldelse_id": ["a", -1, 9999],
+        "vareafgiftssats_id": ["a", -1, 9999],
+    }
+
+    @property
+    def update_object_data(self):
+        if not hasattr(self, "_update_object_data"):
+            self._update_object_data = {
+                key: value
+                for key, value in self.expected_object_data.items()
+                if value is not None
+            }
+        return self._update_object_data
+
+    def test_str(self):
+        self.assertEqual(
+            str(self.varelinje),
+            f"Varelinje(vareafgiftssats=Vareafgiftssats(afgiftsgruppenummer={self.vareafgiftssats_data['afgiftsgruppenummer']}, afgiftssats={self.vareafgiftssats_data['afgiftssats']}, enhed={self.vareafgiftssats_data['enhed'].label}), fakturabeløb={self.varelinje_data['fakturabeløb']})",
+        )
+
+    def test_sammensat(self):
+        personbiler = Vareafgiftssats.objects.create(
+            afgiftstabel=self.afgiftstabel,
+            afgiftsgruppenummer=72,
+            vareart_da="PERSONBILER Afgiften svares med et fast beløb på 50.000 + 100 % af den del af fakturaværdien der overstiger 50.000 men ikke 150.000 + 125 % af resten.",
+            vareart_kl="PERSONBILER Afgiften svares med et fast beløb på 50.000 + 100 % af den del af fakturaværdien der overstiger 50.000 men ikke 150.000 + 125 % af resten.",
+            enhed=Vareafgiftssats.Enhed.SAMMENSAT,
+            minimumsbeløb=None,
+            afgiftssats=Decimal(0),
+            kræver_indførselstilladelse=False,
+        )
+        Vareafgiftssats.objects.create(
+            overordnet=personbiler,
+            afgiftstabel=self.afgiftstabel,
+            afgiftsgruppenummer=7201,
+            vareart_da="PERSONBILER, fast beløb på 50.000",
+            vareart_kl="PERSONBILER, fast beløb på 50.000",
+            enhed=Vareafgiftssats.Enhed.ANTAL,
+            minimumsbeløb=None,
+            afgiftssats=Decimal(50_000),
+            kræver_indførselstilladelse=False,
+        )
+        Vareafgiftssats.objects.create(
+            overordnet=personbiler,
+            afgiftstabel=self.afgiftstabel,
+            afgiftsgruppenummer=7202,
+            vareart_da="PERSONBILER, 100% af den del af fakturaværdien der overstiger 50.000 men ikke 150.000",
+            vareart_kl="PERSONBILER, 100% af den del af fakturaværdien der overstiger 50.000 men ikke 150.000",
+            enhed=Vareafgiftssats.Enhed.PROCENT,
+            segment_nedre=Decimal(50_000),
+            segment_øvre=Decimal(150_000),
+            minimumsbeløb=None,
+            afgiftssats=Decimal(100),
+            kræver_indførselstilladelse=False,
+        )
+        Vareafgiftssats.objects.create(
+            overordnet=personbiler,
+            afgiftstabel=self.afgiftstabel,
+            afgiftsgruppenummer=7202,
+            vareart_da="PERSONBILER, 125% af fakturaværdien der overstiger 150.000",
+            vareart_kl="PERSONBILER, 125% af fakturaværdien der overstiger 150.000",
+            enhed=Vareafgiftssats.Enhed.PROCENT,
+            segment_nedre=Decimal(150_000),
+            minimumsbeløb=None,
+            afgiftssats=Decimal(150),
+            kræver_indførselstilladelse=False,
+        )
+        varelinje1 = Varelinje.objects.create(
+            vareafgiftssats=personbiler,
+            afgiftsanmeldelse=self.afgiftsanmeldelse,
+            antal=1,
+            fakturabeløb=30_000,
+        )
+        self.assertEquals(varelinje1.afgiftsbeløb, Decimal(50_000))
+        varelinje2 = Varelinje.objects.create(
+            vareafgiftssats=personbiler,
+            afgiftsanmeldelse=self.afgiftsanmeldelse,
+            antal=1,
+            fakturabeløb=65_000,
+        )
+        self.assertEquals(varelinje2.afgiftsbeløb, Decimal(50_000 + 1.0 * 15_000))
+        varelinje3 = Varelinje.objects.create(
+            vareafgiftssats=personbiler,
+            afgiftsanmeldelse=self.afgiftsanmeldelse,
+            antal=1,
+            fakturabeløb=500_000,
+        )
+        self.assertEquals(
+            varelinje3.afgiftsbeløb, Decimal(50_000 + 1.0 * 100_000 + 1.5 * 350_000)
+        )
+
+
+class StatistikTest(RestMixin, TestCase):
+    def setUp(self):
+        super().setUp()
+        self.afgiftsanmeldelse.status = "afsluttet"
+        self.afgiftsanmeldelse.save()
+        self.varelinje
+        self.vareafgiftssats2 = Vareafgiftssats.objects.create(
+            afgiftstabel=self.afgiftstabel,
+            afgiftsgruppenummer=5678,
+            vareart_da="Te",
+            vareart_kl="Te",
+            enhed=Vareafgiftssats.Enhed.KILOGRAM,
+            minimumsbeløb=None,
+            afgiftssats=Decimal(1000),
+            kræver_indførselstilladelse=False,
+        )
+        self.varelinje2 = Varelinje.objects.create(
+            vareafgiftssats=self.vareafgiftssats2,
+            afgiftsanmeldelse=self.afgiftsanmeldelse,
+            mængde=500,
+            fakturabeløb=5000,
+        )
+        self.varelinje3 = Varelinje.objects.create(
+            vareafgiftssats=self.vareafgiftssats,
+            afgiftsanmeldelse=self.afgiftsanmeldelse,
+            mængde=700,
+            fakturabeløb=5000,
+            antal=10,
+        )
+        self.varelinje4 = Varelinje.objects.create(
+            vareafgiftssats=self.vareafgiftssats2,
+            afgiftsanmeldelse=self.afgiftsanmeldelse,
+            mængde=900,
+            fakturabeløb=9000,
+        )
+
+    def test_statistik_access(self):
+        url = reverse(f"api-1.0.0:statistik_get")
+        response = self.client.get(url)
+        self.assertEquals(response.status_code, 401)
+
+    def test_statistik(self):
+        url = reverse(f"api-1.0.0:statistik_get")
+        response = self.client.get(
+            url, HTTP_AUTHORIZATION=f"Bearer {self.authorized_access_token}"
+        )
+        data = response.json()["items"]
+        self.assertEquals(len(data), 2)
+        # Sorteret efter afgiftsgruppenummer
+        self.assertEquals(
+            data[0],
+            {
+                # self.varelinje3 + self.varelinje_data
+                "sum_afgiftsbeløb": "1787.50",
+                "afgiftsgruppenummer": 1234,
+                "vareart_da": "Kaffe",
+                "vareart_kl": "Kaffe",
+                "enhed": "kg",
+                "sum_antal": 11,
+                "sum_mængde": "715.000",
+            },
+        )
+        self.assertEquals(
+            data[1],
+            {
+                "sum_afgiftsbeløb": "1400000.00",
+                "afgiftsgruppenummer": 5678,
+                "vareart_da": "Te",
+                "vareart_kl": "Te",
+                "enhed": "kg",
+                "sum_antal": 0,
+                "sum_mængde": "1400.000",
+            },
+        )
