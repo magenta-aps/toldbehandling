@@ -2,6 +2,7 @@
 #
 # SPDX-License-Identifier: MPL-2.0
 
+import random
 from copy import deepcopy
 from datetime import UTC, date, datetime, timedelta
 from decimal import Decimal
@@ -9,17 +10,22 @@ from unittest.mock import ANY, MagicMock, call, patch
 from uuid import uuid4
 
 from aktør.models import Afsender, Modtager
-from anmeldelse.api import AfgiftsanmeldelseAPI, AfgiftsanmeldelseFilterSchema
+from anmeldelse.api import (
+    AfgiftsanmeldelseAPI,
+    AfgiftsanmeldelseFilterSchema,
+    PrivatAfgiftsanmeldelseOut,
+)
 from anmeldelse.models import (
     Afgiftsanmeldelse,
     PrismeResponse,
+    PrivatAfgiftsanmeldelse,
     Varelinje,
     on_add_prismeresponse,
     on_delete_prismeresponse,
     privatafgiftsanmeldelse_upload_to,
 )
 from common.models import IndberetterProfile
-from django.contrib.auth.models import Permission
+from django.contrib.auth.models import Group, Permission, User
 from django.contrib.contenttypes.models import ContentType
 from django.core.files.base import ContentFile
 from django.db.models import Q
@@ -1210,3 +1216,35 @@ class AfgiftsanmeldelseFilterSchemaTest(TestCase):
         self.assertEqual(
             query, Q(toldkategori__in=test_value) | Q(toldkategori__isnull=True)
         )
+
+
+class PrivatAfgiftsanmeldelseOutTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.privat_indberettere, _ = Group.objects.update_or_create(
+            name="PrivatIndberettere",
+        )
+
+        cls.users = User.objects.filter(groups=cls.privat_indberettere)
+        cls.privat_afgiftsanmeldelse = PrivatAfgiftsanmeldelse.objects.create(
+            cpr=random.randint(1000000000, 9999999999),
+            navn=random.choice(["Jens", "Peter", "Hans", "Søren", "Niels"])
+            + " "
+            + random.choice(["Jensen", "Petersen", "Hansen", "Sørensen", "Nielsen"]),
+            adresse="Ligustervænget " + str(random.randint(1, 100)),
+            postnummer=1234,
+            by="TestBy",
+            telefon=str(random.randint(100000, 999999)),
+            bookingnummer=str(random.randint(100000, 999999)),
+            leverandørfaktura_nummer=str(random.randint(100000, 999999)),
+            indførselstilladelse=None,
+            indleveringsdato=date.today() + timedelta(days=random.randint(10, 30)),
+            status=random.choice(["ny", "afvist", "godkendt"]),
+            oprettet_af=cls.users.order_by("?").first(),
+        )
+
+    def test_resolve_payment_status__no_payments(self):
+        resp = PrivatAfgiftsanmeldelseOut.resolve_payment_status(
+            self.privat_afgiftsanmeldelse
+        )
+        self.assertEqual(resp, "created")
