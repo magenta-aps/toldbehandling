@@ -34,6 +34,7 @@ from django.http import Http404
 from django.test import TestCase
 from django.urls import reverse
 from forsendelse.models import Postforsendelse
+from payment.models import Payment
 from project.test_mixins import RestMixin, RestTestMixin
 from project.util import json_dump
 from sats.models import Vareafgiftssats
@@ -1248,3 +1249,18 @@ class PrivatAfgiftsanmeldelseOutTest(TestCase):
             self.privat_afgiftsanmeldelse
         )
         self.assertEqual(resp, "created")
+
+    def test_resolve_payment_status__reserved_payment(self):
+        _ = Payment.objects.create(
+            status="reserved",
+            amount=1337,
+            currency="DKK",
+            declaration=self.privat_afgiftsanmeldelse,
+            reference=self.privat_afgiftsanmeldelse.id,
+            provider_payment_id="1234",
+        )
+
+        resp = PrivatAfgiftsanmeldelseOut.resolve_payment_status(
+            self.privat_afgiftsanmeldelse
+        )
+        self.assertEqual(resp, "reserved")
