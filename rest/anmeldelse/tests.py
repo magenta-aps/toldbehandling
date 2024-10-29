@@ -1264,3 +1264,18 @@ class PrivatAfgiftsanmeldelseOutTest(TestCase):
             self.privat_afgiftsanmeldelse
         )
         self.assertEqual(resp, "reserved")
+
+    def test_resolve_payment_status__paid_payment(self):
+        _ = Payment.objects.create(
+            status="paid",
+            amount=1337,
+            currency="DKK",
+            declaration=self.privat_afgiftsanmeldelse,
+            reference=self.privat_afgiftsanmeldelse.id,
+            provider_payment_id="1234",
+        )
+
+        resp = PrivatAfgiftsanmeldelseOut.resolve_payment_status(
+            self.privat_afgiftsanmeldelse
+        )
+        self.assertEqual(resp, "paid")
