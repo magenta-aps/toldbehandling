@@ -45,7 +45,7 @@ from sats.models import Vareafgiftssats
 class AnmeldelsesTestDataMixin:
     @classmethod
     def setUpTestData(cls):
-        # TF10 / business declarations
+        # TF10 / business declarations permissions
         cls.view_afgiftsanmeldelse_perm = Permission.objects.get(
             codename="view_afgiftsanmeldelse"
         )
@@ -73,11 +73,6 @@ class AnmeldelsesTestDataMixin:
             ),
         )
 
-        # TF5 / private declarations
-        cls.add_privatafgiftsanmeldelse_perm = Permission.objects.get(
-            codename="add_privatafgiftsanmeldelse"
-        )
-
         # User-1 (CVR)
         cls.user, cls.user_token, cls.user_refresh_token = RestMixin.make_user(
             username="payment-test-user",
@@ -89,7 +84,6 @@ class AnmeldelsesTestDataMixin:
                 cls.change_afgiftsanmeldelse_perm,
                 cls.view_historicalafgiftsanmeldelse,
                 cls.approve_reject_anmeldelse_afgiftanmeldelse_perm,
-                cls.add_privatafgiftsanmeldelse_perm,
             ],
         )
 
@@ -1063,7 +1057,54 @@ class PrivatAfgiftsanmeldelseOutTest(TestCase):
         self.assertEqual(resp, "paid")
 
 
-class PrivatAfgiftsanmeldelseAPITest(AnmeldelsesTestDataMixin, TestCase):
+class PrivatAfgiftsanmeldelseAPITest(TestCase):
+    maxDiff = None
+
+    @classmethod
+    def setUpTestData(cls):
+        # Permissions
+        cls.add_privatafgiftsanmeldelse_perm = Permission.objects.get(
+            codename="add_privatafgiftsanmeldelse"
+        )
+
+        cls.view_privatafgiftsanmeldelse_perm = Permission.objects.get(
+            codename="view_privatafgiftsanmeldelse"
+        )
+
+        # User (Privat/CPR)
+        cls.user, cls.user_token, cls.user_refresh_token = RestMixin.make_user(
+            username="privatafgiftsanmeldelse-test-user",
+            plaintext_password="testpassword1337",
+            email="test@magenta-aps.dk",
+            permissions=[
+                cls.add_privatafgiftsanmeldelse_perm,
+                cls.view_privatafgiftsanmeldelse_perm,
+            ],
+        )
+
+        cls.indberetter = IndberetterProfile.objects.create(
+            user=cls.user,
+            cpr="1234567890",
+            api_key=uuid4(),
+        )
+
+        # Privatafgiftsanmeldelse
+        cls.privatafgiftsanmeldelse = PrivatAfgiftsanmeldelse.objects.create(
+            **{
+                "cpr": "101010100",
+                "navn": "Test privatafgiftsanmeldelse",
+                "adresse": "Silkeborgvej 260",
+                "postnummer": "8230",
+                "by": "Åbyhøj",
+                "telefon": "13371337",
+                "bookingnummer": "666",
+                "indleveringsdato": "2022-01-01",
+                "leverandørfaktura_nummer": "1234",
+                "oprettet_af": cls.user,
+                "status": "ny",
+            }
+        )
+
     def test_create(self):
         data_leverandoerfaktura_content = b"%PDF-1.4\n%Fake PDF content"
         data_leverandoerfaktura_base64 = base64.b64encode(
@@ -1091,7 +1132,7 @@ class PrivatAfgiftsanmeldelseAPITest(AnmeldelsesTestDataMixin, TestCase):
         )
 
         self.assertEqual(resp.status_code, 200)
-        self.assertEqual(resp.json(), {"id": 1})
+        self.assertEqual(resp.json(), {"id": 2})
 
     @patch("anmeldelse.api.PrivatAfgiftsanmeldelse.objects.create")
     def test_create_validation_error(self, mock_create):
@@ -1122,6 +1163,54 @@ class PrivatAfgiftsanmeldelseAPITest(AnmeldelsesTestDataMixin, TestCase):
 
         self.assertEqual(resp.status_code, 400)
         self.assertEqual(resp.json(), mock_validation_err_content)
+
+    def test_get(self):
+        resp = self.client.get(
+            reverse(
+                f"api-1.0.0:privat_afgiftsanmeldelse_get",
+                args=[self.privatafgiftsanmeldelse.id],
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+        )
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(
+            resp.json(),
+            {
+                "id": self.privatafgiftsanmeldelse.id,
+                "cpr": 101010100,
+                "navn": "Test privatafgiftsanmeldelse",
+                "adresse": "Silkeborgvej 260",
+                "postnummer": 8230,
+                "by": "Åbyhøj",
+                "telefon": "13371337",
+                "bookingnummer": "666",
+                "indleveringsdato": "2022-01-01",
+                "leverandørfaktura_nummer": "1234",
+                "indførselstilladelse": None,
+                "leverandørfaktura": None,
+                "oprettet": ANY,
+                "oprettet_af": {
+                    "id": ANY,
+                    "username": "privatafgiftsanmeldelse-test-user",
+                    "first_name": "",
+                    "last_name": "",
+                    "email": "test@magenta-aps.dk",
+                    "is_superuser": False,
+                    "groups": [],
+                    "permissions": [
+                        "anmeldelse.add_privatafgiftsanmeldelse",
+                        "anmeldelse.view_privatafgiftsanmeldelse",
+                    ],
+                    "indberetter_data": {"cvr": None},
+                    "twofactor_enabled": False,
+                },
+                "status": "ny",
+                "anonym": False,
+                "payment_status": "created",
+            },
+        )
 
 
 # Other tests of the "anmeldelse"-module
