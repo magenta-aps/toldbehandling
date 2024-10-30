@@ -28,6 +28,7 @@ from anmeldelse.models import (
 from common.models import IndberetterProfile
 from django.contrib.auth.models import Group, Permission, User
 from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.db.models import Q
 from django.db.models.signals import post_delete, post_save
@@ -1064,8 +1065,6 @@ class PrivatAfgiftsanmeldelseOutTest(TestCase):
 
 class PrivatAfgiftsanmeldelseAPITest(AnmeldelsesTestDataMixin, TestCase):
     def test_create(self):
-        url = reverse(f"api-1.0.0:privat_afgiftsanmeldelse_create")
-
         data_leverandoerfaktura_content = b"%PDF-1.4\n%Fake PDF content"
         data_leverandoerfaktura_base64 = base64.b64encode(
             data_leverandoerfaktura_content
@@ -1085,7 +1084,7 @@ class PrivatAfgiftsanmeldelseAPITest(AnmeldelsesTestDataMixin, TestCase):
         }
 
         resp = self.client.post(
-            url,
+            reverse(f"api-1.0.0:privat_afgiftsanmeldelse_create"),
             json_dump(data),
             HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
             content_type="application/json",
@@ -1093,6 +1092,36 @@ class PrivatAfgiftsanmeldelseAPITest(AnmeldelsesTestDataMixin, TestCase):
 
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.json(), {"id": 1})
+
+    @patch("anmeldelse.api.PrivatAfgiftsanmeldelse.objects.create")
+    def test_create_validation_error(self, mock_create):
+        mock_validation_err_content = {
+            "test_field": ["This field has a validation error."]
+        }
+        mock_create.side_effect = ValidationError(mock_validation_err_content)
+
+        resp = self.client.post(
+            reverse(f"api-1.0.0:privat_afgiftsanmeldelse_create"),
+            json_dump(
+                {
+                    "cpr": "101010100",
+                    "navn": "Test privatafgiftsanmeldelse",
+                    "adresse": "Silkeborgvej 260",
+                    "postnummer": "8230",
+                    "by": "Åbyhøj",
+                    "telefon": "13371337",
+                    "bookingnummer": "666",
+                    "indleveringsdato": "2022-01-01",
+                    "leverandørfaktura_nummer": "1234",
+                    "leverandørfaktura": "some_base64_encoded_pdf_content",
+                }
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+        )
+
+        self.assertEqual(resp.status_code, 400)
+        self.assertEqual(resp.json(), mock_validation_err_content)
 
 
 # Other tests of the "anmeldelse"-module
