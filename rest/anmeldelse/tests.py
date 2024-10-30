@@ -2,6 +2,7 @@
 #
 # SPDX-License-Identifier: MPL-2.0
 
+import base64
 import random
 from copy import deepcopy
 from datetime import UTC, date, datetime, timedelta
@@ -43,6 +44,7 @@ from sats.models import Vareafgiftssats
 class AnmeldelsesTestDataMixin:
     @classmethod
     def setUpTestData(cls):
+        # TF10 / business declarations
         cls.view_afgiftsanmeldelse_perm = Permission.objects.get(
             codename="view_afgiftsanmeldelse"
         )
@@ -70,6 +72,11 @@ class AnmeldelsesTestDataMixin:
             ),
         )
 
+        # TF5 / private declarations
+        cls.add_privatafgiftsanmeldelse_perm = Permission.objects.get(
+            codename="add_privatafgiftsanmeldelse"
+        )
+
         # User-1 (CVR)
         cls.user, cls.user_token, cls.user_refresh_token = RestMixin.make_user(
             username="payment-test-user",
@@ -81,6 +88,7 @@ class AnmeldelsesTestDataMixin:
                 cls.change_afgiftsanmeldelse_perm,
                 cls.view_historicalafgiftsanmeldelse,
                 cls.approve_reject_anmeldelse_afgiftanmeldelse_perm,
+                cls.add_privatafgiftsanmeldelse_perm,
             ],
         )
 
@@ -1054,8 +1062,37 @@ class PrivatAfgiftsanmeldelseOutTest(TestCase):
         self.assertEqual(resp, "paid")
 
 
-class PrivatAfgiftsanmeldelseAPITest(TestCase):
-    pass
+class PrivatAfgiftsanmeldelseAPITest(AnmeldelsesTestDataMixin, TestCase):
+    def test_create(self):
+        url = reverse(f"api-1.0.0:privat_afgiftsanmeldelse_create")
+
+        data_leverandoerfaktura_content = b"%PDF-1.4\n%Fake PDF content"
+        data_leverandoerfaktura_base64 = base64.b64encode(
+            data_leverandoerfaktura_content
+        ).decode("utf-8")
+
+        data = {
+            "cpr": "101010100",
+            "navn": "Test privatafgiftsanmeldelse",
+            "adresse": "Silkeborgvej 260",
+            "postnummer": "8230",
+            "by": "Åbyhøj",
+            "telefon": "13371337",
+            "bookingnummer": "666",
+            "indleveringsdato": "2022-01-01",
+            "leverandørfaktura_nummer": "1234",
+            "leverandørfaktura": data_leverandoerfaktura_base64,
+        }
+
+        resp = self.client.post(
+            url,
+            json_dump(data),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+        )
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.json(), {"id": 1})
 
 
 # Other tests of the "anmeldelse"-module
