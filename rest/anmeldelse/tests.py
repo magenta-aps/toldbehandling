@@ -1345,6 +1345,29 @@ class PrivatAfgiftsanmeldelseAPITest(TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.json(), resp_data["id"])
 
+    @patch("anmeldelse.api.PrivatAfgiftsanmeldelse.objects.filter")
+    def test_get_latest_none(self, mock_privatafgiftsanmeldelse_obj_filter: MagicMock):
+        mock_privatafgiftsanmeldelse_obj_filter.return_value = MagicMock(
+            order_by=MagicMock(
+                return_value=MagicMock(first=MagicMock(return_value=None))
+            )
+        )
+
+        resp = self.client.get(
+            reverse(
+                "api-1.0.0:privat_afgiftsanmeldelse_latest",
+                args=[self.indberetter.cpr],
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+        )
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.json(), None)
+        mock_privatafgiftsanmeldelse_obj_filter.assert_called_once_with(
+            cpr=int(self.indberetter.cpr)
+        )
+
 
 # Other tests of the "anmeldelse"-module
 
