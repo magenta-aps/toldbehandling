@@ -37,6 +37,7 @@ from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.utils.http import urlencode
 from forsendelse.models import Postforsendelse
+from ninja_extra.exceptions import PermissionDenied
 from payment.models import Payment
 from project.test_mixins import RestMixin, RestTestMixin
 from project.util import json_dump
@@ -1284,6 +1285,28 @@ class PrivatAfgiftsanmeldelseAPITest(TestCase):
                 call("anmeldelse.view_all_privatafgiftsanmeldelse"),
             ],
         )
+
+    @patch("anmeldelse.api.PrivatAfgiftsanmeldelseAPI.filter_user")
+    def test_check_user_perm_denied(self, mock_filter_user: MagicMock):
+        mock_queryset = MagicMock(exists=MagicMock(return_value=False))
+        mock_filter_user.return_value = mock_queryset
+
+        resp = self.client.get(
+            reverse(
+                "api-1.0.0:privat_afgiftsanmeldelse_get",
+                args=[self.privatafgiftsanmeldelse.id],
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+        )
+
+        self.assertEqual(resp.status_code, 403)
+        self.assertEqual(
+            resp.json(),
+            {"detail": "You do not have permission to perform this action."},
+        )
+        mock_filter_user.assert_called_once()
+        mock_queryset.exists.assert_called_once()
 
 
 # Other tests of the "anmeldelse"-module
