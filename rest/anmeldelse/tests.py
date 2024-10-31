@@ -35,6 +35,7 @@ from django.db.models.signals import post_delete, post_save
 from django.http import Http404
 from django.test import TestCase, override_settings
 from django.urls import reverse
+from django.utils.http import urlencode
 from forsendelse.models import Postforsendelse
 from payment.models import Payment
 from project.test_mixins import RestMixin, RestTestMixin
@@ -1168,7 +1169,7 @@ class PrivatAfgiftsanmeldelseAPITest(TestCase):
     def test_get(self):
         resp = self.client.get(
             reverse(
-                f"api-1.0.0:privat_afgiftsanmeldelse_get",
+                "api-1.0.0:privat_afgiftsanmeldelse_get",
                 args=[self.privatafgiftsanmeldelse.id],
             ),
             HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
@@ -1210,6 +1211,60 @@ class PrivatAfgiftsanmeldelseAPITest(TestCase):
                 "status": "ny",
                 "anonym": False,
                 "payment_status": "created",
+            },
+        )
+
+    def test_list(self):
+        query_params = {"sort": "navn", "order": "asc"}
+        url = reverse("api-1.0.0:privat_afgiftsanmeldelse_list")
+        url = f"{url}?{urlencode(query_params)}"
+
+        resp = self.client.get(
+            url,
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+        )
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(
+            resp.json(),
+            {
+                "count": 1,
+                "items": [
+                    {
+                        "id": self.privatafgiftsanmeldelse.id,
+                        "cpr": 101010100,
+                        "navn": "Test privatafgiftsanmeldelse",
+                        "adresse": "Silkeborgvej 260",
+                        "postnummer": 8230,
+                        "by": "Åbyhøj",
+                        "telefon": "13371337",
+                        "bookingnummer": "666",
+                        "indleveringsdato": "2022-01-01",
+                        "leverandørfaktura_nummer": "1234",
+                        "indførselstilladelse": None,
+                        "leverandørfaktura": None,
+                        "oprettet": ANY,
+                        "oprettet_af": {
+                            "id": ANY,
+                            "username": "privatafgiftsanmeldelse-test-user",
+                            "first_name": "",
+                            "last_name": "",
+                            "email": "test@magenta-aps.dk",
+                            "is_superuser": False,
+                            "groups": [],
+                            "permissions": [
+                                "anmeldelse.add_privatafgiftsanmeldelse",
+                                "anmeldelse.view_privatafgiftsanmeldelse",
+                            ],
+                            "indberetter_data": {"cvr": None},
+                            "twofactor_enabled": False,
+                        },
+                        "status": "ny",
+                        "anonym": False,
+                        "payment_status": "created",
+                    }
+                ],
             },
         )
 
