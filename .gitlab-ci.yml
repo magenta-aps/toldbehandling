@@ -336,7 +336,7 @@ Check coverage:
     - cd "${CI_PROJECT_DIR}/coverage_output/"
     - coverage combine
   script:
-    - coverage report -i --show-missing --fail-under=85
+    - coverage report -i --show-missing --fail-under=87
     - coverage xml
   coverage: '/^TOTAL.+?(\d+\%)$/'
   artifacts:
