@@ -1094,7 +1094,7 @@ class PrivatAfgiftsanmeldelseAPITest(TestCase):
         # Privatafgiftsanmeldelse
         cls.privatafgiftsanmeldelse = PrivatAfgiftsanmeldelse.objects.create(
             **{
-                "cpr": "101010100",
+                "cpr": cls.indberetter.cpr,
                 "navn": "Test privatafgiftsanmeldelse",
                 "adresse": "Silkeborgvej 260",
                 "postnummer": "8230",
@@ -1109,27 +1109,24 @@ class PrivatAfgiftsanmeldelseAPITest(TestCase):
         )
 
     def test_create(self):
-        data_leverandoerfaktura_content = b"%PDF-1.4\n%Fake PDF content"
-        data_leverandoerfaktura_base64 = base64.b64encode(
-            data_leverandoerfaktura_content
-        ).decode("utf-8")
-
-        data = {
-            "cpr": "101010100",
-            "navn": "Test privatafgiftsanmeldelse",
-            "adresse": "Silkeborgvej 260",
-            "postnummer": "8230",
-            "by": "Åbyhøj",
-            "telefon": "13371337",
-            "bookingnummer": "666",
-            "indleveringsdato": "2022-01-01",
-            "leverandørfaktura_nummer": "1234",
-            "leverandørfaktura": data_leverandoerfaktura_base64,
-        }
-
         resp = self.client.post(
             reverse(f"api-1.0.0:privat_afgiftsanmeldelse_create"),
-            json_dump(data),
+            json_dump(
+                {
+                    "cpr": self.indberetter.cpr,
+                    "navn": "Test privatafgiftsanmeldelse",
+                    "adresse": "Silkeborgvej 260",
+                    "postnummer": "8230",
+                    "by": "Åbyhøj",
+                    "telefon": "13371337",
+                    "bookingnummer": "666",
+                    "indleveringsdato": "2022-01-01",
+                    "leverandørfaktura_nummer": "1234",
+                    "leverandørfaktura": base64.b64encode(
+                        b"%PDF-1.4\n%Fake PDF content"
+                    ).decode("utf-8"),
+                }
+            ),
             HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
             content_type="application/json",
         )
@@ -1148,7 +1145,7 @@ class PrivatAfgiftsanmeldelseAPITest(TestCase):
             reverse(f"api-1.0.0:privat_afgiftsanmeldelse_create"),
             json_dump(
                 {
-                    "cpr": "101010100",
+                    "cpr": self.indberetter.cpr,
                     "navn": "Test privatafgiftsanmeldelse",
                     "adresse": "Silkeborgvej 260",
                     "postnummer": "8230",
@@ -1182,7 +1179,7 @@ class PrivatAfgiftsanmeldelseAPITest(TestCase):
             resp.json(),
             {
                 "id": self.privatafgiftsanmeldelse.id,
-                "cpr": 101010100,
+                "cpr": int(self.indberetter.cpr),
                 "navn": "Test privatafgiftsanmeldelse",
                 "adresse": "Silkeborgvej 260",
                 "postnummer": 8230,
@@ -1234,7 +1231,7 @@ class PrivatAfgiftsanmeldelseAPITest(TestCase):
                 "items": [
                     {
                         "id": self.privatafgiftsanmeldelse.id,
-                        "cpr": 101010100,
+                        "cpr": int(self.indberetter.cpr),
                         "navn": "Test privatafgiftsanmeldelse",
                         "adresse": "Silkeborgvej 260",
                         "postnummer": 8230,
@@ -1307,6 +1304,46 @@ class PrivatAfgiftsanmeldelseAPITest(TestCase):
         )
         mock_filter_user.assert_called_once()
         mock_queryset.exists.assert_called_once()
+
+    def test_get_latest(self):
+        # Create new tf5 to verify as the latest
+        resp = self.client.post(
+            reverse(f"api-1.0.0:privat_afgiftsanmeldelse_create"),
+            json_dump(
+                {
+                    "cpr": self.indberetter.cpr,
+                    "navn": "Test privatafgiftsanmeldelse 2",
+                    "adresse": "Silkeborgvej 260",
+                    "postnummer": "8230",
+                    "by": "Åbyhøj",
+                    "telefon": "13371337",
+                    "bookingnummer": "666",
+                    "indleveringsdato": "2022-01-01",
+                    "leverandørfaktura_nummer": "1234",
+                    "leverandørfaktura": base64.b64encode(
+                        b"%PDF-1.4\n%Fake PDF content"
+                    ).decode("utf-8"),
+                }
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+        )
+
+        self.assertEqual(resp.status_code, 200)
+        resp_data = resp.json()
+
+        # check we get the id of the new one
+        resp = self.client.get(
+            reverse(
+                "api-1.0.0:privat_afgiftsanmeldelse_latest",
+                args=[self.indberetter.cpr],
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+        )
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.json(), resp_data["id"])
 
 
 # Other tests of the "anmeldelse"-module
