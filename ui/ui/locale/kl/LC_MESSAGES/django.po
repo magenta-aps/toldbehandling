@@ -37,10 +37,11 @@ msgid "Adgang nægtet"
 msgstr "Iserniarneq itigartinneqarpoq"
 
 #: ui/templates/ui/error/login_assurance.html
-#, fuzzy
-#| msgid "Det anvendte login er udløbet. Prøv at logge ind igen."
 msgid ""
 "Der er logget ind med utilstrækkeligt sikringsniveau. Prøv at logge ind igen."
+msgstr ""
+
+msgid "Det anvendte login er udløbet. Prøv at logge ind igen."
 msgstr "Isersimaneq qaangiutereerpoq. Iseqqeriarit."
 
 #: ui/templates/ui/error/login_repeat.html
@@ -142,9 +143,10 @@ msgid "Denne afgiftsanmeldelse vil blive slettet"
 msgstr ""
 
 #: ui/templates/ui/tf10/delete.html
-#, fuzzy
-#| msgid "Afgiftssats"
 msgid "Afgiftsanmeldelse"
+msgstr "Akitsuusigasssanik nalunaaruteqarneq"
+
+msgid "Afgiftssats"
 msgstr "Akitsuutip annertussusia"
 
 #: ui/templates/ui/tf10/delete.html ui/templates/ui/tf5/payment/checkout.html
@@ -176,10 +178,10 @@ msgstr "Allakkat umiarsuakkoortitat"
 msgid "Luftpost"
 msgstr "Allakkat timmisartukkoortitat"
 
-#: ui/templates/ui/tf10/delete.html
-#, fuzzy
-#| msgid "Afgiftssats"
 msgid "Afgift i alt"
+msgstr "Akitsuutit katillugit"
+
+msgid "Afgiftssats"
 msgstr "Akitsuutip annertussusia"
 
 #: ui/templates/ui/tf10/delete.html
