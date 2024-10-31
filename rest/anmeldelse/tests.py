@@ -1074,6 +1074,10 @@ class PrivatAfgiftsanmeldelseAPITest(TestCase):
             codename="view_privatafgiftsanmeldelse"
         )
 
+        cls.change_privatafgiftsanmeldelse_perm = Permission.objects.get(
+            codename="change_privatafgiftsanmeldelse"
+        )
+
         # User (Privat/CPR)
         cls.user, cls.user_token, cls.user_refresh_token = RestMixin.make_user(
             username="privatafgiftsanmeldelse-test-user",
@@ -1082,6 +1086,7 @@ class PrivatAfgiftsanmeldelseAPITest(TestCase):
             permissions=[
                 cls.add_privatafgiftsanmeldelse_perm,
                 cls.view_privatafgiftsanmeldelse_perm,
+                cls.change_privatafgiftsanmeldelse_perm,
             ],
         )
 
@@ -1201,6 +1206,7 @@ class PrivatAfgiftsanmeldelseAPITest(TestCase):
                     "groups": [],
                     "permissions": [
                         "anmeldelse.add_privatafgiftsanmeldelse",
+                        "anmeldelse.change_privatafgiftsanmeldelse",
                         "anmeldelse.view_privatafgiftsanmeldelse",
                     ],
                     "indberetter_data": {"cvr": None},
@@ -1253,6 +1259,7 @@ class PrivatAfgiftsanmeldelseAPITest(TestCase):
                             "groups": [],
                             "permissions": [
                                 "anmeldelse.add_privatafgiftsanmeldelse",
+                                "anmeldelse.change_privatafgiftsanmeldelse",
                                 "anmeldelse.view_privatafgiftsanmeldelse",
                             ],
                             "indberetter_data": {"cvr": None},
@@ -1367,6 +1374,27 @@ class PrivatAfgiftsanmeldelseAPITest(TestCase):
         mock_privatafgiftsanmeldelse_obj_filter.assert_called_once_with(
             cpr=int(self.indberetter.cpr)
         )
+
+    def test_update(self):
+        resp = self.client.patch(
+            reverse(
+                f"api-1.0.0:privatafgiftsanmeldelse_update",
+                args=[self.privatafgiftsanmeldelse.id],
+            ),
+            json_dump(
+                {
+                    "navn": "Test privatafgiftsanmeldelse 1.2",
+                    "leverandørfaktura": base64.b64encode(
+                        b"%PDF-1.4\n%Fake PDF content - updated!"
+                    ).decode("utf-8"),
+                }
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+        )
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.json(), {"success": True})
 
 
 # Other tests of the "anmeldelse"-module
