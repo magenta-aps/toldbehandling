@@ -1268,6 +1268,23 @@ class PrivatAfgiftsanmeldelseAPITest(TestCase):
             },
         )
 
+    @patch("django.contrib.auth.models.PermissionsMixin.has_perm")
+    def test_filter_user_view_all_perm(self, mock_has_perm: MagicMock):
+        mock_has_perm.return_value = True
+        resp = self.client.get(
+            reverse("api-1.0.0:privat_afgiftsanmeldelse_list"),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+        )
+
+        self.assertEqual(resp.status_code, 200)
+        mock_has_perm.assert_has_calls(
+            [
+                call("anmeldelse.view_privatafgiftsanmeldelse"),
+                call("anmeldelse.view_all_privatafgiftsanmeldelse"),
+            ],
+        )
+
 
 # Other tests of the "anmeldelse"-module
 
