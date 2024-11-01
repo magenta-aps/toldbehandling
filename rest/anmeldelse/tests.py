@@ -42,7 +42,7 @@ from ninja_extra.exceptions import PermissionDenied
 from payment.models import Payment
 from project.test_mixins import RestMixin, RestTestMixin
 from project.util import json_dump
-from sats.models import Vareafgiftssats
+from sats.models import Afgiftstabel, Vareafgiftssats
 
 
 class AnmeldelsesTestDataMixin:
@@ -1426,7 +1426,7 @@ class PrivatAfgiftsanmeldelseAPITest(TestCase):
         self.assertEqual(resp, 1)
 
 
-# Other tests of the "anmeldelse"-module
+# Varlinje tests
 
 
 class VarelinjeTest(RestTestMixin, TestCase):
@@ -1581,6 +1581,80 @@ class VarelinjeTest(RestTestMixin, TestCase):
         self.assertEquals(
             varelinje3.afgiftsbeløb, Decimal(50_000 + 1.0 * 100_000 + 1.5 * 350_000)
         )
+
+
+class VarelinjeAPITest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        # Permissions
+        cls.add_varelinje_perm = Permission.objects.get(codename="add_varelinje")
+        cls.view_varelinje_perm = Permission.objects.get(codename="view_varelinje")
+        cls.change_varelinje_perm = Permission.objects.get(codename="change_varelinje")
+
+        # User (Privat/CPR)
+        cls.user, cls.user_token, cls.user_refresh_token = RestMixin.make_user(
+            username="varelinje-test-user",
+            plaintext_password="testpassword1337",
+            email="test@magenta-aps.dk",
+            permissions=[
+                cls.add_varelinje_perm,
+                cls.view_varelinje_perm,
+                cls.change_varelinje_perm,
+            ],
+        )
+
+        cls.indberetter = IndberetterProfile.objects.create(
+            user=cls.user,
+            cpr="1234567890",
+            api_key=uuid4(),
+        )
+
+        # Varelinjesats
+        cls.afgiftstabel = Afgiftstabel.objects.create(
+            kladde=False, gyldig_fra=datetime.now(UTC)
+        )
+        cls.varelinjesats = Vareafgiftssats.objects.create(
+            afgiftstabel=cls.afgiftstabel,
+            vareart_da="NamNam",
+            afgiftsgruppenummer=1337,
+        )
+
+        # Privatafgifsanmeldelse for test of the VarelinjeAPI
+        cls.privatafgiftsanmeldelse = PrivatAfgiftsanmeldelse.objects.create(
+            **{
+                "cpr": cls.indberetter.cpr,
+                "navn": "Test varelinje-privatafgiftsanmeldelse",
+                "adresse": "Silkeborgvej 260",
+                "postnummer": "8230",
+                "by": "Åbyhøj",
+                "telefon": "13371337",
+                "bookingnummer": "666",
+                "indleveringsdato": "2022-01-01",
+                "leverandørfaktura_nummer": "1234",
+                "oprettet_af": cls.user,
+                "status": "ny",
+            }
+        )
+
+    def test_create(self):
+        resp = self.client.post(
+            reverse(f"api-1.0.0:varelinje_create"),
+            json_dump(
+                {
+                    "privatafgiftsanmeldelse_id": self.privatafgiftsanmeldelse.id,
+                    "vareafgiftssats_id": self.varelinjesats.id,
+                    "antal": 1,
+                }
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+        )
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.json(), {"id": 1})
+
+
+# Other tests of the "anmeldelse"-module
 
 
 class StatistikTest(RestMixin, TestCase):
