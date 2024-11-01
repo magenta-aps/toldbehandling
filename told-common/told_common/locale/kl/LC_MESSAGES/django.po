@@ -872,9 +872,10 @@ msgstr "Nassiussat normuat"
 
 #: told_common/templates/told_common/tf5/form.html
 #: told_common/templates/told_common/tf5/view.html
-#, fuzzy
-#| msgid "Indførselstilladelse nr."
 msgid "Indførselstilladelse"
+msgstr "Eqqussuisinnaanermut akuersissutip nr.-a"
+
+msgid "Indførselstilladelse nr."
 msgstr "Eqqussuisinnaanermut akuersissutip nr.-a"
 
 #: told_common/templates/told_common/tf5/form.html
