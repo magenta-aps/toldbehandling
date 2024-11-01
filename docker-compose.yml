@@ -99,7 +99,7 @@ services:
       - toldbehandling-ui
       - toldbehandling-db
     volumes:
-      - ./admin/:/app
+#      - ./admin/:/app
       - ./told-common/told_common/:/app/told_common
       - file-data:/upload  # rw for at kunne teste; bør være ro i deployments
       - ./log/admin.log:/log/admin.log:rw
