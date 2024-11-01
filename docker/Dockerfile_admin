@@ -54,6 +54,8 @@ COPY ./docker/entrypoint_admin.sh /entrypoint.sh
 EXPOSE 8000
 USER toldbehandling
 ENTRYPOINT ["/entrypoint.sh"]
+
+RUN cd /app/told-common && django-admin compilemessages --locale=kl --locale=da
 WORKDIR /app
 RUN django-admin compilemessages --locale=kl --locale=da
 

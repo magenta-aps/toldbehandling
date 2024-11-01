@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-10-10 07:16-0100\n"
+"POT-Creation-Date: 2024-11-01 07:11-0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -434,9 +434,6 @@ msgstr ""
 "nassiussinissamullu piginnaatinneqarsinnaavoq"
 
 #: told_common/templates/told_common/tf10/form.html
-msgid "Indførselstilladelse nr."
-msgstr "Eqqussuisinnaanermut akuersissutip nr.-a"
-
 msgid "Indførsel fra tredjeland"
 msgstr ""
 
@@ -593,9 +590,6 @@ msgstr "Nassiuguk"
 
 #: told_common/templates/told_common/tf10/form.html
 #: told_common/templates/told_common/tf5/form.html
-msgid "Varelinjer med afgifter"
-msgstr "Titarnerit nioqqutissat akitsuutaasa allassimaffii"
-
 msgid "Varelinje med varekode 101 mangler"
 msgstr ""
 
