@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-10-10 07:16-0100\n"
+"POT-Creation-Date: 2024-11-01 07:11-0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -434,10 +434,8 @@ msgstr ""
 "nassiussinissamullu piginnaatinneqarsinnaavoq"
 
 #: told_common/templates/told_common/tf10/form.html
-#, fuzzy
-#| msgid "Indførselstilladelse nr."
 msgid "Indførsel fra tredjeland"
-msgstr "Eqqussuisinnaanermut akuersissutip nr.-a"
+msgstr ""
 
 #: told_common/templates/told_common/tf10/form.html
 #: told_common/templates/told_common/tf5/form.html
@@ -592,17 +590,13 @@ msgstr "Nassiuguk"
 
 #: told_common/templates/told_common/tf10/form.html
 #: told_common/templates/told_common/tf5/form.html
-#, fuzzy
-#| msgid "Varelinjer med afgifter"
 msgid "Varelinje med varekode 101 mangler"
-msgstr "Titarnerit nioqqutissat akitsuutaasa allassimaffii"
+msgstr ""
 
 #: told_common/templates/told_common/tf10/form.html
 #: told_common/templates/told_common/tf5/form.html
-#, fuzzy
-#| msgid "Varelinjer med afgifter"
 msgid "Varelinje med varekode 102 mangler"
-msgstr "Titarnerit nioqqutissat akitsuutaasa allassimaffii"
+msgstr ""
 
 #: told_common/templates/told_common/tf10/form.html
 #: told_common/templates/told_common/tf5/form.html
@@ -878,9 +872,10 @@ msgstr "Nassiussat normuat"
 
 #: told_common/templates/told_common/tf5/form.html
 #: told_common/templates/told_common/tf5/view.html
-#, fuzzy
-#| msgid "Indførselstilladelse nr."
 msgid "Indførselstilladelse"
+msgstr "Eqqussuisinnaanermut akuersissutip nr.-a"
+
+msgid "Indførselstilladelse nr."
 msgstr "Eqqussuisinnaanermut akuersissutip nr.-a"
 
 #: told_common/templates/told_common/tf5/form.html

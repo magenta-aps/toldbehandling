@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-10-28 06:36-0200\n"
+"POT-Creation-Date: 2024-11-01 07:11-0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -37,11 +37,9 @@ msgid "Adgang nægtet"
 msgstr "Iserniarneq itigartinneqarpoq"
 
 #: ui/templates/ui/error/login_assurance.html
-#, fuzzy
-#| msgid "Det anvendte login er udløbet. Prøv at logge ind igen."
 msgid ""
 "Der er logget ind med utilstrækkeligt sikringsniveau. Prøv at logge ind igen."
-msgstr "Isersimaneq qaangiutereerpoq. Iseqqeriarit."
+msgstr ""
 
 #: ui/templates/ui/error/login_repeat.html
 msgid "Det anvendte login er allerede anvendt. Prøv at logge ind igen."
@@ -142,10 +140,8 @@ msgid "Denne afgiftsanmeldelse vil blive slettet"
 msgstr ""
 
 #: ui/templates/ui/tf10/delete.html
-#, fuzzy
-#| msgid "Afgiftssats"
 msgid "Afgiftsanmeldelse"
-msgstr "Akitsuutip annertussusia"
+msgstr "Akitsuusigasssanik nalunaaruteqarneq"
 
 #: ui/templates/ui/tf10/delete.html ui/templates/ui/tf5/payment/checkout.html
 #: ui/templates/ui/tf5/payment/details.html
@@ -177,10 +173,8 @@ msgid "Luftpost"
 msgstr "Allakkat timmisartukkoortitat"
 
 #: ui/templates/ui/tf10/delete.html
-#, fuzzy
-#| msgid "Afgiftssats"
 msgid "Afgift i alt"
-msgstr "Akitsuutip annertussusia"
+msgstr "Akitsuutit katillugit"
 
 #: ui/templates/ui/tf10/delete.html
 msgid "Er du sikker på at du vil slette denne?"
