@@ -14,6 +14,7 @@ from aktør.models import Afsender, Modtager
 from anmeldelse.api import (
     AfgiftsanmeldelseAPI,
     AfgiftsanmeldelseFilterSchema,
+    PrivatAfgiftsanmeldelseAPI,
     PrivatAfgiftsanmeldelseOut,
 )
 from anmeldelse.models import (
@@ -1395,6 +1396,41 @@ class PrivatAfgiftsanmeldelseAPITest(TestCase):
 
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.json(), {"success": True})
+
+    @patch("anmeldelse.api.datetime")
+    def test_get_historical(self, mock_datetime: MagicMock):
+        # Mocking
+        mock_datetime.now = MagicMock(return_value=datetime.now(UTC))
+
+        # Test invalid usage
+        with self.assertRaises(Http404):
+            resp = PrivatAfgiftsanmeldelseAPI.get_historical(
+                self.privatafgiftsanmeldelse.id, 2
+            )
+
+        # Test single-history record(s)
+        resp = PrivatAfgiftsanmeldelseAPI.get_historical(
+            self.privatafgiftsanmeldelse.id, 0
+        )
+        self.assertEqual(
+            resp, (self.privatafgiftsanmeldelse, mock_datetime.now.return_value)
+        )
+
+        # Test multiple-history record(s)
+        self.privatafgiftsanmeldelse.status = "afvist"
+        self.privatafgiftsanmeldelse.save()
+        history_records = self.privatafgiftsanmeldelse.history.order_by("-history_date")
+
+        resp = PrivatAfgiftsanmeldelseAPI.get_historical(
+            self.privatafgiftsanmeldelse.id, 0
+        )
+        self.assertEqual(
+            resp,
+            (
+                self.privatafgiftsanmeldelse,
+                history_records[0].history_date - timedelta(microseconds=1),
+            ),
+        )
 
 
 # Other tests of the "anmeldelse"-module
