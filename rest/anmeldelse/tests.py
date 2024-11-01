@@ -1432,6 +1432,12 @@ class PrivatAfgiftsanmeldelseAPITest(TestCase):
             ),
         )
 
+    def test_get_historical_count(self):
+        resp = PrivatAfgiftsanmeldelseAPI.get_historical_count(
+            self.privatafgiftsanmeldelse.id
+        )
+        self.assertEqual(resp, 1)
+
 
 # Other tests of the "anmeldelse"-module
 
