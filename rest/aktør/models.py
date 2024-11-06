@@ -77,9 +77,9 @@ class Aktør(models.Model):
         default=False,
     )
     land = models.CharField(
-        max_length = 20,
-        blank = True,
-        null = True,
+        max_length=20,
+        blank=True,
+        null=True,
     )
 
     def __str__(self):
