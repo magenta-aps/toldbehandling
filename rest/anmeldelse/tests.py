@@ -33,7 +33,7 @@ from django.core.files.base import ContentFile
 from django.db.models import Q
 from django.db.models.signals import post_delete, post_save
 from django.http import Http404
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 from forsendelse.models import Postforsendelse
 from payment.models import Payment
@@ -887,6 +887,7 @@ class AfgiftsanmeldelseAPITest(AnmeldelsesTestDataMixin, TestCase):
         result = AfgiftsanmeldelseAPI.map_sort("forbindelsesnummer", "desc")
         self.assertEqual(result, "-fragtforsendelse__forbindelsesnr")
 
+    @override_settings(EMAIL_NOTIFICATIONS_ENABLED=True)
     @patch("anmeldelse.api.send_email")
     def test_update_status_afvist(self, mock_send_email: MagicMock):
         resp = self.client.patch(

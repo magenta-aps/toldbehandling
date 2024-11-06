@@ -22,6 +22,7 @@ from anmeldelse.models import (
 from common.api import UserOut, get_auth_methods
 from common.models import IndberetterProfile
 from common.util import send_email
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.db.models import Q, QuerySet, Sum
@@ -419,7 +420,8 @@ class AfgiftsanmeldelseAPI:
 
         # Send email notification in specific scenarios
         if (
-            item.oprettet_af
+            settings.EMAIL_NOTIFICATIONS_ENABLED
+            and item.oprettet_af
             and item.oprettet_af.email
             and len(item.oprettet_af.email) > 0
         ):

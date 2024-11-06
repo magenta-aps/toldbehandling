@@ -263,6 +263,9 @@ PROMETHEUS_PUSHGATEWAY_HOST = os.environ.get(
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 DEFAULT_FROM_EMAIL = "noreply@nanoq.gl"
+EMAIL_NOTIFICATIONS_ENABLED = bool(
+    strtobool(os.environ.get("EMAIL_NOTIFICATIONS_ENABLED", "False"))
+)
 
 EMAIL_HOST = os.environ.get("EMAIL_HOST", None)
 EMAIL_PORT = int(os.environ.get("EMAIL_PORT", 25))
