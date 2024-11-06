@@ -76,6 +76,11 @@ class Aktør(models.Model):
     kladde = models.BooleanField(
         default=False,
     )
+    land = models.CharField(
+        max_length = 20,
+        blank = True,
+        null = True,
+    )
 
     def __str__(self):
         return f"{self.__class__.__name__}(navn={self.navn}, cvr={self.cvr})"

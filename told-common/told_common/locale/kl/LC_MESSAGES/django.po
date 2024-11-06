@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-11-01 07:11-0200\n"
+"POT-Creation-Date: 2024-11-06 10:10-0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -873,9 +873,6 @@ msgstr "Nassiussat normuat"
 #: told_common/templates/told_common/tf5/form.html
 #: told_common/templates/told_common/tf5/view.html
 msgid "Indførselstilladelse"
-msgstr "Eqqussuisinnaanermut akuersissutip nr.-a"
-
-msgid "Indførselstilladelse nr."
 msgstr "Eqqussuisinnaanermut akuersissutip nr.-a"
 
 #: told_common/templates/told_common/tf5/form.html
