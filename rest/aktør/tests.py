@@ -120,7 +120,7 @@ class AfsenderTest(RestTestMixin, TestCase):
         "cvr": 12345670,
     }
     unique_fields = []
-    exclude_fields = ["postnummer_ref", "eksplicit_stedkode"]
+    exclude_fields = ["postnummer_ref", "eksplicit_stedkode", "land"]
 
     # Expected object in the database as dict
     @property
@@ -184,7 +184,7 @@ class ModtagerTest(RestTestMixin, TestCase):
         "cvr": 12345670,
         "kreditordning": False,
     }
-    exclude_fields = ["postnummer_ref", "eksplicit_stedkode"]
+    exclude_fields = ["postnummer_ref", "eksplicit_stedkode", "land"]
 
     # Expected object in the database as dict
     @property
