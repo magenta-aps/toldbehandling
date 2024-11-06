@@ -1611,8 +1611,9 @@ class VarelinjeAPITest(TestCase):
 
         # Varelinjesats
         cls.afgiftstabel = Afgiftstabel.objects.create(
-            kladde=False, gyldig_fra=datetime.now(UTC)
+            kladde=False, gyldig_fra=datetime.now(UTC) - timedelta(days=1)
         )
+
         cls.varelinjesats = Vareafgiftssats.objects.create(
             afgiftstabel=cls.afgiftstabel,
             vareart_da="NamNam",
@@ -1629,7 +1630,7 @@ class VarelinjeAPITest(TestCase):
                 "by": "Åbyhøj",
                 "telefon": "13371337",
                 "bookingnummer": "666",
-                "indleveringsdato": "2022-01-01",
+                "indleveringsdato": datetime.strftime(datetime.now(UTC), "%Y-%m-%d"),
                 "leverandørfaktura_nummer": "1234",
                 "oprettet_af": cls.user,
                 "status": "ny",
@@ -1651,7 +1652,31 @@ class VarelinjeAPITest(TestCase):
         )
 
         self.assertEqual(resp.status_code, 200)
-        self.assertEqual(resp.json(), {"id": 1})
+        self.assertEqual(resp.json(), {"id": ANY})
+
+    def test_create__vareafgiftssats_afgiftsgruppenummer(self):
+        resp = self.client.post(
+            reverse(f"api-1.0.0:varelinje_create"),
+            json_dump(
+                {
+                    "privatafgiftsanmeldelse_id": self.privatafgiftsanmeldelse.id,
+                    "vareafgiftssats_id": self.varelinjesats.id,
+                    "antal": 1,
+                    "vareafgiftssats_afgiftsgruppenummer": self.varelinjesats.afgiftsgruppenummer,
+                }
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, 200)
+
+        # Fetch the newly created varelinje and verify the "vareafgiftssats_afgiftsgruppenummer" is correct
+        resp_data = resp.json()
+        new_varelinje = Varelinje.objects.get(pk=resp_data["id"])
+        self.assertEqual(
+            new_varelinje.vareafgiftssats.afgiftsgruppenummer,
+            self.varelinjesats.afgiftsgruppenummer,
+        )
 
 
 # Other tests of the "anmeldelse"-module
