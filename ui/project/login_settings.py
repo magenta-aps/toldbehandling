@@ -38,7 +38,7 @@ if LOGIN_BYPASS_ENABLED:
             "cvr": "12345678",
             "firstname": "Dummybruger",
             "lastname": "Testersen",
-            "email": "test@magenta.dk",
+            "email": "",
         }
 
 else:
