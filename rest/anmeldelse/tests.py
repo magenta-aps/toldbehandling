@@ -14,6 +14,7 @@ from aktør.models import Afsender, Modtager
 from anmeldelse.api import (
     AfgiftsanmeldelseAPI,
     AfgiftsanmeldelseFilterSchema,
+    PrivatAfgiftsanmeldelseAPI,
     PrivatAfgiftsanmeldelseOut,
 )
 from anmeldelse.models import (
@@ -35,7 +36,9 @@ from django.db.models.signals import post_delete, post_save
 from django.http import Http404
 from django.test import TestCase, override_settings
 from django.urls import reverse
+from django.utils.http import urlencode
 from forsendelse.models import Postforsendelse
+from ninja_extra.exceptions import PermissionDenied
 from payment.models import Payment
 from project.test_mixins import RestMixin, RestTestMixin
 from project.util import json_dump
@@ -1072,6 +1075,10 @@ class PrivatAfgiftsanmeldelseAPITest(TestCase):
             codename="view_privatafgiftsanmeldelse"
         )
 
+        cls.change_privatafgiftsanmeldelse_perm = Permission.objects.get(
+            codename="change_privatafgiftsanmeldelse"
+        )
+
         # User (Privat/CPR)
         cls.user, cls.user_token, cls.user_refresh_token = RestMixin.make_user(
             username="privatafgiftsanmeldelse-test-user",
@@ -1080,6 +1087,7 @@ class PrivatAfgiftsanmeldelseAPITest(TestCase):
             permissions=[
                 cls.add_privatafgiftsanmeldelse_perm,
                 cls.view_privatafgiftsanmeldelse_perm,
+                cls.change_privatafgiftsanmeldelse_perm,
             ],
         )
 
@@ -1092,7 +1100,7 @@ class PrivatAfgiftsanmeldelseAPITest(TestCase):
         # Privatafgiftsanmeldelse
         cls.privatafgiftsanmeldelse = PrivatAfgiftsanmeldelse.objects.create(
             **{
-                "cpr": "101010100",
+                "cpr": cls.indberetter.cpr,
                 "navn": "Test privatafgiftsanmeldelse",
                 "adresse": "Silkeborgvej 260",
                 "postnummer": "8230",
@@ -1107,27 +1115,24 @@ class PrivatAfgiftsanmeldelseAPITest(TestCase):
         )
 
     def test_create(self):
-        data_leverandoerfaktura_content = b"%PDF-1.4\n%Fake PDF content"
-        data_leverandoerfaktura_base64 = base64.b64encode(
-            data_leverandoerfaktura_content
-        ).decode("utf-8")
-
-        data = {
-            "cpr": "101010100",
-            "navn": "Test privatafgiftsanmeldelse",
-            "adresse": "Silkeborgvej 260",
-            "postnummer": "8230",
-            "by": "Åbyhøj",
-            "telefon": "13371337",
-            "bookingnummer": "666",
-            "indleveringsdato": "2022-01-01",
-            "leverandørfaktura_nummer": "1234",
-            "leverandørfaktura": data_leverandoerfaktura_base64,
-        }
-
         resp = self.client.post(
             reverse(f"api-1.0.0:privat_afgiftsanmeldelse_create"),
-            json_dump(data),
+            json_dump(
+                {
+                    "cpr": self.indberetter.cpr,
+                    "navn": "Test privatafgiftsanmeldelse",
+                    "adresse": "Silkeborgvej 260",
+                    "postnummer": "8230",
+                    "by": "Åbyhøj",
+                    "telefon": "13371337",
+                    "bookingnummer": "666",
+                    "indleveringsdato": "2022-01-01",
+                    "leverandørfaktura_nummer": "1234",
+                    "leverandørfaktura": base64.b64encode(
+                        b"%PDF-1.4\n%Fake PDF content"
+                    ).decode("utf-8"),
+                }
+            ),
             HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
             content_type="application/json",
         )
@@ -1146,7 +1151,7 @@ class PrivatAfgiftsanmeldelseAPITest(TestCase):
             reverse(f"api-1.0.0:privat_afgiftsanmeldelse_create"),
             json_dump(
                 {
-                    "cpr": "101010100",
+                    "cpr": self.indberetter.cpr,
                     "navn": "Test privatafgiftsanmeldelse",
                     "adresse": "Silkeborgvej 260",
                     "postnummer": "8230",
@@ -1168,7 +1173,7 @@ class PrivatAfgiftsanmeldelseAPITest(TestCase):
     def test_get(self):
         resp = self.client.get(
             reverse(
-                f"api-1.0.0:privat_afgiftsanmeldelse_get",
+                "api-1.0.0:privat_afgiftsanmeldelse_get",
                 args=[self.privatafgiftsanmeldelse.id],
             ),
             HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
@@ -1180,7 +1185,7 @@ class PrivatAfgiftsanmeldelseAPITest(TestCase):
             resp.json(),
             {
                 "id": self.privatafgiftsanmeldelse.id,
-                "cpr": 101010100,
+                "cpr": int(self.indberetter.cpr),
                 "navn": "Test privatafgiftsanmeldelse",
                 "adresse": "Silkeborgvej 260",
                 "postnummer": 8230,
@@ -1202,6 +1207,7 @@ class PrivatAfgiftsanmeldelseAPITest(TestCase):
                     "groups": [],
                     "permissions": [
                         "anmeldelse.add_privatafgiftsanmeldelse",
+                        "anmeldelse.change_privatafgiftsanmeldelse",
                         "anmeldelse.view_privatafgiftsanmeldelse",
                     ],
                     "indberetter_data": {"cvr": None},
@@ -1212,6 +1218,225 @@ class PrivatAfgiftsanmeldelseAPITest(TestCase):
                 "payment_status": "created",
             },
         )
+
+    def test_list(self):
+        query_params = {"sort": "navn", "order": "asc"}
+        url = reverse("api-1.0.0:privat_afgiftsanmeldelse_list")
+        url = f"{url}?{urlencode(query_params)}"
+
+        resp = self.client.get(
+            url,
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+        )
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(
+            resp.json(),
+            {
+                "count": 1,
+                "items": [
+                    {
+                        "id": self.privatafgiftsanmeldelse.id,
+                        "cpr": int(self.indberetter.cpr),
+                        "navn": "Test privatafgiftsanmeldelse",
+                        "adresse": "Silkeborgvej 260",
+                        "postnummer": 8230,
+                        "by": "Åbyhøj",
+                        "telefon": "13371337",
+                        "bookingnummer": "666",
+                        "indleveringsdato": "2022-01-01",
+                        "leverandørfaktura_nummer": "1234",
+                        "indførselstilladelse": None,
+                        "leverandørfaktura": None,
+                        "oprettet": ANY,
+                        "oprettet_af": {
+                            "id": ANY,
+                            "username": "privatafgiftsanmeldelse-test-user",
+                            "first_name": "",
+                            "last_name": "",
+                            "email": "test@magenta-aps.dk",
+                            "is_superuser": False,
+                            "groups": [],
+                            "permissions": [
+                                "anmeldelse.add_privatafgiftsanmeldelse",
+                                "anmeldelse.change_privatafgiftsanmeldelse",
+                                "anmeldelse.view_privatafgiftsanmeldelse",
+                            ],
+                            "indberetter_data": {"cvr": None},
+                            "twofactor_enabled": False,
+                        },
+                        "status": "ny",
+                        "anonym": False,
+                        "payment_status": "created",
+                    }
+                ],
+            },
+        )
+
+    @patch("django.contrib.auth.models.PermissionsMixin.has_perm")
+    def test_filter_user_view_all_perm(self, mock_has_perm: MagicMock):
+        mock_has_perm.return_value = True
+        resp = self.client.get(
+            reverse("api-1.0.0:privat_afgiftsanmeldelse_list"),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+        )
+
+        self.assertEqual(resp.status_code, 200)
+        mock_has_perm.assert_has_calls(
+            [
+                call("anmeldelse.view_privatafgiftsanmeldelse"),
+                call("anmeldelse.view_all_privatafgiftsanmeldelse"),
+            ],
+        )
+
+    @patch("anmeldelse.api.PrivatAfgiftsanmeldelseAPI.filter_user")
+    def test_check_user_perm_denied(self, mock_filter_user: MagicMock):
+        mock_queryset = MagicMock(exists=MagicMock(return_value=False))
+        mock_filter_user.return_value = mock_queryset
+
+        resp = self.client.get(
+            reverse(
+                "api-1.0.0:privat_afgiftsanmeldelse_get",
+                args=[self.privatafgiftsanmeldelse.id],
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+        )
+
+        self.assertEqual(resp.status_code, 403)
+        self.assertEqual(
+            resp.json(),
+            {"detail": "You do not have permission to perform this action."},
+        )
+        mock_filter_user.assert_called_once()
+        mock_queryset.exists.assert_called_once()
+
+    def test_get_latest(self):
+        # Create new tf5 to verify as the latest
+        resp = self.client.post(
+            reverse(f"api-1.0.0:privat_afgiftsanmeldelse_create"),
+            json_dump(
+                {
+                    "cpr": self.indberetter.cpr,
+                    "navn": "Test privatafgiftsanmeldelse 2",
+                    "adresse": "Silkeborgvej 260",
+                    "postnummer": "8230",
+                    "by": "Åbyhøj",
+                    "telefon": "13371337",
+                    "bookingnummer": "666",
+                    "indleveringsdato": "2022-01-01",
+                    "leverandørfaktura_nummer": "1234",
+                    "leverandørfaktura": base64.b64encode(
+                        b"%PDF-1.4\n%Fake PDF content"
+                    ).decode("utf-8"),
+                }
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+        )
+
+        self.assertEqual(resp.status_code, 200)
+        resp_data = resp.json()
+
+        # check we get the id of the new one
+        resp = self.client.get(
+            reverse(
+                "api-1.0.0:privat_afgiftsanmeldelse_latest",
+                args=[self.indberetter.cpr],
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+        )
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.json(), resp_data["id"])
+
+    @patch("anmeldelse.api.PrivatAfgiftsanmeldelse.objects.filter")
+    def test_get_latest_none(self, mock_privatafgiftsanmeldelse_obj_filter: MagicMock):
+        mock_privatafgiftsanmeldelse_obj_filter.return_value = MagicMock(
+            order_by=MagicMock(
+                return_value=MagicMock(first=MagicMock(return_value=None))
+            )
+        )
+
+        resp = self.client.get(
+            reverse(
+                "api-1.0.0:privat_afgiftsanmeldelse_latest",
+                args=[self.indberetter.cpr],
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+        )
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.json(), None)
+        mock_privatafgiftsanmeldelse_obj_filter.assert_called_once_with(
+            cpr=int(self.indberetter.cpr)
+        )
+
+    def test_update(self):
+        resp = self.client.patch(
+            reverse(
+                f"api-1.0.0:privatafgiftsanmeldelse_update",
+                args=[self.privatafgiftsanmeldelse.id],
+            ),
+            json_dump(
+                {
+                    "navn": "Test privatafgiftsanmeldelse 1.2",
+                    "leverandørfaktura": base64.b64encode(
+                        b"%PDF-1.4\n%Fake PDF content - updated!"
+                    ).decode("utf-8"),
+                }
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+        )
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.json(), {"success": True})
+
+    @patch("anmeldelse.api.datetime")
+    def test_get_historical(self, mock_datetime: MagicMock):
+        # Mocking
+        mock_datetime.now = MagicMock(return_value=datetime.now(UTC))
+
+        # Test invalid usage
+        with self.assertRaises(Http404):
+            resp = PrivatAfgiftsanmeldelseAPI.get_historical(
+                self.privatafgiftsanmeldelse.id, 2
+            )
+
+        # Test single-history record(s)
+        resp = PrivatAfgiftsanmeldelseAPI.get_historical(
+            self.privatafgiftsanmeldelse.id, 0
+        )
+        self.assertEqual(
+            resp, (self.privatafgiftsanmeldelse, mock_datetime.now.return_value)
+        )
+
+        # Test multiple-history record(s)
+        self.privatafgiftsanmeldelse.status = "afvist"
+        self.privatafgiftsanmeldelse.save()
+        history_records = self.privatafgiftsanmeldelse.history.order_by("-history_date")
+
+        resp = PrivatAfgiftsanmeldelseAPI.get_historical(
+            self.privatafgiftsanmeldelse.id, 0
+        )
+        self.assertEqual(
+            resp,
+            (
+                self.privatafgiftsanmeldelse,
+                history_records[0].history_date - timedelta(microseconds=1),
+            ),
+        )
+
+    def test_get_historical_count(self):
+        resp = PrivatAfgiftsanmeldelseAPI.get_historical_count(
+            self.privatafgiftsanmeldelse.id
+        )
+        self.assertEqual(resp, 1)
 
 
 # Other tests of the "anmeldelse"-module

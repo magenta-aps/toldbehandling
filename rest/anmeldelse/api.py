@@ -704,6 +704,7 @@ class PrivatAfgiftsanmeldelseAPI:
     @route.get(
         "seneste_indførselstilladelse/{cpr}",
         auth=get_auth_methods(),
+        url_name="privat_afgiftsanmeldelse_latest",
     )
     def get_latest(self, cpr: int):
         anmeldelse = (
