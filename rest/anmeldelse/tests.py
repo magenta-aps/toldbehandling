@@ -1678,6 +1678,30 @@ class VarelinjeAPITest(TestCase):
             self.varelinjesats.afgiftsgruppenummer,
         )
 
+    @patch("anmeldelse.api.VarelinjeAPI.get_varesats_id_by_kode")
+    def test_create_validation_err(self, mock_get_varesats_id_by_kode: MagicMock):
+        mock_get_varesats_id_by_kode.return_value = "not-a-number"
+
+        resp = self.client.post(
+            reverse(f"api-1.0.0:varelinje_create"),
+            json_dump(
+                {
+                    "privatafgiftsanmeldelse_id": self.privatafgiftsanmeldelse.id,
+                    "vareafgiftssats_id": self.varelinjesats.id,
+                    "antal": 1,
+                    "vareafgiftssats_afgiftsgruppenummer": self.varelinjesats.afgiftsgruppenummer,
+                }
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+        )
+
+        self.assertEqual(resp.status_code, 400)
+        self.assertEqual(
+            resp.json(),
+            {"vareafgiftssats": ["“not-a-number”-værdien skal være et heltal."]},
+        )
+
 
 # Other tests of the "anmeldelse"-module
 
