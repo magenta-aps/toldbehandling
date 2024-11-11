@@ -48,3 +48,11 @@ class Command(BaseCommand):
                 ],
             )
         )
+
+def set_country():
+    for afsender in Afsender.objects.filter(land__isnull=True):
+        print(f"{afsender.navn} {afsender.adresse} {afsender.postnummer} {afsender.by}")
+        land = input("Land: ")
+        if land != "":
+            afsender.land = land
+            afsender.save(update_fields=["land"])
