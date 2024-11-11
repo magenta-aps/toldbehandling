@@ -16,6 +16,7 @@ from anmeldelse.api import (
     AfgiftsanmeldelseFilterSchema,
     PrivatAfgiftsanmeldelseAPI,
     PrivatAfgiftsanmeldelseOut,
+    VarelinjeAPI,
 )
 from anmeldelse.models import (
     Afgiftsanmeldelse,
@@ -1775,6 +1776,10 @@ class VarelinjeAPITest(TestCase):
         resp_data = resp.json()
         new_varelinje = Varelinje.objects.get(pk=resp_data["id"])
         self.assertEqual(new_varelinje.afgiftsanmeldelse.id, afgiftsanmeldelse.id)
+
+    def test_get_varesats_id_by_kode_not_found_err(self):
+        with self.assertRaises(Http404):
+            resp = VarelinjeAPI.get_varesats_id_by_kode(1234, None, 666)
 
 
 # Other tests of the "anmeldelse"-module
