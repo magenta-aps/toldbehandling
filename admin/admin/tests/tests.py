@@ -521,8 +521,12 @@ class TestGodkend(TestMixin, PermissionsTest, TestCase):
         if path == expected_prefix + "eboks":
             json_content = {"id": 1}
             self.posted.append((path, data))
+        elif path == expected_prefix + "notat":
+            json_content = {"id": 1}
+            self.posted.append((path, data))
         else:
             print(f"Mock {self.__class__.__name__} got unrecognized path: POST {path}")
+
         if json_content:
             content = json.dumps(json_content).encode("utf-8")
         if content:
@@ -593,7 +597,9 @@ class TestGodkend(TestMixin, PermissionsTest, TestCase):
         mock_patch.side_effect = self.mock_requests_patch
         mock_post.side_effect = self.mock_requests_post
         mock_get.side_effect = self.mock_requests_get
-        response = self.client.post(view_url, {"status": "afvist"})
+        response = self.client.post(
+            view_url, {"status": "afvist", "notat2": "test afvist notat"}
+        )
         self.assertEquals(response.status_code, 302)
         prefix = f"{settings.REST_DOMAIN}/api/"
         patched_map = defaultdict(list)
