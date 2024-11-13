@@ -1,0 +1,5 @@
+Afgiftsanmeldelse {{ id }} har skiftet status fra "{{ status_old }}" til "{{ status_new }}", med denne begrundelse:
+
+{{ status_change_reason }}
+
+Du kan gå ind her: {{ afgiftsanmeldelse_link }} og rette op på det.
