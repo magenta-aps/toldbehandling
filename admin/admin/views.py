@@ -247,35 +247,6 @@ class TF10View(
                 if response:
                     return response
                 self.rest_client.afgiftanmeldelse.set_status(anmeldelse_id, status)
-                """
-                if status == "afvist":
-                    anmeldelse = self.rest_client.afgiftanmeldelse.get(
-                        anmeldelse_id, full=True, include_varelinjer=True
-                    )
-                    indberetter_data = anmeldelse.oprettet_af["indberetter_data"]
-                    # TODO: Hvis der er indberettet på vegne af nogen, skal der
-                    #  så sendes noget til den det er på vegne af?
-                    if indberetter_data:
-                        domain = settings.HOST_DOMAIN or "http://localhost"
-                        pdf = render_pdf(
-                            "admin/blanket/tf10/afvist.html",
-                            {
-                                "link": f"{domain}/blanket/tf10/{anmeldelse_id}",
-                                "notat": notat,
-                            },
-                        )
-                        self.rest_client.eboks.create(
-                            {
-                                "cpr": indberetter_data.get("cpr"),
-                                "cvr": indberetter_data.get("cvr"),
-                                "titel": "Din afgiftsanmeldelse (TF10) er afvist",
-                                "pdf": pdf,
-                                "afgiftsanmeldelse_id": anmeldelse_id,
-                            }
-                        )
-                        # For at inspicere pdf'en
-                        # return HttpResponse(content=pdf, content_type="application/pdf")
-                """
 
             # Opret notat _efter_ den nye version af anmeldelsen, så vores historik-filtrering fungerer
             if notat:
