@@ -526,7 +526,10 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <p>Er du sikker på at du vil afvise afgiftsanmeldelsen?</p>
+                    <p>
+                        {% translate "Skriv en begrundelsen for afvisningen herunder." %}<br />
+                        {% translate "Denne begrundelse vil blive sendt til indberetteren pr. email." %}
+                    </p>
                     {{form.notat2}}
                 </div>
                 <div class="modal-footer">

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-10-10 07:16-0100\n"
+"POT-Creation-Date: 2024-11-13 10:35-0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -779,6 +779,14 @@ msgstr ""
 
 #: told_common/templates/told_common/tf10/view.html
 msgid "Historik"
+msgstr ""
+
+#: told_common/templates/told_common/tf10/view.html
+msgid "Skriv en begrundelsen for afvisningen herunder."
+msgstr ""
+
+#: told_common/templates/told_common/tf10/view.html
+msgid "Denne begrundelse vil blive sendt til indberetteren pr. email."
 msgstr ""
 
 #: told_common/templates/told_common/tf5/form.html
