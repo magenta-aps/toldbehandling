@@ -21,8 +21,6 @@ from anmeldelse.models import (
 )
 from common.api import UserOut, get_auth_methods
 from common.models import IndberetterProfile
-from common.util import send_email
-from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.db.models import Q, QuerySet, Sum
@@ -386,7 +384,6 @@ class AfgiftsanmeldelseAPI:
             data["status"] = "ny"
 
         # Assign the payload values to the item
-        status_old = item.status
         for attr, value in data.items():
             if value is not None:
                 setattr(item, attr, value)
@@ -417,25 +414,6 @@ class AfgiftsanmeldelseAPI:
                 )
             else:
                 log.info("Der findes ikke en eksisterende leverandørfaktura")
-
-        # Send email notification in specific scenarios
-        if (
-            settings.EMAIL_NOTIFICATIONS_ENABLED
-            and item.oprettet_af
-            and item.oprettet_af.email
-            and len(item.oprettet_af.email) > 0
-        ):
-            if status_old != "afvist" and item.status == "afvist":
-                send_email(
-                    f"Afgiftsanmeldelse {item.id} er blevet afvist",
-                    "common/emails/afgiftsanmeldelse_status_change.txt",
-                    [item.oprettet_af.email],
-                    context={
-                        "id": item.id,
-                        "status_old": status_old,
-                        "status_new": item.status,
-                    },
-                )
 
         # Persist data & return
         item.save()
