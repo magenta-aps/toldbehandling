@@ -7,7 +7,7 @@ data/er/*
 !data/er/.gitkeep
 rest/rest/static/doc/*
 *.sqlite3
-**/.coverage
+**/.coverage*
 told-common/build/
 told-common/dist/
 told-common/told_common.egg-info/
