@@ -616,16 +616,7 @@
 
 </form>
 
-{% comment %}
-NOTE: We add "required"-attr to "notat2" client-side, since our service-side logic
-is implemented in a way, which prevent us from setting the required-attr in 
-the TF10Form-field, without having to do a bigger refactoring of the code.
-{% endcomment %}
 <script nonce="{{ request.csp_nonce }}">
-    $(function() {
-        $("#id_notat2").attr("required", "required");
-    })
-
     // MODAL hide/show configs
     $(".modal").on("show.bs.modal", function () {
         $(this).find("input,select,textarea").removeAttr("disabled");
