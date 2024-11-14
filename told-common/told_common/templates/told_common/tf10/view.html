@@ -5,7 +5,7 @@
 {% load common_tags %}
 
 {% block content %}
-<form method="post">
+<form method="post" class="needs-validation" novalidate>
     {% csrf_token %}
 
     <div class="mx-5">
@@ -526,12 +526,26 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <p>Er du sikker på at du vil afvise afgiftsanmeldelsen?</p>
+                    <p>
+                        {% translate "Skriv en begrundelsen for afvisningen herunder." %}<br />
+                        {% translate "Denne begrundelse vil blive sendt til indberetteren pr. email." %}
+                    </p>
                     {{form.notat2}}
+                    <div class="invalid-feedback">
+                        {% translate "Afgiftsanmeldelser kan ikke afvises uden et notat" %}
+                    </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Nej</button>
-                    <button type="submit" name="{{form.status.name}}" value="afvist" class="btn btn-danger">Ja</button>
+                    <div class="row gx-2">
+                        <div class="col-8">
+                            <span>{% translate "Er du sikker på, du vil afvise denne afgiftsanmeldelse?" %}</span>
+                        </div>
+                        <div class="col-4 text-end pt-2">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Nej</button>
+                            <button type="submit" name="{{form.status.name}}" value="afvist"
+                                class="btn btn-danger">Ja</button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -601,7 +615,18 @@
     {% endif %}
 
 </form>
+
+{% comment %}
+NOTE: We add "required"-attr to "notat2" client-side, since our service-side logic
+is implemented in a way, which prevent us from setting the required-attr in 
+the TF10Form-field, without having to do a bigger refactoring of the code.
+{% endcomment %}
 <script nonce="{{ request.csp_nonce }}">
+    $(function() {
+        $("#id_notat2").attr("required", "required");
+    })
+
+    // MODAL hide/show configs
     $(".modal").on("show.bs.modal", function () {
         $(this).find("input,select,textarea").removeAttr("disabled");
         $(this).find("[data-modal-required=true]").attr("required", "required");
@@ -609,6 +634,19 @@
     $(".modal").on("hide.bs.modal", function () {
         $(this).find("input,select,textarea").attr("disabled", "disabled");
         $(this).find("[data-modal-required=true]").removeAttr("required");
+
+        // Reset form validation
+        $(this).parents("form.was-validated").removeClass("was-validated")
     });
+
+    // Form validation
+    $(".needs-validation").on("submit", function (e) {
+        if (!this.checkValidity()) {
+            e.preventDefault()
+            event.stopPropagation()
+        }
+
+        $(this).addClass('was-validated')
+    })
 </script>
 {% endblock %}

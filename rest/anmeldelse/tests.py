@@ -890,9 +890,7 @@ class AfgiftsanmeldelseAPITest(AnmeldelsesTestDataMixin, TestCase):
         result = AfgiftsanmeldelseAPI.map_sort("forbindelsesnummer", "desc")
         self.assertEqual(result, "-fragtforsendelse__forbindelsesnr")
 
-    @override_settings(EMAIL_NOTIFICATIONS_ENABLED=True)
-    @patch("anmeldelse.api.send_email")
-    def test_update_status_afvist(self, mock_send_email: MagicMock):
+    def test_update_status_afvist(self):
         resp = self.client.patch(
             reverse(
                 "api-1.0.0:afgiftsanmeldelse_update", args=[self.afgiftsanmeldelse.id]
@@ -911,17 +909,6 @@ class AfgiftsanmeldelseAPITest(AnmeldelsesTestDataMixin, TestCase):
 
         self.afgiftsanmeldelse.refresh_from_db()
         self.assertEqual(self.afgiftsanmeldelse.status, "afvist")
-
-        mock_send_email.assert_called_once_with(
-            f"Afgiftsanmeldelse {self.afgiftsanmeldelse.id} er blevet afvist",
-            "common/emails/afgiftsanmeldelse_status_change.txt",
-            [self.user.email],
-            context={
-                "id": self.afgiftsanmeldelse.id,
-                "status_old": "ny",
-                "status_new": "afvist",
-            },
-        )
 
     def test_update_status_invalid_permissions(self):
         self.user.user_permissions.remove(

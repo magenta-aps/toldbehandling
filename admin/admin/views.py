@@ -46,6 +46,7 @@ from admin.clients.prisme import (
     send_afgiftsanmeldelse,
 )
 from admin.spreadsheet import SpreadsheetExport, VareafgiftssatsSpreadsheetUtil
+from admin.utils import send_email
 
 
 class TwofactorAuthRequiredMixin(LoginRequiredMixin):
@@ -239,47 +240,53 @@ class TF10View(
                         messages.ERROR,
                         f"Anmeldelse ikke sendt til Prisme. Fejlbesked:\n{e.message}",
                     )
-
             elif status is not None:
                 # Yderligere tjek for om brugeren må ændre noget.
                 # Vi kan have en situation hvor brugeren må se siden men ikke submitte formularen
                 response = self.check_permissions(self.edit_permissions)
                 if response:
                     return response
-                self.rest_client.afgiftanmeldelse.set_status(anmeldelse_id, status)
-                """
+
                 if status == "afvist":
+                    if not notat:
+                        raise Exception(
+                            "Afgiftsanmeldelser kan ikke afvises uden et notat"
+                        )
+
+                    # Get current anmeldelse
                     anmeldelse = self.rest_client.afgiftanmeldelse.get(
                         anmeldelse_id, full=True, include_varelinjer=True
                     )
-                    indberetter_data = anmeldelse.oprettet_af["indberetter_data"]
-                    # TODO: Hvis der er indberettet på vegne af nogen, skal der
-                    #  så sendes noget til den det er på vegne af?
-                    if indberetter_data:
-                        domain = settings.HOST_DOMAIN or "http://localhost"
-                        pdf = render_pdf(
-                            "admin/blanket/tf10/afvist.html",
-                            {
-                                "link": f"{domain}/blanket/tf10/{anmeldelse_id}",
-                                "notat": notat,
+
+                    # UPDATE
+                    self.rest_client.afgiftanmeldelse.set_status(anmeldelse_id, status)
+                    self.rest_client.notat.create({"tekst": notat}, self.kwargs["id"])
+
+                    if (
+                        settings.EMAIL_NOTIFICATIONS_ENABLED
+                        and anmeldelse.oprettet_af
+                        and anmeldelse.oprettet_af["email"]
+                        and len(anmeldelse.oprettet_af["email"]) > 0
+                    ):
+                        send_email(
+                            f"Afgiftsanmeldelse {anmeldelse.id} er blevet afvist",
+                            "admin/emails/afgiftsanmeldelse_status_change.txt",
+                            html_template="admin/emails/afgiftsanmeldelse_status_change.html",
+                            to=[anmeldelse.oprettet_af["email"]],
+                            context={
+                                "id": anmeldelse.id,
+                                "status_old": anmeldelse.status,
+                                "status_new": status,
+                                "status_change_reason": notat,
+                                "afgiftsanmeldelse_link": f"{settings.HOST_DOMAIN}/blanket/tf10/{anmeldelse.id}",
                             },
                         )
-                        self.rest_client.eboks.create(
-                            {
-                                "cpr": indberetter_data.get("cpr"),
-                                "cvr": indberetter_data.get("cvr"),
-                                "titel": "Din afgiftsanmeldelse (TF10) er afvist",
-                                "pdf": pdf,
-                                "afgiftsanmeldelse_id": anmeldelse_id,
-                            }
-                        )
-                        # For at inspicere pdf'en
-                        # return HttpResponse(content=pdf, content_type="application/pdf")
-                """
-
-            # Opret notat _efter_ den nye version af anmeldelsen, så vores historik-filtrering fungerer
-            if notat:
-                self.rest_client.notat.create({"tekst": notat}, self.kwargs["id"])
+                else:
+                    self.rest_client.afgiftanmeldelse.set_status(anmeldelse_id, status)
+            else:
+                # Opret notat _efter_ den nye version af anmeldelsen, så vores historik-filtrering fungerer
+                if notat:
+                    self.rest_client.notat.create({"tekst": notat}, self.kwargs["id"])
 
         except HTTPError as e:
             if e.response.status_code == 404:
