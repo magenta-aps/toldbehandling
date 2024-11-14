@@ -65,7 +65,11 @@ class TF10ViewForm(BootstrapForm):
     )
     notat2 = forms.CharField(
         widget=forms.Textarea(
-            attrs={"placeholder": _("Notat"), "disabled": "disabled"}
+            attrs={
+                "placeholder": _("Notat"),
+                "disabled": "disabled",
+                "data-modal-required": "true",
+            }
         ),
         required=False,
     )
@@ -175,7 +179,6 @@ class TF10UpdateMultipleForm(BootstrapForm):
 
 
 class TF10SearchForm(common_forms.TF10SearchForm):
-
     def __init__(self, toldkategorier, *args, **kwargs):
         self.toldkategorier = toldkategorier
         super().__init__(*args, **kwargs)
