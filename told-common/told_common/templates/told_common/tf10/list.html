@@ -155,6 +155,7 @@
            data-silent-sort="true" {# vil vi vise en loading-boks? #}
            data-remember-order="true"
            data-row-attributes="trAttributter"
+           data-row-style="trStyle"
            id="results_table"
     >
         <thead>
@@ -266,9 +267,13 @@ function janejFormatter(value) {
 }
 function trAttributter(data, index) {
     return {
-        "class": (String(data.id)===highlight_id) ? "table-success" : "",
         "data-id": data.id
     };
+}
+function trStyle(data, index) {
+    return {
+        classes: (String(data.id)===highlight_id) ? "table-success" : ""
+    }
 }
 function datoFormatter(value) {
     if (value && value !== "-") {
