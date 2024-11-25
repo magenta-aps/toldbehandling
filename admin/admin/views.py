@@ -157,6 +157,7 @@ class TF10View(
                     request=self.request
                 ),
                 "show_stedkode": True,
+                "rest_endpoint": "/admin/api",
             }
         )
         return context

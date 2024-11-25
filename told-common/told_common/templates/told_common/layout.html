@@ -65,28 +65,32 @@
     $(document).on("click", ".send_reapproval", function (e) {
         e.preventDefault()
         const $this = $(this)
-        const afgiftanmeldelse_id = $this.data("afgiftanmeldelse-id")
-        const highlight_on_success = $this.data("highlight-on-success")
+        const rest_endpoint = $this.data("rest-endpoint")
+        if (typeof rest_endpoint !== "string") {
+            console.error("missing data-rest-endpoint attribute!")
+            return
+        }
+
         if (confirm("{% translate 'Er du sikker på at du vil genindsende anmedelsen til godkendelse?' %}") !== true) {
             return
         }
 
+        const afgiftanmeldelse_id = $this.data("afgiftanmeldelse-id")
+        const highlight_on_success = $this.data("highlight-on-success")
         $.ajax({
-            url: "/rest/afgiftsanmeldelse/" + afgiftanmeldelse_id,
-            type: "PATCH",
+            url: `${rest_endpoint}/afgiftsanmeldelse/${afgiftanmeldelse_id}`,
+            method: "PATCH",
             headers: { "X-CSRFToken": "{{ csrf_token }}" },
             contentType: "application/json",
             data: JSON.stringify({
                 "status": "ny",
             }),
             success: function (response) {
-                console.log("success")
-                console.log(response)
                 if ("success" in response && response.success) {
                     if (highlight_on_success) {
                         window.location.href = window.location.pathname + "?" + $.param({ 'highlight': afgiftanmeldelse_id })
                     } else {
-                        location.reload()
+                        window.location.reload()
                     }
                 }
             },

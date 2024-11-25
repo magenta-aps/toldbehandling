@@ -535,6 +535,8 @@ class AnmeldelseListViewTest(HasLogin):
     can_view = False
     can_edit = False
     can_delete = False
+    rest_endpoint = None
+    highlight_on_success = None
 
     def list_url(self):
         raise NotImplementedError("Implement in subclasses")
@@ -913,6 +915,11 @@ class AnmeldelseListViewTest(HasLogin):
                         [
                             "Vis" if self.can_view else None,
                             "Redigér" if self.can_edit else None,
+                            (
+                                "Genindsend"
+                                if self.can_edit and self.rest_endpoint
+                                else None
+                            ),
                         ],
                     )
                 ),
@@ -938,7 +945,6 @@ class AnmeldelseListViewTest(HasLogin):
         ]
         if self.can_select_multiple:
             expected = [{**item, "": ""} for item in expected]
-
         self.assertEquals(table_data, expected)
 
         url = self.list_url + "?json=1"
@@ -966,6 +972,21 @@ class AnmeldelseListViewTest(HasLogin):
                     f'<a class="btn btn-danger btn-sm" '
                     f'href="{self.delete_url(id)}?back=list">Slet</a>'
                 )
+
+        def _reapprove_button(id: int):
+            if self.can_edit and self.rest_endpoint:
+                btn_html = (
+                    '<button type="button" class="btn btn-sm btn-warning '
+                    f'send_reapproval" data-afgiftanmeldelse-id="{id}"\n'
+                )
+
+                if self.rest_endpoint:
+                    btn_html = btn_html + f'data-rest-endpoint="{self.rest_endpoint}"'
+
+                if self.highlight_on_success:
+                    btn_html = btn_html + ' data-highlight-on-success="true"'
+
+                return btn_html + ">Genindsend</button>"
 
         self.maxDiff = None
 
@@ -1038,6 +1059,7 @@ class AnmeldelseListViewTest(HasLogin):
                             [
                                 _view_button(2),
                                 _edit_button(2),
+                                _reapprove_button(2),
                             ],
                         )
                     ),
@@ -1088,9 +1110,9 @@ class AnmeldelseListViewTest(HasLogin):
             for item in expected["items"]:
                 id = item["id"]
                 item["select"] = (
-                    f'<input type="checkbox" id="select_{id}" name="id" value="{id}"/>'
+                    f'<input type="checkbox" id="select_{id}" name="id" '
+                    f'value="{id}"/>'
                 )
-
         self.assertEquals(
             modify_values(data, (str,), lambda s: collapse_newlines(s)), expected
         )

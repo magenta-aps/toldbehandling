@@ -7,5 +7,6 @@
 <a class="btn btn-danger btn-sm" href="{% url 'tf10_delete' id=item.id %}?back=list">{% translate 'Slet' %}</a>
 {% endif %}
 {% if item.status == "afvist" or item.status == "kladde" %}
-<button type="button" class="btn btn-sm btn-warning send_reapproval" data-afgiftanmeldelse-id="{{item.id}}" data-highlight-on-success="true">{% translate "Genindsend" %}</button>
+<button type="button" class="btn btn-sm btn-warning send_reapproval" data-afgiftanmeldelse-id="{{item.id}}"
+    data-rest-endpoint="/rest" data-highlight-on-success="true">{% translate "Genindsend" %}</button>
 {% endif %}

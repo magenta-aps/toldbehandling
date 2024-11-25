@@ -477,8 +477,8 @@
                     <a href="{% url 'tf10_edit' id=object.id %}?back=view" class="btn btn-primary">{% translate "Redigér" %}</a>
                     {% endif %}
 
-                    {% if object.status == "afvist" %}
-                        <button type="button" class="btn btn-warning send_reapproval" data-afgiftanmeldelse-id="{{id}}">{% translate "Genindsend Afgiftsanmeldelse" %}</button>
+                    {% if object.status == "afvist" and rest_endpoint %}
+                        <button type="button" class="btn btn-warning send_reapproval" data-afgiftanmeldelse-id="{{id}}" data-rest-endpoint="{{rest_endpoint}}">{% translate "Genindsend Afgiftsanmeldelse" %}</button>
                     {% endif %}
                 {% endif %}
 

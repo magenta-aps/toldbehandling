@@ -952,6 +952,8 @@ class UiAnmeldelseListViewTest(AnmeldelseListViewTest, TestCase):
     can_view = True
     can_edit = True
     can_delete = True
+    rest_endpoint = "/rest"
+    highlight_on_success = True
 
     @property
     def login_url(self):
