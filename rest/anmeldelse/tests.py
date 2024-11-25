@@ -17,6 +17,7 @@ from anmeldelse.api import (
     PrivatAfgiftsanmeldelseAPI,
     PrivatAfgiftsanmeldelseOut,
     VarelinjeAPI,
+    VarelinjeFilterSchema,
 )
 from anmeldelse.models import (
     Afgiftsanmeldelse,
@@ -1703,59 +1704,7 @@ class VarelinjeAPITest(TestCase):
         )
 
     def test_create__afgiftsanmeldelse(self):
-        afsender = Afsender.objects.create(
-            **{
-                "navn": "Testfirma 1",
-                "adresse": "Testvej 42",
-                "postnummer": 1234,
-                "by": "TestBy",
-                "postbox": "123",
-                "telefon": "123456",
-                "cvr": 12345678,
-                "kladde": False,
-            }
-        )
-
-        modtager = Modtager.objects.create(
-            **{
-                "navn": "Testfirma 1",
-                "adresse": "Testvej 42",
-                "postnummer": 1234,
-                "by": "TestBy",
-                "postbox": "123",
-                "telefon": "123456",
-                "cvr": 12345678,
-                "kreditordning": True,
-                "kladde": False,
-            }
-        )
-
-        postforsendelse, _ = Postforsendelse.objects.get_or_create(
-            postforsendelsesnummer="1234",
-            oprettet_af=self.user,
-            defaults={
-                "forsendelsestype": Postforsendelse.Forsendelsestype.SKIB,
-                "afsenderbykode": "8200",
-                "afgangsdato": datetime.now(UTC),
-                "kladde": False,
-            },
-        )
-
-        afgiftsanmeldelse = Afgiftsanmeldelse.objects.create(
-            **{
-                "afsender_id": afsender.id,
-                "modtager_id": modtager.id,
-                "postforsendelse_id": postforsendelse.id,
-                "leverandørfaktura_nummer": "12345",
-                "betales_af": "afsender",
-                "indførselstilladelse": "abcde",
-                "betalt": False,
-                "fuldmagtshaver": None,
-                "status": "ny",
-                "oprettet_af": self.user,
-                "tf3": False,
-            }
-        )
+        afgiftsanmeldelse = _create_afgiftsanmeldelse(self.user)
 
         resp = self.client.post(
             reverse(f"api-1.0.0:varelinje_create"),
@@ -1777,9 +1726,91 @@ class VarelinjeAPITest(TestCase):
         new_varelinje = Varelinje.objects.get(pk=resp_data["id"])
         self.assertEqual(new_varelinje.afgiftsanmeldelse.id, afgiftsanmeldelse.id)
 
-    def test_get_varesats_id_by_kode_not_found_err(self):
+    def test_get_varesats_id_by_kode__not_found_err(self):
         with self.assertRaises(Http404):
             resp = VarelinjeAPI.get_varesats_id_by_kode(1234, None, 666)
+
+    def test_list(self):
+        afgiftsanmeldelse = _create_afgiftsanmeldelse(self.user)
+        varelinje = Varelinje.objects.create(
+            **{
+                "afgiftsanmeldelse_id": afgiftsanmeldelse.id,
+                "vareafgiftssats_id": self.varelinjesats.id,
+                "antal": 1,
+            }
+        )
+
+        resp = self.client.get(
+            reverse(f"api-1.0.0:varelinje_list"),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(
+            resp.json(),
+            {
+                "count": 1,
+                "items": [
+                    {
+                        "id": varelinje.id,
+                        "afgiftsanmeldelse": afgiftsanmeldelse.id,
+                        "privatafgiftsanmeldelse": None,
+                        "vareafgiftssats": self.varelinjesats.id,
+                        "mængde": None,
+                        "antal": 1,
+                        "fakturabeløb": None,
+                        "afgiftsbeløb": "0.00",
+                        "kladde": False,
+                    }
+                ],
+            },
+        )
+
+        # Test list by angiftsanmeldelse & from history
+        resp_angiftsanmeldelse_with_history = self.client.get(
+            reverse(f"api-1.0.0:varelinje_list"),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+            data={
+                "afgiftsanmeldelse": afgiftsanmeldelse.id,
+                "afgiftsanmeldelse_history_index": 0,
+            },
+        )
+        self.assertEqual(resp_angiftsanmeldelse_with_history.status_code, 200)
+        self.assertEqual(
+            resp_angiftsanmeldelse_with_history.json(),
+            {
+                "count": 1,
+                "items": [
+                    {
+                        "id": varelinje.id,
+                        "afgiftsanmeldelse": afgiftsanmeldelse.id,
+                        "privatafgiftsanmeldelse": None,
+                        "vareafgiftssats": self.varelinjesats.id,
+                        "mængde": None,
+                        "antal": 1,
+                        "fakturabeløb": None,
+                        "afgiftsbeløb": "0.00",
+                        "kladde": False,
+                    }
+                ],
+            },
+        )
+
+        resp_angiftsanmeldelse_with_history_none = self.client.get(
+            reverse(f"api-1.0.0:varelinje_list"),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+            data={
+                "afgiftsanmeldelse": 1337,
+                "afgiftsanmeldelse_history_index": 0,
+            },
+        )
+
+        self.assertEqual(resp_angiftsanmeldelse_with_history_none.status_code, 200)
+        self.assertEqual(
+            resp_angiftsanmeldelse_with_history_none.json(), {"count": 0, "items": []}
+        )
 
 
 # Other tests of the "anmeldelse"-module
@@ -1859,3 +1890,66 @@ class StatistikTest(RestMixin, TestCase):
                 "sum_mængde": "1400.000",
             },
         )
+
+
+# HELPERS
+
+
+def _create_afgiftsanmeldelse(user: User, idx: str = "1") -> Afgiftsanmeldelse:
+    afsender = Afsender.objects.create(
+        **{
+            "navn": "Testfirma " + idx,
+            "adresse": "Testvej " + idx,
+            "postnummer": 1234,
+            "by": "TestBy",
+            "postbox": "123",
+            "telefon": "123456",
+            "cvr": 12345678,
+            "kladde": False,
+        }
+    )
+
+    modtager = Modtager.objects.create(
+        **{
+            "navn": "Testfirma " + idx,
+            "adresse": "Testvej " + idx,
+            "postnummer": 1234,
+            "by": "TestBy",
+            "postbox": "123",
+            "telefon": "123456",
+            "cvr": 12345678,
+            "kreditordning": True,
+            "kladde": False,
+        }
+    )
+
+    postforsendelse, _ = Postforsendelse.objects.get_or_create(
+        postforsendelsesnummer="1234",
+        oprettet_af=user,
+        defaults={
+            "forsendelsestype": Postforsendelse.Forsendelsestype.SKIB,
+            "afsenderbykode": "8200",
+            "afgangsdato": datetime.now(UTC),
+            "kladde": False,
+        },
+    )
+
+    return Afgiftsanmeldelse.objects.create(
+        **{
+            "afsender_id": afsender.id,
+            "modtager_id": modtager.id,
+            "postforsendelse_id": postforsendelse.id,
+            "leverandørfaktura_nummer": "12345",
+            "betales_af": "afsender",
+            "indførselstilladelse": "abcde",
+            "betalt": False,
+            "fuldmagtshaver": None,
+            "status": "ny",
+            "oprettet_af": user,
+            "tf3": False,
+        }
+    )
+
+
+def _create_privatafgiftsanmeldelse():
+    pass
