@@ -61,6 +61,41 @@
     $("select[data-submit-onchange=true]").on("change", function (){
         this.form.submit();
     })
+
+    $(document).on("click", ".send_reapproval", function (e) {
+        e.preventDefault()
+        const $this = $(this)
+        const afgiftanmeldelse_id = $this.data("afgiftanmeldelse-id")
+        const highlight_on_success = $this.data("highlight-on-success")
+        if (confirm("{% translate 'Er du sikker på at du vil genindsende anmedelsen til godkendelse?' %}") !== true) {
+            return
+        }
+
+        $.ajax({
+            url: "/rest/afgiftsanmeldelse/" + afgiftanmeldelse_id,
+            type: "PATCH",
+            headers: { "X-CSRFToken": "{{ csrf_token }}" },
+            contentType: "application/json",
+            data: JSON.stringify({
+                "status": "ny",
+            }),
+            success: function (response) {
+                console.log("success")
+                console.log(response)
+                if ("success" in response && response.success) {
+                    if (highlight_on_success) {
+                        window.location.href = window.location.pathname + "?" + $.param({ 'highlight': afgiftanmeldelse_id })
+                    } else {
+                        location.reload()
+                    }
+                }
+            },
+            error: function (err) {
+                console.log(err)
+                alert(`{% translate 'Der skete en fejl under genindsendelse af anmeldelse' %} ${afgiftanmeldelse_id}`)
+            },
+        });
+    })
 </script>
 </body>
 </html>

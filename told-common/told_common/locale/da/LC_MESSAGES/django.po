@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-11-13 10:35-0200\n"
+"POT-Creation-Date: 2024-11-25 10:13-0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -787,6 +787,14 @@ msgstr ""
 
 #: told_common/templates/told_common/tf10/view.html
 msgid "Denne begrundelse vil blive sendt til indberetteren pr. email."
+msgstr ""
+
+#: told_common/templates/told_common/tf10/view.html
+msgid "Afgiftsanmeldelser kan ikke afvises uden et notat"
+msgstr ""
+
+#: told_common/templates/told_common/tf10/view.html
+msgid "Er du sikker på, du vil afvise denne afgiftsanmeldelse?"
 msgstr ""
 
 #: told_common/templates/told_common/tf5/form.html
