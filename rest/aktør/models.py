@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: MPL-2.0
 
 from common.models import Postnummer
+from common.util import get_postnummer
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models import CheckConstraint, Q
@@ -93,9 +94,11 @@ class Aktør(models.Model):
             self.postnummer_ref is None
             or self.postnummer_ref.postnummer != self.postnummer
         ):
-            self.postnummer_ref = Postnummer.objects.filter(
-                postnummer=self.postnummer
-            ).first()
+            try:
+                self.postnummer_ref = get_postnummer(self.postnummer, self.by)
+            except Postnummer.DoesNotExist:
+                self.postnummer_ref = None
+
         super().save(*args, **kwargs)
 
     @property
