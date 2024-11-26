@@ -478,7 +478,9 @@
                     {% endif %}
 
                     {% if object.status == "afvist" and rest_endpoint %}
-                        <button type="button" class="btn btn-warning send_reapproval" data-afgiftanmeldelse-id="{{id}}" data-rest-endpoint="{{rest_endpoint}}">{% translate "Genindsend Afgiftsanmeldelse" %}</button>
+                        <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#genindsend_modal">
+                            {% translate "Genindsend" %}
+                        </button>
                     {% endif %}
                 {% endif %}
 
@@ -550,6 +552,24 @@
                                 class="btn btn-danger">Ja</button>
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="genindsend_modal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Genindsend afgiftsanmeldelse</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>{% translate "Er du sikker på du vil genindsende afgiftsanmeldelse" %} {{id}} ?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Nej</button>
+                    <button type="submit" name="{{form.status.name}}" class="btn btn-warning" value="ny">Ja</button>
                 </div>
             </div>
         </div>
