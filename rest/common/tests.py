@@ -763,6 +763,11 @@ class CommonUtilTest(TestCase):
         Postnummer.objects.create(postnummer=8200, navn="Risvangen", stedkode=200)
         Postnummer.objects.create(postnummer=8000, navn="Aarhus C", stedkode=300)
 
+        Postnummer.objects.create(
+            postnummer=3962, navn="Upernavik Kujalleq", stedkode=161
+        )
+        Postnummer.objects.create(postnummer=3962, navn="Upernavik", stedkode=160)
+
     def test_get_postnummer(self):
         self.assertEqual(get_postnummer(8200, "trøjborg").stedkode, 100)
         self.assertEqual(get_postnummer(8200, "trøjborg  ").stedkode, 100)
@@ -774,3 +779,6 @@ class CommonUtilTest(TestCase):
 
         with self.assertRaises(Postnummer.DoesNotExist):
             get_postnummer(1050, "København")
+
+        self.assertEqual(get_postnummer(3962, "Upernavik").stedkode, 160)
+        self.assertEqual(get_postnummer(3962, "Upernavik Kujalleq").stedkode, 161)
