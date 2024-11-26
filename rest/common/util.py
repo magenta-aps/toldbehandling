@@ -56,4 +56,8 @@ def get_postnummer(postnummer: int, by: str):
     for obj in objs:
         if by == obj.navn.lower().strip():
             return obj
-    return obj if objs.count() == 1 else None
+
+    if objs.count() == 1:
+        return obj
+    else:
+        raise Postnummer.DoesNotExist(f"Postnummer med bynavn '{by}' kunne ikke findes")

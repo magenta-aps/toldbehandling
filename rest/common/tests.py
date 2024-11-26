@@ -780,5 +780,8 @@ class CommonUtilTest(TestCase):
         with self.assertRaises(Postnummer.DoesNotExist):
             get_postnummer(1050, "København")
 
+        with self.assertRaises(Postnummer.DoesNotExist):
+            get_postnummer(8200, "Odense")
+
         self.assertEqual(get_postnummer(3962, "Upernavik").stedkode, 160)
         self.assertEqual(get_postnummer(3962, "Upernavik Kujalleq").stedkode, 161)
