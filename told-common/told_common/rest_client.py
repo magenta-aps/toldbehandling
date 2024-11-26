@@ -76,7 +76,7 @@ class ModelRestClient:
                 )
                 return
             except FileNotFoundError:
-                print(
+                log.info(
                     f"Fil ikke fundet [id={data.get('id')}, felt={field}]: "
                     f"{settings.MEDIA_ROOT}{unquote(data[field])}"
                 )

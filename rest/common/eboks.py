@@ -134,10 +134,9 @@ class EboksClient(object):
                     besked, message_id, retries - 1, retry_wait_time * 2
                 )
             else:
-                print(
+                raise HTTPError(
                     f"Failed sending message (id={besked.id}, message_id={message_id})"
                 )
-                raise
 
     @staticmethod
     def parse_exception(e):
