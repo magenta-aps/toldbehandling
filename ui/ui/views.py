@@ -169,9 +169,22 @@ class TF10DeleteView(
 
 
 class TF10View(
-    PermissionsRequiredMixin, HasRestClientMixin, UiViewMixin, common_views.TF10View
+    PermissionsRequiredMixin,
+    HasRestClientMixin,
+    UiViewMixin,
+    common_views.TF10View,
+    FormView,
 ):
-    pass
+    form_class = forms.TF10ViewForm
+
+    def form_valid(self, form):
+        anmeldelse_id = self.kwargs["id"]
+        status_new = form.cleaned_data["status"]
+        self.rest_client.afgiftanmeldelse.set_status(anmeldelse_id, status_new)
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse("tf10_view", kwargs={"id": self.kwargs["id"]})
 
 
 class TF5FormCreateView(

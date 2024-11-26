@@ -145,8 +145,10 @@ class TF10View(
         can_approve = self.has_permissions(
             request=self.request, required_permissions=self.edit_permissions
         )
+
         context.update(
             {
+                "admin_ui": True,
                 "can_godkend": can_approve,
                 "can_afvis": can_approve,
                 "can_edit": TF10FormUpdateView.has_permissions(request=self.request),
