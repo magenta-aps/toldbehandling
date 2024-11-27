@@ -844,6 +844,7 @@ class VarelinjeAPI:
                     PrivatAfgiftsanmeldelse.objects.get(id=privatafgiftsanmeldelse_id)
                 )
                 dato = privatafgiftsanmeldelse.indleveringsdato
+
             if dato:
                 return Vareafgiftssats.objects.get(
                     Q(
