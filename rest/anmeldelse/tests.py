@@ -1812,6 +1812,70 @@ class VarelinjeAPITest(TestCase):
             resp_angiftsanmeldelse_with_history_none.json(), {"count": 0, "items": []}
         )
 
+    def test_filter_user(self):
+        afgiftsanmeldelse = _create_afgiftsanmeldelse(self.user)
+        varelinje = Varelinje.objects.create(
+            **{
+                "afgiftsanmeldelse_id": afgiftsanmeldelse.id,
+                "vareafgiftssats_id": self.varelinjesats.id,
+                "antal": 1,
+            }
+        )
+
+        resp = self.client.get(
+            reverse(f"api-1.0.0:varelinje_get", kwargs={"id": varelinje.id}),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+        )
+
+        self.assertEqual(resp.status_code, 403)
+
+        # Check CVR indberetterprofil
+        user, user_token, _ = RestMixin.make_user(
+            username="varelinje-test-user2",
+            plaintext_password="testpassword1337",
+            email="test2@magenta-aps.dk",
+            permissions=[
+                self.add_varelinje_perm,
+                self.view_varelinje_perm,
+                self.change_varelinje_perm,
+            ],
+        )
+
+        _ = IndberetterProfile.objects.create(
+            user=user,
+            cvr="1234567890",
+            api_key=uuid4(),
+        )
+
+        resp = self.client.get(
+            reverse(f"api-1.0.0:varelinje_get", kwargs={"id": varelinje.id}),
+            HTTP_AUTHORIZATION=f"Bearer {user_token}",
+            content_type="application/json",
+        )
+
+        self.assertEqual(resp.status_code, 403)
+
+        # check missing indberetterprofil
+        user, user_token, _ = RestMixin.make_user(
+            username="varelinje-test-user3",
+            plaintext_password="testpassword1337",
+            email="test3@magenta-aps.dk",
+            permissions=[
+                self.add_varelinje_perm,
+                self.view_varelinje_perm,
+                self.change_varelinje_perm,
+            ],
+        )
+
+        resp = self.client.get(
+            reverse(f"api-1.0.0:varelinje_get", kwargs={"id": varelinje.id}),
+            HTTP_AUTHORIZATION=f"Bearer {user_token}",
+            content_type="application/json",
+        )
+
+        self.assertEqual(resp.status_code, 403)
+
 
 # Other tests of the "anmeldelse"-module
 
