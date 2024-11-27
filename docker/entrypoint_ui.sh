@@ -33,7 +33,7 @@ if [ "${TEST,,}" = true ]; then
 fi
 if [ "${MAKEMESSAGES,,}" = true ]; then
   echo 'making messages'
-  python manage.py makemessages --locale=kl --locale=da --no-obsolete --add-location file
+  python manage.py make_messages --locale=kl --locale=da --no-obsolete --add-location file
 fi
 
 exec "$@"
