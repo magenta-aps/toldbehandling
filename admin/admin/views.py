@@ -272,13 +272,11 @@ class TF10View(
                     ):
                         send_email(
                             f"Afgiftsanmeldelse {anmeldelse.id} er blevet afvist",
-                            "admin/emails/afgiftsanmeldelse_status_change.txt",
-                            html_template="admin/emails/afgiftsanmeldelse_status_change.html",
+                            "admin/emails/afgiftsanmeldelse_afvist.txt",
+                            html_template="admin/emails/afgiftsanmeldelse_afvist.html",
                             to=[anmeldelse.oprettet_af["email"]],
                             context={
                                 "id": anmeldelse.id,
-                                "status_old": anmeldelse.status,
-                                "status_new": status,
                                 "status_change_reason": notat,
                                 "afgiftsanmeldelse_link": f"{settings.HOST_DOMAIN}/blanket/tf10/{anmeldelse.id}",
                             },
