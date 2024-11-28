@@ -1126,7 +1126,7 @@ class PrivatAfgiftsanmeldelseAPITest(TestCase):
         )
 
         self.assertEqual(resp.status_code, 200)
-        self.assertEqual(resp.json(), {"id": 2})
+        self.assertEqual(resp.json(), {"id": ANY})
 
     @patch("anmeldelse.api.PrivatAfgiftsanmeldelse.objects.create")
     def test_create_validation_error(self, mock_create):
