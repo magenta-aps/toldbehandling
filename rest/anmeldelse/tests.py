@@ -1897,6 +1897,7 @@ class NotatAPITest(TestCase):
         # Permissions
         cls.add_notat_perm = Permission.objects.get(codename="add_notat")
         cls.view_notat_perm = Permission.objects.get(codename="view_notat")
+        cls.delete_notat_perm = Permission.objects.get(codename="delete_notat")
 
         # User (Privat/CPR)
         cls.user, cls.user_token, cls.user_refresh_token = RestMixin.make_user(
@@ -1906,6 +1907,7 @@ class NotatAPITest(TestCase):
             permissions=[
                 cls.add_notat_perm,
                 cls.view_notat_perm,
+                cls.delete_notat_perm,
             ],
         )
 
@@ -1923,6 +1925,7 @@ class NotatAPITest(TestCase):
             permissions=[
                 cls.add_notat_perm,
                 cls.view_notat_perm,
+                cls.delete_notat_perm,
             ],
         )
 
@@ -2175,6 +2178,32 @@ class NotatAPITest(TestCase):
             resp.json(),
             {"count": 0, "items": []},
         )
+
+    def test_delete(self):
+        resp_notat_create_cpr = self.client.post(
+            reverse(f"api-1.0.0:notat_create"),
+            json_dump(
+                {
+                    "privatafgiftsanmeldelse_id": self.privatafgiftsanmeldelse.id,
+                    "tekst": "test_list notat - cpr",
+                }
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+        )
+        resp_notat_create_cpr_data = resp_notat_create_cpr.json()
+        self.assertEqual(resp_notat_create_cpr.status_code, 200)
+        self.assertEqual(resp_notat_create_cpr_data, {"id": ANY})
+
+        resp = self.client.delete(
+            reverse(
+                f"api-1.0.0:notat_delete",
+                kwargs={"id": resp_notat_create_cpr_data["id"]},
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, 200)
 
 
 # Other tests of the "anmeldelse"-module
