@@ -1894,6 +1894,7 @@ class NotatAPITest(TestCase):
     def setUpTestData(cls):
         # Permissions
         cls.add_notat_perm = Permission.objects.get(codename="add_notat")
+        cls.view_notat_perm = Permission.objects.get(codename="view_notat")
 
         # User (Privat/CPR)
         cls.user, cls.user_token, cls.user_refresh_token = RestMixin.make_user(
@@ -1902,6 +1903,7 @@ class NotatAPITest(TestCase):
             email="test@magenta-aps.dk",
             permissions=[
                 cls.add_notat_perm,
+                cls.view_notat_perm,
             ],
         )
 
@@ -1911,6 +1913,7 @@ class NotatAPITest(TestCase):
             api_key=uuid4(),
         )
 
+        # Anmeldelser
         cls.privatafgiftsanmeldelse = PrivatAfgiftsanmeldelse.objects.create(
             **{
                 "cpr": cls.indberetter.cpr,
@@ -1959,6 +1962,45 @@ class NotatAPITest(TestCase):
 
         self.assertEqual(resp_afgiftsanmeldelse.status_code, 200)
         self.assertEqual(resp_afgiftsanmeldelse.json(), {"id": ANY})
+
+    def test_get(self):
+        resp_notat_create = self.client.post(
+            reverse(f"api-1.0.0:notat_create"),
+            json_dump(
+                {
+                    "privatafgiftsanmeldelse_id": self.privatafgiftsanmeldelse.id,
+                    "tekst": "test_create notat for get",
+                }
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+        )
+        resp_notat_create_data = resp_notat_create.json()
+
+        self.assertEqual(resp_notat_create.status_code, 200)
+        self.assertEqual(resp_notat_create_data, {"id": ANY})
+
+        resp = self.client.get(
+            reverse(
+                f"api-1.0.0:notat_get", kwargs={"id": resp_notat_create_data["id"]}
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+        )
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(
+            resp.json(),
+            {
+                "id": resp_notat_create_data["id"],
+                "afgiftsanmeldelse": None,
+                "privatafgiftsanmeldelse": self.privatafgiftsanmeldelse.id,
+                "oprettet": ANY,
+                "tekst": "test_create notat for get",
+                "index": 0,
+                "navn": "",
+            },
+        )
 
 
 # Other tests of the "anmeldelse"-module
