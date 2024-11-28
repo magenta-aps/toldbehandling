@@ -1,1 +1,0 @@
-Afgiftsanmeldelsen {{ id }} har skiftet status fra "{{ status_old }}" til "{{ status_new }}"
