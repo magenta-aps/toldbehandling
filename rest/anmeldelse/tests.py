@@ -1890,6 +1890,8 @@ class NotatOutTest(TestCase):
 
 
 class NotatAPITest(TestCase):
+    maxDiff = None
+
     @classmethod
     def setUpTestData(cls):
         # Permissions
@@ -1913,6 +1915,23 @@ class NotatAPITest(TestCase):
             api_key=uuid4(),
         )
 
+        # User (CVR)
+        cls.cvr_user, cls.cvr_user_token, _ = RestMixin.make_user(
+            username="notat-cvr-test-user",
+            plaintext_password="testpassword1337",
+            email="cvruser@magenta-aps.dk",
+            permissions=[
+                cls.add_notat_perm,
+                cls.view_notat_perm,
+            ],
+        )
+
+        cls.cvr_indberetter = IndberetterProfile.objects.create(
+            user=cls.cvr_user,
+            cvr="1234567890",
+            api_key=uuid4(),
+        )
+
         # Anmeldelser
         cls.privatafgiftsanmeldelse = PrivatAfgiftsanmeldelse.objects.create(
             **{
@@ -1930,7 +1949,7 @@ class NotatAPITest(TestCase):
             }
         )
 
-        cls.afgiftsanmeldelse = _create_afgiftsanmeldelse(cls.user)
+        cls.afgiftsanmeldelse = _create_afgiftsanmeldelse(cls.cvr_user)
 
     def test_create(self):
         resp_privatafgiftsanmeldelse = self.client.post(
@@ -2000,6 +2019,161 @@ class NotatAPITest(TestCase):
                 "index": 0,
                 "navn": "",
             },
+        )
+
+    def test_list(self):
+        # Create TEST data for this test
+        resp_notat_create_cpr = self.client.post(
+            reverse(f"api-1.0.0:notat_create"),
+            json_dump(
+                {
+                    "privatafgiftsanmeldelse_id": self.privatafgiftsanmeldelse.id,
+                    "tekst": "test_list notat - cpr",
+                }
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+        )
+        resp_notat_create_cpr_data = resp_notat_create_cpr.json()
+        self.assertEqual(resp_notat_create_cpr.status_code, 200)
+        self.assertEqual(resp_notat_create_cpr_data, {"id": ANY})
+
+        resp_notat_create_cvr = self.client.post(
+            reverse(f"api-1.0.0:notat_create"),
+            json_dump(
+                {
+                    "afgiftsanmeldelse_id": self.afgiftsanmeldelse.id,
+                    "tekst": "test_list notat - cvr",
+                }
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.cvr_user_token}",
+            content_type="application/json",
+        )
+        resp_notat_create_cvr_data = resp_notat_create_cvr.json()
+        self.assertEqual(resp_notat_create_cvr.status_code, 200)
+        self.assertEqual(resp_notat_create_cvr_data, {"id": ANY})
+
+        # List all notes
+        resp = self.client.get(
+            reverse(f"api-1.0.0:notat_list"),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+        )
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(
+            resp.json(),
+            {
+                "count": 2,
+                "items": [
+                    {
+                        "id": resp_notat_create_cpr_data["id"],
+                        "afgiftsanmeldelse": None,
+                        "privatafgiftsanmeldelse": self.privatafgiftsanmeldelse.id,
+                        "oprettet": ANY,
+                        "tekst": "test_list notat - cpr",
+                        "index": 0,
+                        "navn": "",
+                    },
+                    {
+                        "id": resp_notat_create_cvr_data["id"],
+                        "afgiftsanmeldelse": self.afgiftsanmeldelse.id,
+                        "privatafgiftsanmeldelse": None,
+                        "oprettet": ANY,
+                        "tekst": "test_list notat - cvr",
+                        "index": 0,
+                        "navn": "",
+                    },
+                ],
+            },
+        )
+
+        # List notes with filter
+        resp = self.client.get(
+            reverse(f"api-1.0.0:notat_list"),
+            HTTP_AUTHORIZATION=f"Bearer {self.cvr_user_token}",
+            content_type="application/json",
+            data={
+                "privatafgiftsanmeldelse": self.privatafgiftsanmeldelse.id,
+                "afgiftsanmeldelse_history_index": 0,
+            },
+        )
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(
+            resp.json(),
+            {
+                "count": 1,
+                "items": [
+                    {
+                        "id": resp_notat_create_cpr_data["id"],
+                        "afgiftsanmeldelse": None,
+                        "privatafgiftsanmeldelse": self.privatafgiftsanmeldelse.id,
+                        "oprettet": ANY,
+                        "tekst": "test_list notat - cpr",
+                        "index": 0,
+                        "navn": "",
+                    }
+                ],
+            },
+        )
+
+        resp = self.client.get(
+            reverse(f"api-1.0.0:notat_list"),
+            HTTP_AUTHORIZATION=f"Bearer {self.cvr_user_token}",
+            content_type="application/json",
+            data={
+                "afgiftsanmeldelse": self.afgiftsanmeldelse.id,
+                "afgiftsanmeldelse_history_index": 0,
+            },
+        )
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(
+            resp.json(),
+            {
+                "count": 1,
+                "items": [
+                    {
+                        "id": resp_notat_create_cvr_data["id"],
+                        "afgiftsanmeldelse": self.afgiftsanmeldelse.id,
+                        "privatafgiftsanmeldelse": None,
+                        "oprettet": ANY,
+                        "tekst": "test_list notat - cvr",
+                        "index": 0,
+                        "navn": "",
+                    }
+                ],
+            },
+        )
+
+        # Test no results
+        resp = self.client.get(
+            reverse(f"api-1.0.0:notat_list"),
+            HTTP_AUTHORIZATION=f"Bearer {self.cvr_user_token}",
+            content_type="application/json",
+            data={
+                "privatafgiftsanmeldelse": 1337,
+                "afgiftsanmeldelse_history_index": 0,
+            },
+        )
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(
+            resp.json(),
+            {"count": 0, "items": []},
+        )
+
+        resp = self.client.get(
+            reverse(f"api-1.0.0:notat_list"),
+            HTTP_AUTHORIZATION=f"Bearer {self.cvr_user_token}",
+            content_type="application/json",
+            data={
+                "afgiftsanmeldelse": 1337,
+                "afgiftsanmeldelse_history_index": 0,
+            },
+        )
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(
+            resp.json(),
+            {"count": 0, "items": []},
         )
 
 
