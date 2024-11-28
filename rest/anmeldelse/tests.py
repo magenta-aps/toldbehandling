@@ -2205,6 +2205,126 @@ class NotatAPITest(TestCase):
         )
         self.assertEqual(resp.status_code, 200)
 
+    def test_filter_user(self):
+        # Create user with "view_all" permissions
+        view_all_anmeldelser_perm = Permission.objects.create(
+            name="Kan se alle afgiftsanmeldelser, ikke kun egne",
+            codename="view_all_anmeldelse",
+            content_type=ContentType.objects.get_for_model(
+                Afgiftsanmeldelse, for_concrete_model=False
+            ),
+        )
+
+        (
+            view_all_user,
+            view_all_user_token,
+            view_all_user_refresh_token,
+        ) = RestMixin.make_user(
+            username="notat-test-user-view-all",
+            plaintext_password="testpassword1337",
+            email="testviewall@magenta-aps.dk",
+            permissions=[
+                self.add_notat_perm,
+                self.view_notat_perm,
+                self.delete_notat_perm,
+                view_all_anmeldelser_perm,
+            ],
+        )
+
+        indberetter_view_all = IndberetterProfile.objects.create(
+            user=view_all_user,
+            cvr="1234567891",
+            api_key=uuid4(),
+        )
+
+        # Create a notat, but don't use the view-all user
+        resp_notat_create_cvr = self.client.post(
+            reverse(f"api-1.0.0:notat_create"),
+            json_dump(
+                {
+                    "afgiftsanmeldelse_id": self.afgiftsanmeldelse.id,
+                    "tekst": "test_list notat - cvr",
+                }
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.cvr_user_token}",
+            content_type="application/json",
+        )
+        resp_notat_create_cvr_data = resp_notat_create_cvr.json()
+        self.assertEqual(resp_notat_create_cvr.status_code, 200)
+        self.assertEqual(resp_notat_create_cvr_data, {"id": ANY})
+
+        # Verify the user can view all notes
+        resp = self.client.get(
+            reverse(
+                f"api-1.0.0:notat_get", kwargs={"id": resp_notat_create_cvr_data["id"]}
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {view_all_user_token}",
+            content_type="application/json",
+        )
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(
+            resp.json(),
+            {
+                "id": resp_notat_create_cvr_data["id"],
+                "afgiftsanmeldelse": self.afgiftsanmeldelse.id,
+                "privatafgiftsanmeldelse": None,
+                "oprettet": ANY,
+                "tekst": "test_list notat - cvr",
+                "index": 0,
+                "navn": "",
+            },
+        )
+
+        # cover part where we check on CVR
+        resp = self.client.get(
+            reverse(
+                f"api-1.0.0:notat_get", kwargs={"id": resp_notat_create_cvr_data["id"]}
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.cvr_user_token}",
+            content_type="application/json",
+        )
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(
+            resp.json(),
+            {
+                "id": resp_notat_create_cvr_data["id"],
+                "afgiftsanmeldelse": self.afgiftsanmeldelse.id,
+                "privatafgiftsanmeldelse": None,
+                "oprettet": ANY,
+                "tekst": "test_list notat - cvr",
+                "index": 0,
+                "navn": "",
+            },
+        )
+
+        # check missing indberetterprofil
+        (
+            missing_indberetter_user,
+            missing_indberetter_user_token,
+            _,
+        ) = RestMixin.make_user(
+            username="varelinje-test-user3",
+            plaintext_password="testpassword1337",
+            email="test3@magenta-aps.dk",
+            permissions=[
+                self.add_notat_perm,
+                self.view_notat_perm,
+                self.delete_notat_perm,
+            ],
+        )
+
+        resp = self.client.get(
+            reverse(
+                f"api-1.0.0:notat_get", kwargs={"id": resp_notat_create_cvr_data["id"]}
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {missing_indberetter_user_token}",
+            content_type="application/json",
+        )
+
+        self.assertEqual(resp.status_code, 403)
+
 
 # Other tests of the "anmeldelse"-module
 
