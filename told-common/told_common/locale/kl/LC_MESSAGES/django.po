@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-11-27 07:47-0200\n"
+"POT-Creation-Date: 2024-11-28 08:06-0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -823,10 +823,8 @@ msgid "Annullér afvisning"
 msgstr "Itigartinneqarnera atortussaajunnaarsiguk"
 
 #: told_common/templates/told_common/tf10/view.html
-#, fuzzy
-#| msgid "Indsend"
 msgid "Genindsend"
-msgstr "Nassiuguk"
+msgstr ""
 
 #: told_common/templates/told_common/tf10/view.html
 msgid "Send til Prisme"
@@ -845,22 +843,16 @@ msgid "Denne begrundelse vil blive sendt til indberetteren pr. email."
 msgstr ""
 
 #: told_common/templates/told_common/tf10/view.html
-#, fuzzy
-#| msgid "Afgiftsanmeldelser som jeg har fuldmagt til"
 msgid "Afgiftsanmeldelser kan ikke afvises uden et notat"
-msgstr "Akitsuusigassanik nalunaarutit piginnaatitaaffigisakka"
+msgstr ""
 
 #: told_common/templates/told_common/tf10/view.html
-#, fuzzy
-#| msgid "Er du sikker på at du vil logge ud?"
 msgid "Er du sikker på, du vil afvise denne afgiftsanmeldelse?"
-msgstr "Ilumut aniniarpit?"
+msgstr ""
 
 #: told_common/templates/told_common/tf10/view.html
-#, fuzzy
-#| msgid "Er du sikker på at du vil logge ud?"
 msgid "Er du sikker på du vil genindsende afgiftsanmeldelse"
-msgstr "Ilumut aniniarpit?"
+msgstr ""
 
 #: told_common/templates/told_common/tf5/form.html
 msgid ""
