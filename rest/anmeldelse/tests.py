@@ -1877,6 +1877,90 @@ class VarelinjeAPITest(TestCase):
         self.assertEqual(resp.status_code, 403)
 
 
+# Notat tests
+
+
+class NotatOutTest(TestCase):
+    def test_resolve_navn(self):
+        mock_item = MagicMock(user=MagicMock(first_name="Magenta", last_name="Testsen"))
+        resp = NotatOut.resolve_navn(mock_item)
+        self.assertEqual(
+            resp, f"{mock_item.user.first_name} {mock_item.user.last_name}"
+        )
+
+
+class NotatAPITest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        # Permissions
+        cls.add_notat_perm = Permission.objects.get(codename="add_notat")
+
+        # User (Privat/CPR)
+        cls.user, cls.user_token, cls.user_refresh_token = RestMixin.make_user(
+            username="notat-test-user",
+            plaintext_password="testpassword1337",
+            email="test@magenta-aps.dk",
+            permissions=[
+                cls.add_notat_perm,
+            ],
+        )
+
+        cls.indberetter = IndberetterProfile.objects.create(
+            user=cls.user,
+            cpr="1234567890",
+            api_key=uuid4(),
+        )
+
+        cls.privatafgiftsanmeldelse = PrivatAfgiftsanmeldelse.objects.create(
+            **{
+                "cpr": cls.indberetter.cpr,
+                "navn": "Test notat-privatafgiftsanmeldelse",
+                "adresse": "Silkeborgvej 260",
+                "postnummer": "8230",
+                "by": "Åbyhøj",
+                "telefon": "13371337",
+                "bookingnummer": "666",
+                "indleveringsdato": datetime.strftime(datetime.now(UTC), "%Y-%m-%d"),
+                "leverandørfaktura_nummer": "1234",
+                "oprettet_af": cls.user,
+                "status": "ny",
+            }
+        )
+
+        cls.afgiftsanmeldelse = _create_afgiftsanmeldelse(cls.user)
+
+    def test_create(self):
+        resp_privatafgiftsanmeldelse = self.client.post(
+            reverse(f"api-1.0.0:notat_create"),
+            json_dump(
+                {
+                    "privatafgiftsanmeldelse_id": self.privatafgiftsanmeldelse.id,
+                    "tekst": "test_create notat",
+                }
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+        )
+
+        self.assertEqual(resp_privatafgiftsanmeldelse.status_code, 200)
+        self.assertEqual(resp_privatafgiftsanmeldelse.json(), {"id": ANY})
+
+        resp_afgiftsanmeldelse = self.client.post(
+            reverse(f"api-1.0.0:notat_create"),
+            json_dump(
+                {
+                    "afgiftsanmeldelse_id": self.afgiftsanmeldelse.id,
+                    "tekst": "test_create notat",
+                }
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+        )
+
+        self.assertEqual(resp_afgiftsanmeldelse.status_code, 200)
+        self.assertEqual(resp_afgiftsanmeldelse.json(), {"id": ANY})
+
+
 # Other tests of the "anmeldelse"-module
 
 
@@ -1953,15 +2037,6 @@ class StatistikTest(RestMixin, TestCase):
                 "sum_antal": 0,
                 "sum_mængde": "1400.000",
             },
-        )
-
-
-class NotatOutTest(TestCase):
-    def test_resolve_navn(self):
-        mock_item = MagicMock(user=MagicMock(first_name="Magenta", last_name="Testsen"))
-        resp = NotatOut.resolve_navn(mock_item)
-        self.assertEqual(
-            resp, f"{mock_item.user.first_name} {mock_item.user.last_name}"
         )
 
 
