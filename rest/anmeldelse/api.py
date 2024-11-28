@@ -1067,7 +1067,7 @@ class NotatAPI:
                 qs = privatanmeldelse.notat_set.filter(
                     index__lte=afgiftsanmeldelse_history_index
                 )
-            except Afgiftsanmeldelse.DoesNotExist:
+            except PrivatAfgiftsanmeldelse.DoesNotExist:
                 qs = Notat.objects.none()
         else:
             qs = Notat.objects.all()
