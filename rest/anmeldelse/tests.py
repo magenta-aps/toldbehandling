@@ -14,10 +14,10 @@ from aktør.models import Afsender, Modtager
 from anmeldelse.api import (
     AfgiftsanmeldelseAPI,
     AfgiftsanmeldelseFilterSchema,
+    NotatOut,
     PrivatAfgiftsanmeldelseAPI,
     PrivatAfgiftsanmeldelseOut,
     VarelinjeAPI,
-    VarelinjeFilterSchema,
 )
 from anmeldelse.models import (
     Afgiftsanmeldelse,
@@ -1953,6 +1953,15 @@ class StatistikTest(RestMixin, TestCase):
                 "sum_antal": 0,
                 "sum_mængde": "1400.000",
             },
+        )
+
+
+class NotatOutTest(TestCase):
+    def test_resolve_navn(self):
+        mock_item = MagicMock(user=MagicMock(first_name="Magenta", last_name="Testsen"))
+        resp = NotatOut.resolve_navn(mock_item)
+        self.assertEqual(
+            resp, f"{mock_item.user.first_name} {mock_item.user.last_name}"
         )
 
 
