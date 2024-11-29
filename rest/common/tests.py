@@ -7,6 +7,7 @@ from anmeldelse.models import Afgiftsanmeldelse
 from common.api import APIKeyAuth, DjangoPermission, UserOut
 from common.eboks import EboksClient, MockResponse
 from common.models import EboksBesked, EboksDispatch, IndberetterProfile, Postnummer
+from common.util import get_postnummer
 from django.contrib.auth.models import Permission, User
 from django.contrib.contenttypes.models import ContentType
 from django.test import TestCase
@@ -753,3 +754,34 @@ class CommonEboksModuleTests(CommonTest, TestCase):
                     "url_with_prefix": "/int/rest/srv.svc/",
                 },
             )
+
+
+class CommonUtilTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        Postnummer.objects.create(postnummer=8200, navn="Trøjborg", stedkode=100)
+        Postnummer.objects.create(postnummer=8200, navn="Risvangen", stedkode=200)
+        Postnummer.objects.create(postnummer=8000, navn="Aarhus C", stedkode=300)
+
+        Postnummer.objects.create(
+            postnummer=3962, navn="Upernavik Kujalleq", stedkode=161
+        )
+        Postnummer.objects.create(postnummer=3962, navn="Upernavik", stedkode=160)
+
+    def test_get_postnummer(self):
+        self.assertEqual(get_postnummer(8200, "trøjborg").stedkode, 100)
+        self.assertEqual(get_postnummer(8200, "trøjborg  ").stedkode, 100)
+        self.assertEqual(get_postnummer(8200, "Trøjborg  ").stedkode, 100)
+        self.assertEqual(get_postnummer(8200, "Risvangen").stedkode, 200)
+        self.assertEqual(get_postnummer(8000, "Aarhus C").stedkode, 300)
+        self.assertEqual(get_postnummer(8000, "Århus C").stedkode, 300)
+        self.assertEqual(get_postnummer(8000, "Hermans hule").stedkode, 300)
+
+        with self.assertRaises(Postnummer.DoesNotExist):
+            get_postnummer(1050, "København")
+
+        with self.assertRaises(Postnummer.DoesNotExist):
+            get_postnummer(8200, "Odense")
+
+        self.assertEqual(get_postnummer(3962, "Upernavik").stedkode, 160)
+        self.assertEqual(get_postnummer(3962, "Upernavik Kujalleq").stedkode, 161)

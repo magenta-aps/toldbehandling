@@ -53,8 +53,8 @@ services:
       - CREATE_USERS=false
       - CREATE_SYSTEM_USER=false
       - CREATE_GROUPS=false
-      - CREATE_POSTNUMRE=false
-      - CREATE_STEDKODER=false
+      - CREATE_POSTNUMRE=true
+      - CREATE_STEDKODER=true
       - TEST=false
       - DUMMYDATA=false
     network_mode: "host"

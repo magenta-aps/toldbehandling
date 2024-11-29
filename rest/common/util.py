@@ -1,6 +1,7 @@
 from datetime import timedelta
 from typing import Any, List, Optional
 
+from common.models import Postnummer
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.utils.datetime_safe import date
@@ -44,3 +45,19 @@ def send_email(
         )
 
     msg.send()
+
+
+def get_postnummer(postnummer: int, by: str):
+    objs = Postnummer.objects.filter(postnummer=postnummer)
+    if not objs:
+        raise Postnummer.DoesNotExist("Postnummer kunne ikke findes")
+
+    by = by.lower().strip()
+    for obj in objs:
+        if by == obj.navn.lower().strip():
+            return obj
+
+    if objs.count() == 1:
+        return obj
+    else:
+        raise Postnummer.DoesNotExist(f"Postnummer med bynavn '{by}' kunne ikke findes")

@@ -6,7 +6,7 @@ from decimal import Decimal
 
 from aktør.models import Afsender, Modtager, Speditør
 from common.models import Postnummer
-from common.util import dato_måned_slut
+from common.util import dato_måned_slut, get_postnummer
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
@@ -210,13 +210,14 @@ class Afgiftsanmeldelse(models.Model):
         ).afgangsdato
         måned_slut = dato_måned_slut(afgangsdato)
         postnummer = afgiftsanmeldelse.modtager.postnummer
+        by = afgiftsanmeldelse.modtager.by
         if afgiftsanmeldelse.toldkategori == "70":
             ekstra_dage = 20  # 59830
         elif afgiftsanmeldelse.toldkategori == "76":
             ekstra_dage = 14  # 59830
         else:
             try:
-                ekstra_dage = Postnummer.objects.get(postnummer=postnummer).dage
+                ekstra_dage = get_postnummer(postnummer, by).dage
             except Postnummer.DoesNotExist:
                 ekstra_dage = 0
         return måned_slut + timedelta(days=ekstra_dage)
