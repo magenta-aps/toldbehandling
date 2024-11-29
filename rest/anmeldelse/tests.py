@@ -20,6 +20,7 @@ from anmeldelse.api import (
     PrivatAfgiftsanmeldelseAPI,
     PrivatAfgiftsanmeldelseOut,
     StatistikFilterSchema,
+    Toldkategori,
     VarelinjeAPI,
 )
 from anmeldelse.models import (
@@ -2620,6 +2621,13 @@ class AnmeldelseModelsStrMethodTest(TestCase):
 
         self.assertEqual(
             str(new_prism_resp), f"PrismeResponse(tf10={afgiftsanmeldelse.id})"
+        )
+
+    def test_toldkategori_str(self):
+        toldkategori = Toldkategori.objects.first()
+        self.assertEqual(
+            str(toldkategori),
+            f"Toldkategori(kategori={toldkategori.kategori}, navn={toldkategori.navn})",
         )
 
 
