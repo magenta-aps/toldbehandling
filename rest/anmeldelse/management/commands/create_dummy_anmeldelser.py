@@ -121,7 +121,9 @@ class Command(BaseCommand):
                         afgiftsanmeldelse=anmeldelse,
                         rec_id=random.randint(1000000000, 9999999999),
                         tax_notification_number=random.randint(10000000, 99999999),
-                        delivery_date=date.today(),
+                        delivery_date=datetime.combine(
+                            date.today(), datetime.min.time(), tzinfo=timezone.utc
+                        ),
                     )
 
         indberetter_group = Group.objects.get(name="PrivatIndberettere")
@@ -150,10 +152,12 @@ class Command(BaseCommand):
             anmeldelse.leverandørfaktura.save(
                 "leverandørfaktura.txt", ContentFile("testdata")
             )
+            indleveringsdato = datetime.combine(
+                anmeldelse.indleveringsdato, datetime.min.time(), tzinfo=timezone.utc
+            )
             tabel = Afgiftstabel.objects.filter(
-                Q(gyldig_til__gte=anmeldelse.indleveringsdato)
-                | Q(gyldig_til__isnull=True),
-                gyldig_fra__lte=anmeldelse.indleveringsdato,
+                Q(gyldig_til__gte=indleveringsdato) | Q(gyldig_til__isnull=True),
+                gyldig_fra__lte=indleveringsdato,
             )
             for j in range(1, 5):
                 Varelinje.objects.create(
