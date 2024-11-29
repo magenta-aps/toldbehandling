@@ -15,6 +15,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 import os
+import sys
 from datetime import timedelta
 from pathlib import Path
 
@@ -23,7 +24,7 @@ from told_common.util import strtobool
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
+TESTING = len(sys.argv) > 1 and sys.argv[1] == "test"
 SECRET_KEY = os.environ["DJANGO_SECRET_KEY"]
 
 DEBUG = bool(strtobool(os.environ.get("DJANGO_DEBUG", "False")))
@@ -277,3 +278,9 @@ CSP_SCRIPT_SRC_ATTR = (
 )
 CSP_STYLE_SRC_ATTR = ("'self'",)
 CSP_IMG_SRC = ("'self'", "data:")
+
+
+if TESTING:
+    import logging
+
+    logging.disable(logging.CRITICAL)

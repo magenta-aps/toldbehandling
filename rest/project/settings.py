@@ -22,7 +22,7 @@ from project.util import strtobool
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
+TESTING = len(sys.argv) > 1 and sys.argv[1] == "test"
 SECRET_KEY = os.environ["DJANGO_SECRET_KEY"]
 
 DEBUG = bool(strtobool(os.environ.get("DJANGO_DEBUG", "False")))
@@ -257,3 +257,9 @@ EKSPEDITIONSGEBYR = 250
 PROMETHEUS_PUSHGATEWAY_HOST = os.environ.get(
     "PROMETHEUS_PUSHGATEWAY", "pushgateway:9091"
 )
+
+
+if TESTING:
+    import logging
+
+    logging.disable(logging.CRITICAL)
