@@ -17,6 +17,7 @@ from anmeldelse.api import (
     NotatOut,
     PrivatAfgiftsanmeldelseAPI,
     PrivatAfgiftsanmeldelseOut,
+    StatistikFilterSchema,
     VarelinjeAPI,
 )
 from anmeldelse.models import (
@@ -2508,6 +2509,19 @@ class StatistikTest(RestMixin, TestCase):
                 "sum_antal": 0,
                 "sum_mængde": "1400.000",
             },
+        )
+
+
+class StatistikFilterSchemaTest(TestCase):
+    def test_filter_anmeldelsestype(self):
+        filter = StatistikFilterSchema()
+        self.assertEqual(
+            filter.filter_anmeldelsestype("tf5"),
+            Q(privatafgiftsanmeldelse__isnull=False),
+        )
+        self.assertEqual(
+            filter.filter_anmeldelsestype("tf10"),
+            Q(afgiftsanmeldelse__isnull=False),
         )
 
 
