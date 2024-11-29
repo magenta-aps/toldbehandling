@@ -2525,6 +2525,72 @@ class StatistikFilterSchemaTest(TestCase):
         )
 
 
+class ToldkategoriAPITest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        (
+            cls.cvr_user,
+            cls.cvr_user_token,
+            cls.cvr_user_refresh_token,
+        ) = RestMixin.make_user(
+            username="prisme-response-test-user",
+            plaintext_password="testpassword1337",
+            email="prismeresponstest@magenta-aps.dk",
+            permissions=[],
+        )
+
+    def test_list(self):
+        resp = self.client.get(
+            reverse(f"api-1.0.0:toldkategori_get"),
+            HTTP_AUTHORIZATION=f"Bearer {self.cvr_user_token}",
+            content_type="application/json",
+        )
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(
+            resp.json(),
+            [
+                {
+                    "kategori": "70",
+                    "navn": "RAL Royal Arctic Line A/S",
+                    "kræver_cvr": False,
+                },
+                {
+                    "kategori": "71",
+                    "navn": "Forudbetalt indførselsafgift",
+                    "kræver_cvr": True,
+                },
+                {
+                    "kategori": "73A",
+                    "navn": "Kreditkunder Nan,Qaq,Nar,Kali,Qas,Nuu,Man,Sis,Nars",
+                    "kræver_cvr": True,
+                },
+                {
+                    "kategori": "73B",
+                    "navn": "Kreditkunder Kangaa,Aas,Qas,Ilu,Qeq",
+                    "kræver_cvr": True,
+                },
+                {
+                    "kategori": "73C",
+                    "navn": "Kreditkunder Uum,Uper",
+                    "kræver_cvr": True,
+                },
+                {
+                    "kategori": "73D",
+                    "navn": "Kreditkunder Tasiilaq,Kangerlussuaq",
+                    "kræver_cvr": True,
+                },
+                {
+                    "kategori": "73E",
+                    "navn": "Kreditkunder Ittoqqortoormiit,Qaanaq",
+                    "kræver_cvr": True,
+                },
+                {"kategori": "76", "navn": "Fra Tusass A/S", "kræver_cvr": False},
+                {"kategori": "77", "navn": "Fra Skattestyrelsen", "kræver_cvr": True},
+            ],
+        )
+
+
 # HELPERS
 
 
