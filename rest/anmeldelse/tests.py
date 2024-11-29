@@ -2514,6 +2514,41 @@ class ToldkategoriAPITest(TestCase):
         )
 
 
+# Model magic-str-method tests
+
+
+class AnmeldelseModelsStrMethodTest(TestCase):
+    def test_privatafgiftsanmeldelse_str(self):
+        (
+            user,
+            _,
+            _,
+            _,
+            indberetter,
+        ) = _create_user_with_permissions("notat", "cpr")
+
+        privatafgiftsanmeldelse = PrivatAfgiftsanmeldelse.objects.create(
+            **{
+                "cpr": indberetter.cpr,
+                "navn": "Test notat-privatafgiftsanmeldelse",
+                "adresse": "Silkeborgvej 260",
+                "postnummer": "8230",
+                "by": "Åbyhøj",
+                "telefon": "13371337",
+                "bookingnummer": "666",
+                "indleveringsdato": datetime.strftime(datetime.now(UTC), "%Y-%m-%d"),
+                "leverandørfaktura_nummer": "1234",
+                "oprettet_af": user,
+                "status": "ny",
+            }
+        )
+
+        self.assertEqual(
+            str(privatafgiftsanmeldelse),
+            f"PrivatAfgiftsanmeldelse(id={privatafgiftsanmeldelse.id})",
+        )
+
+
 # HELPERS
 
 
