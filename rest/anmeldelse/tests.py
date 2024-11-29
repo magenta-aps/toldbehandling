@@ -2370,6 +2370,34 @@ class PrismeResponseAPITest(TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.json(), {"id": ANY})
 
+    def test_get(self):
+        new_prism_resp = PrismeResponse.objects.create(
+            **{
+                "afgiftsanmeldelse_id": self.afgiftsanmeldelse.id,
+                "tax_notification_number": 1337,
+                "delivery_date": datetime.now(UTC),
+                "rec_id": 80085,
+            },
+        )
+
+        resp = self.client.get(
+            reverse(f"api-1.0.0:prismeresponse_get", kwargs={"id": new_prism_resp.id}),
+            HTTP_AUTHORIZATION=f"Bearer {self.cvr_user_token}",
+            content_type="application/json",
+        )
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(
+            resp.json(),
+            {
+                "id": new_prism_resp.id,
+                "afgiftsanmeldelse": self.afgiftsanmeldelse.id,
+                "rec_id": 80085,
+                "tax_notification_number": 1337,
+                "delivery_date": new_prism_resp.delivery_date.isoformat(),
+            },
+        )
+
 
 # Other tests of the "anmeldelse"-module
 
