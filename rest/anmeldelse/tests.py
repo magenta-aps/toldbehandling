@@ -15,10 +15,12 @@ from aktør.models import Afsender, Modtager
 from anmeldelse.api import (
     AfgiftsanmeldelseAPI,
     AfgiftsanmeldelseFilterSchema,
+    Notat,
     NotatOut,
     PrivatAfgiftsanmeldelseAPI,
     PrivatAfgiftsanmeldelseOut,
     StatistikFilterSchema,
+    Toldkategori,
     VarelinjeAPI,
 )
 from anmeldelse.models import (
@@ -2460,7 +2462,7 @@ class ToldkategoriAPITest(TestCase):
             cls.cvr_user_refresh_token,
             cls.cvr_permissions,
             cls.cvr_indberetter,
-        ) = _create_user_with_permissions("prisme", "cvr", permissions=[])
+        ) = _create_user_with_permissions("toldkategori", "cvr", permissions=[])
 
     def test_list(self):
         resp = self.client.get(
@@ -2511,6 +2513,121 @@ class ToldkategoriAPITest(TestCase):
                 {"kategori": "76", "navn": "Fra Tusass A/S", "kræver_cvr": False},
                 {"kategori": "77", "navn": "Fra Skattestyrelsen", "kræver_cvr": True},
             ],
+        )
+
+
+# Model magic-str-method tests
+
+
+class AnmeldelseModelsStrMethodTest(TestCase):
+    def test_privatafgiftsanmeldelse_str(self):
+        (
+            user,
+            _,
+            _,
+            _,
+            indberetter,
+        ) = _create_user_with_permissions("privatafgiftsanmeldelse", "cpr")
+
+        privatafgiftsanmeldelse = PrivatAfgiftsanmeldelse.objects.create(
+            **{
+                "cpr": indberetter.cpr,
+                "navn": "Test notat-privatafgiftsanmeldelse",
+                "adresse": "Silkeborgvej 260",
+                "postnummer": "8230",
+                "by": "Åbyhøj",
+                "telefon": "13371337",
+                "bookingnummer": "666",
+                "indleveringsdato": datetime.strftime(datetime.now(UTC), "%Y-%m-%d"),
+                "leverandørfaktura_nummer": "1234",
+                "oprettet_af": user,
+                "status": "ny",
+            }
+        )
+
+        self.assertEqual(
+            str(privatafgiftsanmeldelse),
+            f"PrivatAfgiftsanmeldelse(id={privatafgiftsanmeldelse.id})",
+        )
+
+    def test_notat_str(self):
+        # CPR
+        (
+            user,
+            _,
+            _,
+            _,
+            indberetter,
+        ) = _create_user_with_permissions("notat", "cpr")
+
+        privatafgiftsanmeldelse = _create_privatafgiftsanmeldelse(user, indberetter)
+
+        notat = Notat.objects.create(
+            **{
+                "user": user,
+                "tekst": "test af notat.__str__ (cpr)",
+                "privatafgiftsanmeldelse_id": privatafgiftsanmeldelse.id,
+                "index": 123,
+            }
+        )
+
+        self.assertEqual(
+            str(notat), f"Notat(tf5={privatafgiftsanmeldelse.id}, index={notat.index})"
+        )
+
+        # CVR
+        (
+            cvr_user,
+            _,
+            _,
+            _,
+            _,
+        ) = _create_user_with_permissions("notat", "cvr")
+
+        afgiftsanmeldelse = _create_afgiftsanmeldelse(cvr_user)
+
+        notat = Notat.objects.create(
+            **{
+                "user": user,
+                "tekst": "test af notat.__str__ (cvr)",
+                "afgiftsanmeldelse_id": afgiftsanmeldelse.id,
+                "index": 321,
+            }
+        )
+
+        self.assertEqual(
+            str(notat), f"Notat(tf10={afgiftsanmeldelse.id}, index={notat.index})"
+        )
+
+    def test_prisme_response_str(self):
+        (
+            cvr_user,
+            _,
+            _,
+            _,
+            _,
+        ) = _create_user_with_permissions("prisme", "cvr", permissions=[])
+
+        afgiftsanmeldelse = _create_afgiftsanmeldelse(cvr_user)
+
+        new_prism_resp = PrismeResponse.objects.create(
+            **{
+                "afgiftsanmeldelse_id": afgiftsanmeldelse.id,
+                "tax_notification_number": 1337,
+                "delivery_date": datetime.now(UTC),
+                "rec_id": 80085,
+            },
+        )
+
+        self.assertEqual(
+            str(new_prism_resp), f"PrismeResponse(tf10={afgiftsanmeldelse.id})"
+        )
+
+    def test_toldkategori_str(self):
+        toldkategori = Toldkategori.objects.first()
+        self.assertEqual(
+            str(toldkategori),
+            f"Toldkategori(kategori={toldkategori.kategori}, navn={toldkategori.navn})",
         )
 
 
@@ -2621,5 +2738,27 @@ def _create_afgiftsanmeldelse(user: User, idx: str = "1") -> Afgiftsanmeldelse:
     )
 
 
-def _create_privatafgiftsanmeldelse():
-    pass
+def _create_privatafgiftsanmeldelse(
+    user: User,
+    indberetter: IndberetterProfile,
+    name: Optional[str] = None,
+    address: Optional[str] = None,
+    postal_nr: Optional[str] = None,
+    city: Optional[str] = None,
+    status: Optional[str] = None,
+):
+    return PrivatAfgiftsanmeldelse.objects.create(
+        **{
+            "cpr": indberetter.cpr,
+            "navn": "test-privatafgiftsanmeldelse" if not name else name,
+            "adresse": "Silkeborgvej 260" if not address else address,
+            "postnummer": "8230" if not postal_nr else postal_nr,
+            "by": "Åbyhøj" if not city else city,
+            "telefon": "13371337",
+            "bookingnummer": "666",
+            "indleveringsdato": datetime.strftime(datetime.now(UTC), "%Y-%m-%d"),
+            "leverandørfaktura_nummer": "1234",
+            "oprettet_af": user,
+            "status": "ny" if not status else status,
+        }
+    )
