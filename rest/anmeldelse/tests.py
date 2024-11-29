@@ -2598,6 +2598,30 @@ class AnmeldelseModelsStrMethodTest(TestCase):
             str(notat), f"Notat(tf10={afgiftsanmeldelse.id}, index={notat.index})"
         )
 
+    def test_prisme_response_str(self):
+        (
+            cvr_user,
+            _,
+            _,
+            _,
+            _,
+        ) = _create_user_with_permissions("prisme", "cvr", permissions=[])
+
+        afgiftsanmeldelse = _create_afgiftsanmeldelse(cvr_user)
+
+        new_prism_resp = PrismeResponse.objects.create(
+            **{
+                "afgiftsanmeldelse_id": afgiftsanmeldelse.id,
+                "tax_notification_number": 1337,
+                "delivery_date": datetime.now(UTC),
+                "rec_id": 80085,
+            },
+        )
+
+        self.assertEqual(
+            str(new_prism_resp), f"PrismeResponse(tf10={afgiftsanmeldelse.id})"
+        )
+
 
 # HELPERS
 
