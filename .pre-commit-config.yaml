@@ -15,7 +15,7 @@ repos:
         files: 'rest/|ui/'
 
   - repo: https://github.com/psf/black
-    rev: 23.1.0
+    rev: 24.4.1
     hooks:
       - id: black
         exclude: 'migrations|\.venv-toldbehandling-ui|\.venv-toldbehandling-rest'

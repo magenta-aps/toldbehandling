@@ -3854,7 +3854,7 @@ class TF5NotatTest(HasLogin, TestCase):
                 "indleveringsdato": "2024-02-01",
                 "leverandørfaktura_nummer": "1234",
                 "indførselstilladelse": None,
-                "leverandørfaktura": None,  # "/privatfakturaer/1/a.pdf",
+                "leverandørfaktura": "",  # "/privatfakturaer/1/a.pdf",
                 "oprettet": "2024-01-24T12:23:17.315148+00:00",
                 "oprettet_af": {
                     "id": 10,
@@ -4042,7 +4042,7 @@ class TF5BankPaymentTest(HasLogin, TestCase):
                 "indleveringsdato": "2024-02-01",
                 "leverandørfaktura_nummer": "1234",
                 "indførselstilladelse": None,
-                "leverandørfaktura": None,  # "/privatfakturaer/1/a.pdf",
+                "leverandørfaktura": "",  # "/privatfakturaer/1/a.pdf",
                 "oprettet": "2024-01-24T12:23:17.315148+00:00",
                 "oprettet_af": {
                     "id": 10,
