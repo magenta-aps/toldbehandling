@@ -7,6 +7,7 @@ import random
 from copy import deepcopy
 from datetime import UTC, date, datetime, timedelta
 from decimal import Decimal
+from typing import List, Optional
 from unittest.mock import ANY, MagicMock, call, patch
 from uuid import uuid4
 
@@ -17,6 +18,7 @@ from anmeldelse.api import (
     NotatOut,
     PrivatAfgiftsanmeldelseAPI,
     PrivatAfgiftsanmeldelseOut,
+    StatistikFilterSchema,
     VarelinjeAPI,
 )
 from anmeldelse.models import (
@@ -1587,28 +1589,13 @@ class VarelinjeTest(RestTestMixin, TestCase):
 class VarelinjeAPITest(TestCase):
     @classmethod
     def setUpTestData(cls):
-        # Permissions
-        cls.add_varelinje_perm = Permission.objects.get(codename="add_varelinje")
-        cls.view_varelinje_perm = Permission.objects.get(codename="view_varelinje")
-        cls.change_varelinje_perm = Permission.objects.get(codename="change_varelinje")
-
-        # User (Privat/CPR)
-        cls.user, cls.user_token, cls.user_refresh_token = RestMixin.make_user(
-            username="varelinje-test-user",
-            plaintext_password="testpassword1337",
-            email="test@magenta-aps.dk",
-            permissions=[
-                cls.add_varelinje_perm,
-                cls.view_varelinje_perm,
-                cls.change_varelinje_perm,
-            ],
-        )
-
-        cls.indberetter = IndberetterProfile.objects.create(
-            user=cls.user,
-            cpr="1234567890",
-            api_key=uuid4(),
-        )
+        (
+            cls.user,
+            cls.user_token,
+            cls.user_refresh_token,
+            cls.user_permissions,
+            cls.indberetter,
+        ) = _create_user_with_permissions("varelinje", "cpr")
 
         # Varelinjesats
         cls.afgiftstabel = Afgiftstabel.objects.create(
@@ -1831,21 +1818,8 @@ class VarelinjeAPITest(TestCase):
         self.assertEqual(resp.status_code, 403)
 
         # Check CVR indberetterprofil
-        user, user_token, _ = RestMixin.make_user(
-            username="varelinje-test-user2",
-            plaintext_password="testpassword1337",
-            email="test2@magenta-aps.dk",
-            permissions=[
-                self.add_varelinje_perm,
-                self.view_varelinje_perm,
-                self.change_varelinje_perm,
-            ],
-        )
-
-        _ = IndberetterProfile.objects.create(
-            user=user,
-            cvr="1234567890",
-            api_key=uuid4(),
+        (user, user_token, _, _, _) = _create_user_with_permissions(
+            "varelinje", "cvr", permissions=self.user_permissions
         )
 
         resp = self.client.get(
@@ -1857,20 +1831,17 @@ class VarelinjeAPITest(TestCase):
         self.assertEqual(resp.status_code, 403)
 
         # check missing indberetterprofil
-        user, user_token, _ = RestMixin.make_user(
-            username="varelinje-test-user3",
-            plaintext_password="testpassword1337",
-            email="test3@magenta-aps.dk",
-            permissions=[
-                self.add_varelinje_perm,
-                self.view_varelinje_perm,
-                self.change_varelinje_perm,
-            ],
+        (user2, user_token2, _, _, _) = _create_user_with_permissions(
+            "varelinje",
+            "cvr",
+            permissions=self.user_permissions,
+            indberetter_exclude=True,
+            username_override="no-indberetter",
         )
 
         resp = self.client.get(
             reverse(f"api-1.0.0:varelinje_get", kwargs={"id": varelinje.id}),
-            HTTP_AUTHORIZATION=f"Bearer {user_token}",
+            HTTP_AUTHORIZATION=f"Bearer {user_token2}",
             content_type="application/json",
         )
 
@@ -1894,46 +1865,21 @@ class NotatAPITest(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        # Permissions
-        cls.add_notat_perm = Permission.objects.get(codename="add_notat")
-        cls.view_notat_perm = Permission.objects.get(codename="view_notat")
-        cls.delete_notat_perm = Permission.objects.get(codename="delete_notat")
+        (
+            cls.user,
+            cls.user_token,
+            cls.user_refresh_token,
+            cls.user_permissions,
+            cls.indberetter,
+        ) = _create_user_with_permissions("notat", "cpr")
 
-        # User (Privat/CPR)
-        cls.user, cls.user_token, cls.user_refresh_token = RestMixin.make_user(
-            username="notat-test-user",
-            plaintext_password="testpassword1337",
-            email="test@magenta-aps.dk",
-            permissions=[
-                cls.add_notat_perm,
-                cls.view_notat_perm,
-                cls.delete_notat_perm,
-            ],
-        )
-
-        cls.indberetter = IndberetterProfile.objects.create(
-            user=cls.user,
-            cpr="1234567890",
-            api_key=uuid4(),
-        )
-
-        # User (CVR)
-        cls.cvr_user, cls.cvr_user_token, _ = RestMixin.make_user(
-            username="notat-cvr-test-user",
-            plaintext_password="testpassword1337",
-            email="cvruser@magenta-aps.dk",
-            permissions=[
-                cls.add_notat_perm,
-                cls.view_notat_perm,
-                cls.delete_notat_perm,
-            ],
-        )
-
-        cls.cvr_indberetter = IndberetterProfile.objects.create(
-            user=cls.cvr_user,
-            cvr="1234567890",
-            api_key=uuid4(),
-        )
+        (
+            cls.cvr_user,
+            cls.cvr_user_token,
+            cls.cvr_user_refresh_token,
+            cls.cvr_user_permissions,
+            cls.cvr_indberetter,
+        ) = _create_user_with_permissions("notat", "cvr")
 
         # Anmeldelser
         cls.privatafgiftsanmeldelse = PrivatAfgiftsanmeldelse.objects.create(
@@ -2219,22 +2165,13 @@ class NotatAPITest(TestCase):
             view_all_user,
             view_all_user_token,
             view_all_user_refresh_token,
-        ) = RestMixin.make_user(
-            username="notat-test-user-view-all",
-            plaintext_password="testpassword1337",
-            email="testviewall@magenta-aps.dk",
-            permissions=[
-                self.add_notat_perm,
-                self.view_notat_perm,
-                self.delete_notat_perm,
-                view_all_anmeldelser_perm,
-            ],
-        )
-
-        indberetter_view_all = IndberetterProfile.objects.create(
-            user=view_all_user,
-            cvr="1234567891",
-            api_key=uuid4(),
+            view_all_permissions,
+            view_all_indberetter,
+        ) = _create_user_with_permissions(
+            "notat",
+            "cvr",
+            permissions=self.cvr_user_permissions + [view_all_anmeldelser_perm],
+            username_override="notat-view_all",
         )
 
         # Create a notat, but don't use the view-all user
@@ -2308,11 +2245,7 @@ class NotatAPITest(TestCase):
             username="varelinje-test-user3",
             plaintext_password="testpassword1337",
             email="test3@magenta-aps.dk",
-            permissions=[
-                self.add_notat_perm,
-                self.view_notat_perm,
-                self.delete_notat_perm,
-            ],
+            permissions=self.cvr_user_permissions,
         )
 
         resp = self.client.get(
@@ -2336,18 +2269,9 @@ class PrismeResponseAPITest(TestCase):
             cls.cvr_user,
             cls.cvr_user_token,
             cls.cvr_user_refresh_token,
-        ) = RestMixin.make_user(
-            username="prisme-response-test-user",
-            plaintext_password="testpassword1337",
-            email="prismeresponstest@magenta-aps.dk",
-            permissions=[],
-        )
-
-        cls.cvr_indberetter = IndberetterProfile.objects.create(
-            user=cls.cvr_user,
-            cvr="1234567890",
-            api_key=uuid4(),
-        )
+            cls.cvr_permissions,
+            cls.cvr_indberetter,
+        ) = _create_user_with_permissions("prisme", "cvr", permissions=[])
 
         # anmeldelser
         cls.afgiftsanmeldelse = _create_afgiftsanmeldelse(cls.cvr_user)
@@ -2432,7 +2356,7 @@ class PrismeResponseAPITest(TestCase):
         )
 
 
-# Other tests of the "anmeldelse"-module
+# Statistik tests
 
 
 class StatistikTest(RestMixin, TestCase):
@@ -2511,7 +2435,134 @@ class StatistikTest(RestMixin, TestCase):
         )
 
 
+class StatistikFilterSchemaTest(TestCase):
+    def test_filter_anmeldelsestype(self):
+        filter = StatistikFilterSchema()
+        self.assertEqual(
+            filter.filter_anmeldelsestype("tf5"),
+            Q(privatafgiftsanmeldelse__isnull=False),
+        )
+        self.assertEqual(
+            filter.filter_anmeldelsestype("tf10"),
+            Q(afgiftsanmeldelse__isnull=False),
+        )
+
+
+# Toldkategori tests
+
+
+class ToldkategoriAPITest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        (
+            cls.cvr_user,
+            cls.cvr_user_token,
+            cls.cvr_user_refresh_token,
+            cls.cvr_permissions,
+            cls.cvr_indberetter,
+        ) = _create_user_with_permissions("prisme", "cvr", permissions=[])
+
+    def test_list(self):
+        resp = self.client.get(
+            reverse(f"api-1.0.0:toldkategori_get"),
+            HTTP_AUTHORIZATION=f"Bearer {self.cvr_user_token}",
+            content_type="application/json",
+        )
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(
+            resp.json(),
+            [
+                {
+                    "kategori": "70",
+                    "navn": "RAL Royal Arctic Line A/S",
+                    "kræver_cvr": False,
+                },
+                {
+                    "kategori": "71",
+                    "navn": "Forudbetalt indførselsafgift",
+                    "kræver_cvr": True,
+                },
+                {
+                    "kategori": "73A",
+                    "navn": "Kreditkunder Nan,Qaq,Nar,Kali,Qas,Nuu,Man,Sis,Nars",
+                    "kræver_cvr": True,
+                },
+                {
+                    "kategori": "73B",
+                    "navn": "Kreditkunder Kangaa,Aas,Qas,Ilu,Qeq",
+                    "kræver_cvr": True,
+                },
+                {
+                    "kategori": "73C",
+                    "navn": "Kreditkunder Uum,Uper",
+                    "kræver_cvr": True,
+                },
+                {
+                    "kategori": "73D",
+                    "navn": "Kreditkunder Tasiilaq,Kangerlussuaq",
+                    "kræver_cvr": True,
+                },
+                {
+                    "kategori": "73E",
+                    "navn": "Kreditkunder Ittoqqortoormiit,Qaanaq",
+                    "kræver_cvr": True,
+                },
+                {"kategori": "76", "navn": "Fra Tusass A/S", "kræver_cvr": False},
+                {"kategori": "77", "navn": "Fra Skattestyrelsen", "kræver_cvr": True},
+            ],
+        )
+
+
 # HELPERS
+
+
+def _create_user_with_permissions(
+    resource: str,
+    indberetter_type: Optional[str] = None,
+    indberetter_exclude: Optional[bool] = None,
+    permissions: Optional[List[str]] = None,
+    cpr_or_cvr: str = "1234567890",
+    username_override: Optional[str] = None,
+) -> tuple[User, str, str, list[Permission], IndberetterProfile | None]:
+    user_permissions = (
+        [
+            Permission.objects.get(codename=f"add_{resource}"),
+            Permission.objects.get(codename=f"view_{resource}"),
+            Permission.objects.get(codename=f"delete_{resource}"),
+        ]
+        if permissions == None
+        else permissions
+    )
+
+    username = (
+        f"{resource}-{indberetter_type}-test-user"
+        if not username_override
+        else username_override
+    )
+    user, user_token, user_refresh_token = RestMixin.make_user(
+        username=username,
+        plaintext_password="testpassword1337",
+        email=f"{username}@magenta-aps.dk",
+        permissions=user_permissions,
+    )
+
+    indberetter = None
+    if not indberetter_exclude:
+        if indberetter_type == "cpr":
+            indberetter = IndberetterProfile.objects.create(
+                user=user,
+                cpr=cpr_or_cvr,
+                api_key=uuid4(),
+            )
+        elif indberetter_type == "cvr":
+            indberetter = IndberetterProfile.objects.create(
+                user=user,
+                cvr=cpr_or_cvr,
+                api_key=uuid4(),
+            )
+
+    return user, user_token, user_refresh_token, user_permissions, indberetter
 
 
 def _create_afgiftsanmeldelse(user: User, idx: str = "1") -> Afgiftsanmeldelse:
