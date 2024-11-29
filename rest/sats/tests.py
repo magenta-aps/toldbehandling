@@ -268,7 +268,7 @@ class SatsAPITests(TestCase):
     def test_list_afgiftstabeller_filter_gyldig_til__gt(self):
         endpoint = reverse("api-1.0.0:afgiftstabel_list")
         resp = self.client.get(
-            f"{endpoint}?gyldig_til__gt=2023-12-31",
+            f"{endpoint}?gyldig_til__gt=2023-12-31T00:00:00-02:00",
             HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
         )
 
@@ -292,7 +292,7 @@ class SatsAPITests(TestCase):
     def test_list_afgiftstabeller_filter_gyldig_til__gte(self):
         endpoint = reverse("api-1.0.0:afgiftstabel_list")
         resp = self.client.get(
-            f"{endpoint}?gyldig_til__gte=2024-01-01",
+            f"{endpoint}?gyldig_til__gte=2024-01-01T00:00:00-02:00",
             HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
         )
 

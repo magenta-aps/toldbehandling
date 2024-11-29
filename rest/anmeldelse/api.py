@@ -5,11 +5,12 @@
 
 import base64
 import logging
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, time, timedelta
 from decimal import Decimal
 from typing import List, Optional, Tuple
 from uuid import uuid4
 
+import django.utils.timezone as tz
 from aktør.api import AfsenderOut, ModtagerOut, SpeditørOut
 from anmeldelse.models import (
     Afgiftsanmeldelse,
@@ -27,6 +28,7 @@ from django.db.models import Q, QuerySet, Sum
 from django.db.models.expressions import F, Value
 from django.http import Http404, HttpResponseBadRequest
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from forsendelse.api import FragtforsendelseOut, PostforsendelseOut
 from ninja import Field, FilterSchema, ModelSchema, Query
 from ninja_extra import api_controller, permissions, route
@@ -479,7 +481,7 @@ class AfgiftsanmeldelseAPI:
         if next:  # next er None hvis vi har fat i den seneste version
             as_of = next.history_date - timedelta(microseconds=1)
         else:
-            as_of = datetime.now()
+            as_of = timezone.now()
         anmeldelse = anmeldelse.history.as_of(as_of)
         return anmeldelse, as_of
 
@@ -727,7 +729,7 @@ class PrivatAfgiftsanmeldelseAPI:
         if next:  # next er None hvis vi har fat i den seneste version
             as_of = next.history_date - timedelta(microseconds=1)
         else:
-            as_of = datetime.now()
+            as_of = timezone.now()
         anmeldelse = anmeldelse.history.as_of(as_of)
         return anmeldelse, as_of
 
@@ -846,6 +848,7 @@ class VarelinjeAPI:
                 dato = privatafgiftsanmeldelse.indleveringsdato
 
             if dato:
+                dato = datetime.combine(dato, time.min, tz.get_default_timezone())
                 return Vareafgiftssats.objects.get(
                     Q(
                         afgiftsgruppenummer=kode,

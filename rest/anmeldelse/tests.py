@@ -937,7 +937,7 @@ class AfgiftsanmeldelseAPITest(AnmeldelsesTestDataMixin, TestCase):
                 {"detail": "You do not have permission to perform this action."},
             )
 
-    @patch("anmeldelse.api.datetime")
+    @patch("anmeldelse.api.timezone")
     def test_get_historical(self, mock_datetime: MagicMock):
         # Mocking
         mock_datetime.now = MagicMock(return_value=datetime.now(UTC))
@@ -1385,7 +1385,7 @@ class PrivatAfgiftsanmeldelseAPITest(TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.json(), {"success": True})
 
-    @patch("anmeldelse.api.datetime")
+    @patch("anmeldelse.api.timezone")
     def test_get_historical(self, mock_datetime: MagicMock):
         # Mocking
         mock_datetime.now = MagicMock(return_value=datetime.now(UTC))
