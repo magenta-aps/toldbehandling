@@ -2326,6 +2326,51 @@ class NotatAPITest(TestCase):
         self.assertEqual(resp.status_code, 403)
 
 
+# Prisme tests
+
+
+class PrismeResponseAPITest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        (
+            cls.cvr_user,
+            cls.cvr_user_token,
+            cls.cvr_user_refresh_token,
+        ) = RestMixin.make_user(
+            username="prisme-response-test-user",
+            plaintext_password="testpassword1337",
+            email="prismeresponstest@magenta-aps.dk",
+            permissions=[],
+        )
+
+        cls.cvr_indberetter = IndberetterProfile.objects.create(
+            user=cls.cvr_user,
+            cvr="1234567890",
+            api_key=uuid4(),
+        )
+
+        # anmeldelser
+        cls.afgiftsanmeldelse = _create_afgiftsanmeldelse(cls.cvr_user)
+
+    def test_create(self):
+        resp = self.client.post(
+            reverse(f"api-1.0.0:prismeresponse_create"),
+            json_dump(
+                {
+                    "afgiftsanmeldelse_id": self.afgiftsanmeldelse.id,
+                    "tax_notification_number": 1337,
+                    "delivery_date": datetime.now(UTC),
+                    "rec_id": 80085,
+                }
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.cvr_user_token}",
+            content_type="application/json",
+        )
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.json(), {"id": ANY})
+
+
 # Other tests of the "anmeldelse"-module
 
 
