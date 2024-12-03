@@ -1,5 +1,6 @@
 import base64
 from datetime import datetime
+from typing import List, Optional
 from unittest.mock import ANY, MagicMock, call, patch
 from uuid import uuid4
 
@@ -785,3 +786,90 @@ class CommonUtilTest(TestCase):
 
         self.assertEqual(get_postnummer(3962, "Upernavik").stedkode, 160)
         self.assertEqual(get_postnummer(3962, "Upernavik Kujalleq").stedkode, 161)
+
+
+# UserAPI in rest/common/api.py
+
+
+class UserAPITest(TestCase):
+    def test_check_user(self):
+        _create_user_with_permissions(
+            "user", "cpr", cpr_or_cvr="1234567890", permissions=[]
+        )
+
+        (
+            _,
+            user2_token,
+            _,
+            _,
+            _,
+        ) = _create_user_with_permissions(
+            "user",
+            "cpr",
+            cpr_or_cvr="1234567891",
+            permissions=[],
+            username_override="user2",
+        )
+
+        resp = self.client.get(
+            reverse(f"api-1.0.0:user_get", kwargs={"cpr": "1234567890"}),
+            HTTP_AUTHORIZATION=f"Bearer {user2_token}",
+            content_type="application/json",
+        )
+
+        self.assertEqual(resp.status_code, 403)
+        self.assertEqual(
+            resp.json(),
+            {"detail": "You do not have permission to perform this action."},
+        )
+
+
+# Helpers
+
+
+def _create_user_with_permissions(
+    resource: str,
+    indberetter_type: Optional[str] = None,
+    indberetter_exclude: Optional[bool] = None,
+    permissions: Optional[List[str]] = None,
+    cpr_or_cvr: str = "1234567890",
+    username_override: Optional[str] = None,
+) -> tuple[User, str, str, list[Permission], IndberetterProfile | None]:
+    user_permissions = (
+        [
+            Permission.objects.get(codename=f"add_{resource}"),
+            Permission.objects.get(codename=f"view_{resource}"),
+            Permission.objects.get(codename=f"delete_{resource}"),
+        ]
+        if permissions == None
+        else permissions
+    )
+
+    username = (
+        f"{resource}-{indberetter_type}-test-user"
+        if not username_override
+        else username_override
+    )
+    user, user_token, user_refresh_token = RestMixin.make_user(
+        username=username,
+        plaintext_password="testpassword1337",
+        email=f"{username}@magenta-aps.dk",
+        permissions=user_permissions,
+    )
+
+    indberetter = None
+    if not indberetter_exclude:
+        if indberetter_type == "cpr":
+            indberetter = IndberetterProfile.objects.create(
+                user=user,
+                cpr=cpr_or_cvr,
+                api_key=uuid4(),
+            )
+        elif indberetter_type == "cvr":
+            indberetter = IndberetterProfile.objects.create(
+                user=user,
+                cvr=cpr_or_cvr,
+                api_key=uuid4(),
+            )
+
+    return user, user_token, user_refresh_token, user_permissions, indberetter
