@@ -5,7 +5,7 @@ from unittest.mock import ANY, MagicMock, call, patch
 from uuid import uuid4
 
 from anmeldelse.models import Afgiftsanmeldelse
-from common.api import APIKeyAuth, DjangoPermission, UserOut
+from common.api import APIKeyAuth, DjangoPermission, UserAPI, UserOut
 from common.eboks import EboksClient, MockResponse
 from common.models import EboksBesked, EboksDispatch, IndberetterProfile, Postnummer
 from common.util import get_postnummer
@@ -822,6 +822,22 @@ class UserAPITest(TestCase):
             resp.json(),
             {"detail": "You do not have permission to perform this action."},
         )
+
+    @patch("common.api.QuerySet")
+    def test_filter_user_is_superuser(self, mock_queryset):
+        mock_request = MagicMock()
+        mock_user = MagicMock()
+        mock_request.user = mock_user
+
+        api = UserAPI()
+        api.context = MagicMock()
+        api.context.request = mock_request
+
+        result = api.filter_user(mock_queryset)
+
+        mock_user.is_superuser.__bool__.assert_called_once()
+        mock_user.has_perm.assert_not_called()
+        self.assertEqual(result, mock_queryset)
 
 
 # Helpers
