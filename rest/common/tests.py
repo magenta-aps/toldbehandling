@@ -14,6 +14,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.db.models import QuerySet
 from django.test import TestCase
 from django.urls import reverse
+from ninja_extra.exceptions import PermissionDenied
 from project.test_mixins import RestMixin
 from project.util import json_dump
 from requests import HTTPError
@@ -793,6 +794,17 @@ class CommonUtilTest(TestCase):
 
 
 class UserAPITest(TestCase):
+    def setUp(self):
+        # Set up a mock request and user
+        self.mock_request = MagicMock()
+        self.mock_user = MagicMock()
+        self.mock_request.user = self.mock_user
+
+        # Create an instance of UserAPI with a mocked context
+        self.api = UserAPI()
+        self.api.context = MagicMock()
+        self.api.context.request = self.mock_request
+
     def test_check_user(self):
         _create_user_with_permissions(
             "user", "cpr", cpr_or_cvr="1234567890", permissions=[]
@@ -826,36 +838,43 @@ class UserAPITest(TestCase):
 
     @patch("common.api.QuerySet")
     def test_filter_user_is_superuser(self, mock_queryset):
-        mock_request = MagicMock()
-        mock_user = MagicMock()
-        mock_request.user = mock_user
+        self.mock_user.is_superuser = True
+        self.mock_user.has_perm = MagicMock()
 
-        api = UserAPI()
-        api.context = MagicMock()
-        api.context.request = mock_request
+        result = self.api.filter_user(mock_queryset)
 
-        result = api.filter_user(mock_queryset)
-
-        mock_user.is_superuser.__bool__.assert_called_once()
-        mock_user.has_perm.assert_not_called()
+        self.assertTrue(self.mock_user.is_superuser)
+        self.mock_user.has_perm.assert_not_called()
         self.assertEqual(result, mock_queryset)
 
     @patch("common.api.QuerySet.filter")
     def test_filter_user_has_perm_auth_view_user(self, mock_filter: MagicMock):
-        mock_request = MagicMock()
-        mock_user = MagicMock(is_superuser=False, has_perm=MagicMock(return_value=True))
-        mock_request.user = mock_user
+        self.mock_user.is_superuser = False
+        self.mock_user.has_perm = MagicMock(return_value=True)
+
         mock_queryset = MagicMock(spec=QuerySet)
+        result = self.api.filter_user(mock_queryset)
 
-        api = UserAPI()
-        api.context = MagicMock()
-        api.context.request = mock_request
-
-        result = api.filter_user(mock_queryset)
-
-        mock_user.has_perm.assert_called_once_with("auth.view_user")
+        self.mock_user.has_perm.assert_called_once_with("auth.view_user")
         mock_filter.assert_not_called()
         self.assertEqual(result, mock_queryset)
+
+    @patch("common.api.get_object_or_404")
+    def test_update_permission_denied(self, mock_get_object_or_404):
+        mock_user_item = MagicMock()
+        mock_user_item.indberetter_data = MagicMock(cpr=123456)
+        mock_get_object_or_404.return_value = mock_user_item
+
+        self.mock_user.has_perm.return_value = False
+        self.mock_user.indberetter_data = None
+
+        with self.assertRaises(PermissionDenied):
+            self.api.update(cpr="123456", payload=MagicMock())
+
+        mock_get_object_or_404.assert_called_once_with(
+            User, indberetter_data__cpr=123456
+        )
+        self.mock_user.has_perm.assert_called_once_with("auth.change_user")
 
 
 # Helpers
