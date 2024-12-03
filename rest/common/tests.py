@@ -11,6 +11,7 @@ from common.models import EboksBesked, EboksDispatch, IndberetterProfile, Postnu
 from common.util import get_postnummer
 from django.contrib.auth.models import Permission, User
 from django.contrib.contenttypes.models import ContentType
+from django.db.models import QuerySet
 from django.test import TestCase
 from django.urls import reverse
 from project.test_mixins import RestMixin
@@ -837,6 +838,23 @@ class UserAPITest(TestCase):
 
         mock_user.is_superuser.__bool__.assert_called_once()
         mock_user.has_perm.assert_not_called()
+        self.assertEqual(result, mock_queryset)
+
+    @patch("common.api.QuerySet.filter")
+    def test_filter_user_has_perm_auth_view_user(self, mock_filter: MagicMock):
+        mock_request = MagicMock()
+        mock_user = MagicMock(is_superuser=False, has_perm=MagicMock(return_value=True))
+        mock_request.user = mock_user
+        mock_queryset = MagicMock(spec=QuerySet)
+
+        api = UserAPI()
+        api.context = MagicMock()
+        api.context.request = mock_request
+
+        result = api.filter_user(mock_queryset)
+
+        mock_user.has_perm.assert_called_once_with("auth.view_user")
+        mock_filter.assert_not_called()
         self.assertEqual(result, mock_queryset)
 
 
