@@ -2,4 +2,11 @@ Afgiftsanmeldelse {{ id }} er blevet afvist, med denne begrundelse:
 
 {{ status_change_reason }}
 
-Du kan gå ind her: {{ afgiftsanmeldelse_link }} og rette op på det.
+Du kan gå ind her: {{ afgiftsanmeldelse_link }} for at foretage de nødvendige korrektioner.
+
+Inussiarnersumik inuulluaqqusillunga
+Best regards
+Venlig hilsen
+
+Skattestyrelsen i Grønland
+Toldfunktionen
