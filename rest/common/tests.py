@@ -1,17 +1,20 @@
 import base64
 from datetime import datetime
+from typing import List, Optional
 from unittest.mock import ANY, MagicMock, call, patch
 from uuid import uuid4
 
 from anmeldelse.models import Afgiftsanmeldelse
-from common.api import APIKeyAuth, DjangoPermission, UserOut
+from common.api import APIKeyAuth, DjangoPermission, UserAPI, UserOut
 from common.eboks import EboksClient, MockResponse
 from common.models import EboksBesked, EboksDispatch, IndberetterProfile, Postnummer
 from common.util import get_postnummer
 from django.contrib.auth.models import Permission, User
 from django.contrib.contenttypes.models import ContentType
+from django.db.models import QuerySet
 from django.test import TestCase
 from django.urls import reverse
+from ninja_extra.exceptions import PermissionDenied
 from project.test_mixins import RestMixin
 from project.util import json_dump
 from requests import HTTPError
@@ -785,3 +788,292 @@ class CommonUtilTest(TestCase):
 
         self.assertEqual(get_postnummer(3962, "Upernavik").stedkode, 160)
         self.assertEqual(get_postnummer(3962, "Upernavik Kujalleq").stedkode, 161)
+
+
+# UserAPI in rest/common/api.py
+
+
+class UserAPITest(TestCase):
+    def setUp(self):
+        # Set up a mock request and user
+        self.mock_request = MagicMock()
+        self.mock_user = MagicMock()
+        self.mock_request.user = self.mock_user
+
+        # Create an instance of UserAPI with a mocked context
+        self.api = UserAPI()
+        self.api.context = MagicMock()
+        self.api.context.request = self.mock_request
+
+    def test_check_user(self):
+        _create_user_with_permissions(
+            "user", "cpr", cpr_or_cvr="1234567890", permissions=[]
+        )
+
+        (
+            _,
+            user2_token,
+            _,
+            _,
+            _,
+        ) = _create_user_with_permissions(
+            "user",
+            "cpr",
+            cpr_or_cvr="1234567891",
+            permissions=[],
+            username_override="user2",
+        )
+
+        resp = self.client.get(
+            reverse(f"api-1.0.0:user_get", kwargs={"cpr": "1234567890"}),
+            HTTP_AUTHORIZATION=f"Bearer {user2_token}",
+            content_type="application/json",
+        )
+
+        self.assertEqual(resp.status_code, 403)
+        self.assertEqual(
+            resp.json(),
+            {"detail": "You do not have permission to perform this action."},
+        )
+
+    @patch("common.api.QuerySet")
+    def test_filter_user_is_superuser(self, mock_queryset):
+        self.mock_user.is_superuser = True
+        self.mock_user.has_perm = MagicMock()
+
+        result = self.api.filter_user(mock_queryset)
+
+        self.assertTrue(self.mock_user.is_superuser)
+        self.mock_user.has_perm.assert_not_called()
+        self.assertEqual(result, mock_queryset)
+
+    @patch("common.api.QuerySet.filter")
+    def test_filter_user_has_perm_auth_view_user(self, mock_filter: MagicMock):
+        self.mock_user.is_superuser = False
+        self.mock_user.has_perm = MagicMock(return_value=True)
+
+        mock_queryset = MagicMock(spec=QuerySet)
+        result = self.api.filter_user(mock_queryset)
+
+        self.mock_user.has_perm.assert_called_once_with("auth.view_user")
+        mock_filter.assert_not_called()
+        self.assertEqual(result, mock_queryset)
+
+    @patch("common.api.get_object_or_404")
+    def test_update_permission_denied(self, mock_get_object_or_404):
+        mock_user_item = MagicMock()
+        mock_user_item.indberetter_data = MagicMock(cpr=123456)
+        mock_get_object_or_404.return_value = mock_user_item
+
+        self.mock_user.has_perm.return_value = False
+        self.mock_user.indberetter_data = None
+
+        with self.assertRaises(PermissionDenied):
+            self.api.update(cpr="123456", payload=MagicMock())
+
+        mock_get_object_or_404.assert_called_once_with(
+            User, indberetter_data__cpr=123456
+        )
+        self.mock_user.has_perm.assert_called_once_with("auth.change_user")
+
+    def test_update_by_id(self):
+        # Test update of CPR user
+        (
+            user,
+            user_token,
+            user_refresh_token,
+            user_permissions,
+            user_indberetterprofil,
+        ) = _create_user_with_permissions(
+            "user", "cpr", cpr_or_cvr="1234567890", permissions=[]
+        )
+
+        resp = self.client.patch(
+            reverse(f"api-1.0.0:user_update_by_id", args=[user.id]),
+            json_dump(
+                {
+                    "id": user.id,
+                    "username": user.username + "-2",
+                    "first_name": user.first_name + "-2",
+                    "last_name": user.last_name + "-2",
+                    "email": "testupdate-2@magenta.dk",
+                    "indberetter_data": {"cpr": "1234567891"},
+                }
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {user_token}",
+            content_type="application/json",
+        )
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(
+            resp.json(),
+            {
+                "id": user.id,
+                "username": "user-cpr-test-user-2",
+                "first_name": "-2",
+                "last_name": "-2",
+                "email": "testupdate-2@magenta.dk",
+                "is_superuser": False,
+                "groups": [],
+                "permissions": [],
+                "indberetter_data": {"cvr": None},
+                "access_token": ANY,
+                "refresh_token": ANY,
+            },
+        )
+
+        # Test update of CVR user
+        (
+            cvr_user,
+            cvr_user_token,
+            cvr_user_refresh_token,
+            cvr_user_permissions,
+            cvr_user_indberetterprofil,
+        ) = _create_user_with_permissions(
+            "user",
+            "cvr",
+            cpr_or_cvr="1234567890",
+            permissions=[],
+            username_override="cvruser",
+        )
+
+        resp = self.client.patch(
+            reverse(f"api-1.0.0:user_update_by_id", args=[cvr_user.id]),
+            json_dump(
+                {
+                    "id": cvr_user.id,
+                    "username": cvr_user.username + "-2",
+                    "first_name": cvr_user.first_name + "-2",
+                    "last_name": cvr_user.last_name + "-2",
+                    "email": "cvruser-2@magenta.dk",
+                    "indberetter_data": {"cvr": "1234567891"},
+                }
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {cvr_user_token}",
+            content_type="application/json",
+        )
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(
+            resp.json(),
+            {
+                "id": cvr_user.id,
+                "username": "cvruser-2",
+                "first_name": "-2",
+                "last_name": "-2",
+                "email": "cvruser-2@magenta.dk",
+                "is_superuser": False,
+                "groups": [],
+                "permissions": [],
+                "indberetter_data": {"cvr": 1234567891},
+                "access_token": ANY,
+                "refresh_token": ANY,
+            },
+        )
+
+        # Test permission denied
+        (
+            user2,
+            user2_token,
+            _,
+            _,
+            _,
+        ) = _create_user_with_permissions(
+            "user",
+            "cpr",
+            cpr_or_cvr="1234567891",
+            permissions=[],
+            username_override="TestUser2",
+        )
+
+        resp = self.client.patch(
+            reverse(f"api-1.0.0:user_update_by_id", args=[user2.id]),
+            json_dump(
+                {
+                    "id": user.id,
+                    "username": user.username + "-3",
+                    "first_name": user.first_name + "-3",
+                    "last_name": user.last_name + "-3",
+                    "email": "testupdate-3@magenta.dk",
+                }
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {user_token}",
+            content_type="application/json",
+        )
+
+        self.assertEqual(resp.status_code, 403)
+        self.assertEqual(
+            resp.json(),
+            {"detail": "You do not have permission to perform this action."},
+        )
+
+        # Test update on non-existent group
+        resp = self.client.patch(
+            reverse(f"api-1.0.0:user_update_by_id", args=[user.id]),
+            json_dump(
+                {
+                    "id": user.id,
+                    "username": user.username + "-4",
+                    "first_name": user.first_name + "-4",
+                    "last_name": user.last_name + "-4",
+                    "email": "testupdate-4@magenta.dk",
+                    "groups": ["testgroupwhichdoesnotexist"],
+                }
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {user_token}",
+            content_type="application/json",
+        )
+
+        self.assertEqual(resp.status_code, 422)
+        self.assertEqual(resp.json(), {"detail": "Group does not exist"})
+
+
+# Helpers
+
+
+def _create_user_with_permissions(
+    resource: str,
+    indberetter_type: Optional[str] = None,
+    indberetter_exclude: Optional[bool] = None,
+    permissions: Optional[List[str]] = None,
+    cpr_or_cvr: str = "1234567890",
+    username_override: Optional[str] = None,
+) -> tuple[User, str, str, list[Permission], IndberetterProfile | None]:
+    user_permissions = (
+        [
+            Permission.objects.get(codename=f"add_{resource}"),
+            Permission.objects.get(codename=f"view_{resource}"),
+            Permission.objects.get(codename=f"delete_{resource}"),
+        ]
+        if permissions == None
+        else permissions
+    )
+
+    username = (
+        f"{resource}-{indberetter_type}-test-user"
+        if not username_override
+        else username_override
+    )
+    user, user_token, user_refresh_token = RestMixin.make_user(
+        username=username,
+        plaintext_password="testpassword1337",
+        email=f"{username}@magenta-aps.dk",
+        permissions=user_permissions,
+    )
+
+    indberetter = None
+    if not indberetter_exclude:
+        if indberetter_type == "cpr":
+            indberetter = IndberetterProfile.objects.create(
+                user=user,
+                cpr=cpr_or_cvr,
+                api_key=uuid4(),
+            )
+        elif indberetter_type == "cvr":
+            indberetter = IndberetterProfile.objects.create(
+                user=user,
+                cvr=cpr_or_cvr,
+                api_key=uuid4(),
+            )
+
+    return user, user_token, user_refresh_token, user_permissions, indberetter

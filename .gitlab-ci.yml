@@ -258,7 +258,7 @@ Unittest REST:
   script:
     - cd /app
     - coverage run manage.py test
-    - coverage report --show-missing
+    - coverage report --show-missing --fail-under=100
     - mv .coverage "${CI_PROJECT_DIR}/coverage_output/.coverage.${CI_JOB_ID}"
     - cp -r ./sats ./common ./forsendelse ./anmeldelse ./aktør ./common ./otp ./payment ./metrics ./project "${CI_PROJECT_DIR}/coverage_output/"
 
