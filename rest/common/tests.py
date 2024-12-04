@@ -876,6 +876,157 @@ class UserAPITest(TestCase):
         )
         self.mock_user.has_perm.assert_called_once_with("auth.change_user")
 
+    def test_update_by_id(self):
+        # Test update of CPR user
+        (
+            user,
+            user_token,
+            user_refresh_token,
+            user_permissions,
+            user_indberetterprofil,
+        ) = _create_user_with_permissions(
+            "user", "cpr", cpr_or_cvr="1234567890", permissions=[]
+        )
+
+        resp = self.client.patch(
+            reverse(f"api-1.0.0:user_update_by_id", args=[user.id]),
+            json_dump(
+                {
+                    "id": user.id,
+                    "username": user.username + "-2",
+                    "first_name": user.first_name + "-2",
+                    "last_name": user.last_name + "-2",
+                    "email": "testupdate-2@magenta.dk",
+                    "indberetter_data": {"cpr": "1234567891"},
+                }
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {user_token}",
+            content_type="application/json",
+        )
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(
+            resp.json(),
+            {
+                "id": user.id,
+                "username": "user-cpr-test-user-2",
+                "first_name": "-2",
+                "last_name": "-2",
+                "email": "testupdate-2@magenta.dk",
+                "is_superuser": False,
+                "groups": [],
+                "permissions": [],
+                "indberetter_data": {"cvr": None},
+                "access_token": ANY,
+                "refresh_token": ANY,
+            },
+        )
+
+        # Test update of CVR user
+        (
+            cvr_user,
+            cvr_user_token,
+            cvr_user_refresh_token,
+            cvr_user_permissions,
+            cvr_user_indberetterprofil,
+        ) = _create_user_with_permissions(
+            "user",
+            "cvr",
+            cpr_or_cvr="1234567890",
+            permissions=[],
+            username_override="cvruser",
+        )
+
+        resp = self.client.patch(
+            reverse(f"api-1.0.0:user_update_by_id", args=[cvr_user.id]),
+            json_dump(
+                {
+                    "id": cvr_user.id,
+                    "username": cvr_user.username + "-2",
+                    "first_name": cvr_user.first_name + "-2",
+                    "last_name": cvr_user.last_name + "-2",
+                    "email": "cvruser-2@magenta.dk",
+                    "indberetter_data": {"cvr": "1234567891"},
+                }
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {cvr_user_token}",
+            content_type="application/json",
+        )
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(
+            resp.json(),
+            {
+                "id": cvr_user.id,
+                "username": "cvruser-2",
+                "first_name": "-2",
+                "last_name": "-2",
+                "email": "cvruser-2@magenta.dk",
+                "is_superuser": False,
+                "groups": [],
+                "permissions": [],
+                "indberetter_data": {"cvr": 1234567891},
+                "access_token": ANY,
+                "refresh_token": ANY,
+            },
+        )
+
+        # Test permission denied
+        (
+            user2,
+            user2_token,
+            _,
+            _,
+            _,
+        ) = _create_user_with_permissions(
+            "user",
+            "cpr",
+            cpr_or_cvr="1234567891",
+            permissions=[],
+            username_override="TestUser2",
+        )
+
+        resp = self.client.patch(
+            reverse(f"api-1.0.0:user_update_by_id", args=[user2.id]),
+            json_dump(
+                {
+                    "id": user.id,
+                    "username": user.username + "-3",
+                    "first_name": user.first_name + "-3",
+                    "last_name": user.last_name + "-3",
+                    "email": "testupdate-3@magenta.dk",
+                }
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {user_token}",
+            content_type="application/json",
+        )
+
+        self.assertEqual(resp.status_code, 403)
+        self.assertEqual(
+            resp.json(),
+            {"detail": "You do not have permission to perform this action."},
+        )
+
+        # Test update on non-existent group
+        resp = self.client.patch(
+            reverse(f"api-1.0.0:user_update_by_id", args=[user.id]),
+            json_dump(
+                {
+                    "id": user.id,
+                    "username": user.username + "-4",
+                    "first_name": user.first_name + "-4",
+                    "last_name": user.last_name + "-4",
+                    "email": "testupdate-4@magenta.dk",
+                    "groups": ["testgroupwhichdoesnotexist"],
+                }
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {user_token}",
+            content_type="application/json",
+        )
+
+        self.assertEqual(resp.status_code, 422)
+        self.assertEqual(resp.json(), {"detail": "Group does not exist"})
+
 
 # Helpers
 
