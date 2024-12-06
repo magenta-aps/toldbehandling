@@ -4,7 +4,7 @@ Afgiftsanmeldelse {{ id }} er blevet afvist, med denne begrundelse:
 
 Du kan gå ind her: {{ afgiftsanmeldelse_link }} for at foretage de nødvendige korrektioner.
 
-Inussiarnersumik inuulluaqqusillunga
+Inussiarnersumik inuulluaqqusilluta
 Best regards
 Venlig hilsen
 
