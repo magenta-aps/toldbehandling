@@ -37,6 +37,7 @@ HOST_DOMAIN = os.environ.get("HOST_DOMAIN", "http://akitsuut.aka.gl")
 
 if os.environ.get("HOST_DOMAIN", False):
     CSRF_TRUSTED_ORIGINS = [os.environ["HOST_DOMAIN"]]
+CSRF_COOKIE_SECURE = True
 
 # Application definition
 
@@ -241,8 +242,9 @@ STORAGES = {
 
 # Når SAML-IdP'en POSTer til os, skal vi modtage vores session-cookie fra browseren
 # https://docs.djangoproject.com/en/4.2/ref/settings/#session-cookie-samesite
-SESSION_COOKIE_SAMESITE = "None"
-SESSION_COOKIE_SECURE = True
+if not DEBUG:
+    SESSION_COOKIE_SAMESITE = "None"
+SESSION_COOKIE_SECURE = not DEBUG
 
 
 TILLÆGSAFGIFT_FAKTOR = 0.5

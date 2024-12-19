@@ -26,8 +26,10 @@ services:
       - MIGRATE=true
       - CREATE_USERS=true
       - TEST=false
-    network_mode: "host"
-    command: gunicorn -b 0.0.0.0:7000 project.wsgi:application --reload -w 1 --access-logfile - --error-logfile - --capture-output # reload on code changes
+    networks:
+      - database
+      - rest
+    command: gunicorn -b 0.0.0.0:8000 project.wsgi:application --reload -w 1 --access-logfile - --error-logfile - --capture-output # reload on code changes
 
   toldbehandling-rest-cron:
     user: "75130:1000"  # Override in docker-compose.override.yml if your local user is different
@@ -57,7 +59,9 @@ services:
       - CREATE_STEDKODER=true
       - TEST=false
       - DUMMYDATA=false
-    network_mode: "host"
+    networks:
+      - database
+      - rest
     command: [ "supercronic", "/crontab" ]
 
   toldbehandling-ui:
@@ -79,11 +83,17 @@ services:
       - tf5-data:/tf5:rw
       - ./dev-environment/cert:/ssl:ro
       - ./log/ui.log:/log/ui.log:rw
+    ports:
+      - "8041:8000"
     environment:
       - MAKE_MIGRATIONS=true
       - MIGRATE=true
       - TEST=false
-    network_mode: "host"
+    networks:
+      - default
+      - database
+      - rest
+      - cache
     command: gunicorn -b 0.0.0.0:8000 project.wsgi:application --reload -w 1 --access-logfile - --error-logfile - --capture-output # reload on code changes
 
   toldbehandling-admin:
@@ -103,12 +113,18 @@ services:
       - ./told-common/told_common/:/app/told_common
       - file-data:/upload  # rw for at kunne teste; bør være ro i deployments
       - ./log/admin.log:/log/admin.log:rw
+    ports:
+      - "8040:8000"
     environment:
       - MAKE_MIGRATIONS=true
       - MIGRATE=true
       - TEST=false
-    network_mode: "host"
-    command: gunicorn -b 0.0.0.0:8001 project.wsgi:application --reload -w 1 --access-logfile - --error-logfile - --capture-output # reload on code changes
+    networks:
+      - default
+      - database
+      - rest
+      - cache
+    command: gunicorn -b 0.0.0.0:8000 project.wsgi:application --reload -w 1 --access-logfile - --error-logfile - --capture-output # reload on code changes
 
   toldbehandling-db:
     # Do not set `user` here
@@ -119,7 +135,8 @@ services:
     volumes:
       - ./dev-environment/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
       - postgres-data:/var/lib/postgresql/data
-    network_mode: "host"
+    networks:
+      - database
 
   toldbehandling-er:
     user: "1000:1000"  # Override in docker-compose.override.yml if your local user is different
@@ -134,50 +151,75 @@ services:
       - ./dev-environment/rest.env
     volumes:
       - ./data/er:/doc
-    network_mode: "host"
+    networks:
+      - database
 
   toldbehandling-er-web:
     container_name: toldbehandling-er-web
     user: "1000:1000"
     image: halverneus/static-file-server:latest
     environment:
-      - PORT=8002
+      - PORT=8000
       - URL_PREFIX=/er
+    ports:
+      - "8043:8000"
     volumes:
       - ./data/er:/web:ro
-    network_mode: "host"
+    networks:
+      - default
 
-  toldbehandling-test-idp:
+  toldbehandling-idp:
     user: "1000:1000"  # Override in docker-compose.override.yml if your local user is different
     image: kenchan0130/simplesamlphp
-    container_name: toldbehandling-test-idp
-    network_mode: "host"
+    container_name: toldbehandling-idp
+    ports:
+      - "8042:8042"
     environment:
-      SIMPLESAMLPHP_SP_ENTITY_ID: http://localhost:8000/saml/metadata/
-      SIMPLESAMLPHP_SP_ASSERTION_CONSUMER_SERVICE: http://localhost:8000/login/callback/
-      SIMPLESAMLPHP_SP_SINGLE_LOGOUT_SERVICE: http://localhost:8000/logout/callback/
+      HTTP_PORT: 8042
+      SIMPLESAMLPHP_SP_ENTITY_ID: http://toldbehandling-ui:8041/saml/metadata/
+      SIMPLESAMLPHP_SP_ASSERTION_CONSUMER_SERVICE: http://toldbehandling-ui:8041/login/callback/
+      SIMPLESAMLPHP_SP_SINGLE_LOGOUT_SERVICE: http://toldbehandling-ui:8041/logout/callback/
       SIMPLESAMLPHP_IDP_CERTIFICATE: /var/www/simplesamlphp/cert/selfsigned.crt
       SIMPLESAMLPHP_IDP_PRIVATEKEY: /var/www/simplesamlphp/cert/selfsigned.key
-
     volumes:
       - ./dev-environment/cert/idp/selfsigned.crt:/var/www/simplesamlphp/cert/server.crt:ro
       - ./dev-environment/cert/idp/selfsigned.key:/var/www/simplesamlphp/cert/server.pem:ro
-      - ./dev-idp/authsources.php:/var/www/simplesamlphp/config/authsources.php:ro
-      - ./dev-idp/saml20-sp-remote.php:/var/www/simplesamlphp/metadata/saml20-sp-remote.php:ro
+      - ./dev-environment/idp/authsources.php:/var/www/simplesamlphp/config/authsources.php:ro
+      - ./dev-environment/idp/saml20-sp-remote.php:/var/www/simplesamlphp/metadata/saml20-sp-remote.php:ro
+      - ./dev-environment/idp/ports.conf:/etc/apache2/ports.conf:ro
+      - ./dev-environment/idp/site.conf:/etc/apache2/sites-available/simplesamlphp.conf:ro
+
+    networks:
+      - default
 
   toldbehandling-cache:
     image: memcached
     container_name: toldbehandling-cache
-    network_mode: "host"
+    networks:
+      - cache
 
   toldbehandling-mailhog:
     container_name: toldbehandling-mailhog
     image: mailhog/mailhog
     ports:
       - "1025:1025" # SMTP
-      - "8025:8025" # HTTP
+      - "8044:8025" # HTTP
+
+  toldbehandling-hosts-updater:
+    container_name: toldbehandling-hosts-updater
+    image: bash
+    volumes:
+      - ./dev-environment/hosts.sh:/hosts.sh:ro
+      - /etc/hosts:/hosts:rw
+    command: [ "bash", "/hosts.sh" ]
 
 volumes:
   postgres-data:
   file-data:
   tf5-data:
+
+networks:
+  default:
+  database:
+  rest:
+  cache:
