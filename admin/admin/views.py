@@ -48,7 +48,6 @@ from admin.clients.prisme import (
 from admin.spreadsheet import SpreadsheetExport, VareafgiftssatsSpreadsheetUtil
 from admin.utils import send_email
 
-
 log = logging.getLogger(__name__)
 
 
@@ -236,11 +235,15 @@ class TF10View(
                                 )
                             )
                         except:
-                            log.error(f"Anmeldelse {anmeldelse.id} sendt til prisme, "
-                                      f"men fejlede under oprettelse af PrismeResponse")
+                            log.error(
+                                f"Anmeldelse {anmeldelse.id} sendt til prisme, "
+                                f"men fejlede under oprettelse af PrismeResponse"
+                            )
                             raise
                     if len(responses) == 0:
-                        log.error(f"Anmeldelse {anmeldelse.id} sendt til prisme, men fik ikke noget svar")
+                        log.error(
+                            f"Anmeldelse {anmeldelse.id} sendt til prisme, men fik ikke noget svar"
+                        )
                 except (
                     PrismeException,
                     PrismeHttpException,
@@ -252,7 +255,9 @@ class TF10View(
                         messages.ERROR,
                         f"Anmeldelse ikke sendt til Prisme. Fejlbesked:\n{e.message}",
                     )
-                    log.error(f"Anmeldelse {anmeldelse.id} ikke sendt til Prisme", exc_info=e)
+                    log.error(
+                        f"Anmeldelse {anmeldelse.id} ikke sendt til Prisme", exc_info=e
+                    )
             elif status is not None:
                 # Yderligere tjek for om brugeren må ændre noget.
                 # Vi kan have en situation hvor brugeren må se siden men ikke submitte formularen
