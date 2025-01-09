@@ -252,6 +252,7 @@ class TF10View(
                         messages.ERROR,
                         f"Anmeldelse ikke sendt til Prisme. Fejlbesked:\n{e.message}",
                     )
+                    log.error(f"Anmeldelse {anmeldelse.id} ikke sendt til Prisme", exc_info=e)
             elif status is not None:
                 # Yderligere tjek for om brugeren må ændre noget.
                 # Vi kan have en situation hvor brugeren må se siden men ikke submitte formularen
