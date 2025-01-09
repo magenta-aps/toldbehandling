@@ -48,7 +48,6 @@ from admin.clients.prisme import (
 from admin.spreadsheet import SpreadsheetExport, VareafgiftssatsSpreadsheetUtil
 from admin.utils import send_email
 
-
 log = logging.getLogger(__name__)
 
 
