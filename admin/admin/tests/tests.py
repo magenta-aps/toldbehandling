@@ -17,16 +17,29 @@ from unittest.mock import mock_open, patch
 from urllib.parse import parse_qs, quote, quote_plus, urlparse
 
 import requests
+from admin.clients.prisme import PrismeClient, prisme_send_dummy
+from admin.forms import TF10CreateForm
+from admin.views import (
+    AfgiftstabelDetailView,
+    AfgiftstabelDownloadView,
+    AfgiftstabelListView,
+    StatistikView,
+    TF5View,
+    TF10EditMultipleView,
+    TF10FormUpdateView,
+    TF10HistoryDetailView,
+    TF10HistoryListView,
+    TF10ListView,
+    TF10View,
+)
 from bs4 import BeautifulSoup, Tag
 from django.conf import settings
-from django.core.cache import cache, caches
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.shortcuts import redirect
 from django.template.response import TemplateResponse
 from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
-from django.utils.timezone import get_current_timezone
 from django.views.generic import TemplateView
 from openpyxl import Workbook, load_workbook
 from requests import Response
@@ -43,22 +56,6 @@ from told_common.tests import (
     modify_values,
 )
 from told_common.views import FragtbrevView
-
-from admin.clients.prisme import PrismeClient, prisme_send_dummy
-from admin.forms import TF10CreateForm
-from admin.views import (
-    AfgiftstabelDetailView,
-    AfgiftstabelDownloadView,
-    AfgiftstabelListView,
-    StatistikView,
-    TF5View,
-    TF10EditMultipleView,
-    TF10FormUpdateView,
-    TF10HistoryDetailView,
-    TF10HistoryListView,
-    TF10ListView,
-    TF10View,
-)
 
 
 class TestLogin(TestMixin, TestCase):
