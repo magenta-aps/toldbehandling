@@ -9,7 +9,7 @@ import time
 import traceback
 from collections import defaultdict
 from copy import deepcopy
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
 from decimal import Decimal
 from io import BytesIO, StringIO
 from typing import Dict, List, Tuple
@@ -25,6 +25,8 @@ from django.shortcuts import redirect
 from django.template.response import TemplateResponse
 from django.test import TestCase
 from django.urls import reverse
+from django.utils import timezone
+from django.utils.timezone import get_current_timezone
 from django.views.generic import TemplateView
 from openpyxl import Workbook, load_workbook
 from requests import Response
@@ -2106,7 +2108,7 @@ class AfgiftstabelDetailViewTest(PermissionsTest, TestCase):
         self.client.post(
             reverse("afgiftstabel_view", kwargs={"id": 1}),
             {
-                "gyldig_fra": "11/01/2025 00:00",
+                "gyldig_fra": "11/01/3025 00:00",
                 "offset": "60",
                 "kladde": True,
             },
@@ -2120,7 +2122,7 @@ class AfgiftstabelDetailViewTest(PermissionsTest, TestCase):
             [
                 {
                     "kladde": "True",
-                    "gyldig_fra": "2025-01-11T00:00:00+01:00",
+                    "gyldig_fra": "3025-01-11T00:00:00+01:00",
                     "offset": 60,
                     "delete": False,
                 }
