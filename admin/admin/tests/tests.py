@@ -2106,7 +2106,7 @@ class AfgiftstabelDetailViewTest(PermissionsTest, TestCase):
         self.client.post(
             reverse("afgiftstabel_view", kwargs={"id": 1}),
             {
-                "gyldig_fra": "11/01/2025 00:00",
+                "gyldig_fra": "11/01/3025 00:00",
                 "offset": "60",
                 "kladde": True,
             },
@@ -2120,7 +2120,7 @@ class AfgiftstabelDetailViewTest(PermissionsTest, TestCase):
             [
                 {
                     "kladde": "True",
-                    "gyldig_fra": "2025-01-11T00:00:00+01:00",
+                    "gyldig_fra": "3025-01-11T00:00:00+01:00",
                     "offset": 60,
                     "delete": False,
                 }
