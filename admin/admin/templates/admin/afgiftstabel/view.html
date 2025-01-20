@@ -16,10 +16,7 @@
 
 {% endblock %}
 {% block extra_footers %}
-<!--
-<script src="{% static 'bootstrap-table/bootstrap-table.min.js' %}" nonce="{{ request.csp_nonce }}"></script>
 <script src="{% static 'bootstrap-table/bootstrap-table-sticky-header.min.js' %}" nonce="{{ request.csp_nonce }}"></script>
--->
 {% endblock %}
 
 {% block content %}
@@ -155,7 +152,7 @@
             {% if not vareafgiftssats.overordnet %}
 	    <tr id={{vareafgiftssats.id}}>
 		{% if vareafgiftssats.subsatser %}
-                <td rowspan="{{vareafgiftssats.subsatser|length|add:1}}" title="FuckDigHTML">
+                <td rowspan="{{vareafgiftssats.subsatser|length|add:1}}">
                     {{vareafgiftssats.afgiftsgruppenummer|unlocalize}}
                 </td>
                 <td>{{vareafgiftssats.vareart_da}}</td>
@@ -164,13 +161,11 @@
                 <td>{{vareafgiftssats.kræver_indførselstilladelse|yesno}}</td>
                 <td colspan="6">{{vareafgiftssats.subsatser|length}}</td>
                 {% else %}
-                <td title="YourMomAHoe">
-                    {{vareafgiftssats.afgiftsgruppenummer|unlocalize}}
-                </td>
+                <td>{{vareafgiftssats.afgiftsgruppenummer|unlocalize}}</td>
                 <td>{{vareafgiftssats.vareart_da}}</td>
                 <td>{{vareafgiftssats.vareart_kl}}</td>
                 <td>{{vareafgiftssats.enhed|enhedsnavn}}</td>
-		<td>{{vareafgiftssats.kræver_indførselstilladelse|yesno}}</td>
+		        <td>{{vareafgiftssats.kræver_indførselstilladelse|yesno}}</td>
                 <td>{{vareafgiftssats.minimumsbeløb|default_if_none:""}}</td>
                 <td>{{vareafgiftssats.afgiftssats}}</td>
                 <td>{{vareafgiftssats.segment_nedre|default_if_none:""}}</td>
@@ -184,7 +179,7 @@
                 <td>{{subsats.vareart_da}}</td>
                 <td>{{subsats.vareart_kl}}</td>
                 <td>{{subsats.enhed|enhedsnavn}}</td>
-		<td></td>
+		        <td>{{vareafgiftssats.kræver_indførselstilladelse|yesno}}</td>
                 <td>{{vareafgiftssats.minimumsbeløb|default_if_none:""}}</td>
                 <td>{{subsats.afgiftssats}}</td>
                 <td>{{subsats.segment_nedre|default_if_none:""}}</td>
