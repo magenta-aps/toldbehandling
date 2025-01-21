@@ -177,7 +177,7 @@ class Vareafgiftssats(ToldDataClass):
                     self.subsatser.append(subsats)
 
 
-def encode_optional_isoformat(d):
+def encode_optional_isoformat(d: datetime) -> str | None:
     if d is None:
         return None
     return d.isoformat()
@@ -310,9 +310,6 @@ class Afgiftsanmeldelse(ToldDataClass):
     modtager: Union[int, Modtager, None]
     fragtforsendelse: Union[int, FragtForsendelse, None]
     postforsendelse: Union[int, PostForsendelse, None]
-    leverandørfaktura_nummer: Optional[str]
-    leverandørfaktura: Optional[File]
-    indførselstilladelse: Optional[str]
     afgift_total: Decimal
     betalt: bool
     status: str
@@ -330,8 +327,11 @@ class Afgiftsanmeldelse(ToldDataClass):
             mm_field=fields.Date(format="iso"),
         ),
     )
-    notater: Optional[List[Notat]]
-    prismeresponses: Optional[List[PrismeResponse]]
+    leverandørfaktura_nummer: Optional[str] = None
+    leverandørfaktura: Optional[File] = None
+    indførselstilladelse: Optional[str] = None
+    notater: Optional[List[Notat]] = None
+    prismeresponses: Optional[List[PrismeResponse]] = None
     varelinjer: Optional[List[Varelinje]] = None
     oprettet_af: Optional[dict] = None
     oprettet_på_vegne_af: Optional[dict] = None
