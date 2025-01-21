@@ -133,7 +133,7 @@
                data-classes="table"
         >
             <thead>
-            <tr id="VareafgiftssatsHeader">
+            <tr>
                 <th class="col-1">{% translate "Afgifts­gruppe­nummer" %}</th>
                 <th class="col-2">{% translate "Vareart (da)" %}</th>
                 <th class="col-2">{% translate "Vareart (kl)" %}</th>
@@ -150,7 +150,7 @@
             <tbody>
             {% for vareafgiftssats in object.vareafgiftssatser %}
             {% if not vareafgiftssats.overordnet %}
-	    <tr id={{vareafgiftssats.id}}>
+	    <tr>
 		{% if vareafgiftssats.subsatser %}
                 <td rowspan="{{vareafgiftssats.subsatser|length|add:1}}">
                     {{vareafgiftssats.afgiftsgruppenummer|unlocalize}}
@@ -159,7 +159,7 @@
                 <td>{{vareafgiftssats.vareart_kl}}</td>
                 <td>{{vareafgiftssats.enhed|enhedsnavn}}</td>
                 <td>{{vareafgiftssats.kræver_indførselstilladelse|yesno}}</td>
-                <td colspan="6">{{vareafgiftssats.subsatser|length}}</td>
+                <td colspan="4"></td>
                 {% else %}
                 <td>{{vareafgiftssats.afgiftsgruppenummer|unlocalize}}</td>
                 <td>{{vareafgiftssats.vareart_da}}</td>
@@ -175,7 +175,7 @@
                 {% endif %}
             </tr>
             {% for subsats in vareafgiftssats.subsatser %}
-            <tr id={{subsats.id}}>
+            <tr>
                 <td>{{subsats.vareart_da}}</td>
                 <td>{{subsats.vareart_kl}}</td>
                 <td>{{subsats.enhed|enhedsnavn}}</td>
