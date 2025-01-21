@@ -7,10 +7,11 @@ import os
 import time
 from copy import deepcopy
 from datetime import datetime, timedelta
+from decimal import Decimal
 from functools import partial
 from io import StringIO
 from typing import Any, Callable, Tuple
-from unittest.mock import mock_open, patch
+from unittest.mock import MagicMock, mock_open, patch
 from urllib.parse import parse_qs, quote, quote_plus, urlparse
 
 import requests
@@ -19,11 +20,18 @@ from django.conf import settings
 from django.contrib.auth.models import Permission
 from django.core.cache import cache
 from django.http import FileResponse
-from django.test import override_settings
+from django.test import TestCase, override_settings
 from django.test.testcases import SimpleTestCase
 from django.urls import reverse
 from requests import Response
-from told_common.data import JwtTokenInfo
+from told_common.data import (
+    Afgiftsanmeldelse,
+    JwtTokenInfo,
+    User,
+    Vareafgiftssats,
+    encode_optional_isoformat,
+    unformat_decimal,
+)
 from told_common.rest_client import RestClient, RestClientException
 from told_common.templatetags.common_tags import file_basename, zfill
 from told_common.views import FileView
@@ -1564,3 +1572,124 @@ def collapse_newlines(value: str):
         if line:
             new_values.append(line)
     return "\n".join(new_values)
+
+
+class TestData(TestCase):
+    def test_unformat_decimal(self):
+        self.assertEquals(unformat_decimal("1,0"), Decimal("1.0"))
+        self.assertEquals(unformat_decimal("1.0"), Decimal("1.0"))
+        self.assertEquals(unformat_decimal("1"), Decimal("1"))
+        self.assertEquals(unformat_decimal("1.000,00"), Decimal("1000.00"))
+        self.assertEquals(unformat_decimal(""), None)
+
+    def test_vareafgiftssats_text_none(self):
+        varegiftssats_invalid_enhed = Vareafgiftssats(
+            id=1,
+            afgiftstabel=1,
+            vareart_da="Båthorn",
+            vareart_kl="Båthorn",
+            afgiftsgruppenummer=1234567,
+            enhed="testerror",
+            afgiftssats=Decimal("1.00"),
+            kræver_indførselstilladelse=False,
+            minimumsbeløb=None,
+            overordnet=None,
+            segment_nedre=None,
+            segment_øvre=None,
+            subsatser=None,
+        )
+
+        self.assertEqual(varegiftssats_invalid_enhed.text, None)
+
+    def test_vareafgiftssats_populate_subs(self):
+        mock_sub_getter = MagicMock(
+            return_value=[
+                Vareafgiftssats(
+                    id=2,
+                    afgiftstabel=1,
+                    vareart_da="Mocked Vareart",
+                    vareart_kl="Mocked Vareart KL",
+                    afgiftsgruppenummer=123,
+                    enhed=Vareafgiftssats.Enhed.KILOGRAM,
+                    afgiftssats=Decimal("12.5"),
+                )
+            ]
+        )
+
+        varegiftssats = Vareafgiftssats(
+            id=1,
+            afgiftstabel=1,
+            vareart_da="Båthorn",
+            vareart_kl="Båthorn",
+            afgiftsgruppenummer=1234567,
+            enhed=Vareafgiftssats.Enhed.SAMMENSAT,
+            afgiftssats=Decimal("1.00"),
+            kræver_indførselstilladelse=False,
+            minimumsbeløb=None,
+            overordnet=None,
+            segment_nedre=None,
+            segment_øvre=None,
+            subsatser=None,
+        )
+
+        varegiftssats.populate_subs(mock_sub_getter)
+
+        self.assertIsNotNone(varegiftssats.subsatser)
+        self.assertEqual(len(varegiftssats.subsatser), 1)
+        self.assertEqual(varegiftssats.subsatser[0].id, 2)
+        self.assertEqual(varegiftssats.subsatser[0].afgiftssats, Decimal("12.5"))
+
+    def test_encode_optional_isoformat(self):
+        self.assertEqual(encode_optional_isoformat(None), None)
+        self.assertEqual(
+            encode_optional_isoformat(datetime(2025, 1, 1, 12, 30, 45)),
+            "2025-01-01T12:30:45",
+        )
+
+    def test_afgiftsanmeldelse_fragtforsendelse_forbindelsesnummer(self):
+        afgiftsanmeldelse = Afgiftsanmeldelse(
+            id=None,
+            afsender=None,
+            modtager=None,
+            fragtforsendelse=MagicMock(forbindelsesnr="abc123"),
+            postforsendelse=None,
+            afgift_total=Decimal("0.00"),
+            betalt=None,
+            status=None,
+            dato=None,
+            beregnet_faktureringsdato=None,
+        )
+        self.assertEqual(afgiftsanmeldelse.forbindelsesnummer, "abc123")
+
+    def test_afgiftsanmeldelse_fragtforsendelse_afgangsdato(self):
+        afgangsdato = datetime(2025, 1, 1, 12, 30, 45)
+        afgiftsanmeldelse = Afgiftsanmeldelse(
+            id=None,
+            afsender=None,
+            modtager=None,
+            fragtforsendelse=MagicMock(afgangsdato=afgangsdato),
+            postforsendelse=None,
+            afgift_total=Decimal("0.00"),
+            betalt=None,
+            status=None,
+            dato=None,
+            beregnet_faktureringsdato=None,
+        )
+
+        self.assertEqual(afgiftsanmeldelse.afgangsdato, afgangsdato)
+
+    def test_user_is_anonymous(self):
+        user = User(
+            id=1,
+            username="test-1",
+            first_name="Test",
+            last_name="User",
+            email="testuser@magenta-aps.dk",
+            is_superuser=False,
+            groups=[],
+            permissions=[],
+            jwt_token=MagicMock(),
+            # Our currently implementation just checks if a JWTToken have been set
+        )
+
+        self.assertEqual(user.is_anonymous, True)
