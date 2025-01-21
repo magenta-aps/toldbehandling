@@ -59,8 +59,8 @@ docker exec toldbehandling-rest bash -c 'coverage run manage.py test ; coverage 
 
 and for the `admin` app:
 
-```
-docker exec toldbehandling-admin bash -c 'coverage run manage.py test ; coverage report --show-missing'
+```bash
+docker exec toldbehandling-admin bash -c 'coverage run manage.py test ; coverage combine ; coverage report --show-missing'
 ```
 
 You can run the mypy checks with the following command:
