@@ -17,6 +17,7 @@ services:
     volumes:
       - ./rest/:/app
       - ./data/er:/static/er
+      - ./data/static:/static
       - file-data:/upload
       - ./log/rest.log:/rest.log:rw
     depends_on:
@@ -26,6 +27,8 @@ services:
       - MIGRATE=true
       - CREATE_USERS=true
       - TEST=false
+    ports:
+      - "8045:8000"
     networks:
       - database
       - rest
