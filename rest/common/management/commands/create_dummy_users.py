@@ -55,6 +55,13 @@ class Command(BaseCommand):
         except Group.DoesNotExist:
             kontrollører_group = None
 
+        try:
+            admin_læs_group = Group.objects.get(
+                name="AdminLæs",
+            )
+        except Group.DoesNotExist:
+            admin_læs_group = None
+
         admin, created = User.objects.update_or_create(
             defaults={
                 "first_name": "Admin",
@@ -218,6 +225,20 @@ class Command(BaseCommand):
             },
         )
         admin_godkender.groups.add(admin_godkendere_group)
+
+        admin_læs, created = User.objects.update_or_create(
+            username="admin_læs",
+            defaults={
+                "first_name": "AdminLæs",
+                "last_name": "",
+                "email": "",
+                "password": make_password("admin_læs"),
+                "is_active": True,
+                "is_staff": False,
+                "is_superuser": False,
+            },
+        )
+        admin_læs.groups.add(admin_læs_group)
 
         kontrollør, created = User.objects.update_or_create(
             username="kontrollør",

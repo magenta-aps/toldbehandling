@@ -44,6 +44,9 @@ class Command(BaseCommand):
         kontrollører, _ = Group.objects.update_or_create(
             name="Kontrollører",
         )
+        admin_læs, _ = Group.objects.update_or_create(
+            name="AdminLæs",
+        )
 
         afsender_model = ContentType.objects.get_for_model(
             Afsender, for_concrete_model=False
@@ -311,6 +314,30 @@ class Command(BaseCommand):
             ("approve", afgiftstabel_model),
         ) + admin_tf10_list_view_required_permissions:
             admin_godkendere.permissions.add(
+                Permission.objects.get(
+                    codename=f"{action}_{model.model}", content_type=model
+                )
+            )
+
+        for permission in (
+            admin_site_access,
+            se_alle_afgiftsanmeldelser,
+            se_alle_fragtforsendelser,
+            se_alle_postforsendelser,
+            se_alle_private_afgiftsanmeldelser,
+        ):
+            admin_læs.permissions.add(permission)
+
+        for action, model in (
+            ("view", afgiftstabel_model),
+            ("view", vareafgiftssats_model),
+            ("view", speditør_model),
+            ("view", privatafgiftsanmeldelse_model),
+            ("view", afgiftstabel_model),
+            ("view", vareafgiftssats_model),
+            ("view", notat_model),
+        ) + admin_tf10_list_view_required_permissions:
+            admin_læs.permissions.add(
                 Permission.objects.get(
                     codename=f"{action}_{model.model}", content_type=model
                 )
