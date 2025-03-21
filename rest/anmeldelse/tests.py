@@ -479,6 +479,11 @@ class AfgiftsanmeldelseTest(RestTestMixin, TestCase):
         result = Afgiftsanmeldelse.beregn_faktureringsdato(self.afgiftsanmeldelse)
         self.assertEqual(result, date(2023, 12, 14))
 
+        self.afgiftsanmeldelse.toldkategori = "73A"
+        self.afgiftsanmeldelse.modtager.postnummer = 3900
+        result = Afgiftsanmeldelse.beregn_faktureringsdato(self.afgiftsanmeldelse)
+        self.assertEqual(result, date(2023, 12, 20))
+
     def test_receiver_on_add_prismeresponse(self):
         # Connect the signal manually to ensure it's being tested
         post_save.connect(
