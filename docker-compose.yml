@@ -17,7 +17,6 @@ services:
     volumes:
       - ./rest/:/app
       - ./data/er:/static/er
-      - ./data/static:/static
       - file-data:/upload
       - ./log/rest.log:/rest.log:rw
     depends_on:
