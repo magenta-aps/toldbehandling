@@ -9,10 +9,15 @@ ENV SUPERCRONIC_URL=https://github.com/aptible/supercronic/releases/download/v0.
     PYTHONUNBUFFERED=1
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN mkdir /app && \
+    mkdir -p /static/api && \
     #gid/uid from salt
     groupadd -g 75130 -r toldbehandling && \
     groupadd -g 75100 -r certificate_exporter && \
-    useradd -u 75130 --no-log-init -r -g toldbehandling -G certificate_exporter toldbehandling
+    useradd -u 75130 --no-log-init -r -g toldbehandling -G certificate_exporter toldbehandling && \
+    chown -R toldbehandling:toldbehandling /app && \
+    chown -R toldbehandling:toldbehandling /static/api && \
+    chmod a+w /static/api
+
 COPY rest/requirements.txt /app/requirements.txt
 COPY rest/mypy.ini /app/mypy.ini
 
@@ -39,10 +44,17 @@ RUN mkdir /upload && \
 ARG COMMIT_TAG
 ENV COMMIT_TAG=${COMMIT_TAG:-HEAD}
 
-USER toldbehandling
 COPY ./docker/entrypoint_rest.sh /entrypoint.sh
 COPY --chown=toldbehandling:toldbehandling ./rest /app
+USER toldbehandling
 EXPOSE 8000
 ENTRYPOINT ["/entrypoint.sh"]
 WORKDIR /app
+
+# temporary use of dev env to make manage.py work
+COPY ./dev-environment/rest.env rest.env
+
+# hadolint ignore=SC1091
+RUN set -a && source rest.env && set +a && python manage.py collectstatic --no-input --clear && rm rest.env
+
 CMD ["gunicorn","-b","0.0.0.0:8000","project.wsgi:application","-w","4","--timeout","120","--error-logfile","-","--capture-output"]
