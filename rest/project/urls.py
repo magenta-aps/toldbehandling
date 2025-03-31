@@ -10,8 +10,9 @@ from django.urls.resolvers import URLPattern, URLResolver
 from project.api import api
 
 urlpatterns: list[URLResolver | URLPattern] = [
-    path("admin/", admin.site.urls),
+    path("api/admin/", admin.site.urls),
     path("api/", api.urls),
 ]
 
+urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
