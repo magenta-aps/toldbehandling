@@ -26,6 +26,8 @@ services:
       - MIGRATE=true
       - CREATE_USERS=true
       - TEST=false
+    ports:
+      - "8045:8000"
     networks:
       - database
       - rest
