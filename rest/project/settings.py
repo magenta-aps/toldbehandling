@@ -31,6 +31,7 @@ ENVIRONMENT = os.environ.get("ENVIRONMENT", "development")
 HOST_DOMAIN = os.environ.get("HOST_DOMAIN", "http://akitsuut.aka.gl")
 
 ALLOWED_HOSTS = json.loads(os.environ.get("ALLOWED_HOSTS", "[]"))
+CSRF_TRUSTED_ORIGINS = json.loads(os.environ.get("ALLOWED_HOSTS", "[]"))
 
 
 # Application definition
