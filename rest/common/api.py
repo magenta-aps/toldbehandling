@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: MPL-2.0
 # mypy: disable-error-code="call-arg, attr-defined"
 import base64
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
 from common.models import EboksBesked, IndberetterProfile
 from django.contrib.auth.models import Group, User
@@ -190,23 +190,43 @@ class UserAPI:
             return qs
         return qs.filter(pk=user.pk)
 
+    def dash_null(self, key:str, value:int|str):
+        if value == "-":
+            return {key+"__isnull": True}
+        elif type(value) == int:
+            return {key: value}
+        else:
+            raise ValueError("Incorrect type")
+
     @route.get(
         "/this",
         response=UserOut,
         auth=get_auth_methods(),
         url_name="user_view",
     )
-    def get_user(self, request):
+    def get_user_from_request(self, request):
         return request.user
 
     @route.get(
         "/cpr/{cpr}",
         response=UserOutWithTokens,
         auth=get_auth_methods(),
-        url_name="user_get",
+        url_name="user_cpr_get",
     )
     def get_user_cpr(self, cpr: int):
-        user = get_object_or_404(User, indberetter_data__cpr=cpr)
+        return self.get_user(cpr, "-")
+
+    @route.get(
+        "/{cpr}/{cvr}",
+        response=UserOutWithTokens,
+        auth=get_auth_methods(),
+        url_name="user_get",
+    )
+    def get_user(self, cpr: int, cvr: Union[int,str]):
+        user = get_object_or_404(User, **{
+            "indberetter_data__cpr": cpr,
+            **self.dash_null("indberetter_data__cvr", cvr)
+        })
         self.check_user(user)
         return UserOutWithTokens.user_to_dict(user)
 
@@ -218,7 +238,20 @@ class UserAPI:
         permissions=[DjangoPermission("auth.read_apikeys")],
     )
     def get_user_cpr_apikey(self, cpr: int):
-        user = get_object_or_404(User, indberetter_data__cpr=cpr)
+        return self.get_user_apikey(cpr, "-")
+
+    @route.get(
+        "/{cpr}/{cvr}/apikey",
+        response=IndberetterProfileApiKeyOut,
+        auth=JWTAuth(),
+        url_name="user_get_apikey",
+        permissions=[DjangoPermission("auth.read_apikeys")],
+    )
+    def get_user_apikey(self, cpr: int, cvr: int|str):
+        user = get_object_or_404(User, **{
+            "indberetter_data__cpr": cpr,
+            **self.dash_null("indberetter_data__cvr", cvr)
+        })
         self.check_user(user)
         return user.indberetter_data
 
@@ -264,11 +297,23 @@ class UserAPI:
         "/cpr/{cpr}",
         response=UserOutWithTokens,
         auth=get_auth_methods(),
+        url_name="user_cpr_update",
+    )
+    def update_by_cpr(self, cpr: int, payload: UserIn):
+        return self.update(cpr, "-", payload)
+
+    @route.patch(
+        "/{cpr}/{cvr}",
+        response=UserOutWithTokens,
+        auth=get_auth_methods(),
         url_name="user_update",
     )
-    def update(self, cpr, payload: UserIn):
+    def update(self, cpr: int, cvr: int|str, payload: UserIn):
         cpr = int(cpr)
-        item = get_object_or_404(User, indberetter_data__cpr=cpr)
+        item = get_object_or_404(User, **{
+            "indberetter_data__cpr": cpr,
+            **self.dash_null("indberetter_data__cvr", cvr)
+        })
         user = self.context.request.user
         if not (
             user.has_perm("auth.change_user")

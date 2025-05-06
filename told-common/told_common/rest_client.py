@@ -1102,7 +1102,7 @@ class RestClient:
         elif cpr:
             mapped_data["groups"].append("PrivatIndberettere")
         try:
-            user = client.get(f"user/cpr/{int(cpr)}")
+            user = client.get(f"user/{int(cpr)}")
         except RestClientException as e:
             if e.status_code == 404:
                 user = client.post("user", mapped_data)
@@ -1115,11 +1115,11 @@ class RestClient:
             or mapped_data["email"] != user["email"]
             or cvr != user["indberetter_data"]["cvr"]
         ):
-            user = client.patch(f"user/cpr/{int(cpr)}", mapped_data)
+            user = client.patch(f"user/{int(cpr)}", mapped_data)
 
         try:
             # Only the system user can obtain this
-            api_key = client.get(f"user/cpr/{int(cpr)}/apikey")["api_key"]
+            api_key = client.get(f"user/{int(cpr)}/apikey")["api_key"]
             user["indberetter_data"]["api_key"] = api_key
         except HTTPError:
             pass

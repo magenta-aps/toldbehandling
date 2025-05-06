@@ -347,7 +347,7 @@ class TestRestClient(SimpleTestCase):
                         }
                     ],
                 }
-        elif path.startswith("user/cpr/"):
+        elif path.startswith("user/"):
             if path.endswith("apikey"):
                 # GET to fetch API key by CPR
                 return {"api_key": "mocked"}

@@ -59,6 +59,7 @@ class CommonTest:
         cls.indberetter2 = IndberetterProfile.objects.create(
             user=cls.user2,
             cpr="1234567890",
+            cvr=None,
             api_key=IndberetterProfile.create_api_key(),
         )
 
@@ -215,7 +216,7 @@ class CommonUserAPITests(CommonTest, TestCase):
 
     def test_get_user_cpr(self):
         resp = self.client.get(
-            reverse("api-1.0.0:user_get", args=[self.indberetter2.cpr]),
+            reverse("api-1.0.0:user_get", args=[self.indberetter2.cpr, self.indberetter2.cvr or "-"]),
             HTTP_AUTHORIZATION=f"Bearer {self.user2_token}",
             content_type="application/json",
         )
@@ -243,7 +244,7 @@ class CommonUserAPITests(CommonTest, TestCase):
 
     def test_get_user_cpr_apikey(self):
         resp = self.client.get(
-            reverse("api-1.0.0:user_get_apikey", args=[self.indberetter2.cpr]),
+            reverse("api-1.0.0:user_get_apikey", args=[self.indberetter2.cpr, self.indberetter2.cvr or "-"]),
             HTTP_AUTHORIZATION=f"Bearer {self.user2_token}",
             content_type="application/json",
         )
@@ -371,7 +372,7 @@ class CommonUserAPITests(CommonTest, TestCase):
 
     def test_update(self):
         resp = self.client.patch(
-            reverse("api-1.0.0:user_update", args=[self.indberetter2.cpr]),
+            reverse("api-1.0.0:user_cpr_update", args=[self.indberetter2.cpr]),
             data=json_dump(
                 {
                     # NOTE: required by the payload, but not used in the handler
@@ -409,7 +410,7 @@ class CommonUserAPITests(CommonTest, TestCase):
 
     def test_update_exceptions(self):
         resp = self.client.patch(
-            reverse("api-1.0.0:user_update", args=[self.indberetter2.cpr]),
+            reverse("api-1.0.0:user_update", args=[self.indberetter2.cpr, self.indberetter2.cvr or "-"]),
             data=json_dump(
                 {
                     # NOTE: required by the payload, but not used in the handler
@@ -825,7 +826,7 @@ class UserAPITest(TestCase):
         )
 
         resp = self.client.get(
-            reverse(f"api-1.0.0:user_get", kwargs={"cpr": "1234567890"}),
+            reverse(f"api-1.0.0:user_cpr_get", kwargs={"cpr": "1234567890"}),
             HTTP_AUTHORIZATION=f"Bearer {user2_token}",
             content_type="application/json",
         )
@@ -869,10 +870,10 @@ class UserAPITest(TestCase):
         self.mock_user.indberetter_data = None
 
         with self.assertRaises(PermissionDenied):
-            self.api.update(cpr="123456", payload=MagicMock())
+            self.api.update(cpr="123456", cvr="-", payload=MagicMock())
 
         mock_get_object_or_404.assert_called_once_with(
-            User, indberetter_data__cpr=123456
+            User, indberetter_data__cpr=123456, indberetter_data__cvr__isnull=True
         )
         self.mock_user.has_perm.assert_called_once_with("auth.change_user")
 
