@@ -279,7 +279,6 @@ class LoginTest(TestMixin):
         response = self.client.get(self.restricted_url)
         self.assertEquals(response.status_code, 302)
 
-
     @staticmethod
     def mock_post(url, data, **kwargs):
         return LoginTest.create_response(200, {

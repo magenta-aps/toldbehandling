@@ -39,7 +39,10 @@ class CommonTest:
         )
 
         cls.indberetter = IndberetterProfile.objects.create(
-            user=cls.user, cvr="13371337", api_key=IndberetterProfile.create_api_key()
+            user=cls.user,
+            cpr="1212121212",
+            cvr="13371337",
+            api_key=IndberetterProfile.create_api_key(),
         )
 
         # User-2 (CPR)
@@ -191,6 +194,8 @@ class CommonAPITests(CommonTest, TestCase):
 
 
 class CommonUserAPITests(CommonTest, TestCase):
+    maxDiff = None
+
     def test_get_user(self):
         resp = self.client.get(
             reverse("api-1.0.0:user_view"),
@@ -212,6 +217,32 @@ class CommonUserAPITests(CommonTest, TestCase):
                 "permissions": ["anmeldelse.view_afgiftsanmeldelse"],
                 "indberetter_data": {"cvr": 13371337},
                 "twofactor_enabled": False,
+            },
+        )
+
+    def test_get_user_cpr_cvr(self):
+        resp = self.client.get(
+            reverse("api-1.0.0:user_get", args=[self.indberetter.cpr, self.indberetter.cvr]),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(
+            resp.json(),
+            {
+                "id": self.user.id,
+                "username": "payment-test-user",
+                "first_name": "",
+                "last_name": "",
+                "email": "",
+                "is_superuser": False,
+                "groups": [],
+                "permissions": [
+                    "anmeldelse.view_afgiftsanmeldelse",
+                ],
+                "indberetter_data": {"cvr": int(self.indberetter.cvr)},
+                "access_token": ANY,
+                "refresh_token": ANY,
             },
         )
 
@@ -242,6 +273,14 @@ class CommonUserAPITests(CommonTest, TestCase):
                 "refresh_token": ANY,
             },
         )
+
+    def test_get_user_incorrect_cvr(self):
+        resp = self.client.get(
+            reverse("api-1.0.0:user_get", args=[self.indberetter2.cpr, "foobar"]),
+            HTTP_AUTHORIZATION=f"Bearer {self.user2_token}",
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, 400)
 
     def test_get_user_cpr_apikey(self):
         resp = self.client.get(

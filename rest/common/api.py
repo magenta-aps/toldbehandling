@@ -7,6 +7,7 @@ from typing import Dict, List, Optional, Union
 
 from common.models import EboksBesked, IndberetterProfile
 from django.contrib.auth.models import Group, User
+from django.core.exceptions import BadRequest
 from django.db.models import QuerySet
 from django.http import HttpRequest
 from django.shortcuts import get_object_or_404
@@ -193,10 +194,12 @@ class UserAPI:
     def dash_null(self, key: str, value: Union[int, str]):
         if value == "-":
             return {key+"__isnull": True}
-        elif type(value) is int:
-            return {key: value}
-        else:
-            raise ValueError("Incorrect type")
+        if type(value) is str:
+            try:
+                value = int(value)
+            except ValueError:
+                raise BadRequest(f"Incorrect value '{value}', must be '-' or a number")
+        return {key: value}
 
     @route.get(
         "/this",
