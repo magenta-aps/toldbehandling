@@ -331,7 +331,7 @@ class LoginTest(TestMixin):
                     "groups": ["PrivatIndberettere"],
                 }
             ),
-            headers={'Content-Type': 'application/json'},
+            headers={'Content-Type': "application/json"},
         )
         #
         # # Another login, now with a CVR
@@ -361,7 +361,7 @@ class LoginTest(TestMixin):
                     "groups": ["ErhvervIndberettere"],
                 }
             ),
-            headers={'Content-Type': 'application/json'},
+            headers={'Content-Type': "application/json"},
         )
 
 
