@@ -190,7 +190,7 @@ class UserAPI:
             return qs
         return qs.filter(pk=user.pk)
 
-    def dash_null(self, key:str, value:int|str):
+    def dash_null(self, key: str, value: Union[int, str]):
         if value == "-":
             return {key+"__isnull": True}
         elif type(value) == int:
@@ -247,7 +247,7 @@ class UserAPI:
         url_name="user_get_apikey",
         permissions=[DjangoPermission("auth.read_apikeys")],
     )
-    def get_user_apikey(self, cpr: int, cvr: int|str):
+    def get_user_apikey(self, cpr: int, cvr: Union[int, str]):
         user = get_object_or_404(User, **{
             "indberetter_data__cpr": cpr,
             **self.dash_null("indberetter_data__cvr", cvr)
@@ -308,7 +308,7 @@ class UserAPI:
         auth=get_auth_methods(),
         url_name="user_update",
     )
-    def update(self, cpr: int, cvr: int|str, payload: UserIn):
+    def update(self, cpr: int, cvr: Union[int, str], payload: UserIn):
         cpr = int(cpr)
         item = get_object_or_404(User, **{
             "indberetter_data__cpr": cpr,
