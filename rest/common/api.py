@@ -193,7 +193,7 @@ class UserAPI:
     def dash_null(self, key: str, value: Union[int, str]):
         if value == "-":
             return {key+"__isnull": True}
-        elif type(value) == int:
+        elif type(value) is int:
             return {key: value}
         else:
             raise ValueError("Incorrect type")
@@ -222,7 +222,7 @@ class UserAPI:
         auth=get_auth_methods(),
         url_name="user_get",
     )
-    def get_user(self, cpr: int, cvr: Union[int,str]):
+    def get_user(self, cpr: int, cvr: Union[int, str]):
         user = get_object_or_404(User, **{
             "indberetter_data__cpr": cpr,
             **self.dash_null("indberetter_data__cvr", cvr)
