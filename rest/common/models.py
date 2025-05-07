@@ -12,6 +12,7 @@ from lxml import etree
 class IndberetterProfile(models.Model):
     class Meta:
         unique_together = (("cpr", "cvr"),)
+
     user = models.OneToOneField(
         User, on_delete=models.CASCADE, null=False, related_name="indberetter_data"
     )

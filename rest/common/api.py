@@ -193,7 +193,7 @@ class UserAPI:
 
     def dash_null(self, key: str, value: Union[int, str]):
         if value == "-":
-            return {key+"__isnull": True}
+            return {key + "__isnull": True}
         if type(value) is str:
             try:
                 value = int(value)
@@ -226,10 +226,13 @@ class UserAPI:
         url_name="user_get",
     )
     def get_user(self, cpr: int, cvr: Union[int, str]):
-        user = get_object_or_404(User, **{
-            "indberetter_data__cpr": cpr,
-            **self.dash_null("indberetter_data__cvr", cvr)
-        })
+        user = get_object_or_404(
+            User,
+            **{
+                "indberetter_data__cpr": cpr,
+                **self.dash_null("indberetter_data__cvr", cvr),
+            }
+        )
         self.check_user(user)
         return UserOutWithTokens.user_to_dict(user)
 
@@ -237,7 +240,7 @@ class UserAPI:
         "/cpr/{cpr}/apikey",
         response=IndberetterProfileApiKeyOut,
         auth=JWTAuth(),
-        url_name="user_get_apikey",
+        url_name="user_get_cpr_apikey",
         permissions=[DjangoPermission("auth.read_apikeys")],
     )
     def get_user_cpr_apikey(self, cpr: int):
@@ -251,10 +254,13 @@ class UserAPI:
         permissions=[DjangoPermission("auth.read_apikeys")],
     )
     def get_user_apikey(self, cpr: int, cvr: Union[int, str]):
-        user = get_object_or_404(User, **{
-            "indberetter_data__cpr": cpr,
-            **self.dash_null("indberetter_data__cvr", cvr)
-        })
+        user = get_object_or_404(
+            User,
+            **{
+                "indberetter_data__cpr": cpr,
+                **self.dash_null("indberetter_data__cvr", cvr),
+            }
+        )
         self.check_user(user)
         return user.indberetter_data
 
@@ -313,10 +319,13 @@ class UserAPI:
     )
     def update(self, cpr: int, cvr: Union[int, str], payload: UserIn):
         cpr = int(cpr)
-        item = get_object_or_404(User, **{
-            "indberetter_data__cpr": cpr,
-            **self.dash_null("indberetter_data__cvr", cvr)
-        })
+        item = get_object_or_404(
+            User,
+            **{
+                "indberetter_data__cpr": cpr,
+                **self.dash_null("indberetter_data__cvr", cvr),
+            }
+        )
         user = self.context.request.user
         if not (
             user.has_perm("auth.change_user")

@@ -222,7 +222,10 @@ class CommonUserAPITests(CommonTest, TestCase):
 
     def test_get_user_cpr_cvr(self):
         resp = self.client.get(
-            reverse("api-1.0.0:user_get", args=[self.indberetter.cpr, self.indberetter.cvr]),
+            reverse(
+                "api-1.0.0:user_get",
+                args=[self.indberetter.cpr, self.indberetter.cvr],
+            ),
             HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
             content_type="application/json",
         )
@@ -248,7 +251,10 @@ class CommonUserAPITests(CommonTest, TestCase):
 
     def test_get_user_cpr(self):
         resp = self.client.get(
-            reverse("api-1.0.0:user_get", args=[self.indberetter2.cpr, self.indberetter2.cvr or "-"]),
+            reverse(
+                "api-1.0.0:user_get",
+                args=[self.indberetter2.cpr, self.indberetter2.cvr or "-"]
+            ),
             HTTP_AUTHORIZATION=f"Bearer {self.user2_token}",
             content_type="application/json",
         )
@@ -276,19 +282,39 @@ class CommonUserAPITests(CommonTest, TestCase):
 
     def test_get_user_incorrect_cvr(self):
         resp = self.client.get(
-            reverse("api-1.0.0:user_get", args=[self.indberetter2.cpr, "foobar"]),
+            reverse(
+                "api-1.0.0:user_get",
+                args=[self.indberetter2.cpr, "foobar"]
+            ),
             HTTP_AUTHORIZATION=f"Bearer {self.user2_token}",
             content_type="application/json",
         )
         self.assertEqual(resp.status_code, 400)
 
-    def test_get_user_cpr_apikey(self):
+    def test_get_user_apikey(self):
         resp = self.client.get(
-            reverse("api-1.0.0:user_get_apikey", args=[self.indberetter2.cpr, self.indberetter2.cvr or "-"]),
+            reverse(
+                "api-1.0.0:user_get_apikey",
+                args=[self.indberetter2.cpr, self.indberetter2.cvr or "-"]
+            ),
             HTTP_AUTHORIZATION=f"Bearer {self.user2_token}",
             content_type="application/json",
         )
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(
+            resp.json(),
+            {"api_key": str(self.user2.indberetter_data.api_key)},
+        )
 
+    def test_get_user_cpr_apikey(self):
+        resp = self.client.get(
+            reverse(
+                "api-1.0.0:user_get_cpr_apikey",
+                args=[self.indberetter2.cpr]
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.user2_token}",
+            content_type="application/json",
+        )
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(
             resp.json(),
