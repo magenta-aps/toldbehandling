@@ -281,11 +281,14 @@ class LoginTest(TestMixin):
 
     @staticmethod
     def mock_post(url, data, **kwargs):
-        return LoginTest.create_response(200, {
-            **json.loads(data),
-            "access_token": "123456",
-            "refresh_token": "abcdef",
-        })
+        return LoginTest.create_response(
+            200,
+            {
+                **json.loads(data),
+                "access_token": "123456",
+                "refresh_token": "abcdef",
+            }
+        )
 
     # Mock getting user data
     @patch.object(
@@ -294,11 +297,7 @@ class LoginTest(TestMixin):
         return_value=create_response(404, "")
     )
     # Mock posting user data
-    @patch.object(
-        requests.sessions.Session,
-        "post",
-        side_effect=mock_post
-    )
+    @patch.object(requests.sessions.Session, "post", side_effect=mock_post)
     # Mock logging in as system user
     @patch.object(
         RestClient,
@@ -306,10 +305,7 @@ class LoginTest(TestMixin):
         return_value=JwtTokenInfo(access_token="123456", refresh_token="abcdef"),
     )
     def test_login_same_cpr_multiple_cvrs_not_exist(
-            self,
-            mock_post_login,
-            mock_post,
-            mock_get
+            self, mock_post_login, mock_post, mock_get
     ):
         client = RestClient(self.MockJwtTokenInfo())
 
@@ -326,15 +322,17 @@ class LoginTest(TestMixin):
         mock_get.assert_any_call(f"{settings.REST_DOMAIN}/api/user/1234567890/-/apikey")
         mock_post.assert_called_with(
             f"{settings.REST_DOMAIN}/api/user",
-            json.dumps({
-                "indberetter_data": {"cpr": 1234567890, "cvr": None},
-                "username": "test@example.com",
-                "first_name": "Tester",
-                "last_name": "Testersen",
-                "email": "test@example.com",
-                "is_superuser": False,
-                "groups": ["PrivatIndberettere"],
-            }),
+            json.dumps(
+                {
+                    "indberetter_data": {"cpr": 1234567890, "cvr": None},
+                    "username": "test@example.com",
+                    "first_name": "Tester",
+                    "last_name": "Testersen",
+                    "email": "test@example.com",
+                    "is_superuser": False,
+                    "groups": ["PrivatIndberettere"],
+                }
+            ),
             headers={'Content-Type': 'application/json'}
         )
         #
@@ -354,15 +352,17 @@ class LoginTest(TestMixin):
         )
         mock_post.assert_called_with(
             f"{settings.REST_DOMAIN}/api/user",
-            json.dumps({
-                "indberetter_data": {"cpr": 1234567890, "cvr": 10000000},
-                "username": "test@example.com",
-                "first_name": "Tester",
-                "last_name": "Testersen",
-                "email": "test@example.com",
-                "is_superuser": False,
-                "groups": ["ErhvervIndberettere"],
-            }),
+            json.dumps(
+                {
+                    "indberetter_data": {"cpr": 1234567890, "cvr": 10000000},
+                    "username": "test@example.com",
+                    "first_name": "Tester",
+                    "last_name": "Testersen",
+                    "email": "test@example.com",
+                    "is_superuser": False,
+                    "groups": ["ErhvervIndberettere"],
+                }
+            ),
             headers={'Content-Type': 'application/json'}
         )
 
