@@ -3,9 +3,10 @@ from django.contrib.auth import REDIRECT_FIELD_NAME
 from django.shortcuts import redirect
 from django.views.generic import FormView
 from told_common.view_mixins import HasRestClientMixin
+from two_factor import views as twofactor_views
+
 from told_twofactor import forms
 from told_twofactor.registry import update_registry
-from two_factor import views as twofactor_views
 
 update_registry()
 

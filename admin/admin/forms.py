@@ -13,7 +13,6 @@ from django.forms import Select, formset_factory
 from django.utils.translation import gettext_lazy as _
 from dynamic_forms import DynamicField
 from tempus_dominus.widgets import DateTimePicker
-from told_common import forms as common_forms
 from told_common.form_mixins import (
     BootstrapForm,
     DateInput,
@@ -23,6 +22,7 @@ from told_common.form_mixins import (
 )
 
 from admin.spreadsheet import SpreadsheetImportException, VareafgiftssatsSpreadsheetUtil
+from told_common import forms as common_forms
 
 
 class TF10CreateForm(common_forms.TF10Form):

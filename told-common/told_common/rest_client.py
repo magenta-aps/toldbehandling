@@ -1118,13 +1118,15 @@ class RestClient:
             or mapped_data["email"] != user["email"]
             or cvr != user["indberetter_data"]["cvr"]
         ):
+            print(mapped_data)
+            print(user)
             user = client.patch(f"user/{cpr_key}/{cvr_key}", mapped_data)
 
         try:
             # Only the system user can obtain this
             api_key = client.get(f"user/{cpr_key}/{cvr_key}/apikey")["api_key"]
             user["indberetter_data"]["api_key"] = api_key
-        except HTTPError:
+        except RestClientException:
             pass
         token = JwtTokenInfo(
             access_token=user.pop("access_token"),
