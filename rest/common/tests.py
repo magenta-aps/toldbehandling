@@ -282,10 +282,7 @@ class CommonUserAPITests(CommonTest, TestCase):
 
     def test_get_user_incorrect_cvr(self):
         resp = self.client.get(
-            reverse(
-                "api-1.0.0:user_get",
-                args=[self.indberetter2.cpr, "foobar"]
-            ),
+            reverse("api-1.0.0:user_get", args=[self.indberetter2.cpr, "foobar"]),
             HTTP_AUTHORIZATION=f"Bearer {self.user2_token}",
             content_type="application/json",
         )
