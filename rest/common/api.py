@@ -231,7 +231,7 @@ class UserAPI:
             **{
                 "indberetter_data__cpr": cpr,
                 **self.dash_null("indberetter_data__cvr", cvr),
-            }
+            },
         )
         self.check_user(user)
         return UserOutWithTokens.user_to_dict(user)
@@ -259,7 +259,7 @@ class UserAPI:
             **{
                 "indberetter_data__cpr": cpr,
                 **self.dash_null("indberetter_data__cvr", cvr),
-            }
+            },
         )
         self.check_user(user)
         return user.indberetter_data
@@ -324,7 +324,7 @@ class UserAPI:
             **{
                 "indberetter_data__cpr": cpr,
                 **self.dash_null("indberetter_data__cvr", cvr),
-            }
+            },
         )
         user = self.context.request.user
         if not (

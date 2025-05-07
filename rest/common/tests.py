@@ -253,7 +253,7 @@ class CommonUserAPITests(CommonTest, TestCase):
         resp = self.client.get(
             reverse(
                 "api-1.0.0:user_get",
-                args=[self.indberetter2.cpr, self.indberetter2.cvr or "-"]
+                args=[self.indberetter2.cpr, self.indberetter2.cvr or "-"],
             ),
             HTTP_AUTHORIZATION=f"Bearer {self.user2_token}",
             content_type="application/json",
@@ -295,7 +295,7 @@ class CommonUserAPITests(CommonTest, TestCase):
         resp = self.client.get(
             reverse(
                 "api-1.0.0:user_get_apikey",
-                args=[self.indberetter2.cpr, self.indberetter2.cvr or "-"]
+                args=[self.indberetter2.cpr, self.indberetter2.cvr or "-"],
             ),
             HTTP_AUTHORIZATION=f"Bearer {self.user2_token}",
             content_type="application/json",
@@ -308,10 +308,7 @@ class CommonUserAPITests(CommonTest, TestCase):
 
     def test_get_user_cpr_apikey(self):
         resp = self.client.get(
-            reverse(
-                "api-1.0.0:user_get_cpr_apikey",
-                args=[self.indberetter2.cpr]
-            ),
+            reverse("api-1.0.0:user_get_cpr_apikey", args=[self.indberetter2.cpr]),
             HTTP_AUTHORIZATION=f"Bearer {self.user2_token}",
             content_type="application/json",
         )
@@ -476,7 +473,10 @@ class CommonUserAPITests(CommonTest, TestCase):
 
     def test_update_exceptions(self):
         resp = self.client.patch(
-            reverse("api-1.0.0:user_update", args=[self.indberetter2.cpr, self.indberetter2.cvr or "-"]),
+            reverse(
+                "api-1.0.0:user_update",
+                args=[self.indberetter2.cpr, self.indberetter2.cvr or "-"],
+            ),
             data=json_dump(
                 {
                     # NOTE: required by the payload, but not used in the handler
