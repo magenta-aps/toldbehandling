@@ -11,7 +11,7 @@ from decimal import Decimal
 from functools import partial
 from io import StringIO
 from typing import Any, Callable, Tuple
-from unittest.mock import mock_open, patch, call
+from unittest.mock import mock_open, patch
 from urllib.parse import parse_qs, quote, quote_plus, urlparse
 
 import requests
@@ -306,7 +306,12 @@ class LoginTest(TestMixin):
         "login",
         return_value=JwtTokenInfo(access_token="123456", refresh_token="abcdef"),
     )
-    def test_login_same_cpr_multiple_cvrs_not_exist(self, mock_post_login, mock_post, mock_get):
+    def test_login_same_cpr_multiple_cvrs_not_exist(
+            self,
+            mock_post_login,
+            mock_post,
+            mock_get
+    ):
         client = RestClient(self.MockJwtTokenInfo())
 
         client.login_saml_user(
@@ -345,7 +350,9 @@ class LoginTest(TestMixin):
             }
         )
         mock_get.assert_any_call(f"{settings.REST_DOMAIN}/api/user/1234567890/10000000")
-        mock_get.assert_any_call(f"{settings.REST_DOMAIN}/api/user/1234567890/10000000/apikey")
+        mock_get.assert_any_call(
+            f"{settings.REST_DOMAIN}/api/user/1234567890/10000000/apikey"
+        )
         mock_post.assert_called_with(
             f"{settings.REST_DOMAIN}/api/user",
             json.dumps({
@@ -474,7 +481,6 @@ class TestRestClient(SimpleTestCase):
         return result
 
 
-
 class TestUserMultipleCvrs(SimpleTestCase):
     first_name = "Navn"
     last_name = "Navnesen"
@@ -516,7 +522,6 @@ class TestUserMultipleCvrs(SimpleTestCase):
         else:
             raise NotImplementedError(f"cannot mock GET to unknown path '{path}'")
 
-
     def _user_response(self) -> dict:
         return {
             "username": f"{self.first_name} {self.last_name}",
@@ -528,7 +533,6 @@ class TestUserMultipleCvrs(SimpleTestCase):
             "access_token": None,
             "refresh_token": None,
         }
-
 
 
 class HasLogin:

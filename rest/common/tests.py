@@ -19,6 +19,7 @@ from project.test_mixins import RestMixin
 from project.util import json_dump
 from requests import HTTPError
 
+
 # Test helpers
 
 
