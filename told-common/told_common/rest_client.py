@@ -1118,7 +1118,6 @@ class RestClient:
             or mapped_data["email"] != user["email"]
             or cvr != user["indberetter_data"]["cvr"]
         ):
-            print(user)
             user = client.patch(f"user/{cpr_key}/{cvr_key}", mapped_data)
 
         try:
