@@ -287,14 +287,12 @@ class LoginTest(TestMixin):
                 **json.loads(data),
                 "access_token": "123456",
                 "refresh_token": "abcdef",
-            }
+            },
         )
 
     # Mock getting user data
     @patch.object(
-        requests.sessions.Session,
-        "get",
-        return_value=create_response(404, "")
+        requests.sessions.Session,"get", return_value=create_response(404, "")
     )
     # Mock posting user data
     @patch.object(requests.sessions.Session, "post", side_effect=mock_post)
@@ -305,7 +303,7 @@ class LoginTest(TestMixin):
         return_value=JwtTokenInfo(access_token="123456", refresh_token="abcdef"),
     )
     def test_login_same_cpr_multiple_cvrs_not_exist(
-            self, mock_post_login, mock_post, mock_get
+        self, mock_post_login, mock_post, mock_get
     ):
         client = RestClient(self.MockJwtTokenInfo())
 
@@ -333,7 +331,7 @@ class LoginTest(TestMixin):
                     "groups": ["PrivatIndberettere"],
                 }
             ),
-            headers={'Content-Type': 'application/json'}
+            headers={'Content-Type': 'application/json'},
         )
         #
         # # Another login, now with a CVR
@@ -363,7 +361,7 @@ class LoginTest(TestMixin):
                     "groups": ["ErhvervIndberettere"],
                 }
             ),
-            headers={'Content-Type': 'application/json'}
+            headers={'Content-Type': 'application/json'},
         )
 
 
