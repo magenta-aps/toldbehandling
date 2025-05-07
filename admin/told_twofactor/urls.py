@@ -1,5 +1,4 @@
 from django.urls import path
-
 from told_common import views as common_views
 from told_twofactor import views
 

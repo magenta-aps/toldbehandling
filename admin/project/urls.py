@@ -2,9 +2,8 @@
 #
 # SPDX-License-Identifier: MPL-2.0
 from django.urls import include, path
-from two_factor.urls import urlpatterns as tf_urls
-
 from told_common import views as common_views
+from two_factor.urls import urlpatterns as tf_urls
 
 urlpatterns = [
     path("admin/", include("admin.urls")),

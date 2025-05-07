@@ -4,9 +4,9 @@
 
 from django.urls import path
 from django.views.generic.base import RedirectView
+from told_common import views as common_views
 
 from admin import views
-from told_common import views as common_views
 
 urlpatterns = [
     path("", RedirectView.as_view(pattern_name="tf10_list")),

@@ -19,6 +19,7 @@ from django.utils.translation import gettext_lazy as _
 from django.views import View
 from django.views.generic import FormView, TemplateView
 from requests import HTTPError
+from told_common import views as common_views
 from told_common.data import (
     Afgiftsanmeldelse,
     Afgiftstabel,
@@ -46,7 +47,6 @@ from admin.clients.prisme import (
 )
 from admin.spreadsheet import SpreadsheetExport, VareafgiftssatsSpreadsheetUtil
 from admin.utils import send_email
-from told_common import views as common_views
 
 log = logging.getLogger(__name__)
 
