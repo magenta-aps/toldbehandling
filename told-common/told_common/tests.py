@@ -292,7 +292,7 @@ class LoginTest(TestMixin):
 
     # Mock getting user data
     @patch.object(
-        requests.sessions.Session,"get", return_value=create_response(404, "")
+        requests.sessions.Session, "get", return_value=create_response(404, "")
     )
     # Mock posting user data
     @patch.object(requests.sessions.Session, "post", side_effect=mock_post)
