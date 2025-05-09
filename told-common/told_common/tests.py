@@ -323,12 +323,12 @@ class LoginTest(TestMixin):
             json.dumps(
                 {
                     "indberetter_data": {"cpr": 1234567890, "cvr": None},
-                    "username": "test@example.com",
                     "first_name": "Tester",
                     "last_name": "Testersen",
                     "email": "test@example.com",
                     "is_superuser": False,
                     "groups": ["PrivatIndberettere"],
+                    "username": "test@example.com",
                 }
             ),
             headers={"Content-Type": "application/json"},
@@ -353,12 +353,12 @@ class LoginTest(TestMixin):
             json.dumps(
                 {
                     "indberetter_data": {"cpr": 1234567890, "cvr": 10000000},
-                    "username": "test@example.com",
                     "first_name": "Tester",
                     "last_name": "Testersen",
                     "email": "test@example.com",
                     "is_superuser": False,
                     "groups": ["ErhvervIndberettere"],
+                    "username": "test@example.com",
                 }
             ),
             headers={"Content-Type": "application/json"},

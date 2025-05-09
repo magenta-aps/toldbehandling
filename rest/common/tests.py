@@ -315,6 +315,51 @@ class CommonUserAPITests(CommonTest, TestCase):
         )
 
     def test_create_user(self):
+        for i in range(1, 3):
+            new_cvr = int(self.indberetter.cvr) + i
+            resp = self.client.post(
+                reverse("api-1.0.0:user_create"),
+                data=json_dump(
+                    {
+                        "username": self.indberetter.user.username,
+                        "password": "testpassword1337",
+                        "first_name": self.indberetter.user.first_name,
+                        "last_name": self.indberetter.user.last_name,
+                        "email": "testuser3@magenta-aps.dk",
+                        "indberetter_data": {"cvr": new_cvr},
+                    }
+                ),
+                HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+                content_type="application/json",
+            )
+
+            self.assertEqual(resp.status_code, 200)
+            resp_json = resp.json()
+            self.assertTrue(isinstance(resp_json["id"], int))
+            self.assertEqual(
+                resp_json,
+                {
+                    "id": ANY,
+                    "username": f"{self.indberetter.user.username} ({i})",
+                    "first_name": self.indberetter.user.first_name,
+                    "last_name": self.indberetter.user.last_name,
+                    "email": "testuser3@magenta-aps.dk",
+                    "is_superuser": False,
+                    "groups": [],
+                    "permissions": [],
+                    "indberetter_data": {"cvr": new_cvr},
+                    "access_token": ANY,
+                    "refresh_token": ANY,
+                },
+            )
+            self.assertTrue(
+                User.objects.filter(
+                    username=f"{self.indberetter.user.username} ({i})"
+                ).exists()
+            )
+
+    def test_create_user_same_cpr(self):
+
         resp = self.client.post(
             reverse("api-1.0.0:user_create"),
             data=json_dump(

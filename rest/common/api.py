@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: MPL-2.0
 # mypy: disable-error-code="call-arg, attr-defined"
 import base64
+import re
 from typing import Dict, List, Optional, Union
 
 from common.models import EboksBesked, IndberetterProfile
@@ -272,8 +273,27 @@ class UserAPI:
             groups = [Group.objects.get(name=g) for g in payload.groups or []]
         except Group.DoesNotExist:
             raise ValidationError("Group does not exist")  # type: ignore
+
+        username = payload.username
+        if User.objects.filter(username=username).exists():
+            matcher: re.Pattern = re.compile("^" + re.escape(username) + r" \((\d+)\)$")
+            existing_usernames = sorted(
+                filter(
+                    lambda u: matcher.match(u) is not None,
+                    User.objects.filter(username__startswith=username).values_list(
+                        "username", flat=True
+                    ),
+                )
+            )
+            index = 0
+            if len(existing_usernames) > 0:
+                match = re.search(matcher, existing_usernames[-1])
+                if match is not None:
+                    index = int(match.group(1))
+            username = f"{username} ({index+1})"
+
         user = User.objects.create(
-            username=payload.username,
+            username=username,
             first_name=payload.first_name,
             last_name=payload.last_name,
             email=payload.email,
