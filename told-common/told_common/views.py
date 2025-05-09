@@ -17,7 +17,7 @@ from django.http import FileResponse, Http404, JsonResponse
 from django.shortcuts import redirect
 from django.template import loader
 from django.template.response import TemplateResponse
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from django.views import View
 from django.views.generic import FormView, RedirectView, TemplateView
@@ -632,6 +632,57 @@ class TF10FormUpdateView(
                 initial["fuldmagtshaver"] = getattr(item.fuldmagtshaver, "cvr")
             initial["tf3"] = item.tf3
         return initial
+
+
+class TF10FormDeleteView(
+    PermissionsRequiredMixin,
+    HasRestClientMixin,
+    CustomLayoutMixin,
+    TemplateView,
+):
+    template_name = "told_common/tf10/delete.html"
+    required_permissions = (
+        "anmeldelse.view_afgiftsanmeldelse",
+        "anmeldelse.delete_afgiftsanmeldelse",
+    )
+
+    def get(self, request, *args, **kwargs):
+        if not self.item:
+            raise ObjectDoesNotExist("Afgiftsanmeldelse kunne ikke findes")
+
+        if self.item.status not in ["ny", "kladde"]:
+            return TemplateResponse(
+                request=self.request,
+                status=403,
+                headers={"Cache-Control": "no-cache"},
+                template="told_common/access_denied.html",
+                context={"invalid_status": self.item.status},
+            )
+
+        return super().get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        declaration_id = int(self.kwargs["id"])
+        resp = self.rest_client.afgiftanmeldelse.delete(declaration_id)
+        if resp["success"] is not True:
+            raise Exception(f"Afgiftsanmeldelse {declaration_id} kunne ikke slettes")
+
+        return redirect(reverse_lazy("tf10_list"))
+
+    def get_context_data(self, **kwargs):
+        return super().get_context_data(
+            **{
+                **kwargs,
+                "declaration": self.item,
+            }
+        )
+
+    @cached_property
+    def item(self):
+        return self.rest_client.afgiftanmeldelse.get(
+            self.kwargs["id"],
+            full=True,
+        )
 
 
 class ListView(FormView):
