@@ -998,6 +998,7 @@ class AdminLoginTest(LoginTest, TestCase):
 class AdminAnmeldelseListViewTest(PermissionsTest, AnmeldelseListViewTest, TestCase):
     can_view = True
     can_edit = True
+    can_delete = True
     can_select_multiple = True
     view = TF10ListView
     check_permissions = ((reverse("tf10_list"), view.required_permissions),)
@@ -1015,6 +1016,41 @@ class AdminAnmeldelseListViewTest(PermissionsTest, AnmeldelseListViewTest, TestC
 
     def view_url(self, id: int):
         return str(reverse("tf10_view", kwargs={"id": id}))
+
+    def delete_url(self, id: int):
+        return str(reverse("tf10_delete", kwargs={"id": id}))
+
+    @patch.object(requests.Session, "get")
+    def test_delete_new(self, mock_get):
+        mock_rest_resp = Response()
+        mock_rest_resp.status_code = 200
+        mock_rest_resp._content = json.dumps(
+            self.create_mock_afgiftsanmeldelse(id=1, status="ny")
+        ).encode("utf-8")
+        mock_get.side_effect = lambda p: mock_rest_resp
+
+        self.login()
+        url = reverse("tf10_delete", kwargs={"id": 2})
+        response = self.client.get(url)
+
+        mock_get.assert_called_once()
+        self.assertEquals(response.status_code, 200)
+
+    @patch.object(requests.Session, "get")
+    def test_delete_kladde(self, mock_get):
+        mock_resp = Response()
+        mock_resp.status_code = 200
+        mock_resp._content = json.dumps(
+            self.create_mock_afgiftsanmeldelse(id=1, status="kladde")
+        ).encode("utf-8")
+        mock_get.side_effect = lambda path: mock_resp
+
+        self.login()
+        url = reverse("tf10_delete", kwargs={"id": 2})
+        response = self.client.get(url)
+
+        mock_get.assert_called_once()
+        self.assertEquals(response.status_code, 200)
 
 
 class AnmeldelseHistoryListViewTest(PermissionsTest, TestCase):
