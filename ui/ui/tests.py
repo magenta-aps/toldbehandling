@@ -21,8 +21,8 @@ from told_common.data import Vareafgiftssats
 from told_common.forms import TF5Form, TF10Form, TF10VareForm
 from told_common.rest_client import RestClient
 from told_common.tests import (
-    BlanketMixin,
     AnmeldelseListViewTest,
+    BlanketMixin,
     FileViewTest,
     HasLogin,
     TemplateTagsTest,

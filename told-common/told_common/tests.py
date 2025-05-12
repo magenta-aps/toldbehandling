@@ -102,7 +102,8 @@ class BlanketMixin:
                     "kladde": False,
                 },
                 "leverandørfaktura_nummer": "5678",
-                "leverandørfaktura": "/leverand%C3%B8rfakturaer/3/leverand%C3%B8rfaktura.txt",
+                "leverandørfaktura": "/leverand%C3%B8rfakturaer/"
+                + "3/leverand%C3%B8rfaktura.txt",
                 "betales_af": "afsender",
                 "indførselstilladelse": "1234",
                 "afgift_total": "658.00",
@@ -1334,9 +1335,9 @@ class AnmeldelseListViewTest(BlanketMixin, HasLogin):
         if self.can_select_multiple:
             for item in expected["items"]:
                 id = item["id"]
-                item[
-                    "select"
-                ] = f'<input type="checkbox" id="select_{id}" name="id" value="{id}"/>'
+                item["select"] = (
+                    f'<input type="checkbox" id="select_{id}" name="id" value="{id}"/>'
+                )
 
         self.assertEquals(
             modify_values(data, (str,), lambda s: collapse_newlines(s)), expected
