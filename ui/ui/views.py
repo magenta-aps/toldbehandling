@@ -119,7 +119,7 @@ class TF10DeleteView(
     common_views.TF10FormDeleteView,
     UiViewMixin,
 ):
-    pass
+    allowed_statuses_delete = ["ny", "kladde"]
 
 
 class TF10View(

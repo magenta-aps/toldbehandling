@@ -22,6 +22,7 @@ from anmeldelse.models import (
 )
 from common.api import UserOut, get_auth_methods
 from common.models import IndberetterProfile
+from django.contrib.auth.models import Group
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.db.models import Q, QuerySet, Sum
@@ -222,8 +223,6 @@ class AfgiftsanmeldelsePermission(RestPermission):
     permissions=[permissions.IsAuthenticated & AfgiftsanmeldelsePermission],
 )
 class AfgiftsanmeldelseAPI:
-    allowed_statuses_delete = ["ny", "kladde"]
-
     @route.post("", auth=get_auth_methods(), url_name="afgiftsanmeldelse_create")
     def create(
         self,
@@ -427,7 +426,8 @@ class AfgiftsanmeldelseAPI:
         url_name="afgiftsanmeldelse_delete",
     )
     def delete(self, id: int):
-        """Delete afgiftsanmeldelse. Only allowed if status is 'ny' or 'kladde'.
+        """Delete afgiftsanmeldelse.
+        Only allowed if status is 'ny' or 'kladde', unless user is an admin.
 
         NOTE: Normally DELETE returns 204, but since our existing code returns 200
         + a dict with a success key, we do the same here.
@@ -435,7 +435,7 @@ class AfgiftsanmeldelseAPI:
         item = get_object_or_404(Afgiftsanmeldelse, id=id)
         self.check_user(item)
 
-        if item.status not in self.allowed_statuses_delete:
+        if item.status not in self.get_allowed_statuses_delete():
             raise PermissionDenied(
                 "You are not allowed to delete 'afgiftsanmeldelser' "
                 f"with status: {item.status}"
@@ -446,6 +446,16 @@ class AfgiftsanmeldelseAPI:
 
     def check_perm(self, permission):
         return self.context.request.user.has_perm(permission)
+
+    def get_allowed_statuses_delete(self) -> List[str]:
+        user = self.context.request.user
+        if (
+            Group.objects.get(name="Toldmedarbejdere") in user.groups.all()
+            or user.is_staff
+        ):
+            return ["ny", "kladde", "afvist", "godkendt"]
+        else:
+            return ["ny", "kladde"]
 
     def filter_user(self, qs: QuerySet) -> QuerySet:
         user = self.context.request.user

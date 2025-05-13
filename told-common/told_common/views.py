@@ -646,12 +646,13 @@ class TF10FormDeleteView(
         "anmeldelse.view_afgiftsanmeldelse",
         "anmeldelse.delete_afgiftsanmeldelse",
     )
+    allowed_statuses_delete = ["ny", "kladde"]
 
     def get(self, request, *args, **kwargs):
         if not self.item:
             raise ObjectDoesNotExist("Afgiftsanmeldelse kunne ikke findes")
 
-        if self.item.status not in ["ny", "kladde"]:
+        if self.item.status not in self.allowed_statuses_delete:
             return TemplateResponse(
                 request=self.request,
                 status=403,

@@ -233,6 +233,7 @@ class Command(BaseCommand):
             ("change", varelinje_model),
             ("change", postforsendelse_model),
             ("change", fragtforsendelse_model),
+            ("delete", afgiftsanmeldelse_model),
             ("delete", varelinje_model),
             ("delete", postforsendelse_model),
             ("delete", fragtforsendelse_model),
