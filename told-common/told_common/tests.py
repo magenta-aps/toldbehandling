@@ -75,6 +75,13 @@ class LoginTest(TestMixin):
     def restricted_url(self):
         raise NotImplementedError("Implement in subclasses")
 
+    class MockJwtTokenInfo:
+        access_token = None
+        access_token_timestamp = time.time()
+
+        def __bool__(self):
+            return False
+
     @staticmethod
     def create_response(status_code, content):
         response = Response()
@@ -272,6 +279,91 @@ class LoginTest(TestMixin):
         response = self.client.get(self.restricted_url)
         self.assertEquals(response.status_code, 302)
 
+    @staticmethod
+    def mock_post(url, data, **kwargs):
+        return LoginTest.create_response(
+            200,
+            {
+                **json.loads(data),
+                "access_token": "123456",
+                "refresh_token": "abcdef",
+            },
+        )
+
+    # Mock getting user data
+    @patch.object(
+        requests.sessions.Session, "get", return_value=create_response(404, "")
+    )
+    # Mock posting user data
+    @patch.object(requests.sessions.Session, "post", side_effect=mock_post)
+    # Mock logging in as system user
+    @patch.object(
+        RestClient,
+        "login",
+        return_value=JwtTokenInfo(access_token="123456", refresh_token="abcdef"),
+    )
+    def test_login_same_cpr_multiple_cvrs_not_exist(
+        self, mock_post_login, mock_post, mock_get
+    ):
+        client = RestClient(self.MockJwtTokenInfo())
+
+        client.login_saml_user(
+            {
+                "firstname": "Tester",
+                "lastname": "Testersen",
+                "cvr": None,
+                "cpr": 1234567890,
+                "email": "test@example.com",
+            }
+        )
+        mock_get.assert_any_call(f"{settings.REST_DOMAIN}/api/user/1234567890/-")
+        mock_get.assert_any_call(f"{settings.REST_DOMAIN}/api/user/1234567890/-/apikey")
+        mock_post.assert_called_with(
+            f"{settings.REST_DOMAIN}/api/user",
+            json.dumps(
+                {
+                    "indberetter_data": {"cpr": 1234567890, "cvr": None},
+                    "first_name": "Tester",
+                    "last_name": "Testersen",
+                    "email": "test@example.com",
+                    "is_superuser": False,
+                    "groups": ["PrivatIndberettere"],
+                    "username": "test@example.com",
+                }
+            ),
+            headers={"Content-Type": "application/json"},
+        )
+        #
+        # # Another login, now with a CVR
+        client.login_saml_user(
+            {
+                "firstname": "Tester",
+                "lastname": "Testersen",
+                "cvr": 10000000,
+                "cpr": 1234567890,
+                "email": "test@example.com",
+            }
+        )
+        mock_get.assert_any_call(f"{settings.REST_DOMAIN}/api/user/1234567890/10000000")
+        mock_get.assert_any_call(
+            f"{settings.REST_DOMAIN}/api/user/1234567890/10000000/apikey"
+        )
+        mock_post.assert_called_with(
+            f"{settings.REST_DOMAIN}/api/user",
+            json.dumps(
+                {
+                    "indberetter_data": {"cpr": 1234567890, "cvr": 10000000},
+                    "first_name": "Tester",
+                    "last_name": "Testersen",
+                    "email": "test@example.com",
+                    "is_superuser": False,
+                    "groups": ["ErhvervIndberettere"],
+                    "username": "test@example.com",
+                }
+            ),
+            headers={"Content-Type": "application/json"},
+        )
+
 
 class TestRestClient(SimpleTestCase):
     first_name = "Navn"
@@ -347,7 +439,7 @@ class TestRestClient(SimpleTestCase):
                         }
                     ],
                 }
-        elif path.startswith("user/cpr/"):
+        elif path.startswith("user/"):
             if path.endswith("apikey"):
                 # GET to fetch API key by CPR
                 return {"api_key": "mocked"}
@@ -384,6 +476,60 @@ class TestRestClient(SimpleTestCase):
         if iteration > 0:
             result = f"{result} ({iteration})"
         return result
+
+
+class TestUserMultipleCvrs(SimpleTestCase):
+    first_name = "Navn"
+    last_name = "Navnesen"
+    cpr = 1234567890
+
+    def _response_for_post(self, path: str, *args, **kwargs):
+        if path == "user":
+            # POST to create user
+            return self._user_response()
+        else:
+            raise NotImplementedError(f"cannot mock POST to unknown path '{path}'")
+
+    def _response_for_get(self, path: str, *args, **kwargs):
+        query = args[0] if args else None
+        if (path == "user") and ("username_startswith" in query):
+            # GET to fetch all users whose usernames start with parameter
+            return {
+                "count": 1,
+                "items": [
+                    {
+                        "id": 1,
+                        "username": "",
+                        "first_name": "",
+                        "last_name": "",
+                        "email": "",
+                        "is_superuser": False,
+                        "groups": [],
+                        "permissions": [],
+                    }
+                ],
+            }
+        elif path.startswith("user/"):
+            if path.endswith("apikey"):
+                # GET to fetch API key by CPR
+                return {"api_key": "mocked"}
+            else:
+                # GET to look up user by CPR
+                return self._user_response()
+        else:
+            raise NotImplementedError(f"cannot mock GET to unknown path '{path}'")
+
+    def _user_response(self) -> dict:
+        return {
+            "username": f"{self.first_name} {self.last_name}",
+            "first_name": self.first_name,
+            "last_name": self.last_name,
+            "email": "",
+            "is_superuser": False,
+            "indberetter_data": {"cpr": self.cpr, "cvr": None},
+            "access_token": None,
+            "refresh_token": None,
+        }
 
 
 class HasLogin:

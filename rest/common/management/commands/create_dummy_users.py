@@ -155,7 +155,7 @@ class Command(BaseCommand):
                 "is_staff": False,
                 "is_superuser": False,
             },
-            username="indberetter2",
+            username="mickey@andeby.dk",
         )
         indberetter2.groups.add(erhvervindberettere_group)
         indberetter.groups.add(privatindberettere_group)

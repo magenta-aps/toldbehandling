@@ -38,7 +38,10 @@ class CommonTest:
         )
 
         cls.indberetter = IndberetterProfile.objects.create(
-            user=cls.user, cvr="13371337", api_key=IndberetterProfile.create_api_key()
+            user=cls.user,
+            cpr="1212121212",
+            cvr="13371337",
+            api_key=IndberetterProfile.create_api_key(),
         )
 
         # User-2 (CPR)
@@ -59,6 +62,7 @@ class CommonTest:
         cls.indberetter2 = IndberetterProfile.objects.create(
             user=cls.user2,
             cpr="1234567890",
+            cvr=None,
             api_key=IndberetterProfile.create_api_key(),
         )
 
@@ -189,6 +193,8 @@ class CommonAPITests(CommonTest, TestCase):
 
 
 class CommonUserAPITests(CommonTest, TestCase):
+    maxDiff = None
+
     def test_get_user(self):
         resp = self.client.get(
             reverse("api-1.0.0:user_view"),
@@ -213,9 +219,41 @@ class CommonUserAPITests(CommonTest, TestCase):
             },
         )
 
+    def test_get_user_cpr_cvr(self):
+        resp = self.client.get(
+            reverse(
+                "api-1.0.0:user_get",
+                args=[self.indberetter.cpr, self.indberetter.cvr],
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(
+            resp.json(),
+            {
+                "id": self.user.id,
+                "username": "payment-test-user",
+                "first_name": "",
+                "last_name": "",
+                "email": "",
+                "is_superuser": False,
+                "groups": [],
+                "permissions": [
+                    "anmeldelse.view_afgiftsanmeldelse",
+                ],
+                "indberetter_data": {"cvr": int(self.indberetter.cvr)},
+                "access_token": ANY,
+                "refresh_token": ANY,
+            },
+        )
+
     def test_get_user_cpr(self):
         resp = self.client.get(
-            reverse("api-1.0.0:user_get", args=[self.indberetter2.cpr]),
+            reverse(
+                "api-1.0.0:user_get",
+                args=[self.indberetter2.cpr, self.indberetter2.cvr or "-"],
+            ),
             HTTP_AUTHORIZATION=f"Bearer {self.user2_token}",
             content_type="application/json",
         )
@@ -241,13 +279,35 @@ class CommonUserAPITests(CommonTest, TestCase):
             },
         )
 
-    def test_get_user_cpr_apikey(self):
+    def test_get_user_incorrect_cvr(self):
         resp = self.client.get(
-            reverse("api-1.0.0:user_get_apikey", args=[self.indberetter2.cpr]),
+            reverse("api-1.0.0:user_get", args=[self.indberetter2.cpr, "foobar"]),
             HTTP_AUTHORIZATION=f"Bearer {self.user2_token}",
             content_type="application/json",
         )
+        self.assertEqual(resp.status_code, 400)
 
+    def test_get_user_apikey(self):
+        resp = self.client.get(
+            reverse(
+                "api-1.0.0:user_get_apikey",
+                args=[self.indberetter2.cpr, self.indberetter2.cvr or "-"],
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.user2_token}",
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(
+            resp.json(),
+            {"api_key": str(self.user2.indberetter_data.api_key)},
+        )
+
+    def test_get_user_cpr_apikey(self):
+        resp = self.client.get(
+            reverse("api-1.0.0:user_get_cpr_apikey", args=[self.indberetter2.cpr]),
+            HTTP_AUTHORIZATION=f"Bearer {self.user2_token}",
+            content_type="application/json",
+        )
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(
             resp.json(),
@@ -255,6 +315,51 @@ class CommonUserAPITests(CommonTest, TestCase):
         )
 
     def test_create_user(self):
+        for i in range(1, 3):
+            new_cvr = int(self.indberetter.cvr) + i
+            resp = self.client.post(
+                reverse("api-1.0.0:user_create"),
+                data=json_dump(
+                    {
+                        "username": self.indberetter.user.username,
+                        "password": "testpassword1337",
+                        "first_name": self.indberetter.user.first_name,
+                        "last_name": self.indberetter.user.last_name,
+                        "email": "testuser3@magenta-aps.dk",
+                        "indberetter_data": {"cvr": new_cvr},
+                    }
+                ),
+                HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+                content_type="application/json",
+            )
+
+            self.assertEqual(resp.status_code, 200)
+            resp_json = resp.json()
+            self.assertTrue(isinstance(resp_json["id"], int))
+            self.assertEqual(
+                resp_json,
+                {
+                    "id": ANY,
+                    "username": f"{self.indberetter.user.username} ({i})",
+                    "first_name": self.indberetter.user.first_name,
+                    "last_name": self.indberetter.user.last_name,
+                    "email": "testuser3@magenta-aps.dk",
+                    "is_superuser": False,
+                    "groups": [],
+                    "permissions": [],
+                    "indberetter_data": {"cvr": new_cvr},
+                    "access_token": ANY,
+                    "refresh_token": ANY,
+                },
+            )
+            self.assertTrue(
+                User.objects.filter(
+                    username=f"{self.indberetter.user.username} ({i})"
+                ).exists()
+            )
+
+    def test_create_user_same_cpr(self):
+
         resp = self.client.post(
             reverse("api-1.0.0:user_create"),
             data=json_dump(
@@ -371,7 +476,7 @@ class CommonUserAPITests(CommonTest, TestCase):
 
     def test_update(self):
         resp = self.client.patch(
-            reverse("api-1.0.0:user_update", args=[self.indberetter2.cpr]),
+            reverse("api-1.0.0:user_cpr_update", args=[self.indberetter2.cpr]),
             data=json_dump(
                 {
                     # NOTE: required by the payload, but not used in the handler
@@ -409,7 +514,10 @@ class CommonUserAPITests(CommonTest, TestCase):
 
     def test_update_exceptions(self):
         resp = self.client.patch(
-            reverse("api-1.0.0:user_update", args=[self.indberetter2.cpr]),
+            reverse(
+                "api-1.0.0:user_update",
+                args=[self.indberetter2.cpr, self.indberetter2.cvr or "-"],
+            ),
             data=json_dump(
                 {
                     # NOTE: required by the payload, but not used in the handler
@@ -825,7 +933,7 @@ class UserAPITest(TestCase):
         )
 
         resp = self.client.get(
-            reverse(f"api-1.0.0:user_get", kwargs={"cpr": "1234567890"}),
+            reverse(f"api-1.0.0:user_cpr_get", kwargs={"cpr": "1234567890"}),
             HTTP_AUTHORIZATION=f"Bearer {user2_token}",
             content_type="application/json",
         )
@@ -869,10 +977,10 @@ class UserAPITest(TestCase):
         self.mock_user.indberetter_data = None
 
         with self.assertRaises(PermissionDenied):
-            self.api.update(cpr="123456", payload=MagicMock())
+            self.api.update(cpr="123456", cvr="-", payload=MagicMock())
 
         mock_get_object_or_404.assert_called_once_with(
-            User, indberetter_data__cpr=123456
+            User, indberetter_data__cpr=123456, indberetter_data__cvr__isnull=True
         )
         self.mock_user.has_perm.assert_called_once_with("auth.change_user")
 
