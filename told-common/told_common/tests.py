@@ -1219,7 +1219,7 @@ class AnmeldelseListViewTest(BlanketMixin, HasLogin):
                 )
 
         def _delete_button(id: int):
-            if self.can_delete or self.is_admin:
+            if self.can_delete:
                 return (
                     f'<a class="btn btn-danger btn-sm" '
                     f'href="{self.delete_url(id)}?back=list">Slet</a>'
@@ -1264,7 +1264,7 @@ class AnmeldelseListViewTest(BlanketMixin, HasLogin):
                             None,
                             [
                                 _view_button(1),
-                                _delete_button(1),
+                                _delete_button(1) if self.is_admin else None,
                             ],
                         )
                     ),
@@ -1304,7 +1304,7 @@ class AnmeldelseListViewTest(BlanketMixin, HasLogin):
                             [
                                 _view_button(2),
                                 _edit_button(2),
-                                _delete_button(2),
+                                _delete_button(2) if self.is_admin else None,
                             ],
                         )
                     ),

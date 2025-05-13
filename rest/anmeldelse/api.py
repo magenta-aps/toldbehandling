@@ -447,10 +447,16 @@ class AfgiftsanmeldelseAPI:
     def check_perm(self, permission):
         return self.context.request.user.has_perm(permission)
 
+    def get_or_none(self, classmodel, **kwargs):
+        try:
+            return classmodel.objects.get(**kwargs)
+        except classmodel.DoesNotExist:
+            return None
+
     def get_allowed_statuses_delete(self) -> List[str]:
         user = self.context.request.user
         if (
-            Group.objects.get(name="Toldmedarbejdere") in user.groups.all()
+            self.get_or_none(Group, name="Toldmedarbejdere") in user.groups.all()
             or user.is_staff
         ):
             return ["ny", "kladde", "afvist", "godkendt"]
