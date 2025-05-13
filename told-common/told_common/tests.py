@@ -783,6 +783,7 @@ class AnmeldelseListViewTest(BlanketMixin, HasLogin):
     can_view = False
     can_edit = False
     can_delete = False
+    is_admin = False
 
     def list_url(self):
         raise NotImplementedError("Implement in subclasses")
@@ -1146,7 +1147,15 @@ class AnmeldelseListViewTest(BlanketMixin, HasLogin):
                 "Modtager": "Testfirma 3",
                 "Forbindelsesnummer": "-",
                 "Status": "Godkendt",
-                "Handlinger": "Vis" if self.can_view else "",
+                "Handlinger": "\n".join(
+                    filter(
+                        None,
+                        [
+                            "Vis" if self.can_view else None,
+                            "Slet" if self.can_delete and self.is_admin else None,
+                        ],
+                    )
+                ),
             },
             {
                 "Nummer": "2",
@@ -1161,6 +1170,7 @@ class AnmeldelseListViewTest(BlanketMixin, HasLogin):
                         [
                             "Vis" if self.can_view else None,
                             "Redigér" if self.can_edit else None,
+                            "Slet" if self.can_delete and self.is_admin else None,
                         ],
                     )
                 ),
@@ -1178,7 +1188,7 @@ class AnmeldelseListViewTest(BlanketMixin, HasLogin):
                         [
                             "Vis" if self.can_view else None,
                             "Redigér" if self.can_edit else None,
-                            "Slet" if self.can_delete else None,
+                            "Slet" if self.can_delete or self.is_admin else None,
                         ],
                     )
                 ),
@@ -1209,7 +1219,7 @@ class AnmeldelseListViewTest(BlanketMixin, HasLogin):
                 )
 
         def _delete_button(id: int):
-            if self.can_delete:
+            if self.can_delete or self.is_admin:
                 return (
                     f'<a class="btn btn-danger btn-sm" '
                     f'href="{self.delete_url(id)}?back=list">Slet</a>'
@@ -1249,7 +1259,15 @@ class AnmeldelseListViewTest(BlanketMixin, HasLogin):
                     },
                     "forbindelsesnummer": None,
                     "status": "Godkendt",
-                    "actions": _view_button(1) or "",
+                    "actions": "\n".join(
+                        filter(
+                            None,
+                            [
+                                _view_button(1),
+                                _delete_button(1),
+                            ],
+                        )
+                    ),
                 },
                 {
                     "select": "",
@@ -1286,6 +1304,7 @@ class AnmeldelseListViewTest(BlanketMixin, HasLogin):
                             [
                                 _view_button(2),
                                 _edit_button(2),
+                                _delete_button(2),
                             ],
                         )
                     ),

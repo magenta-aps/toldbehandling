@@ -1000,6 +1000,7 @@ class AdminAnmeldelseListViewTest(PermissionsTest, AnmeldelseListViewTest, TestC
     can_edit = True
     can_delete = True
     can_select_multiple = True
+    is_admin = True
     view = TF10ListView
     check_permissions = ((reverse("tf10_list"), view.required_permissions),)
 
