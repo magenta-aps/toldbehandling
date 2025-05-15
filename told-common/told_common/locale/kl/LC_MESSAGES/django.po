@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-11-28 08:06-0200\n"
+"POT-Creation-Date: 2025-05-13 05:57-0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -182,19 +182,23 @@ msgstr "Pisiffigisamit faktura"
 msgid "Fragtbrev"
 msgstr "Nassiussat allagartaat"
 
-#: told_common/forms.py told_common/templates/told_common/tf10/view.html
+#: told_common/forms.py told_common/templates/told_common/tf10/delete.html
+#: told_common/templates/told_common/tf10/view.html
 msgid "Skibsfragt"
 msgstr "Umiarsuakkut nassiussat"
 
-#: told_common/forms.py told_common/templates/told_common/tf10/view.html
+#: told_common/forms.py told_common/templates/told_common/tf10/delete.html
+#: told_common/templates/told_common/tf10/view.html
 msgid "Luftfragt"
 msgstr "Timmisartukkut nassiussat"
 
-#: told_common/forms.py told_common/templates/told_common/tf10/view.html
+#: told_common/forms.py told_common/templates/told_common/tf10/delete.html
+#: told_common/templates/told_common/tf10/view.html
 msgid "Skibspost"
 msgstr "Allakkat umiarsuakkoortitat"
 
-#: told_common/forms.py told_common/templates/told_common/tf10/view.html
+#: told_common/forms.py told_common/templates/told_common/tf10/delete.html
+#: told_common/templates/told_common/tf10/view.html
 msgid "Luftpost"
 msgstr "Allakkat timmisartukkoortitat"
 
@@ -220,14 +224,16 @@ msgstr "Akiliisussaq"
 msgid "-- Vælg betaler"
 msgstr "-- Akiliisussaq toqqaruk"
 
-#: told_common/forms.py told_common/templates/told_common/tf10/form.html
+#: told_common/forms.py told_common/templates/told_common/tf10/delete.html
+#: told_common/templates/told_common/tf10/form.html
 #: told_common/templates/told_common/tf10/list.html
 #: told_common/templates/told_common/tf10/view.html
 #: told_common/templates/told_common/tf5/list.html
 msgid "Afsender"
 msgstr "Nassiussisoq"
 
-#: told_common/forms.py told_common/templates/told_common/tf10/form.html
+#: told_common/forms.py told_common/templates/told_common/tf10/delete.html
+#: told_common/templates/told_common/tf10/form.html
 #: told_common/templates/told_common/tf10/list.html
 #: told_common/templates/told_common/tf10/view.html
 #: told_common/templates/told_common/tf5/list.html
@@ -403,9 +409,45 @@ msgstr "Nalunaaquttap akunnera"
 msgid "Ingen notater"
 msgstr "Allattugassaqanngilaq"
 
+#: told_common/templates/told_common/tf10/delete.html
+msgid "Slet afgiftsanmeldelse"
+msgstr ""
+
+#: told_common/templates/told_common/tf10/delete.html
+msgid "Denne afgiftsanmeldelse vil blive slettet"
+msgstr ""
+
+#: told_common/templates/told_common/tf10/delete.html
 #: told_common/templates/told_common/tf10/form.html
 msgid "Afgiftsanmeldelse"
 msgstr "Akitsuusigasssanik nalunaaruteqarneq"
+
+#: told_common/templates/told_common/tf10/delete.html
+#: told_common/templates/told_common/tf10/view.html
+msgid "Forsendelsesmåde"
+msgstr "Qanoq nassiussineq"
+
+#: told_common/templates/told_common/tf10/delete.html
+#: told_common/templates/told_common/tf10/form.html
+#: told_common/templates/told_common/tf10/view.html
+#: told_common/templates/told_common/tf5/form.html
+#: told_common/templates/told_common/tf5/view.html
+msgid "Afgift i alt"
+msgstr "Akitsuutit katillugit"
+
+#: told_common/templates/told_common/tf10/delete.html
+msgid "Er du sikker på at du vil slette denne?"
+msgstr ""
+
+#: told_common/templates/told_common/tf10/delete.html
+#: told_common/templates/told_common/tf10/form.html
+msgid "Slet"
+msgstr "Piiaruk"
+
+#: told_common/templates/told_common/tf10/delete.html
+#: told_common/templates/told_common/tf5/view.html
+msgid "Annullér"
+msgstr "Atorunnaarsiguk"
 
 #: told_common/templates/told_common/tf10/form.html
 #: told_common/templates/told_common/tf10/view.html
@@ -555,17 +597,6 @@ msgstr "Akitsuutip annertussusia"
 #: told_common/templates/told_common/tf5/view.html
 msgid "Afgiftsbeløb"
 msgstr "Akitsuutit"
-
-#: told_common/templates/told_common/tf10/form.html
-msgid "Slet"
-msgstr "Piiaruk"
-
-#: told_common/templates/told_common/tf10/form.html
-#: told_common/templates/told_common/tf10/view.html
-#: told_common/templates/told_common/tf5/form.html
-#: told_common/templates/told_common/tf5/view.html
-msgid "Afgift i alt"
-msgstr "Akitsuutit katillugit"
 
 #: told_common/templates/told_common/tf10/form.html
 #: told_common/templates/told_common/tf10/view.html
@@ -751,10 +782,6 @@ msgstr "Sumiiffiup kodea"
 #: told_common/templates/told_common/tf10/view.html
 msgid "Leverandørfaktura"
 msgstr "Pisiffigisamit faktura"
-
-#: told_common/templates/told_common/tf10/view.html
-msgid "Forsendelsesmåde"
-msgstr "Qanoq nassiussineq"
 
 #: told_common/templates/told_common/tf10/view.html
 msgid "Forbindelsesnr."
@@ -1010,10 +1037,6 @@ msgstr "Postnr/Illoqarfik"
 #: told_common/templates/told_common/tf5/view.html
 msgid "Fakturanummer"
 msgstr "Fakturap normua"
-
-#: told_common/templates/told_common/tf5/view.html
-msgid "Annullér"
-msgstr "Atorunnaarsiguk"
 
 #: told_common/templates/told_common/tf5/view.html
 msgid "Opret tilladelse"

@@ -13,7 +13,6 @@ from django.contrib import messages
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied
 from django.http import FileResponse, Http404, JsonResponse
 from django.shortcuts import redirect
-from django.template.response import TemplateResponse
 from django.urls import reverse, reverse_lazy
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import FormView, RedirectView, TemplateView, View
@@ -117,55 +116,10 @@ class TF10LeverandørFakturaView(UiViewMixin, common_views.LeverandørFakturaVie
 
 
 class TF10DeleteView(
-    PermissionsRequiredMixin,
-    HasRestClientMixin,
-    common_views.CustomLayoutMixin,
+    common_views.TF10FormDeleteView,
     UiViewMixin,
-    TemplateView,
 ):
-    template_name = "ui/tf10/delete.html"
-    required_permissions = (
-        "anmeldelse.view_afgiftsanmeldelse",
-        "anmeldelse.delete_afgiftsanmeldelse",
-    )
-
-    def get(self, request, *args, **kwargs):
-        if not self.item:
-            raise ObjectDoesNotExist("Afgiftsanmeldelse kunne ikke findes")
-
-        if self.item.status not in ["ny", "kladde"]:
-            return TemplateResponse(
-                request=self.request,
-                status=403,
-                headers={"Cache-Control": "no-cache"},
-                template="told_common/access_denied.html",
-                context={"invalid_status": self.item.status},
-            )
-
-        return super().get(request, *args, **kwargs)
-
-    def post(self, request, *args, **kwargs):
-        declaration_id = int(self.kwargs["id"])
-        resp = self.rest_client.afgiftanmeldelse.delete(declaration_id)
-        if resp["success"] is not True:
-            raise Exception(f"Afgiftsanmeldelse {declaration_id} kunne ikke slettes")
-
-        return redirect(reverse_lazy("tf10_list"))
-
-    def get_context_data(self, **kwargs):
-        return super().get_context_data(
-            **{
-                **kwargs,
-                "declaration": self.item,
-            }
-        )
-
-    @cached_property
-    def item(self):
-        return self.rest_client.afgiftanmeldelse.get(
-            self.kwargs["id"],
-            full=True,
-        )
+    allowed_statuses_delete = ["ny", "kladde"]
 
 
 class TF10View(

@@ -413,6 +413,12 @@ class TF10FormUpdateView(AdminLayoutBaseView, common_views.TF10FormUpdateView):
         return initial
 
 
+class TF10DeleteView(
+    common_views.TF10FormDeleteView,
+    AdminLayoutBaseView):
+    allowed_statuses_delete = ["ny", "kladde", "afvist", "godkendt"]
+
+
 class TF10HistoryListView(AdminLayoutBaseView, common_views.ListView):
     required_permissions = (
         "aktør.view_afsender",

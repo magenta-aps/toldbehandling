@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-11-27 07:47-0200\n"
+"POT-Creation-Date: 2025-05-13 05:57-0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -135,61 +135,8 @@ msgstr "Takutiguk"
 msgid "Redigér"
 msgstr "Iluarsiuk"
 
-#: ui/templates/ui/tf10/actions.html ui/templates/ui/tf10/delete.html
+#: ui/templates/ui/tf10/actions.html
 msgid "Slet"
-msgstr ""
-
-#: ui/templates/ui/tf10/delete.html
-msgid "Slet afgiftsanmeldelse"
-msgstr ""
-
-#: ui/templates/ui/tf10/delete.html
-msgid "Denne afgiftsanmeldelse vil blive slettet"
-msgstr ""
-
-#: ui/templates/ui/tf10/delete.html
-msgid "Afgiftsanmeldelse"
-msgstr "Akitsuusigasssanik nalunaaruteqarneq"
-
-#: ui/templates/ui/tf10/delete.html ui/templates/ui/tf5/payment/checkout.html
-#: ui/templates/ui/tf5/payment/details.html
-msgid "Afsender"
-msgstr "Nassiussisoq"
-
-#: ui/templates/ui/tf10/delete.html ui/templates/ui/tf5/payment/details.html
-msgid "Modtager"
-msgstr "Tigusisussaq"
-
-#: ui/templates/ui/tf10/delete.html
-msgid "Forsendelsesmåde"
-msgstr "Qanoq nassiussineq"
-
-#: ui/templates/ui/tf10/delete.html
-msgid "Skibsfragt"
-msgstr "Umiarsuakkut nassiussat"
-
-#: ui/templates/ui/tf10/delete.html
-msgid "Luftfragt"
-msgstr "Timmisartukkut nassiussat"
-
-#: ui/templates/ui/tf10/delete.html
-msgid "Skibspost"
-msgstr "Allakkat umiarsuakkoortitat"
-
-#: ui/templates/ui/tf10/delete.html
-msgid "Luftpost"
-msgstr "Allakkat timmisartukkoortitat"
-
-#: ui/templates/ui/tf10/delete.html
-msgid "Afgift i alt"
-msgstr "Akitsuutit katillugit"
-
-#: ui/templates/ui/tf10/delete.html
-msgid "Er du sikker på at du vil slette denne?"
-msgstr ""
-
-#: ui/templates/ui/tf10/delete.html
-msgid "Annullér"
 msgstr ""
 
 #: ui/templates/ui/tf5/actions.html ui/templates/ui/tf5/payment/checkout.html
@@ -236,6 +183,11 @@ msgstr "Katillugit"
 msgid "Detaljer"
 msgstr "Paasissutissat"
 
+#: ui/templates/ui/tf5/payment/checkout.html
+#: ui/templates/ui/tf5/payment/details.html
+msgid "Afsender"
+msgstr "Nassiussisoq"
+
 #: ui/templates/ui/tf5/payment/details.html
 msgid "Betalingsdetaljer"
 msgstr "Akiliinissap paasissutissartai"
@@ -259,6 +211,10 @@ msgstr "Akilerneqareerput"
 #: ui/templates/ui/tf5/payment/details.html
 msgid "Ikke betalt"
 msgstr "Akilerneqanngillat"
+
+#: ui/templates/ui/tf5/payment/details.html
+msgid "Modtager"
+msgstr "Tigusisussaq"
 
 #: ui/templates/ui/tf5/tilladelse.html
 msgid "Engangstilladelse til privatindførsel af øl, vin og spiritus"
