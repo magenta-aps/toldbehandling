@@ -63,6 +63,108 @@ class TestMixin:
         cache.clear()
 
 
+class BlanketMixin:
+    def create_mock_afgiftsanmeldelse(
+        self,
+        **kwargs,
+    ):
+        return {
+            **{
+                "id": 1,
+                "afsender": {
+                    "id": 1,
+                    "navn": "Testfirma 1",
+                    "adresse": "Testvej 42",
+                    "postnummer": 1234,
+                    "by": "TestBy",
+                    "postbox": "123",
+                    "telefon": "123456",
+                    "cvr": 12345678,
+                },
+                "modtager": {
+                    "id": 1,
+                    "navn": "Testfirma 1",
+                    "adresse": "Testvej 42",
+                    "postnummer": 1234,
+                    "by": "TestBy",
+                    "postbox": "123",
+                    "telefon": "123456",
+                    "cvr": 12345678,
+                    "kreditordning": True,
+                },
+                "fragtforsendelse": None,
+                "postforsendelse": {
+                    "id": 11,
+                    "forsendelsestype": "F",
+                    "postforsendelsesnummer": "10000001",
+                    "afsenderbykode": "164",
+                    "afgangsdato": "2024-03-13",
+                    "kladde": False,
+                },
+                "leverandørfaktura_nummer": "5678",
+                "leverandørfaktura": "/leverand%C3%B8rfakturaer/"
+                + "3/leverand%C3%B8rfaktura.txt",
+                "betales_af": "afsender",
+                "indførselstilladelse": "1234",
+                "afgift_total": "658.00",
+                "betalt": True,
+                "dato": "2024-01-01T02:00:00+00:00",
+                "status": "ny",
+                "oprettet_af": {
+                    "id": 5,
+                    "username": "indberetter",
+                    "first_name": "Anders",
+                    "last_name": "And",
+                    "email": "anders@andeby.dk",
+                    "is_superuser": False,
+                    "groups": ["PrivatIndberettere", "ErhvervIndberettere"],
+                    "permissions": [
+                        "aktør.add_afsender",
+                        "aktør.add_modtager",
+                        "aktør.change_afsender",
+                        "aktør.change_modtager",
+                        "aktør.view_afsender",
+                        "aktør.view_modtager",
+                        "aktør.view_speditør",
+                        "anmeldelse.add_afgiftsanmeldelse",
+                        "anmeldelse.add_notat",
+                        "anmeldelse.add_privatafgiftsanmeldelse",
+                        "anmeldelse.add_varelinje",
+                        "anmeldelse.change_afgiftsanmeldelse",
+                        "anmeldelse.change_privatafgiftsanmeldelse",
+                        "anmeldelse.change_varelinje",
+                        "anmeldelse.view_afgiftsanmeldelse",
+                        "anmeldelse.view_notat",
+                        "anmeldelse.view_privatafgiftsanmeldelse",
+                        "anmeldelse.view_varelinje",
+                        "forsendelse.add_fragtforsendelse",
+                        "forsendelse.add_postforsendelse",
+                        "forsendelse.change_fragtforsendelse",
+                        "forsendelse.change_postforsendelse",
+                        "forsendelse.delete_fragtforsendelse",
+                        "forsendelse.delete_postforsendelse",
+                        "forsendelse.view_fragtforsendelse",
+                        "forsendelse.view_postforsendelse",
+                        "payment.add_item",
+                        "payment.add_payment",
+                        "payment.change_item",
+                        "payment.change_payment",
+                        "payment.view_item",
+                        "payment.view_payment",
+                        "sats.view_afgiftstabel",
+                        "sats.view_vareafgiftssats",
+                    ],
+                    "indberetter_data": {"cvr": 12345678},
+                },
+                "oprettet_på_vegne_af": None,
+                "toldkategori": None,
+                "fuldmagtshaver": None,
+                "beregnet_faktureringsdato": "2024-04-20",
+            },
+            **kwargs,
+        }
+
+
 class TemplateTagsTest:
     def test_file_basename(self):
         self.assertEquals(file_basename("/path/to/file.txt"), "file.txt")
@@ -676,11 +778,12 @@ class PermissionsTest(HasLogin):
                 )
 
 
-class AnmeldelseListViewTest(HasLogin):
+class AnmeldelseListViewTest(BlanketMixin, HasLogin):
     can_select_multiple = False
     can_view = False
     can_edit = False
     can_delete = False
+    is_admin = False
 
     def list_url(self):
         raise NotImplementedError("Implement in subclasses")
@@ -1044,7 +1147,15 @@ class AnmeldelseListViewTest(HasLogin):
                 "Modtager": "Testfirma 3",
                 "Forbindelsesnummer": "-",
                 "Status": "Godkendt",
-                "Handlinger": "Vis" if self.can_view else "",
+                "Handlinger": "\n".join(
+                    filter(
+                        None,
+                        [
+                            "Vis" if self.can_view else None,
+                            "Slet" if self.can_delete and self.is_admin else None,
+                        ],
+                    )
+                ),
             },
             {
                 "Nummer": "2",
@@ -1059,6 +1170,7 @@ class AnmeldelseListViewTest(HasLogin):
                         [
                             "Vis" if self.can_view else None,
                             "Redigér" if self.can_edit else None,
+                            "Slet" if self.can_delete and self.is_admin else None,
                         ],
                     )
                 ),
@@ -1076,7 +1188,7 @@ class AnmeldelseListViewTest(HasLogin):
                         [
                             "Vis" if self.can_view else None,
                             "Redigér" if self.can_edit else None,
-                            "Slet" if self.can_delete else None,
+                            "Slet" if self.can_delete or self.is_admin else None,
                         ],
                     )
                 ),
@@ -1147,7 +1259,15 @@ class AnmeldelseListViewTest(HasLogin):
                     },
                     "forbindelsesnummer": None,
                     "status": "Godkendt",
-                    "actions": _view_button(1) or "",
+                    "actions": "\n".join(
+                        filter(
+                            None,
+                            [
+                                _view_button(1),
+                                _delete_button(1) if self.is_admin else None,
+                            ],
+                        )
+                    ),
                 },
                 {
                     "select": "",
@@ -1184,6 +1304,7 @@ class AnmeldelseListViewTest(HasLogin):
                             [
                                 _view_button(2),
                                 _edit_button(2),
+                                _delete_button(2) if self.is_admin else None,
                             ],
                         )
                     ),

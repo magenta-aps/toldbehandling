@@ -43,8 +43,9 @@ class RestMixin:
         plaintext_password,
         permissions: Union[List[Permission], None],
         email: Optional[str] = None,
+        is_staff: Optional[bool] = False,
     ) -> Tuple[User, str, str]:
-        user = User.objects.create(username=username)
+        user = User.objects.create(username=username, is_staff=is_staff)
         user.email = email if email else user.email
         user.set_password(plaintext_password)
         user.save()
@@ -126,6 +127,20 @@ class RestMixin:
             permissions,
         )
         cls.authorized_user.user_permissions.add(
+            Permission.objects.get(codename="view_all_anmeldelse")
+        )
+
+        (
+            cls.staff_user,
+            cls.staff_access_token,
+            staff_refresh_token,
+        ) = cls.make_user(
+            "staffuser1",
+            "staffpassword",
+            permissions,
+            is_staff=True,
+        )
+        cls.staff_user.user_permissions.add(
             Permission.objects.get(codename="view_all_anmeldelse")
         )
 

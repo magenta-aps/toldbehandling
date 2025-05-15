@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-11-27 07:47-0200\n"
+"POT-Creation-Date: 2025-05-13 05:57-0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -133,61 +133,8 @@ msgstr ""
 msgid "Redigér"
 msgstr ""
 
-#: ui/templates/ui/tf10/actions.html ui/templates/ui/tf10/delete.html
+#: ui/templates/ui/tf10/actions.html
 msgid "Slet"
-msgstr ""
-
-#: ui/templates/ui/tf10/delete.html
-msgid "Slet afgiftsanmeldelse"
-msgstr ""
-
-#: ui/templates/ui/tf10/delete.html
-msgid "Denne afgiftsanmeldelse vil blive slettet"
-msgstr ""
-
-#: ui/templates/ui/tf10/delete.html
-msgid "Afgiftsanmeldelse"
-msgstr ""
-
-#: ui/templates/ui/tf10/delete.html ui/templates/ui/tf5/payment/checkout.html
-#: ui/templates/ui/tf5/payment/details.html
-msgid "Afsender"
-msgstr ""
-
-#: ui/templates/ui/tf10/delete.html ui/templates/ui/tf5/payment/details.html
-msgid "Modtager"
-msgstr ""
-
-#: ui/templates/ui/tf10/delete.html
-msgid "Forsendelsesmåde"
-msgstr ""
-
-#: ui/templates/ui/tf10/delete.html
-msgid "Skibsfragt"
-msgstr ""
-
-#: ui/templates/ui/tf10/delete.html
-msgid "Luftfragt"
-msgstr ""
-
-#: ui/templates/ui/tf10/delete.html
-msgid "Skibspost"
-msgstr ""
-
-#: ui/templates/ui/tf10/delete.html
-msgid "Luftpost"
-msgstr ""
-
-#: ui/templates/ui/tf10/delete.html
-msgid "Afgift i alt"
-msgstr ""
-
-#: ui/templates/ui/tf10/delete.html
-msgid "Er du sikker på at du vil slette denne?"
-msgstr ""
-
-#: ui/templates/ui/tf10/delete.html
-msgid "Annullér"
 msgstr ""
 
 #: ui/templates/ui/tf5/actions.html ui/templates/ui/tf5/payment/checkout.html
@@ -232,6 +179,11 @@ msgstr ""
 msgid "Detaljer"
 msgstr ""
 
+#: ui/templates/ui/tf5/payment/checkout.html
+#: ui/templates/ui/tf5/payment/details.html
+msgid "Afsender"
+msgstr ""
+
 #: ui/templates/ui/tf5/payment/details.html
 msgid "Betalingsdetaljer"
 msgstr ""
@@ -254,6 +206,10 @@ msgstr ""
 
 #: ui/templates/ui/tf5/payment/details.html
 msgid "Ikke betalt"
+msgstr ""
+
+#: ui/templates/ui/tf5/payment/details.html
+msgid "Modtager"
 msgstr ""
 
 #: ui/templates/ui/tf5/tilladelse.html

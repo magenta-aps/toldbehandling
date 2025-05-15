@@ -68,6 +68,11 @@ urlpatterns = [
         views.TF10EditMultipleView.as_view(),
         name="tf10_edit_multiple",
     ),
+    path(
+        "blanket/tf10/<int:id>/delete",
+        views.TF10DeleteView.as_view(),
+        name="tf10_delete",
+    ),
     path("blanket/tf5", views.TF5ListView.as_view(), name="tf5_list"),
     path(
         "blanket/tf5/<int:id>",

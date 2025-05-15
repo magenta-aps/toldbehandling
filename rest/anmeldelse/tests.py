@@ -431,6 +431,40 @@ class AfgiftsanmeldelseTest(RestTestMixin, TestCase):
         )
         self.assertEquals(resp_delete_kladde.status_code, 200)
 
+        # Test delete of "afvist" with staff user
+        afgiftsanmeldelse_rejected = Afgiftsanmeldelse.objects.create(
+            **{
+                **self.afgiftsanmeldelse_data,
+                "status": "afvist",
+                "oprettet_af": self.staff_user,
+            }
+        )
+        resp_delete_rejected = self.client.delete(
+            reverse(
+                f"api-1.0.0:{self.delete_function}",
+                args=[afgiftsanmeldelse_rejected.id],
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.staff_access_token}",
+        )
+        self.assertEquals(resp_delete_new.status_code, 200)
+
+        # Test delete of "godkendt" with staff user
+        afgiftsanmeldelse_approved = Afgiftsanmeldelse.objects.create(
+            **{
+                **self.afgiftsanmeldelse_data,
+                "status": "godkendt",
+                "oprettet_af": self.staff_user,
+            }
+        )
+        resp_delete_approved = self.client.delete(
+            reverse(
+                f"api-1.0.0:{self.delete_function}",
+                args=[afgiftsanmeldelse_approved.id],
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.staff_access_token}",
+        )
+        self.assertEquals(resp_delete_new.status_code, 200)
+
         # Assert that all objects are deleted
         self.assertEquals(Afgiftsanmeldelse.objects.count(), 0)
 
