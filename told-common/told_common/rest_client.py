@@ -1117,6 +1117,7 @@ class RestClient:
             else:
                 raise
 
+        mapped_data["username"] = user["username"]
         if (
             mapped_data["first_name"] != user["first_name"]
             or mapped_data["last_name"] != user["last_name"]
