@@ -46,8 +46,8 @@ class ProviderHandler:
 
 class NetsProviderHandler(ProviderHandler):
     def __init__(self, secret_key: str) -> None:
-        self.host = settings.PAYMENT_PROVIDER_NETS_HOST
-        self.terms_url = settings.PAYMENT_PROVIDER_NETS_TERMS_URL
+        self.host = settings.PAYMENT_PROVIDER_NETS_HOST  # type: ignore
+        self.terms_url = settings.PAYMENT_PROVIDER_NETS_TERMS_URL  # type: ignore
         self.secret_key = secret_key
 
     def create(
@@ -158,9 +158,11 @@ class BankProviderHandler(ProviderHandler):
 def get_provider_handler(
     provider_name: str,
 ) -> NetsProviderHandler | BankProviderHandler:
-    if provider_name.lower() == settings.PAYMENT_PROVIDER_NETS:
-        return NetsProviderHandler(secret_key=settings.PAYMENT_PROVIDER_NETS_SECRET_KEY)
-    if provider_name.lower() == settings.PAYMENT_PROVIDER_BANK:
+    if provider_name.lower() == settings.PAYMENT_PROVIDER_NETS:  # type: ignore
+        return NetsProviderHandler(
+            secret_key=settings.PAYMENT_PROVIDER_NETS_SECRET_KEY  # type: ignore
+        )
+    if provider_name.lower() == settings.PAYMENT_PROVIDER_BANK:  # type: ignore
         return BankProviderHandler()
 
     raise ProviderHandlerNotFound(provider_name)

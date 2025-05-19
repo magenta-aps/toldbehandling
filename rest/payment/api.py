@@ -50,7 +50,7 @@ class PaymentAPI:
                 f"Failed to fetch declaration: {payload.declaration_id}"
             )
 
-        if payload.provider == settings.PAYMENT_PROVIDER_BANK:
+        if payload.provider == settings.PAYMENT_PROVIDER_BANK:  # type: ignore
             if not self.context.request.user.has_perm("payment.bank_payment"):
                 raise PermissionDenied
 
@@ -108,7 +108,7 @@ class PaymentAPI:
 
         provider_payment_new = provider_handler.create(
             provider_payment_payload,
-            f"{settings.HOST_DOMAIN}/payment/checkout/{declaration.id}",
+            f"{settings.HOST_DOMAIN}/payment/checkout/{declaration.id}",  # type: ignore
         )
 
         # Update local payment with external provider payment info,
@@ -139,7 +139,9 @@ class PaymentAPI:
             else Payment.objects.prefetch_related("items").filter(**payment_filter)
         )
 
-        provider_handler = get_provider_handler(settings.PAYMENT_PROVIDER_NETS)
+        provider_handler = get_provider_handler(
+            settings.PAYMENT_PROVIDER_NETS  # type: ignore
+        )
         return [
             _payment_model_to_response(
                 payment,
@@ -155,7 +157,7 @@ class PaymentAPI:
         return _payment_model_to_response(
             payment_local,
             field_converts=_payment_field_converters(
-                get_provider_handler(settings.PAYMENT_PROVIDER_NETS),
+                get_provider_handler(settings.PAYMENT_PROVIDER_NETS),  # type: ignore
             ),
         )
 
@@ -166,28 +168,33 @@ class PaymentAPI:
             id=payment_local.declaration.id
         )
 
-        provider_handler = get_provider_handler(settings.PAYMENT_PROVIDER_NETS)
+        provider_handler = get_provider_handler(
+            settings.PAYMENT_PROVIDER_NETS  # type: ignore
+        )
         provider_payment = provider_handler.read(payment_local.provider_payment_id)
+        status_created = settings.PAYMENT_PAYMENT_STATUS_CREATED  # type: ignore
+        status_reserved = settings.PAYMENT_PAYMENT_STATUS_RESERVED  # type: ignore
+        status_paid = settings.PAYMENT_PAYMENT_STATUS_PAID  # type: ignore
 
         # Update local payment status based on the summary
         if (
-            payment_local.status == settings.PAYMENT_PAYMENT_STATUS_CREATED
+            payment_local.status == status_created
             and provider_payment.summary.reserved_amount == payment_local.amount
         ):
-            payment_local.status = settings.PAYMENT_PAYMENT_STATUS_RESERVED
+            payment_local.status = status_reserved
             payment_local.save()
 
         if (
-            payment_local.status == settings.PAYMENT_PAYMENT_STATUS_RESERVED
+            payment_local.status == status_reserved
             and provider_payment.summary.charged_amount == payment_local.amount
         ):
-            payment_local.status = settings.PAYMENT_PAYMENT_STATUS_PAID
+            payment_local.status = status_paid
             payment_local.save()
 
         # Update/finish the TF5 when a payment have been received
         if payment_tf5.status != "afsluttet" and payment_local.status in [
-            settings.PAYMENT_PAYMENT_STATUS_RESERVED,
-            settings.PAYMENT_PAYMENT_STATUS_PAID,
+            status_reserved,
+            status_paid,
         ]:
             payment_tf5.status = "afsluttet"
             payment_tf5.save()

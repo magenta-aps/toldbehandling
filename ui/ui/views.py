@@ -267,12 +267,13 @@ class TF5FormCreateView(
         return kwargs
 
     def get_context_data(self, **context: Dict[str, Any]) -> Dict[str, Any]:
+        tillægsafgift_faktor = settings.TILLÆGSAFGIFT_FAKTOR  # type: ignore
         context = super().get_context_data(
             **{
                 **context,
                 "konstanter": {
-                    "tillægsafgift_faktor": settings.TILLÆGSAFGIFT_FAKTOR,
-                    "ekspeditionsgebyr": settings.EKSPEDITIONSGEBYR,
+                    "tillægsafgift_faktor": tillægsafgift_faktor,
+                    "ekspeditionsgebyr": settings.EKSPEDITIONSGEBYR,  # type: ignore
                 },
                 "extend_template": self.extend_template,
                 "highlight": self.request.GET.get("highlight"),
@@ -348,7 +349,7 @@ class TF5TilladelseView(
 
     @staticmethod
     def id_path(id: int) -> str:
-        return os.path.join(settings.TF5_ROOT, f"{id}.pdf")
+        return os.path.join(settings.TF5_ROOT, f"{id}.pdf")  # type: ignore
 
     @staticmethod
     def exists(id: int) -> bool:

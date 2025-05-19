@@ -69,16 +69,15 @@ class ModelRestClient:
 
     @staticmethod
     def set_file(data: dict, field: str):
+        media_root = settings.MEDIA_ROOT  # type: ignore
         if data.get(field):
             try:
-                data[field] = File(
-                    open(f"{settings.MEDIA_ROOT}{unquote(data[field])}", "rb")
-                )
+                data[field] = File(open(f"{media_root}{unquote(data[field])}", "rb"))
                 return
             except FileNotFoundError:
                 log.info(
                     f"Fil ikke fundet [id={data.get('id')}, felt={field}]: "
-                    f"{settings.MEDIA_ROOT}{unquote(data[field])}"
+                    f"{media_root}{unquote(data[field])}"
                 )
         data[field] = None
 
@@ -967,7 +966,7 @@ class ToldkategoriRestClient(ModelRestClient):
 
 
 class RestClient:
-    domain = settings.REST_DOMAIN
+    domain = settings.REST_DOMAIN  # type: ignore
 
     def __init__(self, token: JwtTokenInfo):
         self.session: Session = requests.sessions.Session()
@@ -1040,7 +1039,8 @@ class RestClient:
 
     @classmethod
     def get_system_rest_client(cls) -> "RestClient":
-        return RestClient(RestClient.login("system", settings.SYSTEM_USER_PASSWORD))
+        password = settings.SYSTEM_USER_PASSWORD  # type: ignore
+        return RestClient(RestClient.login("system", password))
 
     @classmethod
     def login_saml_user(cls, saml_data: dict) -> Tuple[Dict, JwtTokenInfo]:

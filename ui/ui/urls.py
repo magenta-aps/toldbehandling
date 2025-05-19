@@ -48,7 +48,7 @@ urlpatterns: list[URLResolver | URLPattern] = [
         name="tf10_delete",
     ),
 ]
-if settings.TF5_ENABLED:
+if settings.TF5_ENABLED:  # type: ignore
     urlpatterns += [
         path(
             "blanket/tf5/create",

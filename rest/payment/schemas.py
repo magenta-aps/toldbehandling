@@ -5,10 +5,10 @@
 from typing import List, Optional
 
 from anmeldelse.models import PrivatAfgiftsanmeldelse
+from django.conf import settings
 from ninja import ModelSchema, Schema
 from payment.models import Item, Payment
 from payment.utils import convert_keys_to_snake_case
-from project.settings import PAYMENT_PROVIDER_NETS
 
 # Model schemas for models outside the payment-app (e.g. anmeldelse)
 
@@ -90,7 +90,7 @@ class ContactDetails(Schema):
 
 class PaymentCreatePayload(Schema):
     declaration_id: int
-    provider: str = PAYMENT_PROVIDER_NETS
+    provider: str = settings.PAYMENT_PROVIDER_NETS  # type: ignore
 
 
 # Provider input schemas / payloads
