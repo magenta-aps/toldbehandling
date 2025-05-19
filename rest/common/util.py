@@ -23,8 +23,7 @@ def get_postnummer(postnummer: int, by: str):
     if objs.count() == 1:
         return objs.first()
     if by is not None:
-        by = by.lower().strip()
-        obj = objs.filter(navn__iexact=by).first()
+        obj = objs.filter(navn__iexact=by.lower().strip()).first()
         if obj is not None:
             return obj
     raise Postnummer.DoesNotExist(f"Postnummer med bynavn '{by}' kunne ikke findes")
