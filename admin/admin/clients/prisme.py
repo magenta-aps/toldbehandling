@@ -341,7 +341,7 @@ def prisme_send_dummy(
     OBS: This implementation is based on how we mocked in test. This has now
     been moved to this function instead as well, so it's only specified in one place.
     """
-    if settings.PRISME_MOCK_HTTP_ERROR == 413:
+    if settings.PRISME_MOCK_HTTP_ERROR == 413:  # type: ignore
         raise TransportError("Server returned HTTP status 413", 413)
 
     return [
@@ -363,7 +363,7 @@ def send_afgiftsanmeldelse(
 ) -> Optional[List[CustomDutyResponse | PrismeResponseObject]]:
     try:
         request = CustomDutyRequest(afgiftsanmeldelse)
-        if settings.ENVIRONMENT != "production":
+        if settings.ENVIRONMENT != "production":  # type: ignore
             return prisme_send_dummy(request)
         return PrismeClient().send(request)
     except TransportError as e:

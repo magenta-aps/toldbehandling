@@ -144,13 +144,14 @@ def get_payment_fees(varelinjer: Iterable[Varelinje], currency_multiplier: int =
     ]
 
     tillaegsafgift = round_decimal(
-        Decimal(settings.TILLAEGSAFGIFT_FAKTOR) * Decimal(sum(afgiftsbeløb))
+        Decimal(settings.TILLAEGSAFGIFT_FAKTOR)  # type: ignore
+        * Decimal(sum(afgiftsbeløb))
     )
 
     # OBS: logic copied from "told_common/util.py::round_decimal", but since rest
     # dont have access to told_common tools anymore, its needs to be copied here
     ekspeditionsgebyr = Decimal(
-        Decimal(settings.EKSPEDITIONSGEBYR).quantize(
+        Decimal(settings.EKSPEDITIONSGEBYR).quantize(  # type: ignore
             Decimal(".01"), rounding=ROUND_HALF_EVEN
         )
     )

@@ -13,6 +13,7 @@ psycopg2-binary==2.9.9
 whitenoise==6.0.0
 django-bootstrap-icons==0.8.6
 django-forms-dynamic==1.0.0
+django-split-settings==1.3.1
 django-tempus-dominus==5.1.2.17
 django-two-factor-auth==1.15.5
 django-phonenumber-field[phonenumberslite]==7.2.0

@@ -3,7 +3,7 @@ relative_files = True
 source = .
 omit = 
     manage.py
-    project/settings.py
+    project/settings/*
     project/asgi.py
     project/wsgi.py
     project/test_mixins.py

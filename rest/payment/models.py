@@ -6,8 +6,8 @@ from django.conf import settings
 from django.db import models
 
 PAYMENT_PROVIDER_CHOICES = {
-    settings.PAYMENT_PROVIDER_NETS: "Nets",
-    settings.PAYMENT_PROVIDER_BANK: "Bankoverførsel",
+    settings.PAYMENT_PROVIDER_NETS: "Nets",  # type: ignore
+    settings.PAYMENT_PROVIDER_BANK: "Bankoverførsel",  # type: ignore
 }
 
 
@@ -125,7 +125,7 @@ class Payment(models.Model):
         max_length=128,
         null=False,
         choices=PAYMENT_PROVIDER_CHOICES.items(),
-        default=settings.PAYMENT_PROVIDER_NETS,
+        default=settings.PAYMENT_PROVIDER_NETS,  # type: ignore
     )
     """The payment provider, for example 'nets' or 'bank'."""
 

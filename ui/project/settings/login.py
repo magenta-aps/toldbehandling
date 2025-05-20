@@ -1,8 +1,35 @@
+# SPDX-FileCopyrightText: 2023 Magenta ApS <info@magenta.dk>
+#
+# SPDX-License-Identifier: MPL-2.0
 import os
 from typing import Callable
 
 from django.urls import reverse_lazy
+from project.settings.base import DEBUG
 from told_common.util import strtobool
+
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        "NAME": "django.contrib.auth."
+        "password_validation.UserAttributeSimilarityValidator",
+    },
+    {
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+    },
+    {
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
+    },
+    {
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
+    },
+]
+
+# Når SAML-IdP'en POSTer til os, skal vi modtage vores session-cookie fra browseren
+# https://docs.djangoproject.com/en/4.2/ref/settings/#session-cookie-samesite
+if not DEBUG:
+    SESSION_COOKIE_SAMESITE = "None"
+SESSION_COOKIE_SECURE = not DEBUG
+
 
 LOGIN_SESSION_DATA_KEY = "saml_user"
 LOGIN_PROVIDER_CLASS = os.environ.get("LOGIN_PROVIDER_CLASS") or None
