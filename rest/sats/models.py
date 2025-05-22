@@ -132,9 +132,8 @@ class Vareafgiftssats(models.Model):
         decimal_places=2,
         default=0,
     )
-    kræver_indførselstilladelse = models.BooleanField(
-        default=False,
-    )
+    alkohol_indførselstilladelse = models.BooleanField(default=False)
+    tobak_indførselstilladelse = models.BooleanField(default=False)
     minimumsbeløb = models.DecimalField(
         null=True,
         blank=True,
@@ -182,6 +181,10 @@ class Vareafgiftssats(models.Model):
         default=False,
         verbose_name="Vareafgiftssatsen kan bruges af private",
     )
+
+    @property
+    def kræver_indførselstilladelse(self):
+        return self.alkohol_indførselstilladelse or self.tobak_indførselstilladelse
 
     def __str__(self):
         nummer = self.afgiftsgruppenummer
