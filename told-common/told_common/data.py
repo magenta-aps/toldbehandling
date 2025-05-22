@@ -78,7 +78,9 @@ class Vareafgiftssats(ToldDataClass):
     enhed: Enhed
     afgiftssats: Decimal
     har_privat_tillægsafgift_alkohol: bool = False
-    kræver_indførselstilladelse: Optional[bool] = False
+    # kræver_indførselstilladelse: Optional[bool] = False
+    alkohol_indførselstilladelse: Optional[bool] = False
+    tobak_indførselstilladelse: Optional[bool] = False
     synlig_privat: bool = False
     minimumsbeløb: Optional[Decimal] = None
     overordnet: Optional[int] = None
@@ -175,6 +177,10 @@ class Vareafgiftssats(ToldDataClass):
                 self.subsatser = []
                 for subsats in subs:
                     self.subsatser.append(subsats)
+
+    @property
+    def kræver_indførselstilladelse(self):
+        return self.alkohol_indførselstilladelse or self.tobak_indførselstilladelse
 
 
 def encode_optional_isoformat(d):

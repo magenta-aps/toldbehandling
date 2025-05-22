@@ -170,7 +170,8 @@ class VareafgiftssatsIn(ModelSchema):
             "afgiftsgruppenummer",
             "enhed",
             "afgiftssats",
-            "kræver_indførselstilladelse",
+            "alkohol_indførselstilladelse",
+            "tobak_indførselstilladelse",
             "har_privat_tillægsafgift_alkohol",
             "minimumsbeløb",
             "segment_nedre",
@@ -178,7 +179,8 @@ class VareafgiftssatsIn(ModelSchema):
             "synlig_privat",
         ]
         model_fields_optional = [
-            "kræver_indførselstilladelse",
+            "alkohol_indførselstilladelse",
+            "tobak_indførselstilladelse",
             "har_privat_tillægsafgift_alkohol",
             "minimumsbeløb",
             "segment_nedre",
@@ -199,7 +201,8 @@ class PartialVareafgiftssatsIn(ModelSchema):
             "afgiftsgruppenummer",
             "enhed",
             "afgiftssats",
-            "kræver_indførselstilladelse",
+            "alkohol_indførselstilladelse",
+            "tobak_indførselstilladelse",
             "har_privat_tillægsafgift_alkohol",
             "minimumsbeløb",
             "segment_nedre",
@@ -220,7 +223,8 @@ class VareafgiftssatsOut(ModelSchema):
             "afgiftsgruppenummer",
             "enhed",
             "afgiftssats",
-            "kræver_indførselstilladelse",
+            "alkohol_indførselstilladelse",
+            "tobak_indførselstilladelse",
             "har_privat_tillægsafgift_alkohol",
             "minimumsbeløb",
             "overordnet",
@@ -231,19 +235,20 @@ class VareafgiftssatsOut(ModelSchema):
 
 
 class VareafgiftssatsFilterSchema(FilterSchema):
-    afgiftstabel: Optional[int] = None
-    vareart_da: Optional[str] = None
-    vareart_kl: Optional[str] = None
-    afgiftsgruppenummer: Optional[int] = None
-    enhed: Optional[str] = None
-    afgiftssats: Optional[Decimal] = None
-    kræver_indførselstilladelse: Optional[bool] = None
-    har_privat_tillægsafgift_alkohol: Optional[bool] = None
-    minimumsbeløb: Optional[Decimal] = None
-    overordnet: Optional[int] = None
-    segment_nedre: Optional[Decimal] = None
-    segment_øvre: Optional[Decimal] = None
-    synlig_privat: Optional[bool] = None
+    afgiftstabel: Optional[int]
+    vareart_da: Optional[str]
+    vareart_kl: Optional[str]
+    afgiftsgruppenummer: Optional[int]
+    enhed: Optional[str]
+    afgiftssats: Optional[Decimal]
+    alkohol_indførselstilladelse: Optional[bool]
+    tobak_indførselstilladelse: Optional[bool]
+    har_privat_tillægsafgift_alkohol: Optional[bool]
+    minimumsbeløb: Optional[Decimal]
+    overordnet: Optional[int]
+    segment_nedre: Optional[Decimal]
+    segment_øvre: Optional[Decimal]
+    synlig_privat: Optional[bool]
 
 
 class VareafgiftssatsPermission(RestPermission):
