@@ -186,11 +186,11 @@ class TF10Form(BootstrapForm):
         label=_("Tlf."),
     )
     modtager_existing_id = forms.IntegerField(required=False, widget=forms.Select)
-    indførselstilladelse = DynamicField(
+    alkohol_indførselstilladelse = DynamicField(
         forms.CharField,
         max_length=12,
         required=False,
-        label=_("Indførsels­tilladelse nr."),
+        label=_("Indførsels­tilladelse nr. (Alkohol)"),
         widget=lambda form: forms.TextInput(
             attrs=(
                 {
@@ -199,7 +199,29 @@ class TF10Form(BootstrapForm):
                         [
                             str(id)
                             for id, sats in form.varesatser.items()
-                            if sats.kræver_indførselstilladelse
+                            if sats.alkohol_indførselstilladelse
+                        ]
+                    ),
+                }
+                if form.varesatser
+                else {}
+            )
+        ),
+    )
+    tobak_indførselstilladelse = DynamicField(
+        forms.CharField,
+        max_length=12,
+        required=False,
+        label=_("Indførsels­tilladelse nr. (Tobak)"),
+        widget=lambda form: forms.TextInput(
+            attrs=(
+                {
+                    "data-required-field": "[name$=vareafgiftssats]",
+                    "data-required-values": ",".join(
+                        [
+                            str(id)
+                            for id, sats in form.varesatser.items()
+                            if sats.tobak_indførselstilladelse
                         ]
                     ),
                 }
@@ -343,7 +365,10 @@ class TF10Form(BootstrapForm):
     def clean_with_formset(self, formset):
         # Perform validation on form and formset together
         if (
-            not self.cleaned_data["indførselstilladelse"]
+            not (
+                self.cleaned_data["alkohol_indførselstilladelse"]
+                or self.cleaned_data["tobak_indførselstilladelse"]
+            )
             and not self.cleaned_data["kladde"]
         ):
             # Hvis vi ikke har en indførselstilladelse,
