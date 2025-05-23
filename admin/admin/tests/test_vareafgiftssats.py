@@ -19,7 +19,8 @@ class VareafgiftsSatsTest(TestCase):
             enhed=Vareafgiftssats.Enhed.KILOGRAM,
             minimumsbeløb=False,
             afgiftssats=Decimal("6.00"),
-            kræver_indførselstilladelse=False,
+            alkohol_indførselstilladelse=False,
+            tobak_indførselstilladelse=False,
             har_privat_tillægsafgift_alkohol=False,
         )
         sats1a = Vareafgiftssats(
@@ -31,7 +32,8 @@ class VareafgiftsSatsTest(TestCase):
             enhed=Vareafgiftssats.Enhed.KILOGRAM,
             minimumsbeløb=False,
             afgiftssats=Decimal("6.00"),
-            kræver_indførselstilladelse=False,
+            alkohol_indførselstilladelse=False,
+            tobak_indførselstilladelse=False,
             har_privat_tillægsafgift_alkohol=False,
             segment_nedre=Decimal(200),
         )
@@ -44,7 +46,8 @@ class VareafgiftsSatsTest(TestCase):
             enhed=Vareafgiftssats.Enhed.KILOGRAM,
             minimumsbeløb=False,
             afgiftssats=Decimal("6.00"),
-            kræver_indførselstilladelse=False,
+            alkohol_indførselstilladelse=False,
+            tobak_indførselstilladelse=False,
             har_privat_tillægsafgift_alkohol=False,
             segment_øvre=Decimal(400),
         )
@@ -57,7 +60,8 @@ class VareafgiftsSatsTest(TestCase):
             enhed=Vareafgiftssats.Enhed.KILOGRAM,
             minimumsbeløb=False,
             afgiftssats=Decimal("6.00"),
-            kræver_indførselstilladelse=False,
+            alkohol_indførselstilladelse=False,
+            tobak_indførselstilladelse=False,
             har_privat_tillægsafgift_alkohol=False,
             segment_nedre=Decimal(200),
             segment_øvre=Decimal(400),
@@ -72,7 +76,8 @@ class VareafgiftsSatsTest(TestCase):
             enhed=Vareafgiftssats.Enhed.LITER,
             minimumsbeløb=False,
             afgiftssats=Decimal("3.5"),
-            kræver_indførselstilladelse=False,
+            alkohol_indførselstilladelse=False,
+            tobak_indførselstilladelse=False,
             har_privat_tillægsafgift_alkohol=True,
         )
         sats2a = Vareafgiftssats(
@@ -84,7 +89,8 @@ class VareafgiftsSatsTest(TestCase):
             enhed=Vareafgiftssats.Enhed.LITER,
             minimumsbeløb=False,
             afgiftssats=Decimal("3.5"),
-            kræver_indførselstilladelse=False,
+            alkohol_indførselstilladelse=False,
+            tobak_indførselstilladelse=False,
             har_privat_tillægsafgift_alkohol=True,
             segment_nedre=Decimal(200),
         )
@@ -97,7 +103,8 @@ class VareafgiftsSatsTest(TestCase):
             enhed=Vareafgiftssats.Enhed.LITER,
             minimumsbeløb=False,
             afgiftssats=Decimal("3.5"),
-            kræver_indførselstilladelse=False,
+            alkohol_indførselstilladelse=False,
+            tobak_indførselstilladelse=False,
             har_privat_tillægsafgift_alkohol=True,
             segment_øvre=Decimal(400),
         )
@@ -110,7 +117,8 @@ class VareafgiftsSatsTest(TestCase):
             enhed=Vareafgiftssats.Enhed.LITER,
             minimumsbeløb=False,
             afgiftssats=Decimal("3.5"),
-            kræver_indførselstilladelse=False,
+            alkohol_indførselstilladelse=False,
+            tobak_indførselstilladelse=False,
             har_privat_tillægsafgift_alkohol=True,
             segment_nedre=Decimal(200),
             segment_øvre=Decimal(400),
@@ -125,7 +133,8 @@ class VareafgiftsSatsTest(TestCase):
             enhed=Vareafgiftssats.Enhed.ANTAL,
             minimumsbeløb=False,
             afgiftssats=Decimal(2530),
-            kræver_indførselstilladelse=False,
+            alkohol_indførselstilladelse=False,
+            tobak_indførselstilladelse=False,
             har_privat_tillægsafgift_alkohol=False,
         )
         sats3a = Vareafgiftssats(
@@ -137,7 +146,8 @@ class VareafgiftsSatsTest(TestCase):
             enhed=Vareafgiftssats.Enhed.ANTAL,
             minimumsbeløb=False,
             afgiftssats=Decimal(2530),
-            kræver_indførselstilladelse=False,
+            alkohol_indførselstilladelse=False,
+            tobak_indførselstilladelse=False,
             har_privat_tillægsafgift_alkohol=False,
             segment_nedre=Decimal(200),
         )
@@ -150,7 +160,8 @@ class VareafgiftsSatsTest(TestCase):
             enhed=Vareafgiftssats.Enhed.ANTAL,
             minimumsbeløb=False,
             afgiftssats=Decimal(2530),
-            kræver_indførselstilladelse=False,
+            alkohol_indførselstilladelse=False,
+            tobak_indførselstilladelse=False,
             har_privat_tillægsafgift_alkohol=False,
             segment_øvre=Decimal(400),
         )
@@ -163,7 +174,8 @@ class VareafgiftsSatsTest(TestCase):
             enhed=Vareafgiftssats.Enhed.ANTAL,
             minimumsbeløb=False,
             afgiftssats=Decimal(2530),
-            kræver_indførselstilladelse=False,
+            alkohol_indførselstilladelse=False,
+            tobak_indførselstilladelse=False,
             har_privat_tillægsafgift_alkohol=False,
             segment_nedre=Decimal(200),
             segment_øvre=Decimal(400),
@@ -178,7 +190,8 @@ class VareafgiftsSatsTest(TestCase):
             enhed=Vareafgiftssats.Enhed.PROCENT,
             minimumsbeløb=False,
             afgiftssats=Decimal(100),
-            kræver_indførselstilladelse=False,
+            alkohol_indførselstilladelse=False,
+            tobak_indførselstilladelse=False,
             har_privat_tillægsafgift_alkohol=False,
         )
         sats4a = Vareafgiftssats(
@@ -190,7 +203,8 @@ class VareafgiftsSatsTest(TestCase):
             enhed=Vareafgiftssats.Enhed.PROCENT,
             minimumsbeløb=False,
             afgiftssats=Decimal(100),
-            kræver_indførselstilladelse=False,
+            alkohol_indførselstilladelse=False,
+            tobak_indførselstilladelse=False,
             har_privat_tillægsafgift_alkohol=False,
             segment_nedre=Decimal(200),
         )
@@ -203,7 +217,8 @@ class VareafgiftsSatsTest(TestCase):
             enhed=Vareafgiftssats.Enhed.PROCENT,
             minimumsbeløb=False,
             afgiftssats=Decimal(100),
-            kræver_indførselstilladelse=False,
+            alkohol_indførselstilladelse=False,
+            tobak_indførselstilladelse=False,
             har_privat_tillægsafgift_alkohol=False,
             segment_øvre=Decimal(400),
         )
@@ -216,7 +231,8 @@ class VareafgiftsSatsTest(TestCase):
             enhed=Vareafgiftssats.Enhed.PROCENT,
             minimumsbeløb=False,
             afgiftssats=Decimal(100),
-            kræver_indførselstilladelse=False,
+            alkohol_indførselstilladelse=False,
+            tobak_indførselstilladelse=False,
             har_privat_tillægsafgift_alkohol=False,
             segment_nedre=Decimal(200),
             segment_øvre=Decimal(400),
@@ -232,7 +248,8 @@ class VareafgiftsSatsTest(TestCase):
             enhed=Vareafgiftssats.Enhed.ANTAL,
             minimumsbeløb=None,
             afgiftssats=Decimal(50_000),
-            kræver_indførselstilladelse=False,
+            alkohol_indførselstilladelse=False,
+            tobak_indførselstilladelse=False,
             har_privat_tillægsafgift_alkohol=False,
         )
         sats7202 = Vareafgiftssats(
@@ -247,7 +264,8 @@ class VareafgiftsSatsTest(TestCase):
             segment_øvre=Decimal(150_000),
             minimumsbeløb=None,
             afgiftssats=Decimal(100),
-            kræver_indførselstilladelse=False,
+            alkohol_indførselstilladelse=False,
+            tobak_indførselstilladelse=False,
             har_privat_tillægsafgift_alkohol=False,
         )
         sats7203 = Vareafgiftssats(
@@ -261,7 +279,8 @@ class VareafgiftsSatsTest(TestCase):
             segment_nedre=Decimal(150_000),
             minimumsbeløb=None,
             afgiftssats=Decimal(150),
-            kræver_indførselstilladelse=False,
+            alkohol_indførselstilladelse=False,
+            tobak_indførselstilladelse=False,
             har_privat_tillægsafgift_alkohol=False,
         )
         sats72 = Vareafgiftssats(
@@ -273,7 +292,8 @@ class VareafgiftsSatsTest(TestCase):
             enhed=Vareafgiftssats.Enhed.SAMMENSAT,
             minimumsbeløb=None,
             afgiftssats=Decimal(0),
-            kræver_indførselstilladelse=False,
+            alkohol_indførselstilladelse=False,
+            tobak_indførselstilladelse=False,
             har_privat_tillægsafgift_alkohol=False,
             subsatser=[sats7201, sats7202, sats7203],
         )
