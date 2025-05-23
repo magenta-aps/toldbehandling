@@ -318,7 +318,9 @@ class Afgiftsanmeldelse(ToldDataClass):
     postforsendelse: Union[int, PostForsendelse, None]
     leverandørfaktura_nummer: Optional[str]
     leverandørfaktura: Optional[File]
-    indførselstilladelse: Optional[str]
+    # indførselstilladelse: Optional[str]
+    alkohol_indførselstilladelse: Optional[str]
+    tobak_indførselstilladelse: Optional[str]
     afgift_total: Decimal
     betalt: bool
     status: str
