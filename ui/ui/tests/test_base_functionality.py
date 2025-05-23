@@ -49,7 +49,8 @@ class TF10BlanketTest(BlanketMixin, TestMixin, HasLogin, TestCase):
         "modtager_by": "TestBy",
         "modtager_postbox": "124",
         "modtager_telefon": "123123",
-        "indførselstilladelse": "123",
+        "alkohol_indførselstilladelse": "123",
+        "tobak_indførselstilladelse": "456",
         "leverandørfaktura_nummer": "123",
         "fragttype": "skibsfragt",
         "fragtbrevnr": "ABCDE1234567",
@@ -412,7 +413,8 @@ class TF10BlanketTest(BlanketMixin, TestMixin, HasLogin, TestCase):
             "modtager_by",
             "modtager_postbox",
             "modtager_telefon",
-            "indførselstilladelse",
+            "alkohol_indførselstilladelse",
+            "tobak_indførselstilladelse",
             "fragttype",
             "forbindelsesnr",
             "fragtbrevnr",
@@ -468,7 +470,8 @@ class TF10BlanketTest(BlanketMixin, TestMixin, HasLogin, TestCase):
                 afgiftsgruppenummer=12345678,
                 enhed=Vareafgiftssats.Enhed.KILOGRAM,
                 afgiftssats="1.00",
-                kræver_indførselstilladelse=False,
+                alkohol_indførselstilladelse=False,
+                tobak_indførselstilladelse=False,
                 har_privat_tillægsafgift_alkohol=False,
             ),
             2: Vareafgiftssats(
@@ -479,7 +482,8 @@ class TF10BlanketTest(BlanketMixin, TestMixin, HasLogin, TestCase):
                 afgiftsgruppenummer=87654321,
                 enhed=Vareafgiftssats.Enhed.ANTAL,
                 afgiftssats="1.00",
-                kræver_indførselstilladelse=False,
+                alkohol_indførselstilladelse=False,
+                tobak_indførselstilladelse=False,
                 har_privat_tillægsafgift_alkohol=False,
             ),
             3: Vareafgiftssats(
@@ -490,7 +494,8 @@ class TF10BlanketTest(BlanketMixin, TestMixin, HasLogin, TestCase):
                 afgiftsgruppenummer=22446688,
                 enhed=Vareafgiftssats.Enhed.PROCENT,
                 afgiftssats="0.50",
-                kræver_indførselstilladelse=False,
+                alkohol_indførselstilladelse=False,
+                tobak_indførselstilladelse=False,
                 har_privat_tillægsafgift_alkohol=False,
             ),
         }
@@ -582,7 +587,8 @@ class TF10BlanketTest(BlanketMixin, TestMixin, HasLogin, TestCase):
             [
                 {
                     "leverandørfaktura_nummer": "123",
-                    "indførselstilladelse": "123",
+                    "alkohol_indførselstilladelse": "123",
+                    "tobak_indførselstilladelse": "456",
                     "afsender_id": 1,
                     "modtager_id": 1,
                     "fuldmagtshaver_id": None,
@@ -649,7 +655,8 @@ class TF10BlanketTest(BlanketMixin, TestMixin, HasLogin, TestCase):
             [
                 {
                     "leverandørfaktura_nummer": "123",
-                    "indførselstilladelse": "123",
+                    "alkohol_indførselstilladelse": "123",
+                    "tobak_indførselstilladelse": "456",
                     "afsender_id": 1,
                     "modtager_id": 1,
                     "fuldmagtshaver_id": None,
@@ -732,7 +739,8 @@ class TF10BlanketTest(BlanketMixin, TestMixin, HasLogin, TestCase):
             [
                 {
                     "leverandørfaktura_nummer": "123",
-                    "indførselstilladelse": "123",
+                    "alkohol_indførselstilladelse": "123",
+                    "tobak_indførselstilladelse": "456",
                     "afsender_id": 1,
                     "modtager_id": 1,
                     "fuldmagtshaver_id": None,
@@ -1115,7 +1123,8 @@ class TF5BlanketTest(TestMixin, HasLogin, TestCase):
                 afgiftsgruppenummer=12345678,
                 enhed=Vareafgiftssats.Enhed.KILOGRAM,
                 afgiftssats="1.00",
-                kræver_indførselstilladelse=False,
+                alkohol_indførselstilladelse=False,
+                tobak_indførselstilladelse=False,
                 har_privat_tillægsafgift_alkohol=False,
             ),
             2: Vareafgiftssats(
@@ -1126,7 +1135,8 @@ class TF5BlanketTest(TestMixin, HasLogin, TestCase):
                 afgiftsgruppenummer=87654321,
                 enhed=Vareafgiftssats.Enhed.ANTAL,
                 afgiftssats="1.00",
-                kræver_indførselstilladelse=False,
+                alkohol_indførselstilladelse=False,
+                tobak_indførselstilladelse=False,
                 har_privat_tillægsafgift_alkohol=False,
             ),
             3: Vareafgiftssats(
@@ -1137,7 +1147,8 @@ class TF5BlanketTest(TestMixin, HasLogin, TestCase):
                 afgiftsgruppenummer=22446688,
                 enhed=Vareafgiftssats.Enhed.PROCENT,
                 afgiftssats="0.50",
-                kræver_indførselstilladelse=False,
+                alkohol_indførselstilladelse=False,
+                tobak_indførselstilladelse=False,
                 har_privat_tillægsafgift_alkohol=False,
             ),
         }
