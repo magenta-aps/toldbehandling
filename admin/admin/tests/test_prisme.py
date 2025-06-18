@@ -4,7 +4,7 @@ from typing import List
 from unittest.mock import patch
 
 from django.core.files.base import ContentFile
-from django.test import override_settings, TestCase
+from django.test import TestCase, override_settings
 from django.utils.datetime_safe import date
 from lxml import etree
 from told_common.data import (
@@ -71,7 +71,6 @@ class DummyResponse:
         self.instanceCollection = DummyResponseItemList(data)
 
 
-@override_settings(PRISME_WSDL="https://test.example.com/")
 class PrismeTest(TestCase):
     maxDiff = None
 
