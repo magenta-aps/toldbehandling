@@ -4,13 +4,6 @@ from typing import List
 from unittest import TestCase
 from unittest.mock import patch
 
-from admin.clients.prisme import (
-    CustomDutyRequest,
-    send_afgiftsanmeldelse,
-    CustomDutyResponse,
-    PrismeException,
-    PrismeClient,
-)
 from django.core.files.base import ContentFile
 from django.test import override_settings
 from django.utils.datetime_safe import date
@@ -23,6 +16,14 @@ from told_common.data import (
     Modtager,
     Vareafgiftssats,
     Varelinje,
+)
+
+from admin.clients.prisme import (
+    CustomDutyRequest,
+    CustomDutyResponse,
+    PrismeClient,
+    PrismeException,
+    send_afgiftsanmeldelse,
 )
 
 
@@ -59,9 +60,11 @@ class DummyResponseItem:
         self.replyText = text
         self.xml = xml
 
+
 class DummyResponseItemList:
     def __init__(self, items):
         self.GWSReplyInstanceDCFUJ = items
+
 
 class DummyResponse:
     def __init__(self, data: List[DummyResponseItem]):
@@ -69,8 +72,10 @@ class DummyResponse:
         self.instanceCollection = DummyResponseItemList(data)
 
 
+@override_settings(PRISME_WSDL="https://test.example.com/")
 class PrismeTest(TestCase):
     maxDiff = None
+
     def setUp(self) -> None:
         self.anmeldelse = Afgiftsanmeldelse(
             id=1,
@@ -275,7 +280,9 @@ class PrismeTest(TestCase):
     @patch.object(PrismeClient, "client")
     def test_send_afgiftsanmeldelse_errorcode(self, mock_client):
         # mock_client.get_type.side_effect = self.get_type
-        mock_client.service.processService.return_value = DummyErrorResponse(1, "test error")
+        mock_client.service.processService.return_value = DummyErrorResponse(
+            1, "test error"
+        )
         with self.assertRaises(PrismeException) as cm:
             send_afgiftsanmeldelse(self.anmeldelse)
         exception = cm.exception
@@ -286,15 +293,21 @@ class PrismeTest(TestCase):
     @override_settings(ENVIRONMENT="production")
     @patch.object(PrismeClient, "client")
     def test_send_afgiftsanmeldelse(self, mock_client):
-        mock_client.service.processService.return_value = DummyResponse([
-            DummyResponseItem(0, "", """
+        mock_client.service.processService.return_value = DummyResponse(
+            [
+                DummyResponseItem(
+                    0,
+                    "",
+                    """
                 <CustomDutyTableFUJ>
                 <RecId>111111</RecId>
                 <TaxNotificationNumber>1234</TaxNotificationNumber>
                 <DeliveryDate>2025-16-18T00:00:00</DeliveryDate>
                 </CustomDutyTableFUJ>
-            """)
-        ])
+            """,
+                )
+            ]
+        )
         responses = send_afgiftsanmeldelse(self.anmeldelse)
 
         self.assertEquals(len(responses), 1)
@@ -319,9 +332,9 @@ class PrismeTest(TestCase):
     @override_settings(ENVIRONMENT="production")
     @patch.object(PrismeClient, "client")
     def test_send_afgiftsanmeldelse_error_in_object(self, mock_client):
-        mock_client.service.processService.return_value = DummyResponse([
-            DummyResponseItem(1, "object error", None)
-        ])
+        mock_client.service.processService.return_value = DummyResponse(
+            [DummyResponseItem(1, "object error", None)]
+        )
         with self.assertRaises(PrismeException) as cm:
             send_afgiftsanmeldelse(self.anmeldelse)
         exception = cm.exception
