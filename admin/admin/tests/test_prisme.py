@@ -16,12 +16,15 @@ from told_common.data import (
     Vareafgiftssats,
     Varelinje,
 )
+from zeep.exceptions import Fault, TransportError
 
 from admin.clients.prisme import (
     CustomDutyRequest,
     CustomDutyResponse,
     PrismeClient,
+    PrismeConnectionException,
     PrismeException,
+    PrismeHttpException,
     send_afgiftsanmeldelse,
 )
 
@@ -339,3 +342,34 @@ class PrismeTest(TestCase):
         self.assertEquals(exception.__class__, PrismeException)
         self.assertEquals(exception.code, 1)
         self.assertEquals(exception.message, "object error")
+
+
+    @override_settings(ENVIRONMENT="production")
+    @patch.object(PrismeClient, "send", side_effect=TransportError(message="test", status_code=500))
+    def test_send_afgiftsanmeldelse_transport(self, mock_client):
+        with self.assertRaises(PrismeHttpException) as cm:
+            send_afgiftsanmeldelse(self.anmeldelse)
+        exception = cm.exception
+        self.assertEquals(exception.__class__, PrismeHttpException)
+        self.assertEquals(exception.code, 413)
+        self.assertEquals(exception.message, "test")
+
+    @override_settings(ENVIRONMENT="production")
+    @patch.object(PrismeClient, "send", side_effect=TransportError(message="test", status_code=413))
+    def test_send_afgiftsanmeldelse_transport(self, mock_client):
+        with self.assertRaises(PrismeHttpException) as cm:
+            send_afgiftsanmeldelse(self.anmeldelse)
+        exception = cm.exception
+        self.assertEquals(exception.__class__, PrismeHttpException)
+        self.assertEquals(exception.code, 413)
+        self.assertEquals(exception.message, "test\nPrisme-fejl: Afsendelse er for stor (for store filer vedhæftet)")
+
+    @override_settings(ENVIRONMENT="production")
+    @patch.object(PrismeClient, "send", side_effect=Fault(message="test", code=123))
+    def test_send_afgiftsanmeldelse_transport(self, mock_client):
+        with self.assertRaises(PrismeConnectionException) as cm:
+            send_afgiftsanmeldelse(self.anmeldelse)
+        exception = cm.exception
+        self.assertEquals(exception.__class__, PrismeConnectionException)
+        self.assertEquals(exception.code, 123)
+        self.assertEquals(exception.message, "test")

@@ -45,15 +45,15 @@ class PrismeConnectionException(Exception):
 class PrismeRequestObject:
     @property
     def method(self):
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: noqa
 
     @property
     def xml(self):
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: noqa
 
     @property
     def reply_class(self):
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: noqa
 
     @staticmethod
     def prepare(value, is_amount=False):
