@@ -672,6 +672,9 @@ class HasLogin:
         )
         session.save()
 
+    def logout(self):
+        self.client.logout()
+
 
 class PermissionsTest(HasLogin):
     check_permissions = ()
