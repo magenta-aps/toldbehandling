@@ -1,4 +1,5 @@
 import base64
+from copy import copy
 from decimal import Decimal
 from typing import List
 from unittest.mock import patch
@@ -213,8 +214,8 @@ class PrismeTest(TestCase):
                 by="Testby",
                 postbox=1234,
                 telefon="123456",
-                cvr=12345678,
                 kreditordning=True,
+                cvr=None,
             ),
             leverandørfaktura_nummer="5678",
             betales_af="modtager",
@@ -473,7 +474,7 @@ class PrismeTest(TestCase):
                 </CustomDutyHeaderLine>
               </CustomDutyHeaderLines>
               <CustomsCategory>73A</CustomsCategory>
-              <CvrConsignee>12345678</CvrConsignee>
+              <CvrConsignee></CvrConsignee>
               <CvrConsigner>12345678</CvrConsigner>
               <DeliveryDate>2023-10-01</DeliveryDate>
               <DlvModeId>40</DlvModeId>
@@ -562,6 +563,16 @@ class PrismeTest(TestCase):
         self.assertEquals(request.forbindelsesnummer, "999")
         self.assertEquals(request.toldkategori, "73A")
         self.assertEquals(self.strip_xml_whitespace(request.xml), expected, request.xml)
+
+    def test_request_xml_4(self):
+        temp = copy(self.anmeldelse)
+        temp.fragtforsendelse = None
+        temp.postforsendelse = None
+        request = CustomDutyRequest(temp)
+        with self.assertRaises(ValueError):
+            _ = request.leveringsmåde
+        with self.assertRaises(ValueError):
+            _ = request.forsendelsesnummer
 
     @override_settings(ENVIRONMENT="test")
     def test_send_afgiftsanmeldelse_test(self):
@@ -700,3 +711,14 @@ class PrismeTest(TestCase):
         self.assertEquals(exception.__class__, PrismeConnectionException)
         self.assertEquals(exception.code, 123)
         self.assertEquals(exception.message, "test")
+
+    @override_settings(ENVIRONMENT="production", PRISME={"wsdl_file": None})
+    def test_send_afgiftsanmeldelse_no_wsdl(self):
+        with self.assertRaises(PrismeException) as cm:
+            send_afgiftsanmeldelse(self.anmeldelse)
+        exception = cm.exception
+        self.assertEquals(exception.__class__, PrismeException)
+        self.assertEquals(exception.code, 0)
+        self.assertIn(
+            "WSDL ikke konfigureret\nMetode: createCustomDuty\n", exception.message
+        )
