@@ -13,6 +13,7 @@ from told_common.data import (
     Forsendelsestype,
     FragtForsendelse,
     Modtager,
+    PostForsendelse,
     Vareafgiftssats,
     Varelinje,
 )
@@ -281,6 +282,104 @@ class PrismeTest(TestCase):
             notater=[],
             prismeresponses=[],
         )
+        cls.anmeldelse3 = Afgiftsanmeldelse(
+            id=3,
+            postforsendelse=PostForsendelse(
+                id=1,
+                forsendelsestype=Forsendelsestype.FLY,
+                postforsendelsesnummer=5,
+                afsenderbykode="800",
+                afgangsdato=date(2023, 10, 1),
+            ),
+            fragtforsendelse=None,
+            afsender=Afsender(
+                id=1,
+                navn="Testfirma1",
+                adresse="Testvej 12",
+                postnummer=1234,
+                by="Testby",
+                postbox=1234,
+                telefon="123456",
+                cvr=12345678,
+            ),
+            modtager=Modtager(
+                id=1,
+                navn="Testfirma2",
+                adresse="Testvej 34",
+                postnummer=1234,
+                by="Testby",
+                postbox=1234,
+                telefon="123456",
+                cvr=12345678,
+                kreditordning=True,
+                stedkode=600,
+            ),
+            leverandørfaktura_nummer="5678",
+            betales_af="afsender",
+            indførselstilladelse="1234",
+            betalt=True,
+            status="godkendt",
+            dato=date(2023, 11, 13),
+            toldkategori="73A",
+            varelinjer=[
+                Varelinje(
+                    id=1,
+                    afgiftsanmeldelse=1,
+                    vareafgiftssats=Vareafgiftssats(
+                        id=1,
+                        afgiftstabel=1,
+                        vareart_da="Testvarer1",
+                        vareart_kl="Testvarer1",
+                        afgiftsgruppenummer=2,
+                        enhed=Vareafgiftssats.Enhed.ANTAL,
+                        afgiftssats=Decimal("20.00"),
+                        kræver_indførselstilladelse=False,
+                        har_privat_tillægsafgift_alkohol=False,
+                        minimumsbeløb=None,
+                        overordnet=None,
+                        segment_nedre=None,
+                        segment_øvre=None,
+                        subsatser=None,
+                    ),
+                    mængde=Decimal("42.0"),
+                    antal=1,
+                    fakturabeløb=Decimal("123.45"),
+                    afgiftsbeløb=Decimal("20.00"),
+                ),
+                Varelinje(
+                    id=2,
+                    afgiftsanmeldelse=1,
+                    vareafgiftssats=Vareafgiftssats(
+                        id=2,
+                        afgiftstabel=1,
+                        vareart_da="Testvarer2",
+                        vareart_kl="Testvarer2",
+                        afgiftsgruppenummer=2,
+                        enhed=Vareafgiftssats.Enhed.ANTAL,
+                        afgiftssats=Decimal("120.00"),
+                        kræver_indførselstilladelse=False,
+                        har_privat_tillægsafgift_alkohol=False,
+                        minimumsbeløb=None,
+                        overordnet=None,
+                        segment_nedre=None,
+                        segment_øvre=None,
+                        subsatser=None,
+                    ),
+                    mængde=Decimal("142.0"),
+                    antal=1,
+                    fakturabeløb=Decimal("1123.45"),
+                    afgiftsbeløb=Decimal("120.00"),
+                ),
+            ],
+            beregnet_faktureringsdato=date(2024, 1, 1),
+            leverandørfaktura=ContentFile(
+                "Testdata (leverandørfaktura)".encode("utf-8"),
+                "/leverandørfakturaer/1/leverandørfaktura.txt",
+            ),
+            afgift_total=Decimal("140.00"),
+            notater=[],
+            prismeresponses=[],
+        )
 
     @staticmethod
     def strip_xml_whitespace(xml: str):
@@ -405,6 +504,62 @@ class PrismeTest(TestCase):
         self.assertEquals(request.betaler, "Consignee")
         self.assertEquals(request.forsendelsesnummer, 1)
         self.assertEquals(request.forbindelsesnummer, "123")
+        self.assertEquals(request.toldkategori, "73A")
+        self.assertEquals(self.strip_xml_whitespace(request.xml), expected, request.xml)
+
+    def test_request_xml_3(self):
+        request = CustomDutyRequest(self.anmeldelse3)
+        expected = self.strip_xml_whitespace(
+            f"""
+            <CustomDutyHeader>
+              <BillOfLadingOrPostalNumber>5</BillOfLadingOrPostalNumber>
+              <ConnectionNumber>999</ConnectionNumber>
+              <CustomDutyHeaderLines>
+                <CustomDutyHeaderLine>
+                  <BillAmount>123.45</BillAmount>
+                  <LineAmount>20.00</LineAmount>
+                  <LineNum>001</LineNum>
+                  <Qty>1</Qty>
+                  <TaxGroupNumber>002</TaxGroupNumber>
+                </CustomDutyHeaderLine>
+              </CustomDutyHeaderLines>
+              <CustomDutyHeaderLines>
+                <CustomDutyHeaderLine>
+                  <BillAmount>1123.45</BillAmount>
+                  <LineAmount>120.00</LineAmount>
+                  <LineNum>002</LineNum>
+                  <Qty>1</Qty>
+                  <TaxGroupNumber>002</TaxGroupNumber>
+                </CustomDutyHeaderLine>
+              </CustomDutyHeaderLines>
+              <CustomsCategory>73A</CustomsCategory>
+              <CvrConsignee>12345678</CvrConsignee>
+              <CvrConsigner>12345678</CvrConsigner>
+              <DeliveryDate>2023-10-01</DeliveryDate>
+              <DlvModeId>50</DlvModeId>
+              <ImportAuthorizationNumber>1234</ImportAuthorizationNumber>
+              <LocationCode>600</LocationCode>
+              <PaymentParty>Consigner</PaymentParty>
+              <TaxNotificationNumber>3</TaxNotificationNumber>
+              <Type>TF10</Type>
+              <VendInvoiceNumber>5678</VendInvoiceNumber>
+              <WebDueDate>2024-01-01</WebDueDate>
+              <files>
+                <file>
+                  <Content>{base64.b64encode("Testdata (leverandørfaktura)".encode("utf-8")).decode("ascii")}</Content>
+                  <Name>leverandørfaktura.txt</Name>
+                </file>
+              </files>
+            </CustomDutyHeader>
+        """
+        )
+        self.assertEquals(request.reply_class, CustomDutyResponse)
+        self.assertEquals(request.leveringsmåde, 50)
+        self.assertEquals(request.forsendelse, self.anmeldelse3.postforsendelse)
+        self.assertEquals(request.stedkode, "600")
+        self.assertEquals(request.betaler, "Consigner")
+        self.assertEquals(request.forsendelsesnummer, 5)
+        self.assertEquals(request.forbindelsesnummer, "999")
         self.assertEquals(request.toldkategori, "73A")
         self.assertEquals(self.strip_xml_whitespace(request.xml), expected, request.xml)
 
