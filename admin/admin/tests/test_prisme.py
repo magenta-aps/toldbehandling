@@ -1,11 +1,10 @@
 import base64
 from decimal import Decimal
 from typing import List
-from unittest import TestCase
 from unittest.mock import patch
 
 from django.core.files.base import ContentFile
-from django.test import override_settings
+from django.test import override_settings, TestCase
 from django.utils.datetime_safe import date
 from lxml import etree
 from told_common.data import (
