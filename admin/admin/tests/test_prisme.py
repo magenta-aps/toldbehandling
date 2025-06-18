@@ -77,8 +77,10 @@ class DummyResponse:
 class PrismeTest(TestCase):
     maxDiff = None
 
-    def setUp(self) -> None:
-        self.anmeldelse = Afgiftsanmeldelse(
+    @classmethod
+    def setUpTestData(cls) -> None:
+        super().setUpTestData()
+        cls.anmeldelse = Afgiftsanmeldelse(
             id=1,
             fragtforsendelse=FragtForsendelse(
                 id=1,
@@ -342,7 +344,6 @@ class PrismeTest(TestCase):
         self.assertEquals(exception.__class__, PrismeException)
         self.assertEquals(exception.code, 1)
         self.assertEquals(exception.message, "object error")
-
 
     @override_settings(ENVIRONMENT="production")
     @patch.object(PrismeClient, "send", side_effect=TransportError(message="test", status_code=500))
