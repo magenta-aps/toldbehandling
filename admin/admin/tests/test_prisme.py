@@ -1,8 +1,18 @@
 import base64
 from decimal import Decimal
+from typing import List
 from unittest import TestCase
+from unittest.mock import patch
 
+from admin.clients.prisme import (
+    CustomDutyRequest,
+    send_afgiftsanmeldelse,
+    CustomDutyResponse,
+    PrismeException,
+    PrismeClient,
+)
 from django.core.files.base import ContentFile
+from django.test import override_settings
 from django.utils.datetime_safe import date
 from lxml import etree
 from told_common.data import (
@@ -15,10 +25,52 @@ from told_common.data import (
     Varelinje,
 )
 
-from admin.clients.prisme import CustomDutyRequest
+
+class DummyRequest:
+    def __init__(self, requestHeader, xmlCollection):
+        self.requestHeader = requestHeader
+        self.xmlCollection = xmlCollection
+
+
+class DummyRequestItem:
+    def __init__(self, xml):
+        self.xml = xml
+
+
+class DummyRequestItemList:
+    def __init__(self, items):
+        self.items = items
+
+
+class DummyResponseStatus:
+    def __init__(self, reply_code, reply_text):
+        self.replyCode = reply_code
+        self.replyText = reply_text
+
+
+class DummyErrorResponse:
+    def __init__(self, reply_code, reply_text):
+        self.status = DummyResponseStatus(reply_code, reply_text)
+
+
+class DummyResponseItem:
+    def __init__(self, code, text, xml):
+        self.replyCode = code
+        self.replyText = text
+        self.xml = xml
+
+class DummyResponseItemList:
+    def __init__(self, items):
+        self.GWSReplyInstanceDCFUJ = items
+
+class DummyResponse:
+    def __init__(self, data: List[DummyResponseItem]):
+        self.status = DummyResponseStatus(0, "ok")
+        self.instanceCollection = DummyResponseItemList(data)
 
 
 class PrismeTest(TestCase):
+    maxDiff = None
     def setUp(self) -> None:
         self.anmeldelse = Afgiftsanmeldelse(
             id=1,
@@ -53,6 +105,7 @@ class PrismeTest(TestCase):
                 telefon="123456",
                 cvr=12345678,
                 kreditordning=True,
+                stedkode=700,
             ),
             leverandørfaktura_nummer="5678",
             betales_af="afsender",
@@ -129,7 +182,6 @@ class PrismeTest(TestCase):
 
     def test_request_xml(self):
         request = CustomDutyRequest(self.anmeldelse)
-        self.maxDiff = None
         expected = self.strip_xml_whitespace(
             f"""
             <CustomDutyHeader>
@@ -159,7 +211,7 @@ class PrismeTest(TestCase):
               <DeliveryDate>2023-10-01</DeliveryDate>
               <DlvModeId>10</DlvModeId>
               <ImportAuthorizationNumber>1234</ImportAuthorizationNumber>
-              <LocationCode></LocationCode>
+              <LocationCode>700</LocationCode>
               <PaymentParty>Consigner</PaymentParty>
               <TaxNotificationNumber>1</TaxNotificationNumber>
               <Type>TF10</Type>
@@ -178,4 +230,101 @@ class PrismeTest(TestCase):
             </CustomDutyHeader>
         """
         )
+        self.assertEquals(request.reply_class, CustomDutyResponse)
+        self.assertEquals(request.leveringsmåde, 10)
+        self.assertEquals(request.forsendelse, self.anmeldelse.fragtforsendelse)
+        self.assertEquals(request.stedkode, "700")
+        self.assertEquals(request.betaler, "Consigner")
+        self.assertEquals(request.forsendelsesnummer, 1)
+        self.assertEquals(request.forbindelsesnummer, "123")
+        self.assertEquals(request.toldkategori, "73A")
         self.assertEquals(self.strip_xml_whitespace(request.xml), expected, request.xml)
+
+    @override_settings(ENVIRONMENT="test")
+    def test_send_afgiftsanmeldelse_test(self):
+        responses = send_afgiftsanmeldelse(self.anmeldelse)
+        self.assertEquals(len(responses), 1)
+        response = responses[0]
+        self.assertTrue(isinstance(response, CustomDutyResponse))
+        self.assertEquals(response.record_id, "5637147578")
+        self.assertEquals(response.tax_notification_number, "44668899")
+        self.assertEquals(response.delivery_date, "2023-04-07T00:00:00")
+        self.assertEquals(
+            response.xml.replace(" ", ""),
+            """
+            <CustomDutyTableFUJ>
+            <RecId>5637147578</RecId>
+            <TaxNotificationNumber>44668899</TaxNotificationNumber>
+            <DeliveryDate>2023-04-07T00:00:00</DeliveryDate>
+            </CustomDutyTableFUJ>
+            """.replace(
+                " ", ""
+            ),
+        )
+
+    @staticmethod
+    def get_type(name: str):
+        if name == "tns:GWSRequestDCFUJ":
+            return DummyRequest
+        if name == "tns:GWSRequestXMLDCFUJ":
+            return DummyRequestItem
+        if name == "tns:ArrayOfGWSRequestXMLDCFUJ":
+            return DummyRequestItemList
+
+    @override_settings(ENVIRONMENT="production")
+    @patch.object(PrismeClient, "client")
+    def test_send_afgiftsanmeldelse_errorcode(self, mock_client):
+        # mock_client.get_type.side_effect = self.get_type
+        mock_client.service.processService.return_value = DummyErrorResponse(1, "test error")
+        with self.assertRaises(PrismeException) as cm:
+            send_afgiftsanmeldelse(self.anmeldelse)
+        exception = cm.exception
+        self.assertEquals(exception.__class__, PrismeException)
+        self.assertEquals(exception.code, 1)
+        self.assertEquals(exception.message, "test error")
+
+    @override_settings(ENVIRONMENT="production")
+    @patch.object(PrismeClient, "client")
+    def test_send_afgiftsanmeldelse(self, mock_client):
+        mock_client.service.processService.return_value = DummyResponse([
+            DummyResponseItem(0, "", """
+                <CustomDutyTableFUJ>
+                <RecId>111111</RecId>
+                <TaxNotificationNumber>1234</TaxNotificationNumber>
+                <DeliveryDate>2025-16-18T00:00:00</DeliveryDate>
+                </CustomDutyTableFUJ>
+            """)
+        ])
+        responses = send_afgiftsanmeldelse(self.anmeldelse)
+
+        self.assertEquals(len(responses), 1)
+        response = responses[0]
+        self.assertTrue(isinstance(response, CustomDutyResponse))
+        self.assertEquals(response.record_id, "111111")
+        self.assertEquals(response.tax_notification_number, "1234")
+        self.assertEquals(response.delivery_date, "2025-16-18T00:00:00")
+        self.assertEquals(
+            response.xml.replace(" ", ""),
+            """
+            <CustomDutyTableFUJ>
+            <RecId>111111</RecId>
+            <TaxNotificationNumber>1234</TaxNotificationNumber>
+            <DeliveryDate>2025-16-18T00:00:00</DeliveryDate>
+            </CustomDutyTableFUJ>
+            """.replace(
+                " ", ""
+            ),
+        )
+
+    @override_settings(ENVIRONMENT="production")
+    @patch.object(PrismeClient, "client")
+    def test_send_afgiftsanmeldelse_error_in_object(self, mock_client):
+        mock_client.service.processService.return_value = DummyResponse([
+            DummyResponseItem(1, "object error", None)
+        ])
+        with self.assertRaises(PrismeException) as cm:
+            send_afgiftsanmeldelse(self.anmeldelse)
+        exception = cm.exception
+        self.assertEquals(exception.__class__, PrismeException)
+        self.assertEquals(exception.code, 1)
+        self.assertEquals(exception.message, "object error")
