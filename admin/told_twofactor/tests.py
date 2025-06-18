@@ -45,7 +45,11 @@ class TwoFactorSetupViewTest(HasLogin, TestMixin, TestCase):
         mock_user_get.side_effect = lambda: None
         mock_create_device.side_effect = lambda x: None
         mock_gen_token.return_value = 112233
-        for field, expected_redirect in ((None, "/admin"), ("next", "/foo"), ("back", "/bar")):
+        for field, expected_redirect in (
+            (None, "/admin"),
+            ("next", "/foo"),
+            ("back", "/bar"),
+        ):
             self.login()
             url = self.url
             if field:
@@ -116,14 +120,16 @@ class TwofactorLoginTest(HasLogin, TestMixin, TestCase):
     @patch.object(requests, "post")
     def test_login_success(self, mock_post):
         mock_post.side_effect = self.mock_requests_post_accept
-        for field, expected_redirect in ((None, "/admin"), ("next", "/foo"), ("back", "/bar")):
+        for field, expected_redirect in (
+            (None, "/admin"),
+            ("next", "/foo"),
+            ("back", "/bar"),
+        ):
             url = reverse("twofactor:login")
             if field:
                 url += f"?{field}={expected_redirect}"
             self.client.login()
-            response = self.client.post(
-                url, {"twofactor_token": "112233"}
-            )
+            response = self.client.post(url, {"twofactor_token": "112233"})
             self.assertTrue(self.client.session.get("twofactor_authenticated", False))
             self.assertEquals(response.status_code, 302)
             self.assertEquals(response.headers.get("Location"), expected_redirect)

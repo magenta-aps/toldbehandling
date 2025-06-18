@@ -181,6 +181,106 @@ class PrismeTest(TestCase):
             notater=[],
             prismeresponses=[],
         )
+        cls.anmeldelse2 = Afgiftsanmeldelse(
+            id=2,
+            fragtforsendelse=FragtForsendelse(
+                id=1,
+                forsendelsestype=Forsendelsestype.FLY,
+                fragtbrevsnummer=1,
+                fragtbrev=ContentFile(
+                    b"Testdata (fragtbrev)", "/fragtbreve/1/fragtbrev.txt"
+                ),
+                forbindelsesnr="123",
+                afgangsdato=date(2023, 10, 1),
+            ),
+            postforsendelse=None,
+            afsender=Afsender(
+                id=1,
+                navn="Testfirma1",
+                adresse="Testvej 12",
+                postnummer=1234,
+                by="Testby",
+                postbox=1234,
+                telefon="123456",
+                cvr=12345678,
+            ),
+            modtager=Modtager(
+                id=1,
+                navn="Testfirma2",
+                adresse="Testvej 34",
+                postnummer=1234,
+                by="Testby",
+                postbox=1234,
+                telefon="123456",
+                cvr=12345678,
+                kreditordning=True,
+            ),
+            leverandørfaktura_nummer="5678",
+            betales_af="modtager",
+            indførselstilladelse="1234",
+            betalt=True,
+            status="godkendt",
+            dato=date(2023, 11, 13),
+            toldkategori="73A",
+            varelinjer=[
+                Varelinje(
+                    id=1,
+                    afgiftsanmeldelse=1,
+                    vareafgiftssats=Vareafgiftssats(
+                        id=1,
+                        afgiftstabel=1,
+                        vareart_da="Testvarer3",
+                        vareart_kl="Testvarer3",
+                        afgiftsgruppenummer=3,
+                        enhed=Vareafgiftssats.Enhed.LITER,
+                        afgiftssats=Decimal("20.00"),
+                        kræver_indførselstilladelse=False,
+                        har_privat_tillægsafgift_alkohol=False,
+                        minimumsbeløb=None,
+                        overordnet=None,
+                        segment_nedre=None,
+                        segment_øvre=None,
+                        subsatser=None,
+                    ),
+                    mængde=Decimal("42.0"),
+                    antal=1,
+                    fakturabeløb=Decimal("123.45"),
+                    afgiftsbeløb=Decimal("20.00"),
+                ),
+                Varelinje(
+                    id=2,
+                    afgiftsanmeldelse=1,
+                    vareafgiftssats=Vareafgiftssats(
+                        id=2,
+                        afgiftstabel=1,
+                        vareart_da="Testvarer4",
+                        vareart_kl="Testvarer4",
+                        afgiftsgruppenummer=4,
+                        enhed=Vareafgiftssats.Enhed.KILOGRAM,
+                        afgiftssats=Decimal("120.00"),
+                        kræver_indførselstilladelse=False,
+                        har_privat_tillægsafgift_alkohol=False,
+                        minimumsbeløb=None,
+                        overordnet=None,
+                        segment_nedre=None,
+                        segment_øvre=None,
+                        subsatser=None,
+                    ),
+                    mængde=Decimal("142.0"),
+                    antal=1,
+                    fakturabeløb=Decimal("1123.45"),
+                    afgiftsbeløb=Decimal("120.00"),
+                ),
+            ],
+            beregnet_faktureringsdato=date(2024, 1, 1),
+            leverandørfaktura=ContentFile(
+                "Testdata (leverandørfaktura)".encode("utf-8"),
+                "/leverandørfakturaer/1/leverandørfaktura.txt",
+            ),
+            afgift_total=Decimal("140.00"),
+            notater=[],
+            prismeresponses=[],
+        )
 
     @staticmethod
     def strip_xml_whitespace(xml: str):
@@ -188,7 +288,7 @@ class PrismeTest(TestCase):
             etree.XML(xml, parser=etree.XMLParser(remove_blank_text=True))
         )
 
-    def test_request_xml(self):
+    def test_request_xml_1(self):
         request = CustomDutyRequest(self.anmeldelse)
         expected = self.strip_xml_whitespace(
             f"""
@@ -243,6 +343,66 @@ class PrismeTest(TestCase):
         self.assertEquals(request.forsendelse, self.anmeldelse.fragtforsendelse)
         self.assertEquals(request.stedkode, "700")
         self.assertEquals(request.betaler, "Consigner")
+        self.assertEquals(request.forsendelsesnummer, 1)
+        self.assertEquals(request.forbindelsesnummer, "123")
+        self.assertEquals(request.toldkategori, "73A")
+        self.assertEquals(self.strip_xml_whitespace(request.xml), expected, request.xml)
+
+    def test_request_xml_2(self):
+        request = CustomDutyRequest(self.anmeldelse2)
+        expected = self.strip_xml_whitespace(
+            f"""
+            <CustomDutyHeader>
+              <BillOfLadingOrPostalNumber>1</BillOfLadingOrPostalNumber>
+              <ConnectionNumber>123</ConnectionNumber>
+              <CustomDutyHeaderLines>
+                <CustomDutyHeaderLine>
+                  <BillAmount>123.45</BillAmount>
+                  <LineAmount>20.00</LineAmount>
+                  <LineNum>001</LineNum>
+                  <Qty>42.0</Qty>
+                  <TaxGroupNumber>003</TaxGroupNumber>
+                </CustomDutyHeaderLine>
+              </CustomDutyHeaderLines>
+              <CustomDutyHeaderLines>
+                <CustomDutyHeaderLine>
+                  <BillAmount>1123.45</BillAmount>
+                  <LineAmount>120.00</LineAmount>
+                  <LineNum>002</LineNum>
+                  <Qty>142.0</Qty>
+                  <TaxGroupNumber>004</TaxGroupNumber>
+                </CustomDutyHeaderLine>
+              </CustomDutyHeaderLines>
+              <CustomsCategory>73A</CustomsCategory>
+              <CvrConsignee>12345678</CvrConsignee>
+              <CvrConsigner>12345678</CvrConsigner>
+              <DeliveryDate>2023-10-01</DeliveryDate>
+              <DlvModeId>40</DlvModeId>
+              <ImportAuthorizationNumber>1234</ImportAuthorizationNumber>
+              <LocationCode></LocationCode>
+              <PaymentParty>Consignee</PaymentParty>
+              <TaxNotificationNumber>2</TaxNotificationNumber>
+              <Type>TF10</Type>
+              <VendInvoiceNumber>5678</VendInvoiceNumber>
+              <WebDueDate>2024-01-01</WebDueDate>
+              <files>
+                <file>
+                  <Content>{base64.b64encode("Testdata (leverandørfaktura)".encode("utf-8")).decode("ascii")}</Content>
+                  <Name>leverandørfaktura.txt</Name>
+                </file>
+                <file>
+                  <Content>{base64.b64encode("Testdata (fragtbrev)".encode("utf-8")).decode("ascii")}</Content>
+                  <Name>fragtbrev.txt</Name>
+                </file>
+              </files>
+            </CustomDutyHeader>
+        """
+        )
+        self.assertEquals(request.reply_class, CustomDutyResponse)
+        self.assertEquals(request.leveringsmåde, 40)
+        self.assertEquals(request.forsendelse, self.anmeldelse2.fragtforsendelse)
+        self.assertEquals(request.stedkode, "")
+        self.assertEquals(request.betaler, "Consignee")
         self.assertEquals(request.forsendelsesnummer, 1)
         self.assertEquals(request.forbindelsesnummer, "123")
         self.assertEquals(request.toldkategori, "73A")
@@ -346,7 +506,11 @@ class PrismeTest(TestCase):
         self.assertEquals(exception.message, "object error")
 
     @override_settings(ENVIRONMENT="production")
-    @patch.object(PrismeClient, "send", side_effect=TransportError(message="test", status_code=500))
+    @patch.object(
+        PrismeClient,
+        "send",
+        side_effect=TransportError(message="test", status_code=500),
+    )
     def test_send_afgiftsanmeldelse_transport_500(self, mock_client):
         with self.assertRaises(PrismeHttpException) as cm:
             send_afgiftsanmeldelse(self.anmeldelse)
@@ -356,14 +520,21 @@ class PrismeTest(TestCase):
         self.assertEquals(exception.message, "test")
 
     @override_settings(ENVIRONMENT="production")
-    @patch.object(PrismeClient, "send", side_effect=TransportError(message="test", status_code=413))
+    @patch.object(
+        PrismeClient,
+        "send",
+        side_effect=TransportError(message="test", status_code=413),
+    )
     def test_send_afgiftsanmeldelse_transport_413(self, mock_client):
         with self.assertRaises(PrismeHttpException) as cm:
             send_afgiftsanmeldelse(self.anmeldelse)
         exception = cm.exception
         self.assertEquals(exception.__class__, PrismeHttpException)
         self.assertEquals(exception.code, 413)
-        self.assertEquals(exception.message, "test\nPrisme-fejl: Afsendelse er for stor (for store filer vedhæftet)")
+        self.assertEquals(
+            exception.message,
+            "test\nPrisme-fejl: Afsendelse er for stor (for store filer vedhæftet)",
+        )
 
     @override_settings(ENVIRONMENT="production")
     @patch.object(PrismeClient, "send", side_effect=Fault(message="test", code=123))
