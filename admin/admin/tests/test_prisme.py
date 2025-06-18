@@ -596,6 +596,18 @@ class PrismeTest(TestCase):
             ),
         )
 
+    @override_settings(ENVIRONMENT="test", PRISME_MOCK_HTTP_ERROR=413)
+    def test_send_afgiftsanmeldelse_test_exception(self):
+        with self.assertRaises(PrismeHttpException) as cm:
+            send_afgiftsanmeldelse(self.anmeldelse)
+        exception = cm.exception
+        self.assertEquals(
+            exception.message,
+            "Server returned HTTP status 413\n"
+            "Prisme-fejl: Afsendelse er for stor (for store filer vedhæftet)",
+        )
+        self.assertEquals(exception.code, 413)
+
     @staticmethod
     def get_type(name: str):
         if name == "tns:GWSRequestDCFUJ":
