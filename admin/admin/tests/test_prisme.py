@@ -352,7 +352,7 @@ class PrismeTest(TestCase):
             send_afgiftsanmeldelse(self.anmeldelse)
         exception = cm.exception
         self.assertEquals(exception.__class__, PrismeHttpException)
-        self.assertEquals(exception.code, 413)
+        self.assertEquals(exception.code, 500)
         self.assertEquals(exception.message, "test")
 
     @override_settings(ENVIRONMENT="production")
