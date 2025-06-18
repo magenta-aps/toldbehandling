@@ -45,27 +45,15 @@ class PrismeConnectionException(Exception):
 class PrismeRequestObject:
     @property
     def method(self):
-        raise NotImplementedError  # pragma: noqa
+        raise NotImplementedError  # pragma: no cover
 
     @property
     def xml(self):
-        raise NotImplementedError  # pragma: noqa
+        raise NotImplementedError  # pragma: no cover
 
     @property
     def reply_class(self):
-        raise NotImplementedError  # pragma: noqa
-
-    @staticmethod
-    def prepare(value, is_amount=False):
-        if value is None:
-            return ""
-        if is_amount:
-            value = f"{value:.2f}"
-        if isinstance(value, datetime):
-            value = f"{value:%Y-%m-%dT%H:%M:%S}"
-        if isinstance(value, date):
-            value = f"{value:%Y-%m-%d}"
-        return value
+        raise NotImplementedError  # pragma: no cover
 
 
 class PrismeResponseObject(object):

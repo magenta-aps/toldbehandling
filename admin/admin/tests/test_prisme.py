@@ -347,7 +347,7 @@ class PrismeTest(TestCase):
 
     @override_settings(ENVIRONMENT="production")
     @patch.object(PrismeClient, "send", side_effect=TransportError(message="test", status_code=500))
-    def test_send_afgiftsanmeldelse_transport(self, mock_client):
+    def test_send_afgiftsanmeldelse_transport_500(self, mock_client):
         with self.assertRaises(PrismeHttpException) as cm:
             send_afgiftsanmeldelse(self.anmeldelse)
         exception = cm.exception
@@ -357,7 +357,7 @@ class PrismeTest(TestCase):
 
     @override_settings(ENVIRONMENT="production")
     @patch.object(PrismeClient, "send", side_effect=TransportError(message="test", status_code=413))
-    def test_send_afgiftsanmeldelse_transport(self, mock_client):
+    def test_send_afgiftsanmeldelse_transport_413(self, mock_client):
         with self.assertRaises(PrismeHttpException) as cm:
             send_afgiftsanmeldelse(self.anmeldelse)
         exception = cm.exception
@@ -367,7 +367,7 @@ class PrismeTest(TestCase):
 
     @override_settings(ENVIRONMENT="production")
     @patch.object(PrismeClient, "send", side_effect=Fault(message="test", code=123))
-    def test_send_afgiftsanmeldelse_transport(self, mock_client):
+    def test_send_afgiftsanmeldelse_zeepfault(self, mock_client):
         with self.assertRaises(PrismeConnectionException) as cm:
             send_afgiftsanmeldelse(self.anmeldelse)
         exception = cm.exception
