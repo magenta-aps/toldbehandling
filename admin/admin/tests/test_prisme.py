@@ -753,14 +753,6 @@ class PrismeTest(TestCase):
         PRISME={
             "wsdl_file": "https://not-existing-server-for-realz.com/wsdl",
             "area": "SULLISSIVIK",
-            "proxy": {"socks": "example.com:1234"},
-        },
-    )
-    @override_settings(
-        ENVIRONMENT="production",
-        PRISME={
-            "wsdl_file": "https://not-existing-server-for-realz.com/wsdl",
-            "area": "SULLISSIVIK",
         },
     )
     @patch.object(Transport, "load")
@@ -775,6 +767,31 @@ class PrismeTest(TestCase):
         self.assertEqual(header.area, "SULLISSIVIK")
         self.assertEqual(header.clientVersion, 1)
         self.assertEqual(header.method, "createCustomDuty")
+
+    @override_settings(
+        ENVIRONMENT="production",
+        PRISME={
+            "wsdl_file": "https://not-existing-server-for-realz.com/wsdl",
+            "area": "SULLISSIVIK",
+        },
+    )
+    @patch.object(Transport, "load")
+    def test_client_wsdl_body(self, mock_load):
+        with open(
+            os.path.join(os.path.dirname(__file__), "prisme.wsdl"), "rb"
+        ) as wsdl_file:
+            mock_load.return_value = wsdl_file.read()
+        prismeclient = PrismeClient()
+        request = CustomDutyRequest(self.anmeldelse)
+        body = prismeclient.create_request_body(request.xml)
+        self.assertEqual(body.__class__.__name__, "ArrayOfGWSRequestXMLDCFUJ")
+        self.assertTrue(hasattr(body, "GWSRequestXMLDCFUJ"))
+        self.assertEqual(type(body.GWSRequestXMLDCFUJ), list)
+        self.assertEqual(len(body.GWSRequestXMLDCFUJ), 1)
+        self.assertEqual(
+            body.GWSRequestXMLDCFUJ[0].__class__.__name__, "GWSRequestXMLDCFUJ"
+        )
+        self.assertEqual(body.GWSRequestXMLDCFUJ[0].xml, request.xml)
 
     @override_settings(
         ENVIRONMENT="production",
