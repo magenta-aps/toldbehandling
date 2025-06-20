@@ -1,0 +1,304 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions name="GenericService" targetNamespace="http://fujitsu.dk/GWCService/GenericService"
+                  xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+                  xmlns:wsam="http://www.w3.org/2007/05/addressing/metadata"
+                  xmlns:wsx="http://schemas.xmlsoap.org/ws/2004/09/mex"
+                  xmlns:wsap="http://schemas.xmlsoap.org/ws/2004/08/addressing/policy"
+                  xmlns:msc="http://schemas.microsoft.com/ws/2005/12/wsdl/contract"
+                  xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy" xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+                  xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"
+                  xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/"
+                  xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/"
+                  xmlns:tns="http://fujitsu.dk/GWCService/GenericService"
+                  xmlns:wsa10="http://www.w3.org/2005/08/addressing"
+                  xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl"
+                  xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing">
+    <wsp:Policy wsu:Id="wsHttpBinding_policy">
+        <wsp:ExactlyOne>
+            <wsp:All>
+                <http:BasicAuthentication xmlns:http="http://schemas.microsoft.com/ws/06/2004/policy/http"/>
+                <sp:TransportBinding xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+                    <wsp:Policy>
+                        <sp:TransportToken>
+                            <wsp:Policy>
+                                <sp:HttpsToken RequireClientCertificate="false"/>
+                            </wsp:Policy>
+                        </sp:TransportToken>
+                        <sp:AlgorithmSuite>
+                            <wsp:Policy>
+                                <sp:Basic256/>
+                            </wsp:Policy>
+                        </sp:AlgorithmSuite>
+                        <sp:Layout>
+                            <wsp:Policy>
+                                <sp:Strict/>
+                            </wsp:Policy>
+                        </sp:Layout>
+                    </wsp:Policy>
+                </sp:TransportBinding>
+                <wsaw:UsingAddressing/>
+            </wsp:All>
+        </wsp:ExactlyOne>
+    </wsp:Policy>
+    <wsdl:types>
+        <xs:schema elementFormDefault="qualified" targetNamespace="http://fujitsu.dk/GWCService/GenericService"
+                   xmlns:xs="http://www.w3.org/2001/XMLSchema">
+            <xs:import namespace="http://schemas.datacontract.org/2004/07/Dynamics.Ax.Application"/>
+            <xs:element name="processService">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="request" nillable="true" type="q1:GWSRequestDCFUJ"
+                                    xmlns:q1="http://schemas.datacontract.org/2004/07/Dynamics.Ax.Application"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="processServiceResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="processServiceResult" nillable="true" type="q2:GWSReplyDCFUJ"
+                                    xmlns:q2="http://schemas.datacontract.org/2004/07/Dynamics.Ax.Application"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getServerVersion">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="request" nillable="true" type="q3:GWSRequestHeaderDCFUJ"
+                                    xmlns:q3="http://schemas.datacontract.org/2004/07/Dynamics.Ax.Application"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="getServerVersionResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element minOccurs="0" name="getServerVersionResult" nillable="true"
+                                    type="q4:GWSServerVersionDCFUJ"
+                                    xmlns:q4="http://schemas.datacontract.org/2004/07/Dynamics.Ax.Application"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+        </xs:schema>
+        <xs:schema attributeFormDefault="qualified" elementFormDefault="qualified"
+                   targetNamespace="http://schemas.microsoft.com/2003/10/Serialization/"
+                   xmlns:xs="http://www.w3.org/2001/XMLSchema"
+                   xmlns:tns="http://schemas.microsoft.com/2003/10/Serialization/">
+            <xs:element name="anyType" nillable="true" type="xs:anyType"/>
+            <xs:element name="anyURI" nillable="true" type="xs:anyURI"/>
+            <xs:element name="base64Binary" nillable="true" type="xs:base64Binary"/>
+            <xs:element name="boolean" nillable="true" type="xs:boolean"/>
+            <xs:element name="byte" nillable="true" type="xs:byte"/>
+            <xs:element name="dateTime" nillable="true" type="xs:dateTime"/>
+            <xs:element name="decimal" nillable="true" type="xs:decimal"/>
+            <xs:element name="double" nillable="true" type="xs:double"/>
+            <xs:element name="float" nillable="true" type="xs:float"/>
+            <xs:element name="int" nillable="true" type="xs:int"/>
+            <xs:element name="long" nillable="true" type="xs:long"/>
+            <xs:element name="QName" nillable="true" type="xs:QName"/>
+            <xs:element name="short" nillable="true" type="xs:short"/>
+            <xs:element name="string" nillable="true" type="xs:string"/>
+            <xs:element name="unsignedByte" nillable="true" type="xs:unsignedByte"/>
+            <xs:element name="unsignedInt" nillable="true" type="xs:unsignedInt"/>
+            <xs:element name="unsignedLong" nillable="true" type="xs:unsignedLong"/>
+            <xs:element name="unsignedShort" nillable="true" type="xs:unsignedShort"/>
+            <xs:element name="char" nillable="true" type="tns:char"/>
+            <xs:simpleType name="char">
+                <xs:restriction base="xs:int"/>
+            </xs:simpleType>
+            <xs:element name="duration" nillable="true" type="tns:duration"/>
+            <xs:simpleType name="duration">
+                <xs:restriction base="xs:duration">
+                    <xs:pattern value="\-?P(\d*D)?(T(\d*H)?(\d*M)?(\d*(\.\d*)?S)?)?"/>
+                    <xs:minInclusive value="-P10675199DT2H48M5.4775808S"/>
+                    <xs:maxInclusive value="P10675199DT2H48M5.4775807S"/>
+                </xs:restriction>
+            </xs:simpleType>
+            <xs:element name="guid" nillable="true" type="tns:guid"/>
+            <xs:simpleType name="guid">
+                <xs:restriction base="xs:string">
+                    <xs:pattern value="[\da-fA-F]{8}-[\da-fA-F]{4}-[\da-fA-F]{4}-[\da-fA-F]{4}-[\da-fA-F]{12}"/>
+                </xs:restriction>
+            </xs:simpleType>
+            <xs:attribute name="FactoryType" type="xs:QName"/>
+            <xs:attribute name="Id" type="xs:ID"/>
+            <xs:attribute name="Ref" type="xs:IDREF"/>
+        </xs:schema>
+        <xs:schema elementFormDefault="qualified"
+                   targetNamespace="http://schemas.datacontract.org/2004/07/Dynamics.Ax.Application"
+                   xmlns:xs="http://www.w3.org/2001/XMLSchema"
+                   xmlns:tns="http://schemas.datacontract.org/2004/07/Dynamics.Ax.Application">
+            <xs:import namespace="http://schemas.datacontract.org/2004/07/Microsoft.Dynamics.Ax.Xpp"/>
+            <xs:complexType name="GWSRequestDCFUJ">
+                <xs:complexContent mixed="false">
+                    <xs:extension base="q1:XppObjectBase"
+                                  xmlns:q1="http://schemas.datacontract.org/2004/07/Microsoft.Dynamics.Ax.Xpp">
+                        <xs:sequence>
+                            <xs:element minOccurs="0" name="requestHeader" nillable="true"
+                                        type="tns:GWSRequestHeaderDCFUJ"/>
+                            <xs:element minOccurs="0" name="xmlCollection" nillable="true"
+                                        type="tns:ArrayOfGWSRequestXMLDCFUJ"/>
+                        </xs:sequence>
+                    </xs:extension>
+                </xs:complexContent>
+            </xs:complexType>
+            <xs:element name="GWSRequestDCFUJ" nillable="true" type="tns:GWSRequestDCFUJ"/>
+            <xs:complexType name="GWSServerVersionDCFUJ">
+                <xs:complexContent mixed="false">
+                    <xs:extension base="q2:XppObjectBase"
+                                  xmlns:q2="http://schemas.datacontract.org/2004/07/Microsoft.Dynamics.Ax.Xpp">
+                        <xs:sequence>
+                            <xs:element minOccurs="0" name="serverVersion" nillable="true" type="xs:string"/>
+                            <xs:element minOccurs="0" name="serverVersionDescription" nillable="true" type="xs:string"/>
+                        </xs:sequence>
+                    </xs:extension>
+                </xs:complexContent>
+            </xs:complexType>
+            <xs:element name="GWSServerVersionDCFUJ" nillable="true" type="tns:GWSServerVersionDCFUJ"/>
+            <xs:complexType name="GWSReplyDCFUJ">
+                <xs:complexContent mixed="false">
+                    <xs:extension base="q3:XppObjectBase"
+                                  xmlns:q3="http://schemas.datacontract.org/2004/07/Microsoft.Dynamics.Ax.Xpp">
+                        <xs:sequence>
+                            <xs:element minOccurs="0" name="instanceCollection" nillable="true"
+                                        type="tns:ArrayOfGWSReplyInstanceDCFUJ"/>
+                            <xs:element minOccurs="0" name="status" nillable="true" type="tns:GWSReplyStatusDCFUJ"/>
+                        </xs:sequence>
+                    </xs:extension>
+                </xs:complexContent>
+            </xs:complexType>
+            <xs:element name="GWSReplyDCFUJ" nillable="true" type="tns:GWSReplyDCFUJ"/>
+            <xs:complexType name="ArrayOfGWSReplyInstanceDCFUJ">
+                <xs:sequence>
+                    <xs:element minOccurs="0" maxOccurs="unbounded" name="GWSReplyInstanceDCFUJ" nillable="true"
+                                type="tns:GWSReplyInstanceDCFUJ"/>
+                </xs:sequence>
+            </xs:complexType>
+            <xs:element name="ArrayOfGWSReplyInstanceDCFUJ" nillable="true" type="tns:ArrayOfGWSReplyInstanceDCFUJ"/>
+            <xs:complexType name="GWSReplyInstanceDCFUJ">
+                <xs:complexContent mixed="false">
+                    <xs:extension base="q4:XppObjectBase"
+                                  xmlns:q4="http://schemas.datacontract.org/2004/07/Microsoft.Dynamics.Ax.Xpp">
+                        <xs:sequence>
+                            <xs:element minOccurs="0" name="replyCode" type="xs:int"/>
+                            <xs:element minOccurs="0" name="replyText" nillable="true" type="xs:string"/>
+                            <xs:element minOccurs="0" name="xml" nillable="true" type="xs:string"/>
+                        </xs:sequence>
+                    </xs:extension>
+                </xs:complexContent>
+            </xs:complexType>
+            <xs:element name="GWSReplyInstanceDCFUJ" nillable="true" type="tns:GWSReplyInstanceDCFUJ"/>
+            <xs:complexType name="GWSReplyStatusDCFUJ">
+                <xs:complexContent mixed="false">
+                    <xs:extension base="q5:XppObjectBase"
+                                  xmlns:q5="http://schemas.datacontract.org/2004/07/Microsoft.Dynamics.Ax.Xpp">
+                        <xs:sequence>
+                            <xs:element minOccurs="0" name="replyCode" type="xs:int"/>
+                            <xs:element minOccurs="0" name="replyText" nillable="true" type="xs:string"/>
+                        </xs:sequence>
+                    </xs:extension>
+                </xs:complexContent>
+            </xs:complexType>
+            <xs:element name="GWSReplyStatusDCFUJ" nillable="true" type="tns:GWSReplyStatusDCFUJ"/>
+            <xs:complexType name="GWSRequestHeaderDCFUJ">
+                <xs:complexContent mixed="false">
+                    <xs:extension base="q6:XppObjectBase"
+                                  xmlns:q6="http://schemas.datacontract.org/2004/07/Microsoft.Dynamics.Ax.Xpp">
+                        <xs:sequence>
+                            <xs:element minOccurs="0" name="area" nillable="true" type="xs:string"/>
+                            <xs:element minOccurs="0" name="clientVersion" nillable="true" type="xs:string"/>
+                            <xs:element minOccurs="0" name="method" nillable="true" type="xs:string"/>
+                        </xs:sequence>
+                    </xs:extension>
+                </xs:complexContent>
+            </xs:complexType>
+            <xs:element name="GWSRequestHeaderDCFUJ" nillable="true" type="tns:GWSRequestHeaderDCFUJ"/>
+            <xs:complexType name="GWSRequestXMLDCFUJ">
+                <xs:complexContent mixed="false">
+                    <xs:extension base="q7:XppObjectBase"
+                                  xmlns:q7="http://schemas.datacontract.org/2004/07/Microsoft.Dynamics.Ax.Xpp">
+                        <xs:sequence>
+                            <xs:element minOccurs="0" name="xml" nillable="true" type="xs:string"/>
+                        </xs:sequence>
+                    </xs:extension>
+                </xs:complexContent>
+            </xs:complexType>
+            <xs:element name="GWSRequestXMLDCFUJ" nillable="true" type="tns:GWSRequestXMLDCFUJ"/>
+            <xs:complexType name="ArrayOfGWSRequestXMLDCFUJ">
+                <xs:sequence>
+                    <xs:element minOccurs="0" maxOccurs="unbounded" name="GWSRequestXMLDCFUJ" nillable="true"
+                                type="tns:GWSRequestXMLDCFUJ"/>
+                </xs:sequence>
+            </xs:complexType>
+            <xs:element name="ArrayOfGWSRequestXMLDCFUJ" nillable="true" type="tns:ArrayOfGWSRequestXMLDCFUJ"/>
+        </xs:schema>
+        <xs:schema elementFormDefault="qualified"
+                   targetNamespace="http://schemas.datacontract.org/2004/07/Microsoft.Dynamics.Ax.Xpp"
+                   xmlns:xs="http://www.w3.org/2001/XMLSchema"
+                   xmlns:tns="http://schemas.datacontract.org/2004/07/Microsoft.Dynamics.Ax.Xpp">
+            <xs:complexType name="XppObjectBase">
+                <xs:sequence/>
+            </xs:complexType>
+            <xs:element name="XppObjectBase" nillable="true" type="tns:XppObjectBase"/>
+        </xs:schema>
+    </wsdl:types>
+    <wsdl:message name="IGenericService_processService_InputMessage">
+        <wsdl:part name="parameters" element="tns:processService"/>
+    </wsdl:message>
+    <wsdl:message name="IGenericService_processService_OutputMessage">
+        <wsdl:part name="parameters" element="tns:processServiceResponse"/>
+    </wsdl:message>
+    <wsdl:message name="IGenericService_getServerVersion_InputMessage">
+        <wsdl:part name="parameters" element="tns:getServerVersion"/>
+    </wsdl:message>
+    <wsdl:message name="IGenericService_getServerVersion_OutputMessage">
+        <wsdl:part name="parameters" element="tns:getServerVersionResponse"/>
+    </wsdl:message>
+    <wsdl:portType name="IGenericService">
+        <wsdl:operation name="processService">
+            <wsdl:input wsaw:Action="http://fujitsu.dk/GWCService/GenericService/IGenericService/processService"
+                        message="tns:IGenericService_processService_InputMessage"/>
+            <wsdl:output
+                    wsaw:Action="http://fujitsu.dk/GWCService/GenericService/IGenericService/processServiceResponse"
+                    message="tns:IGenericService_processService_OutputMessage"/>
+        </wsdl:operation>
+        <wsdl:operation name="getServerVersion">
+            <wsdl:input wsaw:Action="http://fujitsu.dk/GWCService/GenericService/IGenericService/getServerVersion"
+                        message="tns:IGenericService_getServerVersion_InputMessage"/>
+            <wsdl:output
+                    wsaw:Action="http://fujitsu.dk/GWCService/GenericService/IGenericService/getServerVersionResponse"
+                    message="tns:IGenericService_getServerVersion_OutputMessage"/>
+        </wsdl:operation>
+    </wsdl:portType>
+    <wsdl:binding name="wsHttpBinding" type="tns:IGenericService">
+        <wsp:PolicyReference URI="#wsHttpBinding_policy"/>
+        <soap12:binding transport="http://schemas.xmlsoap.org/soap/http"/>
+        <wsdl:operation name="processService">
+            <soap12:operation soapAction="http://fujitsu.dk/GWCService/GenericService/IGenericService/processService"
+                              style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="getServerVersion">
+            <soap12:operation soapAction="http://fujitsu.dk/GWCService/GenericService/IGenericService/getServerVersion"
+                              style="document"/>
+            <wsdl:input>
+                <soap12:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap12:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:service name="GenericService">
+        <wsdl:port name="wsHttpBinding" binding="tns:wsHttpBinding">
+            <soap12:address location="https://webservices.erp.gl/GWCServiceSetup/GenericService.svc"/>
+            <wsa10:EndpointReference>
+                <wsa10:Address>https://webservices.erp.gl/GWCServiceSetup/GenericService.svc</wsa10:Address>
+            </wsa10:EndpointReference>
+        </wsdl:port>
+    </wsdl:service>
+</wsdl:definitions>
