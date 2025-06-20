@@ -45,27 +45,15 @@ class PrismeConnectionException(Exception):
 class PrismeRequestObject:
     @property
     def method(self):
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     @property
     def xml(self):
-        raise NotImplementedError
+        raise NotImplementedError  # pragma: no cover
 
     @property
     def reply_class(self):
-        raise NotImplementedError
-
-    @staticmethod
-    def prepare(value, is_amount=False):
-        if value is None:
-            return ""
-        if is_amount:
-            value = f"{value:.2f}"
-        if isinstance(value, datetime):
-            value = f"{value:%Y-%m-%dT%H:%M:%S}"
-        if isinstance(value, date):
-            value = f"{value:%Y-%m-%d}"
-        return value
+        raise NotImplementedError  # pragma: no cover
 
 
 class PrismeResponseObject(object):
@@ -91,12 +79,14 @@ class CustomDutyRequest(PrismeRequestObject):
     def leveringsmåde(self):
         if self.afgiftsanmeldelse.postforsendelse:
             return 50  # POST
-        forsendelsestype = self.afgiftsanmeldelse.fragtforsendelse.forsendelsestype
-        if forsendelsestype == Forsendelsestype.FLY:
-            return 40  # FLY
-        if forsendelsestype == Forsendelsestype.SKIB:
-            return 10  # SKIB
+        if self.afgiftsanmeldelse.fragtforsendelse:
+            forsendelsestype = self.afgiftsanmeldelse.fragtforsendelse.forsendelsestype
+            if forsendelsestype == Forsendelsestype.FLY:
+                return 40  # FLY
+            if forsendelsestype == Forsendelsestype.SKIB:
+                return 10  # SKIB
         # return 90  # Egen kraft
+        raise ValueError("Missing fragtforsendelse or postforsendelse")
 
     @property
     def forsendelse(self):
@@ -124,7 +114,7 @@ class CustomDutyRequest(PrismeRequestObject):
             return self.afgiftsanmeldelse.fragtforsendelse.fragtbrevsnummer
         if self.afgiftsanmeldelse.postforsendelse:
             return self.afgiftsanmeldelse.postforsendelse.postforsendelsesnummer
-        return ""
+        raise ValueError("Missing fragtforsendelse or postforsendelse")
 
     @property
     def forbindelsesnummer(self):
@@ -291,7 +281,7 @@ class PrismeClient:
             if not self.settings["wsdl_file"]:
                 raise PrismeException(
                     0,
-                    "\n\n".join(
+                    "\n".join(
                         [
                             "WSDL ikke konfigureret",
                             f"Metode: {request_object.method}",
