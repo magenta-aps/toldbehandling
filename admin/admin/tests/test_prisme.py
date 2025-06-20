@@ -842,7 +842,7 @@ class PrismeTest(TestCase):
         },
     )
     @patch.object(Transport, "load")
-    def test_client_auth_basic(self, mock_load):
+    def test_client_auth_ntlm(self, mock_load):
         with open(
             os.path.join(os.path.dirname(__file__), "prisme.wsdl"), "rb"
         ) as wsdl_file:
