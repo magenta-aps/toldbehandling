@@ -229,6 +229,7 @@ Build ER image:
     LANGUAGE_COOKIE_DOMAIN: localhost
     EBOKS_MOCK: 'True'
     SYSTEM_USER_PASSWORD: system
+    PRISME_WSDL: https://test.example.com/
 
   before_script:
     - mkdir "${CI_PROJECT_DIR}/coverage_output"
@@ -336,7 +337,7 @@ Check coverage:
     - cd "${CI_PROJECT_DIR}/coverage_output/"
     - coverage combine
   script:
-    - coverage report -i --show-missing --fail-under=90
+    - coverage report -i --show-missing --fail-under=91
     - coverage xml
   coverage: '/^TOTAL.+?(\d+\%)$/'
   artifacts:
