@@ -21,6 +21,7 @@ from told_common.data import (
 )
 from zeep import Transport
 from zeep.exceptions import Fault, TransportError
+from zeep.wsdl import Document
 
 from admin.clients.prisme import (
     CustomDutyRequest,
@@ -31,7 +32,6 @@ from admin.clients.prisme import (
     PrismeHttpException,
     send_afgiftsanmeldelse,
 )
-from zeep.wsdl import Document
 
 
 class DummyRequest:
@@ -738,7 +738,10 @@ class PrismeTest(TestCase):
             "WSDL ikke konfigureret\nMetode: createCustomDuty\n", exception.message
         )
 
-    @override_settings(ENVIRONMENT="production", PRISME={"wsdl_file": "https://not-existing-server-for-realz.com/wsdl"})
+    @override_settings(
+        ENVIRONMENT="production",
+        PRISME={"wsdl_file": "https://not-existing-server-for-realz.com/wsdl"},
+    )
     def test_client_no_connection(self):
         with self.assertRaises(PrismeConnectionException) as cm:
             _ = PrismeClient().client
@@ -750,13 +753,9 @@ class PrismeTest(TestCase):
         PRISME={
             "wsdl_file": "https://not-existing-server-for-realz.com/wsdl",
             "area": "SULLISSIVIK",
-            "proxy": {
-                "socks": "example.com:1234"
-            }
+            "proxy": {"socks": "example.com:1234"},
         },
-
     )
-
     @override_settings(
         ENVIRONMENT="production",
         PRISME={
@@ -766,7 +765,9 @@ class PrismeTest(TestCase):
     )
     @patch.object(Transport, "load")
     def test_client_wsdl_header(self, mock_load):
-        with open(os.path.join(os.path.dirname(__file__), "prisme.wsdl"), "rb") as wsdl_file:
+        with open(
+            os.path.join(os.path.dirname(__file__), "prisme.wsdl"), "rb"
+        ) as wsdl_file:
             mock_load.return_value = wsdl_file.read()
         prismeclient = PrismeClient()
         header = prismeclient.create_request_header("createCustomDuty")
@@ -782,17 +783,21 @@ class PrismeTest(TestCase):
             "area": "SULLISSIVIK",
             "proxy": {
                 "socks": "example.com:1234",
-            }
+            },
         },
     )
     @patch.object(Transport, "load")
     def test_client_socks(self, mock_load):
-        with open(os.path.join(os.path.dirname(__file__), "prisme.wsdl"), "rb") as wsdl_file:
+        with open(
+            os.path.join(os.path.dirname(__file__), "prisme.wsdl"), "rb"
+        ) as wsdl_file:
             mock_load.return_value = wsdl_file.read()
         prismeclient = PrismeClient()
         client = prismeclient.client
         proxy = "socks5://example.com:1234"
-        self.assertEqual(client.transport.session.proxies, {"http": proxy, "https": proxy})
+        self.assertEqual(
+            client.transport.session.proxies, {"http": proxy, "https": proxy}
+        )
 
     @override_settings(
         ENVIRONMENT="production",
@@ -805,16 +810,20 @@ class PrismeTest(TestCase):
                     "domain": "local",
                     "password": "12345",
                 }
-            }
+            },
         },
     )
     @patch.object(Transport, "load")
     def test_client_auth_basic(self, mock_load):
-        with open(os.path.join(os.path.dirname(__file__), "prisme.wsdl"), "rb") as wsdl_file:
+        with open(
+            os.path.join(os.path.dirname(__file__), "prisme.wsdl"), "rb"
+        ) as wsdl_file:
             mock_load.return_value = wsdl_file.read()
         prismeclient = PrismeClient()
         client = prismeclient.client
-        self.assertEqual(client.transport.session.auth.__class__.__name__, "HTTPBasicAuth")
+        self.assertEqual(
+            client.transport.session.auth.__class__.__name__, "HTTPBasicAuth"
+        )
         self.assertEqual(client.transport.session.auth.username, "test@local")
         self.assertEqual(client.transport.session.auth.password, "12345")
 
@@ -829,15 +838,19 @@ class PrismeTest(TestCase):
                     "domain": "local",
                     "password": "12345",
                 }
-            }
+            },
         },
     )
     @patch.object(Transport, "load")
     def test_client_auth_basic(self, mock_load):
-        with open(os.path.join(os.path.dirname(__file__), "prisme.wsdl"), "rb") as wsdl_file:
+        with open(
+            os.path.join(os.path.dirname(__file__), "prisme.wsdl"), "rb"
+        ) as wsdl_file:
             mock_load.return_value = wsdl_file.read()
         prismeclient = PrismeClient()
         client = prismeclient.client
-        self.assertEqual(client.transport.session.auth.__class__.__name__, "HttpNtlmAuth")
+        self.assertEqual(
+            client.transport.session.auth.__class__.__name__, "HttpNtlmAuth"
+        )
         self.assertEqual(client.transport.session.auth.username, "local\\test")
         self.assertEqual(client.transport.session.auth.password, "12345")
