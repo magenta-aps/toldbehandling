@@ -1,4 +1,5 @@
 import base64
+import os.path
 from copy import copy
 from decimal import Decimal
 from typing import List
@@ -18,6 +19,7 @@ from told_common.data import (
     Vareafgiftssats,
     Varelinje,
 )
+from zeep import Transport
 from zeep.exceptions import Fault, TransportError
 
 from admin.clients.prisme import (
@@ -29,6 +31,7 @@ from admin.clients.prisme import (
     PrismeHttpException,
     send_afgiftsanmeldelse,
 )
+from zeep.wsdl import Document
 
 
 class DummyRequest:
@@ -438,15 +441,15 @@ class PrismeTest(TestCase):
             </CustomDutyHeader>
         """
         )
-        self.assertEquals(request.reply_class, CustomDutyResponse)
-        self.assertEquals(request.leveringsmåde, 10)
-        self.assertEquals(request.forsendelse, self.anmeldelse.fragtforsendelse)
-        self.assertEquals(request.stedkode, "700")
-        self.assertEquals(request.betaler, "Consigner")
-        self.assertEquals(request.forsendelsesnummer, 1)
-        self.assertEquals(request.forbindelsesnummer, "123")
-        self.assertEquals(request.toldkategori, "73A")
-        self.assertEquals(self.strip_xml_whitespace(request.xml), expected, request.xml)
+        self.assertEqual(request.reply_class, CustomDutyResponse)
+        self.assertEqual(request.leveringsmåde, 10)
+        self.assertEqual(request.forsendelse, self.anmeldelse.fragtforsendelse)
+        self.assertEqual(request.stedkode, "700")
+        self.assertEqual(request.betaler, "Consigner")
+        self.assertEqual(request.forsendelsesnummer, 1)
+        self.assertEqual(request.forbindelsesnummer, "123")
+        self.assertEqual(request.toldkategori, "73A")
+        self.assertEqual(self.strip_xml_whitespace(request.xml), expected, request.xml)
 
     def test_request_xml_2(self):
         request = CustomDutyRequest(self.anmeldelse2)
@@ -498,15 +501,15 @@ class PrismeTest(TestCase):
             </CustomDutyHeader>
         """
         )
-        self.assertEquals(request.reply_class, CustomDutyResponse)
-        self.assertEquals(request.leveringsmåde, 40)
-        self.assertEquals(request.forsendelse, self.anmeldelse2.fragtforsendelse)
-        self.assertEquals(request.stedkode, "")
-        self.assertEquals(request.betaler, "Consignee")
-        self.assertEquals(request.forsendelsesnummer, 1)
-        self.assertEquals(request.forbindelsesnummer, "123")
-        self.assertEquals(request.toldkategori, "73A")
-        self.assertEquals(self.strip_xml_whitespace(request.xml), expected, request.xml)
+        self.assertEqual(request.reply_class, CustomDutyResponse)
+        self.assertEqual(request.leveringsmåde, 40)
+        self.assertEqual(request.forsendelse, self.anmeldelse2.fragtforsendelse)
+        self.assertEqual(request.stedkode, "")
+        self.assertEqual(request.betaler, "Consignee")
+        self.assertEqual(request.forsendelsesnummer, 1)
+        self.assertEqual(request.forbindelsesnummer, "123")
+        self.assertEqual(request.toldkategori, "73A")
+        self.assertEqual(self.strip_xml_whitespace(request.xml), expected, request.xml)
 
     def test_request_xml_3(self):
         request = CustomDutyRequest(self.anmeldelse3)
@@ -554,15 +557,15 @@ class PrismeTest(TestCase):
             </CustomDutyHeader>
         """
         )
-        self.assertEquals(request.reply_class, CustomDutyResponse)
-        self.assertEquals(request.leveringsmåde, 50)
-        self.assertEquals(request.forsendelse, self.anmeldelse3.postforsendelse)
-        self.assertEquals(request.stedkode, "600")
-        self.assertEquals(request.betaler, "Consigner")
-        self.assertEquals(request.forsendelsesnummer, 5)
-        self.assertEquals(request.forbindelsesnummer, "999")
-        self.assertEquals(request.toldkategori, "73A")
-        self.assertEquals(self.strip_xml_whitespace(request.xml), expected, request.xml)
+        self.assertEqual(request.reply_class, CustomDutyResponse)
+        self.assertEqual(request.leveringsmåde, 50)
+        self.assertEqual(request.forsendelse, self.anmeldelse3.postforsendelse)
+        self.assertEqual(request.stedkode, "600")
+        self.assertEqual(request.betaler, "Consigner")
+        self.assertEqual(request.forsendelsesnummer, 5)
+        self.assertEqual(request.forbindelsesnummer, "999")
+        self.assertEqual(request.toldkategori, "73A")
+        self.assertEqual(self.strip_xml_whitespace(request.xml), expected, request.xml)
 
     def test_request_xml_4(self):
         temp = copy(self.anmeldelse)
@@ -577,13 +580,13 @@ class PrismeTest(TestCase):
     @override_settings(ENVIRONMENT="test")
     def test_send_afgiftsanmeldelse_test(self):
         responses = send_afgiftsanmeldelse(self.anmeldelse)
-        self.assertEquals(len(responses), 1)
+        self.assertEqual(len(responses), 1)
         response = responses[0]
         self.assertTrue(isinstance(response, CustomDutyResponse))
-        self.assertEquals(response.record_id, "5637147578")
-        self.assertEquals(response.tax_notification_number, "44668899")
-        self.assertEquals(response.delivery_date, "2023-04-07T00:00:00")
-        self.assertEquals(
+        self.assertEqual(response.record_id, "5637147578")
+        self.assertEqual(response.tax_notification_number, "44668899")
+        self.assertEqual(response.delivery_date, "2023-04-07T00:00:00")
+        self.assertEqual(
             response.xml.replace(" ", ""),
             """
             <CustomDutyTableFUJ>
@@ -601,12 +604,12 @@ class PrismeTest(TestCase):
         with self.assertRaises(PrismeHttpException) as cm:
             send_afgiftsanmeldelse(self.anmeldelse)
         exception = cm.exception
-        self.assertEquals(
+        self.assertEqual(
             exception.message,
             "Server returned HTTP status 413\n"
             "Prisme-fejl: Afsendelse er for stor (for store filer vedhæftet)",
         )
-        self.assertEquals(exception.code, 413)
+        self.assertEqual(exception.code, 413)
 
     @staticmethod
     def get_type(name: str):
@@ -627,9 +630,9 @@ class PrismeTest(TestCase):
         with self.assertRaises(PrismeException) as cm:
             send_afgiftsanmeldelse(self.anmeldelse)
         exception = cm.exception
-        self.assertEquals(exception.__class__, PrismeException)
-        self.assertEquals(exception.code, 1)
-        self.assertEquals(exception.message, "test error")
+        self.assertEqual(exception.__class__, PrismeException)
+        self.assertEqual(exception.code, 1)
+        self.assertEqual(exception.message, "test error")
 
     @override_settings(ENVIRONMENT="production")
     @patch.object(PrismeClient, "client")
@@ -651,13 +654,13 @@ class PrismeTest(TestCase):
         )
         responses = send_afgiftsanmeldelse(self.anmeldelse)
 
-        self.assertEquals(len(responses), 1)
+        self.assertEqual(len(responses), 1)
         response = responses[0]
         self.assertTrue(isinstance(response, CustomDutyResponse))
-        self.assertEquals(response.record_id, "111111")
-        self.assertEquals(response.tax_notification_number, "1234")
-        self.assertEquals(response.delivery_date, "2025-16-18T00:00:00")
-        self.assertEquals(
+        self.assertEqual(response.record_id, "111111")
+        self.assertEqual(response.tax_notification_number, "1234")
+        self.assertEqual(response.delivery_date, "2025-16-18T00:00:00")
+        self.assertEqual(
             response.xml.replace(" ", ""),
             """
             <CustomDutyTableFUJ>
@@ -679,9 +682,9 @@ class PrismeTest(TestCase):
         with self.assertRaises(PrismeException) as cm:
             send_afgiftsanmeldelse(self.anmeldelse)
         exception = cm.exception
-        self.assertEquals(exception.__class__, PrismeException)
-        self.assertEquals(exception.code, 1)
-        self.assertEquals(exception.message, "object error")
+        self.assertEqual(exception.__class__, PrismeException)
+        self.assertEqual(exception.code, 1)
+        self.assertEqual(exception.message, "object error")
 
     @override_settings(ENVIRONMENT="production")
     @patch.object(
@@ -693,9 +696,9 @@ class PrismeTest(TestCase):
         with self.assertRaises(PrismeHttpException) as cm:
             send_afgiftsanmeldelse(self.anmeldelse)
         exception = cm.exception
-        self.assertEquals(exception.__class__, PrismeHttpException)
-        self.assertEquals(exception.code, 500)
-        self.assertEquals(exception.message, "test")
+        self.assertEqual(exception.__class__, PrismeHttpException)
+        self.assertEqual(exception.code, 500)
+        self.assertEqual(exception.message, "test")
 
     @override_settings(ENVIRONMENT="production")
     @patch.object(
@@ -707,9 +710,9 @@ class PrismeTest(TestCase):
         with self.assertRaises(PrismeHttpException) as cm:
             send_afgiftsanmeldelse(self.anmeldelse)
         exception = cm.exception
-        self.assertEquals(exception.__class__, PrismeHttpException)
-        self.assertEquals(exception.code, 413)
-        self.assertEquals(
+        self.assertEqual(exception.__class__, PrismeHttpException)
+        self.assertEqual(exception.code, 413)
+        self.assertEqual(
             exception.message,
             "test\nPrisme-fejl: Afsendelse er for stor (for store filer vedhæftet)",
         )
@@ -720,17 +723,121 @@ class PrismeTest(TestCase):
         with self.assertRaises(PrismeConnectionException) as cm:
             send_afgiftsanmeldelse(self.anmeldelse)
         exception = cm.exception
-        self.assertEquals(exception.__class__, PrismeConnectionException)
-        self.assertEquals(exception.code, 123)
-        self.assertEquals(exception.message, "test")
+        self.assertEqual(exception.__class__, PrismeConnectionException)
+        self.assertEqual(exception.code, 123)
+        self.assertEqual(exception.message, "test")
 
     @override_settings(ENVIRONMENT="production", PRISME={"wsdl_file": None})
     def test_send_afgiftsanmeldelse_no_wsdl(self):
         with self.assertRaises(PrismeException) as cm:
             send_afgiftsanmeldelse(self.anmeldelse)
         exception = cm.exception
-        self.assertEquals(exception.__class__, PrismeException)
-        self.assertEquals(exception.code, 0)
+        self.assertEqual(exception.__class__, PrismeException)
+        self.assertEqual(exception.code, 0)
         self.assertIn(
             "WSDL ikke konfigureret\nMetode: createCustomDuty\n", exception.message
         )
+
+    @override_settings(ENVIRONMENT="production", PRISME={"wsdl_file": "https://not-existing-server-for-realz.com/wsdl"})
+    def test_client_no_connection(self):
+        with self.assertRaises(PrismeConnectionException) as cm:
+            _ = PrismeClient().client
+        exception = cm.exception
+        self.assertIn("Failed connecting to prisme", exception.message)
+
+    @override_settings(
+        ENVIRONMENT="production",
+        PRISME={
+            "wsdl_file": "https://not-existing-server-for-realz.com/wsdl",
+            "area": "SULLISSIVIK",
+            "proxy": {
+                "socks": "example.com:1234"
+            }
+        },
+
+    )
+
+    @override_settings(
+        ENVIRONMENT="production",
+        PRISME={
+            "wsdl_file": "https://not-existing-server-for-realz.com/wsdl",
+            "area": "SULLISSIVIK",
+        },
+    )
+    @patch.object(Transport, "load")
+    def test_client_wsdl_header(self, mock_load):
+        with open(os.path.join(os.path.dirname(__file__), "prisme.wsdl"), "rb") as wsdl_file:
+            mock_load.return_value = wsdl_file.read()
+        prismeclient = PrismeClient()
+        header = prismeclient.create_request_header("createCustomDuty")
+        self.assertEqual(header.__class__.__name__, "GWSRequestHeaderDCFUJ")
+        self.assertEqual(header.area, "SULLISSIVIK")
+        self.assertEqual(header.clientVersion, 1)
+        self.assertEqual(header.method, "createCustomDuty")
+
+    @override_settings(
+        ENVIRONMENT="production",
+        PRISME={
+            "wsdl_file": "https://not-existing-server-for-realz.com/wsdl",
+            "area": "SULLISSIVIK",
+            "proxy": {
+                "socks": "example.com:1234",
+            }
+        },
+    )
+    @patch.object(Transport, "load")
+    def test_client_socks(self, mock_load):
+        with open(os.path.join(os.path.dirname(__file__), "prisme.wsdl"), "rb") as wsdl_file:
+            mock_load.return_value = wsdl_file.read()
+        prismeclient = PrismeClient()
+        client = prismeclient.client
+        proxy = "socks5://example.com:1234"
+        self.assertEqual(client.transport.session.proxies, {"http": proxy, "https": proxy})
+
+    @override_settings(
+        ENVIRONMENT="production",
+        PRISME={
+            "wsdl_file": "https://not-existing-server-for-realz.com/wsdl",
+            "area": "SULLISSIVIK",
+            "auth": {
+                "basic": {
+                    "username": "test",
+                    "domain": "local",
+                    "password": "12345",
+                }
+            }
+        },
+    )
+    @patch.object(Transport, "load")
+    def test_client_auth_basic(self, mock_load):
+        with open(os.path.join(os.path.dirname(__file__), "prisme.wsdl"), "rb") as wsdl_file:
+            mock_load.return_value = wsdl_file.read()
+        prismeclient = PrismeClient()
+        client = prismeclient.client
+        self.assertEqual(client.transport.session.auth.__class__.__name__, "HTTPBasicAuth")
+        self.assertEqual(client.transport.session.auth.username, "test@local")
+        self.assertEqual(client.transport.session.auth.password, "12345")
+
+    @override_settings(
+        ENVIRONMENT="production",
+        PRISME={
+            "wsdl_file": "https://not-existing-server-for-realz.com/wsdl",
+            "area": "SULLISSIVIK",
+            "auth": {
+                "ntlm": {
+                    "username": "test",
+                    "domain": "local",
+                    "password": "12345",
+                }
+            }
+        },
+    )
+    @patch.object(Transport, "load")
+    def test_client_auth_basic(self, mock_load):
+        with open(os.path.join(os.path.dirname(__file__), "prisme.wsdl"), "rb") as wsdl_file:
+            mock_load.return_value = wsdl_file.read()
+        prismeclient = PrismeClient()
+        client = prismeclient.client
+        self.assertEqual(client.transport.session.auth.__class__.__name__, "HttpNtlmAuth")
+        self.assertEqual(client.transport.session.auth.username, "local\\test")
+        self.assertEqual(client.transport.session.auth.password, "12345")
