@@ -899,7 +899,10 @@ class TestPrisme(TestMixin, PermissionsTest, TestCase):
         json_content = None
         content = None
         status_code = None
-        if path == expected_prefix + "modtager/1":
+        if path in (
+            expected_prefix + "modtager/1",
+            expected_prefix + "afgiftsanmeldelse/1",
+        ):
             json_content = {"id": 1}
             self.patched.append((path, data))
         else:
@@ -945,7 +948,12 @@ class TestPrisme(TestMixin, PermissionsTest, TestCase):
         )
 
         response = self.client.post(
-            view_url, {"send_til_prisme": "true", "modtager_stedkode": "123"}
+            view_url,
+            {
+                "send_til_prisme": "true",
+                "modtager_stedkode": "123",
+                "toldkategori": "70",
+            },
         )
         self.assertEquals(response.status_code, 302)
         prefix = f"{settings.REST_DOMAIN}/api/"
@@ -953,6 +961,9 @@ class TestPrisme(TestMixin, PermissionsTest, TestCase):
         for url, data in self.patched:
             patched[url].append(json.loads(data))
         self.assertEquals(patched[prefix + "modtager/1"][0]["stedkode"], 123)
+        self.assertEquals(
+            patched[prefix + "afgiftsanmeldelse/1"][0]["toldkategori"], "70"
+        )
         posted = defaultdict(list)
         for url, data in self.posted:
             posted[url].append(json.loads(data))
