@@ -23,7 +23,7 @@ from django.core.cache import cache, caches
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.shortcuts import redirect
 from django.template.response import TemplateResponse
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.views.generic import TemplateView
 from openpyxl import Workbook, load_workbook
@@ -59,7 +59,7 @@ from admin.views import (
 )
 
 
-class TestLogin(TestMixin, TestCase):
+class LoginTest(TestMixin, HasLogin, TestCase):
     @staticmethod
     def create_response(status_code, content):
         response = Response()
@@ -94,7 +94,11 @@ class TestLogin(TestMixin, TestCase):
                 "groups": [],
                 "permissions": [],
             }
+            if path == expected_prefix + "user":
+                json_content = {"count": 1, "items": [json_content]}
         elif path == expected_prefix + "afsender":
+            json_content = {"count": 0, "items": []}
+        elif path == expected_prefix + "afgiftstabel":
             json_content = {"count": 0, "items": []}
         else:
             raise Exception(f"Mock {cls.__name__} got unrecognized path: GET {path}")
@@ -148,6 +152,31 @@ class TestLogin(TestMixin, TestCase):
         self.assertEquals(response.headers["Location"], "/")
         self.assertEquals(self.client.session["access_token"], "123456")
         self.assertEquals(self.client.session["refresh_token"], "abcdef")
+
+    @override_settings(REQUIRE_2FA=True, DEBUG=True)
+    @patch.object(requests.sessions.Session, "get")
+    @patch.object(
+        requests,
+        "post",
+        return_value=create_response(200, {"access": "123456", "refresh": "abcdef"}),
+    )
+    def test_correct_login_2fa(self, mock_post, mock_get):
+        mock_get.side_effect = self.mock_requests_get
+        self.login(userdata_extra={"twofactor_enabled": False})
+        response = self.client.get(reverse("tf10_create"))
+        self.assertEquals(response.status_code, 302)
+        self.assertEquals(response.headers["Location"], reverse("twofactor:setup"))
+
+        self.logout()
+
+        self.login(session_extra={"twofactor_authenticated": False})
+        response = self.client.get(reverse("tf10_create"))
+        self.assertEquals(response.status_code, 302)
+        self.assertEquals(
+            response.headers["Location"],
+            reverse("twofactor:login") + "?back=" + quote_plus(reverse("tf10_create")),
+        )
+        self.logout()
 
     @patch.object(RestClient, "refresh_login")
     @patch.object(
@@ -870,7 +899,10 @@ class TestPrisme(TestMixin, PermissionsTest, TestCase):
         json_content = None
         content = None
         status_code = None
-        if path == expected_prefix + "modtager/1":
+        if path in (
+            expected_prefix + "modtager/1",
+            expected_prefix + "afgiftsanmeldelse/1",
+        ):
             json_content = {"id": 1}
             self.patched.append((path, data))
         else:
@@ -916,7 +948,12 @@ class TestPrisme(TestMixin, PermissionsTest, TestCase):
         )
 
         response = self.client.post(
-            view_url, {"send_til_prisme": "true", "modtager_stedkode": "123"}
+            view_url,
+            {
+                "send_til_prisme": "true",
+                "modtager_stedkode": "123",
+                "toldkategori": "70",
+            },
         )
         self.assertEquals(response.status_code, 302)
         prefix = f"{settings.REST_DOMAIN}/api/"
@@ -924,6 +961,9 @@ class TestPrisme(TestMixin, PermissionsTest, TestCase):
         for url, data in self.patched:
             patched[url].append(json.loads(data))
         self.assertEquals(patched[prefix + "modtager/1"][0]["stedkode"], 123)
+        self.assertEquals(
+            patched[prefix + "afgiftsanmeldelse/1"][0]["toldkategori"], "70"
+        )
         posted = defaultdict(list)
         for url, data in self.posted:
             posted[url].append(json.loads(data))
