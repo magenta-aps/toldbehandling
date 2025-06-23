@@ -639,7 +639,7 @@ class HasLogin:
     def login_url(self):
         raise NotImplementedError
 
-    def login(self, userdata=None):
+    def login(self, userdata=None, userdata_extra=None, session_extra=None):
         session = self.client.session
         if not userdata:
             userdata = {
@@ -656,6 +656,8 @@ class HasLogin:
                 "groups": [],
                 "twofactor_enabled": True,
             }
+            if userdata_extra is not None:
+                userdata.update(userdata_extra)
         session.update(
             {
                 "access_token": "123456",
@@ -670,6 +672,8 @@ class HasLogin:
                 "twofactor_authenticated": True,
             }
         )
+        if session_extra is not None:
+            session.update(session_extra)
         session.save()
 
     def logout(self):
