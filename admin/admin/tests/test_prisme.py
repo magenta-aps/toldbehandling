@@ -21,7 +21,6 @@ from told_common.data import (
 )
 from zeep import Transport
 from zeep.exceptions import Fault, TransportError
-from zeep.wsdl import Document
 
 from admin.clients.prisme import (
     CustomDutyRequest,
