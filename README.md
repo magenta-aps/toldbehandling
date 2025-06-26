@@ -48,19 +48,19 @@ creating a `docker-compose.override.yml` file. See the
 You can also run tests locally by using `docker exec`:
 
 ```
-docker exec toldbehandling-ui bash -c 'coverage run manage.py test ; coverage report --show-missing'
+docker exec toldbehandling-ui bash -c 'coverage run manage.py test --parallel ; coverage combine ; coverage report --show-missing'
 ```
 
 and for the `rest` app:
 
 ```
-docker exec toldbehandling-rest bash -c 'coverage run manage.py test ; coverage report --show-missing'
+docker exec toldbehandling-rest bash -c 'coverage run manage.py test --parallel ; coverage combine ; coverage report --show-missing'
 ```
 
 and for the `admin` app:
 
 ```
-docker exec toldbehandling-admin bash -c 'coverage run manage.py test ; coverage report --show-missing'
+docker exec toldbehandling-admin bash -c 'coverage run manage.py test --parallel ; coverage combine ; coverage report --show-missing'
 ```
 
 You can run the mypy checks with the following command:

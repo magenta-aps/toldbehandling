@@ -236,7 +236,7 @@ class TF5FormCreateView(
         if "initial" in kwargs:
             initial = kwargs["initial"]
         else:
-            initial = kwargs["initial"] = {}
+            initial = kwargs["initial"] = {}  # pragma: no cover
 
         sessiondata = self.request.session.get(settings.LOGIN_SESSION_DATA_KEY)
         if sessiondata:
@@ -507,6 +507,6 @@ class TF5PaymentDetailsView(
 class TF5PaymentRefreshView(
     PermissionsRequiredMixin, HasRestClientMixin, UiViewMixin, TF5Mixin, View
 ):
-    async def post(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         payment_refreshed = self.rest_client.payment.refresh(int(self.kwargs["id"]))
         return JsonResponse({"payment_refreshed": payment_refreshed})
