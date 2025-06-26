@@ -4,7 +4,6 @@
 import base64
 import json
 from collections import defaultdict
-from operator import not_
 from typing import List, Tuple
 from unittest.mock import call, patch
 from urllib.parse import quote
@@ -252,7 +251,9 @@ class TF10BlanketTest(BlanketMixin, TestMixin, HasLogin, TestCase):
                     "kladde": False,
                 },
                 "leverandørfaktura_nummer": "5678",
-                "leverandørfaktura": "/leverand%C3%B8rfakturaer/3/leverand%C3%B8rfaktura.txt",
+                "leverandørfaktura": (
+                    "/leverand%C3%B8rfakturaer/3/" "leverand%C3%B8rfaktura.txt"
+                ),
                 "betales_af": "afsender",
                 "indførselstilladelse": "1234",
                 "afgift_total": "658.00",
@@ -953,7 +954,7 @@ class TF5BlanketTest(TestMixin, HasLogin, TestCase):
         json_content = None
         content = None
         status_code = None
-        empty = {"count": 0, "items": []}
+
         if path == expected_prefix + "afgiftstabel":
             json_content = {
                 "count": 1,
@@ -1230,3 +1231,20 @@ class TF5BlanketTest(TestMixin, HasLogin, TestCase):
             self.assertEquals(
                 html_errors[file_field], ["Filen er for stor; den må max. være 10.0 MB"]
             )
+
+    @patch.object(requests.Session, "get")
+    @patch.object(
+        requests.Session,
+        "post",
+    )
+    def test_form_redirects_to_payment_page(self, mock_post, mock_get):
+        if not settings.TF5_ENABLED:
+            return
+        self.login()
+        url = reverse("tf5_create")
+        mock_get.side_effect = self.mock_requests_get
+        mock_post.side_effect = self.mock_requests_post
+        self.formdata1["betal"] = True
+        response = self.client.post(url, data={**self.formdata1, **self.formfiles1})
+        self.assertIn("/payment/checkout", response["Location"])
+        self.formdata1["betal"] = False

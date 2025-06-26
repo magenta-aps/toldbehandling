@@ -271,7 +271,7 @@ Unittest UI:
     - cp -r ./told-common/told_common .
     - coverage run manage.py test --parallel 4
     - coverage combine
-    - coverage report --show-missing --fail-under=67
+    - coverage report --show-missing --fail-under=74
     - mv .coverage "${CI_PROJECT_DIR}/coverage_output/.coverage.${CI_JOB_ID}"
     - cp -r ./ui "${CI_PROJECT_DIR}/coverage_output/"
 
@@ -337,7 +337,7 @@ Check coverage:
     - cd "${CI_PROJECT_DIR}/coverage_output/"
     - coverage combine
   script:
-    - coverage report -i --show-missing --fail-under=92
+    - coverage report -i --show-missing --fail-under=94
     - coverage xml
   coverage: '/^TOTAL.+?(\d+\%)$/'
   artifacts:
