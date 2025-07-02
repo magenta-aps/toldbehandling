@@ -7,7 +7,7 @@ from django.urls import reverse
 from django_otp.oath import TOTP
 from requests import Response
 from told_common.rest_client import TotpDeviceRestClient, UserRestClient
-from told_common.tests import HasLogin, TestMixin
+from told_common.tests.tests import HasLogin, TestMixin
 
 
 class TwoFactorSetupViewTest(HasLogin, TestMixin, TestCase):

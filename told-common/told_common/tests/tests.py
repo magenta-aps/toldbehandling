@@ -7,7 +7,6 @@ import os
 import time
 from copy import deepcopy
 from datetime import datetime, timedelta
-from decimal import Decimal
 from functools import partial
 from io import StringIO
 from typing import Any, Callable, Tuple
@@ -20,11 +19,11 @@ from django.conf import settings
 from django.contrib.auth.models import Permission
 from django.core.cache import cache
 from django.http import FileResponse
-from django.test import TestCase, override_settings
+from django.test import override_settings
 from django.test.testcases import SimpleTestCase
 from django.urls import reverse
 from requests import Response
-from told_common.data import JwtTokenInfo, unformat_decimal
+from told_common.data import JwtTokenInfo
 from told_common.rest_client import RestClient, RestClientException
 from told_common.templatetags.common_tags import file_basename, zfill
 from told_common.views import FileView
@@ -1565,11 +1564,3 @@ def collapse_newlines(value: str):
         if line:
             new_values.append(line)
     return "\n".join(new_values)
-
-
-class TestData(TestCase):
-    def test_unformat_decimal(self):
-        self.assertEquals(unformat_decimal("1,0"), Decimal("1.0"))
-        self.assertEquals(unformat_decimal("1.0"), Decimal("1.0"))
-        self.assertEquals(unformat_decimal("1"), Decimal("1"))
-        self.assertEquals(unformat_decimal("1.000,00"), Decimal("1000.00"))
