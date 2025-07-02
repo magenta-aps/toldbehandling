@@ -31,7 +31,7 @@ from requests import Response
 from told_common.data import Notat, Vareafgiftssats
 from told_common.forms import TF10VareForm
 from told_common.rest_client import RestClient
-from told_common.tests import (
+from told_common.tests.tests import (
     AnmeldelseListViewTest,
     HasLogin,
     LoginTest,
