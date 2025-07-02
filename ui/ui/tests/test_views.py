@@ -13,7 +13,7 @@ from django.test import TestCase
 from django.urls import reverse
 from requests import HTTPError, Response
 from told_common.data import Afsender, Modtager
-from told_common.tests import HasLogin
+from told_common.tests.tests import HasLogin
 from weasyprint import HTML
 
 User = get_user_model()

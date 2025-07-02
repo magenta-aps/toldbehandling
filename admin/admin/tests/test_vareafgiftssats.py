@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: MPL-2.0
 
 from decimal import Decimal
+from unittest.mock import MagicMock
 
 from django.test import TestCase
 from told_common.data import Vareafgiftssats, format_decimal, format_int
@@ -277,6 +278,19 @@ class VareafgiftsSatsTest(TestCase):
             har_privat_tillægsafgift_alkohol=False,
             subsatser=[sats7201, sats7202, sats7203],
         )
+        sats72_2 = Vareafgiftssats(
+            id=1,
+            afgiftstabel=1,
+            afgiftsgruppenummer=72,
+            vareart_da="PERSONBILER Afgiften svares med et fast beløb på 50.000 + 100 % af den del af fakturaværdien der overstiger 50.000 men ikke 150.000 + 125 % af resten.",
+            vareart_kl="PERSONBILER Afgiften svares med et fast beløb på 50.000 + 100 % af den del af fakturaværdien der overstiger 50.000 men ikke 150.000 + 125 % af resten.",
+            enhed=Vareafgiftssats.Enhed.SAMMENSAT,
+            minimumsbeløb=None,
+            afgiftssats=Decimal(0),
+            kræver_indførselstilladelse=False,
+            har_privat_tillægsafgift_alkohol=False,
+            subsatser=None,
+        )
 
         self.assertEquals(sats1.text, "6,00 kr. pr kg")
         self.assertEquals(sats1a.text, "6,00 kr. pr kg over 200,00 kg")
@@ -311,6 +325,7 @@ class VareafgiftsSatsTest(TestCase):
             sats72.text,
             "50.000,00 kr. pr stk + 100,00% af fakturabeløb mellem 50.000,00 og 150.000,00 + 150,00% af fakturabeløb over 150.000,00",
         )
+        self.assertEquals(sats72_2.text, None)
 
     def test_format_decimal(self):
         self.assertEquals(format_decimal(Decimal("1234.56")), "1.234,56")
@@ -318,3 +333,27 @@ class VareafgiftsSatsTest(TestCase):
     def test_format_int(self):
         self.assertEquals(format_int(Decimal("1234.00")), 1234)
         self.assertEquals(format_int(Decimal("1234.99")), 1234)
+
+    def test_populate_subs(self):
+
+        sats72 = Vareafgiftssats(
+            id=1,
+            afgiftstabel=1,
+            afgiftsgruppenummer=72,
+            vareart_da="PERSONBILER Afgiften svares med et fast beløb på 50.000 + 100 % af den del af fakturaværdien der overstiger 50.000 men ikke 150.000 + 125 % af resten.",
+            vareart_kl="PERSONBILER Afgiften svares med et fast beløb på 50.000 + 100 % af den del af fakturaværdien der overstiger 50.000 men ikke 150.000 + 125 % af resten.",
+            enhed=Vareafgiftssats.Enhed.SAMMENSAT,
+            minimumsbeløb=None,
+            afgiftssats=Decimal(0),
+            kræver_indførselstilladelse=False,
+            har_privat_tillægsafgift_alkohol=False,
+            subsatser=None,
+        )
+
+        sub_getter = MagicMock()
+
+        sub_getter.return_value = ["foo", "bar"]
+
+        sats72.populate_subs(sub_getter)
+
+        self.assertEqual(sats72.subsatser, ["foo", "bar"])
