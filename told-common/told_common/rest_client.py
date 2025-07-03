@@ -190,8 +190,8 @@ class PostforsendelseRestClient(ModelRestClient):
             "afsenderbykode",
             "afgangsdato",
         ):
-            if (
-                data[x] != getattr(existing, x)
+            if data[x] != (
+                getattr(existing, x)
                 if isinstance(existing, PostForsendelse)
                 else existing[x]
             ):
@@ -257,8 +257,8 @@ class FragtforsendelseRestClient(ModelRestClient):
             "forbindelsesnr",
             "afgangsdato",
         ):
-            if (
-                data[x] != getattr(existing, x)
+            if data[x] != (
+                getattr(existing, x)
                 if isinstance(existing, FragtForsendelse)
                 else existing[x]
             ):
