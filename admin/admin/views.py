@@ -542,7 +542,7 @@ class TF10EditMultipleView(AdminLayoutBaseView, FormView):
                 id=self.ids, full=True
             )
             return items
-        return []
+        return []  # pragma: no cover
 
     @cached_property
     def fragttyper(self) -> Set[str]:
