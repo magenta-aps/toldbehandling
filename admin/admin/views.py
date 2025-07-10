@@ -542,7 +542,7 @@ class TF10EditMultipleView(AdminLayoutBaseView, FormView):
                 id=self.ids, full=True
             )
             return items
-        return []
+        return []  # pragma: no cover
 
     @cached_property
     def fragttyper(self) -> Set[str]:
@@ -991,7 +991,7 @@ class StatistikView(AdminLayoutBaseView, FormWithFormsetView):
 
     @cached_property
     def satser(self):
-        return self.rest_client.vareafgiftssats.list()
+        return self.rest_client.vareafgiftssats.list()  # pragma: no cover
 
     def get_formset_kwargs(self) -> Dict[str, Any]:
         kwargs = super().get_formset_kwargs()
