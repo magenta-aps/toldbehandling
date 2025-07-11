@@ -38,6 +38,7 @@ from ninja_extra.pagination import paginate
 from ninja_extra.schemas import NinjaPaginationResponseSchema
 from payment.models import Payment
 from project.util import RestPermission, json_dump
+from pydantic import validator, root_validator
 from sats.models import Vareafgiftssats
 
 log = logging.getLogger(__name__)
@@ -768,6 +769,19 @@ class VarelinjeIn(ModelSchema):
         model_fields = ["mængde", "antal", "kladde", "fakturabeløb"]
         model_fields_optional = ["mængde", "antal", "kladde", "fakturabeløb"]
 
+    @root_validator(pre=False)
+    def enhed_must_have_corresponding_field(cls, values):
+        enhed = Vareafgiftssats.objects.get(id=values.get("vareafgiftssats_id")).enhed
+        if enhed == Vareafgiftssats.Enhed.ANTAL and values.get("antal") is None:
+            raise ValueError('Must set antal')
+        if enhed == Vareafgiftssats.Enhed.PROCENT and values.get("fakturabeløb") is None:
+            raise ValueError('Must set fakturabeløb')
+        if enhed in (
+            Vareafgiftssats.Enhed.KILOGRAM,
+            Vareafgiftssats.Enhed.LITER,
+        ) and values.get("mængde") is None:
+            raise ValueError('Must set mængde')
+        return values
 
 class PartialVarelinjeIn(ModelSchema):
     afgiftsanmeldelse_id: Optional[int] = None
