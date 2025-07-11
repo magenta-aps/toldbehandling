@@ -21,7 +21,7 @@ from ninja_extra import NinjaExtraAPI
 from ninja_jwt.controller import NinjaJWTDefaultController
 from otp.api import TOTPDeviceAPI, TwoFactorLoginAPI
 from payment.api import PaymentAPI
-from project.util import json_dump, ORJSONRenderer
+from project.util import ORJSONRenderer, json_dump
 from sats.api import AfgiftstabelAPI, VareafgiftssatsAPI
 
 api = NinjaExtraAPI(title="Toldbehandling", renderer=ORJSONRenderer(), csrf=False)
@@ -46,6 +46,4 @@ api.register_controllers(MetricsAPI)
 
 @api.exception_handler(ValidationError)
 def custom_validation_errors(request, e: ValidationError):
-    return HttpResponseBadRequest(
-        json_dump(e), content_type="application/json"
-    )
+    return HttpResponseBadRequest(json_dump(e), content_type="application/json")

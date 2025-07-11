@@ -771,8 +771,10 @@ class VarelinjeIn(ModelSchema):
 
     @root_validator(pre=False)
     def enhed_must_have_corresponding_field(cls, values):
-        if values.get("kladde") != True:
-            enhed = Vareafgiftssats.objects.get(id=values.get("vareafgiftssats_id")).enhed
+        if values.get("kladde") is not True:
+            enhed = Vareafgiftssats.objects.get(
+                id=values.get("vareafgiftssats_id")
+            ).enhed
             if enhed == Vareafgiftssats.Enhed.ANTAL and values.get("antal") is None:
                 raise ValidationError({"__all__": "Must set antal"})
             if (
@@ -808,8 +810,10 @@ class PartialVarelinjeIn(ModelSchema):
 
     @root_validator(pre=False)
     def enhed_must_have_corresponding_field(cls, values):
-        if values.get("kladde") != True:
-            enhed = Vareafgiftssats.objects.get(id=values.get("vareafgiftssats_id")).enhed
+        if values.get("kladde") is not True:
+            enhed = Vareafgiftssats.objects.get(
+                id=values.get("vareafgiftssats_id")
+            ).enhed
             if enhed == Vareafgiftssats.Enhed.ANTAL and values.get("antal") is None:
                 raise ValidationError({"__all__": "Must set antal"})
             if (
@@ -820,9 +824,9 @@ class PartialVarelinjeIn(ModelSchema):
             if (
                 enhed
                 in (
-                Vareafgiftssats.Enhed.KILOGRAM,
-                Vareafgiftssats.Enhed.LITER,
-            )
+                    Vareafgiftssats.Enhed.KILOGRAM,
+                    Vareafgiftssats.Enhed.LITER,
+                )
                 and values.get("mængde") is None
             ):
                 raise ValidationError({"__all__": "Must set mængde"})
