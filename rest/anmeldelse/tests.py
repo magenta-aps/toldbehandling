@@ -1699,8 +1699,7 @@ class VarelinjeAPITest(TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.json(), {"id": ANY})
 
-
-    def test_create_no_antal(self):
+    def test_create__validation_err__no_antal(self):
         resp = self.client.post(
             reverse(f"api-1.0.0:varelinje_create"),
             json_dump(
@@ -1713,41 +1712,40 @@ class VarelinjeAPITest(TestCase):
             HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
             content_type="application/json",
         )
-        print(resp.json())
-        self.assertEqual(resp.status_code, 422)
-        self.assertEqual(resp.json()["detail"][0]["msg"], "Must set antal")
+        self.assertEqual(resp.status_code, 400)
+        self.assertEqual(resp.json(), {"__all__": ["Must set antal"]})
 
-    def test_create_no_mængde(self):
+    def test_create__validation_err__no_mængde(self):
         resp = self.client.post(
             reverse(f"api-1.0.0:varelinje_create"),
             json_dump(
                 {
                     "privatafgiftsanmeldelse_id": self.privatafgiftsanmeldelse.id,
                     "vareafgiftssats_id": self.varelinjesats2.id,
-                    "fakturabeløb": "100"
+                    "fakturabeløb": "100",
                 }
             ),
             HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
             content_type="application/json",
         )
-        self.assertEqual(resp.status_code, 422)
-        self.assertEqual(resp.json()["detail"][0]["msg"], "Must set mængde")
+        self.assertEqual(resp.status_code, 400)
+        self.assertEqual(resp.json(), {"__all__": ["Must set mængde"]})
 
-    def test_create_no_fakturabeløb(self):
+    def test_create__validation_err__no_fakturabeløb(self):
         resp = self.client.post(
             reverse(f"api-1.0.0:varelinje_create"),
             json_dump(
                 {
                     "privatafgiftsanmeldelse_id": self.privatafgiftsanmeldelse.id,
                     "vareafgiftssats_id": self.varelinjesats3.id,
-                    "antal": "100"
+                    "antal": "100",
                 }
             ),
             HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
             content_type="application/json",
         )
-        self.assertEqual(resp.status_code, 422)
-        self.assertEqual(resp.json()["detail"][0]["msg"], "Must set fakturabeløb")
+        self.assertEqual(resp.status_code, 400)
+        self.assertEqual(resp.json(), {"__all__": ["Must set fakturabeløb"]})
 
     def test_create__vareafgiftssats_afgiftsgruppenummer(self):
         resp = self.client.post(
