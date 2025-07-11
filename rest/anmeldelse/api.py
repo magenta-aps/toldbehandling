@@ -260,7 +260,7 @@ class AfgiftsanmeldelseAPI:
             return {"id": item.id}
         except ValidationError as e:
             return HttpResponseBadRequest(
-                json_dump(e), content_type="application/json"
+                json_dump(e.message_dict), content_type="application/json"
             )
 
     # List afgiftsanmeldelser. Relaterede objekter refereres med deres id
@@ -771,23 +771,24 @@ class VarelinjeIn(ModelSchema):
 
     @root_validator(pre=False)
     def enhed_must_have_corresponding_field(cls, values):
-        enhed = Vareafgiftssats.objects.get(id=values.get("vareafgiftssats_id")).enhed
-        if enhed == Vareafgiftssats.Enhed.ANTAL and values.get("antal") is None:
-            raise ValidationError({"__all__": "Must set antal"})
-        if (
-            enhed == Vareafgiftssats.Enhed.PROCENT
-            and values.get("fakturabeløb") is None
-        ):
-            raise ValidationError({"__all__": "Must set fakturabeløb"})
-        if (
-            enhed
-            in (
-                Vareafgiftssats.Enhed.KILOGRAM,
-                Vareafgiftssats.Enhed.LITER,
-            )
-            and values.get("mængde") is None
-        ):
-            raise ValidationError({"__all__": "Must set mængde"})
+        if values.get("kladde") != True:
+            enhed = Vareafgiftssats.objects.get(id=values.get("vareafgiftssats_id")).enhed
+            if enhed == Vareafgiftssats.Enhed.ANTAL and values.get("antal") is None:
+                raise ValidationError({"__all__": "Must set antal"})
+            if (
+                enhed == Vareafgiftssats.Enhed.PROCENT
+                and values.get("fakturabeløb") is None
+            ):
+                raise ValidationError({"__all__": "Must set fakturabeløb"})
+            if (
+                enhed
+                in (
+                    Vareafgiftssats.Enhed.KILOGRAM,
+                    Vareafgiftssats.Enhed.LITER,
+                )
+                and values.get("mængde") is None
+            ):
+                raise ValidationError({"__all__": "Must set mængde"})
         return values
 
 
@@ -804,6 +805,28 @@ class PartialVarelinjeIn(ModelSchema):
             "kladde",
         ]
         model_fields_optional = "__all__"
+
+    @root_validator(pre=False)
+    def enhed_must_have_corresponding_field(cls, values):
+        if values.get("kladde") != True:
+            enhed = Vareafgiftssats.objects.get(id=values.get("vareafgiftssats_id")).enhed
+            if enhed == Vareafgiftssats.Enhed.ANTAL and values.get("antal") is None:
+                raise ValidationError({"__all__": "Must set antal"})
+            if (
+                enhed == Vareafgiftssats.Enhed.PROCENT
+                and values.get("fakturabeløb") is None
+            ):
+                raise ValidationError({"__all__": "Must set fakturabeløb"})
+            if (
+                enhed
+                in (
+                Vareafgiftssats.Enhed.KILOGRAM,
+                Vareafgiftssats.Enhed.LITER,
+            )
+                and values.get("mængde") is None
+            ):
+                raise ValidationError({"__all__": "Must set mængde"})
+        return values
 
 
 class VarelinjeOut(ModelSchema):

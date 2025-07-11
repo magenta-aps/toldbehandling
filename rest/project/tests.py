@@ -17,12 +17,10 @@ class UtilTest(TestCase):
             json_dump({"foo": NonSerializable()})
 
         self.assertEqual(
-            json_dump(ValidationError(["error1", "error2"])),
-            b"[\"error1\",\"error2\"]"
+            json_dump(ValidationError(["error1", "error2"])), b"[\"error1\",\"error2\"]"
         )
         self.assertEqual(
-            json_dump(ValidationError({"field": "hephey"})),
-            b"{\"field\":[\"hephey\"]}"
+            json_dump(ValidationError({"field": "hephey"})), b"{\"field\":[\"hephey\"]}"
         )
 
     def test_strtobool(self):
