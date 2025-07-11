@@ -4,6 +4,7 @@
 
 from unittest import TestCase
 
+from django.core.exceptions import ValidationError
 from project.util import json_dump, strtobool
 
 
@@ -14,6 +15,15 @@ class UtilTest(TestCase):
 
         with self.assertRaises(TypeError):
             json_dump({"foo": NonSerializable()})
+
+        self.assertEqual(
+            json_dump(ValidationError(["error1", "error2"])),
+            b"[\"error1\",\"error2\"]"
+        )
+        self.assertEqual(
+            json_dump(ValidationError({"field": "hephey"})),
+            b"{\"field\":[\"hephey\"]}"
+        )
 
     def test_strtobool(self):
         for true_value in ("y", "yes", "t", "true", "on", "1"):

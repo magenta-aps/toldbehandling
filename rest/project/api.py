@@ -43,6 +43,7 @@ api.register_controllers(PaymentAPI)
 api.register_controllers(TOTPDeviceAPI, TwoFactorLoginAPI)
 api.register_controllers(MetricsAPI)
 
+
 @api.exception_handler(ValidationError)
 def custom_validation_errors(request, e: ValidationError):
     return HttpResponseBadRequest(

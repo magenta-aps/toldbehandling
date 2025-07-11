@@ -42,7 +42,7 @@ class ORJSONRenderer(BaseRenderer):
         return orjson.dumps(data, default=self.default)
 
 
-def json_dump(data: Union[Dict, List]):
+def json_dump(data: Union[Dict, List, ValidationError]):
     return ORJSONRenderer().dumps(data)
 
 
