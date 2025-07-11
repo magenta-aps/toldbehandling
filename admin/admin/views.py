@@ -989,10 +989,6 @@ class StatistikView(AdminLayoutBaseView, FormWithFormsetView):
     formset_class = forms.StatistikGruppeFormSet
     template_name = "admin/statistik.html"
 
-    @cached_property
-    def satser(self):
-        return self.rest_client.vareafgiftssats.list()
-
     def get_formset_kwargs(self) -> Dict[str, Any]:
         kwargs = super().get_formset_kwargs()
         # The form_kwargs dict is passed as kwargs to subforms in the formset
