@@ -29,9 +29,8 @@ class ORJSONRenderer(BaseRenderer):
                 return str(o.message)
             if hasattr(o, "error_dict"):
                 return o.error_dict
-            if hasattr(o, "error_list"):
+            else:
                 return o.error_list
-            return dict(o)
 
         raise TypeError
 
