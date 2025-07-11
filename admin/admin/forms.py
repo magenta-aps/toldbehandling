@@ -102,7 +102,7 @@ class TF10ViewForm(BootstrapForm):
 
     def clean(self):
         if self.cleaned_data.get("send_til_prisme"):
-            if "toldkategori" not in self.cleaned_data:
+            if not self.cleaned_data.get("toldkategori"):
                 self.add_error(
                     "toldkategori",
                     ValidationError(
