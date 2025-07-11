@@ -46,7 +46,6 @@ class PostforsendelseIn(ModelSchema):
             "postforsendelsesnummer",
             "afsenderbykode",
             "afgangsdato",
-            "kladde",
         ]
 
 
@@ -58,7 +57,6 @@ class PartialPostforsendelseIn(ModelSchema):
             "postforsendelsesnummer",
             "afsenderbykode",
             "afgangsdato",
-            "kladde",
         ]
         model_fields_optional = "__all__"
 
@@ -72,8 +70,13 @@ class PostforsendelseOut(ModelSchema):
             "postforsendelsesnummer",
             "afsenderbykode",
             "afgangsdato",
-            "kladde",
         ]
+
+        kladde: bool
+
+        @staticmethod
+        def resolve_kladde(obj: Postforsendelse):
+            return obj.kladde
 
 
 class PostforsendelseFilterSchema(FilterSchema):
@@ -188,7 +191,6 @@ class FragtforsendelseIn(ModelSchema):
             "fragtbrevsnummer",
             "forbindelsesnr",
             "afgangsdato",
-            "kladde",
         ]
         model_fields_optional = "__all__"
 
@@ -204,7 +206,6 @@ class PartialFragtforsendelseIn(ModelSchema):
             "fragtbrevsnummer",
             "forbindelsesnr",
             "afgangsdato",
-            "kladde",
         ]
         model_fields_optional = "__all__"
 
@@ -219,8 +220,13 @@ class FragtforsendelseOut(ModelSchema):
             "fragtbrev",
             "forbindelsesnr",
             "afgangsdato",
-            "kladde",
         ]
+
+        kladde: bool
+
+        @staticmethod
+        def resolve_kladde(obj: Fragtforsendelse):
+            return obj.kladde
 
 
 class FragtforsendelseFilterSchema(FilterSchema):
@@ -230,7 +236,6 @@ class FragtforsendelseFilterSchema(FilterSchema):
     afgangsdato: Optional[str]
     afgangsdato__før: Optional[str] = Field(q="afgangsdato__lt")
     afgangsdato__efter: Optional[str] = Field(q="afgangsdato__gte")
-    kladde: Optional[bool]
 
 
 class FragtforsendelsePermission(RestPermission):

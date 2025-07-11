@@ -340,11 +340,11 @@ class Varelinje(models.Model):
                 | Q(privatafgiftsanmeldelse__isnull=True),
                 name="afgiftsanmeldelse_only_one",
             ),
-            CheckConstraint(
-                check=Q(vareafgiftssats__isnull=False) | Q(kladde=True),
-                name="aktuel_har_vareafgiftssats",
-            ),
         ]
+
+    def clean(self):
+        if not self.kladde and self.vareafgiftssats is None:
+            raise ValidationError("Angiv venligst afgiftssats")
 
     history = HistoricalRecords()
     afgiftsanmeldelse = HistoricForeignKey(
@@ -392,7 +392,13 @@ class Varelinje(models.Model):
         blank=True,
         validators=[MinValueValidator(0)],
     )
-    kladde = models.BooleanField(default=False)
+
+    @property
+    def kladde(self):
+        if self.afgiftsanmeldelse:
+            return self.afgiftsanmeldelse.status == "kladde"
+        else:
+            return True
 
     def __str__(self):
         return (

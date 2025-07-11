@@ -765,8 +765,8 @@ class VarelinjeIn(ModelSchema):
 
     class Config:
         model = Varelinje
-        model_fields = ["mængde", "antal", "kladde", "fakturabeløb"]
-        model_fields_optional = ["mængde", "antal", "kladde", "fakturabeløb"]
+        model_fields = ["mængde", "antal", "fakturabeløb"]
+        model_fields_optional = ["mængde", "antal", "fakturabeløb"]
 
 
 class PartialVarelinjeIn(ModelSchema):
@@ -779,7 +779,6 @@ class PartialVarelinjeIn(ModelSchema):
             "mængde",
             "antal",
             "fakturabeløb",
-            "kladde",
         ]
         model_fields_optional = "__all__"
 
@@ -796,8 +795,13 @@ class VarelinjeOut(ModelSchema):
             "antal",
             "fakturabeløb",
             "afgiftsbeløb",
-            "kladde",
         ]
+
+    kladde: bool
+
+    @staticmethod
+    def resolve_kladde(obj: Varelinje):
+        return obj.kladde
 
 
 class VarelinjeFilterSchema(FilterSchema):
@@ -808,7 +812,6 @@ class VarelinjeFilterSchema(FilterSchema):
     antal: Optional[int]
     fakturabeløb: Optional[Decimal]
     afgiftsbeløb: Optional[Decimal]
-    kladde: Optional[bool]
 
 
 class VarelinjePermission(RestPermission):

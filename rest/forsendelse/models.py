@@ -6,7 +6,6 @@ import re
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.db.models import CheckConstraint, Q
 from django.utils.datetime_safe import date
 from django.utils.translation import gettext_lazy as _
 
@@ -14,12 +13,10 @@ from django.utils.translation import gettext_lazy as _
 class Forsendelse(models.Model):
     class Meta:
         abstract = True
-        constraints = [
-            CheckConstraint(
-                check=Q(afgangsdato__isnull=False) | Q(kladde=True),
-                name="aktuel_har_afgangsdato",
-            )
-        ]
+
+    def clean(self):
+        if not self.kladde and self.afgangsdato is None:
+            raise ValidationError("Angiv venligst afgangsdato")
 
     class Forsendelsestype(models.TextChoices):
         SKIB = "S", _("Skib")
@@ -36,26 +33,28 @@ class Forsendelse(models.Model):
         null=True,
     )
     afgangsdato = models.DateField(null=True, blank=True, default=date.today)
-    kladde = models.BooleanField(default=False)
 
     def save(self, *args, **kwargs):
         super().full_clean()
         super().save(*args, **kwargs)
 
+    @property
+    def kladde(self):
+        if hasattr(self, "afgiftsanmeldelse") and self.afgiftsanmeldelse:
+            return self.afgiftsanmeldelse.status == "kladde"
+        else:
+            return True
+
 
 class Postforsendelse(Forsendelse):
     class Meta:
         ordering = ["postforsendelsesnummer"]
-        constraints = [
-            CheckConstraint(
-                check=Q(postforsendelsesnummer__isnull=False) | Q(kladde=True),
-                name="aktuel_har_postforsendelsesnummer",
-            ),
-            CheckConstraint(
-                check=Q(afsenderbykode__isnull=False) | Q(kladde=True),
-                name="aktuel_har_afsenderbykode",
-            ),
-        ]
+
+    def clean(self):
+        if not self.kladde and self.postforsendelsesnummer is None:
+            raise ValidationError("Angiv venligst postforsendelsesnummer")
+        if not self.kladde and self.afsenderbykode is None:
+            raise ValidationError("Angiv venligst afsenderbykode")
 
     postforsendelsesnummer = models.CharField(
         max_length=20,
@@ -90,16 +89,6 @@ def fragtbrev_upload_to(instance, filename):
 class Fragtforsendelse(Forsendelse):
     class Meta:
         ordering = ["fragtbrevsnummer"]
-        constraints = [
-            CheckConstraint(
-                check=Q(fragtbrevsnummer__isnull=False) | Q(kladde=True),
-                name="aktuel_har_fragtbrevsnummer",
-            ),
-            CheckConstraint(
-                check=Q(forbindelsesnr__isnull=False) | Q(kladde=True),
-                name="aktuel_har_forbindelsesnr",
-            ),
-        ]
 
     fragtbrevsnummer = models.CharField(
         max_length=20,
@@ -134,6 +123,12 @@ class Fragtforsendelse(Forsendelse):
         super().clean()
         if self.kladde:
             return
+
+        if self.fragtbrevsnummer is None:
+            raise ValidationError("Angiv venligst fragtbrevsnummer")
+        if self.forbindelsesnr is None:
+            raise ValidationError("Angiv venligst forbindelsesnummer")
+
         if self.forsendelsestype == Forsendelse.Forsendelsestype.SKIB:
             if not re.match(
                 r"[a-zA-Z]{3} \d{3}$",
