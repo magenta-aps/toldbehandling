@@ -777,7 +777,7 @@ class VarelinjeIn(ModelSchema):
                 enhed = Vareafgiftssats.objects.get(id=id).enhed
             except Vareafgiftssats.DoesNotExist:
                 raise ValidationError(
-                    {"vareafgiftssats_id": "object with id {id} does not exist"}
+                    {"vareafgiftssats_id": f"object with id {id} does not exist"}
                 )
             if enhed == Vareafgiftssats.Enhed.ANTAL and values.get("antal") is None:
                 raise ValidationError({"__all__": "Must set antal"})
