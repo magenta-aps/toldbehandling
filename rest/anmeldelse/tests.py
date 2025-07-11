@@ -1747,6 +1747,24 @@ class VarelinjeAPITest(TestCase):
         self.assertEqual(resp.status_code, 400)
         self.assertEqual(resp.json(), {"__all__": ["Must set fakturabeløb"]})
 
+    def test_create__validation_err__no_such_id(self):
+        resp = self.client.post(
+            reverse(f"api-1.0.0:varelinje_create"),
+            json_dump(
+                {
+                    "privatafgiftsanmeldelse_id": self.privatafgiftsanmeldelse.id,
+                    "vareafgiftssats_id": 5000,
+                    "antal": "100",
+                }
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, 400)
+        self.assertEqual(
+            resp.json(), {"vareafgiftssats_id": ["object with id 5000 does not exist"]}
+        )
+
     def test_create__vareafgiftssats_afgiftsgruppenummer(self):
         resp = self.client.post(
             reverse(f"api-1.0.0:varelinje_create"),
