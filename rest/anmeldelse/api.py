@@ -38,6 +38,7 @@ from ninja_extra.pagination import paginate
 from ninja_extra.schemas import NinjaPaginationResponseSchema
 from payment.models import Payment
 from project.util import RestPermission, json_dump
+from pydantic import root_validator
 from sats.models import Vareafgiftssats
 
 log = logging.getLogger(__name__)
@@ -767,6 +768,34 @@ class VarelinjeIn(ModelSchema):
         model = Varelinje
         model_fields = ["mængde", "antal", "kladde", "fakturabeløb"]
         model_fields_optional = ["mængde", "antal", "kladde", "fakturabeløb"]
+
+    @root_validator(pre=False)
+    def enhed_must_have_corresponding_field(cls, values):
+        if values.get("kladde") is not True:
+            try:
+                id = values.get("vareafgiftssats_id")
+                enhed = Vareafgiftssats.objects.get(id=id).enhed
+            except Vareafgiftssats.DoesNotExist:
+                raise ValidationError(
+                    {"vareafgiftssats_id": f"object with id {id} does not exist"}
+                )
+            if enhed == Vareafgiftssats.Enhed.ANTAL and values.get("antal") is None:
+                raise ValidationError({"__all__": "Must set antal"})
+            if (
+                enhed == Vareafgiftssats.Enhed.PROCENT
+                and values.get("fakturabeløb") is None
+            ):
+                raise ValidationError({"__all__": "Must set fakturabeløb"})
+            if (
+                enhed
+                in (
+                    Vareafgiftssats.Enhed.KILOGRAM,
+                    Vareafgiftssats.Enhed.LITER,
+                )
+                and values.get("mængde") is None
+            ):
+                raise ValidationError({"__all__": "Must set mængde"})
+        return values
 
 
 class PartialVarelinjeIn(ModelSchema):

@@ -1646,7 +1646,23 @@ class VarelinjeAPITest(TestCase):
         cls.varelinjesats = Vareafgiftssats.objects.create(
             afgiftstabel=cls.afgiftstabel,
             vareart_da="NamNam",
+            vareart_kl="NamNam",
             afgiftsgruppenummer=1337,
+            enhed=Vareafgiftssats.Enhed.ANTAL,
+        )
+        cls.varelinjesats2 = Vareafgiftssats.objects.create(
+            afgiftstabel=cls.afgiftstabel,
+            vareart_da="GufGuf",
+            vareart_kl="GufGuf",
+            afgiftsgruppenummer=1338,
+            enhed=Vareafgiftssats.Enhed.KILOGRAM,
+        )
+        cls.varelinjesats3 = Vareafgiftssats.objects.create(
+            afgiftstabel=cls.afgiftstabel,
+            vareart_da="NomNom",
+            vareart_kl="NomNom",
+            afgiftsgruppenummer=1339,
+            enhed=Vareafgiftssats.Enhed.PROCENT,
         )
 
         # Privatafgifsanmeldelse for test of the VarelinjeAPI
@@ -1682,6 +1698,72 @@ class VarelinjeAPITest(TestCase):
 
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.json(), {"id": ANY})
+
+    def test_create__validation_err__no_antal(self):
+        resp = self.client.post(
+            reverse(f"api-1.0.0:varelinje_create"),
+            json_dump(
+                {
+                    "privatafgiftsanmeldelse_id": self.privatafgiftsanmeldelse.id,
+                    "vareafgiftssats_id": self.varelinjesats.id,
+                    "mængde": "300",
+                }
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, 400)
+        self.assertEqual(resp.json(), {"__all__": ["Must set antal"]})
+
+    def test_create__validation_err__no_mængde(self):
+        resp = self.client.post(
+            reverse(f"api-1.0.0:varelinje_create"),
+            json_dump(
+                {
+                    "privatafgiftsanmeldelse_id": self.privatafgiftsanmeldelse.id,
+                    "vareafgiftssats_id": self.varelinjesats2.id,
+                    "fakturabeløb": "100",
+                }
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, 400)
+        self.assertEqual(resp.json(), {"__all__": ["Must set mængde"]})
+
+    def test_create__validation_err__no_fakturabeløb(self):
+        resp = self.client.post(
+            reverse(f"api-1.0.0:varelinje_create"),
+            json_dump(
+                {
+                    "privatafgiftsanmeldelse_id": self.privatafgiftsanmeldelse.id,
+                    "vareafgiftssats_id": self.varelinjesats3.id,
+                    "antal": "100",
+                }
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, 400)
+        self.assertEqual(resp.json(), {"__all__": ["Must set fakturabeløb"]})
+
+    def test_create__validation_err__no_such_id(self):
+        resp = self.client.post(
+            reverse(f"api-1.0.0:varelinje_create"),
+            json_dump(
+                {
+                    "privatafgiftsanmeldelse_id": self.privatafgiftsanmeldelse.id,
+                    "vareafgiftssats_id": 5000,
+                    "antal": "100",
+                }
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, 400)
+        self.assertEqual(
+            resp.json(), {"vareafgiftssats_id": ["object with id 5000 does not exist"]}
+        )
 
     def test_create__vareafgiftssats_afgiftsgruppenummer(self):
         resp = self.client.post(

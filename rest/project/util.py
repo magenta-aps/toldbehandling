@@ -7,6 +7,7 @@ from decimal import Decimal
 from typing import Dict, List, Union
 
 import orjson
+from django.core.exceptions import ValidationError
 from django.core.files import File
 from django.http import HttpRequest
 from ninja.renderers import BaseRenderer
@@ -23,6 +24,14 @@ class ORJSONRenderer(BaseRenderer):
         if isinstance(o, File):
             with o.open("rb") as file:
                 return base64.b64encode(file.read()).decode("utf-8")
+        if isinstance(o, ValidationError):
+            if hasattr(o, "message"):
+                return str(o.message)
+            if hasattr(o, "error_dict"):
+                return o.error_dict
+            else:
+                return o.error_list
+
         raise TypeError
 
     def render(self, request, data, *, response_status):
@@ -32,7 +41,7 @@ class ORJSONRenderer(BaseRenderer):
         return orjson.dumps(data, default=self.default)
 
 
-def json_dump(data: Union[Dict, List]):
+def json_dump(data: Union[Dict, List, ValidationError]):
     return ORJSONRenderer().dumps(data)
 
 
