@@ -944,7 +944,10 @@ class TestPrisme(TestMixin, PermissionsTest, TestCase):
         self.assertEquals(response.status_code, 200)
         self.assertEquals(
             self.get_errors(response.content)["__all__"],
-            ["Der skal vælges en stedkode når der sendes til Prisme"],
+            [
+                "Skal vælge en toldkategori når der sendes til Prisme",
+                "Der skal vælges en stedkode når der sendes til Prisme",
+            ],
         )
 
         response = self.client.post(
