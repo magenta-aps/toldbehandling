@@ -18,3 +18,9 @@ class VareafgiftssatsSpreadsheetUtilTest(TestCase):
                 headers=["Afgiftsgruppenummer", "Vareart (da)"],
                 row=["invalid int here", "Fancy stuff"],
             )
+
+    def test_validate_satser_import_exception(self):
+        with self.assertRaises(SpreadsheetImportException):
+            _ = VareafgiftssatsSpreadsheetUtil.validate_satser(
+                satser=[{"afgiftsgruppenummer": None}]
+            )
