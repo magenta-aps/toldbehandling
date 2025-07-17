@@ -1,6 +1,9 @@
+from datetime import datetime, timedelta, timezone
 from unittest.mock import MagicMock
+from zoneinfo import ZoneInfo
 
 from django.test import TestCase
+from django.utils.timezone import is_aware
 
 from admin.forms import AfgiftstabelUpdateForm, TF10ViewForm
 
@@ -34,3 +37,13 @@ class FormsTest(TestCase):
 
         self.assertFalse(form.is_valid())
         self.assertIn("gyldig_fra", form.errors)
+
+    def test_afgiftstabel_update_form_clean(self):
+        gyldig_fra = datetime.now(timezone.utc) + timedelta(days=1)
+        form = AfgiftstabelUpdateForm(data={"gyldig_fra": gyldig_fra})
+
+        self.assertTrue(form.is_valid())
+        self.assertEqual(gyldig_fra.tzinfo, timezone.utc)
+        self.assertEqual(
+            form.cleaned_data["gyldig_fra"].tzinfo, ZoneInfo("America/Godthab")
+        )
