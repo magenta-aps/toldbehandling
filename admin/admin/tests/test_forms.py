@@ -47,3 +47,13 @@ class FormsTest(TestCase):
         self.assertEqual(
             form.cleaned_data["gyldig_fra"].tzinfo, ZoneInfo("America/Godthab")
         )
+
+    def test_afgiftstabel_update_form_clean_gyldig_fra_error(self):
+        gyldig_fra = datetime.now(timezone.utc)
+        form = AfgiftstabelUpdateForm(data={"gyldig_fra": gyldig_fra})
+        self.assertFalse(form.is_valid())
+        self.assertIn("gyldig_fra", form.errors)
+        self.assertEqual(
+            form.errors["gyldig_fra"],
+            ["Dato skal være efter i dag", "Dette felt er påkrævet."],
+        )
