@@ -1,6 +1,6 @@
 from django.test import TestCase
 
-from admin.spreadsheet import VareafgiftssatsSpreadsheetUtil
+from admin.spreadsheet import SpreadsheetImportException, VareafgiftssatsSpreadsheetUtil
 
 
 class VareafgiftssatsSpreadsheetUtilTest(TestCase):
@@ -11,3 +11,10 @@ class VareafgiftssatsSpreadsheetUtilTest(TestCase):
 
         # If an IndexError occurs, the value will be set to None
         self.assertEqual(result, {"afgiftsgruppenummer": 1337, "vareart_da": None})
+
+    def test_from_spreadsheet_row_invalid_value(self):
+        with self.assertRaises(SpreadsheetImportException):
+            _ = VareafgiftssatsSpreadsheetUtil.from_spreadsheet_row(
+                headers=["Afgiftsgruppenummer", "Vareart (da)"],
+                row=["invalid int here", "Fancy stuff"],
+            )
