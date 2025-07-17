@@ -2,7 +2,7 @@ from unittest.mock import MagicMock
 
 from django.test import TestCase
 
-from admin.forms import TF10ViewForm
+from admin.forms import AfgiftstabelUpdateForm, TF10ViewForm
 
 
 class FormsTest(TestCase):
@@ -24,3 +24,13 @@ class FormsTest(TestCase):
         # Asserts
         self.assertFalse(form.is_valid())
         self.assertIn("toldkategori", form.errors)
+
+    def test_afgiftstabel_update_form_clean_invalid_gyldig_fra(self):
+        form = AfgiftstabelUpdateForm(
+            data={
+                "delete": False,
+            }
+        )
+
+        self.assertFalse(form.is_valid())
+        self.assertIn("gyldig_fra", form.errors)
