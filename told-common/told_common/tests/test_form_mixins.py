@@ -2,7 +2,11 @@ from datetime import datetime
 
 from django.core.exceptions import ValidationError
 from django.test import TestCase
-from told_common.form_mixins import DateTimeInput, FixedWidthIntegerField
+from told_common.form_mixins import (
+    DateTimeInput,
+    FixedWidthIntegerField,
+    MultipleSeparatedChoiceField,
+)
 
 
 class FixedWidthIntegerFieldTest(TestCase):
@@ -27,3 +31,9 @@ class DateTimeInputTest(TestCase):
         dt = datetime(2025, 7, 18, 15, 30, 45)
         rendered = mixin.format_value(dt)
         self.assertEqual(rendered, "2025-07-18T15:30:45")
+
+
+class MultipleSeparatedChoiceFieldTest(TestCase):
+    def test_to_python_value_arg_none(self):
+        mixin = MultipleSeparatedChoiceField()
+        self.assertEqual(mixin.to_python(None), [])
