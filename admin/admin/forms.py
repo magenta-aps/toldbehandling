@@ -102,11 +102,14 @@ class TF10ViewForm(BootstrapForm):
 
     def clean(self):
         if self.cleaned_data.get("send_til_prisme"):
-            if "toldkategori" not in self.cleaned_data:
+            if (
+                "toldkategori" not in self.cleaned_data
+                or self.cleaned_data["toldkategori"] == ""
+            ):
                 self.add_error(
                     "toldkategori",
                     ValidationError(
-                        "Skal vælge en toldkategori når der sendes til Prisme"
+                        "Der skal vælges en toldkategori når der sendes til Prisme"
                     ),
                 )
             if not self.cleaned_data.get("modtager_stedkode"):
