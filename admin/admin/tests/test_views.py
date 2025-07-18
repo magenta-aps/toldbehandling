@@ -875,6 +875,24 @@ class TestStatistikView(BaseTest):
                     "sum_mængde": Decimal("0.00"),
                     "sum_antal": 0,
                 },
+                {
+                    "afgiftsgruppenummer": 105,
+                    "vareart_da": "Lego",
+                    "vareart_kl": "LEGO",
+                    "enhed": "ant",
+                    "sum_afgiftsbeløb": Decimal("100.00"),
+                    "sum_mængde": Decimal("0.00"),
+                    "sum_antal": 42,
+                },
+                {
+                    "afgiftsgruppenummer": 106,
+                    "vareart_da": "Tang",
+                    "vareart_kl": "TANG",
+                    "enhed": "pct",
+                    "sum_afgiftsbeløb": Decimal("100.00"),
+                    "sum_mængde": Decimal("0.00"),
+                    "sum_antal": 0,
+                },
             ],
         }
 
