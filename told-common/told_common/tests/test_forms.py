@@ -1,5 +1,7 @@
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
-from told_common.forms import TF10Form
+from told_common.data import Vareafgiftssats
+from told_common.forms import TF10Form, TF10VareForm
 
 
 class TF10FormTest(TestCase):
@@ -92,3 +94,69 @@ class TF10FormTest(TestCase):
             form.errors["fragtbrevnr"].as_text(),
             "* Ved luftfragt skal fragtbrevnummer bestå af otte cifre",
         )
+
+    def test_clean_with_formset(self):
+        form = TF10Form(
+            varesatser={
+                1: Vareafgiftssats(
+                    id=1,
+                    afgiftstabel=1,
+                    vareart_da="Båthorn",
+                    vareart_kl="Båthorn",
+                    afgiftsgruppenummer=12345678,
+                    enhed=Vareafgiftssats.Enhed.KILOGRAM,
+                    afgiftssats="1.00",
+                    kræver_indførselstilladelse=True,
+                ),
+            },
+            data={
+                "afsender_cvr": "12345678",
+                "afsender_navn": "TestFirma1",
+                "afsender_adresse": "Testvej 42",
+                "afsender_postnummer": "1234",
+                "afsender_by": "TestBy",
+                "afsender_postbox": "123",
+                "afsender_telefon": "123456",
+                "modtager_cvr": "12345679",
+                "modtager_navn": "TestFirma2",
+                "modtager_adresse": "Testvej 43",
+                "modtager_postnummer": "1234",
+                "modtager_by": "TestBy",
+                "modtager_postbox": "124",
+                "modtager_telefon": "123123",
+                # To verify clean_with_formset later
+                "indførselstilladelse": None,
+                "leverandørfaktura_nummer": "123",
+                "fragttype": "skibsfragt",
+                "fragtbrevnr": "ABCDE1234567",
+                "afgangsdato": "2023-11-03",
+                "form-TOTAL_FORMS": "1",
+                "form-INITIAL_FORMS": "1",
+                "form-0-vareafgiftssats": "1",
+                "form-0-mængde": "3",
+                "form-0-antal": "6",
+                "form-0-fakturabeløb": "100.00",
+                "forbindelsesnr": "ABC 337",
+                "betales_af": "afsender",
+                "leverandørfaktura": None,
+                "fragtbrev": None,
+            },
+            files={
+                "fragtbrev": SimpleUploadedFile(
+                    "fragtbrev.txt", b"\x00" * (5 * 1024 * 1024)  # 5MB
+                ),
+                "leverandørfaktura": SimpleUploadedFile(
+                    "leverandørfaktura.txt", b"\x00" * (5 * 1024 * 1024)  # 5MB
+                ),
+            },
+        )
+        self.assertTrue(form.is_valid())
+
+        subform = TF10VareForm(
+            varesatser=form.varesatser,
+            data={"vareafgiftssats": 1, "mængde": 2},
+        )
+        subform.is_valid()
+
+        form.clean_with_formset(formset=[subform])
+        self.assertIn("indførselstilladelse", form.errors)
