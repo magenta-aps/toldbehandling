@@ -1,3 +1,5 @@
+from typing import Dict, Optional
+
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 from told_common.data import Vareafgiftssats
@@ -96,7 +98,7 @@ class TF10FormTest(TestCase):
         )
 
     def test_clean_with_formset(self):
-        form = TF10Form(
+        form = TF10FormTest.create_TF10Form(
             varesatser={
                 1: Vareafgiftssats(
                     id=1,
@@ -108,7 +110,63 @@ class TF10FormTest(TestCase):
                     afgiftssats="1.00",
                     kræver_indførselstilladelse=True,
                 ),
-            },
+            }
+        )
+        self.assertTrue(form.is_valid())
+
+        subform = TF10VareForm(
+            varesatser=form.varesatser,
+            data={"vareafgiftssats": 1, "mængde": 2},
+        )
+        subform.is_valid()
+
+        form.clean_with_formset(formset=[subform])
+        self.assertIn("indførselstilladelse", form.errors)
+
+    @staticmethod
+    def create_TF10Form(
+        varesatser: Optional[Dict] = None, kladde: Optional[bool] = None
+    ):
+        return TF10Form(
+            varesatser=(
+                varesatser
+                if varesatser
+                else {
+                    1: Vareafgiftssats(
+                        id=1,
+                        afgiftstabel=1,
+                        vareart_da="Båthorn",
+                        vareart_kl="Båthorn",
+                        afgiftsgruppenummer=12345678,
+                        enhed=Vareafgiftssats.Enhed.KILOGRAM,
+                        afgiftssats="1.00",
+                        kræver_indførselstilladelse=False,
+                        har_privat_tillægsafgift_alkohol=False,
+                    ),
+                    2: Vareafgiftssats(
+                        id=2,
+                        afgiftstabel=1,
+                        vareart_da="Klovnesko",
+                        vareart_kl="Klovnesko",
+                        afgiftsgruppenummer=87654321,
+                        enhed=Vareafgiftssats.Enhed.ANTAL,
+                        afgiftssats="1.00",
+                        kræver_indførselstilladelse=False,
+                        har_privat_tillægsafgift_alkohol=False,
+                    ),
+                    3: Vareafgiftssats(
+                        id=3,
+                        afgiftstabel=1,
+                        vareart_da="Ethjulede cykler",
+                        vareart_kl="Ethjulede cykler",
+                        afgiftsgruppenummer=22446688,
+                        enhed=Vareafgiftssats.Enhed.PROCENT,
+                        afgiftssats="0.50",
+                        kræver_indførselstilladelse=False,
+                        har_privat_tillægsafgift_alkohol=False,
+                    ),
+                }
+            ),
             data={
                 "afsender_cvr": "12345678",
                 "afsender_navn": "TestFirma1",
@@ -140,6 +198,7 @@ class TF10FormTest(TestCase):
                 "betales_af": "afsender",
                 "leverandørfaktura": None,
                 "fragtbrev": None,
+                "kladde": kladde if kladde else False,
             },
             files={
                 "fragtbrev": SimpleUploadedFile(
@@ -150,13 +209,18 @@ class TF10FormTest(TestCase):
                 ),
             },
         )
-        self.assertTrue(form.is_valid())
 
-        subform = TF10VareForm(
-            varesatser=form.varesatser,
+
+class TF10VareFormTest(TestCase):
+    def test_kladde_parent_from_parent(self):
+        tf10_form = TF10FormTest.create_TF10Form(kladde=True)
+        self.assertTrue(tf10_form.is_valid())
+
+        form = TF10VareForm(
+            varesatser=tf10_form.varesatser,
             data={"vareafgiftssats": 1, "mængde": 2},
         )
-        subform.is_valid()
+        self.assertTrue(form.is_valid())
 
-        form.clean_with_formset(formset=[subform])
-        self.assertIn("indførselstilladelse", form.errors)
+        form.set_parent_form(tf10_form)
+        self.assertTrue(form.kladde)
