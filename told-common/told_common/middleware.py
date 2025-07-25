@@ -3,13 +3,6 @@ from django.utils.deprecation import MiddlewareMixin
 from told_common.data import JwtTokenInfo, User
 
 
-class RestTokenUser:
-    def __init__(self, userdata: User, jwt_token: JwtTokenInfo):
-        super().__init__()
-        self.userdata = userdata
-        self.jwt_token = jwt_token
-
-
 class RestTokenUserMiddleware(MiddlewareMixin):
     def process_request(self, request, *args, **kwargs):
         self.set_user(request)
