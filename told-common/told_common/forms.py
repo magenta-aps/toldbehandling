@@ -396,17 +396,15 @@ class TF10VareForm(BootstrapForm):
 
     def clean_vareafgiftssats(self) -> Optional[int]:
         # Get 'varekode' for selected vareafgiftssats
-        vareafgiftssats_selected_id = self.cleaned_data["vareafgiftssats"]
-        for id in self.varesatser.keys():
-            if id == int(vareafgiftssats_selected_id):
-                return vareafgiftssats_selected_id
+        vareafgiftssats_selected_id = int(self.cleaned_data["vareafgiftssats"])
+        vareafgiftssats_selected_id_clean = None
 
-        if not self.kladde:
-            raise ValidationError(
-                self.fields["vareafgiftssats"].error_messages["required"],
-                code="required",
-            )
-        return None
+        for valid_varestats_id in self.varesatser.keys():
+            if vareafgiftssats_selected_id == valid_varestats_id:
+                vareafgiftssats_selected_id_clean = vareafgiftssats_selected_id
+                break
+
+        return vareafgiftssats_selected_id_clean
 
     def clean_mængde(self) -> int:
         mængde = self.cleaned_data["mængde"]
