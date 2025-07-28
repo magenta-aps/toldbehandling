@@ -723,6 +723,27 @@ class TestAfgiftstabelDownloadView(BaseTest):
         self.assertEqual(response.status_code, 302)
         self.assertEqual(self.rest_client_mock.vareafgiftssats.create.call_count, 3)
 
+    def test_save_invalid_data(self):
+        url = reverse("afgiftstabel_create")
+        self.login()
+
+        self.sats1.kræver_indførselstilladelse = None
+
+        self.rest_client_mock.afgiftstabel.create.return_value = 1
+        self.rest_client_mock.vareafgiftssats.create.return_value = 2
+
+        self.client.post(
+            url,
+            data={
+                "fil": SimpleUploadedFile(
+                    "test.csv",
+                    self.client.get(self.csv_url).content,
+                    content_type="text/csv",
+                )
+            },
+        )
+        self.assertEqual(self.rest_client_mock.vareafgiftssats.create.call_count, 0)
+
 
 class TestTF5Views(BaseTest):
     def setUp(self):
@@ -871,6 +892,24 @@ class TestStatistikView(BaseTest):
                     "vareart_da": "Energidrik",
                     "vareart_kl": "ENERGY",
                     "enhed": "l",
+                    "sum_afgiftsbeløb": Decimal("100.00"),
+                    "sum_mængde": Decimal("0.00"),
+                    "sum_antal": 0,
+                },
+                {
+                    "afgiftsgruppenummer": 105,
+                    "vareart_da": "KNALLERTER",
+                    "vareart_kl": "KNALLERTER",
+                    "enhed": "ant",
+                    "sum_afgiftsbeløb": Decimal("100.00"),
+                    "sum_mængde": Decimal("0.00"),
+                    "sum_antal": 0,
+                },
+                {
+                    "afgiftsgruppenummer": 105,
+                    "vareart_da": "PERSONBILER",
+                    "vareart_kl": "PERSONBILER",
+                    "enhed": "pct",
                     "sum_afgiftsbeløb": Decimal("100.00"),
                     "sum_mængde": Decimal("0.00"),
                     "sum_antal": 0,
