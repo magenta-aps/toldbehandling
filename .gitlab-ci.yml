@@ -271,9 +271,10 @@ Unittest UI:
     - cp -r ./told-common/told_common .
     - coverage run manage.py test --parallel 4
     - coverage combine
-    - coverage report --show-missing --fail-under=84
+    - coverage report --show-missing --fail-under=84 --omit="/media/*"
     - mv .coverage "${CI_PROJECT_DIR}/coverage_output/.coverage.${CI_JOB_ID}"
-    - cp -r ./ui "${CI_PROJECT_DIR}/coverage_output/"
+    - cp -r ./ui ./told_common "${CI_PROJECT_DIR}/coverage_output/"
+    - cp .coveragerc "${CI_PROJECT_DIR}/coverage_output/"
 
 Unittest Admin:
   <<: *test-admin
