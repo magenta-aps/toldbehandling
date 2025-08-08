@@ -67,6 +67,7 @@ class Afgiftsanmeldelse(models.Model):
         related_name="afgiftsanmeldelser",
         on_delete=models.SET_NULL,  # Vi kan slette brugere og beholde deres anmeldelser
         null=True,
+        blank=True,
     )
     oprettet_på_vegne_af = models.ForeignKey(
         User,
