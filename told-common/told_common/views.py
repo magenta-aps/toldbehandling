@@ -252,7 +252,7 @@ class TF10FormCreateView(
                     dato = date.fromisoformat(dato_string)
                 except ValueError:
                     log.warning(
-                        "Could not parse input date", dato_string
+                        "Could not parse input date %s", dato_string
                     )
         return dict(
             filter(
