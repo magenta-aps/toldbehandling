@@ -245,13 +245,15 @@ class TF10FormCreateView(
     @cached_property
     def toplevel_current_varesatser(self):
         dato = date.today()
-        if self.request.POST and "afgangsdato" in self.request.POST:
-            try:
-                dato = date.fromisoformat(self.request.POST["afgangsdato"])
-            except ValueError:
-                log.warning(
-                    "Could not parse input date", self.request.POST["afgangsdato"]
-                )
+        if self.request.POST:
+            dato_string = self.request.POST.get("afgangsdato")
+            if dato_string:
+                try:
+                    dato = date.fromisoformat(dato_string)
+                except ValueError:
+                    log.warning(
+                        "Could not parse input date", dato_string
+                    )
         return dict(
             filter(
                 lambda pair: pair[1].overordnet is None,
