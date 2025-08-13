@@ -45,7 +45,7 @@ class FormsTest(TestCase):
         self.assertTrue(form.is_valid())
         self.assertEqual(gyldig_fra.tzinfo, timezone.utc)
         self.assertEqual(
-            form.cleaned_data["gyldig_fra"].tzinfo, ZoneInfo("America/Godthab")
+            form.cleaned_data["gyldig_fra"].tzinfo, ZoneInfo("America/Nuuk")
         )
 
     def test_afgiftstabel_update_form_clean_gyldig_fra_error(self):

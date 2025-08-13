@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: MPL-2.0
 LANGUAGE_CODE = "da-DK"
-TIME_ZONE = "America/Godthab"
+TIME_ZONE = "America/Nuuk"
 USE_I18N = True
 USE_L10N = True
 USE_TZ = True
