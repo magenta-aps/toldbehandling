@@ -28,7 +28,7 @@ RUN sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt bookworm-pgdg main"
     curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor -o /etc/apt/trusted.gpg.d/postgresql.gpg && \
     apt-get update && \
     apt-get install -y --no-install-recommends \
-        gettext python3-distutils libxmlsec1-dev xmlsec1 postgresql-client-common postgresql-client-16 && \
+        gettext libxmlsec1-dev xmlsec1 postgresql-client-common postgresql-client-16 && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # supercronic
