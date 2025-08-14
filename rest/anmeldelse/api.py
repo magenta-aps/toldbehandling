@@ -772,13 +772,37 @@ class VarelinjeIn(ModelSchema):
     @root_validator(pre=False)
     def enhed_must_have_corresponding_field(cls, values):
         if values.get("kladde") is not True:
-            try:
-                id = values.get("vareafgiftssats_id")
-                enhed = Vareafgiftssats.objects.get(id=id).enhed
-            except Vareafgiftssats.DoesNotExist:
+
+            vareafgiftssats_id = values.get("vareafgiftssats_id")
+            vareafgiftssats_afgiftsgruppenummer = values.get("vareafgiftssats_afgiftsgruppenummer")
+            if vareafgiftssats_id is None and vareafgiftssats_afgiftsgruppenummer is None:
                 raise ValidationError(
-                    {"vareafgiftssats_id": f"object with id {id} does not exist"}
+                    {"__all__": "Must specify either vareafgiftssats_id or vareafgiftssats_afgiftsgruppenummer"}
                 )
+            id = None
+            if vareafgiftssats_id is not None:
+                id = vareafgiftssats_id
+                try:
+                    enhed = Vareafgiftssats.objects.get(id=id).enhed
+                except Vareafgiftssats.DoesNotExist:
+                    raise ValidationError(
+                        {"vareafgiftssats_id": f"object with id {id} does not exist"}
+                    )
+            else:
+                try:
+                    id = VarelinjeAPI.get_varesats_id_by_kode(
+                        values.get("afgiftsanmeldelse_id"),
+                        values.get("privatafgiftsanmeldelse_id"),
+                        values.get("vareafgiftssats_afgiftsgruppenummer"),
+                    )
+                except Http404:
+                    pass
+                if id is None:
+                    raise ValidationError(
+                        {"vareafgiftssats_afgiftsgruppenummer": f"Did not find a valid varesats based on vareafgiftssats_afgiftsgruppenummer {vareafgiftssats_afgiftsgruppenummer}"}
+                    )
+                enhed = Vareafgiftssats.objects.get(id=id).enhed
+
             if enhed == Vareafgiftssats.Enhed.ANTAL and values.get("antal") is None:
                 raise ValidationError({"__all__": "Must set antal"})
             if (
