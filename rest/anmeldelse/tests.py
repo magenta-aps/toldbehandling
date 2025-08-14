@@ -1811,6 +1811,30 @@ class VarelinjeAPITest(TestCase):
             self.varelinjesats.afgiftsgruppenummer,
         )
 
+
+    def test_create__vareafgiftssats_afgiftsgruppenummer_only(self):
+        resp = self.client.post(
+            reverse(f"api-1.0.0:varelinje_create"),
+            json_dump(
+                {
+                    "privatafgiftsanmeldelse_id": self.privatafgiftsanmeldelse.id,
+                    "antal": 1,
+                    "vareafgiftssats_afgiftsgruppenummer": self.varelinjesats.afgiftsgruppenummer,
+                }
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, 200)
+
+        # Fetch the newly created varelinje and verify the "vareafgiftssats_afgiftsgruppenummer" is correct
+        resp_data = resp.json()
+        new_varelinje = Varelinje.objects.get(pk=resp_data["id"])
+        self.assertEqual(
+            new_varelinje.vareafgiftssats.afgiftsgruppenummer,
+            self.varelinjesats.afgiftsgruppenummer,
+        )
+
     def test_create__validation_err__no_such_afgiftsgruppenummer(self):
         resp = self.client.post(
             reverse(f"api-1.0.0:varelinje_create"),
