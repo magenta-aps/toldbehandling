@@ -1761,7 +1761,12 @@ class VarelinjeAPITest(TestCase):
         )
         self.assertEqual(resp.status_code, 400)
         self.assertEqual(
-            resp.json(), {"__all__": ["Must specify either vareafgiftssats_id or vareafgiftssats_afgiftsgruppenummer"]}
+            resp.json(),
+            {
+                "__all__": [
+                    "Must specify either vareafgiftssats_id or vareafgiftssats_afgiftsgruppenummer"
+                ]
+            },
         )
 
     def test_create__validation_err__no_such_id(self):
@@ -1806,7 +1811,6 @@ class VarelinjeAPITest(TestCase):
             self.varelinjesats.afgiftsgruppenummer,
         )
 
-
     def test_create__validation_err__no_such_afgiftsgruppenummer(self):
         resp = self.client.post(
             reverse(f"api-1.0.0:varelinje_create"),
@@ -1822,7 +1826,12 @@ class VarelinjeAPITest(TestCase):
         )
         self.assertEqual(resp.status_code, 400)
         self.assertEqual(
-            resp.json(), {"vareafgiftssats_afgiftsgruppenummer": ["Did not find a valid varesats based on vareafgiftssats_afgiftsgruppenummer 5000"]}
+            resp.json(),
+            {
+                "vareafgiftssats_afgiftsgruppenummer": [
+                    "Did not find a valid varesats based on vareafgiftssats_afgiftsgruppenummer 5000"
+                ]
+            },
         )
 
     @patch("anmeldelse.api.VarelinjeAPI.get_varesats_id_by_kode")

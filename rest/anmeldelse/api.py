@@ -774,10 +774,17 @@ class VarelinjeIn(ModelSchema):
         if values.get("kladde") is not True:
 
             vareafgiftssats_id = values.get("vareafgiftssats_id")
-            vareafgiftssats_afgiftsgruppenummer = values.get("vareafgiftssats_afgiftsgruppenummer")
-            if vareafgiftssats_id is None and vareafgiftssats_afgiftsgruppenummer is None:
+            vareafgiftssats_afgiftsgruppenummer = values.get(
+                "vareafgiftssats_afgiftsgruppenummer"
+            )
+            if (
+                vareafgiftssats_id is None
+                and vareafgiftssats_afgiftsgruppenummer is None
+            ):
                 raise ValidationError(
-                    {"__all__": "Must specify either vareafgiftssats_id or vareafgiftssats_afgiftsgruppenummer"}
+                    {
+                        "__all__": "Must specify either vareafgiftssats_id or vareafgiftssats_afgiftsgruppenummer"
+                    }
                 )
             id = None
             if vareafgiftssats_id is not None:
@@ -799,7 +806,9 @@ class VarelinjeIn(ModelSchema):
                     pass
                 if id is None:
                     raise ValidationError(
-                        {"vareafgiftssats_afgiftsgruppenummer": f"Did not find a valid varesats based on vareafgiftssats_afgiftsgruppenummer {vareafgiftssats_afgiftsgruppenummer}"}
+                        {
+                            "vareafgiftssats_afgiftsgruppenummer": f"Did not find a valid varesats based on vareafgiftssats_afgiftsgruppenummer {vareafgiftssats_afgiftsgruppenummer}"
+                        }
                     )
                 enhed = Vareafgiftssats.objects.get(id=id).enhed
 
