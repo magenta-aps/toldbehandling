@@ -1811,7 +1811,6 @@ class VarelinjeAPITest(TestCase):
             self.varelinjesats.afgiftsgruppenummer,
         )
 
-
     def test_create__vareafgiftssats_afgiftsgruppenummer_only(self):
         resp = self.client.post(
             reverse(f"api-1.0.0:varelinje_create"),
