@@ -808,8 +808,7 @@ class VarelinjeIn(ModelSchema):
                 if id is None:
                     raise ValidationError(
                         {
-                            "vareafgiftssats_afgiftsgruppenummer":
-                            f"Did not find a valid varesats based on "
+                            "vareafgiftssats_afgiftsgruppenummer": f"Did not find a valid varesats based on "
                             f"vareafgiftssats_afgiftsgruppenummer "
                             f"{vareafgiftssats_afgiftsgruppenummer}"
                         }
