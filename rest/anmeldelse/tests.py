@@ -1747,6 +1747,28 @@ class VarelinjeAPITest(TestCase):
         self.assertEqual(resp.status_code, 400)
         self.assertEqual(resp.json(), {"__all__": ["Must set fakturabeløb"]})
 
+    def test_create__validation_err__no_vareafgiftssats_no_afgiftsgruppenummer(self):
+        resp = self.client.post(
+            reverse(f"api-1.0.0:varelinje_create"),
+            json_dump(
+                {
+                    "privatafgiftsanmeldelse_id": self.privatafgiftsanmeldelse.id,
+                    "antal": "100",
+                }
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, 400)
+        self.assertEqual(
+            resp.json(),
+            {
+                "__all__": [
+                    "Must specify either vareafgiftssats_id or vareafgiftssats_afgiftsgruppenummer"
+                ]
+            },
+        )
+
     def test_create__validation_err__no_such_id(self):
         resp = self.client.post(
             reverse(f"api-1.0.0:varelinje_create"),
@@ -1787,6 +1809,52 @@ class VarelinjeAPITest(TestCase):
         self.assertEqual(
             new_varelinje.vareafgiftssats.afgiftsgruppenummer,
             self.varelinjesats.afgiftsgruppenummer,
+        )
+
+    def test_create__vareafgiftssats_afgiftsgruppenummer_only(self):
+        resp = self.client.post(
+            reverse(f"api-1.0.0:varelinje_create"),
+            json_dump(
+                {
+                    "privatafgiftsanmeldelse_id": self.privatafgiftsanmeldelse.id,
+                    "antal": 1,
+                    "vareafgiftssats_afgiftsgruppenummer": self.varelinjesats.afgiftsgruppenummer,
+                }
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, 200)
+
+        # Fetch the newly created varelinje and verify the "vareafgiftssats_afgiftsgruppenummer" is correct
+        resp_data = resp.json()
+        new_varelinje = Varelinje.objects.get(pk=resp_data["id"])
+        self.assertEqual(
+            new_varelinje.vareafgiftssats.afgiftsgruppenummer,
+            self.varelinjesats.afgiftsgruppenummer,
+        )
+
+    def test_create__validation_err__no_such_afgiftsgruppenummer(self):
+        resp = self.client.post(
+            reverse(f"api-1.0.0:varelinje_create"),
+            json_dump(
+                {
+                    "privatafgiftsanmeldelse_id": self.privatafgiftsanmeldelse.id,
+                    "vareafgiftssats_afgiftsgruppenummer": 5000,
+                    "antal": "100",
+                }
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, 400)
+        self.assertEqual(
+            resp.json(),
+            {
+                "vareafgiftssats_afgiftsgruppenummer": [
+                    "Did not find a valid varesats based on vareafgiftssats_afgiftsgruppenummer 5000"
+                ]
+            },
         )
 
     @patch("anmeldelse.api.VarelinjeAPI.get_varesats_id_by_kode")
