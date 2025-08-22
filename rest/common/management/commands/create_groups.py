@@ -160,6 +160,7 @@ class Command(BaseCommand):
             ("change", varelinje_model),
             ("change", payment_model),
             ("change", payment_item_model),
+            ("delete", varelinje_model),
         ):
             cpr_indberettere.permissions.add(
                 Permission.objects.get(
@@ -192,6 +193,7 @@ class Command(BaseCommand):
             ("change", varelinje_model),
             ("change", postforsendelse_model),
             ("change", fragtforsendelse_model),
+            ("delete", varelinje_model),
             ("delete", postforsendelse_model),
             ("delete", fragtforsendelse_model),
             ("delete", afgiftsanmeldelse_model),

@@ -287,6 +287,7 @@ class TF10BlanketTest(BlanketMixin, TestMixin, HasLogin, TestCase):
                         "anmeldelse.view_notat",
                         "anmeldelse.view_privatafgiftsanmeldelse",
                         "anmeldelse.view_varelinje",
+                        "anmeldelse.delete_varelinje",
                         "forsendelse.add_fragtforsendelse",
                         "forsendelse.add_postforsendelse",
                         "forsendelse.change_fragtforsendelse",
