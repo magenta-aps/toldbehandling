@@ -814,9 +814,10 @@ class VarelinjeIn(ModelSchema):
                     try:
                         id = int(id)
                     except ValueError:
-                        ValidationError(
+                        raise ValidationError(
                             {
-                                "vareafgiftssats_id": f"object with id {vareafgiftssats_id} does not exist"
+                                "vareafgiftssats_id": f"object with id "
+                                f"{vareafgiftssats_id} does not exist"
                             }
                         )
                 try:
