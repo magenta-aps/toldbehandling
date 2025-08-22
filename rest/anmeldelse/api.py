@@ -772,8 +772,7 @@ class VarelinjeIn(ModelSchema):
     @root_validator(pre=False)
     def enhed_must_have_corresponding_field(cls, values):
         if values.get("kladde") is not True:
-
-            vareafgiftssats_id = values.get("vareafgiftssats_id")
+            vareafgiftssats_id: int | None = values.get("vareafgiftssats_id")
             vareafgiftssats_afgiftsgruppenummer = values.get(
                 "vareafgiftssats_afgiftsgruppenummer"
             )
@@ -799,16 +798,6 @@ class VarelinjeIn(ModelSchema):
                 enhed = Vareafgiftssats.objects.get(id=id).enhed
             elif vareafgiftssats_id not in (None, 0):
                 id = vareafgiftssats_id
-                if type(id) is not int:
-                    try:
-                        id = int(id)
-                    except ValueError:
-                        raise ValidationError(
-                            {
-                                "vareafgiftssats_id": f"object with id "
-                                f"{vareafgiftssats_id} does not exist"
-                            }
-                        )
                 try:
                     enhed = Vareafgiftssats.objects.get(id=id).enhed
                 except Vareafgiftssats.DoesNotExist:
