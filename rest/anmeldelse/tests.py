@@ -1879,7 +1879,7 @@ class VarelinjeAPITest(TestCase):
         self.assertEqual(
             resp.json(),
             {
-                "vareafgiftssats": [
+                "vareafgiftssats_afgiftsgruppenummer": [
                     "Did not find a valid varesats based on vareafgiftssats_afgiftsgruppenummer 1337"
                 ]
             },
