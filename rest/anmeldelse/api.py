@@ -787,7 +787,7 @@ class VarelinjeIn(ModelSchema):
                     )
                 except Http404:
                     pass
-                if id is None:
+                if id is None or type(id) is not int:
                     raise ValidationError(
                         {
                             "vareafgiftssats_afgiftsgruppenummer": f"Did not "
@@ -796,17 +796,7 @@ class VarelinjeIn(ModelSchema):
                             f"{vareafgiftssats_afgiftsgruppenummer}"
                         }
                     )
-                if type(id) is int:
-                    enhed = Vareafgiftssats.objects.get(id=id).enhed
-                else:
-                    raise ValidationError(
-                        {
-                            "vareafgiftssats_afgiftsgruppenummer": f"Did not "
-                            f"find a valid varesats based on "
-                            f"vareafgiftssats_afgiftsgruppenummer "
-                            f"{vareafgiftssats_afgiftsgruppenummer}"
-                        }
-                    )
+                enhed = Vareafgiftssats.objects.get(id=id).enhed
             elif vareafgiftssats_id not in (None, 0):
                 id = vareafgiftssats_id
                 if type(id) is not int:

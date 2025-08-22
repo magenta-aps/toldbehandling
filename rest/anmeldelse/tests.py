@@ -1878,7 +1878,11 @@ class VarelinjeAPITest(TestCase):
         self.assertEqual(resp.status_code, 400)
         self.assertEqual(
             resp.json(),
-            {"vareafgiftssats": ["“not-a-number”-værdien skal være et heltal."]},
+            {
+                "vareafgiftssats": [
+                    "Did not find a valid varesats based on vareafgiftssats_afgiftsgruppenummer 1337"
+                ]
+            },
         )
 
     def test_create__afgiftsanmeldelse(self):
