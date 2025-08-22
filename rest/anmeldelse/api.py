@@ -791,9 +791,9 @@ class VarelinjeIn(ModelSchema):
                     raise ValidationError(
                         {
                             "vareafgiftssats_afgiftsgruppenummer": f"Did not "
-                                                                   f"find a valid varesats based on "
-                                                                   f"vareafgiftssats_afgiftsgruppenummer "
-                                                                   f"{vareafgiftssats_afgiftsgruppenummer}"
+                            f"find a valid varesats based on "
+                            f"vareafgiftssats_afgiftsgruppenummer "
+                            f"{vareafgiftssats_afgiftsgruppenummer}"
                         }
                     )
                 enhed = Vareafgiftssats.objects.get(id=id).enhed
@@ -809,7 +809,7 @@ class VarelinjeIn(ModelSchema):
                 raise ValidationError(
                     {
                         "__all__": "Must specify either vareafgiftssats_id or "
-                                   "vareafgiftssats_afgiftsgruppenummer"
+                        "vareafgiftssats_afgiftsgruppenummer"
                     }
                 )
 
