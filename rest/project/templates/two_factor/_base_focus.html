@@ -1,0 +1,16 @@
+{% extends "two_factor/_base.html" %}
+
+{% block content_wrapper %}
+  <div class="d-flex justify-content-center align-items-center vh-100">
+    <div class="card csp-w-40rem shadow-lg">
+      <h5 class="card-header text-center">
+        {% block card_title %}{% endblock %}
+      </h5>
+      <div class="card-body">
+        {% block card_content %}
+          {% block content %}{% endblock %}
+        {% endblock %}
+      </div>
+    </div>
+  </div>
+{% endblock %}
