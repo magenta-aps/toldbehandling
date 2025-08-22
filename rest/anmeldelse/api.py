@@ -11,6 +11,21 @@ from typing import List, Optional, Tuple
 from uuid import uuid4
 
 import django.utils.timezone as tz
+from django.contrib.auth.models import Group
+from django.core.exceptions import ValidationError
+from django.core.files.base import ContentFile
+from django.db.models import Q, QuerySet, Sum
+from django.db.models.expressions import F, Value
+from django.http import Http404, HttpResponseBadRequest
+from django.shortcuts import get_object_or_404
+from django.utils import timezone
+from ninja import Field, FilterSchema, ModelSchema, Query
+from ninja_extra import api_controller, permissions, route
+from ninja_extra.exceptions import PermissionDenied
+from ninja_extra.pagination import paginate
+from ninja_extra.schemas import NinjaPaginationResponseSchema
+from pydantic import root_validator
+
 from aktør.api import AfsenderOut, ModtagerOut, SpeditørOut
 from anmeldelse.models import (
     Afgiftsanmeldelse,
@@ -22,23 +37,9 @@ from anmeldelse.models import (
 )
 from common.api import UserOut, get_auth_methods
 from common.models import IndberetterProfile
-from django.contrib.auth.models import Group
-from django.core.exceptions import ValidationError
-from django.core.files.base import ContentFile
-from django.db.models import Q, QuerySet, Sum
-from django.db.models.expressions import F, Value
-from django.http import Http404, HttpResponseBadRequest
-from django.shortcuts import get_object_or_404
-from django.utils import timezone
 from forsendelse.api import FragtforsendelseOut, PostforsendelseOut
-from ninja import Field, FilterSchema, ModelSchema, Query
-from ninja_extra import api_controller, permissions, route
-from ninja_extra.exceptions import PermissionDenied
-from ninja_extra.pagination import paginate
-from ninja_extra.schemas import NinjaPaginationResponseSchema
 from payment.models import Payment
 from project.util import RestPermission, json_dump
-from pydantic import root_validator
 from sats.models import Vareafgiftssats
 
 log = logging.getLogger(__name__)
@@ -783,7 +784,7 @@ class VarelinjeIn(ModelSchema):
                     id = VarelinjeAPI.get_varesats_id_by_kode(
                         values.get("afgiftsanmeldelse_id"),
                         values.get("privatafgiftsanmeldelse_id"),
-                        values.get("vareafgiftssats_afgiftsgruppenummer"),
+                        vareafgiftssats_afgiftsgruppenummer,
                     )
                 except Http404:
                     pass
@@ -796,9 +797,28 @@ class VarelinjeIn(ModelSchema):
                             f"{vareafgiftssats_afgiftsgruppenummer}"
                         }
                     )
-                enhed = Vareafgiftssats.objects.get(id=id).enhed
+                if type(id) is int:
+                    enhed = Vareafgiftssats.objects.get(id=id).enhed
+                else:
+                    raise ValidationError(
+                        {
+                            "vareafgiftssats_afgiftsgruppenummer": f"Did not "
+                            f"find a valid varesats based on "
+                            f"vareafgiftssats_afgiftsgruppenummer "
+                            f"{vareafgiftssats_afgiftsgruppenummer}"
+                        }
+                    )
             elif vareafgiftssats_id not in (None, 0):
                 id = vareafgiftssats_id
+                if type(id) is not int:
+                    try:
+                        id = int(id)
+                    except ValueError:
+                        ValidationError(
+                            {
+                                "vareafgiftssats_id": f"object with id {vareafgiftssats_id} does not exist"
+                            }
+                        )
                 try:
                     enhed = Vareafgiftssats.objects.get(id=id).enhed
                 except Vareafgiftssats.DoesNotExist:

@@ -10,6 +10,7 @@ from django.contrib.auth.models import Permission, User
 from django.test import TestCase
 from django.urls import reverse
 from ninja_extra.exceptions import PermissionDenied
+
 from project.test_mixins import RestMixin, RestTestMixin
 from project.util import json_dump
 from sats.models import Afgiftstabel, Vareafgiftssats
