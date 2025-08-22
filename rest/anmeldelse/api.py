@@ -777,26 +777,8 @@ class VarelinjeIn(ModelSchema):
             vareafgiftssats_afgiftsgruppenummer = values.get(
                 "vareafgiftssats_afgiftsgruppenummer"
             )
-            if (
-                vareafgiftssats_id is None
-                and vareafgiftssats_afgiftsgruppenummer is None
-            ):
-                raise ValidationError(
-                    {
-                        "__all__": "Must specify either vareafgiftssats_id or "
-                        "vareafgiftssats_afgiftsgruppenummer"
-                    }
-                )
             id = None
-            if vareafgiftssats_id is not None:
-                id = vareafgiftssats_id
-                try:
-                    enhed = Vareafgiftssats.objects.get(id=id).enhed
-                except Vareafgiftssats.DoesNotExist:
-                    raise ValidationError(
-                        {"vareafgiftssats_id": f"object with id {id} does not exist"}
-                    )
-            else:
+            if vareafgiftssats_afgiftsgruppenummer not in (None, 0):
                 try:
                     id = VarelinjeAPI.get_varesats_id_by_kode(
                         values.get("afgiftsanmeldelse_id"),
@@ -809,12 +791,27 @@ class VarelinjeIn(ModelSchema):
                     raise ValidationError(
                         {
                             "vareafgiftssats_afgiftsgruppenummer": f"Did not "
-                            f"find a valid varesats based on "
-                            f"vareafgiftssats_afgiftsgruppenummer "
-                            f"{vareafgiftssats_afgiftsgruppenummer}"
+                                                                   f"find a valid varesats based on "
+                                                                   f"vareafgiftssats_afgiftsgruppenummer "
+                                                                   f"{vareafgiftssats_afgiftsgruppenummer}"
                         }
                     )
                 enhed = Vareafgiftssats.objects.get(id=id).enhed
+            elif vareafgiftssats_id not in (None, 0):
+                id = vareafgiftssats_id
+                try:
+                    enhed = Vareafgiftssats.objects.get(id=id).enhed
+                except Vareafgiftssats.DoesNotExist:
+                    raise ValidationError(
+                        {"vareafgiftssats_id": f"object with id {id} does not exist"}
+                    )
+            else:
+                raise ValidationError(
+                    {
+                        "__all__": "Must specify either vareafgiftssats_id or "
+                                   "vareafgiftssats_afgiftsgruppenummer"
+                    }
+                )
 
             if enhed == Vareafgiftssats.Enhed.ANTAL and values.get("antal") is None:
                 raise ValidationError({"__all__": "Must set antal"})
