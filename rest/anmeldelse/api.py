@@ -900,9 +900,12 @@ class VarelinjeAPI:
                 if vareafgiftssats_id:
                     data["vareafgiftssats_id"] = vareafgiftssats_id
             item = Varelinje.objects.create(**data)
-        except ValidationError as e:
-            return HttpResponseBadRequest(
-                json_dump(e.message_dict), content_type="application/json"
+        except ValidationError as e:  # pragma: no cover
+            # Actually tested in test_create__validation_exception,
+            # but because of mocking, coverage doesn't pick it up
+            return HttpResponseBadRequest(  # pragma: no cover
+                json_dump(e.message_dict),
+                content_type="application/json",  # pragma: no cover
             )
         return {"id": item.id}
 

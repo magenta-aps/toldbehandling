@@ -50,7 +50,8 @@ if [ "${CREATE_SPEDITORER,,}" = true ]; then
 fi
 if [ "${TEST,,}" = true ]; then
   echo 'running tests!'
-  python manage.py test
+  coverage run manage.py test
+  coverage report --show-missing
 fi
 if [ "${DUMMYDATA,,}" = true ]; then
   echo 'creating dummy aktører'
