@@ -1,0 +1,29 @@
+{% extends "two_factor/_base_focus.html" %}
+{% load i18n %}
+{% load two_factor_tags %}
+
+{% block extra_media %}
+  {{ form.media }}
+{% endblock %}
+
+{% block card_title %}{% translate "Django administration" %}{% endblock %}
+{% block content %}
+
+  {% if wizard.steps.current == 'auth' %}
+    <p>{% blocktrans %}Indtast dine logininformationer.{% endblocktrans %}</p>
+  {% elif wizard.steps.current == 'token' %}
+    <p>{{ device|as_verbose_action }}</p>
+  {% endif %}
+
+  <form action="" method="post">
+    {% block main_form_content %}
+    {% csrf_token %}
+    {% include "two_factor/_wizard_forms.html" %}
+
+    {# hidden submit button to enable [enter] key #}
+    <input type="submit" value="" hidden />
+
+    {% include "two_factor/_wizard_actions.html" %}
+    {% endblock %}
+  </form>
+{% endblock %}

@@ -1,0 +1,15 @@
+{% extends "two_factor/_base_focus.html" %}
+{% load i18n %}
+
+{% block card_title %}{% translate "Aktivér to-faktor godkendelse" %}{% endblock %}
+{% block content %}
+  <p>
+      {% blocktrans trimmed %}
+      Tillykke, du har aktiveret to-faktor godkendelse.
+      {% endblocktrans %}
+  </p>
+  <p>
+      <a href="{% url 'admin:index' %}"
+         class="btn btn-block btn-secondary">{% trans "Fortsæt til admin hjemmeside" %}</a>
+  </p>
+{% endblock %}

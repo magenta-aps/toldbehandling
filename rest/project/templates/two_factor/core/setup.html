@@ -1,0 +1,40 @@
+{% extends "two_factor/_base_focus.html" %}
+{% load i18n %}
+
+{% block extra_media %}
+  {{ form.media }}
+{% endblock %}
+
+{% block card_title %}{% translate "Aktivér to-faktor godkendelse" %}{% endblock %}
+{% block content %}
+  {% if wizard.steps.current == 'welcome' %}
+    <p>
+        {% blocktrans trimmed %}
+        Du skal aktivere to-faktor godkendelse for at fortsætte. 
+        Følg trinnene i denne guide for at aktivere to-faktor-godkendelse.
+        {% endblocktrans %}
+    </p>
+  {% elif wizard.steps.current == 'generator' %}  
+    <p>
+        {% blocktranslate trimmed %}
+        For at opsætte to-faktor godkendelse, skan QR-koden med en
+        autentificerings-app på en smartphone, f.eks. Microsoft Authenticator eller Google Authenticator.
+        {% endblocktranslate %}
+    </p>
+    <img src="{{ QR_URL }}" alt="QR Code" class="bg-white"/></p>
+    <p>
+        {% blocktranslate trimmed %}
+        Indtast derefter koden fra appen i nedenstående felt
+        {% endblocktranslate %}
+    </p>
+  {% endif %}
+
+  <form action="" method="post">{% csrf_token %}
+    {% include "two_factor/_wizard_forms.html" %}
+
+    {# hidden submit button to enable [enter] key #}
+    <input type="submit" value="" hidden />
+
+    {% include "two_factor/_wizard_actions.html" %}
+  </form>
+{% endblock %}
