@@ -772,23 +772,31 @@ class VarelinjeIn(ModelSchema):
     @root_validator(pre=False)
     def enhed_must_have_corresponding_field(cls, values):
         if values.get("kladde") is not True:
-
-            vareafgiftssats_id = values.get("vareafgiftssats_id")
+            vareafgiftssats_id: int | None = values.get("vareafgiftssats_id")
             vareafgiftssats_afgiftsgruppenummer = values.get(
                 "vareafgiftssats_afgiftsgruppenummer"
             )
-            if (
-                vareafgiftssats_id is None
-                and vareafgiftssats_afgiftsgruppenummer is None
-            ):
-                raise ValidationError(
-                    {
-                        "__all__": "Must specify either vareafgiftssats_id or "
-                        "vareafgiftssats_afgiftsgruppenummer"
-                    }
-                )
             id = None
-            if vareafgiftssats_id is not None:
+            if vareafgiftssats_afgiftsgruppenummer not in (None, 0):
+                try:
+                    id = VarelinjeAPI.get_varesats_id_by_kode(
+                        values.get("afgiftsanmeldelse_id"),
+                        values.get("privatafgiftsanmeldelse_id"),
+                        vareafgiftssats_afgiftsgruppenummer,
+                    )
+                except Http404:
+                    pass
+                if id is None or type(id) is not int:
+                    raise ValidationError(
+                        {
+                            "vareafgiftssats_afgiftsgruppenummer": "Did not "
+                            "find a valid varesats based on "
+                            "vareafgiftssats_afgiftsgruppenummer "
+                            f"{vareafgiftssats_afgiftsgruppenummer}"
+                        }
+                    )
+                enhed = Vareafgiftssats.objects.get(id=id).enhed
+            elif vareafgiftssats_id not in (None, 0):
                 id = vareafgiftssats_id
                 try:
                     enhed = Vareafgiftssats.objects.get(id=id).enhed
@@ -797,24 +805,12 @@ class VarelinjeIn(ModelSchema):
                         {"vareafgiftssats_id": f"object with id {id} does not exist"}
                     )
             else:
-                try:
-                    id = VarelinjeAPI.get_varesats_id_by_kode(
-                        values.get("afgiftsanmeldelse_id"),
-                        values.get("privatafgiftsanmeldelse_id"),
-                        values.get("vareafgiftssats_afgiftsgruppenummer"),
-                    )
-                except Http404:
-                    pass
-                if id is None:
-                    raise ValidationError(
-                        {
-                            "vareafgiftssats_afgiftsgruppenummer": f"Did not "
-                            f"find a valid varesats based on "
-                            f"vareafgiftssats_afgiftsgruppenummer "
-                            f"{vareafgiftssats_afgiftsgruppenummer}"
-                        }
-                    )
-                enhed = Vareafgiftssats.objects.get(id=id).enhed
+                raise ValidationError(
+                    {
+                        "__all__": "Must specify either vareafgiftssats_id or "
+                        "vareafgiftssats_afgiftsgruppenummer"
+                    }
+                )
 
             if enhed == Vareafgiftssats.Enhed.ANTAL and values.get("antal") is None:
                 raise ValidationError({"__all__": "Must set antal"})
@@ -904,9 +900,12 @@ class VarelinjeAPI:
                 if vareafgiftssats_id:
                     data["vareafgiftssats_id"] = vareafgiftssats_id
             item = Varelinje.objects.create(**data)
-        except ValidationError as e:
-            return HttpResponseBadRequest(
-                json_dump(e.message_dict), content_type="application/json"
+        except ValidationError as e:  # pragma: no cover
+            # Actually tested in test_create__validation_exception,
+            # but because of mocking, coverage doesn't pick it up
+            return HttpResponseBadRequest(  # pragma: no cover
+                json_dump(e.message_dict),
+                content_type="application/json",  # pragma: no cover
             )
         return {"id": item.id}
 
