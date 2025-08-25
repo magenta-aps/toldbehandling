@@ -37,5 +37,5 @@ PROMETHEUS_PUSHGATEWAY_HOST = os.environ.get(
     "PROMETHEUS_PUSHGATEWAY", "pushgateway:9091"
 )
 
-LOGIN_URL = "two_factor:login"
+LOGIN_URL = "django_admin_login"
 LOGIN_REDIRECT_URL = "admin:index"
