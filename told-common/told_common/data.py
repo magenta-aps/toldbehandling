@@ -435,7 +435,9 @@ class PrivatAfgiftsanmeldelse(ToldDataClass):
     @property
     def afgift_sum(self):
         return round_decimal(
-            sum([varelinje.afgiftsbeløb for varelinje in self.varelinjer or []])
+            Decimal(
+                sum([varelinje.afgiftsbeløb for varelinje in self.varelinjer or []])
+            )
         )
 
     @property

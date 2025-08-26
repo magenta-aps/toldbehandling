@@ -9,10 +9,11 @@ from unittest.mock import MagicMock, patch
 
 import pandas as pd
 from dateutil.tz import tzoffset
+from django.contrib.messages import get_messages
 from django.core.cache import cache
 from django.core.files import File
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import RequestFactory, TestCase, override_settings
+from django.test import TestCase, override_settings
 from django.urls import reverse
 from requests import HTTPError, Response
 from told_common.data import (
@@ -27,10 +28,9 @@ from told_common.data import (
     PrivatAfgiftsanmeldelse,
     Toldkategori,
     Vareafgiftssats,
+    Varelinje,
 )
 from told_common.tests.tests import HasLogin
-
-from admin.views import StatistikView
 
 
 class BaseTest(HasLogin, TestCase):
@@ -96,14 +96,18 @@ class BaseTest(HasLogin, TestCase):
             subsatser=None,
         )
 
-        self.addCleanup(self.rest_client_patcher.stop)
-        cache.clear()
+        self.rest_client_mock.varesatser_all.return_value = {
+            1: self.sats1,
+            2: self.sats2,
+            3: self.sats3,
+        }
 
+        self.rest_client_mock.varesatser_fra.return_value = {
+            1: self.sats1,
+            2: self.sats2,
+            3: self.sats3,
+        }
 
-class TF10Test(BaseTest):
-
-    def setUp(self):
-        super().setUp()
         self.indberetter_data = {"cpr": "0101011234", "cvr": "123456"}
 
         def get_item(key):
@@ -119,24 +123,107 @@ class TF10Test(BaseTest):
         self.indberetter_mock.__bool__.return_value = True
         self.indberetter_mock.get.side_effect = get_indberetter
 
-        self.item_mock = MagicMock()
-        self.item_mock.status = "kladde"
-        self.item_mock.__getitem__.side_effect = get_item
-        self.item_mock.afsender = MagicMock(Afsender)
-        self.item_mock.afsender.cvr = 1111
+        self.tf10_item = MagicMock()
+        self.tf10_item.status = "kladde"
+        self.tf10_item.__getitem__.side_effect = get_item
+        self.tf10_item.afsender = MagicMock(Afsender)
+        self.tf10_item.afsender.cvr = 1111
 
-        self.item_mock.modtager = MagicMock(Modtager)
-        self.item_mock.modtager.id = 1
-        self.item_mock.modtager.cvr = None
-        self.item_mock.indberetter = self.indberetter_mock
-        self.item_mock.toldkategori = "73A"
-        self.item_mock.kategori = "73A"
-        self.item_mock.kræver_cvr = True
-        self.item_mock.betales_af = "afsender"
+        self.tf10_item.modtager = MagicMock(Modtager)
+        self.tf10_item.modtager.id = 1
+        self.tf10_item.modtager.cvr = None
+        self.tf10_item.indberetter = self.indberetter_mock
+        self.tf10_item.toldkategori = "73A"
+        self.tf10_item.kategori = "73A"
+        self.tf10_item.kræver_cvr = True
+        self.tf10_item.betales_af = "afsender"
 
-        self.item_mock.oprettet_af = {"email": "jack@sparrow.sp"}
+        self.tf10_item.oprettet_af = {
+            "email": "jack@sparrow.sp",
+            "first_name": "Jack",
+            "last_name": "Sparrow",
+        }
 
-        self.rest_client_mock.afgiftanmeldelse.get.return_value = self.item_mock
+        self.varelinje1 = Varelinje(
+            id=1,
+            afgiftsanmeldelse=1,
+            vareafgiftssats=self.sats1,
+            afgiftsbeløb=12,
+        )
+        self.varelinje2 = Varelinje(
+            id=2,
+            afgiftsanmeldelse=2,
+            vareafgiftssats=self.sats2,
+            afgiftsbeløb=13,
+        )
+
+        self.tf10_item.varelinjer = [self.varelinje1, self.varelinje2]
+
+        user1 = MagicMock()
+        user1.id = 1
+        user1.first_name = "Joe"
+        user1.last_name = "Jackson"
+        self.rest_client_mock.user.list.return_value = (0, [user1])
+
+        self.tf5_item1 = PrivatAfgiftsanmeldelse(
+            id=1,
+            cpr=1234567890,
+            anonym=False,
+            navn="Anna Andersen",
+            adresse="Fiktivvej 1",
+            postnummer=2100,
+            by="København",
+            telefon="12345678",
+            leverandørfaktura_nummer="INV001",
+            leverandørfaktura=MagicMock(spec=File),  # mocked File object
+            bookingnummer="BK001",
+            status="oprettet",
+            indleveringsdato=datetime.date(2025, 7, 1),
+            oprettet=datetime.datetime(2025, 7, 1, 12, 0),
+            oprettet_af={"id": 1, "navn": "Admin"},
+            payment_status="afventende",
+            indførselstilladelse="ABC123",
+            varelinjer=[self.varelinje1, self.varelinje2],
+            notater=[],
+        )
+
+        self.tf5_item2 = PrivatAfgiftsanmeldelse(
+            id=2,
+            cpr=9876543210,
+            anonym=True,
+            navn="",
+            adresse="Hemmeligvej 42",
+            postnummer=8000,
+            by="Aarhus",
+            telefon="87654321",
+            leverandørfaktura_nummer="INV002",
+            leverandørfaktura=MagicMock(spec=File),  # mocked File object
+            bookingnummer="BK002",
+            status="afsluttet",
+            indleveringsdato=datetime.date(2025, 7, 2),
+            oprettet=datetime.datetime(2025, 7, 2, 9, 30),
+            oprettet_af={"id": 2, "navn": "System"},
+            payment_status="betalt",
+            indførselstilladelse=None,
+            varelinjer=None,
+            notater=None,
+        )
+
+        items = [self.tf5_item1, self.tf5_item2]
+
+        self.rest_client_mock.privat_afgiftsanmeldelse.list.return_value = (2, items)
+        self.rest_client_mock.privat_afgiftsanmeldelse.get.return_value = self.tf5_item1
+
+        self.addCleanup(self.rest_client_patcher.stop)
+        cache.clear()
+
+
+class TF10Test(BaseTest):
+
+    def setUp(self):
+        super().setUp()
+
+        self.rest_client_mock.afgiftanmeldelse.get.return_value = self.tf10_item
 
         kategori = Toldkategori(kategori="73A", navn="foo", kræver_cvr=True)
         self.rest_client_mock.toldkategori.list.return_value = [kategori]
@@ -185,8 +272,8 @@ class TF10Test(BaseTest):
 
     def test_send_to_prisme_no_cvr(self):
         self.login()
-        self.assertEqual(self.item_mock.modtager.cvr, None)
-        self.item_mock.betales_af = "modtager"
+        self.assertEqual(self.tf10_item.modtager.cvr, None)
+        self.tf10_item.betales_af = "modtager"
         self.client.post(self.url, data=self.prisme_data)
         self.rest_client_mock.prismeresponse.create.assert_not_called()
 
@@ -725,57 +812,6 @@ class TestAfgiftstabelDownloadView(BaseTest):
 
 
 class TestTF5Views(BaseTest):
-    def setUp(self):
-        super().setUp()
-
-        self.item1 = PrivatAfgiftsanmeldelse(
-            id=1,
-            cpr=1234567890,
-            anonym=False,
-            navn="Anna Andersen",
-            adresse="Fiktivvej 1",
-            postnummer=2100,
-            by="København",
-            telefon="12345678",
-            leverandørfaktura_nummer="INV001",
-            leverandørfaktura=MagicMock(spec=File),  # mocked File object
-            bookingnummer="BK001",
-            status="oprettet",
-            indleveringsdato=datetime.date(2025, 7, 1),
-            oprettet=datetime.datetime(2025, 7, 1, 12, 0),
-            oprettet_af={"id": 1, "navn": "Admin"},
-            payment_status="afventende",
-            indførselstilladelse="ABC123",
-            varelinjer=[],
-            notater=[],
-        )
-
-        self.item2 = PrivatAfgiftsanmeldelse(
-            id=2,
-            cpr=9876543210,
-            anonym=True,
-            navn="",
-            adresse="Hemmeligvej 42",
-            postnummer=8000,
-            by="Aarhus",
-            telefon="87654321",
-            leverandørfaktura_nummer="INV002",
-            leverandørfaktura=MagicMock(spec=File),  # mocked File object
-            bookingnummer="BK002",
-            status="afsluttet",
-            indleveringsdato=datetime.date(2025, 7, 2),
-            oprettet=datetime.datetime(2025, 7, 2, 9, 30),
-            oprettet_af={"id": 2, "navn": "System"},
-            payment_status="betalt",
-            indførselstilladelse=None,
-            varelinjer=None,
-            notater=None,
-        )
-
-        items = [self.item1, self.item2]
-
-        self.rest_client_mock.privat_afgiftsanmeldelse.list.return_value = (2, items)
-        self.rest_client_mock.privat_afgiftsanmeldelse.get.return_value = self.item1
 
     def test_listview(self):
         self.login()
@@ -907,3 +943,510 @@ class TestStatistikView(BaseTest):
         self.assertEqual(df.loc[102, "GRUPPESUM"], 20600)
         self.assertEqual(df.loc[103, "KVANTUM"], 120)
         self.assertEqual(df.loc[104, "AFGIFT"], 100)
+
+
+class TestRestView(BaseTest):
+    def test_patch_endpoint(self):
+        self.login()
+        self.rest_client_mock.patch.return_value = {"patched": True}
+
+        url = reverse("rest", kwargs={"path": "some/path"})
+        data = {"foo": "bar"}
+
+        response = self.client.patch(
+            url,
+            data=json.dumps(data),
+            content_type="application/json",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertJSONEqual(response.content, {"patched": True})
+        self.rest_client_mock.patch.assert_called_once_with("some/path", data)
+
+
+class TestFileView(BaseTest):
+    def test_fileview_raises_404_if_path_does_not_exist(self):
+        self.login()
+        url = reverse("fragtbrev_view", kwargs={"id": 1})
+
+        file_mock = MagicMock()
+        file_mock.key = "nonexisting_path"
+        self.rest_client_mock.get.return_value = file_mock
+
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 404)
+
+
+class TestTF10FormCreateView(BaseTest):
+
+    def setUp(self):
+        super().setUp()
+
+        self.data = {
+            "afsender_cvr": "12345678",
+            "afsender_navn": "TestFirma1",
+            "afsender_adresse": "Testvej 42",
+            "afsender_postnummer": "1234",
+            "afsender_by": "TestBy",
+            "afsender_postbox": "123",
+            "afsender_telefon": "123456",
+            "modtager_cvr": "12345679",
+            "modtager_navn": "TestFirma2",
+            "modtager_adresse": "Testvej 43",
+            "modtager_postnummer": "1234",
+            "modtager_by": "TestBy",
+            "modtager_postbox": "124",
+            "modtager_telefon": "123123",
+            "indførselstilladelse": "123",
+            "leverandørfaktura_nummer": "123",
+            "fragttype": "skibsfragt",
+            "fragtbrevnr": "ABCDE1234567",
+            "afgangsdato": "2023-11-03",
+            "form-TOTAL_FORMS": "1",
+            "form-INITIAL_FORMS": "1",
+            "form-0-vareafgiftssats": "2",
+            "form-0-mængde": "3",
+            "form-0-antal": "6",
+            "form-0-fakturabeløb": "100.00",
+            "forbindelsesnr": "ABC 337",
+            "oprettet_på_vegne_af": 1,
+            "betales_af": "afsender",
+            "tf3": "False",
+            "fragtbrev": MagicMock(),
+            "leverandørfaktura": MagicMock(),
+        }
+
+        self.url = reverse("tf10_create")
+
+    def test_create(self):
+        self.login()
+        response = self.client.post(self.url, data=self.data)
+        self.assertEqual(response.status_code, 302)
+        self.rest_client_mock.afgiftanmeldelse.create.assert_called_once()
+
+    def test_create_without_faktura(self):
+        self.login()
+        self.data["leverandørfaktura"] = ""
+        response = self.client.post(self.url, data=self.data)
+        self.assertTrue(response.context["form"].errors)
+
+    def test_create_with_note(self):
+        self.login()
+        self.data["notat"] = "foo"
+        response = self.client.post(self.url, data=self.data)
+        self.assertEqual(response.status_code, 302)
+        self.rest_client_mock.notat.create.assert_called_once()
+
+    def test_create_as_kladde(self):
+        self.login()
+        self.data["kladde"] = True
+        response = self.client.post(self.url, data=self.data)
+        self.assertEqual(response.status_code, 302)
+
+        storage = get_messages(response.wsgi_request)
+        messages = [m.message for m in storage]
+
+        pattern = r"Afgiftsanmeldelsen med nummer .* blev gemt som kladde\."
+        self.assertRegex(messages[0], pattern)
+
+    def test_invalid_afgangsdato(self):
+
+        self.login()
+        self.data["afgangsdato"] = "foo"
+        response = self.client.post(self.url, data=self.data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("Indtast en gyldig dato", str(response.context["form"].errors))
+
+
+class TestTF10FormUpdateView(BaseTest):
+    def setUp(self):
+        super().setUp()
+
+        self.data = {
+            "afsender_cvr": "12345678",
+            "afsender_navn": "TestFirma1",
+            "afsender_adresse": "Testvej 42",
+            "afsender_postnummer": "1234",
+            "afsender_by": "TestBy",
+            "afsender_postbox": "123",
+            "afsender_telefon": "123456",
+            "modtager_cvr": "12345679",
+            "modtager_navn": "TestFirma2",
+            "modtager_adresse": "Testvej 43",
+            "modtager_postnummer": "1234",
+            "modtager_by": "TestBy",
+            "modtager_postbox": "124",
+            "modtager_telefon": "123123",
+            "indførselstilladelse": "123",
+            "leverandørfaktura_nummer": "123",
+            "fragttype": "skibsfragt",
+            "fragtbrevnr": "ABCDE1234567",
+            "afgangsdato": "2023-11-03",
+            "form-TOTAL_FORMS": "1",
+            "form-INITIAL_FORMS": "1",
+            "form-0-vareafgiftssats": "2",
+            "form-0-mængde": "3",
+            "form-0-antal": "6",
+            "form-0-fakturabeløb": "100.00",
+            "forbindelsesnr": "ABC 337",
+            "oprettet_på_vegne_af": 1,
+            "betales_af": "afsender",
+            "tf3": "False",
+            "fragtbrev": MagicMock(),
+            "leverandørfaktura": MagicMock(),
+        }
+
+        self.url = reverse("tf10_edit", kwargs={"id": 1})
+
+        self.rest_client_mock.afgiftanmeldelse.get.return_value = self.tf10_item
+
+    def test_edit(self):
+        self.login()
+        response = self.client.post(self.url, data=self.data)
+
+        self.assertEqual(response.status_code, 302)
+        self.rest_client_mock.afgiftanmeldelse.update.assert_called_once()
+
+    def test_edit_non_kladde(self):
+        self.login()
+        self.tf10_item.status = "må ikke redigeres"
+        response = self.client.post(self.url, data=self.data)
+
+        self.assertEqual(response.status_code, 403)
+
+    def test_success_url_with_back_url(self):
+        self.login()
+        self.tf10_item.id = 1
+
+        response = self.client.post(self.url + "?back=view", data=self.data)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse("tf10_view", kwargs={"id": 1}))
+
+    def test_success_url(self):
+        self.login()
+        self.tf10_item.id = 1
+
+        response = self.client.post(self.url, data=self.data)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse("tf10_list") + "?highlight=1")
+
+    def test_new_postforsendelse(self):
+        self.login()
+        self.tf10_item.postforsendelse = None
+        response = self.client.post(self.url, data=self.data)
+
+        self.assertEqual(response.status_code, 302)
+        self.rest_client_mock.postforsendelse.create.assert_called_once()
+
+    def test_invalid_afgangsdato(self):
+
+        self.login()
+        self.data["afgangsdato"] = "foo"
+        response = self.client.post(self.url, data=self.data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("Indtast en gyldig dato", str(response.context["form"].errors))
+
+    def test_varelinje_not_in_toplevel(self):
+
+        # Sats1 is not in the toplevel_current_varesatser
+        # But if sats2 has the proper number, that ends up being used instead
+        self.sats2.afgiftsgruppenummer = 101
+
+        self.rest_client_mock.varesatser_all.return_value = {
+            1: self.sats1,
+            2: self.sats2,
+            3: self.sats3,
+        }
+
+        self.rest_client_mock.varesatser_fra.return_value = {
+            1: self.sats1,
+            2: self.sats2,
+            3: self.sats3,
+        }
+
+        self.login()
+        response = self.client.post(self.url, data=self.data)
+        self.assertEqual(response.status_code, 302)
+
+
+class TestTF10FormDeleteView(BaseTest):
+    def setUp(self):
+        super().setUp()
+
+        self.url = reverse("tf10_delete", kwargs={"id": 1})
+        self.rest_client_mock.afgiftanmeldelse.get.return_value = self.tf10_item
+
+        self.rest_client_mock.afgiftanmeldelse.delete.return_value = {"success": True}
+
+    def test_delete(self):
+        self.login()
+        response = self.client.post(self.url)
+
+        self.assertEqual(response.status_code, 302)
+        self.rest_client_mock.afgiftanmeldelse.delete.assert_called_once()
+
+    def test_get_object_does_not_exist(self):
+        self.login()
+        self.rest_client_mock.afgiftanmeldelse.get.return_value = None
+        response = self.client.get(self.url)
+
+        self.assertEqual(response.status_code, 500)
+        self.assertIn("Afgiftsanmeldelse kunne ikke findes", str(response.content))
+
+    def test_delete_failed(self):
+        self.login()
+        self.rest_client_mock.afgiftanmeldelse.delete.return_value = {"success": False}
+        response = self.client.post(self.url)
+
+        self.assertEqual(response.status_code, 500)
+        self.assertIn("Afgiftsanmeldelse 1 kunne ikke slettes", str(response.content))
+
+
+class TestTF10ListView(BaseTest):
+    def setUp(self):
+        super().setUp()
+
+        self.url = reverse("tf10_list")
+        self.rest_client_mock.afgiftanmeldelse.get.return_value = self.tf10_item
+
+        self.rest_client_mock.afgiftanmeldelse.list.return_value = (1, [self.tf10_item])
+
+    def test_list(self):
+        self.login()
+        response = self.client.get(self.url)
+        items = response.context_data["items"]
+        self.assertEqual(len(items), 1)
+
+    @patch("admin.views.TF10ListView.get_initial")
+    def test_form_kwargs(self, mock_get_initial):
+        mock_get_initial.return_value = {1: "foo", 2: ["bar"]}
+        self.login()
+        response = self.client.get(self.url)
+        form = response.context_data["form"]
+
+        self.assertEqual(form.data[1], "foo")
+        self.assertEqual(form.data[2], "bar")
+
+
+class TestTF10View(BaseTest):
+    def setUp(self):
+        super().setUp()
+
+        self.url = reverse("tf10_view", kwargs={"id": 1})
+        self.rest_client_mock.afgiftanmeldelse.get.return_value = self.tf10_item
+
+    def test_view(self):
+        self.login()
+
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.rest_client_mock.afgiftanmeldelse.get.assert_called_once()
+
+        context = response.context_data
+        indberettere = context["indberettere"]
+        self.assertEqual(len(indberettere), 3)
+        self.assertEqual(indberettere[0]["navn"], "Jack Sparrow")
+
+    def test_object_not_found(self):
+        self.login()
+        response = Response()
+        response.status_code = 404
+
+        self.rest_client_mock.afgiftanmeldelse.get.side_effect = HTTPError(
+            response=response
+        )
+
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 404)
+
+    def test_http_error(self):
+        self.login()
+        response = Response()
+        response.status_code = 500
+
+        self.rest_client_mock.afgiftanmeldelse.get.side_effect = HTTPError(
+            response=response
+        )
+
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 500)
+
+
+class TestTF5View(BaseTest):
+
+    def setUp(self):
+        super().setUp()
+
+        self.url = reverse("tf5_view", kwargs={"id": 1})
+
+    def test_view(self):
+        self.login()
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.rest_client_mock.privat_afgiftsanmeldelse.get.assert_called_once()
+
+        context = response.context_data
+        self.assertEqual(context["object"].id, 1)
+
+    def test_cancel_tf5(self):
+
+        self.login()
+        response = self.client.post(
+            self.url, data={"annulleret": True, "notat1": "foo"}
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.rest_client_mock.privat_afgiftsanmeldelse.annuller.assert_called_once()
+
+    def test_cancel_tf5_not_allowed(self):
+
+        self.login(
+            userdata_extra={
+                "permissions": [
+                    "auth.admin",
+                    "aktør.view_afsender",
+                    "aktør.view_modtager",
+                    "sats.view_vareafgiftssats",
+                    "anmeldelse.prisme_afgiftsanmeldelse",
+                    "aktør.change_modtager",
+                    "forsendelse.view_postforsendelse",
+                    "forsendelse.view_fragtforsendelse",
+                    "anmeldelse.view_afgiftsanmeldelse",
+                    "anmeldelse.view_varelinje",
+                    "anmeldelse.change_afgiftsanmeldelse",
+                    "anmeldelse.view_privatafgiftsanmeldelse",
+                    # "anmeldelse.change_privatafgiftsanmeldelse"
+                ],
+                "is_superuser": False,
+            }
+        )
+        response = self.client.post(
+            self.url, data={"annulleret": True, "notat1": "foo"}
+        )
+
+        self.assertEqual(response.status_code, 403)
+        self.rest_client_mock.privat_afgiftsanmeldelse.annuller.assert_not_called()
+
+    def test_cancel_tf5_404(self):
+
+        self.login()
+
+        response = Response()
+        response.status_code = 404
+
+        self.rest_client_mock.privat_afgiftsanmeldelse.annuller.side_effect = HTTPError(
+            response=response
+        )
+
+        response = self.client.post(
+            self.url, data={"annulleret": True, "notat1": "foo"}
+        )
+
+        self.assertEqual(response.status_code, 404)
+
+    def test_cancel_tf5_500(self):
+
+        self.login()
+
+        response = Response()
+        response.status_code = 500
+
+        self.rest_client_mock.privat_afgiftsanmeldelse.annuller.side_effect = HTTPError(
+            response=response
+        )
+
+        response = self.client.post(
+            self.url, data={"annulleret": True, "notat1": "foo"}
+        )
+
+        self.assertEqual(response.status_code, 500)
+
+    def test_view_404(self):
+        self.login()
+
+        response = Response()
+        response.status_code = 404
+
+        self.rest_client_mock.privat_afgiftsanmeldelse.get.side_effect = HTTPError(
+            response=response
+        )
+
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 404)
+
+    def test_view_500(self):
+        self.login()
+
+        response = Response()
+        response.status_code = 500
+
+        self.rest_client_mock.privat_afgiftsanmeldelse.get.side_effect = HTTPError(
+            response=response
+        )
+
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 500)
+
+
+class TestTF5UpdateView(BaseTest):
+    def setUp(self):
+        super().setUp()
+
+        self.url = reverse("tf5_edit", kwargs={"id": 1})
+
+        self.data = {
+            "afsender_cvr": "12345678",
+            "afsender_navn": "TestFirma1",
+            "afsender_adresse": "Testvej 42",
+            "afsender_postnummer": "1234",
+            "afsender_by": "TestBy",
+            "afsender_postbox": "123",
+            "afsender_telefon": "123456",
+            "modtager_cvr": "12345679",
+            "modtager_navn": "TestFirma2",
+            "modtager_adresse": "Testvej 43",
+            "modtager_postnummer": "1234",
+            "modtager_by": "TestBy",
+            "modtager_postbox": "124",
+            "modtager_telefon": "123123",
+            "indførselstilladelse": "123",
+            "leverandørfaktura_nummer": "123",
+            "fragttype": "skibsfragt",
+            "fragtbrevnr": "ABCDE1234567",
+            "afgangsdato": "2023-11-03",
+            "form-TOTAL_FORMS": "1",
+            "form-INITIAL_FORMS": "1",
+            "form-0-vareafgiftssats": "2",
+            "form-0-mængde": "3",
+            "form-0-antal": "6",
+            "form-0-fakturabeløb": "100.00",
+            "forbindelsesnr": "ABC 337",
+            "oprettet_på_vegne_af": 1,
+            "betales_af": "afsender",
+            "tf3": "False",
+            "fragtbrev": MagicMock(),
+            "leverandørfaktura": MagicMock(),
+            "cpr": "0101011234",
+            "navn": "Jack Sparrow",
+            "adresse": "The seven seas",
+            "postnummer": "1234",
+            "by": "Atlantica",
+            "telefon": "44 55 44 11",
+            "bookingnummer": 123,
+            "indleveringsdato": "2025-01-01",
+        }
+
+    def test_update(self):
+        self.login()
+        response = self.client.post(self.url, self.data)
+        self.assertEqual(response.status_code, 302)
+        self.rest_client_mock.privat_afgiftsanmeldelse.update.assert_called_once()
+
+    def test_view(self):
+        self.login()
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        context = response.context_data
+        self.assertEqual(context["item"].id, 1)
