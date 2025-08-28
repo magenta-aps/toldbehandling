@@ -29,7 +29,6 @@ from told_common.data import (
     Afgiftsanmeldelse,
     Forsendelsestype,
     PrivatAfgiftsanmeldelse,
-    Vareafgiftssats,
 )
 from told_common.rest_client import RestClient
 from told_common.util import (
@@ -191,11 +190,6 @@ class TF10FormCreateView(
                 self.userdata["username"],
                 leverandørfakturafil.name,
                 leverandørfakturafil.size,
-            )
-        else:
-            log.info(
-                "Bruger '%s' opretter TF10 uden at sætte leverandørfaktura",
-                self.userdata["username"],
             )
 
         self.anmeldelse_id = self.rest_client.afgiftanmeldelse.create(
@@ -494,7 +488,8 @@ class TF10FormUpdateView(
         return super().form_valid(form, formset)
 
     def status(self, item, form):
-        return None  # override in subclasses. None means "no change"
+        # override in subclasses. None means "no change"
+        return None  # pragma: no cover
 
     @cached_property
     def varesatser(self):
@@ -702,7 +697,8 @@ class ListView(FormView):
             return self.form_invalid(form)
 
     def get_items(self, search_data: Dict[str, Any]):
-        return {"count": 0, "items": []}
+        # Overwrite in subclasses
+        return {"count": 0, "items": []}  # pragma: no cover
 
     def store_search(self, search_data: dict):
         if "list_search" not in self.request.session:
@@ -720,7 +716,8 @@ class ListView(FormView):
     def item_to_json_dict(
         self, item: Dict[str, Any], context: Dict[str, Any], index: int
     ) -> Dict[str, Any]:
-        return {**item, "select": item["id"]}
+        # Overwrite in subclasses
+        return {**item, "select": item["id"]}  # pragma: no cover
 
     def form_valid(self, form):
         search_data = {"offset": 0, "limit": self.list_size}
@@ -880,9 +877,6 @@ class TF10ListView(
 class TF10BaseView:
     rest_client: RestClient
 
-    def get_subsatser(self, parent_id: int) -> List[Vareafgiftssats]:
-        return self.rest_client.vareafgiftssats.list(overordnet=parent_id)
-
 
 class TF10View(TF10BaseView, TemplateView):
     required_permissions: Iterable[str] = (
@@ -993,9 +987,6 @@ class TF5View(
     template_name = "told_common/tf5/view.html"
     form_class = forms.TF5ViewForm
     show_notater = False
-
-    def get_subsatser(self, parent_id: int) -> List[Vareafgiftssats]:
-        return self.rest_client.vareafgiftssats.list(overordnet=parent_id)
 
     def get_context_data(self, **kwargs):
         can_edit = (

@@ -83,49 +83,6 @@ class LoginRequiredMixin:
         return self.request.session["user"]
 
 
-class GroupRequiredMixin(LoginRequiredMixin):
-    # Liste af gruppenavne som har tilladelse til at komme ind
-    allowed_groups: Iterable[str] = ()
-    request: HttpRequest
-
-    # Skal stemme overens med de grupper der oprettes i create_groups.py
-    PRIVATINDBERETTERE = "PrivatIndberettere"
-    ERHVERVINDBERETTERE = "ErhvervIndberettere"
-    TOLDMEDARBEJDERE = "Toldmedarbejdere"
-    AFSTEMMERE_BOGHOLDERE = "Afstemmere/bogholdere"
-    DATAANSVARLIGE = "Dataansvarlige"
-
-    # Som LoginRequiredMixin, men kræver også at brugeren har den rette Permission
-    # til at komme ind på admin-sitet
-    def check(self) -> Optional[HttpResponse]:
-        response = super().check()
-        if response:
-            return response
-        if self.userdata["is_superuser"]:
-            return None
-
-        user_groups = set(self.userdata["groups"])
-        required_groups = set(self.allowed_groups)
-        if required_groups.intersection(user_groups):
-            return None
-
-        return TemplateResponse(
-            request=self.request,
-            template="told_common/access_denied.html",
-            context={"missing_groups": self.allowed_groups},
-            headers={"Cache-Control": "no-cache"},
-            status=403,
-        )
-
-    def get_context_data(self, **kwargs):
-        return super().get_context_data(
-            **{
-                **kwargs,
-                "user_groups": self.userdata["groups"],
-            }
-        )
-
-
 class PermissionsRequiredMixin(LoginRequiredMixin):
     # Liste af permissions påkræves for adgang
     required_permissions: Iterable[str] = ()
@@ -181,19 +138,6 @@ class HasRestClientMixin:
         response = super().dispatch(request, *args, **kwargs)
         if self.rest_client.token:
             self.rest_client.token.save(request)
-        return response
-
-
-class HasSystemRestClientMixin:
-    def dispatch(self, request, *args, **kwargs):
-        self.rest_client = RestClient(
-            RestClient.login("system", settings.SYSTEM_USER_PASSWORD)
-        )
-        response = super().dispatch(request, *args, **kwargs)
-        # TODO: Gem token et sted? Ikke oveni den eksisterende sat af HasRestClientMixin
-        # TODO: Måske i en class-level cache?
-        # if self.rest_client.token:
-        #     self.rest_client.token.save(request)
         return response
 
 
