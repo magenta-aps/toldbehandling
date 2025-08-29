@@ -96,9 +96,8 @@
 
         {% if form.toldkategori %}
         <div class="row align-items-center">
-            <div class="col-4">
+            <div class="col-4 align-self-start">
                 <label for="{{form.toldkategori.id_for_label}}" class="form-label">{% translate "Toldkategori" %}</label><br/>
-                <small>{% translate "Brug shift eller ctrl/cmd for at vælge flere" %}</small>
             </div>
             <div class="col-8">
                 {{form.toldkategori}}
