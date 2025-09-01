@@ -142,6 +142,7 @@ class Afgiftsanmeldelse(models.Model):
             ("afvist", "afvist"),
             ("godkendt", "godkendt"),
             ("afsluttet", "afsluttet"),
+            ("slettet", "slettet"),
         ),
         default="ny",
     )
@@ -319,6 +320,7 @@ class PrivatAfgiftsanmeldelse(models.Model):
             ("afvist", "afvist"),
             ("godkendt", "godkendt"),
             ("afsluttet", "afsluttet"),
+            ("slettet", "slettet"),
         ),
         default="ny",
     )

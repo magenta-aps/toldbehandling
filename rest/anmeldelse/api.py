@@ -280,6 +280,8 @@ class AfgiftsanmeldelseAPI:
         qs = self.filter_user(Afgiftsanmeldelse.objects.all())
         # https://django-ninja.rest-framework.com/guides/input/filtering/
         qs = filters.filter(qs)
+        if filters.status != "slettet":
+            qs = qs.exclude(status="slettet")
         order_by = self.map_sort(sort, order)
         if order_by:
             qs = qs.order_by(order_by, "id")
@@ -302,6 +304,8 @@ class AfgiftsanmeldelseAPI:
         qs = self.filter_user(Afgiftsanmeldelse.objects.all())
         # https://django-ninja.rest-framework.com/guides/input/filtering/
         qs = filters.filter(qs)
+        if filters.status != "slettet":
+            qs = qs.exclude(status="slettet")
         order_by = self.map_sort(sort, order)
         if order_by:
             qs = qs.order_by(order_by, "id")
@@ -482,7 +486,7 @@ class AfgiftsanmeldelseAPI:
             Q(oprettet_af__indberetter_data__cvr=cvr)
             | Q(oprettet_på_vegne_af__indberetter_data__cvr=cvr)
             | Q(fuldmagtshaver__cvr=cvr)
-        )
+        ).exclude(status="slettet")
 
     def check_user(self, item: Afgiftsanmeldelse):
         if not self.filter_user(Afgiftsanmeldelse.objects.filter(id=item.id)).exists():
