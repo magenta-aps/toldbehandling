@@ -1,15 +1,17 @@
 # SPDX-FileCopyrightText: 2023 Magenta ApS <info@magenta.dk>
 #
 # SPDX-License-Identifier: MPL-2.0
+from __future__ import annotations
 
 import re
-from typing import Optional
+from typing import Any, Dict, Optional
 
 from django import forms
 from django.core.exceptions import ValidationError
 from django.core.files import File
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.forms import FileField, MultipleChoiceField
+from django.forms.widgets import CheckboxSelectMultiple
 from django.utils.translation import gettext_lazy as _
 from dynamic_forms import DynamicFormMixin
 from humanize import naturalsize
@@ -35,8 +37,8 @@ class BootstrapForm(DynamicFormMixin, forms.Form):
     def set_field_classes(self, name, field, check_for_errors=False):
         classes = self.split_class(field.widget.attrs.get("class"))
         classes.append("mr-2")
-        if isinstance(field.widget, (forms.CheckboxInput, forms.RadioSelect)):
-            pass
+        if isinstance(field.widget, (forms.widgets.RadioSelect)):
+            classes.append("form-check")
         else:
             classes.append("form-control")
             if isinstance(field.widget, forms.Select):
@@ -201,3 +203,16 @@ class MultipleSeparatedChoiceField(MultipleChoiceField):
         if not value:
             return []
         return re.split("|".join(map(re.escape, self.delimiters)), value)
+
+
+class ModifiableCheckboxSelectMultiple(CheckboxSelectMultiple):
+
+    def __init__(self, subwidget_attrs: Dict[str, Any] | None = None, *args, **kwargs):
+        self.subwidget_attrs = subwidget_attrs or {}
+        super().__init__(*args, **kwargs)
+
+    def optgroups(self, name, value, attrs: Dict[str, Any] | None = None):
+        if attrs is None:
+            attrs = {}  # pragma: no cover
+        attrs.update(self.subwidget_attrs)
+        return super().optgroups(name, value, attrs)
