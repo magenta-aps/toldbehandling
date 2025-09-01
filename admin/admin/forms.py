@@ -19,6 +19,7 @@ from told_common.form_mixins import (
     DateInput,
     FixedWidthIntegerField,
     MaxSizeFileField,
+    ModifiableCheckboxSelectMultiple,
     MultipleSeparatedChoiceField,
 )
 
@@ -194,6 +195,7 @@ class TF10SearchForm(common_forms.TF10SearchForm):
             for toldkategori in form.toldkategorier
         ],
         required=False,
+        widget=ModifiableCheckboxSelectMultiple(attrs={}, subwidget_attrs={"class": "form-check-input"})
     )
 
 
