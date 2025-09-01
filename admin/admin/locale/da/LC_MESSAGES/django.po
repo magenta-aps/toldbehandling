@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-05-13 05:57-0100\n"
+"POT-Creation-Date: 2025-09-01 07:47-0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -75,6 +75,22 @@ msgid "Afgangsdato"
 msgstr ""
 
 #: admin/forms.py
+msgid "Alle"
+msgstr ""
+
+#: admin/forms.py admin/templates/admin/afgiftstabel/view.html
+msgid "Kladde"
+msgstr ""
+
+#: admin/forms.py
+msgid "Afsluttet"
+msgstr ""
+
+#: admin/forms.py
+msgid "Slettet"
+msgstr ""
+
+#: admin/forms.py
 msgid "Ingen kategori"
 msgstr ""
 
@@ -107,10 +123,6 @@ msgstr ""
 
 #: admin/templates/admin/afgiftstabel/view.html
 msgid "Gyldig til"
-msgstr ""
-
-#: admin/templates/admin/afgiftstabel/view.html
-msgid "Kladde"
 msgstr ""
 
 #: admin/templates/admin/afgiftstabel/view.html

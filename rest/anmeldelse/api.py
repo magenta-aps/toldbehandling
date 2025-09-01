@@ -379,6 +379,7 @@ class AfgiftsanmeldelseAPI:
                 raise PermissionDenied
 
         data = payload.dict(exclude_unset=True)
+        print(f"data: {data}")
 
         # Draft double-check
         kladde = data.pop("kladde", False)
@@ -419,6 +420,7 @@ class AfgiftsanmeldelseAPI:
 
         # Persist data & return
         item.save()
+        print("success")
         return {"success": True}
 
     @route.delete(
@@ -482,7 +484,7 @@ class AfgiftsanmeldelseAPI:
             Q(oprettet_af__indberetter_data__cvr=cvr)
             | Q(oprettet_på_vegne_af__indberetter_data__cvr=cvr)
             | Q(fuldmagtshaver__cvr=cvr)
-        )
+        ).exclude(status="slettet")
 
     def check_user(self, item: Afgiftsanmeldelse):
         if not self.filter_user(Afgiftsanmeldelse.objects.filter(id=item.id)).exists():

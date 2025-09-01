@@ -660,10 +660,10 @@ class TF10FormDeleteView(
 
     def post(self, request, *args, **kwargs):
         declaration_id = int(self.kwargs["id"])
-        resp = self.rest_client.afgiftanmeldelse.delete(declaration_id)
-        if resp["success"] is not True:
+        try:
+            self.rest_client.afgiftanmeldelse.set_status(declaration_id, "slettet")
+        except ValueError:
             raise Exception(f"Afgiftsanmeldelse {declaration_id} kunne ikke slettes")
-
         return redirect(reverse_lazy("tf10_list"))
 
     def get_context_data(self, **kwargs):

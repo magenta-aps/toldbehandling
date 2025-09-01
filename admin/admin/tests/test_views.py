@@ -1183,9 +1183,10 @@ class TestTF10FormDeleteView(BaseTest):
     def test_delete(self):
         self.login()
         response = self.client.post(self.url)
-
         self.assertEqual(response.status_code, 302)
-        self.rest_client_mock.afgiftanmeldelse.delete.assert_called_once()
+        self.rest_client_mock.afgiftanmeldelse.set_status.assert_called_with(
+            1, "slettet"
+        )
 
     def test_get_object_does_not_exist(self):
         self.login()
@@ -1197,7 +1198,9 @@ class TestTF10FormDeleteView(BaseTest):
 
     def test_delete_failed(self):
         self.login()
-        self.rest_client_mock.afgiftanmeldelse.delete.return_value = {"success": False}
+        self.rest_client_mock.afgiftanmeldelse.set_status.side_effect = ValueError(
+            "status skal være 'ny', 'godkendt', 'afvist' eller 'slettet'"
+        )
         response = self.client.post(self.url)
 
         self.assertEqual(response.status_code, 500)

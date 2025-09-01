@@ -187,6 +187,16 @@ class TF10SearchForm(common_forms.TF10SearchForm):
         self.toldkategorier = toldkategorier
         super().__init__(*args, **kwargs)
 
+    status_choices_all = [
+        (None, _("Alle")),
+        ("ny", _("Ny")),
+        ("kladde", _("Kladde")),
+        ("afvist", _("Afvist")),
+        ("godkendt", _("Godkendt")),
+        ("afsluttet", _("Afsluttet")),
+        ("slettet", _("Slettet")),
+    ]
+
     toldkategori = DynamicField(
         forms.MultipleChoiceField,
         choices=lambda form: [("no_category", _("Ingen kategori"))]

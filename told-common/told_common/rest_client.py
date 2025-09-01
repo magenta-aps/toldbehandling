@@ -427,10 +427,12 @@ class AfgiftanmeldelseRestClient(ModelRestClient):
         return id
 
     def set_status(self, id: int, status: str):
-        if status in ("ny", "godkendt", "afvist"):
+        if status in ("ny", "godkendt", "afvist", "slettet"):
             self.rest.patch(f"afgiftsanmeldelse/{id}", {"status": status})
         else:
-            raise Exception("status skal være 'ny', 'godkendt' eller 'afvist'")
+            raise ValueError(
+                "status skal være 'ny', 'godkendt', 'afvist' eller 'slettet'"
+            )
 
     def set_toldkategori(self, id: int, toldkategori: str):
         self.rest.patch(f"afgiftsanmeldelse/{id}", {"toldkategori": toldkategori})
