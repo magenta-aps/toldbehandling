@@ -491,14 +491,14 @@ class TF10SearchForm(PaginateForm, BootstrapForm):
         required=False,
     )
 
-    status_choices_all = (
+    status_choices_all = [
         (None, _("Alle")),
         ("ny", _("Ny")),
         ("kladde", _("Kladde")),
         ("afvist", _("Afvist")),
         ("godkendt", _("Godkendt")),
         ("afsluttet", _("Afsluttet")),
-    )
+    ]
     status_choices_kun_godkendte = (
         (None, _("Alle")),
         ("godkendt", _("Godkendt")),
