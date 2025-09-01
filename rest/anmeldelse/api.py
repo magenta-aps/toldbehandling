@@ -280,6 +280,8 @@ class AfgiftsanmeldelseAPI:
         qs = self.filter_user(Afgiftsanmeldelse.objects.all())
         # https://django-ninja.rest-framework.com/guides/input/filtering/
         qs = filters.filter(qs)
+        if filters.status != "slettet":
+            qs = qs.exclude(status="slettet")
         order_by = self.map_sort(sort, order)
         if order_by:
             qs = qs.order_by(order_by, "id")
@@ -302,6 +304,8 @@ class AfgiftsanmeldelseAPI:
         qs = self.filter_user(Afgiftsanmeldelse.objects.all())
         # https://django-ninja.rest-framework.com/guides/input/filtering/
         qs = filters.filter(qs)
+        if filters.status != "slettet":
+            qs = qs.exclude(status="slettet")
         order_by = self.map_sort(sort, order)
         if order_by:
             qs = qs.order_by(order_by, "id")
@@ -379,7 +383,6 @@ class AfgiftsanmeldelseAPI:
                 raise PermissionDenied
 
         data = payload.dict(exclude_unset=True)
-        print(f"data: {data}")
 
         # Draft double-check
         kladde = data.pop("kladde", False)
@@ -420,7 +423,6 @@ class AfgiftsanmeldelseAPI:
 
         # Persist data & return
         item.save()
-        print("success")
         return {"success": True}
 
     @route.delete(
