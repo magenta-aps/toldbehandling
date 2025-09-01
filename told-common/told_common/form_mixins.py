@@ -205,7 +205,7 @@ class MultipleSeparatedChoiceField(MultipleChoiceField):
         return re.split("|".join(map(re.escape, self.delimiters)), value)
 
 
-class SubWidgetAttrMixin:
+class ModifiableCheckboxSelectMultiple(CheckboxSelectMultiple):
 
     def __init__(self, subwidget_attrs=None, *args, **kwargs):
         self.subwidget_attrs = subwidget_attrs or {}
@@ -216,7 +216,3 @@ class SubWidgetAttrMixin:
             attrs = {}  # pragma: no cover
         attrs.update(self.subwidget_attrs)
         return super().optgroups(name, value, attrs)
-
-
-class ModifiableCheckboxSelectMultiple(SubWidgetAttrMixin, CheckboxSelectMultiple):
-    pass
