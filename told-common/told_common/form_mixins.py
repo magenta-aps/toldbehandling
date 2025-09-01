@@ -207,7 +207,7 @@ class MultipleSeparatedChoiceField(MultipleChoiceField):
 
 class ModifiableCheckboxSelectMultiple(CheckboxSelectMultiple):
 
-    def __init__(self, subwidget_attrs=None, *args, **kwargs):
+    def __init__(self, subwidget_attrs: Dict[str, Any] | None = None, *args, **kwargs):
         self.subwidget_attrs = subwidget_attrs or {}
         super().__init__(*args, **kwargs)
 
