@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-09-01 05:13-0100\n"
+"POT-Creation-Date: 2025-09-01 06:55-0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -704,6 +704,10 @@ msgstr "Piginnaatitsissummut tunngsoq"
 #: told_common/templates/told_common/tf5/list.html
 msgid "Søg"
 msgstr "Ujaruk"
+
+#: told_common/templates/told_common/tf10/list.html
+msgid "Ryd søgning"
+msgstr ""
 
 #: told_common/templates/told_common/tf10/list.html
 #: told_common/templates/told_common/tf5/list.html
