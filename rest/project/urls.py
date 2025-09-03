@@ -5,17 +5,12 @@
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.urls import path, reverse
 from django.urls.resolvers import URLPattern, URLResolver
 from project.api import api
 from two_factor.admin import AdminSiteOTPRequired
 from two_factor.views import LoginView, QRGeneratorView, SetupCompleteView, SetupView
-
-
-def empty_favicon(request):
-    return HttpResponse(status=204)
 
 
 class RestAdminSiteOTPRequired(AdminSiteOTPRequired):
@@ -58,7 +53,6 @@ urlpatterns: list[URLResolver | URLPattern] = [
     ),
     path("api/admin/", admin.site.urls),
     path("api/", api.urls),
-    path("favicon.ico", empty_favicon),
 ]
 
 urlpatterns += static(
