@@ -206,7 +206,7 @@ msgstr "Allakkat timmisartukkoortitat"
 #: told_common/templates/told_common/tf10/list.html
 #: told_common/templates/told_common/tf5/list.html
 msgid "Notat"
-msgstr "Allakkiaq"
+msgstr "Oqaaseqaat"
 
 #: told_common/forms.py told_common/templates/told_common/tf10/list.html
 msgid "Nej"
@@ -288,7 +288,7 @@ msgstr "-- Nioqqutissat suunerat toqqaruk"
 
 #: told_common/forms.py
 msgid "Alle"
-msgstr "Tamarmik/Tamaasa"
+msgstr "Tamaasa takutikkit"
 
 #: told_common/forms.py told_common/templates/told_common/tf10/view.html
 #: told_common/templates/told_common/tf5/list.html
@@ -321,7 +321,7 @@ msgstr "Naammassineqarpoq"
 #, fuzzy
 #| msgid "Mine afgiftsanmeldelser"
 msgid "Mine egne afgiftsanmeldelser"
-msgstr "Akitsuusigassanik nalunaaruteqarnikka"
+msgstr "Akitsuusigassatut nalunaarutigisimasakka"
 
 #: told_common/forms.py
 msgid "Afgiftsanmeldelser som jeg har fuldmagt til"
@@ -753,7 +753,7 @@ msgstr "Angallavigisap normua"
 #: told_common/templates/told_common/tf10/list.html
 #: told_common/templates/told_common/tf5/list.html
 msgid "Handlinger"
-msgstr "Iliuutsit"
+msgstr "Iliuuserineqarsimasut"
 
 #: told_common/templates/told_common/tf10/list.html
 #: told_common/templates/told_common/tf5/list.html
@@ -1077,7 +1077,7 @@ msgstr "Akitsuusigassanik nalunaarut {id} -mik normulik nutarterneqarpoq"
 
 #: told_common/views.py
 msgid "Mine afgiftsanmeldelser"
-msgstr "Akitsuusigassanik nalunaaruteqarnikka"
+msgstr "Akitsuusigassatut nalunaarutigisimasakka"
 
 #: told_common/views.py
 msgid "Afgiftsanmeldelse findes ikke"
