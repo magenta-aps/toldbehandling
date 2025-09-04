@@ -753,7 +753,7 @@ msgstr "Angallavigisap normua"
 #: told_common/templates/told_common/tf10/list.html
 #: told_common/templates/told_common/tf5/list.html
 msgid "Handlinger"
-msgstr "Iliuuserineqarsimasut"
+msgstr "Iliuusissat"
 
 #: told_common/templates/told_common/tf10/list.html
 #: told_common/templates/told_common/tf5/list.html
