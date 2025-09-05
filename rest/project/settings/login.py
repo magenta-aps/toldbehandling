@@ -16,3 +16,6 @@ AUTH_PASSWORD_VALIDATORS = [
         "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
+
+SESSION_COOKIE_DOMAIN = ".akitsuut.aka.gl"
+CSRF_COOKIE_DOMAIN = ".akitsuut.aka.gl"
