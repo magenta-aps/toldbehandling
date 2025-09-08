@@ -60,7 +60,6 @@ class TOTPDeviceAPI:
     @route.post(
         "", response={204: None}, auth=get_auth_methods(), url_name="totpdevice_create"
     )
-    # TODO: foretag tjeks så dette ikke kan misbruges
     def create(self, payload: TOTPDeviceIn):
         if payload.user_id != self.context.request.user.id:
             raise PermissionDenied
