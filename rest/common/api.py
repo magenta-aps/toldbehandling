@@ -382,7 +382,7 @@ class UserAPI:
         user_signedin = self.context.request.user
         user = get_object_or_404(User, id=id)
 
-        # User may not change other users, unless he has class access
+        # User may not change other users, unless they have class access
         if user_signedin.id != user.id and not user_signedin.has_perm(
             "auth.change_user"
         ):
