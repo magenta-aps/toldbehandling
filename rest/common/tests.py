@@ -9,7 +9,7 @@ from common.api import APIKeyAuth, DjangoPermission, UserAPI, UserOut
 from common.eboks import EboksClient, MockResponse
 from common.models import EboksBesked, EboksDispatch, IndberetterProfile, Postnummer
 from common.util import get_postnummer
-from django.contrib.auth.models import Permission, User, Group
+from django.contrib.auth.models import Group, Permission, User
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import QuerySet
 from django.test import TestCase
@@ -1145,9 +1145,10 @@ class UserAPITest(TestCase):
         )
 
         self.assertEqual(resp.status_code, 403)
-        self.assertEqual(resp.json(), {"detail": "You do not have permission to perform this action."})
-
-
+        self.assertEqual(
+            resp.json(),
+            {"detail": "You do not have permission to perform this action."},
+        )
 
         # Test update on non-existent group
         resp = self.client.patch(
@@ -1168,8 +1169,6 @@ class UserAPITest(TestCase):
 
         self.assertEqual(resp.status_code, 422)
         self.assertEqual(resp.json(), {"detail": "Group does not exist"})
-
-
 
 
 # Helpers

@@ -390,8 +390,10 @@ class UserAPI:
 
         # User may not change his own groups
         groups = set(payload.groups or [])
-        if payload.groups is not None and groups != set(user.groups.all().values_list("name", flat=True)) and not user_signedin.has_perm(
-                "auth.change_user"
+        if (
+            payload.groups is not None
+            and groups != set(user.groups.all().values_list("name", flat=True))
+            and not user_signedin.has_perm("auth.change_user")
         ):
             raise PermissionDenied
 
