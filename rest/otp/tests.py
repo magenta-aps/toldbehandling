@@ -23,6 +23,11 @@ class TOTPDeviceAPITests(TestCase):
             plaintext_password="testpassword1337",
             permissions=cls.user_permissions,
         )
+        cls.user2, cls.user_token2, cls.user_refresh_token2 = RestMixin.make_user(
+            username="otp-test-user2",
+            plaintext_password="testpassword1337",
+            permissions=cls.user_permissions,
+        )
 
     def test_create(self):
         resp = self.client.post(
@@ -37,6 +42,17 @@ class TOTPDeviceAPITests(TestCase):
 
         self.assertEqual(resp.status_code, 204)
         self.assertEqual(resp.content.decode(), "")
+
+        resp = self.client.post(
+            reverse("api-1.0.0:totpdevice_create"),
+            TOTPDeviceIn(
+                user_id=self.user2.id,
+                name="test-otp-create-device",
+            ).json(),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, 403)
 
     def test_list(self):
         TOTPDevice.objects.create(
