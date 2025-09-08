@@ -388,7 +388,7 @@ class UserAPI:
         ):
             raise PermissionDenied
 
-        # User may not change his own groups
+        # User may not change their own groups
         groups = set(payload.groups or [])
         if (
             payload.groups is not None
