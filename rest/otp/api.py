@@ -10,7 +10,7 @@ from ninja.filter_schema import FilterSchema
 from ninja.params import Query
 from ninja.schema import Schema
 from ninja_extra import api_controller, permissions, route
-from ninja_extra.exceptions import AuthenticationFailed
+from ninja_extra.exceptions import AuthenticationFailed, PermissionDenied
 
 
 class TOTPDeviceIn(ModelSchema):
@@ -60,8 +60,9 @@ class TOTPDeviceAPI:
     @route.post(
         "", response={204: None}, auth=get_auth_methods(), url_name="totpdevice_create"
     )
-    # TODO: foretag tjeks så dette ikke kan misbruges
     def create(self, payload: TOTPDeviceIn):
+        if payload.user_id != self.context.request.user.id:
+            raise PermissionDenied
         TOTPDevice.objects.create(**payload.dict())
 
     @route.get(
