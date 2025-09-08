@@ -382,10 +382,26 @@ class UserAPI:
         user_signedin = self.context.request.user
         user = get_object_or_404(User, id=id)
 
+        # User may not change other users, unless they have class access
         if user_signedin.id != user.id and not user_signedin.has_perm(
             "auth.change_user"
         ):
             raise PermissionDenied
+
+        # User may not change their own groups
+        user_groups = None
+        if payload.groups is not None:
+            groups = set(payload.groups)
+            if (
+                payload.groups is not None
+                and groups != set(user.groups.all().values_list("name", flat=True))
+                and not user_signedin.has_perm("auth.change_user")
+            ):
+                raise PermissionDenied
+            try:
+                user_groups = [Group.objects.get(name=g) for g in groups]
+            except Group.DoesNotExist:
+                raise ValidationError("Group does not exist")  # type: ignore
 
         user.username = payload.username
         user.first_name = payload.first_name
@@ -393,11 +409,8 @@ class UserAPI:
         user.email = payload.email
         user.save()
 
-        try:
-            user_groups = [Group.objects.get(name=g) for g in payload.groups or []]
+        if user_groups is not None:
             user.groups.set(user_groups)
-        except Group.DoesNotExist:
-            raise ValidationError("Group does not exist")  # type: ignore
 
         if payload.indberetter_data:
             if payload.indberetter_data.cpr:

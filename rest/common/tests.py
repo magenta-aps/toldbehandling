@@ -9,7 +9,7 @@ from common.api import APIKeyAuth, DjangoPermission, UserAPI, UserOut
 from common.eboks import EboksClient, MockResponse
 from common.models import EboksBesked, EboksDispatch, IndberetterProfile, Postnummer
 from common.util import get_postnummer
-from django.contrib.auth.models import Permission, User
+from django.contrib.auth.models import Group, Permission, User
 from django.contrib.contenttypes.models import ContentType
 from django.db.models import QuerySet
 from django.test import TestCase
@@ -913,6 +913,17 @@ class UserAPITest(TestCase):
         self.api.context = MagicMock()
         self.api.context.request = self.mock_request
 
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.admin, cls.admin_token, cls.admin_refresh_token = RestMixin.make_user(
+            username="admin",
+            plaintext_password="testpassword1337",
+            permissions=[],
+        )
+        cls.admin.is_superuser = True
+        cls.admin.save()
+
     def test_check_user(self):
         _create_user_with_permissions(
             "user", "cpr", cpr_or_cvr="1234567890", permissions=[]
@@ -985,6 +996,7 @@ class UserAPITest(TestCase):
         self.mock_user.has_perm.assert_called_once_with("auth.change_user")
 
     def test_update_by_id(self):
+        self.maxDiff = None
         # Test update of CPR user
         (
             user,
@@ -1115,7 +1127,8 @@ class UserAPITest(TestCase):
             {"detail": "You do not have permission to perform this action."},
         )
 
-        # Test update on non-existent group
+        Group.objects.create(name="admin")
+        # Test update to new groups
         resp = self.client.patch(
             reverse(f"api-1.0.0:user_update_by_id", args=[user.id]),
             json_dump(
@@ -1125,10 +1138,66 @@ class UserAPITest(TestCase):
                     "first_name": user.first_name + "-4",
                     "last_name": user.last_name + "-4",
                     "email": "testupdate-4@magenta.dk",
-                    "groups": ["testgroupwhichdoesnotexist"],
+                    "groups": ["admin"],
                 }
             ),
             HTTP_AUTHORIZATION=f"Bearer {user_token}",
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, 403)
+        self.assertEqual(
+            resp.json(),
+            {"detail": "You do not have permission to perform this action."},
+        )
+
+        # Test update to new groups
+        resp = self.client.patch(
+            reverse(f"api-1.0.0:user_update_by_id", args=[user.id]),
+            json_dump(
+                {
+                    "id": user.id,
+                    "username": user.username + "-4",
+                    "first_name": user.first_name + "-4",
+                    "last_name": user.last_name + "-4",
+                    "email": "testupdate-4@magenta.dk",
+                    "groups": ["admin"],
+                }
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.admin_token}",
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(
+            resp.json(),
+            {
+                "id": user.id,
+                "username": user.username + "-4",
+                "first_name": user.first_name + "-4",
+                "last_name": user.last_name + "-4",
+                "email": "testupdate-4@magenta.dk",
+                "is_superuser": False,
+                "groups": ["admin"],
+                "permissions": [],
+                "indberetter_data": {"cvr": None},
+                "access_token": ANY,
+                "refresh_token": ANY,
+            },
+        )
+
+        # Test update on non-existent group
+        resp = self.client.patch(
+            reverse(f"api-1.0.0:user_update_by_id", args=[user.id]),
+            json_dump(
+                {
+                    "id": user.id,
+                    "username": user.username + "-5",
+                    "first_name": user.first_name + "-5",
+                    "last_name": user.last_name + "-5",
+                    "email": "testupdate-5@magenta.dk",
+                    "groups": ["testgroupwhichdoesnotexist"],
+                }
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.admin_token}",
             content_type="application/json",
         )
 
