@@ -4,5 +4,5 @@
 <a class="btn btn-primary btn-sm" href="{% url 'tf10_edit' id=item.id %}?back=list">{% translate 'Redigér' %}</a>
 {% endif %}
 {% if item.status == "ny" or item.status == "kladde" %}
-<a class="btn btn-danger btn-sm" href="{% url 'tf10_delete' id=item.id %}?back=list">{% translate 'Slet' %}</a>
+<a class="btn btn-primary btn-sm" href="{% url 'tf10_delete' id=item.id %}?back=list">{% translate 'Slet' %}</a>
 {% endif %}
