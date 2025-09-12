@@ -1,0 +1,20 @@
+{% load i18n %}
+{% spaceless %}
+<span class="badge
+    {% if item.status == "ny" %}
+    badge-draft
+    {% elif item.status == "kladde"  %}
+    badge-waiting
+    {% elif item.status == "godkendt"  %}
+    badge-approved
+    {% elif item.status == "afvist"  %}
+    badge-rejected
+    {% elif item.status == "afsluttet"  %}
+    text-bg-primary
+    {% else %}
+    text-bg-secondary
+    {% endif  %}
+">
+    {% translate item.status|capfirst %}
+</span>
+{% endspaceless %}
