@@ -1,62 +1,34 @@
 {% extends "told_common/layout.html" %}
-{% load static %}
 {% load i18n %}
-{% load bootstrap_icons %}
-{% get_current_language as LANGUAGE_CODE %}
-{% load common_tags %}
-{% block header %}
-<header>
-    {% if environment != "production" %}
-    <nav class="bg-warning">
-        <p class="text-center fw-bold my-0">
-            {{environment|upper}}
-        </p>
-    </nav>
-    {% endif %}
-    <nav class="nav flex-column flex-sm-row p-1">
-        {% if can_list_tf5 %}
-        <a class="p-2 text-muted" href="{% url 'tf5_list' %}">{% translate "TF5-anmeldelser" %}</a>
-        {% endif %}
-        {% if can_list_tf10 %}
-        <a class="p-2 text-muted" href="{% url 'tf10_list' %}">{% translate "TF10-anmeldelser" %}</a>
-        {% endif %}
-        <span class="locale-changer navbar-text ms-auto">
-            <form action="{% url 'set_language' %}" method="post">
-                {% csrf_token %}
-                {% get_current_language as current_language %}
-                {% get_available_languages as languages %}
-                {% get_language_info_list for languages as languages %}
-                <select class="form-control form-select" name="language">
-                {% for language in languages %}
-                    <option value="{{ language.code }}"{% if language.code == current_language %} selected{% endif %}>
-                        {{ language.name_local|capfirst }}
-                    </option>
-                {% endfor %}
-                </select>
-            </form>
-        </span>
 
-        <span class="m-2 pt-2">
-            {{user.first_name}} {{user.last_name}}
-        </span>
-        {% if user.indberetter_data.api_key and not hide_api_key_btn %}
-        <button type="button" class="mx-1 my-2 btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#apikey_modal">
-            API-nøgle
-        </button>
-        {% endif %}
-        <a href="{% url 'login:logout' %}" class="mx-1 my-2 btn btn-primary" id="logout-link">{% translate "Log ud" %}</a>
-        <button type="button" class="btn btn-outline-primary mx-1 my-2" data-bs-toggle="modal" data-bs-target="#about_modal">
-            Om
-        </button>
-    </nav>
-    <hr class="p-0 m-0"/>
-</header>
+{% block main_navigation %}
+{% if can_list_tf5 %}
+<li class="nav-item ms-4 {% if current_view == "tf5_list" %}active{% endif %}">
+    <a href="{% url 'tf5_list' %}" class="nav-link d-flex align-items-center">
+        <span class="material-icons">description</span>
+        <span class="ms-1">{% translate 'TF5-anmeldelser' %}</span>
+    </a>
+</li>
+{% endif %}
+{% if can_list_tf10 %}
+<li class="nav-item ms-4 {% if current_view == "tf10_list" %}active{% endif %}">
+    <a href="{% url 'tf10_list' %}" class="nav-link d-flex align-items-center">
+        <span class="material-icons">description</span>
+        <span class="ms-1">{% translate 'TF10-anmeldelser' %}</span>
+    </a>
+</li>
+{% endif %}
 {% endblock %}
 
-{% block content %}
-{% endblock %}
-
-{% block extra_footers %}
+{% block user_menu_actions %}
+{% if user.indberetter_data.api_key and not hide_api_key_btn %}
+<div class="d-flex mt-3">
+    <button type="button" class="btn btn-primary d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#apikey_modal">
+        <span class="material-icons me-1">key</span>
+        <span>{% translate "API-nøgle" %}</span>
+    </button>
+</div>
+{% endif %}
 {% endblock %}
 
 {% block modals %}
@@ -69,34 +41,8 @@
             <div class="modal-body">
                  {{user.indberetter_data.api_key}}
                  <div>
-                    <a href="{{api_doc_url}}">API Dokumentation</a>
+                    <a href="{{api_doc_url}}">API-dokumentation</a>
                  </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div id="about_modal" class="modal">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Toldbehandling</h5>
-            </div>
-            <div class="modal-body">
-                <table class="table table-borderless">
-                    <tr>
-                        <th>{% translate 'Version' %}:</th>
-                        <td>{{version}}</td>
-                    </tr>
-                    <tr>
-                        <th>{% translate 'Kildekode' %}:</th>
-                        <td>
-                            <a href="https://github.com/magenta-aps/toldbehandling">
-                                https://github.com/magenta-aps/toldbehandling
-                            </a>
-                        </td>
-                    </tr>
-                </table>
             </div>
         </div>
     </div>

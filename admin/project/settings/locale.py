@@ -1,18 +1,26 @@
 # SPDX-FileCopyrightText: 2023 Magenta ApS <info@magenta.dk>
 #
 # SPDX-License-Identifier: MPL-2.0
-
 import os
 
+import django.conf.locale
 from project.settings.base import BASE_DIR
 
-LANGUAGE_CODE = "da-DK"
+LANGUAGE_CODE = "da"
 LANGUAGES = [
     ("da", "Dansk"),
     ("kl", "Kalaallisut"),
 ]
 LOCALE_PATHS = [os.path.join(BASE_DIR, "locale")]
-LOCALE_MAP = {"da": "da-DK", "kl": "kl-GL"}
+# LOCALE_MAP = {"da": "da-DK", "kl": "kl-GL"}
+
+# Add custom languages not provided by Django
+django.conf.locale.LANG_INFO["kl"] = {
+    "bidi": False,
+    "code": "kl",
+    "name": "Greenlandic",
+    "name_local": "Kalaallisut",
+}
 
 TIME_ZONE = "America/Nuuk"
 USE_I18N = True
