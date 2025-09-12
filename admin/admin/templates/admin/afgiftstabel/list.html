@@ -10,28 +10,39 @@
 <link rel="stylesheet" href="{% static 'bootstrap-table/bootstrap-table.min.css' %}">
 <link rel="stylesheet" href="{% static 'bootstrap-table/bootstrap-table-sticky-header.min.css' %}">
 {% endblock %}
+
 {% block extra_footers %}
 <script src="{% static 'bootstrap-table/bootstrap-table.min.js' %}" nonce="{{ request.csp_nonce }}"></script>
 <script src="{% static 'bootstrap-table/bootstrap-table-sticky-header.min.js' %}" nonce="{{ request.csp_nonce }}"></script>
 <script src="{% static 'bootstrap-table/bootstrap-table-defer-url.min.js' %}" nonce="{{ request.csp_nonce }}"></script>
 {% endblock %}
 
+{% block navigation_actions %}
+{% if can_upload %}
+<li class="nav-item ms-4">
+    <a href="{% url 'afgiftstabel_create' %}" class="btn btn-secondary d-flex align-items-center">
+        <span class="material-icons">add</span>
+        <span class="ms-1">{% translate 'Opret ny' %}</span>
+    </a>
+</li>
+{% endif %}
+{% endblock %}
+
 {% block content %}
-
-<div class="mx-5">
-
-    <h1>Afgiftstabeller</h1>
-
-    {% if can_upload %}
-    <div class="clearfix">
-        <a class="float-end btn btn-primary" href="{% url 'afgiftstabel_create' %}">Opret ny tabel fra regneark</a>
+<div class="content">
+    <div class="d-flex align-items-center mb-5">
+        <h1>Afgiftstabeller</h1>
+        {% if can_upload %}
+        <a href="{% url 'afgiftstabel_create' %}" class="btn btn-secondary ms-3">
+            <span class="material-icons">add</span>
+            <span>{% translate "Opret ny tabel fra regneark" %}</span>
+        </a>
+        {% endif %}
     </div>
-    {% endif %}
 
-    <table class="table table-bordered"
-           data-toggle="table"
+    <table data-toggle="table"
            data-sticky-header="true"
-           data-classes="table"
+           data-classes="table table-light"
            data-data-field="items"
            data-sortable="true"
            data-pagination="true"
