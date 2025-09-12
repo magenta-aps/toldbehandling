@@ -737,6 +737,7 @@ class ListView(FormView):
                 {"item": item, **context},
                 self.request,
             )
+        return None
 
     def form_valid(self, form):
         search_data = {"offset": 0, "limit": self.list_size}
