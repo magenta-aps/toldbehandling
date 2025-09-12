@@ -16,14 +16,13 @@
 
 {% block content %}
 
-<div class="mx-5">
+<div class="content">
 
-    <h1>Historik for afgiftsanmeldelse {{id|unlocalize}}</h1>
+    <h1 class="mb-3">Historik for afgiftsanmeldelse {{id|unlocalize}}</h1>
 
-    <table class="table table-bordered table-striped"
-           data-toggle="table"
+    <table data-toggle="table"
            data-sticky-header="true"
-           data-classes="table"
+           data-classes="table table-light"
            data-data-field="items"
            data-sortable="true"
            data-pagination="true"
