@@ -18,6 +18,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "told_common.context_processors.nav_context",
             ],
             "libraries": {
                 "common_tags": "told_common.templatetags.common_tags",

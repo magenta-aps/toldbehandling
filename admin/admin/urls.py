@@ -1,8 +1,7 @@
 # SPDX-FileCopyrightText: 2023 Magenta ApS <info@magenta.dk>
 #
 # SPDX-License-Identifier: MPL-2.0
-
-from django.urls import path
+from django.urls import include, path
 from django.views.generic.base import RedirectView
 from told_common import views as common_views
 
@@ -91,4 +90,5 @@ urlpatterns = [
         name="tf5_leverandørfaktura",
     ),
     path("statistik", views.StatistikView.as_view(), name="statistik"),
+    path("i18n/", include("django.conf.urls.i18n")),
 ]
