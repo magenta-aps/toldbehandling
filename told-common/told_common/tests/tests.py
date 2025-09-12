@@ -857,7 +857,7 @@ class AnmeldelseListViewTest(BlanketMixin, HasLogin):
                 "beregnet_faktureringsdato": "2023-11-10",
                 "afgift_total": "0",
                 "fragtforsendelse": None,
-                "status": "godkendt",
+                "status": "Godkendt",
                 "fuldmagtshaver": {"cvr": 12345678, "navn": "HepHey A/S"},
             },
             {
@@ -901,7 +901,7 @@ class AnmeldelseListViewTest(BlanketMixin, HasLogin):
                 "beregnet_faktureringsdato": "2023-11-10",
                 "afgift_total": "0",
                 "fragtforsendelse": None,
-                "status": "afvist",
+                "status": "Afvist",
                 "fuldmagtshaver": {"cvr": 12345678, "navn": "HepHey A/S"},
             },
             {
@@ -945,7 +945,7 @@ class AnmeldelseListViewTest(BlanketMixin, HasLogin):
                 "beregnet_faktureringsdato": "2023-11-10",
                 "afgift_total": "0",
                 "fragtforsendelse": None,
-                "status": "ny",
+                "status": "Ny",
                 "fuldmagtshaver": {"cvr": 12345678, "navn": "HepHey A/S"},
             },
         ]

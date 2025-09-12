@@ -19,6 +19,7 @@ from django.shortcuts import redirect
 from django.template import loader
 from django.template.response import TemplateResponse
 from django.urls import reverse, reverse_lazy
+from django.utils.safestring import SafeString
 from django.utils.translation import gettext_lazy as _
 from django.views import View
 from django.views.generic import FormView, RedirectView, TemplateView
@@ -693,6 +694,7 @@ class ListView(FormView):
     list_size: int = 20
     form_class = forms.PaginateForm
     select_template: Optional[str] = None
+    status_template: str = "told_common/status.html"
 
     def get(self, request, *args, **kwargs):
         # Søgeform; viser formularen (med evt. fejl) når den er invalid,
@@ -725,6 +727,15 @@ class ListView(FormView):
     ) -> Dict[str, Any]:
         # Overwrite in subclasses
         return {**item, "select": item["id"]}  # pragma: no cover
+    def map_value(
+        self, item: Dict[str, Any], key: str, context: Dict[str, Any]
+    ) -> SafeString | None:
+        if key == "status":
+            return loader.render_to_string(
+                self.status_template,
+                {"item": item, **context},
+                self.request,
+            )
 
     def form_valid(self, form):
         search_data = {"offset": 0, "limit": self.list_size}
@@ -844,6 +855,9 @@ class TF10ListView(
         }
 
     def map_value(self, item, key, context):
+        value = super().map_value(item, key, context)
+        if value is not None:
+            return value
         if key == "actions":
             return loader.render_to_string(
                 self.actions_template,
@@ -857,8 +871,6 @@ class TF10ListView(
                 self.request,
             )
         value = getattr(item, key)
-        if key == "status":
-            return _(value.capitalize())
         return value
 
     def get_form_kwargs(self) -> Dict[str, Any]:
@@ -1103,6 +1115,9 @@ class TF5ListView(PermissionsRequiredMixin, HasRestClientMixin, TF5Mixin, ListVi
         }
 
     def map_value(self, item, key, context):
+        value = super().map_value(item, key, context)
+        if value is not None:
+            return value
         if key == "actions":
             return loader.render_to_string(
                 self.actions_template,
@@ -1119,10 +1134,8 @@ class TF5ListView(PermissionsRequiredMixin, HasRestClientMixin, TF5Mixin, ListVi
                 {"item": item, **context},
                 self.request,
             )
-        value = getattr(item, key)
-        if key == "status":
-            return _(value.capitalize())
 
+        value = getattr(item, key)
         if value is not None and key in ("oprettet", "indleveringsdato"):
             return value.strftime("%d-%m-%Y")
 
