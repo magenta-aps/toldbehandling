@@ -1396,7 +1396,6 @@ class AnmeldelseListViewTest(BlanketMixin, HasLogin):
     @patch.object(requests.Session, "get")
     def test_list_filter(self, mock_get):
         mock_get.side_effect = self.mock_requests_get
-        self.login()
         filter_tests = [
             ("dato_før", "2023-09-01", set()),
             ("dato_før", "2023-09-02", {3}),
@@ -1418,15 +1417,17 @@ class AnmeldelseListViewTest(BlanketMixin, HasLogin):
             ("modtager", "23", {2}),
         ]
         for field, value, expected in filter_tests:
-            url = self.list_url + f"?json=1&{field}={value}"
-            response = self.client.get(url)
-            self.assertEquals(
-                response.status_code,
-                200,
-                f"Failed for {field}={value}: {response.content}",
-            )
-            numbers = [int(item["id"]) for item in response.json()["items"]]
-            self.assertEquals(set(numbers), expected)
+            with self.subTest((field, value)):
+                url = self.list_url + f"?json=1&{field}={value}"
+                self.login()
+                response = self.client.get(url)
+                self.assertEquals(
+                    response.status_code,
+                    200,
+                    f"Failed for {field}={value}: {response.content}",
+                )
+                numbers = [int(item["id"]) for item in response.json()["items"]]
+                self.assertEquals(set(numbers), expected)
 
     @patch.object(requests.Session, "get")
     def test_list_paginate(self, mock_get):
