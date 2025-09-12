@@ -1,0 +1,359 @@
+$primary: #73be46;
+$dark-primary: #395f23;
+$light-primary: #b9dfa3;
+$lighter-primary: lighten($primary, 45);
+$secondary: #ffe169;
+$tertiary: #dc501e;
+$shadow: #25486226;
+
+// Neutral colours
+$black: #000000;
+$near-black: rgba($black, 0.9);
+$dark-grey: rgba($black, 0.5); //#4d4420;
+$grey: #d7d7d2;
+$light-grey: #ebebe8; //#e3e3df;
+$lightest-grey: #f3f3f1; //#f5f7f8;
+$white: #ffffff;
+
+// Badge colours
+$approved: #233915;
+$approved-light: $light-primary;
+$waiting: #083d44;
+$waiting-light: #80d5df;
+$rejected: darken($tertiary, 30); //#4d2111;
+$rejected-light: #eea78e;
+
+// Alert levels
+$success: $approved-light;
+$info: $dark-primary;
+$warning: $secondary;
+$danger: $tertiary;
+
+$light: $lightest-grey;
+$dark: $dark-grey;
+
+$badge-font-size: 1em;
+$badge-font-weight: normal;
+
+$table-bg: $lightest-grey;
+
+$border-color: $grey;
+
+$pagination-bg: $lighter-primary;
+$pagination-color: $primary;
+$pagination-active-bg: $light-primary;
+$pagination-active-color: $dark-primary;
+$pagination-border-color: none;
+
+$breadcrumb-divider: quote("\203A");
+
+@import "./bootstrap/scss/bootstrap";
+
+// Figtree font
+@font-face {
+  font-family: "Figtree Normal";
+  font-weight: normal;
+  src: url("../figtree/Figtree-VariableFont_wght.ttf") format("truetype");
+}
+@font-face {
+  font-family: "Figtree Italic";
+  font-weight: normal;
+  src: url("../figtree/Figtree-Italic-VariableFont_wght.ttf") format("truetype");
+}
+
+body {
+  font-family: "Figtree Normal", "Trebuchet MS", "Helvetica", sans-serif;
+}
+
+i {
+  font-family: "Figtree Italic", "Trebuchet MS", "Helvetica", sans-serif;
+  font-style: normal; /* avoid "double italicization" */
+}
+
+// Headers
+h1 {
+  font-size: 32px;
+  color: $black;
+}
+h1 a {
+  color: $black;
+}
+h2 {
+  font-size: 22px;
+  color: $dark-primary;
+}
+h3 {
+  font-size: 20px;
+  color: $dark-primary;
+}
+h4 {
+  font-size: 1.25rem;
+  color: $dark-primary;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  // Makes it easier to align buttons with headers (default is 0.5rem)
+  margin-bottom: 0;
+}
+
+a {
+  color: $dark-primary;
+  text-decoration: none;
+}
+
+body {
+  background-color: $grey;
+}
+
+h1.secondary,
+h2.secondary,
+div.secondary,
+span.secondary {
+  color: $dark-grey;
+}
+
+.content {
+  margin: 3 * $spacer;
+  padding: 3 * $spacer;
+  background-color: #ffffff;
+  border-radius: $spacer;
+  box-shadow: 0 0 $spacer $shadow;
+}
+.card-container {
+  height: 80vh;
+}
+.card {
+  min-width: 35vw;
+  padding: 3 * $spacer;
+  border-color: transparent;
+  border-radius: $spacer;
+  box-shadow: 0 0 $spacer $shadow;
+}
+.card-body {
+  padding: 0;
+}
+.card-header {
+  padding: 0 0 2 * $spacer 0;
+  background-color: transparent;
+  border: none;
+}
+
+.btn-danger {
+  color: $white;
+}
+
+// Nav
+header nav {
+  height: 4.5 * $spacer;
+  background: $primary;
+}
+header nav .navbar-nav {
+}
+header nav .navbar-nav .nav-item {
+  vertical-align: middle;
+}
+header nav .navbar-nav .nav-item.active {
+  border-bottom: 2px solid $black;
+}
+header nav .navbar-nav .nav-item a.nav-link {
+  height: 4.5 * $spacer;
+}
+header nav .navbar-nav a {
+  color: $black;
+  text-decoration: none;
+}
+header nav .language-picker {
+  background-color: transparent;
+  border: 0;
+}
+header nav .language-picker:focus {
+  box-shadow: none;
+}
+header nav .dark-icon {
+  color: $black;
+}
+
+// Settings ("wheel") menu
+#settings {
+  padding: $spacer;
+  min-width: 15vw;
+  border-color: transparent;
+  border-radius: 0.5 * $spacer;
+  box-shadow: 0 0 $spacer $shadow;
+}
+#settings .dark-icon {
+  color: $near-black;
+}
+#settings h4 {
+  color: $near-black;
+}
+#settings h5 {
+  color: $dark-primary;
+  margin-top: 2 * $spacer;
+  margin-bottom: $spacer;
+}
+#settings a:not(.btn) {
+  color: $primary;
+}
+
+// Footer
+footer {
+  margin: 0 3 * $spacer 3 * $spacer 3 * $spacer;
+  padding: 0 0 0 148px;
+  min-height: 51px;
+  background: url("../logo_aka.png") center left no-repeat;
+}
+footer a {
+  padding: $spacer $spacer $spacer 3 * $spacer;
+}
+footer a .material-icons {
+  color: $near-black;
+}
+
+// The design guide's colour are "inverted" and using a non-standard colour scheme
+.badge-draft {
+  background-color: $light-grey;
+  color: $dark-grey;
+}
+.badge-waiting {
+  background-color: $waiting-light;
+  color: $waiting;
+}
+.badge-approved {
+  background-color: $approved-light;
+  color: $approved;
+}
+.badge-rejected {
+  background-color: $rejected-light;
+  color: $rejected;
+}
+
+// Buttons
+.btn span.material-icons {
+  display: inline;
+  vertical-align: text-bottom;
+}
+
+// Tables
+.table {
+  overflow: hidden !important;
+  // 0.625rem (10px) rounding of all tables
+  border-radius: 0.625 * $spacer;
+}
+.table th {
+  background-color: $light-grey;
+  border-bottom: 0;
+}
+.table > :not(caption) > * > th {
+  // Forces all table headers to be `black`
+  color: $black;
+}
+.table > :not(caption) > * > th > a {
+  // Forces all the headers that act as links (for sorting) to be `black`
+  color: $black;
+}
+.table th,
+.table tbody td {
+  // Default padding
+  padding: $spacer;
+  // Equal width columns
+  width: 1%;
+}
+.table tfoot td {
+  padding: $spacer 0;
+}
+.bootstrap-table .table th,
+.bootstrap-table .table tbody td {
+  // Padding for Bootstrap Table
+  // (0.75rem matches the left/right padding set by Bootstrap Table for table headers)
+  padding: $spacer 0.75rem;
+  vertical-align: top !important;
+}
+.bootstrap-table .table .th-inner {
+  white-space: normal !important;
+}
+.bootstrap-datetimepicker-widget .table th,
+.bootstrap-datetimepicker-widget .table tbody td {
+  // Reset padding for "tempus dominus" datetime picker widget
+  padding: 0;
+}
+table tbody > tr:last-child > td {
+  border-bottom: 0;
+}
+.table-light td {
+  background-color: transparent;
+  border-color: $grey;
+}
+
+// Forms
+form .row {
+  margin-bottom: $spacer;
+}
+form .form-control,
+form .form-select {
+  border-radius: 50 * $spacer;
+}
+form textarea.form-control {
+  border-radius: $spacer;
+}
+// Disable "is-valid" style on "filter" forms
+form.filter-form .is-valid {
+    --bs-form-select-bg-icon: none !important;
+    border-color: var(--bs-border-color) !important;
+    background-image: var(--bs-form-select-bg-img), var(--bs-form-select-bg-icon, none) !important;
+    padding-right: 0.75rem;
+}
+form.filter-form .is-valid:focus {
+    box-shadow: 0 0 0 .25rem rgba($secondary, .5);
+}
+// Style readonly inputs as disabled
+form .form-control[readonly=readonly] {
+  background-color: $lightest-grey;
+  color: $dark-grey;
+}
+
+// Form errors
+ul.errorlist {
+    padding-left: 0;
+}
+ul.errorlist:not(.alert .errorlist) li {
+    list-style-type: none;
+    color: $tertiary;
+}
+.alert ul.errorlist {
+    margin-bottom: 0;
+}
+.alert ul.errorlist li {
+    list-style-type: none;
+}
+
+// Pagination (elements generated by Bootstrap-Table)
+ul.pagination li.page-pre a,
+ul.pagination li.page-next a {
+  background: $primary;
+  color: $black;
+}
+ul.pagination li.page-pre.disabled a,
+ul.pagination li.page-next.disabled a {
+  background: $light-grey;
+  color: $dark-grey;
+}
+ul.pagination a span.material-icons {
+  display: inline;
+  vertical-align: text-bottom;
+}
+
+// Modals
+.modal .modal-footer {
+  justify-content: start;
+}
+.modal .modal-footer .btn[data-bs-dismiss=modal]:not(.btn-primary) {
+  // Make "cancel" buttons appear as a normal link by removing background and border
+  background: transparent;
+  border: none;
+  color: $dark-primary;
+}
