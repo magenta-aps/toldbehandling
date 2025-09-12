@@ -1,68 +1,54 @@
 {% extends "told_common/layout.html" %}
 {% load i18n %}
-{% block header %}
-<header>
-    {% if environment != "production" %}
-    <nav class="bg-warning">
-        <p class="text-center fw-bold my-0">
-            {{environment|upper}}
-        </p>
-    </nav>
-    {% endif %}
-    <nav class="nav flex-column flex-sm-row p-1">
-        {% if nav_afgiftstabeller %}
-        <a class="p-2 text-muted" href="{% url 'afgiftstabel_list' %}">Afgiftstabeller</a>
-        {% endif %}
 
-        {% if nav_afgiftsanmeldelser %}
-        <a class="p-2 text-muted" href="{% url 'tf10_list' %}">Afgiftsanmeldelser</a>
-        {% endif %}
-
-        {% if nav_privatafgiftsanmeldelser %}
-        <a class="p-2 text-muted" href="{% url 'tf5_list' %}">Private indførselstilladelser</a>
-        {% endif %}
-
-        <a class="p-2 text-muted" href="{% url 'statistik' %}">Statistik</a>
-        <span class="p-2 ms-auto">
-            {{user.first_name}} {{user.last_name}} ({{user.username}})
-        </span>
-        <a href="{% url 'logout' %}" class="btn btn-sm btn-primary m-1">Log ud</a>
-
-        {% if not user.twofactor_enabled %}
-        <a href="{% url 'twofactor:setup' %}" class="btn btn-sm btn-primary m-1">Indstil Tofaktor-autentificering</a>
-        {% endif %}
-
-        <button type="button" class="btn btn-sm btn-outline-primary m-1" data-bs-toggle="modal" data-bs-target="#about_modal">
-            Om
-        </button>
-    </nav>
-    <hr class="p-0 m-0"/>
-</header>
+{% block main_navigation %}
+{% if nav_afgiftstabeller %}
+<li class="nav-item ms-4 {% if current_view == "afgiftstabel_list" %}active{% endif %}">
+    <a href="{% url 'afgiftstabel_list' %}" class="nav-link d-flex align-items-center">
+        <span class="material-icons">description</span>
+        <span class="ms-1">{% translate 'Afgiftstabeller' %}</span>
+    </a>
+</li>
+{% endif %}
+{% if nav_afgiftsanmeldelser %}
+<li class="nav-item ms-4 {% if current_view == "tf10_list" %}active{% endif %}">
+    <a href="{% url 'tf10_list' %}" class="nav-link d-flex align-items-center">
+        <span class="material-icons">description</span>
+        <span class="ms-1">{% translate 'Afgiftsanmeldelser' %}</span>
+    </a>
+</li>
+{% endif %}
+{% if nav_privatafgiftsanmeldelser %}
+<li class="nav-item ms-4 {% if current_view == "tf5_list" %}active{% endif %}">
+    <a href="{% url 'tf5_list' %}" class="nav-link d-flex align-items-center">
+        <span class="material-icons">description</span>
+        <span class="ms-1">{% translate 'Private indførselstilladelser' %}</span>
+    </a>
+</li>
+{% endif %}
+<li class="nav-item ms-4 {% if current_view == "statistik" %}active{% endif %}">
+    <a href="{% url 'statistik' %}" class="nav-link d-flex align-items-center">
+        <span class="material-icons">bar_chart</span>
+        <span class="ms-1">{% translate 'Statistik' %}</span>
+    </a>
+</li>
 {% endblock %}
-{% block modals %}
-<div id="about_modal" class="modal">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Toldbehandling</h5>
-            </div>
-            <div class="modal-body">
-                <table class="table table-borderless">
-                    <tr>
-                        <th>{% translate 'Version' %}:</th>
-                        <td>{{version}}</td>
-                    </tr>
-                    <tr>
-                        <th>{% translate 'Kildekode' %}:</th>
-                        <td>
-                            <a href="https://github.com/magenta-aps/toldbehandling">
-                                https://github.com/magenta-aps/toldbehandling
-                            </a>
-                        </td>
-                    </tr>
-                </table>
-            </div>
-        </div>
-    </div>
+
+{% block user_menu_actions %}
+{% if request.user.is_authenticated %}
+<div class="d-flex">
+    <a href="{% url 'logout' %}" class="btn btn-primary d-flex align-items-center" id="logout-link">
+        <span class="material-icons me-1">login</span>
+        <span>{% translate "Log ud" %}</span>
+    </a>
 </div>
+{% if not user.twofactor_enabled %}
+<div class="d-flex mt-3">
+    <a href="{% url 'twofactor:setup' %}" class="btn btn-primary d-flex align-items-center">
+        <span class="material-icons me-1">login</span>
+        <span>{% translate "Indstil tofaktor-autentificering" %}</span>
+    </a>
+</div>
+{% endif %}{# not user.twofactor_enabled #}
+{% endif %}{# user.is_authenticated #}
 {% endblock %}

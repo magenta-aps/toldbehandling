@@ -1,11 +1,15 @@
 {% load static %}
 {% load i18n %}
+{% load compress %}
 <!doctype html>
-<html lang="da">
+<html lang="{{ LANGUAGE_CODE }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="{% static 'bootstrap/bootstrap.min.css' %}" >
+    {% compress css %}
+    <link type="text/x-scss" href="{% static 'bootstrap/theme.scss' %}" rel="stylesheet" media="screen" nonce="{{ request.csp_nonce }}">
+    {% endcompress %}
+    <link href="{% static 'material-design/filled.css' %}" rel="stylesheet" nonce="{{ request.csp_nonce }}" />
     <link rel="stylesheet" href="{% static 'toldbehandling/css/style.css' %}" >
     <script src="{% static 'jquery/jquery-3.5.1.min.js' %}" nonce="{{ request.csp_nonce }}"></script>
     <script src="{% static 'bootstrap/bootstrap.bundle.min.js' %}" nonce="{{ request.csp_nonce }}"></script>
@@ -15,13 +19,99 @@
 </head>
 <body>
 {% block header %}
+<header>
+    {% if environment != "production" %}
+    <div class="bg-warning">
+        <p class="text-center fw-bold my-0">
+            {{ environment|upper }}
+        </p>
+    </div>
+    {% endif %}
+
+    <nav class="nav navbar navbar-expand px-5 py-0 mb-3">
+        <h1 class="navbar-brand py-0 my-0">
+            <a href="{% url 'tf10_list' %}">Akitsuut.aka.gl</a>
+        </h1>
+        <ul class="navbar-nav">
+            {% block main_navigation %}
+            {% endblock %}
+        </ul>
+        <ul class="navbar-nav d-flex align-items-center ms-auto">
+            {% block navigation_actions %}
+            {% endblock %}
+
+            <div class="d-flex align-items-center ms-4">
+                <span class="material-icons dark-icon">language</span>
+                <form action="{% url 'set_language' %}" method="post" class="navbar-form navbar-right mx-1 my-2">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <select name="language" class="form-select language-picker">
+                            {% get_current_language as current_language %}
+                            {% get_available_languages as languages %}
+                            {% get_language_info_list for languages as languages %}
+                            {% for language in languages %}
+                            <option value="{{ language.code }}"{% if language.code == current_language %} selected{% endif %}>
+                                {{ language.name_local|capfirst }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <script nonce="{{ request.csp_nonce }}">$("[name=language]").on("change", function () {
+                            this.form.submit()
+                        })</script>
+                    </div>
+                </form>
+            </div>
+
+            <li class="nav-item dropdown">
+                <a href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    {% if request.user.is_authenticated %}
+                    <span class="material-icons dark-icon fs-3 d-flex">account_circle</span>
+                    {% else %}
+                    <span class="material-icons dark-icon fs-3 d-flex">help</span>
+                    {% endif %}
+                </a>
+                <div id="settings" class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                    {% if request.user.is_authenticated %}
+                    <div class="d-flex align-items-center">
+                        <span class="material-icons dark-icon fs-1 me-3">account_circle</span>
+                        <h4 class="fw-bold">{{ user.first_name }} {{ user.last_name }} ({{ user.username }})</h4>
+                    </div>
+                    {% endif %}
+                    <h5 class="fw-bold">{% translate "Om Akitsuut/Toldbehandling" %}</h5>
+                    <p>{% translate 'Version' %}: {{ version }}</p>
+                    <p>
+                        {% translate 'Kildekode' %}:
+                        <a href="https://github.com/magenta-aps/toldbehandling">{% translate "Github - Toldbehandling" %}</a>
+                    </p>
+                    {% block user_menu_actions %}
+                    {% endblock %}
+                </div>
+            </li>
+        </ul>
+    </nav>
+</header>
 {% endblock %}
+
 {% block content %}
 {% endblock %}
+
+{% block footer %}
+<footer>
+    <div class="d-flex flex-wrap">
+        <a href="https://www.aka.gl" target="_blank" class="d-inline-flex align-items-center">
+            <span class="material-icons me-1">open_in_new</span>
+            <span>https://www.aka.gl</span>
+        </a>
+    </div>
+</footer>
+{% endblock %}
+
 {% block extra_footers %}
 {% endblock %}
+
 {% block modals %}
 {% endblock %}
+
 <script nonce="{{ request.csp_nonce }}">
     $("#logout-link").on('click', function () {
         return confirm("{% translate 'Er du sikker på at du vil logge ud?' %}");
