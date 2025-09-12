@@ -857,7 +857,7 @@ class AnmeldelseListViewTest(BlanketMixin, HasLogin):
                 "beregnet_faktureringsdato": "2023-11-10",
                 "afgift_total": "0",
                 "fragtforsendelse": None,
-                "status": "Godkendt",
+                "status": "godkendt",
                 "fuldmagtshaver": {"cvr": 12345678, "navn": "HepHey A/S"},
             },
             {
@@ -901,7 +901,7 @@ class AnmeldelseListViewTest(BlanketMixin, HasLogin):
                 "beregnet_faktureringsdato": "2023-11-10",
                 "afgift_total": "0",
                 "fragtforsendelse": None,
-                "status": "Afvist",
+                "status": "afvist",
                 "fuldmagtshaver": {"cvr": 12345678, "navn": "HepHey A/S"},
             },
             {
@@ -945,7 +945,7 @@ class AnmeldelseListViewTest(BlanketMixin, HasLogin):
                 "beregnet_faktureringsdato": "2023-11-10",
                 "afgift_total": "0",
                 "fragtforsendelse": None,
-                "status": "Ny",
+                "status": "ny",
                 "fuldmagtshaver": {"cvr": 12345678, "navn": "HepHey A/S"},
             },
         ]
@@ -1227,9 +1227,13 @@ class AnmeldelseListViewTest(BlanketMixin, HasLogin):
         def _delete_button(id: int):
             if self.can_delete:
                 return (
-                    f'<a class="btn btn-danger btn-sm" '
+                    f'<a class="btn btn-primary btn-sm" '
                     f'href="{self.delete_url(id)}?back=list">Slet</a>'
                 )
+
+        def _status_badge(text: str, _class: str) -> str:
+            # Return the expected status badge
+            return f"""<span class="badge\n{_class}\n">\n{text}\n</span>"""
 
         self.maxDiff = None
 
@@ -1264,7 +1268,7 @@ class AnmeldelseListViewTest(BlanketMixin, HasLogin):
                         "stedkode": None,
                     },
                     "forbindelsesnummer": None,
-                    "status": "Godkendt",
+                    "status": _status_badge("Godkendt", "badge-approved"),
                     "actions": "\n".join(
                         filter(
                             None,
@@ -1303,7 +1307,7 @@ class AnmeldelseListViewTest(BlanketMixin, HasLogin):
                         "stedkode": None,
                     },
                     "forbindelsesnummer": None,
-                    "status": "Afvist",
+                    "status": _status_badge("Afvist", "badge-rejected"),
                     "actions": "\n".join(
                         filter(
                             None,
@@ -1343,7 +1347,7 @@ class AnmeldelseListViewTest(BlanketMixin, HasLogin):
                         "stedkode": None,
                     },
                     "forbindelsesnummer": None,
-                    "status": "Ny",
+                    "status": _status_badge("Ny", "badge-draft"),
                     "actions": "\n".join(
                         filter(
                             None,
@@ -1396,6 +1400,7 @@ class AnmeldelseListViewTest(BlanketMixin, HasLogin):
     @patch.object(requests.Session, "get")
     def test_list_filter(self, mock_get):
         mock_get.side_effect = self.mock_requests_get
+        self.login()
         filter_tests = [
             ("dato_før", "2023-09-01", set()),
             ("dato_før", "2023-09-02", {3}),
@@ -1417,17 +1422,19 @@ class AnmeldelseListViewTest(BlanketMixin, HasLogin):
             ("modtager", "23", {2}),
         ]
         for field, value, expected in filter_tests:
-            with self.subTest((field, value)):
-                url = self.list_url + f"?json=1&{field}={value}"
-                self.login()
-                response = self.client.get(url)
-                self.assertEquals(
-                    response.status_code,
-                    200,
-                    f"Failed for {field}={value}: {response.content}",
-                )
-                numbers = [int(item["id"]) for item in response.json()["items"]]
-                self.assertEquals(set(numbers), expected)
+            url = self.list_url + f"?json=1&{field}={value}"
+            response = self.client.get(url)
+            self.assertEquals(
+                response.status_code,
+                200,
+                f"Failed for {field}={value}: {response.content}",
+            )
+            numbers = [int(item["id"]) for item in response.json()["items"]]
+            self.assertEquals(
+                set(numbers),
+                expected,
+                f"Failed for {field}={value}: {response.json()}",
+            )
 
     @patch.object(requests.Session, "get")
     def test_list_paginate(self, mock_get):
