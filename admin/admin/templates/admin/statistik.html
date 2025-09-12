@@ -6,7 +6,6 @@
 
 {% block extra_headers %}
 <script type="text/javascript" src="{% static 'toldbehandling/js/formset.js' %}" nonce="{{ request.csp_nonce }}"></script>
-<link rel="stylesheet" href="{% static 'font-awesome/css/all.min.css' %}" >
 <script nonce="{{ request.csp_nonce }}">
     $(function (){
         const container = $("#formset_container");
@@ -60,64 +59,88 @@
 {% endblock %}
 
 {% block content %}
-<div class="mx-5">
+<div class="content">
+<h1 class="mb-3">{% translate "Statistik" %}</h1>
 <form method="post">
     {% csrf_token %}
     {{form.errors}}
-    <h3>Filtrering</h3>
+
+    <h3 class="mb-3">{% translate "Filtre" %}</h3>
     <div class="row">
         <div class="col-4">
             <label for="{{form.anmeldelsestype.name}}" class="form-label">{% translate "Anmeldelsestype" %}</label>
-        </div>
-        <div class="col-8">
             {{form.anmeldelsestype}}
         </div>
+        <div class="col-4">
+            <label for="{{form.startdato.name}}" class="form-label">{% translate "Dato mellem" %}</label>
+            <div class="d-flex align-items-center justify-between">
+                {{form.startdato}}
+                <span class="ms-2">{% translate "og" %}</span>
+            </div>
+        </div>
+        <div class="col-4">
+            <label class="form-label">&nbsp;</label>
+            {{form.slutdato}}
+        </div>
     </div>
-    <div class="row">
-        <div class="col-4">{% translate "Dato mellem" %}</div>
-        <div class="col-4">{{form.startdato}}</div>
-        <div class="col-4">{{form.slutdato}}</div>
-    </div>
-    <h3>Grupper</h3>
+
+    <h3 class="mt-5 mb-3">Grupper</h3>
     <div id="formset">
     {{ formset.management_form }}
     <div id="formset_container">
         {% for subform in formset %}
-        {{subform.errors}}
         <div class="row">
-            <div class="col-4">
+            <div class="col-1">
                 <label for="{{subform.gruppe.name}}">Gruppe:</label>
             </div>
-            <div class="col-7">
+            <div class="col-3">
                 {{subform.gruppe}}
+                {{subform.gruppe.errors}}
             </div>
             <div class="col-1 px-0">
-                <button type="button" class="btn btn-danger remove-row"><i class="fa fa-minus"></i></button>
-                <button type="button" class="btn btn-success add-row"><i class="fa fa-plus"></i></button>
+                <button type="button" class="btn btn-info me-2 remove-row">
+                    <span class="material-icons">remove</span>
+                </button>
+                <button type="button" class="btn btn-info me-2 add-row">
+                    <span class="material-icons">add</span>
+                </button>
             </div>
         </div>
         {% endfor %}
     </div>
     <div id="formset_prototype" class="d-none">
         <div class="row">
-            <div class="col-4">
+            <div class="col-1">
                 <label for="{{formset.empty_form.gruppe.name}}">Gruppe:</label>
             </div>
-            <div class="col-7">
+            <div class="col-3">
                 {{formset.empty_form.gruppe}}
             </div>
             <div class="col-1 px-0">
-                <button type="button" class="btn btn-danger remove-row"><i class="fa fa-minus"></i></button>
-                <button type="button" class="btn btn-success add-row"><i class="fa fa-plus"></i></button>
+                <button type="button" class="btn btn-info me-2 remove-row">
+                    <span class="material-icons">remove</span>
+                </button>
+                <button type="button" class="btn btn-info me-2 add-row">
+                    <span class="material-icons">add</span>
+                </button>
             </div>
         </div>
     </div>
     </div>
-    <button type="submit" class="btn btn-primary">Søg</button>
-    <button type="submit" class="btn btn-primary" name="{{form.download.name}}" value="true">Download regneark</button>
+
+    <div class="d-flex align-items-center my-5">
+        <button type="submit" class="btn btn-primary me-2">
+            <span class="material-icons">search</span>
+            <span>{% translate "Søg" %}</span>
+        </button>
+        <button type="submit" class="btn btn-primary me-2" name="{{form.download.name}}" value="true">
+            <span class="material-icons">download</span>
+            <span>{% translate "Download regneark" %}</span>
+        </button>
+    </div>
 </form>
-<hr/>
-<table class="table">
+
+<table class="table table-light my-3">
     <thead>
         <tr>
             <th class="col-2">Afgiftsgruppe</th>
@@ -142,8 +165,8 @@
     </tbody>
 </table>
 
-<h3>Gruppesummer</h3>
-<table class="table">
+<h3 class="mb-3">Gruppesummer</h3>
+<table class="table table-light">
     <thead>
     <tr>
         <th class="col-10">Gruppe</th>
