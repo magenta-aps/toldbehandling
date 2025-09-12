@@ -2,6 +2,8 @@
 #
 # SPDX-License-Identifier: MPL-2.0
 
+from .base import DEBUG
+
 default_loaders = [
     "django.template.loaders.filesystem.Loader",
     "django.template.loaders.app_directories.Loader",
