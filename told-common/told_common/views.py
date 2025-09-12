@@ -727,6 +727,7 @@ class ListView(FormView):
     ) -> Dict[str, Any]:
         # Overwrite in subclasses
         return {**item, "select": item["id"]}  # pragma: no cover
+
     def map_value(
         self, item: Dict[str, Any], key: str, context: Dict[str, Any]
     ) -> SafeString | None:
