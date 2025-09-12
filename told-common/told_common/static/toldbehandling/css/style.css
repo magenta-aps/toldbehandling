@@ -22,22 +22,6 @@ input[type="number"].no-buttons:focus {
 }
 
 
-ul.errorlist {
-    padding-left: 0;
-}
-ul.errorlist:not(.alert .errorlist) li {
-    list-style-type: none;
-    font-size: 0.8em;
-    color: #dc3545;
-}
-.alert ul.errorlist {
-    margin-bottom: 0;
-}
-.alert ul.errorlist li {
-    list-style-type: none;
-}
-
-
 table.scrollbody thead {
     display: block;
 }
