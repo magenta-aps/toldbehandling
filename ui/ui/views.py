@@ -385,7 +385,7 @@ class TF5TilladelseView(
                                     "printing": True,
                                 },
                                 stylesheets=[
-                                    "/static/bootstrap/bootstrap.min.css",
+                                    "bootstrap/theme.scss",
                                     "/static/toldbehandling/css/style.css",
                                     "/static/toldbehandling/css/pdfprint.css",
                                 ],
