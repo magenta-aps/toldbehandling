@@ -46,6 +46,8 @@ setuptools.setup(
         "holidays==0.38",
         "pypdf==5.0.1",
         "django-forms-dynamic==1.0.0",
+        "django_compressor==4.5.1",
+        "django-libsass==0.9",
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
