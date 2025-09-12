@@ -14,4 +14,5 @@ INSTALLED_APPS = [
     "django_bootstrap_icons",
     "mitid_test",
     "csp_helpers",
+    "compressor",
 ]
