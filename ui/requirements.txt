@@ -20,3 +20,6 @@ tblib==3.0.0
 django-csp==3.8
 django-csp[jinja2]
 django-csp-helpers==0.7.1
+
+django_compressor==4.5.1
+django-libsass==0.9
