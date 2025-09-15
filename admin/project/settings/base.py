@@ -34,7 +34,7 @@ APPEND_SLASH = True
 REST_DOMAIN = os.environ["REST_DOMAIN"]
 
 NINJA_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(seconds=20),
+    "ACCESS_TOKEN_LIFETIME": timedelta(seconds=60),
 }
 
 TILLÆGSAFGIFT_FAKTOR = 0.5
