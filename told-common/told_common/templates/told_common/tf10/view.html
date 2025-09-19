@@ -35,7 +35,7 @@
 
                 {% if can_godkend %}
                 {% if object.status == "ny" or object.status == "afvist" %}
-                <button type="button" class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#godkend_modal">
+                <button type="button" class="btn btn-success me-2" data-bs-toggle="modal" data-bs-target="#godkend_modal">
                     <span class="material-icons">check</span>
                     <span>{% translate "Godkend" %}</span>
                 </button>
@@ -518,7 +518,7 @@
                     {{form.notat1}}
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" name="{{form.status.name}}" value="godkendt" class="btn btn-primary">
+                    <button type="submit" name="{{form.status.name}}" value="godkendt" class="btn btn-success">
                         <span class="material-icons">check</span>
                         <span>{% translate "Godkend" %}</span>
                     </button>
