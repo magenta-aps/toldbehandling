@@ -149,7 +149,7 @@ class Command(BaseCommand):
             defaults={
                 "first_name": "Mickey",
                 "last_name": "Mouse",
-                "email": "mickey@andeby.dk",
+                "email": "",
                 "password": make_password("indberetter2"),
                 "is_active": True,
                 "is_staff": False,

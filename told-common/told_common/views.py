@@ -89,6 +89,13 @@ class RestView(LoginRequiredMixin, HasRestClientMixin, View):
         )
 
 
+class SyncSessionView(LoginRequiredMixin, HasRestClientMixin, View):
+    def post(self, request, *args, **kwargs) -> JsonResponse:
+        userdata = self.rest_client.user.this()
+        self.request.session["user"] = userdata
+        return JsonResponse(userdata)
+
+
 class FileView(LoginRequiredMixin, HasRestClientMixin, View):
     def get(self, request, *args, **kwargs):
         # Vil kaste 404 hvis id ikke findes
