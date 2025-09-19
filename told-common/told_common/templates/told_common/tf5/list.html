@@ -131,11 +131,9 @@
 
     {% if messages %}
     {% for message in messages %}
-    <div class="card">
-        <div class="card-body text-center">
-            {% bs_icon "check2-circle" size="2em" color="green" %}
-            <div id="message_content">{{message}}</div>
-        </div>
+    <div class="alert alert-info d-flex align-items-center justify-content-center mb-3">
+        <span class="material-icons text-info fs-3 me-2">check_circle</span>
+        <span>{{message}}</span>
     </div>
     {% endfor %}
     {% endif %}
