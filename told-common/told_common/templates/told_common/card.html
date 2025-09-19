@@ -2,20 +2,18 @@
 {% load i18n %}
 
 {% block content %}
-
-{% if form.non_field_errors %}
-<div class="row justify-content-md-center">
-    {% for error in form.non_field_errors %}
-    <div class="alert alert-danger" role="alert">
-        {{ error }}
-    </div>
-    {% endfor %}
-</div>
-{% endif %}
-
-<div class="justify-content-md-center d-flex align-items-center vh-100">
+<div class="card-container d-flex align-items-center justify-content-md-center">
     <div class="card" class="csp-w-40rem">
         <h5 class="card-header">{% block card_title %}{% endblock %}</h5>
+        {% if form.non_field_errors %}
+        <div>
+            {% for error in form.non_field_errors %}
+            <div class="alert alert-danger" role="alert">
+                {{ error }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
         <div class="card-body">
             <p>
                 {% block card_content %}{% endblock %}
@@ -23,5 +21,4 @@
         </div>
     </div>
 </div>
-
 {% endblock %}
