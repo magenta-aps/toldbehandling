@@ -1,5 +1,6 @@
 $primary: #73be46;
 $dark-primary: #395f23;
+$medium-primary: #518531;
 $light-primary: #b9dfa3;
 $lighter-primary: lighten($primary, 45);
 $secondary: #ffe169;
@@ -15,22 +16,21 @@ $light-grey: #ebebe8; //#e3e3df;
 $lightest-grey: #f3f3f1; //#f5f7f8;
 $white: #ffffff;
 
-// Badge colours
+// Map colors to Bootstrap theme color names
+$success: $medium-primary;
+$info: $dark-primary;
+$warning: $secondary;
+$danger: $tertiary;
+$light: $lightest-grey;
+$dark: $dark-grey;
+
+// Status colors
 $approved: #233915;
 $approved-light: $light-primary;
 $waiting: #083d44;
 $waiting-light: #80d5df;
 $rejected: darken($tertiary, 30); //#4d2111;
 $rejected-light: #eea78e;
-
-// Alert levels
-$success: $approved-light;
-$info: $dark-primary;
-$warning: $secondary;
-$danger: $tertiary;
-
-$light: $lightest-grey;
-$dark: $dark-grey;
 
 $badge-font-size: 1em;
 $badge-font-weight: normal;
@@ -142,10 +142,6 @@ span.secondary {
   border: none;
 }
 
-.btn-danger {
-  color: $white;
-}
-
 // Nav
 header nav {
   height: 4.5 * $spacer;
@@ -236,6 +232,10 @@ footer a .material-icons {
 .btn span.material-icons {
   display: inline;
   vertical-align: text-bottom;
+}
+.btn-danger,
+.btn-success {
+  color: $white;
 }
 
 // Tables
