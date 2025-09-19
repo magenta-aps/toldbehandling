@@ -24,7 +24,7 @@ HOST_DOMAIN = os.environ.get("HOST_DOMAIN", "http://akitsuut.aka.gl")
 
 if os.environ.get("HOST_DOMAIN", False):
     CSRF_TRUSTED_ORIGINS = [os.environ["HOST_DOMAIN"]]
-CSRF_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = not DEBUG
 
 ROOT_URLCONF = "project.urls"
 
