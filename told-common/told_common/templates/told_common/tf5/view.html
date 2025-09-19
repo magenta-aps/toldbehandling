@@ -22,16 +22,8 @@
                 <h1 class="mb-3">{% translate "Engangstilladelse til privat indførsel af øl, vin og spiritus" %}</h1>
                 {% if not printing %}
                 {% include "told_common/status.html" with item=object %}
-                {% if object.payment_status == "created" %}
-                <span class="badge bg-secondary">{% translate "Ikke betalt" %}</span>
-                {% elif object.payment_status == "reserved" %}
-                <span class="badge bg-warning">{% translate "Reserveret" %}</span>
-                {% elif object.payment_status == "paid" %}
-                <span class="badge bg-success">{% translate "Betalt" %}</span>
-                {% elif object.payment_status == "declined" %}
-                <span class="badge bg-danger">{% translate "Afvist" %}</span>
+                {% include "told_common/payment_status.html" with object=object %}
                 {% endif %}
-                {% endif %}{# not printing #}
             </div>
             <div class="col-6 text-end">
                 {# Object actions #}
