@@ -356,17 +356,23 @@ class UserAPI:
             )
         ):
             raise PermissionDenied
+        if payload.groups is not None and not user.has_perm("auth.change_user"):
+            raise PermissionDenied
+        if payload.groups is not None:
         try:
             groups = [Group.objects.get(name=g) for g in payload.groups or []]
+                item.groups.set(groups)
         except Group.DoesNotExist:
             raise ValidationError("Group does not exist")  # type: ignore
+        if payload.username is not None:
         item.username = payload.username
+        if payload.first_name is not None:
         item.first_name = payload.first_name
+        if payload.last_name is not None:
         item.last_name = payload.last_name
+        if payload.email is not None:
         item.email = payload.email
-        item.is_superuser = False
         item.save()
-        item.groups.set(groups)
         if payload.indberetter_data:
             item.indberetter_data.cvr = payload.indberetter_data.cvr
         item.indberetter_data.save()
