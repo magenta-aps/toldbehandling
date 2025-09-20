@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: 2023 Magenta ApS <info@magenta.dk>
 #
 # SPDX-License-Identifier: MPL-2.0
+import json
 import os
 from datetime import date
 from io import BytesIO
@@ -14,6 +15,7 @@ from django.urls import reverse
 from requests import HTTPError, Response
 from told_common.data import Afsender, Modtager
 from told_common.tests.tests import HasLogin
+from told_common.rest_client import UserRestClient
 from weasyprint import HTML
 
 User = get_user_model()
@@ -276,3 +278,49 @@ class TF5Test(BaseTest):
         response = self.client.post(url)
 
         self.assertEqual(response.json()["payment_refreshed"], True)
+
+
+class SyncTest(BaseTest, TestCase):
+
+    @staticmethod
+    def create_response(status_code, content):
+        response = Response()
+        response.status_code = status_code
+        if type(content) in (dict, list):
+            content = json.dumps(content)
+        if type(content) is str:
+            content = content.encode("utf-8")
+        response._content = content
+        return response
+
+    def test_sync_session_view(self):
+
+        self.login()
+        with patch.object(UserRestClient, "this", autospec=True) as mock_this:
+            mock_this.return_value = {
+                "indberetter_data": {"cpr": 1234567890, "cvr": None},
+                "first_name": "Tester",
+                "last_name": "Testersen",
+                "email": "test3@example.com",
+                "is_superuser": False,
+                "groups": ["PrivatIndberettere"],
+                "username": "test@example.com",
+            }
+            result = UserRestClient().this()
+            print(result)        # Should be your dict
+            print(type(result))  # Should be <class 'dict'>
+            session = self.client.session
+            session["user"] = {
+                "indberetter_data": {"cpr": 1234567890, "cvr": None},
+                "first_name": "Tester",
+                "last_name": "Testersen",
+                "email": "",
+                "is_superuser": False,
+                "groups": ["PrivatIndberettere"],
+                "username": "test@example.com",
+            }
+            session.save()
+            response = self.client.post(reverse("sync_session"))
+            print(response)
+            session = self.client.session
+            print(dict(session))
