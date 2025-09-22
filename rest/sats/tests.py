@@ -223,6 +223,9 @@ class VareafgiftssatsTest(RestTestMixin, TestCase):
             self._update_object_data.update({})
         return self._update_object_data
 
+    def test_kræver_indførselstilladelse(self):
+        self.assertFalse(self.vareafgiftssats.kræver_indførselstilladelse)
+
     def test_str(self):
         self.assertEqual(
             str(self.vareafgiftssats),

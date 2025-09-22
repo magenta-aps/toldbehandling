@@ -1564,7 +1564,6 @@ class VarelinjeTest(RestTestMixin, TestCase):
             enhed=Vareafgiftssats.Enhed.SAMMENSAT,
             minimumsbeløb=None,
             afgiftssats=Decimal(0),
-            kræver_indførselstilladelse=False,
         )
         Vareafgiftssats.objects.create(
             overordnet=personbiler,
@@ -1575,7 +1574,6 @@ class VarelinjeTest(RestTestMixin, TestCase):
             enhed=Vareafgiftssats.Enhed.ANTAL,
             minimumsbeløb=None,
             afgiftssats=Decimal(50_000),
-            kræver_indførselstilladelse=False,
         )
         Vareafgiftssats.objects.create(
             overordnet=personbiler,
@@ -1588,7 +1586,6 @@ class VarelinjeTest(RestTestMixin, TestCase):
             segment_øvre=Decimal(150_000),
             minimumsbeløb=None,
             afgiftssats=Decimal(100),
-            kræver_indførselstilladelse=False,
         )
         Vareafgiftssats.objects.create(
             overordnet=personbiler,
@@ -1600,7 +1597,6 @@ class VarelinjeTest(RestTestMixin, TestCase):
             segment_nedre=Decimal(150_000),
             minimumsbeløb=None,
             afgiftssats=Decimal(150),
-            kræver_indførselstilladelse=False,
         )
         varelinje1 = Varelinje.objects.create(
             vareafgiftssats=personbiler,
@@ -2593,7 +2589,6 @@ class StatistikTest(RestMixin, TestCase):
             enhed=Vareafgiftssats.Enhed.KILOGRAM,
             minimumsbeløb=None,
             afgiftssats=Decimal(1000),
-            kræver_indførselstilladelse=False,
         )
         self.varelinje2 = Varelinje.objects.create(
             vareafgiftssats=self.vareafgiftssats2,
