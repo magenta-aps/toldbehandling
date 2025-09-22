@@ -41,11 +41,14 @@ class RestMixin:
         cls,
         username,
         plaintext_password,
-        permissions: Union[List[Permission], None],
+        permissions: Union[List[Permission], None] = None,
         email: Optional[str] = None,
         is_staff: Optional[bool] = False,
+        is_superuser: Optional[bool] = False,
     ) -> Tuple[User, str, str]:
-        user = User.objects.create(username=username, is_staff=is_staff)
+        user = User.objects.create(
+            username=username, is_staff=is_staff, is_superuser=is_superuser
+        )
         user.email = email if email else user.email
         user.set_password(plaintext_password)
         user.save()
