@@ -41,7 +41,7 @@ setuptools.setup(
         "django==4.2.11",
         "gunicorn==22.0.0",
         "requests==2.31.0",
-        "dataclasses-json==0.6.0",
+        "dataclasses-json==0.6.7",
         "WeasyPrint==62.3",
         "holidays==0.38",
         "pypdf==5.0.1",
