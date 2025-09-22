@@ -364,7 +364,7 @@ class UserAPI:
                 item.groups.set(groups)
             except Group.DoesNotExist:
                 raise ValidationError("Group does not exist")  # type: ignore
-        if payload.username is not None:
+        if payload.username:
             item.username = payload.username
         if payload.first_name is not None:
             item.first_name = payload.first_name
