@@ -30,6 +30,13 @@ class CommonTest:
             codename="view_afgiftsanmeldelse"
         )
 
+        # admin
+        cls.admin, cls.admin_token, cls.admin_refresh_token = RestMixin.make_user(
+            username="admin",
+            plaintext_password="admin",
+            is_superuser=True,
+        )
+
         # User-1 (CVR)
         cls.user, cls.user_token, cls.user_refresh_token = RestMixin.make_user(
             username="payment-test-user",
@@ -65,6 +72,8 @@ class CommonTest:
             cvr=None,
             api_key=IndberetterProfile.create_api_key(),
         )
+
+        cls.group = Group.objects.create(name="test-group")
 
 
 class CustomHTTPErrorResponseMock(MagicMock):
@@ -407,7 +416,7 @@ class CommonUserAPITests(CommonTest, TestCase):
 
         resp = self.client.post(
             reverse("api-1.0.0:user_create"),
-            data=json_dump({**test_user, "groups": ["test-group"]}),
+            data=json_dump({**test_user, "groups": ["foo-group"]}),
             HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
             content_type="application/json",
         )
@@ -438,40 +447,40 @@ class CommonUserAPITests(CommonTest, TestCase):
         )
 
         self.assertEqual(resp.status_code, 200)
-        self.assertEqual(
-            resp.json(),
+        data = resp.json()
+        self.assertEqual(data["count"], 3)
+        self.assertIn(
             {
-                "count": 2,
-                "items": [
-                    {
-                        "id": self.user.id,
-                        "username": "payment-test-user",
-                        "first_name": "",
-                        "last_name": "",
-                        "email": "",
-                        "is_superuser": False,
-                        "groups": [],
-                        "permissions": ["anmeldelse.view_afgiftsanmeldelse"],
-                        "indberetter_data": {"cvr": 13371337},
-                        "twofactor_enabled": False,
-                    },
-                    {
-                        "id": self.user2.id,
-                        "username": "payment-test-user2",
-                        "first_name": "",
-                        "last_name": "",
-                        "email": "",
-                        "is_superuser": False,
-                        "groups": [],
-                        "permissions": [
-                            "anmeldelse.view_afgiftsanmeldelse",
-                            "auth.read_apikeys",
-                        ],
-                        "indberetter_data": {"cvr": None},
-                        "twofactor_enabled": False,
-                    },
-                ],
+                "id": self.user.id,
+                "username": "payment-test-user",
+                "first_name": "",
+                "last_name": "",
+                "email": "",
+                "is_superuser": False,
+                "groups": [],
+                "permissions": ["anmeldelse.view_afgiftsanmeldelse"],
+                "indberetter_data": {"cvr": 13371337},
+                "twofactor_enabled": False,
             },
+            data["items"],
+        )
+        self.assertIn(
+            {
+                "id": self.user2.id,
+                "username": "payment-test-user2",
+                "first_name": "",
+                "last_name": "",
+                "email": "",
+                "is_superuser": False,
+                "groups": [],
+                "permissions": [
+                    "anmeldelse.view_afgiftsanmeldelse",
+                    "auth.read_apikeys",
+                ],
+                "indberetter_data": {"cvr": None},
+                "twofactor_enabled": False,
+            },
+            data["items"],
         )
 
     def test_update(self):
@@ -512,7 +521,52 @@ class CommonUserAPITests(CommonTest, TestCase):
             },
         )
 
+    def test_update_group(self):
+        resp = self.client.patch(
+            reverse(
+                "api-1.0.0:user_update",
+                args=[self.indberetter2.cpr, self.indberetter2.cvr or "-"],
+            ),
+            data=json_dump(
+                {
+                    # NOTE: required by the payload, but not used in the handler
+                    "username": self.user2.username,
+                    "first_name": "Test",
+                    "last_name": "User",
+                    "email": self.user2.email,
+                    "groups": ["test-group"],
+                }
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.admin_token}",
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, 200)
+
     def test_update_exceptions(self):
+        resp = self.client.patch(
+            reverse(
+                "api-1.0.0:user_update",
+                args=[self.indberetter2.cpr, self.indberetter2.cvr or "-"],
+            ),
+            data=json_dump(
+                {
+                    # NOTE: required by the payload, but not used in the handler
+                    "username": self.user2.username,
+                    "first_name": "Test",
+                    "last_name": "User",
+                    "email": self.user2.email,
+                    "groups": ["foo-group"],
+                }
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.admin_token}",
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, 422)
+        self.assertEqual(
+            resp.json(),
+            {"detail": "Group does not exist"},
+        )
+
         resp = self.client.patch(
             reverse(
                 "api-1.0.0:user_update",
@@ -532,11 +586,7 @@ class CommonUserAPITests(CommonTest, TestCase):
             content_type="application/json",
         )
 
-        self.assertEqual(resp.status_code, 422)
-        self.assertEqual(
-            resp.json(),
-            {"detail": "Group does not exist"},
-        )
+        self.assertEqual(resp.status_code, 403)
 
 
 class CommonEboksBeskedAPITests(CommonTest, TestCase):
