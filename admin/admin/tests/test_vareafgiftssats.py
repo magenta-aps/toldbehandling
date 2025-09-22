@@ -307,7 +307,6 @@ class VareafgiftsSatsTest(TestCase):
             enhed=Vareafgiftssats.Enhed.SAMMENSAT,
             minimumsbeløb=None,
             afgiftssats=Decimal(0),
-            kræver_indførselstilladelse=False,
             har_privat_tillægsafgift_alkohol=False,
             subsatser=None,
         )
@@ -365,7 +364,6 @@ class VareafgiftsSatsTest(TestCase):
             enhed=Vareafgiftssats.Enhed.SAMMENSAT,
             minimumsbeløb=None,
             afgiftssats=Decimal(0),
-            kræver_indførselstilladelse=False,
             har_privat_tillægsafgift_alkohol=False,
             subsatser=None,
         )
