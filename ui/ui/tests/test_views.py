@@ -13,8 +13,7 @@ from django.http import FileResponse
 from django.test import TestCase
 from django.urls import reverse
 from requests import HTTPError, Response
-from told_common.data import Afsender, JwtTokenInfo, Modtager
-from told_common.rest_client import RestClient, UserRestClient
+from told_common.data import Afsender, Modtager
 from told_common.tests.tests import HasLogin
 from weasyprint import HTML
 
