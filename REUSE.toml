@@ -3,7 +3,7 @@ SPDX-PackageName = "Toldbehandling"
 SPDX-PackageSupplier = "Magenta ApS <info@magenta.dk>"
 
 [[annotations]]
-path = ["REUSE.toml", "told-common/**", "rest/**", "ui/**", "admin/**", "log/**", "dev-environment/**", "docker/**", "mockup/**", "dev-idp/**", "docker-compose.yml", "docker-compose.override.template.yml", "SUMMARY", "README.md", ".gitignore", ".gitlab-ci.yml", ".eslint/**"]
+path = ["REUSE.toml", "told-common/**", "rest/**", "ui/**", "admin/**", "log/**", "dev-environment/**", "docker/**", "mockup/**", "dev-idp/**", "docker-compose.yml", "docker-compose.override.template.yml", "SUMMARY", "README.md", ".gitignore", ".gitlab-ci.yml", ".renovaterc", ".eslint/**"]
 precedence = "aggregate"
 SPDX-FileCopyrightText = "2024 Magenta ApS <info@magenta.dk>"
 SPDX-License-Identifier = "MPL-2.0"
