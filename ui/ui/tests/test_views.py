@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: 2023 Magenta ApS <info@magenta.dk>
 #
 # SPDX-License-Identifier: MPL-2.0
+import json
 import os
 from datetime import date
 from io import BytesIO
@@ -276,3 +277,43 @@ class TF5Test(BaseTest):
         response = self.client.post(url)
 
         self.assertEqual(response.json()["payment_refreshed"], True)
+
+
+class SyncTest(BaseTest, TestCase):
+
+    @staticmethod
+    def create_response(status_code, content):
+        response = Response()
+        response.status_code = status_code
+        if type(content) in (dict, list):
+            content = json.dumps(content)
+        if type(content) is str:
+            content = content.encode("utf-8")
+        response._content = content
+        return response
+
+    def test_sync_session_view(self):
+        self.login()
+        self.rest_client_mock.user.this.return_value = {
+            "indberetter_data": {"cpr": 1234567890, "cvr": None},
+            "first_name": "Tester",
+            "last_name": "Testersen",
+            "email": "test3@example.com",
+            "is_superuser": False,
+            "groups": ["PrivatIndberettere"],
+            "username": "test@example.com",
+        }
+        session = self.client.session
+        session["user"] = {
+            "indberetter_data": {"cpr": 1234567890, "cvr": None},
+            "first_name": "Tester",
+            "last_name": "Testersen",
+            "email": "",
+            "is_superuser": False,
+            "groups": ["PrivatIndberettere"],
+            "username": "test@example.com",
+        }
+        session.save()
+        self.client.post(reverse("sync_session"))
+        session = self.client.session
+        self.assertEqual(session["user"].get("email"), "test3@example.com")

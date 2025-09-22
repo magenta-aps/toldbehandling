@@ -153,8 +153,24 @@
     const modal = new bootstrap.Modal('#user_email_modal', {});
     modal.show();
 
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
     // Form submit & validation
-    const csrf_token = "{{ csrf_token }}"
+    const csrf_token = getCookie('csrftoken');
 
     $(".needs-validation").on("submit", function (e) {
         e.preventDefault()
@@ -162,7 +178,7 @@
 
         // Run BS validation
         if (!this.checkValidity()) {
-            event.stopPropagation()
+            e.stopPropagation()
             $this.addClass('was-validated') // So errors are shown
             return
         }
@@ -172,7 +188,7 @@
         $.ajax({
             url: "/rest/user/" + user_data.id,
             type: "PATCH",
-            headers: { "X-CSRFToken": csrf_token },
+            headers: { "X-CSRFToken": getCookie('csrftoken') },
             contentType: "application/json",
             data: JSON.stringify({
                 "username": user_data.username,
@@ -182,6 +198,11 @@
             }),
             success: function (response) {
                 modal.hide()
+                $.ajax({
+                    url: "{% url 'sync_session' %}",
+                    type: "POST",
+                    headers: { "X-CSRFToken": getCookie('csrftoken') },
+                })
             },
             error: function (err) {
                 $("#user_email_modal_form-error").removeClass("d-none")

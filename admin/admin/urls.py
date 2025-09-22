@@ -11,6 +11,7 @@ from admin import views
 urlpatterns = [
     path("", RedirectView.as_view(pattern_name="tf10_list")),
     path("api/<path:path>", common_views.RestView.as_view(), name="rest"),
+    path("user/sync", common_views.SyncSessionView.as_view(), name="sync_session"),
     path(
         "file/leverandørfaktura/<int:id>",
         common_views.LeverandørFakturaView.as_view(),
