@@ -1,6 +1,6 @@
 django==4.2.24
-coverage==7.3.0
 beautifulsoup4==4.13.5
+coverage==7.10.7
 humanize==4.7.0
 django_mitid_auth @ git+https://github.com/magenta-aps/gl-django-login.git@1.4.1
 django-session-timeout==0.1.0

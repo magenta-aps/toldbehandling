@@ -1,7 +1,7 @@
 django==4.2.24
 gunicorn==22.0.0
 psycopg2-binary==2.9.10
-coverage==7.3.0
+coverage==7.10.7
 django-extensions==3.2.3
 pydotplus==2.0.2
 django-ninja==0.22.2
