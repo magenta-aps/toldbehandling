@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: MPL-2.0
 import json
 import os
+import time
 from datetime import date
 from io import BytesIO
 from unittest.mock import MagicMock, patch
@@ -15,9 +16,9 @@ from django.urls import reverse
 from requests import HTTPError, Response
 from told_common.data import Afsender, Modtager
 from told_common.tests.tests import HasLogin
-from told_common.rest_client import UserRestClient
+from told_common.rest_client import UserRestClient, RestClient
 from weasyprint import HTML
-
+from told_common.data import JwtTokenInfo
 User = get_user_model()
 
 
@@ -294,33 +295,27 @@ class SyncTest(BaseTest, TestCase):
         return response
 
     def test_sync_session_view(self):
-
         self.login()
-        with patch.object(UserRestClient, "this", autospec=True) as mock_this:
-            mock_this.return_value = {
-                "indberetter_data": {"cpr": 1234567890, "cvr": None},
-                "first_name": "Tester",
-                "last_name": "Testersen",
-                "email": "test3@example.com",
-                "is_superuser": False,
-                "groups": ["PrivatIndberettere"],
-                "username": "test@example.com",
-            }
-            result = UserRestClient().this()
-            print(result)        # Should be your dict
-            print(type(result))  # Should be <class 'dict'>
-            session = self.client.session
-            session["user"] = {
-                "indberetter_data": {"cpr": 1234567890, "cvr": None},
-                "first_name": "Tester",
-                "last_name": "Testersen",
-                "email": "",
-                "is_superuser": False,
-                "groups": ["PrivatIndberettere"],
-                "username": "test@example.com",
-            }
-            session.save()
-            response = self.client.post(reverse("sync_session"))
-            print(response)
-            session = self.client.session
-            print(dict(session))
+        self.rest_client_mock.user.this.return_value = {
+            "indberetter_data": {"cpr": 1234567890, "cvr": None},
+            "first_name": "Tester",
+            "last_name": "Testersen",
+            "email": "test3@example.com",
+            "is_superuser": False,
+            "groups": ["PrivatIndberettere"],
+            "username": "test@example.com",
+        }
+        session = self.client.session
+        session["user"] = {
+            "indberetter_data": {"cpr": 1234567890, "cvr": None},
+            "first_name": "Tester",
+            "last_name": "Testersen",
+            "email": "",
+            "is_superuser": False,
+            "groups": ["PrivatIndberettere"],
+            "username": "test@example.com",
+        }
+        session.save()
+        self.client.post(reverse("sync_session"))
+        session = self.client.session
+        self.assertEqual(session["user"].get("email"), "test3@example.com")
