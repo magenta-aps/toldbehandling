@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: MPL-2.0
 import json
 import os
-import time
 from datetime import date
 from io import BytesIO
 from unittest.mock import MagicMock, patch
@@ -14,11 +13,11 @@ from django.http import FileResponse
 from django.test import TestCase
 from django.urls import reverse
 from requests import HTTPError, Response
-from told_common.data import Afsender, Modtager
+from told_common.data import Afsender, JwtTokenInfo, Modtager
+from told_common.rest_client import RestClient, UserRestClient
 from told_common.tests.tests import HasLogin
-from told_common.rest_client import UserRestClient, RestClient
 from weasyprint import HTML
-from told_common.data import JwtTokenInfo
+
 User = get_user_model()
 
 
