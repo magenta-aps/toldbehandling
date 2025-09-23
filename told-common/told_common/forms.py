@@ -191,13 +191,23 @@ class TF10Form(BootstrapForm):
         max_length=12,
         required=False,
         label=lambda form: _(
-            "Indførsels­tilladelse nr.%s"
-            "" if not form.varesatser else
-            " (Alkohol)" if any(
-                sats.alkohol_indførselstilladelse for id, sats in form.varesatser.items()
-            ) else " (Tobak)" if any(
-                sats.tobak_indførselstilladelse for id, sats in form.varesatser.items()
-            ) else ""
+            "Indførsels­tilladelse nr.%s" ""
+            if not form.varesatser
+            else (
+                " (Alkohol)"
+                if any(
+                    sats.alkohol_indførselstilladelse
+                    for id, sats in form.varesatser.items()
+                )
+                else (
+                    " (Tobak)"
+                    if any(
+                        sats.tobak_indførselstilladelse
+                        for id, sats in form.varesatser.items()
+                    )
+                    else ""
+                )
+            )
         ),
         widget=lambda form: forms.TextInput(
             attrs=(
@@ -366,10 +376,7 @@ class TF10Form(BootstrapForm):
         if (alkohol or tobak) and not self.cleaned_data["indførselstilladelse"]:
             self.add_error(
                 "indførselstilladelse",
-                _(
-                    "Indførselstilladelse er påkrævet med "
-                    "de angivne varearter"
-                ),
+                _("Indførselstilladelse er påkrævet med " "de angivne varearter"),
             )
         # Tjek at der ikke er alkohol og tobak på samme blanket
         if alkohol and tobak:
