@@ -103,12 +103,13 @@ class TF10FormTest(TestCase):
                 1: Vareafgiftssats(
                     id=1,
                     afgiftstabel=1,
-                    vareart_da="Båthorn",
-                    vareart_kl="Båthorn",
+                    vareart_da="Båthornssnaps",
+                    vareart_kl="Båthornsnaps",
                     afgiftsgruppenummer=12345678,
                     enhed=Vareafgiftssats.Enhed.KILOGRAM,
                     afgiftssats="1.00",
-                    kræver_indførselstilladelse=True,
+                    alkohol_indførselstilladelse=True,
+                    har_privat_tillægsafgift_alkohol=True,
                 ),
             }
         )
@@ -140,7 +141,6 @@ class TF10FormTest(TestCase):
                         afgiftsgruppenummer=12345678,
                         enhed=Vareafgiftssats.Enhed.KILOGRAM,
                         afgiftssats="1.00",
-                        kræver_indførselstilladelse=False,
                         har_privat_tillægsafgift_alkohol=False,
                     ),
                     2: Vareafgiftssats(
@@ -151,7 +151,6 @@ class TF10FormTest(TestCase):
                         afgiftsgruppenummer=87654321,
                         enhed=Vareafgiftssats.Enhed.ANTAL,
                         afgiftssats="1.00",
-                        kræver_indførselstilladelse=False,
                         har_privat_tillægsafgift_alkohol=False,
                     ),
                     3: Vareafgiftssats(
@@ -162,7 +161,6 @@ class TF10FormTest(TestCase):
                         afgiftsgruppenummer=22446688,
                         enhed=Vareafgiftssats.Enhed.PROCENT,
                         afgiftssats="0.50",
-                        kræver_indførselstilladelse=False,
                         har_privat_tillægsafgift_alkohol=False,
                     ),
                 }
