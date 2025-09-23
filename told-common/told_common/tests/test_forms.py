@@ -104,12 +104,23 @@ class TF10FormTest(TestCase):
                     id=1,
                     afgiftstabel=1,
                     vareart_da="Båthornssnaps",
-                    vareart_kl="Båthornsnaps",
+                    vareart_kl="Båthornssnaps",
                     afgiftsgruppenummer=12345678,
-                    enhed=Vareafgiftssats.Enhed.KILOGRAM,
+                    enhed=Vareafgiftssats.Enhed.LITER,
                     afgiftssats="1.00",
                     alkohol_indførselstilladelse=True,
                     har_privat_tillægsafgift_alkohol=True,
+                ),
+                2: Vareafgiftssats(
+                    id=2,
+                    afgiftstabel=2,
+                    vareart_da="Båthornssmøg",
+                    vareart_kl="Båthornssmøg",
+                    afgiftsgruppenummer=12345679,
+                    enhed=Vareafgiftssats.Enhed.KILOGRAM,
+                    afgiftssats="1.00",
+                    tobak_indførselstilladelse=True,
+                    har_privat_tillægsafgift_alkohol=False,
                 ),
             }
         )
@@ -123,6 +134,7 @@ class TF10FormTest(TestCase):
 
         form.clean_with_formset(formset=[subform])
         self.assertIn("indførselstilladelse", form.errors)
+        self.assertIn("vareafgiftssats", form.errors)
 
     @staticmethod
     def create_TF10Form(

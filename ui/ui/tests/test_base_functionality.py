@@ -49,8 +49,7 @@ class TF10BlanketTest(BlanketMixin, TestMixin, HasLogin, TestCase):
         "modtager_by": "TestBy",
         "modtager_postbox": "124",
         "modtager_telefon": "123123",
-        "alkohol_indførselstilladelse": "123",
-        "tobak_indførselstilladelse": "456",
+        "indførselstilladelse": "123",
         "leverandørfaktura_nummer": "123",
         "fragttype": "skibsfragt",
         "fragtbrevnr": "ABCDE1234567",
@@ -414,8 +413,7 @@ class TF10BlanketTest(BlanketMixin, TestMixin, HasLogin, TestCase):
             "modtager_by",
             "modtager_postbox",
             "modtager_telefon",
-            "alkohol_indførselstilladelse",
-            "tobak_indførselstilladelse",
+            "indførselstilladelse",
             "fragttype",
             "forbindelsesnr",
             "fragtbrevnr",
@@ -588,8 +586,7 @@ class TF10BlanketTest(BlanketMixin, TestMixin, HasLogin, TestCase):
             [
                 {
                     "leverandørfaktura_nummer": "123",
-                    "alkohol_indførselstilladelse": "123",
-                    "tobak_indførselstilladelse": "456",
+                    "indførselstilladelse": "123",
                     "afsender_id": 1,
                     "modtager_id": 1,
                     "fuldmagtshaver_id": None,
@@ -656,8 +653,7 @@ class TF10BlanketTest(BlanketMixin, TestMixin, HasLogin, TestCase):
             [
                 {
                     "leverandørfaktura_nummer": "123",
-                    "alkohol_indførselstilladelse": "123",
-                    "tobak_indførselstilladelse": "456",
+                    "indførselstilladelse": "123",
                     "afsender_id": 1,
                     "modtager_id": 1,
                     "fuldmagtshaver_id": None,
@@ -740,8 +736,7 @@ class TF10BlanketTest(BlanketMixin, TestMixin, HasLogin, TestCase):
             [
                 {
                     "leverandørfaktura_nummer": "123",
-                    "alkohol_indførselstilladelse": "123",
-                    "tobak_indførselstilladelse": "456",
+                    "indførselstilladelse": "123",
                     "afsender_id": 1,
                     "modtager_id": 1,
                     "fuldmagtshaver_id": None,
