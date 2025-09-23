@@ -126,15 +126,24 @@ class TF10FormTest(TestCase):
         )
         self.assertTrue(form.is_valid())
 
-        subform = TF10VareForm(
+        subform1 = TF10VareForm(
             varesatser=form.varesatser,
             data={"vareafgiftssats": 1, "mængde": 2},
         )
-        subform.is_valid()
+        subform1.is_valid()
+        subform2 = TF10VareForm(
+            varesatser=form.varesatser,
+            data={"vareafgiftssats": 2, "mængde": 3},
+        )
+        subform2.is_valid()
 
-        form.clean_with_formset(formset=[subform])
+        form.clean_with_formset(formset=[subform1, subform2])
         self.assertIn("indførselstilladelse", form.errors)
-        self.assertIn("vareafgiftssats", form.errors)
+        self.assertIn(
+            "Der må ikke være både alkohol- og tobakholdige "
+            "varearter på samme afgiftsanmeldelse",
+            form.non_field_errors(),
+        )
 
     @staticmethod
     def create_TF10Form(
