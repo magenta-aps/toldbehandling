@@ -381,7 +381,7 @@ class TF10Form(BootstrapForm):
         # Tjek at der ikke er alkohol og tobak på samme blanket
         if alkohol and tobak:
             self.add_error(
-                "vareafgiftssats",
+                None,
                 _(
                     "Der må ikke være både alkohol- og tobakholdige varearter på samme"
                     " afgiftsanmeldelse"
