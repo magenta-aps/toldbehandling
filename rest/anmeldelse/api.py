@@ -773,7 +773,7 @@ class VarelinjeIn(ModelSchema):
         model_fields = ["mængde", "antal", "kladde", "fakturabeløb"]
         model_fields_optional = ["mængde", "antal", "kladde", "fakturabeløb"]
 
-    @root_validator(pre=False)
+    @root_validator(pre=False, skip_on_failure=True)
     def enhed_must_have_corresponding_field(cls, values):
         if values.get("kladde") is not True:
             vareafgiftssats_id: int | None = values.get("vareafgiftssats_id")
