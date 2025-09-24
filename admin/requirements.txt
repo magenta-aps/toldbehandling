@@ -1,6 +1,6 @@
 django==4.2.24
 coverage==7.3.0
-beautifulsoup4==4.12.2
+beautifulsoup4==4.13.5
 humanize==4.7.0
 openpyxl==3.1.5
 dict2xml==1.7.7
