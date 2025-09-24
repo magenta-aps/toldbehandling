@@ -29,3 +29,5 @@ django-csp[jinja2]
 django-csp-helpers==0.7.1
 pandas==2.3.2
 setuptools==80.9.0
+django_compressor==4.5.1
+django-libsass==0.9

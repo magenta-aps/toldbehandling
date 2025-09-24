@@ -1227,9 +1227,13 @@ class AnmeldelseListViewTest(BlanketMixin, HasLogin):
         def _delete_button(id: int):
             if self.can_delete:
                 return (
-                    f'<a class="btn btn-danger btn-sm" '
+                    f'<a class="btn btn-primary btn-sm" '
                     f'href="{self.delete_url(id)}?back=list">Slet</a>'
                 )
+
+        def _status_badge(text: str, _class: str) -> str:
+            # Return the expected status badge
+            return f"""<span class="badge\n{_class}\n">\n{text}\n</span>"""
 
         self.maxDiff = None
 
@@ -1264,7 +1268,7 @@ class AnmeldelseListViewTest(BlanketMixin, HasLogin):
                         "stedkode": None,
                     },
                     "forbindelsesnummer": None,
-                    "status": "Godkendt",
+                    "status": _status_badge("Godkendt", "badge-approved"),
                     "actions": "\n".join(
                         filter(
                             None,
@@ -1303,7 +1307,7 @@ class AnmeldelseListViewTest(BlanketMixin, HasLogin):
                         "stedkode": None,
                     },
                     "forbindelsesnummer": None,
-                    "status": "Afvist",
+                    "status": _status_badge("Afvist", "badge-rejected"),
                     "actions": "\n".join(
                         filter(
                             None,
@@ -1343,7 +1347,7 @@ class AnmeldelseListViewTest(BlanketMixin, HasLogin):
                         "stedkode": None,
                     },
                     "forbindelsesnummer": None,
-                    "status": "Ny",
+                    "status": _status_badge("Ny", "badge-draft"),
                     "actions": "\n".join(
                         filter(
                             None,
@@ -1426,7 +1430,11 @@ class AnmeldelseListViewTest(BlanketMixin, HasLogin):
                 f"Failed for {field}={value}: {response.content}",
             )
             numbers = [int(item["id"]) for item in response.json()["items"]]
-            self.assertEquals(set(numbers), expected)
+            self.assertEquals(
+                set(numbers),
+                expected,
+                f"Failed for {field}={value}: {response.json()}",
+            )
 
     @patch.object(requests.Session, "get")
     def test_list_paginate(self, mock_get):

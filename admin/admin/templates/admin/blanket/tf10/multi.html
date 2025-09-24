@@ -11,7 +11,7 @@
 {% block content %}
 <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
-    <div class="mx-5">
+    <div class="content">
 
         <h2>Redigerer {{items|length}} afgiftsanmeldelser</h2>
         <p>
@@ -58,7 +58,10 @@
         </div>
 
         <div class="clearfix my-1">
-            <button type="submit" class="btn btn-success float-end">Gem</button>
+            <button type="submit" class="btn btn-success float-end">
+                <span class="material-icons">save</span>
+                <span>Gem</span>
+            </button>
         </div>
     </div>
 </form>

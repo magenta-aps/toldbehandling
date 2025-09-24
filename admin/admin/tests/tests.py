@@ -2146,7 +2146,7 @@ class AfgiftstabelDetailViewTest(PermissionsTest, TestCase):
         return response
 
     def parse_form_row(self, soup, class_):
-        row = soup.find("form").find("div", class_=class_)
+        row = soup.find("form", action="").find("div", class_=class_)
         items = []
         for cell in row.children:
             strings = list(cell.stripped_strings)
@@ -4198,7 +4198,10 @@ class TF5BankPaymentTest(HasLogin, TestCase):
         mock_post.side_effect = self.mock_requests_post
         response = self.client.get("/admin/blanket/tf5/1")
         soup = BeautifulSoup(response.content, "html.parser")
-        buttons = [element.text.strip() for element in soup.css.select("button")]
+        buttons = [
+            element.text.strip()
+            for element in soup.css.select("button :not(.material-icons)")
+        ]
         self.assertIn("Opret betaling", buttons)
 
         self.client.post("/admin/blanket/tf5/1", {"betalt": "true"})

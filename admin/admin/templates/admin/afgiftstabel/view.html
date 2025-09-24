@@ -9,23 +9,67 @@
 {% block extra_headers %}
 <link rel="stylesheet" href="{% static 'bootstrap-table/bootstrap-table.min.css' %}">
 <link rel="stylesheet" href="{% static 'bootstrap-table/bootstrap-table-sticky-header.min.css' %}">
-
 {% nonced %}
 {{ form.media }}
 {% endnonced %}
-
 {% endblock %}
+
 {% block extra_footers %}
+<script src="{% static 'bootstrap-table/bootstrap-table.min.js' %}" nonce="{{ request.csp_nonce }}"></script>
 <script src="{% static 'bootstrap-table/bootstrap-table-sticky-header.min.js' %}" nonce="{{ request.csp_nonce }}"></script>
+{% comment %}
+<script nonce="{{ request.csp_nonce }}">
+    document.cookie = "utcoffset=" + -(new Date()).getTimezoneOffset() + "; Secure";
+</script>
+{% endcomment %}
 {% endblock %}
 
 {% block content %}
 <form method="post" action="">
-    <div class="mx-5">
-        <h1>Afgiftstabel</h1>
-        {% csrf_token %}
-        <div class="row my-1">
+    <div class="content">
+        <div class="row">
             <div class="col-6">
+                <h1 class="mb-3">Afgiftstabel</h1>
+            </div>
+            <div class="col-6 text-end">
+                {# Object actions #}
+
+                {% if can_edit %}
+                <button type="submit" class="btn btn-success me-2">
+                    <span class="material-icons">save</span>
+                    <span>{% translate "Gem" %}</span>
+                </button>
+                {% endif %}
+
+                {% if can_delete %}
+                <button type="button" class="btn btn-danger me-2" data-bs-toggle="modal" data-bs-target="#delete_modal">
+                    <span class="material-icons">delete</span>
+                    <span>{% translate "Slet" %}</span>
+                </button>
+                {% endif %}
+
+                {% if can_download %}
+                <button class="btn btn-secondary me-2 dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <span class="material-icons">download</span>
+                    <span>{% translate "Download" %}</span>
+                </button>
+                <ul class="dropdown-menu">
+                    <li>
+                        <a href="{% url 'afgiftstabel_download' id=object.id format='xlsx' %}" class="dropdown-item">.xlsx</a>
+                    </li>
+                    <li>
+                        <a href="{% url 'afgiftstabel_download' id=object.id format='csv' %}" class="dropdown-item">.csv</a>
+                    </li>
+                </ul>
+                {% endif %}
+            </div>
+        </div>
+
+        {% csrf_token %}
+        <div class="row">
+            <div class="col-6">
+                {# Object properties #}
+
                 <div class="row gyldig_fra align-items-center">
                     <div class="col-2">
                         <label for="{{form.gyldig_fra.name}}">{% translate "Gyldig fra" %}</label>
@@ -43,6 +87,10 @@
                         <script nonce="{{ request.csp_nonce }}">
                             const gyldig_fra = $("[name={{form.gyldig_fra.name}}]");
                             const offset = $("[name={{form.offset.name}}]");
+                            /*
+                            const utcOffsetInMinutes = -(new Date()).getTimezoneOffset();
+                            offset.val(utcOffsetInMinutes);
+                            */
                             const onUpdate = function () {
                                     {# Sometimes the value doesn't get updated if we don't use setTimeout #}
                                     setTimeout(function () {
@@ -86,51 +134,26 @@
                 </div>
                 {% endif %}
             </div>
-            <div class="col-6 clearfix">
-                {% if can_download %}
-                <div class="dropdown">
-                    <button class="btn btn-primary float-end dropdown-toggle" type="button" data-bs-toggle="dropdown"
-                            aria-expanded="false">
-                        Download
-                    </button>
-                    <ul class="dropdown-menu">
-                        <li><a href="{% url 'afgiftstabel_download' id=object.id format='xlsx' %}"
-                               class="dropdown-item">.xlsx</a></li>
-                        <li><a href="{% url 'afgiftstabel_download' id=object.id format='csv' %}" class="dropdown-item">.csv</a>
+            <div class="col-6">
+                <div class="alert alert-secondary">
+                    <ul class="mb-0">
+                        <li>
+                            {% translate "Der kan kun ændres tabeller som er kladder eller som begynder i fremtiden" %}
+                        </li>
+                        <li>
+                            {% translate "Der kan kun slettes tabeller som er kladder" %}
+                        </li>
+                        <li>
+                            {% translate "En aktiv afgiftstabel er gældende fra dens begyndelsestidspunkt frem til begyndelsen på den næste aktive afgiftstabel" %}
                         </li>
                     </ul>
                 </div>
-                {% endif %}
-                {% if can_edit %}
-                <button type="submit" class="btn btn-success float-end">Gem</button>
-                {% endif %}
-                {% if can_delete %}
-                <button type="button" class="btn btn-danger float-end" data-bs-toggle="modal"
-                        data-bs-target="#delete_modal">Slet
-                </button>
-                {% endif %}
-            </div>
-        </div>
-        <div class="card">
-            <div class="card-body">
-                <ul class="mb-0">
-                    <li>
-                        {% translate "Der kan kun ændres tabeller som er kladder eller som begynder i fremtiden" %}
-                    </li>
-                    <li>
-                        {% translate "Der kan kun slettes tabeller som er kladder" %}
-                    </li>
-                    <li>
-                        {% translate "En aktiv afgiftstabel er gældende fra dens begyndelsestidspunkt frem til begyndelsen på den næste aktive afgiftstabel" %}
-                    </li>
-                </ul>
             </div>
         </div>
 
-        <table class="table"
-               data-toggle="table"
+        <table data-toggle="table"
                data-sticky-header="true"
-               data-classes="table"
+               data-classes="table table-light"
         >
             <thead>
             <tr>
@@ -150,8 +173,8 @@
             <tbody>
             {% for vareafgiftssats in object.vareafgiftssatser %}
             {% if not vareafgiftssats.overordnet %}
-	    <tr>
-		{% if vareafgiftssats.subsatser %}
+            <tr>
+                {% if vareafgiftssats.subsatser %}
                 <td rowspan="{{vareafgiftssats.subsatser|length|add:1}}">
                     {{vareafgiftssats.afgiftsgruppenummer|unlocalize}}
                 </td>
@@ -165,7 +188,7 @@
                 <td>{{vareafgiftssats.vareart_da}}</td>
                 <td>{{vareafgiftssats.vareart_kl}}</td>
                 <td>{{vareafgiftssats.enhed|enhedsnavn}}</td>
-		        <td>{{vareafgiftssats.kræver_indførselstilladelse|yesno}}</td>
+                <td>{{vareafgiftssats.kræver_indførselstilladelse|yesno}}</td>
                 <td>{{vareafgiftssats.minimumsbeløb|default_if_none:""}}</td>
                 <td>{{vareafgiftssats.afgiftssats}}</td>
                 <td>{{vareafgiftssats.segment_nedre|default_if_none:""}}</td>
@@ -179,7 +202,7 @@
                 <td>{{subsats.vareart_da}}</td>
                 <td>{{subsats.vareart_kl}}</td>
                 <td>{{subsats.enhed|enhedsnavn}}</td>
-		        <td>{{vareafgiftssats.kræver_indførselstilladelse|yesno}}</td>
+                <td>{{vareafgiftssats.kræver_indførselstilladelse|yesno}}</td>
                 <td>{{vareafgiftssats.minimumsbeløb|default_if_none:""}}</td>
                 <td>{{subsats.afgiftssats}}</td>
                 <td>{{subsats.segment_nedre|default_if_none:""}}</td>
@@ -193,6 +216,7 @@
             </tbody>
         </table>
     </div>
+
     {% if can_delete %}
     <div id="delete_modal" class="modal" tabindex="-1">
         <div class="modal-dialog">
@@ -205,13 +229,17 @@
                     <p>Er du sikker på at du vil slette denne afgiftstabel?</p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Nej</button>
-                    <button type="submit" class="btn btn-danger" name="{{form.delete.name}}" value="1">Ja</button>
+                    <button type="submit" class="btn btn-danger" name="{{form.delete.name}}" value="1">
+                        <span class="material-icons">delete</span>
+                        <span>{% translate "Slet" %}</span>
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <span>{% translate "Annullér" %}</span>
+                    </button>
                 </div>
             </div>
         </div>
     </div>
     {% endif %}
 </form>
-
 {% endblock %}

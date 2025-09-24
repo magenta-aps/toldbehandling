@@ -6,54 +6,90 @@
 {% load bootstrap_icons %}
 
 {% block content %}
-<div class="container-lg">
-    <h1>{% translate 'Slet afgiftsanmeldelse' %}</h1>
-    <hr />
-
+<div class="content">
+    <h1 class="mb-3">{% translate 'Slet afgiftsanmeldelse' %}</h1>
     <p>{% translate 'Denne afgiftsanmeldelse vil blive slettet' %}:</p>
-    <div class="card mb-3">
-        <div class="card-header">
-            <div class="d-flex">
-                <div class="flex-grow-1">
-                    <strong>{% translate "Afgiftsanmeldelse" %} {{ declaration.id }} ({{ declaration.status }})</strong>
-                </div>
-                <div>{{declaration.dato|date:"c"}}</div>
-            </div>
+
+    <hr>
+
+    <div class="row mb-3">
+        <div class="col-4">
+            <strong>{% translate "Afgiftsanmeldelse" %}</strong>
         </div>
-        <ul class="list-group list-group-flush">
-            <li class="list-group-item border-0">
-                <strong>{% translate "Afsender" %}:</strong> {{ declaration.afsender.navn }}
-            </li>
-            <li class="list-group-item border-0">
-                <strong>{% translate "Modtager" %}:</strong> {{ declaration.modtager.navn }}
-            </li>
-            <li class="list-group-item border-0">
-                <strong>{% translate "Forsendelsesmåde" %}:</strong>
-                <span>
-                    {% if declaration.fragtforsendelse.forsendelsestype.name == "SKIB" %}
-                    {% translate "Skibsfragt" %}
-                    {% elif declaration.fragtforsendelse.forsendelsestype.name == "FLY" %}
-                    {% translate "Luftfragt" %}
-                    {% elif declaration.postforsendelse.forsendelsestype.name == "SKIB" %}
-                    {% translate "Skibspost" %}
-                    {% elif declaration.postforsendelse.forsendelsestype.name == "FLY" %}
-                    {% translate "Luftpost" %}
-                    {% endif %}
-                </span>
-            </li>
-            <li class="list-group-item border-0">
-                <strong>{% translate "Afgift i alt" %}:</strong> {{ declaration.afgift_total | floatformat:"2g" }}
-            </li>
-        </ul>
+        <div class="col-8">
+             {{ declaration.id }} ({{ declaration.status }})
+        </div>
     </div>
 
-    <p>{% translate 'Er du sikker på at du vil slette denne?' %}</p>
-    <div>
-        <form method="post">
-            {% csrf_token %}
-            <input type="submit" value="{% translate 'Slet' %}" class="btn btn-danger">
-            <a href="{% url 'tf10_view' id=declaration.id %}" class="btn btn-secondary">{% translate 'Annullér' %}</a>
-        </form>
+    <div class="row mb-3">
+        <div class="col-4">
+            <strong>{% translate "Dato" %}</strong>
+        </div>
+        <div class="col-8">
+             {{ declaration.dato|date:"c" }}
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-4">
+            <strong>{% translate "Afsender" %}</strong>
+        </div>
+        <div class="col-8">
+             {{ declaration.afsender.navn }}
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-4">
+            <strong>{% translate "Modtager" %}</strong>
+        </div>
+        <div class="col-8">
+             {{ declaration.modtager.navn }}
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-4">
+            <strong>{% translate "Forsendelsesmåde" %}:</strong>
+        </div>
+        <div class="col-8">
+            {% if declaration.fragtforsendelse.forsendelsestype.name == "SKIB" %}
+            {% translate "Skibsfragt" %}
+            {% elif declaration.fragtforsendelse.forsendelsestype.name == "FLY" %}
+            {% translate "Luftfragt" %}
+            {% elif declaration.postforsendelse.forsendelsestype.name == "SKIB" %}
+            {% translate "Skibspost" %}
+            {% elif declaration.postforsendelse.forsendelsestype.name == "FLY" %}
+            {% translate "Luftpost" %}
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row mb-3">
+        <div class="col-4">
+            <strong>{% translate "Afgift i alt" %}:</strong>
+        </div>
+        <div class="col-8">
+             {{ declaration.afgift_total | floatformat:"2g" }}
+        </div>
+    </div>
+
+    <hr>
+
+    <div class="row">
+        <div class="col-12">
+            <p>{% translate 'Er du sikker på at du vil slette denne?' %}</p>
+            <div>
+                <form method="post" class="d-flex align-items-center">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger me-2">
+                        <span class="material-icons">delete</span>
+                        <span>{% translate "Slet" %}</span>
+                    </button>
+                    <a href="{% url 'tf10_view' id=declaration.id %}">{% translate 'Annullér' %}</a>
+                </form>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}
