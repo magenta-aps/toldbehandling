@@ -190,25 +190,7 @@ class TF10Form(BootstrapForm):
         forms.CharField,
         max_length=12,
         required=False,
-        label=lambda form: _(
-            "Indførsels­tilladelse nr.%s" ""
-            if not form.varesatser
-            else (
-                " (Alkohol)"
-                if any(
-                    sats.alkohol_indførselstilladelse
-                    for id, sats in form.varesatser.items()
-                )
-                else (
-                    " (Tobak)"
-                    if any(
-                        sats.tobak_indførselstilladelse
-                        for id, sats in form.varesatser.items()
-                    )
-                    else ""
-                )
-            )
-        ),
+        label="Indførsels tilladelse nr.",
         widget=lambda form: forms.TextInput(
             attrs=(
                 {
@@ -316,6 +298,8 @@ class TF10Form(BootstrapForm):
     )
 
     def clean(self):
+        print("AAAAARGH")
+        print(dir(self))
         if self.cleaned_data["kladde"]:
             return
 
