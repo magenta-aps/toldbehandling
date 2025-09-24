@@ -9,41 +9,78 @@
     {% if not printing %}
     {% csrf_token %}
     {% endif %}
-    <div class="container-lg">
-        <h1>{% translate "Engangstilladelse til privat indførsel af øl, vin og spiritus" %}</h1>
 
-        {% if not printing %}
-        {% if object.status == "godkendt" %}
-        <span class="badge bg-success">{% translate "Godkendt" %}</span>
-        {% elif object.status == "annulleret" %}
-        <span class="badge bg-danger">{% translate "Annulleret" %}</span>
-        {% elif object.status == "afvist" %}
-        <span class="badge bg-danger">{% translate "Afvist" %}</span>
-        {% elif object.status == "ny" %}
-        <span class="badge bg-secondary">{% translate "Ny" %}</span>
-        {% endif %}
-
-        {% if object.payment_status == "created" %}
-        <span class="badge bg-secondary">{% translate "Ikke betalt" %}</span>
-        {% elif object.payment_status == "reserved" %}
-        <span class="badge bg-warning">{% translate "Reserveret" %}</span>
-        {% elif object.payment_status == "paid" %}
-        <span class="badge bg-success">{% translate "Betalt" %}</span>
-        {% elif object.payment_status == "declined" %}
-        <span class="badge bg-danger">{% translate "Afvist" %}</span>
-        {% endif %}
-        
-
-        <div class="row">
-            <div class="col-12">
-                {{form.non_field_errors}}
-            </div>
+    <div class="content">
+        {% if form.non_field_errors and not printing %}
+        <div class="alert alert-danger">
+            {{ form.non_field_errors }}
         </div>
         {% endif %}
-        <hr/>
+
+        <div class="row">
+            <div class="col-6">
+                <h1 class="mb-3">{% translate "Engangstilladelse til privat indførsel af øl, vin og spiritus" %}</h1>
+                {% if not printing %}
+                {% include "told_common/status.html" with item=object %}
+                {% include "told_common/payment_status.html" with object=object %}
+                {% endif %}
+            </div>
+            <div class="col-6 text-end">
+                {# Object actions #}
+
+                {% if not printing %}
+
+                {% if can_edit %}
+                <a class="btn btn-primary me-2" href="{% url 'tf5_edit' object.id %}">
+                    <span class="material-icons">edit</span>
+                    <span>{% translate "Redigér" %}</span>
+                </a>
+                {% endif %}
+
+                {% if can_cancel %}
+                <button type="button" class="btn btn-danger me-2" data-bs-toggle="modal" data-bs-target="#annuller_modal">
+                    <span class="material-icons">cancel</span>
+                    <span>{% translate "Annullér" %}</span>
+                </button>
+                {% endif %}
+
+                {% if can_create_tilladelse or can_send_tilladelse %}
+                {% csrf_token %}
+                {% if can_create_tilladelse %}
+                <button name="opret" value="true" formaction="{% url 'tf5_tilladelse' object.id %}?next={% url 'tf5_tilladelse' object.id %}" class="btn btn-secondary me-2">
+                    <span class="material-icons">create</span>
+                    <span>{% translate "Opret tilladelse" %}</span>
+                </button>
+                {% endif %}
+                {% if can_send_tilladelse %}
+                <button name="send" value="true" formaction="{% url 'tf5_tilladelse' object.id %}?next={% url 'tf5_tilladelse' object.id %}" class="btn btn-secondary me-2">
+                    <span class="material-icons">send</span>
+                    <span>{% translate "Send tilladelse" %}</span>
+                </button>
+                {% endif %}
+                {% endif %}
+
+                {% if can_view_tilladelse %}
+                <a class="btn btn-secondary me-2" href="{% url 'tf5_tilladelse' object.id %}">
+                    <span class="material-icons">download</span>
+                    <span>{% translate "Download tilladelse" %}</span>
+                </a>
+                {% endif %}
+
+                {% if can_opret_betaling %}
+                <button type="button" class="btn btn-secondary me-2" data-bs-toggle="modal" data-bs-target="#betal_modal">
+                    <span class="material-icons">create</span>
+                    <span>{% translate "Opret betaling" %}</span>
+                </button>
+                {% endif %}
+
+                {% endif %}{# not printing #}
+            </div>
+        </div>
+
+        <hr>
 
         {% localize off %}
-
         <div class="row align-items-center">
             <div class="col-2 clearfix">
                 {% translate "Navn" %}
@@ -145,45 +182,41 @@
 
         {% endlocalize %}
 
-        <hr/>
-        <h5>{% translate "Afgifter" %}</h5>
+        <hr>
 
-        <h5>Varelinjer med afgifter</h5>
+        <h5 class="mb-3">{% translate "Varelinjer med afgifter" %}</h5>
 
-        <table class="table table-striped">
+        <table class="table table-light">
             <thead>
             <tr>
-                <th class="col-2 px-0">
+                <th class="col-2">
                     {% translate "Vareart" %}
                 </th>
-                <th class="col-2 px-0">
+                <th class="col-2">
                     {% translate "Varekode" %}
                 </th>
-                <th class="col-1 px-0">
+                <th class="col-1">
                     {% translate "kg | liter" %}
                 </th>
-                <th class="col-1 px-0">
+                <th class="col-1">
                     {% translate "Antal" %}
                 </th>
-                <th class="col-2 px-0">
+                <th class="col-2">
                     {% translate "Fakturabeløb" %}
                 </th>
-                <th class="col-2 px-0">
+                <th class="col-2">
                     {% translate "Afgiftssats" %}
                 </th>
-                <th class="col-2 px-0">
+                <th class="col-2">
                     {% translate "Afgiftsbeløb" %}
                 </th>
             </tr>
             </thead>
             <tbody>
-
-
             {% for varelinje in object.varelinjer %}
             {% with varelinje.vareafgiftssats as sats %}
-
             <tr>
-                <td class="col-2 px-0">
+                <td class="col-2">
                     {% get_current_language as LANGUAGE_CODE %}
                     {% if LANGUAGE_CODE == "kl" %}
                     {{sats.vareart_kl}}
@@ -191,96 +224,53 @@
                     {{sats.vareart_da}}
                     {% endif %}
                 </td>
-                <td class="col-2 px-0">
+                <td class="col-2">
                     {{sats.afgiftsgruppenummer|zfill:9}}
                 </td>
-                <td class="col-1 px-0">
+                <td class="col-1">
                     {{varelinje.mængde|default_if_none:""}}
                 </td>
-                <!-- TODO: Skal der vises kg/liter eller antal når der er tale om en procentsats eller sammensat sats? -->
-                <td class="col-1 px-0">
+                {# TODO: Skal der vises kg/liter eller antal når der er tale om en procentsats eller sammensat sats? #}
+                <td class="col-1">
                     {{varelinje.antal|default_if_none:""}}
                 </td>
-                <td class="col-2 px-0">
+                <td class="col-2">
                     {{varelinje.fakturabeløb|floatformat:2}}
                 </td>
-                <td class="col-2 px-0">
+                <td class="col-2">
                     {{sats.text}}
                 </td>
-                <td class="col-2 px-0">
+                <td class="col-2">
                     {{varelinje.afgiftsbeløb|floatformat:2}}
                 </td>
             </tr>
             {% endwith %}
             {% endfor %}
-
             </tbody>
-
             <tfoot>
             <tr>
                 <td colspan="5" rowspan="4"></td>
-                <td><strong>{% translate "Indførselsafgift" %}</strong></td>
-                <td>{{object.afgift_sum}}</td>
+                <td class="px-3"><strong>{% translate "Indførselsafgift" %}</strong></td>
+                <td class="px-3">{{object.afgift_sum}}</td>
             </tr>
             <tr>
-                <td><strong>{% translate "Tillægsafgift alkohol" %}</strong></td>
-                <td>{{object.tillægsafgift}}</td>
+                <td class="px-3"><strong>{% translate "Tillægsafgift alkohol" %}</strong></td>
+                <td class="px-3">{{object.tillægsafgift}}</td>
             </tr>
             <tr>
-                <td><strong>{% translate "Ekspeditionsgebyr" %}</strong></td>
-                <td>{{object.ekspeditionsgebyr}}</td>
+                <td class="px-3"><strong>{% translate "Ekspeditionsgebyr" %}</strong></td>
+                <td class="px-3">{{object.ekspeditionsgebyr}}</td>
             </tr>
             <tr>
-                <td><strong>{% translate "Afgift i alt" %}</strong></td>
-                <td>{{object.afgift_total}}</td>
+                <td class="px-3"><strong>{% translate "Afgift i alt" %}</strong></td>
+                <td class="px-3">{{object.afgift_total}}</td>
             </tr>
             </tfoot>
         </table>
 
         {% if show_notater %}
-        <hr/>
-        <h5>{% translate "Notater" %}</h5>
+        <h5 class="mb-3">{% translate "Notater" %}</h5>
         {% include "told_common/notat/list.html" with notater=object.notater %}
-        {% endif %}
-
-        {% if not printing %}
-        <div class="form-row">
-            <div class="ml-auto">
-                {% if can_edit %}
-                <a class="btn btn-primary" href="{% url 'tf5_edit' object.id %}">{% translate "Redigér" %}</a>
-                {% endif %}
-
-                {% if can_cancel %}
-                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#annuller_modal">
-                    {% translate "Annullér" %}
-                </button>
-                {% endif %}
-
-                {% if can_create_tilladelse or can_send_tilladelse %}
-                {% csrf_token %}
-                {% if can_create_tilladelse %}
-                <button name="opret" value="true" formaction="{% url 'tf5_tilladelse' object.id %}?next={% url 'tf5_tilladelse' object.id %}" class="btn btn-success">
-                    {% translate "Opret tilladelse" %}
-                </button>
-                {% endif %}
-                {% if can_send_tilladelse %}
-                <button name="send" value="true" formaction="{% url 'tf5_tilladelse' object.id %}?next={% url 'tf5_tilladelse' object.id %}" class="btn btn-success">
-                    {% translate "Send tilladelse" %}
-                </button>
-                {% endif %}
-                {% endif %}
-
-                {% if can_view_tilladelse %}
-                <a class="btn btn-primary" href="{% url 'tf5_tilladelse' object.id %}">Download tilladelse</a>
-                {% endif %}
-
-                {% if can_opret_betaling %}
-                <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#betal_modal">
-                    Opret betaling
-                </button>
-                {% endif %}
-            </div>
-        </div>
         {% endif %}
     </div>
 
@@ -295,8 +285,13 @@
                     <p>Er du sikker på at du vil annullere indførselsansøgningen?</p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Nej</button>
-                    <button type="submit" name="{{form.annulleret.name}}" value="true" class="btn btn-danger">Ja</button>
+                    <button type="submit" name="{{form.annulleret.name}}" value="true" class="btn btn-danger">
+                        <span class="material-icons">cancel</span>
+                        <span>{% translate "Ja" %}</span>
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        {% translate "Nej" %}
+                    </button>
                 </div>
             </div>
         </div>
@@ -315,16 +310,18 @@
                 <p>Er du sikker på at du vil sætte status til "betalt"?</p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Nej</button>
-                <button type="submit" name="{{form.betalt.name}}" value="true" class="btn btn-success">Ja</button>
+                <button type="submit" name="{{form.betalt.name}}" value="true" class="btn btn-secondary">
+                    <span class="material-icons">edit</span>
+                    <span>{% translate "Opret betaling" %}</span>
+                </button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    {% translate "Annullér" %}
+                </button>
             </div>
         </div>
     </div>
 </div>
 {% endif %}
-
-
-
 
 {% if not printing %}
 {% if messages %}

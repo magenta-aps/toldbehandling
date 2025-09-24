@@ -8,16 +8,17 @@
 <script type="text/javascript" src="{% static 'toldbehandling/js/formset.js' %}" nonce="{{ request.csp_nonce }}"></script>
 <script type="text/javascript" src="{% static 'toldbehandling/js/formfile.js' %}" nonce="{{ request.csp_nonce }}"></script>
 <link rel="stylesheet" type="text/css" href="{% static 'toldbehandling/css/formfile.css' %}"/>
-<link rel="stylesheet" href="{% static 'font-awesome/css/all.min.css' %}" >
 {% endblock %}
 
 {% block content %}
 <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
-    <div class="container-lg">
-        <h1>{% translate "Afgiftsanmeldelse" %}</h1>
+    <div class="content">
         <div class="row">
-            <h4 class="col-6">{% translate "For indførsel af afgiftspligtige varer i Grønland" %}</h4>
+            <div class="col-6">
+                <h1 class="mb-3">{% translate "Afgiftsanmeldelse" %}</h1>
+                <h4 class="mb-3">{% translate "For indførsel af afgiftspligtige varer i Grønland" %}</h4>
+            </div>
             <div class="col-6">
                 {% if form.oprettet_på_vegne_af %}
                 <div class="row align-items-center">
@@ -82,11 +83,14 @@
                 {% endif %}
 
                 {% if gem_top %}
-                    <button type="submit" class="btn btn-success float-end">{% translate "Gem" %}</button>
+                <button type="submit" class="btn btn-success float-end">
+                    <span class="material-icons">save</span>
+                    <span>{% translate "Gem" %}</span>
+                </button>
                 {% endif %}
             </div>
-
         </div>
+
         <div class="row">
             <div class="col-12">
                 {{form.non_field_errors}}
@@ -96,9 +100,9 @@
         <hr/>
 
         <div class="row">
-
+            {# Sender details #}
             <div class="col-6">
-                <h5>{% translate "Afsender" %}</h5>
+                <h5 class="mb-3">{% translate "Afsender" %}</h5>
                 <div class="row align-items-center">
                     <div class="col-4">
                         <label for="{{form.afsender_cvr.id_for_label}}">{{form.afsender_cvr.label}}</label>
@@ -117,24 +121,24 @@
                         {{form.afsender_navn.errors}}
                     </div>
                 </div>
-                <div class="row" id="afsender_adresse_container" >
-                <div class="col-12">
-                    <div class="alert alert-warning multiple">
-                        <label for="{{form.afsender_existing_id.id_for_label}}">
-                        <span data-multi="cvr">
-                        {% translate "Der er mere end én registreret afsender for det angivne CVR-nummer." %}
-                        </span>
-                        <span data-multi="navn">
-                        {% translate "Der er mere end én registreret afsender for det angivne navn." %}
-                        </span>
-                        {% translate "Vælg én fra listen herunder, eller udfyld felterne med nye data." %}
-                    </label>
-                    <p>
-                        {{form.afsender_existing_id}}
-                    </p>
+                <div id="afsender_adresse_container">
+                    <div class="col-8 offset-4">
+                        <div class="alert alert-warning multiple">
+                            <label for="{{form.afsender_existing_id.id_for_label}}">
+                            <span data-multi="cvr">
+                            {% translate "Der er mere end én registreret afsender for det angivne CVR-nummer." %}
+                            </span>
+                            <span data-multi="navn">
+                            {% translate "Der er mere end én registreret afsender for det angivne navn." %}
+                            </span>
+                            {% translate "Vælg én fra listen herunder, eller udfyld felterne med nye data." %}
+                        </label>
+                        <p>
+                            {{form.afsender_existing_id}}
+                        </p>
+                        </div>
                     </div>
                 </div>
-            </div>
                 <div class="row align-items-center">
                     <div class="col-4">
                         <label for="{{form.afsender_adresse.id_for_label}}">{{form.afsender_adresse.label}}*</label>
@@ -182,8 +186,9 @@
                 </div>
             </div>
 
+            {# Recipient details #}
             <div class="col-6">
-                <h5>{% translate "Modtager" %}</h5>
+                <h5 class="mb-3">{% translate "Modtager" %}</h5>
                 <div class="row align-items-center">
                     <div class="col-4">
                         <label for="{{form.modtager_cvr.id_for_label}}">{{form.modtager_cvr.label}}</label>
@@ -202,10 +207,8 @@
                         {{form.modtager_navn.errors}}
                     </div>
                 </div>
-
-
-                <div class="row" id="modtager_adresse_container" >
-                <div class="col-12">
+                <div id="modtager_adresse_container">
+                    <div class="col-8 offset-4">
                         <div class="alert alert-warning multiple">
                             <label for="{{form.modtager_existing_id.id_for_label}}">
                             <span data-multi="cvr">
@@ -217,12 +220,12 @@
                             {% translate "Vælg én fra listen herunder, eller udfyld felterne med nye data." %}
                         </label>
                         <p>
-                                {{form.modtager_existing_id}}
+                            {{form.modtager_existing_id}}
                         </p>
                         </div>
                         <input type="hidden" class="d-none" name="{{form.modtager_existing_id.name}}"/>
+                    </div>
                 </div>
-            </div>
                 <div class="row align-items-center">
                     <div class="col-4">
                         <label for="{{form.modtager_adresse.id_for_label}}">{{form.modtager_adresse.label}}*</label>
@@ -277,7 +280,6 @@
                         {{form.indførselstilladelse.errors}}
                     </div>
                 </div>
-
                 <div class="row align-items-center">
                     <div class="col-4">
                         <label for="{{form.betales_af.id_for_label}}">{{form.betales_af.label}}</label>
@@ -287,11 +289,12 @@
                         {{form.betales_af.errors}}
                     </div>
                 </div>
-        </div>
+            </div>
         </div>
 
         <hr/>
-        <h5>{% translate "Oplysninger om fragt" %}</h5>
+
+        <h5 class="mb-3">{% translate "Oplysninger om fragt" %}</h5>
 
         <div class="row">
             <div class="col-6">
@@ -371,18 +374,19 @@
                         {{form.afgangsdato.errors}}
                     </div>
                 </div>
-
             </div>
         </div>
 
         <hr/>
 
-        <h5>{% translate "Varelinjer med afgifter" %}</h5>
-		{% if not admin %}
+        <h5 class="mb-3">{% translate "Varelinjer med afgifter" %}</h5>
+
+        {% if not admin %}
         <p>
             {% translate "I henhold til gældende grønlandske afgiftsbestemmelser anmeldes følgende varer til afgiftsberigtigelse overfor den grønlandske landskasse" %}
         </p>
-		{% endif %}
+        {% endif %}
+
         <div class="row">
             <div class="col-1 pe-0">
                 <label>{% translate "Vare­kode" %}</label>
@@ -411,7 +415,7 @@
         </div>
 
         <div id="formset">
-        {{ formset.management_form }}
+            {{ formset.management_form }}
             <div id="formset_container">
             {% for subform in formset %}
                 {% include "told_common/tf10/subform.html" with subform=subform %}
@@ -434,14 +438,14 @@
             </div>
         </div>
 
+        <hr/>
 
         {% if vis_notater or form.notat %}
-        <hr/>
-        <h5>{% translate "Notater" %}</h5>
+        <h5 class="mb-3">{% translate "Notater" %}</h5>
         {% endif %}
 
-		{% if vis_notater %}
-        <table class="table table-striped">
+        {% if vis_notater %}
+        <table class="table table-light">
             <thead>
             <tr>
                 <th class="col-2">Bruger</th>
@@ -474,17 +478,22 @@
         {% endif %}
 
         {% if form.toldkategori %}
-        <hr/>
-        <h5>{% translate "Toldkategori" %}</h5>
+        <h5 class="mb-3">{% translate "Toldkategori" %}</h5>
         <div class="row align-items-center">
             <div class="col-2"><label for="{{form.toldkategori.id_for_label}}">{{form.toldkategori.label}}</label></div>
             <div class="col-4">{{form.toldkategori}}</div>
         </div>
         {% endif %}
 
-        <div class="clearfix">
-            <button type="submit" class="btn btn-success float-end">
-                {% if item %}{% translate "Opdatér" %}{% else %}{% translate "Indsend" %}{% endif %}
+        <div>
+            <button type="submit" class="btn btn-success">
+                {% if item %}
+                <span class="material-icons">save</span>
+                <span>{% translate "Gem" %}</span>
+                {% else %}
+                <span class="material-icons">send</span>
+                <span>{% translate "Indsend" %}</span>
+                {% endif %}
             </button>
         </div>
     </div>

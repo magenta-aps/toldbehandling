@@ -17,28 +17,60 @@
 <script src="{% static 'bootstrap-table/bootstrap-table-defer-url.min.js' %}" nonce="{{ request.csp_nonce }}"></script>
 {% endblock %}
 
+{% block navigation_actions %}
+{% if can_create %}
+<li class="nav-item ms-4">
+    <a href="{% url 'tf5_create' %}" class="btn btn-secondary d-flex align-items-center">
+        <span class="material-icons">add</span>
+        <span class="ms-1">{% translate 'Opret ny' %}</span>
+    </a>
+</li>
+{% endif %}
+{% endblock %}
+
 {% block content %}
-
-<div class="mx-5">
-
-    <h1>{{ title }}</h1>
+<div class="content">
+    <div class="d-flex align-items-center mb-5">
+        <h1>{{ title }}</h1>
+        {% if can_create %}
+        <a href="{% url 'tf5_create' %}" class="btn btn-secondary ms-3">
+            <span class="material-icons">add</span>
+            <span>{% translate "Opret ny" %}</span>
+        </a>
+        {% endif %}
+    </div>
 
     {{form.errors}}
 
     <form method="get" action="{% url 'tf5_list' %}">
-        <!--
+        <h2 class="mb-3">{% translate "Filtre" %}</h2>
+
         <div class="row">
-            <div class="col-4"><label for="{{form.status.name}}" class="form-label">{% translate "Status" %}</label></div>
-            <div class="col-8">
-                {{form.status}}
+            <div class="col-3">
+                <div>{% translate "Oprettelsesdato mellem" %}</div>
+                <div class="d-flex align-items-center justify-between">
+                    {{form.oprettet_efter}}
+                    <span class="ms-2">{% translate "og" %}</span>
+                </div>
+            </div>
+            <div class="col-3">
+                <div>&nbsp;</div>
+                {{form.oprettet_før}}
+            </div>
+            <div class="col-3">
+                <div>{% translate "Afgangsdato mellem" %}</div>
+                <div class="d-flex align-items-center justify-between">
+                    {{form.indleveringsdato_efter}}
+                    <span class="ms-2">{% translate "og" %}</span>
+                </div>
+            </div>
+            <div class="col-3">
+                <div>&nbsp;</div>
+                {{form.indleveringsdato_før}}
             </div>
         </div>
-        -->
-        <div class="row align-items-center">
-            <div class="col-4">{% translate "Oprettelsesdato mellem" %}</div>
-            <div class="col-4">{{form.oprettet_efter}}</div>
-            <div class="col-4">{{form.oprettet_før}}</div>
-        </div>
+
+        {% comment %}
         <div class="row align-items-center">
             <div class="col-4">{% translate "Indleveringsdato mellem" %}</div>
 
@@ -58,71 +90,50 @@
             <div class="col-4">{{form.indleveringsdato_før}}</div>
             {% endif %}
         </div>
+        {% endcomment %}
 
-        <!--
         <div class="row">
-            <div class="col-4"><label for="{{form.afsender.name}}" class="form-label">{% translate "Afsender" %}</label></div>
-            <div class="col-8">
-                {{form.afsender}}
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-4"><label for="{{form.modtager.name}}" class="form-label">{% translate "Modtager" %}</label></div>
-            <div class="col-8">
-                {{form.modtager}}
-            </div>
-        </div>
-        -->
-        <div class="row align-items-center">
-            <div class="col-4"><label for="{{form.leverandørfaktura_nummer.name}}" class="form-label">{% translate "Leverandørfakturanummer" %}</label></div>
-            <div class="col-8">
+            <div class="col-3">
+                <label for="{{form.leverandørfaktura_nummer.name}}" class="form-label">{% translate "Leverandørfakturanummer" %}</label>
                 {{form.leverandørfaktura_nummer}}
             </div>
-        </div>
-
-        <div class="row align-items-center">
-            <div class="col-4"><label for="{{form.vareart.name}}" class="form-label">{% translate "Varetype" %}</label></div>
-            <div class="col-8">
+            <div class="col-3">
+                <label for="{{form.vareart.name}}" class="form-label">{% translate "Varetype" %}</label>
                 {{form.vareart}}
             </div>
-        </div>
-        <div class="row align-items-center">
-            <div class="col-4"><label for="{{form.id.name}}" class="form-label">{% translate "Anmeldelsesnummer" %}</label></div>
-            <div class="col-8">
+            <div class="col-3">
+                <label for="{{form.id.name}}" class="form-label">{% translate "Anmeldelsesnummer" %}</label>
                 {{form.id}}
             </div>
-        </div>
-
-        {% if form.notat %}
-        <div class="row align-items-center">
-            <div class="col-4"><label for="{{form.notat.id_for_label}}" class="form-label">{% translate "Notat" %}</label></div>
-            <div class="col-8">
+            {% if form.notat %}
+            <div class="col-3">
+                <label for="{{form.notat.id_for_label}}" class="form-label">{% translate "Notat" %}</label>
                 {{form.notat}}
             </div>
+            {% endif %}
         </div>
-        {% endif %}
 
         <div class="row">
-            <div class="col-12 cleafix">
-                <button type="submit" class="btn btn-primary float-end ms-1">{% translate "Søg" %}</button>
-                {% if can_create %}
-                <a href="{% url 'tf5_create' %}" class="btn btn-primary float-end mx-1">{% translate "Opret ny" %}</a>
-                {% endif %}
+            <div class="col-12 clearfix">
+                <button type="submit" class="btn btn-primary">
+                    <span class="material-icons">search</span>
+                    <span>{% translate "Søg" %}</span>
+                </button>
                 {% if can_edit_multiple %}
-                <a class="edit_button btn btn-secondary float-end mx-1" href="#">{% translate "Redigér" %}</a>
+                <a class="edit_button btn btn-secondary float-end" href="#">
+                    <span class="material-icons">edit</span>
+                    <span>{% translate "Redigér" %}</span>
+                </a>
                 {% endif %}
             </div>
         </div>
     </form>
-    <hr/>
 
     {% if messages %}
     {% for message in messages %}
-    <div class="card">
-        <div class="card-body text-center">
-            {% bs_icon "check2-circle" size="2em" color="green" %}
-            <div id="message_content">{{message}}</div>
-        </div>
+    <div class="alert alert-info d-flex align-items-center justify-content-center mb-3">
+        <span class="material-icons text-info fs-3 me-2">check_circle</span>
+        <span>{{message}}</span>
     </div>
     {% endfor %}
     {% endif %}
@@ -133,10 +144,22 @@
     </div>
     {% endif %}
 
-    <table class="table table-bordered"
+    {% if total %}
+    <div class="row">
+        <p>
+            {% blocktrans trimmed count total as total %}
+            {{ total }} anmeldelse
+            {% plural %}
+            {{ total }} anmeldelser
+            {% endblocktrans %}
+        </p>
+    </div>
+    {% endif %}
+
+    <table class="mt-3"
            data-toggle="table"
            data-sticky-header="true"
-           data-classes="table"
+           data-classes="table table-light"
            data-data-field="items"
            data-sortable="true"
            data-pagination="true"
@@ -145,6 +168,8 @@
            data-page-number="{{search_data.page_number|unlocalize}}"
            data-side-pagination="server"
            data-pagination-loop="false"
+           data-pagination-pre-text="<span class='material-icons'>arrow_back</span>"
+           data-pagination-next-text="<span class='material-icons'>arrow_forward</span>"
            data-defer-url="{% url 'tf5_list' %}?json=1"
            data-query-params="queryParams"
            data-total-rows="{{total|unlocalize}}"
@@ -159,10 +184,10 @@
             <th data-field="select"><input type="checkbox" id="select_all"/></th>
             {% endif %}
             <th data-sortable="true" data-field="id">{% translate "Nummer" %}</th>
+            <th data-sortable="true" data-field="status" data-formatter="statusFormatter">{% translate "Status" %}</th>
             <th data-sortable="true" data-field="oprettet">{% translate "Indberetningsdato" %}</th>
             <th data-sortable="true" data-field="indleveringsdato">{% translate "Indleveringsdato" %}</th>
             <th data-sortable="true" data-field="leverandørfaktura_nummer">{% translate "Leverandørfakturanummer" %}</th>
-            <th data-sortable="true" data-field="status" data-formatter="statusFormatter">{% translate "Status" %}</th>
             <th data-field="actions">{% translate "Handlinger" %}</th>
         </tr>
         </thead>
@@ -175,10 +200,10 @@
             </td>
             {% endif %}
             <td>{{item.id}}</td>
+            <td>{{item.status}}</td>
             <td>{{item.oprettet}}</td>
             <td>{{item.indleveringsdato}}</td>
             <td>{{item.leverandørfaktura_nummer}}</td>
-            <td>{% translate item.status|capfirst %}</td>
             <td>{{item.actions}}</td>
         </tr>
         {% empty %}
@@ -195,17 +220,6 @@
 
         </tbody>
     </table>
-
-    <div class="row">
-        <div class="col-12 clearfix">
-            {% if can_create %}
-            <a href="{% url 'tf5_create' %}" class="btn btn-primary float-end">{% translate "Opret ny" %}</a>
-            {% endif %}
-            {% if can_edit_multiple %}
-            <a class="edit_button btn btn-secondary float-end" href="#">{% translate "Redigér" %}</a>
-            {% endif %}
-        </div>
-    </div>
 </div>
 
 {% if can_cancel %}

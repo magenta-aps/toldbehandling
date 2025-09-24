@@ -1,0 +1,14 @@
+{% load i18n %}
+{% spaceless %}
+    {% if object.payment_status %}
+        {% if object.payment_status == "created" %}
+        <span class="badge badge-draft">{% translate "Ikke betalt" %}</span>
+        {% elif object.payment_status == "reserved" %}
+        <span class="badge badge-waiting">{% translate "Reserveret" %}</span>
+        {% elif object.payment_status == "paid" %}
+        <span class="badge badge-approved">{% translate "Betalt" %}</span>
+        {% elif object.payment_status == "declined" %}
+        <span class="badge badge-rejected">{% translate "Afvist" %}</span>
+        {% endif %}
+    {% endif %}{# object.payment_status #}
+{% endspaceless %}

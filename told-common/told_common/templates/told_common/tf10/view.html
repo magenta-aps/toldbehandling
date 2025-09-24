@@ -8,8 +8,7 @@
 <form method="post" class="needs-validation" novalidate>
     {% csrf_token %}
 
-    <div class="mx-5">
-
+    <div class="content">
         {% if form.errors %}
         <div class="alert alert-danger">
             <ul class="errorlist nonfield">
@@ -24,21 +23,89 @@
         </div>
         {% endif %}
 
-        <h1>{% blocktranslate with id=object.id|unlocalize %}Afgiftsanmeldelse {{id}}{% endblocktranslate %}</h1>
+        <div class="row">
+            <div class="col-6">
+                <h1 class="mb-3">
+                    {% blocktranslate with id=object.id|unlocalize %}Afgiftsanmeldelse {{id}}{% endblocktranslate %}
+                </h1>
+                {% include "told_common/status.html" with item=object %}
+            </div>
+            <div class="col-6 text-end">
+                {# Object actions #}
 
-        {% if object.status == "afsluttet" %}
-        <span class="badge bg-success">{% translate "Afsluttet" %}</span>
-        {% elif object.status == "godkendt" %}
-        <span class="badge bg-success">{% translate "Godkendt" %}</span>
-        {% elif object.status == "afvist" %}
-        <span class="badge bg-danger">{% translate "Afvist" %}</span>
-        {% elif object.status == "ny" %}
-        <span class="badge bg-secondary">{% translate "Ny" %}</span>
-        {% elif object.status == "kladde" %}
-        <span class="badge bg-warning">{% translate "Kladde" %}</span>
-        {% endif %}
+                {% if can_godkend %}
+                {% if object.status == "ny" or object.status == "afvist" %}
+                <button type="button" class="btn btn-success me-2" data-bs-toggle="modal" data-bs-target="#godkend_modal">
+                    <span class="material-icons">check</span>
+                    <span>{% translate "Godkend" %}</span>
+                </button>
+                {% endif %}
+                {% endif %}
 
-        <h4>{% translate "For indførsel af afgiftspligtige varer i Grønland" %}</h4>
+                {% if can_afvis %}
+                {% if object.status == "ny" %}
+                <button type="button" class="btn btn-danger me-2" data-bs-toggle="modal" data-bs-target="#afvis_modal">
+                    <span class="material-icons">cancel</span>
+                    <span>{% translate "Afvis" %}</span>
+                </button>
+                {% endif %}
+                {% endif %}
+
+                {% if can_godkend or can_afvis %}
+                {% if object.status == "godkendt" or object.status == "afvist" %}
+                <button type="submit" name="{{form.status.name}}" value="ny" class="btn btn-secondary me-2">
+                    <span class="material-icons">cancel</span>
+                    {% if object.status == "godkendt" %}
+                    {% translate "Annullér godkendelse" %}
+                    {% elif object.status == "afvist" %}
+                    {% translate "Annullér afvisning" %}
+                    {% endif %}
+                </button>
+                {% endif %}
+                {% endif %}
+
+                {% if can_edit %}
+                {% if object.status == "ny" or object.status == "kladde" or object.status == "afvist" %}
+                <a href="{% url 'tf10_edit' id=object.id %}?back=view" class="btn btn-secondary me-2">
+                    <span class="material-icons">edit</span>
+                    <span>{% translate "Redigér" %}</span>
+                </a>
+                {% endif %}
+
+                {% if not admin_ui and object.status == "afvist" %}
+                <button type="button" class="btn btn-warning me-2" data-bs-toggle="modal" data-bs-target="#genindsend_modal">
+                    <span class="material-icons">send</span>
+                    <span>{% translate "Genindsend" %}</span>
+                </button>
+                {% endif %}
+                {% endif %}
+
+                {% if can_send_prisme %}
+                {% if object.status == "godkendt" or object.status == "afsluttet" %}
+                {% if object.status == "afsluttet" %}
+                <button type="button" class="btn btn-secondary me-2 disabled">
+                    <span class="material-icons">send</span>
+                    <span>{% translate "Send til Prisme" %}</span>
+                </button>
+                {% else %}
+                <button type="button" class="btn btn-secondary me-2" data-bs-toggle="modal" data-bs-target="#prisme_modal">
+                    <span class="material-icons">send</span>
+                    <span>{% translate "Send til Prisme" %}</span>
+                </button>
+                {% endif %}
+                {% endif %}
+                {% endif %}
+
+                {% if can_view_history %}
+                <a href="{% url 'tf10_history' id=object.id %}" class="btn btn-secondary me-2">
+                    <span class="material-icons">history</span>
+                    <span>{% translate "Historik" %}</span>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <h4 class="my-3">{% translate "For indførsel af afgiftspligtige varer i Grønland" %}</h4>
 
         <div class="row">
             <div class="col-2">
@@ -50,11 +117,11 @@
         </div>
 
         <hr/>
+
         {% localize off %}
         <div class="row">
-
             <div class="col-6">
-                <h5>{% translate "Afsender" %}</h5>
+                <h5 class="mb-3">{% translate "Afsender" %}</h5>
                 <div class="row">
                     <div class="col-4">
                         <label>{% translate "CVR" %}:</label>
@@ -114,7 +181,7 @@
             </div>
 
             <div class="col-6">
-                <h5>{% translate "Modtager" %}</h5>
+                <h5 class="mb-3">{% translate "Modtager" %}</h5>
                 <div class="row">
                     <div class="col-4">
                         <label>{% translate "CVR" %}:</label>
@@ -189,7 +256,8 @@
         {% endlocalize %}
 
         <hr/>
-        <h5>{% translate "Oplysninger om fragt" %}</h5>
+
+        <h5 class="mb-3">{% translate "Oplysninger om fragt" %}</h5>
 
         <div class="row">
             <div class="col-6">
@@ -226,7 +294,6 @@
             </div>
 
             <div class="col-6">
-
                 <div class="row">
                     <div class="col-4">
                         <label>{% translate "Forsendelsesmåde" %}:</label>
@@ -243,7 +310,6 @@
                         {% endif %}
                     </div>
                 </div>
-
 
                 <div class="row">
                     <div class="col-4">
@@ -305,42 +371,40 @@
 
         <hr/>
 
-        <h5>{% translate "Varelinjer med afgifter" %}</h5>
+        <h5 class="mb-3">{% translate "Varelinjer med afgifter" %}</h5>
 
-        <table class="table table-striped">
+        <table class="table table-light">
             <thead>
             <tr>
-                <th class="col-2 px-0">
+                <th class="col-2">
                     {% translate "Vareart" %}
                 </th>
-                <th class="col-2 px-0">
+                <th class="col-2">
                     {% translate "Varekode" %}
                 </th>
-                <th class="col-1 px-0">
+                <th class="col-1">
                     {% translate "kg | liter" %}
                 </th>
-                <th class="col-1 px-0">
+                <th class="col-1">
                     {% translate "Antal" %}
                 </th>
-                <th class="col-2 px-0">
+                <th class="col-2">
                     {% translate "Fakturabeløb" %}
                 </th>
-                <th class="col-2 px-0">
+                <th class="col-2">
                     {% translate "Afgiftssats" %}
                 </th>
-                <th class="col-2 px-0">
+                <th class="col-2">
                     {% translate "Afgiftsbeløb" %}
                 </th>
             </tr>
             </thead>
             <tbody>
 
-
             {% for varelinje in object.varelinjer %}
             {% with varelinje.vareafgiftssats as sats %}
-
             <tr>
-                <td class="col-2 px-0">
+                <td class="col-2">
                     {% get_current_language as LANGUAGE_CODE %}
                     {% if LANGUAGE_CODE == "kl" %}
                     {{sats.vareart_kl}}
@@ -348,23 +412,23 @@
                     {{sats.vareart_da}}
                     {% endif %}
                 </td>
-                <td class="col-2 px-0">
+                <td class="col-2">
                     {{sats.afgiftsgruppenummer|zfill:9}}
                 </td>
-                <td class="col-1 px-0">
+                <td class="col-1">
                     {{varelinje.mængde|default_if_none:""}}
                 </td>
                 <!-- TODO: Skal der vises kg/liter eller antal når der er tale om en procentsats eller sammensat sats? -->
-                <td class="col-1 px-0">
+                <td class="col-1">
                     {{varelinje.antal|default_if_none:""}}
                 </td>
-                <td class="col-2 px-0">
+                <td class="col-2">
                     {{varelinje.fakturabeløb|floatformat:2}}
                 </td>
-                <td class="col-2 px-0">
+                <td class="col-2">
                     {{sats.text}}
                 </td>
-                <td class="col-2 px-0">
+                <td class="col-2">
                     {{varelinje.afgiftsbeløb|floatformat:2}}
                 </td>
             </tr>
@@ -376,16 +440,15 @@
             <tfoot>
                 <tr>
                     <td colspan="5"></td>
-                    <td><strong>{% translate "Afgift i alt" %}</strong></td>
-                    <td>{{object.afgift_sum}}</td>
+                    <td class="px-3"><strong>{% translate "Afgift i alt" %}</strong></td>
+                    <td class="px-3">{{object.afgift_sum}}</td>
                 </tr>
             </tfoot>
         </table>
 
-        <hr/>
-        
-        <h5>{% translate "Indberetter(e)" %}</h5>
-        <table class="table table-striped">
+        <h5 class="mb-3">{% translate "Indberetter(e)" %}</h5>
+
+        <table class="table table-light">
             <thead>
                 <tr>
                     <th class="col-2">{% translate "Type" %}</th>
@@ -408,101 +471,39 @@
             </tbody>
         </table>
 
+        <h5 class="mb-3">{% translate "Notater" %}</h5>
 
-        <hr/>
-
-        <h5>{% translate "Notater" %}</h5>
         {% include "told_common/notat/list.html" with notater=object.notater %}
 
-        <hr/>
+        <h5 class="mb-3">{% translate "Betaling" %}</h5>
 
-        <h5>{% translate "Betaling" %}</h5>
-
-        <div class="row align-items-center">
-            <div class="col-2">{% translate "Toldkategori" %}:</div>
-            {% translate "Ikke angivet" as ikke_angivet %}
-            <div class="col-4">{{object.toldkategori|default:ikke_angivet}}</div>
-        </div>
-
-        <div class="row align-items-center">
-            <div class="col-2">{% translate "Betales af" %}:</div>
-            <div class="col-4">
-                {% if object.betales_af == 'afsender'  %}
-                    {% translate "Afsender" %}
-                {% elif object.betales_af == 'modtager' %}
-                    {% translate "Modtager" %}
-                {% elif object.betales_af == 'indberetter' %}
-                    {% translate "Indberetter" %}
-                {% else %}
-                    {% translate "Ikke tilgængelig" %}
-                {% endif %}
-            </div>
-        </div>
-
-        <hr/>
-
-        <div class="form-row">
-            <div class="ml-auto">
-
-                {% if can_godkend %}
-                    {% if object.status == "ny" or object.status == "afvist" %}
-                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#godkend_modal">
-                        {% translate "Godkend" %}
-                    </button>
-                    {% endif %}
-                {% endif %}
-
-                {% if can_afvis %}
-                {% if object.status == "ny" %}
-                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#afvis_modal">
-                    {% translate "Afvis" %}
-                </button>
-                {% endif %}
-                {% endif %}
-
-                {% if can_godkend or can_afvis %}
-                {% if object.status == "godkendt" or object.status == "afvist" %}
-                <button type="submit" name="{{form.status.name}}" value="ny" class="btn btn-primary">
-                    {% if object.status == "godkendt" %}
-                    {% translate "Annullér godkendelse" %}
-                    {% elif object.status == "afvist" %}
-                    {% translate "Annullér afvisning" %}
-                    {% endif %}
-                </button>
-                {% endif %}
-                {% endif %}
-
-                {% if can_edit %}
-                    {% if object.status == "ny" or object.status == "kladde" or object.status == "afvist" %}
-                    <a href="{% url 'tf10_edit' id=object.id %}?back=view" class="btn btn-primary">{% translate "Redigér" %}</a>
-                    {% endif %}
-
-                    {% if not admin_ui and object.status == "afvist" %}
-                        <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#genindsend_modal">
-                            {% translate "Genindsend" %}
-                        </button>
-                    {% endif %}
-                {% endif %}
-
-                {% if can_send_prisme %}
-                {% if object.status == "godkendt" or object.status == "afsluttet" %}
-                    {% if object.status == "afsluttet" %}
-                    <button type="button" class="btn btn-success disabled">
-                        {% translate "Send til Prisme" %}
-                    </button>
-                    {% else %}
-                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#prisme_modal">
-                        {% translate "Send til Prisme" %}
-                    </button>
-                    {% endif %}
-                {% endif %}
-                {% endif %}
-
-                {% if can_view_history %}
-                    <a href="{% url 'tf10_history' id=object.id %}" class="btn btn-primary">{% translate "Historik" %}</a>
-                {% endif %}
-            </div>
-        </div>
+        <table class="table table-light">
+            <thead>
+                <tr>
+                    <th class="col-2">{% translate "Toldkategori" %}</th>
+                    <th class="col-2">{% translate "Betales af" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        {% translate "Ikke angivet" as ikke_angivet %}
+                        {{object.toldkategori|default:ikke_angivet}}
+                    </td>
+                    <td>
+                        {% if object.betales_af == 'afsender'  %}
+                            {% translate "Afsender" %}
+                        {% elif object.betales_af == 'modtager' %}
+                            {% translate "Modtager" %}
+                        {% elif object.betales_af == 'indberetter' %}
+                            {% translate "Indberetter" %}
+                        {% else %}
+                            {% translate "Ikke tilgængelig" %}
+                        {% endif %}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 
     <div class="modal" id="godkend_modal" tabindex="-1">
@@ -517,8 +518,13 @@
                     {{form.notat1}}
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Nej</button>
-                    <button type="submit" name="{{form.status.name}}" value="godkendt" class="btn btn-success">Ja</button>
+                    <button type="submit" name="{{form.status.name}}" value="godkendt" class="btn btn-success">
+                        <span class="material-icons">check</span>
+                        <span>{% translate "Godkend" %}</span>
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        {% translate "Annuller" %}
+                    </button>
                 </div>
             </div>
         </div>
@@ -542,14 +548,16 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <div class="row gx-2">
-                        <div class="col-8">
+                    <div class="d-flex align-items-center">
+                        <div class="col-7">
                             <span>{% translate "Er du sikker på, du vil afvise denne afgiftsanmeldelse?" %}</span>
                         </div>
-                        <div class="col-4 text-end pt-2">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Nej</button>
-                            <button type="submit" name="{{form.status.name}}" value="afvist"
-                                class="btn btn-danger">Ja</button>
+                        <div class="col-5 text-end">
+                            <button type="submit" name="{{form.status.name}}" value="afvist" class="btn btn-danger">
+                                <span class="material-icons">cancel</span>
+                                <span>{% translate "Afvis" %}</span>
+                            </button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuller</button>
                         </div>
                     </div>
                 </div>
@@ -568,8 +576,11 @@
                     <p>{% translate "Er du sikker på du vil genindsende afgiftsanmeldelse" %} {{id}} ?</p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Nej</button>
-                    <button type="submit" name="{{form.status.name}}" class="btn btn-warning" value="ny">Ja</button>
+                    <button type="submit" name="{{form.status.name}}" class="btn btn-primary" value="ny">
+                        <span class="material-icons">send</span>
+                        <span>Genindsend</span>
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuller</button>
                 </div>
             </div>
         </div>
@@ -584,7 +595,11 @@
                 </div>
                 <div class="modal-body">
                     <p>Er du sikker på at du vil sende afgiftsanmeldelsen til Prisme?</p>
-                    {{form.notat3}}
+                    <div class="row">
+                        <div class="col-12">
+                            {{form.notat3}}
+                        </div>
+                    </div>
 
                     <div class="row align-items-center">
                         <div class="col-4">
@@ -605,8 +620,11 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Nej</button>
-                    <button type="submit" name="{{form.send_til_prisme.name}}" value="true" class="btn btn-success">Ja</button>
+                    <button type="submit" name="{{form.send_til_prisme.name}}" value="true" class="btn btn-primary">
+                        <span class="material-icons">send</span>
+                        <span>Send til Prisme</span>
+                    </button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuller</button>
                 </div>
             </div>
         </div>
@@ -635,7 +653,6 @@
         const modal = new bootstrap.Modal('#message_modal', {});
         modal.show();
     </script>
-
     {% endif %}
 
 </form>

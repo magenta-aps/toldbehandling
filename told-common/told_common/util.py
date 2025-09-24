@@ -13,6 +13,7 @@ from django.core.files import File
 from django.core.serializers.json import DjangoJSONEncoder
 from django.http import QueryDict
 from django.template.loader import render_to_string
+from django.templatetags.static import static
 from django.utils import translation
 from pypdf import PdfWriter
 from weasyprint import CSS, HTML
@@ -60,13 +61,34 @@ def render_pdf(
     html_modifier: Optional[Callable] = None,
     stylesheets=None,
 ) -> bytes:
+    # Late import to avoid circular import (this file is loaded by the Django settings
+    # machinery which in turn is activated if we import `django_libsass` at the top
+    # level of this module.)
+    import django_libsass
+
     html = render_to_string(template_name, context)
     if callable(html_modifier):
         html = html_modifier(html)
     font_config = FontConfiguration()
+
+    stylesheet_objs = []
     if stylesheets:
-        stylesheets = [CSS(filename=filename) for filename in stylesheets]
-    return HTML(string=html).write_pdf(font_config=font_config, stylesheets=stylesheets)
+        for filename in stylesheets:
+            if filename.endswith(".scss"):
+                # Compile SCSS to CSS
+                output = django_libsass.compile(
+                    filename=static(filename),
+                    output_style=django_libsass.OUTPUT_STYLE,
+                    source_comments=django_libsass.SOURCE_COMMENTS,
+                )
+                stylesheet_objs.append(CSS(string=output))
+            else:
+                # Use CSS file as-is
+                stylesheet_objs.append(CSS(filename=filename))
+
+    return HTML(string=html).write_pdf(
+        font_config=font_config, stylesheets=stylesheet_objs
+    )
 
 
 class language:
