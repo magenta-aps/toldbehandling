@@ -377,7 +377,7 @@ class TF10FormCreateView(AdminLayoutBaseView, common_views.TF10FormCreateView):
 
 
 class TF10FormUpdateView(AdminLayoutBaseView, common_views.TF10FormUpdateView):
-    form_class = forms.TF10UpdateForm
+    form_class = forms.TF10UpdateForm  # type: ignore
     required_permissions = (
         "auth.admin",
         *common_views.TF10FormUpdateView.required_permissions,
