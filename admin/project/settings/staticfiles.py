@@ -10,6 +10,7 @@ STORAGES = {
     },
 }
 
+STATICFILES_DIRS = ["/app/told-common/static/"]
 STATICFILES_FINDERS = [
     "django.contrib.staticfiles.finders.FileSystemFinder",
     "django.contrib.staticfiles.finders.AppDirectoriesFinder",
