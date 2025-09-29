@@ -123,22 +123,16 @@
             {% endif %}
         </div>
 
-        <div class="row mb-5">
+        <div class="row mb-3">
             <div class="col-12 clearfix">
                 <button type="submit" class="btn btn-primary">
                     <span class="material-icons">search</span>
                     <span>{% translate "Søg" %}</span>
                 </button>
-                <a href="{% url 'tf10_list' %}?clear=1" class="btn btn-primary ms-2">
+                <a href="{% url 'tf10_list' %}?clear=1" class="btn btn-outline-primary ms-2">
                     <span class="material-icons">clear</span>
                     <span>{% translate "Ryd søgning" %}</span>
                 </a>
-                {% if can_edit_multiple %}
-                <a class="edit_button btn btn-secondary float-end disabled" href="#">
-                    <span class="material-icons">edit</span>
-                    <span>{% translate "Redigér" %}</span>
-                </a>
-                {% endif %}
             </div>
         </div>
     </form>
@@ -153,19 +147,27 @@
     {% endif %}
 
     {% if can_edit_multiple %}
-    <div class="alert alert-secondary">
+    <div class="alert alert-secondary mt-0 mb-3">
         {% translate 'Der kan markeres flere linjer på én gang. Tryk på en linje for at markere den. Tryk igen for at fjerne markering.<br/> Hold Shift nede og tryk på en anden linje for at markere/afmarkere alle de mellemliggende linjer.<br/> De markerede linjer kan redigeres sammen ved at klikke på knappen "Redigér".' %}
     </div>
     {% endif %}
 
     {% if total %}
-    <div class="row">
-        <div>
+    <div class="row d-flex align-items-center">
+        <div class="col-6">
             {% blocktrans trimmed count total as total %}
             {{ total }} anmeldelse
             {% plural %}
             {{ total }} anmeldelser
             {% endblocktrans %}
+        </div>
+        <div class="col-6 text-end">
+            {% if can_edit_multiple %}
+            <a class="edit_button btn btn-secondary float-end disabled" href="#">
+                <span class="material-icons">edit</span>
+                <span>{% translate "Redigér" %}</span>
+            </a>
+            {% endif %}
         </div>
     </div>
     {% endif %}
