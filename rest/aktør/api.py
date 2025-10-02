@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: MPL-2.0
 # mypy: disable-error-code="call-arg, attr-defined"
 
-from typing import Optional
+from typing import Annotated, Optional
 
 from aktør.models import Afsender, Modtager, Speditør
 from common.api import get_auth_methods
@@ -16,6 +16,28 @@ from ninja_extra import api_controller, permissions, route
 from ninja_extra.pagination import paginate
 from ninja_extra.schemas import NinjaPaginationResponseSchema
 from project.util import RestPermission, json_dump
+
+# Shared schemas
+
+
+class SharedAfsenderModtagerOut(FilterSchema):
+    navn: Annotated[Optional[str], Field(None, q="navn__icontains")]
+    adresse: Annotated[Optional[str], Field(None, q="adresse__icontains")]
+    postnummer: Optional[int] = None
+    by: Annotated[Optional[str], Field(None, q="by__icontains")]
+    postbox: Optional[str] = None
+    telefon: Optional[str] = None
+    cvr: Optional[int] = None
+    kladde: Optional[bool] = None
+    stedkode: Optional[int] = None
+
+    def filter_stedkode(self, value: int) -> Q:
+        return Q(eksplicit_stedkode=value) | (
+            Q(eksplicit_stedkode__isnull=True) & Q(postnummer_ref__stedkode=value)
+        )
+
+
+# Afsender
 
 
 class AfsenderIn(ModelSchema):
@@ -76,21 +98,8 @@ class AfsenderOut(ModelSchema):
         return obj.stedkode
 
 
-class AfsenderFilterSchema(FilterSchema):
-    navn: Optional[str] = Field(q="navn__icontains")
-    adresse: Optional[str] = Field(q="adresse__icontains")
-    postnummer: Optional[int]
-    by: Optional[str] = Field(q="by__icontains")
-    postbox: Optional[str]
-    telefon: Optional[str]
-    cvr: Optional[int]
-    kladde: Optional[bool]
-    stedkode: Optional[int]
-
-    def filter_stedkode(self, value: int) -> Q:
-        return Q(eksplicit_stedkode=value) | (
-            Q(eksplicit_stedkode__isnull=True) & Q(postnummer_ref__stedkode=value)
-        )
+class AfsenderFilterSchema(SharedAfsenderModtagerOut):
+    pass
 
 
 class AfsenderPermission(RestPermission):
@@ -154,6 +163,9 @@ class AfsenderAPI:
         return {"success": True}
 
 
+# Modtager
+
+
 class ModtagerIn(ModelSchema):
     stedkode: Optional[int] = None
 
@@ -215,22 +227,8 @@ class ModtagerOut(ModelSchema):
         return obj.stedkode
 
 
-class ModtagerFilterSchema(FilterSchema):
-    navn: Optional[str] = Field(q="navn__icontains")
-    adresse: Optional[str] = Field(q="adresse__icontains")
-    postnummer: Optional[int]
-    by: Optional[str] = Field(q="by__icontains")
-    postbox: Optional[str]
-    telefon: Optional[str]
-    cvr: Optional[int]
-    kreditordning: Optional[bool]
-    kladde: Optional[bool]
-    stedkode: Optional[int]
-
-    def filter_stedkode(self, value: int) -> Q:
-        return Q(eksplicit_stedkode=value) | (
-            Q(eksplicit_stedkode__isnull=True) & Q(postnummer_ref__stedkode=value)
-        )
+class ModtagerFilterSchema(SharedAfsenderModtagerOut):
+    kreditordning: Optional[bool] = None
 
 
 class ModtagerPermission(RestPermission):
@@ -304,8 +302,8 @@ class SpeditørOut(ModelSchema):
 
 
 class SpeditørFilterSchema(FilterSchema):
-    navn: Optional[str] = Field(q="navn__icontains")
-    cvr: Optional[int]
+    navn: Annotated[Optional[str], Field(None, q="navn__icontains")]
+    cvr: Optional[int] = None
 
 
 class SpeditørPermission(RestPermission):

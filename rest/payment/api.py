@@ -70,7 +70,7 @@ class PaymentAPI:
         payment_new = Payment.objects.create(
             amount=0,
             currency="DKK",
-            reference=payload.declaration_id,
+            reference=str(payload.declaration_id),
             declaration=declaration,
             provider=payload.provider,
         )

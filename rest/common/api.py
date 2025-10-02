@@ -4,7 +4,7 @@
 # mypy: disable-error-code="call-arg, attr-defined"
 import base64
 import re
-from typing import Dict, List, Optional, Union
+from typing import Annotated, Dict, List, Optional, Union
 
 from common.models import EboksBesked, IndberetterProfile
 from django.contrib.auth.models import Group, User
@@ -165,13 +165,15 @@ class UserIn(ModelSchema):
 
 
 class UserFilterSchema(FilterSchema):
-    username: Optional[str] = Field(q="username__icontains")
-    username_startswith: Optional[str] = Field(q="username__istartswith")
-    first_name: Optional[str] = Field(q="first_name__icontains")
-    last_name: Optional[str] = Field(q="last_name__icontains")
-    email: Optional[str] = Field(q="email__icontains")
-    is_superuser: Optional[bool]
-    group: Optional[str] = Field(q="groups__name__icontains")
+    username: Annotated[Optional[str], Field(None, q="username__icontains")]
+    username_startswith: Annotated[
+        Optional[str], Field(None, q="username__istartswith")
+    ]
+    first_name: Annotated[Optional[str], Field(None, q="first_name__icontains")]
+    last_name: Annotated[Optional[str], Field(None, q="last_name__icontains")]
+    email: Annotated[Optional[str], Field(None, q="email__icontains")]
+    is_superuser: Optional[bool] = None
+    group: Annotated[Optional[str], Field(None, q="groups__name__icontains")]
 
 
 @api_controller(

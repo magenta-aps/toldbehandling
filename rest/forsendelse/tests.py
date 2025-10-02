@@ -304,7 +304,7 @@ class FragtforsendelseAPITests(TestCase):
             data=json_dump(
                 {
                     "forsendelsestype": Forsendelse.Forsendelsestype.SKIB,
-                    "fragtbrevsnummer": 12345678,
+                    "fragtbrevsnummer": "12345678",
                     "forbindelsesnr": None,
                     "afgangsdato": "2024-12-31",
                     "kladde": False,
@@ -359,7 +359,7 @@ class FragtforsendelseAPITests(TestCase):
             data=json_dump(
                 {
                     "forsendelsestype": Forsendelse.Forsendelsestype.FLY,
-                    "fragtbrevsnummer": 12345678,
+                    "fragtbrevsnummer": "12345678",
                     "forbindelsesnr": "abc",
                     "afgangsdato": "2024-12-31",
                     "kladde": False,
@@ -380,7 +380,7 @@ class FragtforsendelseAPITests(TestCase):
             data=json_dump(
                 {
                     "forsendelsestype": Forsendelse.Forsendelsestype.FLY,
-                    "fragtbrevsnummer": 666,
+                    "fragtbrevsnummer": "666",
                     "forbindelsesnr": "123",
                     "afgangsdato": "2024-12-31",
                     "kladde": False,

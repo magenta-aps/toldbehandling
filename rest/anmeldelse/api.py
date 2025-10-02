@@ -7,7 +7,7 @@ import base64
 import logging
 from datetime import date, datetime, time, timedelta
 from decimal import Decimal
-from typing import List, Optional, Tuple
+from typing import Annotated, List, Optional, Tuple
 from uuid import uuid4
 
 import django.utils.timezone as tz
@@ -166,41 +166,53 @@ class AfgiftsanmeldelseHistoryFullOut(AfgiftsanmeldelseFullOut):
 
 
 class AfgiftsanmeldelseFilterSchema(FilterSchema):
-    id: Optional[List[int]] = Field(q="id__in")
-    afsender: Optional[int]
-    modtager: Optional[int]
-    fragtforsendelse: Optional[int]
-    postforsendelse: Optional[int]
-    leverandørfaktura_nummer: Optional[str] = Field(
-        q="leverandørfaktura_nummer__iexact"
-    )
+    id: Annotated[Optional[List[int]], Field(None, q="__in")]
+    afsender: Annotated[Optional[int], Field(None)]
+    modtager: Annotated[Optional[int], Field(None)]
+    fragtforsendelse: Annotated[Optional[int], Field(None)]
+    postforsendelse: Annotated[Optional[int], Field(None)]
+    leverandørfaktura_nummer: Annotated[
+        Optional[str], Field(None, q="leverandørfaktura_nummer__iexact")
+    ]
     # leverandørfaktura = models.FileField(
     #     upload_to=afgiftsanmeldelse_upload_to,
     # )
-    betales_af: Optional[str]
-    indførselstilladelse: Optional[str]
-    betalt: Optional[bool]
-    status: Optional[str]
-    fuldmagtshaver: Optional[int]
-    fuldmagtshaver_isnull: Optional[bool] = Field(q="fuldmagtshaver__isnull")
-    dato_efter: Optional[date] = Field(q="dato__gte")
-    dato_før: Optional[date] = Field(q="dato__lt")
-    vareart: Optional[str] = Field(q="varelinje__vareafgiftssats__vareart_da")
-    afsenderbykode_or_forbindelsesnr: Optional[str] = Field(
-        q=[
-            "postforsendelse__afsenderbykode__iexact",
-            "fragtforsendelse__forbindelsesnr__iexact",
-        ]
-    )
-    postforsendelsesnummer_or_fragtbrevsnummer: Optional[str] = Field(
-        q=[
-            "postforsendelse__postforsendelsesnummer__iexact",
-            "fragtforsendelse__fragtbrevsnummer__iexact",
-        ]
-    )
-    notat: Optional[str] = Field(q="notat__tekst__icontains")
-    toldkategori: Optional[List[str]]
-    tf3: Optional[bool]
+    betales_af: Annotated[Optional[str], Field(None)]
+    indførselstilladelse: Annotated[Optional[str], Field(None)]
+    betalt: Annotated[Optional[bool], Field(None)]
+    status: Annotated[Optional[str], Field(None)]
+    fuldmagtshaver: Annotated[Optional[int], Field(None)]
+    fuldmagtshaver_isnull: Annotated[
+        Optional[bool], Field(None, q="fuldmagtshaver__isnull")
+    ]
+    dato_efter: Annotated[Optional[date], Field(None, q="dato__gte")]
+    dato_før: Annotated[Optional[date], Field(None, q="dato__lt")]
+    vareart: Annotated[
+        Optional[str], Field(None, q="varelinje__vareafgiftssats__vareart_da")
+    ]
+    afsenderbykode_or_forbindelsesnr: Annotated[
+        Optional[str],
+        Field(
+            None,
+            q=[
+                "postforsendelse__afsenderbykode__iexact",
+                "fragtforsendelse__forbindelsesnr__iexact",
+            ],
+        ),
+    ]
+    postforsendelsesnummer_or_fragtbrevsnummer: Annotated[
+        Optional[str],
+        Field(
+            None,
+            q=[
+                "postforsendelse__postforsendelsesnummer__iexact",
+                "fragtforsendelse__fragtbrevsnummer__iexact",
+            ],
+        ),
+    ]
+    notat: Annotated[Optional[str], Field(None, q="notat__tekst__icontains")]
+    toldkategori: Annotated[Optional[List[str]], Field(None)]
+    tf3: Annotated[Optional[bool], Field(None)]
 
     def filter_toldkategori(self, value: List[str]) -> Q | None:
         if value is None:
@@ -594,25 +606,33 @@ class PrivatAfgiftsanmeldelseOut(ModelSchema):
 
 
 class PrivatAfgiftsanmeldelseFilterSchema(FilterSchema):
-    id: Optional[List[int]] = Field(q="id__in")
-    cpr: Optional[int]
-    navn: Optional[str] = Field(q="navn__icontains")
-    adresse: Optional[str] = Field(q="adresse__icontains")
-    postnummer: Optional[int]
-    by: Optional[str] = Field(q="by__icontains")
-    telefon: Optional[str] = Field(q="telefon__icontains")
-    leverandørfaktura_nummer: Optional[str] = Field(
-        q="leverandørfaktura_nummer__icontains"
-    )
-    indførselstilladelse: Optional[str] = Field(q="indførselstilladelse__icontains")
-    indleveringsdato_efter: Optional[date] = Field(q="indleveringsdato__gte")
-    indleveringsdato_før: Optional[date] = Field(q="indleveringsdato__lt")
-    oprettet_efter: Optional[date] = Field(q="oprettet__gte")
-    oprettet_før: Optional[date] = Field(q="oprettet__lt")
-    vareart: Optional[str] = Field(q="varelinje__vareafgiftssats__vareart_da")
-    status: Optional[str]
-    anonym: Optional[bool]
-    notat: Optional[str] = Field(q="notat__tekst__icontains")
+    id: Annotated[Optional[List[int]], Field(None, q="id__in")]
+    cpr: Annotated[Optional[int], Field(None)]
+    navn: Annotated[Optional[str], Field(None, q="navn__icontains")]
+    adresse: Annotated[Optional[str], Field(None, q="adresse__icontains")]
+    postnummer: Annotated[Optional[int], Field(None)]
+    by: Annotated[Optional[str], Field(None, q="by__icontains")]
+    telefon: Annotated[Optional[str], Field(None, q="telefon__icontains")]
+    leverandørfaktura_nummer: Annotated[
+        Optional[str], Field(None, q="leverandørfaktura_nummer__icontains")
+    ]
+    indførselstilladelse: Annotated[
+        Optional[str], Field(None, q="indførselstilladelse__icontains")
+    ]
+    indleveringsdato_efter: Annotated[
+        Optional[date], Field(None, q="indleveringsdato__gte")
+    ]
+    indleveringsdato_før: Annotated[
+        Optional[date], Field(None, q="indleveringsdato__lt")
+    ]
+    oprettet_efter: Annotated[Optional[date], Field(None, q="oprettet__gte")]
+    oprettet_før: Annotated[Optional[date], Field(None, q="oprettet__lt")]
+    vareart: Annotated[
+        Optional[str], Field(None, q="varelinje__vareafgiftssats__vareart_da")
+    ]
+    status: Annotated[Optional[str], Field(None)]
+    anonym: Annotated[Optional[bool], Field(None)]
+    notat: Annotated[Optional[str], Field(None, q="notat__tekst__icontains")]
 
 
 class PrivatAfgiftsanmeldelsePermission(RestPermission):
@@ -773,7 +793,7 @@ class VarelinjeIn(ModelSchema):
         model_fields = ["mængde", "antal", "kladde", "fakturabeløb"]
         model_fields_optional = ["mængde", "antal", "kladde", "fakturabeløb"]
 
-    @root_validator(pre=False)
+    @root_validator(pre=False, skip_on_failure=True)
     def enhed_must_have_corresponding_field(cls, values):
         if values.get("kladde") is not True:
             vareafgiftssats_id: int | None = values.get("vareafgiftssats_id")
@@ -867,14 +887,14 @@ class VarelinjeOut(ModelSchema):
 
 
 class VarelinjeFilterSchema(FilterSchema):
-    afgiftsanmeldelse: Optional[int]
-    privatafgiftsanmeldelse: Optional[int]
-    vareafgiftssats: Optional[int]
-    mængde: Optional[Decimal]
-    antal: Optional[int]
-    fakturabeløb: Optional[Decimal]
-    afgiftsbeløb: Optional[Decimal]
-    kladde: Optional[bool]
+    afgiftsanmeldelse: Optional[int] = None
+    privatafgiftsanmeldelse: Optional[int] = None
+    vareafgiftssats: Optional[int] = None
+    mængde: Optional[Decimal] = None
+    antal: Optional[int] = None
+    fakturabeløb: Optional[Decimal] = None
+    afgiftsbeløb: Optional[Decimal] = None
+    kladde: Optional[bool] = None
 
 
 class VarelinjePermission(RestPermission):
@@ -1070,8 +1090,8 @@ class NotatOut(ModelSchema):
 
 
 class NotatFilterSchema(FilterSchema):
-    afgiftsanmeldelse: Optional[int]
-    privatafgiftsanmeldelse: Optional[int]
+    afgiftsanmeldelse: Optional[int] = None
+    privatafgiftsanmeldelse: Optional[int] = None
 
 
 class NotatPermission(RestPermission):
@@ -1219,7 +1239,7 @@ class PrismeResponseOut(ModelSchema):
 
 
 class PrismeResponseFilterSchema(FilterSchema):
-    afgiftsanmeldelse: Optional[int]
+    afgiftsanmeldelse: Optional[int] = None
 
 
 class PrismeResponsePermission(RestPermission):
@@ -1271,20 +1291,26 @@ class PrismeResponseAPI:
 
 class StatistikFilterSchema(FilterSchema):
     anmeldelsestype: Optional[str] = None
-    startdato: Optional[date] = Field(
-        None,
-        q=[
-            "privatafgiftsanmeldelse__indleveringsdato__gte",
-            "afgiftsanmeldelse__dato__gte",
-        ],
-    )
-    slutdato: Optional[date] = Field(
-        None,
-        q=[
-            "privatafgiftsanmeldelse__indleveringsdato__lte",
-            "afgiftsanmeldelse__dato__lte",
-        ],
-    )
+    startdato: Annotated[
+        Optional[date],
+        Field(
+            None,
+            q=[
+                "privatafgiftsanmeldelse__indleveringsdato__gte",
+                "afgiftsanmeldelse__dato__gte",
+            ],
+        ),
+    ]
+    slutdato: Annotated[
+        Optional[date],
+        Field(
+            None,
+            q=[
+                "privatafgiftsanmeldelse__indleveringsdato__lte",
+                "afgiftsanmeldelse__dato__lte",
+            ],
+        ),
+    ]
 
     def filter_anmeldelsestype(self, value: str):
         if value == "tf5":

@@ -93,7 +93,7 @@ def generate_payment_item_from_varelinje(
     gross_total_amount = net_total_amount + tax_amount
 
     return {
-        "reference": varelinje.vareafgiftssats.afgiftsgruppenummer,
+        "reference": str(varelinje.vareafgiftssats.afgiftsgruppenummer),
         "name": varelinje_name,
         "quantity": quantity,
         "unit": unit,

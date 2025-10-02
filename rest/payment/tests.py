@@ -220,7 +220,7 @@ class PaymentTest(TestCase):
             order_details=ProviderOrderDetailsResponse(
                 amount=amount,
                 currency=currency,
-                reference=declaration.id,
+                reference=str(declaration.id),
             ),
             checkout=ProviderPaymentCheckoutResponse(
                 url=f"{settings.HOST_DOMAIN}/payment/checkout/{declaration.id}",
@@ -609,7 +609,7 @@ class PaymentAPITests(PaymentTest):
                 declaration_id=self.declaration.id,
                 amount=38700,  # FYI: (137*100) + (250*100)
                 currency="DKK",
-                reference=self.declaration.id,
+                reference=str(self.declaration.id),
                 provider=provider_name,
                 items=[
                     generate_payment_item_from_varelinje(self.declaration_items[0]),

@@ -111,8 +111,8 @@ class ProviderPaymentSummaryResponse(BaseResponse):
 
 
 class ProviderPaymentDetailsResponse(BaseResponse):
-    payment_type: Optional[str]
-    payment_method: Optional[str]
+    payment_type: Optional[str] = None
+    payment_method: Optional[str] = None
     invoice_details: dict
     card_details: dict
 
@@ -162,4 +162,4 @@ class PaymentItemResponse(BaseItem, PersistedModel):
 
 class PaymentResponse(BaseResponse, BasePayment, PersistedModel):
     declaration: PaymentDeclarationResponse
-    provider_payment: Optional[ProviderPaymentResponse]
+    provider_payment: Optional[ProviderPaymentResponse] = None

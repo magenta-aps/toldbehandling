@@ -100,11 +100,10 @@ class TOTPDeviceAPITests(TestCase):
             data=json_dump(
                 {
                     "user_id": self.user.id,
-                    "twofactor_token": valid_token,
+                    "twofactor_token": str(valid_token),
                 }
             ),
         )
-
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.json(), True)
 
