@@ -39,15 +39,15 @@ class AfgiftstabelOut(ModelSchema):
 
 
 class AfgiftstabelFilterSchema(FilterSchema):
-    gyldig_fra__gt: Optional[str]
-    gyldig_fra__lt: Optional[str]
-    gyldig_fra__gte: Optional[str]
-    gyldig_fra__lte: Optional[str]
-    gyldig_til__gt: Optional[str]
-    gyldig_til__lt: Optional[str]
-    gyldig_til__gte: Optional[str]
-    gyldig_til__lte: Optional[str]
-    kladde: Optional[bool]
+    gyldig_fra__gt: Optional[str] = None
+    gyldig_fra__lt: Optional[str] = None
+    gyldig_fra__gte: Optional[str] = None
+    gyldig_fra__lte: Optional[str] = None
+    gyldig_til__gt: Optional[str] = None
+    gyldig_til__lt: Optional[str] = None
+    gyldig_til__gte: Optional[str] = None
+    gyldig_til__lte: Optional[str] = None
+    kladde: Optional[bool] = None
 
     def filter_gyldig_fra__lt(self, value: str) -> Q:
         if value is None:
@@ -231,19 +231,19 @@ class VareafgiftssatsOut(ModelSchema):
 
 
 class VareafgiftssatsFilterSchema(FilterSchema):
-    afgiftstabel: Optional[int]
-    vareart_da: Optional[str]
-    vareart_kl: Optional[str]
-    afgiftsgruppenummer: Optional[int]
-    enhed: Optional[str]
-    afgiftssats: Optional[Decimal]
-    kræver_indførselstilladelse: Optional[bool]
-    har_privat_tillægsafgift_alkohol: Optional[bool]
-    minimumsbeløb: Optional[Decimal]
-    overordnet: Optional[int]
-    segment_nedre: Optional[Decimal]
-    segment_øvre: Optional[Decimal]
-    synlig_privat: Optional[bool]
+    afgiftstabel: Optional[int] = None
+    vareart_da: Optional[str] = None
+    vareart_kl: Optional[str] = None
+    afgiftsgruppenummer: Optional[int] = None
+    enhed: Optional[str] = None
+    afgiftssats: Optional[Decimal] = None
+    kræver_indførselstilladelse: Optional[bool] = None
+    har_privat_tillægsafgift_alkohol: Optional[bool] = None
+    minimumsbeløb: Optional[Decimal] = None
+    overordnet: Optional[int] = None
+    segment_nedre: Optional[Decimal] = None
+    segment_øvre: Optional[Decimal] = None
+    synlig_privat: Optional[bool] = None
 
 
 class VareafgiftssatsPermission(RestPermission):
