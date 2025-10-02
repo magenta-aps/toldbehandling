@@ -887,14 +887,14 @@ class VarelinjeOut(ModelSchema):
 
 
 class VarelinjeFilterSchema(FilterSchema):
-    afgiftsanmeldelse: Optional[int]
-    privatafgiftsanmeldelse: Optional[int]
-    vareafgiftssats: Optional[int]
-    mængde: Optional[Decimal]
-    antal: Optional[int]
-    fakturabeløb: Optional[Decimal]
-    afgiftsbeløb: Optional[Decimal]
-    kladde: Optional[bool]
+    afgiftsanmeldelse: Optional[int] = None
+    privatafgiftsanmeldelse: Optional[int] = None
+    vareafgiftssats: Optional[int] = None
+    mængde: Optional[Decimal] = None
+    antal: Optional[int] = None
+    fakturabeløb: Optional[Decimal] = None
+    afgiftsbeløb: Optional[Decimal] = None
+    kladde: Optional[bool] = None
 
 
 class VarelinjePermission(RestPermission):
@@ -1090,8 +1090,8 @@ class NotatOut(ModelSchema):
 
 
 class NotatFilterSchema(FilterSchema):
-    afgiftsanmeldelse: Optional[int]
-    privatafgiftsanmeldelse: Optional[int]
+    afgiftsanmeldelse: Optional[int] = None
+    privatafgiftsanmeldelse: Optional[int] = None
 
 
 class NotatPermission(RestPermission):
@@ -1239,7 +1239,7 @@ class PrismeResponseOut(ModelSchema):
 
 
 class PrismeResponseFilterSchema(FilterSchema):
-    afgiftsanmeldelse: Optional[int]
+    afgiftsanmeldelse: Optional[int] = None
 
 
 class PrismeResponsePermission(RestPermission):

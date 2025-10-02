@@ -4,7 +4,7 @@
 # mypy: disable-error-code="call-arg, attr-defined"
 import base64
 import logging
-from typing import Optional
+from typing import Annotated, Optional
 from uuid import uuid4
 
 from common.api import get_auth_methods
@@ -77,12 +77,12 @@ class PostforsendelseOut(ModelSchema):
 
 
 class PostforsendelseFilterSchema(FilterSchema):
-    forsendelsestype: Optional[str]
-    postforsendelsesnummer: Optional[str]
-    afsenderbykode: Optional[str]
-    afgangsdato: Optional[str]
-    afgangsdato__før: Optional[str] = Field(q="afgangsdato__lt")
-    afgangsdato__efter: Optional[str] = Field(q="afgangsdato__gte")
+    forsendelsestype: Optional[str] = None
+    postforsendelsesnummer: Optional[str] = None
+    afsenderbykode: Optional[str] = None
+    afgangsdato: Optional[str] = None
+    afgangsdato__før: Annotated[Optional[str], Field(None, q="afgangsdato__lt")]
+    afgangsdato__efter: Annotated[Optional[str], Field(None, q="afgangsdato__gte")]
 
 
 class PostforsendelsePermission(RestPermission):
@@ -224,13 +224,13 @@ class FragtforsendelseOut(ModelSchema):
 
 
 class FragtforsendelseFilterSchema(FilterSchema):
-    forsendelsestype: Optional[str]
-    fragtbrevsnummer: Optional[str]
-    forbindelsesnr: Optional[str]
-    afgangsdato: Optional[str]
-    afgangsdato__før: Optional[str] = Field(q="afgangsdato__lt")
-    afgangsdato__efter: Optional[str] = Field(q="afgangsdato__gte")
-    kladde: Optional[bool]
+    forsendelsestype: Optional[str] = None
+    fragtbrevsnummer: Optional[str] = None
+    forbindelsesnr: Optional[str] = None
+    afgangsdato: Optional[str] = None
+    afgangsdato__før: Annotated[Optional[str], Field(None, q="afgangsdato__lt")]
+    afgangsdato__efter: Annotated[Optional[str], Field(None, q="afgangsdato__gte")]
+    kladde: Optional[bool] = None
 
 
 class FragtforsendelsePermission(RestPermission):
