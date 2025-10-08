@@ -395,6 +395,7 @@ class TF10Form(BootstrapForm):
                         )
                         break
 
+
 class TF10VareForm(BootstrapForm):
     def __init__(self, *args, **kwargs):
         self.varesatser = kwargs.pop("varesatser", {})
