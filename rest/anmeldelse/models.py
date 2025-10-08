@@ -115,7 +115,13 @@ class Afgiftsanmeldelse(models.Model):
         null=True,
         blank=True,
     )
-    indførselstilladelse = models.CharField(
+    indførselstilladelse_alkohol = models.CharField(
+        max_length=20,
+        db_index=True,
+        null=True,
+        blank=True,
+    )
+    indførselstilladelse_tobak = models.CharField(
         max_length=20,
         db_index=True,
         null=True,
