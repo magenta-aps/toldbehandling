@@ -104,7 +104,8 @@ class BlanketMixin:
                 "leverandørfaktura": "/leverand%C3%B8rfakturaer/"
                 + "3/leverand%C3%B8rfaktura.txt",
                 "betales_af": "afsender",
-                "indførselstilladelse": "1234",
+                "indførselstilladelse_alkohol": "1234",
+                "indførselstilladelse_tobak": "1234",
                 "afgift_total": "658.00",
                 "betalt": True,
                 "dato": "2024-01-01T02:00:00+00:00",
@@ -820,7 +821,8 @@ class AnmeldelseListViewTest(BlanketMixin, HasLogin):
                 "id": 1,
                 "leverandørfaktura_nummer": "12345",
                 "betales_af": "afsender",
-                "indførselstilladelse": "abcde",
+                "indførselstilladelse_alkohol": "abcde",
+                "indførselstilladelse_tobak": "abcde",
                 "betalt": False,
                 "leverandørfaktura": "/leverand%C3%B8rfakturaer"
                 "/10/leverand%C3%B8rfaktura.pdf",
@@ -844,7 +846,8 @@ class AnmeldelseListViewTest(BlanketMixin, HasLogin):
                     "telefon": "123456",
                     "cvr": 12345678,
                     "kreditordning": True,
-                    "indførselstilladelse": 123,
+                    "indførselstilladelse_alkohol": 123,
+                    "indførselstilladelse_tobak": 123,
                 },
                 "postforsendelse": {
                     "id": 1,
@@ -864,7 +867,8 @@ class AnmeldelseListViewTest(BlanketMixin, HasLogin):
                 "id": 2,
                 "leverandørfaktura_nummer": "12345",
                 "betales_af": "afsender",
-                "indførselstilladelse": "abcde",
+                "indførselstilladelse_alkohol": "abcde",
+                "indførselstilladelse_tobak": "abcde",
                 "betalt": False,
                 "leverandørfaktura": "/leverand%C3%B8rfakturaer"
                 "/10/leverand%C3%B8rfaktura.pdf",
@@ -888,7 +892,8 @@ class AnmeldelseListViewTest(BlanketMixin, HasLogin):
                     "telefon": "123456",
                     "cvr": 12345678,
                     "kreditordning": True,
-                    "indførselstilladelse": 123,
+                    "indførselstilladelse_alkohol": 123,
+                    "indførselstilladelse_tobak": 123,
                 },
                 "postforsendelse": {
                     "id": 2,
@@ -908,7 +913,8 @@ class AnmeldelseListViewTest(BlanketMixin, HasLogin):
                 "id": 3,
                 "leverandørfaktura_nummer": "12345",
                 "betales_af": "afsender",
-                "indførselstilladelse": "abcde",
+                "indførselstilladelse_alkohol": "abcde",
+                "indførselstilladelse_tobak": "abcde",
                 "betalt": False,
                 "leverandørfaktura": "/leverand%C3%B8rfakturaer"
                 "/10/leverand%C3%B8rfaktura.pdf",
@@ -932,7 +938,8 @@ class AnmeldelseListViewTest(BlanketMixin, HasLogin):
                     "telefon": "123456",
                     "cvr": 12345678,
                     "kreditordning": True,
-                    "indførselstilladelse": 123,
+                    "indførselstilladelse_alkohol": 123,
+                    "indførselstilladelse_tobak": 123,
                 },
                 "postforsendelse": {
                     "id": 3,
@@ -1039,7 +1046,8 @@ class AnmeldelseListViewTest(BlanketMixin, HasLogin):
                         "afgiftsgruppenummer": 1234567,
                         "enhed": "kg",
                         "afgiftssats": "1.00",
-                        "kræver_indførselstilladelse": False,
+                        "kræver_indførselstilladelse_alkohol": False,
+                        "kræver_indførselstilladelse_tobak": False,
                         "har_privat_tillægsafgift_alkohol": False,
                     }
                 ],
