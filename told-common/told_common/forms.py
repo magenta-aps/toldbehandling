@@ -364,9 +364,10 @@ class TF10Form(BootstrapForm):
 
     def clean_with_formset(self, formset):
         # Perform validation on form and formset together
+        print("ALLES GUT")
         if (
             not self.cleaned_data["indførselstilladelse_alkohol"]
-            and not self.cleaned_data["indførselstilladelse_tobak"]
+            or not self.cleaned_data["indførselstilladelse_tobak"]
             and not self.cleaned_data["kladde"]
         ):
             # Hvis vi ikke har en indførselstilladelse,
@@ -393,7 +394,6 @@ class TF10Form(BootstrapForm):
                             ),
                         )
                         break
-
 
 class TF10VareForm(BootstrapForm):
     def __init__(self, *args, **kwargs):
