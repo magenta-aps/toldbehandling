@@ -103,12 +103,13 @@ class TF10FormTest(TestCase):
                 1: Vareafgiftssats(
                     id=1,
                     afgiftstabel=1,
-                    vareart_da="Båthorn",
-                    vareart_kl="Båthorn",
+                    vareart_da="Båthorn Snaps",
+                    vareart_kl="Båthorn Snaps",
                     afgiftsgruppenummer=12345678,
                     enhed=Vareafgiftssats.Enhed.KILOGRAM,
                     afgiftssats="1.00",
-                    kræver_indførselstilladelse=True,
+                    kræver_indførselstilladelse_alkohol=True,
+                    kræver_indførselstilladelse_tobak=False,
                 ),
             }
         )
@@ -121,7 +122,7 @@ class TF10FormTest(TestCase):
         subform.is_valid()
 
         form.clean_with_formset(formset=[subform])
-        self.assertIn("indførselstilladelse", form.errors)
+        self.assertIn("indførselstilladelse_alkohol", form.errors)
 
     @staticmethod
     def create_TF10Form(
@@ -140,7 +141,8 @@ class TF10FormTest(TestCase):
                         afgiftsgruppenummer=12345678,
                         enhed=Vareafgiftssats.Enhed.KILOGRAM,
                         afgiftssats="1.00",
-                        kræver_indførselstilladelse=False,
+                        kræver_indførselstilladelse_alkohol=False,
+                        kræver_indførselstilladelse_tobak=False,
                         har_privat_tillægsafgift_alkohol=False,
                     ),
                     2: Vareafgiftssats(
@@ -151,7 +153,8 @@ class TF10FormTest(TestCase):
                         afgiftsgruppenummer=87654321,
                         enhed=Vareafgiftssats.Enhed.ANTAL,
                         afgiftssats="1.00",
-                        kræver_indførselstilladelse=False,
+                        kræver_indførselstilladelse_alkohol=False,
+                        kræver_indførselstilladelse_tobak=False,
                         har_privat_tillægsafgift_alkohol=False,
                     ),
                     3: Vareafgiftssats(
@@ -163,6 +166,7 @@ class TF10FormTest(TestCase):
                         enhed=Vareafgiftssats.Enhed.PROCENT,
                         afgiftssats="0.50",
                         kræver_indførselstilladelse=False,
+                        kræver_indførselstilladelse_tobak=False,
                         har_privat_tillægsafgift_alkohol=False,
                     ),
                 }
@@ -183,7 +187,8 @@ class TF10FormTest(TestCase):
                 "modtager_postbox": "124",
                 "modtager_telefon": "123123",
                 # To verify clean_with_formset later
-                "indførselstilladelse": None,
+                "indførselstilladelse_alkohol": None,
+                "indførselstilladelse_tobak": None,
                 "leverandørfaktura_nummer": "123",
                 "fragttype": "skibsfragt",
                 "fragtbrevnr": "ABCDE1234567",
