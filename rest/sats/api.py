@@ -170,7 +170,8 @@ class VareafgiftssatsIn(ModelSchema):
             "afgiftsgruppenummer",
             "enhed",
             "afgiftssats",
-            "kræver_indførselstilladelse",
+            "kræver_indførselstilladelse_alkohol",
+            "kræver_indførselstilladelse_tobak",
             "har_privat_tillægsafgift_alkohol",
             "minimumsbeløb",
             "segment_nedre",
@@ -178,7 +179,8 @@ class VareafgiftssatsIn(ModelSchema):
             "synlig_privat",
         ]
         model_fields_optional = [
-            "kræver_indførselstilladelse",
+            "kræver_indførselstilladelse_alkohol",
+            "kræver_indførselstilladelse_tobak",
             "har_privat_tillægsafgift_alkohol",
             "minimumsbeløb",
             "segment_nedre",
@@ -199,7 +201,8 @@ class PartialVareafgiftssatsIn(ModelSchema):
             "afgiftsgruppenummer",
             "enhed",
             "afgiftssats",
-            "kræver_indførselstilladelse",
+            "kræver_indførselstilladelse_alkohol",
+            "kræver_indførselstilladelse_tobak",
             "har_privat_tillægsafgift_alkohol",
             "minimumsbeløb",
             "segment_nedre",
@@ -220,7 +223,8 @@ class VareafgiftssatsOut(ModelSchema):
             "afgiftsgruppenummer",
             "enhed",
             "afgiftssats",
-            "kræver_indførselstilladelse",
+            "kræver_indførselstilladelse_alkohol",
+            "kræver_indførselstilladelse_tobak",
             "har_privat_tillægsafgift_alkohol",
             "minimumsbeløb",
             "overordnet",
@@ -237,7 +241,8 @@ class VareafgiftssatsFilterSchema(FilterSchema):
     afgiftsgruppenummer: Optional[int] = None
     enhed: Optional[str] = None
     afgiftssats: Optional[Decimal] = None
-    kræver_indførselstilladelse: Optional[bool] = None
+    kræver_indførselstilladelse_alkohol: Optional[bool] = None
+    kræver_indførselstilladelse_tobak: Optional[bool] = None
     har_privat_tillægsafgift_alkohol: Optional[bool] = None
     minimumsbeløb: Optional[Decimal] = None
     overordnet: Optional[int] = None
