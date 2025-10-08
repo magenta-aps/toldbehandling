@@ -348,7 +348,8 @@ class AfgiftanmeldelseRestClient(ModelRestClient):
     ) -> dict:
         return {
             "leverandørfaktura_nummer": data.get("leverandørfaktura_nummer"),
-            "indførselstilladelse": data.get("indførselstilladelse"),
+            "indførselstilladelse_alkohol": data.get("indførselstilladelse_alkohol"),
+            "indførselstilladelse_tobak": data.get("indførselstilladelse_tobak"),
             "afsender_id": afsender_id,
             "modtager_id": modtager_id,
             "postforsendelse_id": postforsendelse_id,

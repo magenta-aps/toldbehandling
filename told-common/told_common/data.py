@@ -78,7 +78,8 @@ class Vareafgiftssats(ToldDataClass):
     enhed: Enhed
     afgiftssats: Decimal
     har_privat_tillægsafgift_alkohol: bool = False
-    kræver_indførselstilladelse: Optional[bool] = False
+    kræver_indførselstilladelse_alkohol: Optional[bool] = False
+    kræver_indførselstilladelse_tobak: Optional[bool] = False
     synlig_privat: bool = False
     minimumsbeløb: Optional[Decimal] = None
     overordnet: Optional[int] = None
@@ -312,7 +313,8 @@ class Afgiftsanmeldelse(ToldDataClass):
     postforsendelse: Union[int, PostForsendelse, None]
     leverandørfaktura_nummer: Optional[str]
     leverandørfaktura: Optional[File]
-    indførselstilladelse: Optional[str]
+    indførselstilladelse_alkohol: Optional[str]
+    indførselstilladelse_tobak: Optional[str]
     afgift_total: Decimal
     betalt: bool
     status: str
