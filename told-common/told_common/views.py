@@ -610,7 +610,8 @@ class TF10FormUpdateView(
                 )
                 initial[key + "_change_existing"] = False
             initial["leverandørfaktura_nummer"] = item.leverandørfaktura_nummer
-            initial["indførselstilladelse"] = item.indførselstilladelse
+            initial["indførselstilladelse_alkohol"] = item.indførselstilladelse_alkohol
+            initial["indførselstilladelse_tobak"] = item.indførselstilladelse_tobak
             initial["betales_af"] = item.betales_af
             fragtforsendelse = item.fragtforsendelse
             postforsendelse = item.postforsendelse
