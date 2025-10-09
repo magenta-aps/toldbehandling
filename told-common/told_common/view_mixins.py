@@ -248,6 +248,7 @@ class PreventDoubleSubmitMixin:
                     (k, v) for k, v in self.request.POST.items() if k not in excluded
                 )
                 + sorted((k, hash_file(v)) for k, v in self.request.FILES.items())
+                + [request.path]
             )
         )
 
