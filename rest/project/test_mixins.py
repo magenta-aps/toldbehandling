@@ -533,7 +533,8 @@ class RestMixin:
         self.afgiftsanmeldelse_data = {
             "leverandørfaktura_nummer": "12345",
             "betales_af": "afsender",
-            "indførselstilladelse": "abcde",
+            "indførselstilladelse_alkohol": "abcde",
+            "indførselstilladelse_tobak": "opqrstu",
             "betalt": False,
             "fuldmagtshaver": None,
         }
