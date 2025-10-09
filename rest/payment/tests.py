@@ -75,7 +75,8 @@ class PaymentTest(TestCase):
             enhed=Vareafgiftssats.Enhed.SAMMENSAT,
             minimumsbeløb=None,
             afgiftssats=Decimal("137.00"),
-            kræver_indførselstilladelse=False,
+            kræver_indførselstilladelse_alkohol=False,
+            kræver_indførselstilladelse_tobak=False,
         )
 
         # Create test declarations
