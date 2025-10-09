@@ -550,7 +550,8 @@ class RestMixin:
             "afgiftsgruppenummer": 1234,
             "enhed": Vareafgiftssats.Enhed.KILOGRAM,
             "afgiftssats": "2.50",
-            "kræver_indførselstilladelse": False,
+            "kræver_indførselstilladelse_alkohol": False,
+            "kræver_indførselstilladelse_tobak": False,
             "har_privat_tillægsafgift_alkohol": False,
             "synlig_privat": False,
         }
