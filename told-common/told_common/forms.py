@@ -364,7 +364,6 @@ class TF10Form(BootstrapForm):
 
     def clean_with_formset(self, formset):
         # Perform validation on form and formset together
-        print("ALLES GUT")
         if (
             not self.cleaned_data["indførselstilladelse_alkohol"]
             or not self.cleaned_data["indførselstilladelse_tobak"]
