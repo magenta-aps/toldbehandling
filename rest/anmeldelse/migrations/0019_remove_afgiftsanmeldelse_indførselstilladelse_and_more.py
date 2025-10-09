@@ -3,7 +3,7 @@
 from django.db import migrations, models
 
 def populate_indførselstilladelser(apps, schema_editor):
-    Afgitsanmeldelse = apps.get_model('anmeldelse', 'Afgiftsanmeldelse')
+    Afgiftsanmeldelse = apps.get_model('anmeldelse', 'Afgiftsanmeldelse')
     HistoricalAfgiftsanmeldelse = apps.get_model(
         'anmeldelse',
         'HistoricalAfgiftsanmeldelse',
