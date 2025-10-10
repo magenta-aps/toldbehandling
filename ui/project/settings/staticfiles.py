@@ -4,7 +4,7 @@
 from .base import TESTING
 
 STATIC_URL = "/static/"
-STATIC_ROOT = "/static/"
+STATIC_ROOT = "/static"
 
 STORAGES = {
     "staticfiles": {
