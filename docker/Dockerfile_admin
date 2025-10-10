@@ -9,12 +9,12 @@ ENV SUPERCRONIC_URL=https://github.com/aptible/supercronic/releases/download/v0.
     PYTHONUNBUFFERED=1
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN mkdir /app && \
-    mkdir /static && \
+    mkdir -p /admin/static && \
     #gid/uid from salt
     groupadd -g 75130 -r toldbehandling && \
     groupadd -g 75100 -r certificate_exporter && \
     useradd -u 75130 --no-log-init -r -g toldbehandling -G certificate_exporter toldbehandling && \
-    chown toldbehandling:toldbehandling /static
+    chown toldbehandling:toldbehandling /admin/static
 
 # Font cache for pdf generation
 RUN mkdir -p /home/toldbehandling/.cache/fontconfig && \

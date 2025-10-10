@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: MPL-2.0
 STATIC_URL = "/static/"
-STATIC_ROOT = "/static"
+STATIC_ROOT = "/static/"
 
 STORAGES = {
     "staticfiles": {
