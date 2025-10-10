@@ -23,7 +23,10 @@ STATICFILES_FINDERS = [
     "compressor.finders.CompressorFinder",
 ]
 COMPRESS_PRECOMPILERS = (("text/x-scss", "django_libsass.SassCompiler"),)
+COMPRESS_REBUILD_TIMEOUT = 0
+COMPRESS_ENABLED = True
 LIBSASS_OUTPUT_STYLE = "compressed"
 LIBSASS_ADDITIONAL_INCLUDE_PATHS = [
-    "/app/told-common/told_common/static/bootstrap/scss/"
+    "/app/told-common/told_common/static/bootstrap/scss/",
+    "/app/told_common/static/bootstrap/scss/"
 ]
