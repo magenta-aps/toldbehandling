@@ -191,7 +191,7 @@ header nav .dark-icon {
 // Settings ("wheel") menu
 #settings {
   padding: $spacer;
-  min-width: 20vw;
+  min-width: 25vw;
   border-color: transparent;
   border-radius: 0.5 * $spacer;
   box-shadow: 0 0 $spacer $shadow;
@@ -225,6 +225,7 @@ footer a .material-icons {
   color: $near-black;
 }
 
+// Badges
 .badge {
   border-radius: $spacer;
 }
@@ -258,6 +259,21 @@ footer a .material-icons {
 .btn-danger,
 .btn-success {
   color: $white;
+}
+.btn-outline-primary {
+  background-color: transparent;
+  color: $dark-primary;
+  border: solid 1px transparent;
+}
+.btn-outline-primary:hover {
+  background-color: transparent !important;
+  color: $medium-primary !important;
+  border: solid 1px transparent !important;
+}
+.btn-outline-primary:active {
+  background-color: transparent !important;
+  color: $dark-primary !important;
+  border: solid 1px $dark-primary !important;
 }
 
 // Tables
