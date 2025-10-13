@@ -1,16 +1,25 @@
 # SPDX-FileCopyrightText: 2023 Magenta ApS <info@magenta.dk>
 #
 # SPDX-License-Identifier: MPL-2.0
+from .base import TESTING
+
 STATIC_URL = "/static/"
 STATIC_ROOT = "/static"
 
 STORAGES = {
     "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        "BACKEND": (
+            "django.contrib.staticfiles.storage.StaticFilesStorage"
+            if TESTING
+            else "whitenoise.storage.CompressedManifestStaticFilesStorage"
+        )
     },
 }
 
-STATICFILES_DIRS = ["/app/told-common/told_common/static/"]
+STATICFILES_DIRS = [
+    "/app/told-common/told_common/static/",  # For pipeline tests
+    "/app/told_common/static/",
+]
 STATICFILES_FINDERS = [
     "django.contrib.staticfiles.finders.FileSystemFinder",
     "django.contrib.staticfiles.finders.AppDirectoriesFinder",
@@ -19,5 +28,6 @@ STATICFILES_FINDERS = [
 COMPRESS_PRECOMPILERS = (("text/x-scss", "django_libsass.SassCompiler"),)
 LIBSASS_OUTPUT_STYLE = "compressed"
 LIBSASS_ADDITIONAL_INCLUDE_PATHS = [
-    "/app/told-common/told_common/static/bootstrap/scss/"
+    "/app/told-common/told_common/static/bootstrap/scss/",  # For pipeline tests
+    "/app/told_common/static/bootstrap/scss/",
 ]
