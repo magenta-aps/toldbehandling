@@ -16,7 +16,10 @@ STORAGES = {
     },
 }
 
-STATICFILES_DIRS = ["/app/told-common/told_common/static/"]
+STATICFILES_DIRS = [
+    "/app/told-common/told_common/static/",
+    "/app/told_common/static/",
+]
 STATICFILES_FINDERS = [
     "django.contrib.staticfiles.finders.FileSystemFinder",
     "django.contrib.staticfiles.finders.AppDirectoriesFinder",
@@ -25,5 +28,6 @@ STATICFILES_FINDERS = [
 COMPRESS_PRECOMPILERS = (("text/x-scss", "django_libsass.SassCompiler"),)
 LIBSASS_OUTPUT_STYLE = "compressed"
 LIBSASS_ADDITIONAL_INCLUDE_PATHS = [
-    "/app/told-common/told_common/static/bootstrap/scss/"
+    "/app/told-common/told_common/static/bootstrap/scss/",
+    "/app/told_common/static/bootstrap/scss/",
 ]
