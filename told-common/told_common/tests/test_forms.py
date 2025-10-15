@@ -165,7 +165,7 @@ class TF10FormTest(TestCase):
                         afgiftsgruppenummer=22446688,
                         enhed=Vareafgiftssats.Enhed.PROCENT,
                         afgiftssats="0.50",
-                        kræver_indførselstilladelse=False,
+                        kræver_indførselstilladelse_alkohol=False,
                         kræver_indførselstilladelse_tobak=False,
                         har_privat_tillægsafgift_alkohol=False,
                     ),
