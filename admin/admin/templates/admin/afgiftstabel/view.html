@@ -181,7 +181,15 @@
                 <td>{{vareafgiftssats.vareart_da}}</td>
                 <td>{{vareafgiftssats.vareart_kl}}</td>
                 <td>{{vareafgiftssats.enhed|enhedsnavn}}</td>
-                <td>{{vareafgiftssats.kræver_indførselstilladelse|yesno}}</td>
+                <td>
+                    {% if vareafgiftssats.kræver_indførselstilladelse_alkohol %}
+                    {% translate 'Alkohol' %}
+                    {% elif vareafgiftssats.kræver_indførselstilladelse_tobak %}
+                    {% translate 'Tobak' %}
+                    {% else %}
+                    {% translate 'nej' %}
+                    {% endif %}
+                </td>
                 <td colspan="4"></td>
                 {% else %}
                 <td>{{vareafgiftssats.afgiftsgruppenummer|unlocalize}}</td>
@@ -210,7 +218,15 @@
                 <td>{{subsats.vareart_da}}</td>
                 <td>{{subsats.vareart_kl}}</td>
                 <td>{{subsats.enhed|enhedsnavn}}</td>
-                <td>{{vareafgiftssats.kræver_indførselstilladelse|yesno}}</td>
+                <td>
+                    {% if vareafgiftssats.kræver_indførselstilladelse_alkohol %}
+                    {% translate 'Alkohol' %}
+                    {% elif vareafgiftssats.kræver_indførselstilladelse_tobak %}
+                    {% translate 'Tobak' %}
+                    {% else %}
+                    {% translate 'nej' %}
+                    {% endif %}
+                </td>
                 <td>{{vareafgiftssats.minimumsbeløb|default_if_none:""}}</td>
                 <td>{{subsats.afgiftssats}}</td>
                 <td>{{subsats.segment_nedre|default_if_none:""}}</td>
