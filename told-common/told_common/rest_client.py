@@ -1021,7 +1021,7 @@ class RestClient:
     def check_twofactor(cls, user_id: int, twofactor_token: str):
         response = requests.post(
             f"{cls.domain}/api/2fa/check",
-            json={"user_id": user_id, "twofactor_token": twofactor_token},
+            json={"user_id": user_id, "twofactor_token": str(twofactor_token).zfill(6)},
             headers={"Content-Type": "application/json"},
         )
         response.raise_for_status()
