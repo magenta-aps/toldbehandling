@@ -174,6 +174,53 @@ class PostforsendelseAPITests(TestCase):
             },
         )
 
+    def test_create_postforsendelse_leniency(self):
+        resp = self.client.post(
+            reverse("api-1.0.0:postforsendelse_create"),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+            data=json_dump(
+                {
+                    "kladde": True,
+                    "postforsendelsesnummer": 464,
+                    "afsenderbykode": 1234,
+
+                }
+            ),
+        )
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.json(), {"id": ANY})
+
+    def test_update_postforsendelse_leniency(self):
+        # Create some test data to update
+        postforsendelse = Postforsendelse.objects.create(
+            forsendelsestype=Postforsendelse.Forsendelsestype.SKIB,
+            postforsendelsesnummer="1234567890",
+            afsenderbykode="1234",
+            afgangsdato="2023-01-01",
+            kladde=False,
+            oprettet_af=self.user,
+        )
+
+        resp = self.client.patch(
+            reverse(
+                "api-1.0.0:postforsendelse_update", kwargs={"id": postforsendelse.id}
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+            data=json_dump(
+                {
+                    "postforsendelsesnummer": 547,
+                    "afsenderbykode": 9876,
+                    "kladde": False,
+                }
+            ),
+        )
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.json(), {"count": 0, "items": []})
+
     def test_list_postforsendelser_filter_user_query_none(self):
         # Create some test data to list
         postforsendelse = Postforsendelse.objects.create(
@@ -295,6 +342,49 @@ class FragtforsendelseAPITests(TestCase):
 
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.json(), {"id": ANY})
+
+    def test_create_fragtforsendelse_leniency(self):
+        resp = self.client.post(
+            reverse("api-1.0.0:fragtforsendelse_create"),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+            data=json_dump(
+                {
+                    "fragtbrevsnummer": 123456,
+                    "kladde": True,
+
+                }
+            ),
+        )
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.json(), {"id": ANY})
+
+    def test_update_fragtforsendelse_leniency(self):
+        fragtforsendelse = Fragtforsendelse.objects.create(
+            forsendelsestype=Forsendelse.Forsendelsestype.SKIB,
+            fragtbrevsnummer="abcde1234567",
+            forbindelsesnr="abc 123",
+            afgangsdato="2024-12-31",
+            oprettet_af=self.user,
+        )
+        # Invoke the endpoint
+        resp = self.client.patch(
+            reverse(
+                "api-1.0.0:fragtforsendelse_update", kwargs={"id": fragtforsendelse.id}
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+            data=json_dump(
+                {
+                    "fragtbrevsnummer": 1234567,
+                    "kladde": False,
+                }
+            ),
+        )
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.json(), {"success": True})
 
     def test_create_fragtforsendelse_skib_bad_requests(self):
         resp_invalid_forbindelsesnr = self.client.post(
