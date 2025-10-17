@@ -98,7 +98,6 @@ class PartialAfgiftsanmeldelseIn(ModelSchema):
     tf3: Optional[bool] = None
     leverandørfaktura_nummer: Optional[str] = None
     indførselstilladelse: Optional[str] = None
-    toldkategori: Optional[str] = None
 
     @field_validator(
         "leverandørfaktura_nummer",
