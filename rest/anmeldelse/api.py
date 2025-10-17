@@ -7,7 +7,7 @@ import base64
 import logging
 from datetime import date, datetime, time, timedelta
 from decimal import Decimal
-from typing import Annotated, List, Optional, Tuple
+from typing import Annotated, Any, List, Optional, Tuple
 from uuid import uuid4
 
 import django.utils.timezone as tz
@@ -38,7 +38,7 @@ from ninja_extra.pagination import paginate
 from ninja_extra.schemas import NinjaPaginationResponseSchema
 from payment.models import Payment
 from project.util import RestPermission, json_dump
-from pydantic import root_validator
+from pydantic import field_validator, root_validator
 from sats.models import Vareafgiftssats
 
 log = logging.getLogger(__name__)
@@ -55,6 +55,15 @@ class AfgiftsanmeldelseIn(ModelSchema):
     kladde: Optional[bool] = False
     fuldmagtshaver_id: Optional[int] = None
     tf3: Optional[bool] = False
+    leverandørfaktura_nummer: Optional[str] = None
+
+    @field_validator("leverandørfaktura_nummer", mode="before")
+    @classmethod
+    def coerce_numbers_to_string(cls, value: Any):
+        # Take value of any type, to coerce num->str before normal Pydantic validation
+        if isinstance(value, (int, float)):
+            return str(value)
+        return value
 
     class Config:
         model = Afgiftsanmeldelse

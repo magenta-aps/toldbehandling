@@ -636,6 +636,88 @@ class AfgiftsanmeldelseAPITest(AnmeldelsesTestDataMixin, TestCase):
         afgiftsanmeldelse = Afgiftsanmeldelse.objects.get(id=new_row_id)
         self.assertEqual(afgiftsanmeldelse.betales_af, None)
 
+    def test_create_leverandørfaktura_nummer_leniency(self):
+        postforsendelse_local, _ = Postforsendelse.objects.get_or_create(
+            postforsendelsesnummer="223344",
+            oprettet_af=self.user,
+            defaults={
+                "forsendelsestype": Postforsendelse.Forsendelsestype.SKIB,
+                "afsenderbykode": "8200",
+                "afgangsdato": "2023-11-03",
+                "kladde": False,
+            },
+        )
+
+        resp = self.client.post(
+            reverse("api-1.0.0:afgiftsanmeldelse_create"),
+            data=json_dump(
+                {
+                    "afsender_id": self.afsender.id,
+                    "modtager_id": self.modtager.id,
+                    "postforsendelse_id": postforsendelse_local.id,
+                    "leverandørfaktura_nummer": 12345678901234567890,
+                    "betales_af": "",
+                }
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, 200)
+
+        new_row_id = int(resp.json()["id"])
+        afgiftsanmeldelse = Afgiftsanmeldelse.objects.get(id=new_row_id)
+
+        postforsendelse_local, _ = Postforsendelse.objects.get_or_create(
+            postforsendelsesnummer="223345",
+            oprettet_af=self.user,
+            defaults={
+                "forsendelsestype": Postforsendelse.Forsendelsestype.SKIB,
+                "afsenderbykode": "8300",
+                "afgangsdato": "2024-11-03",
+                "kladde": False,
+            },
+        )
+
+        resp = self.client.post(
+            reverse("api-1.0.0:afgiftsanmeldelse_create"),
+            data=json_dump(
+                {
+                    "afsender_id": self.afsender.id,
+                    "modtager_id": self.modtager.id,
+                    "postforsendelse_id": postforsendelse_local.id,
+                    "leverandørfaktura_nummer": 123456789.01234567890,
+                    "betales_af": "",
+                }
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, 200)
+
+        new_row_id = int(resp.json()["id"])
+        afgiftsanmeldelse = Afgiftsanmeldelse.objects.get(id=new_row_id)
+
+        resp = self.client.post(
+            reverse("api-1.0.0:afgiftsanmeldelse_create"),
+            data=json_dump(
+                {
+                    "afsender_id": self.afsender.id,
+                    "modtager_id": self.modtager.id,
+                    "postforsendelse_id": postforsendelse_local.id,
+                    "leverandørfaktura_nummer": (
+                        1,
+                        2,
+                        3,
+                        4,
+                    ),
+                    "betales_af": "",
+                }
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, 422)
+
     def test_get_history(self):
         # Invoke the endpoint
         resp = self.client.get(
