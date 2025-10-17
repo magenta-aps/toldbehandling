@@ -174,6 +174,101 @@ class PostforsendelseAPITests(TestCase):
             },
         )
 
+    def test_create_postforsendelse_leniency(self):
+        resp = self.client.post(
+            reverse("api-1.0.0:postforsendelse_create"),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+            data=json_dump(
+                {
+                    "kladde": True,
+                    "postforsendelsesnummer": 464,
+                    "afsenderbykode": 1234,
+
+                }
+            ),
+        )
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.json(), {"id": ANY})
+
+    def test_update_postforsendelse_leniency(self):
+        # Add update permissions for this test
+        self.user.user_permissions.add(
+            Permission.objects.get(codename="change_postforsendelse"),
+        )
+        self.user.save()
+
+        # Create IndberetterProfile for user for permissions
+        _ = IndberetterProfile.objects.create(
+            user=self.user, cvr="13371337", api_key=IndberetterProfile.create_api_key()
+        )
+
+        postforsendelse = Postforsendelse.objects.create(
+            forsendelsestype=Postforsendelse.Forsendelsestype.SKIB,
+            postforsendelsesnummer="1234567890",
+            afsenderbykode="1234",
+            afgangsdato="2023-01-01",
+            oprettet_af=self.user,
+        )
+
+        afsender = Afsender.objects.create(
+            navn="Afsender1",
+            adresse="Afsendervej 1",
+            postnummer="1234",
+            by="Afsenderby",
+            postbox="1234",
+            telefon="12345678",
+            cvr="12345678",
+            kladde=False,
+        )
+
+        modtager = Modtager.objects.create(
+            navn="Modtager1",
+            adresse="Modtagervej 1",
+            postnummer="5678",
+            by="Modtagerby",
+            postbox="5678",
+            telefon="87654321",
+            cvr="87654321",
+            kladde=False,
+        )
+
+        # Create test afgiftanmeldelse
+        # OBS: Our permissions check method, PostforsendelseAPI.checkUser(), requires an Afgiftsanmeldelse to exist
+        # for the postforsendelse we want to update
+        afgiftsanmeldelse = Afgiftsanmeldelse.objects.create(
+            afsender=afsender,
+            modtager=modtager,
+            postforsendelse=postforsendelse,
+            fragtforsendelse=None,
+            leverandørfaktura_nummer="1234",
+            betales_af="afsender",
+            indførselstilladelse="5678",
+            betalt=False,
+            oprettet_af=postforsendelse.oprettet_af,
+        )
+
+        resp = self.client.patch(
+            reverse(
+                "api-1.0.0:postforsendelse_update", kwargs={"id": postforsendelse.id}
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+            data=json_dump(
+                {
+                    "postforsendelsesnummer": 547,
+                    "afsenderbykode": 9876,
+                    "kladde": False,
+                }
+            ),
+        )
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(Postforsendelse.objects.get(pk=postforsendelse.pk).afsenderbykode, "9876")
+        self.assertEqual(Postforsendelse.objects.get(pk=postforsendelse.pk).postforsendelsesnummer, "547")
+        self.assertEqual(resp.json(), {"success": True})
+
     def test_list_postforsendelser_filter_user_query_none(self):
         # Create some test data to list
         postforsendelse = Postforsendelse.objects.create(
