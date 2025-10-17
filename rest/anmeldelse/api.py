@@ -56,8 +56,15 @@ class AfgiftsanmeldelseIn(ModelSchema):
     fuldmagtshaver_id: Optional[int] = None
     tf3: Optional[bool] = False
     leverandørfaktura_nummer: Optional[str] = None
+    indførselstilladelse: Optional[str] = None
+    toldkategori: Optional[str] = None
 
-    @field_validator("leverandørfaktura_nummer", mode="before")
+    @field_validator(
+        "leverandørfaktura_nummer",
+        "indførselstilladelse",
+        "toldkategori",
+        mode="before",
+    )
     @classmethod
     def coerce_numbers_to_string(cls, value: Any):
         # Take value of any type, to coerce num->str before normal Pydantic validation
@@ -89,6 +96,22 @@ class PartialAfgiftsanmeldelseIn(ModelSchema):
     fuldmagtshaver_id: Optional[int] = None
     status: Optional[str] = None
     tf3: Optional[bool] = None
+    leverandørfaktura_nummer: Optional[str] = None
+    indførselstilladelse: Optional[str] = None
+    toldkategori: Optional[str] = None
+
+    @field_validator(
+        "leverandørfaktura_nummer",
+        "indførselstilladelse",
+        "toldkategori",
+        mode="before",
+    )
+    @classmethod
+    def coerce_numbers_to_string(cls, value: Any):
+        # Take value of any type, to coerce num->str before normal Pydantic validation
+        if isinstance(value, (int, float)):
+            return str(value)
+        return value
 
     class Config:
         model = Afgiftsanmeldelse
@@ -534,8 +557,26 @@ class AfgiftsanmeldelseAPI:
 
 
 class PrivatAfgiftsanmeldelseIn(ModelSchema):
+    bookingnummer: str
+    telefon: str
     leverandørfaktura: Optional[str] = None  # Base64
     leverandørfaktura_navn: Optional[str] = None
+    leverandørfaktura_nummer: Optional[str] = None
+    indførselstilladelse: Optional[str] = None
+
+    @field_validator(
+        "leverandørfaktura_nummer",
+        "indførselstilladelse",
+        "bookingnummer",
+        "telefon",
+        mode="before",
+    )
+    @classmethod
+    def coerce_numbers_to_string(cls, value: Any):
+        # Take value of any type, to coerce num->str before normal Pydantic validation
+        if isinstance(value, (int, float)):
+            return str(value)
+        return value
 
     class Config:
         model = PrivatAfgiftsanmeldelse
@@ -555,8 +596,26 @@ class PrivatAfgiftsanmeldelseIn(ModelSchema):
 
 
 class PartialPrivatAfgiftsanmeldelseIn(ModelSchema):
+    telefon: Optional[str] = None
+    bookingnummer: Optional[str] = None
     leverandørfaktura: Optional[str] = None  # Base64
     leverandørfaktura_navn: Optional[str] = None
+    leverandørfaktura_nummer: Optional[str] = None
+    indførselstilladelse: Optional[str] = None
+
+    @field_validator(
+        "leverandørfaktura_nummer",
+        "indførselstilladelse",
+        "bookingnummer",
+        "telefon",
+        mode="before",
+    )
+    @classmethod
+    def coerce_numbers_to_string(cls, value: Any):
+        # Take value of any type, to coerce num->str before normal Pydantic validation
+        if isinstance(value, (int, float)):
+            return str(value)
+        return value
 
     class Config:
         model = PrivatAfgiftsanmeldelse
