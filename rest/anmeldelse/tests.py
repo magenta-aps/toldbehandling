@@ -636,7 +636,7 @@ class AfgiftsanmeldelseAPITest(AnmeldelsesTestDataMixin, TestCase):
         afgiftsanmeldelse = Afgiftsanmeldelse.objects.get(id=new_row_id)
         self.assertEqual(afgiftsanmeldelse.betales_af, None)
 
-    def test_create_leverandørfaktura_nummer_leniency(self):
+    def test_create_leniency(self):
         postforsendelse_local, _ = Postforsendelse.objects.get_or_create(
             postforsendelsesnummer="223344",
             oprettet_af=self.user,
@@ -652,11 +652,12 @@ class AfgiftsanmeldelseAPITest(AnmeldelsesTestDataMixin, TestCase):
             reverse("api-1.0.0:afgiftsanmeldelse_create"),
             data=json_dump(
                 {
-                    "afsender_id": self.afsender.id,
-                    "modtager_id": self.modtager.id,
-                    "postforsendelse_id": postforsendelse_local.id,
+                    "afsender_id": int(self.afsender.id),
+                    "modtager_id": int(self.modtager.id),
+                    "postforsendelse_id": int(postforsendelse_local.id),
                     "leverandørfaktura_nummer": 12345678901234567890,
-                    "betales_af": "",
+                    "betales_af": "modtager",
+                    "indførselstilladelse": 2227,
                 }
             ),
             HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
@@ -686,7 +687,7 @@ class AfgiftsanmeldelseAPITest(AnmeldelsesTestDataMixin, TestCase):
                     "modtager_id": self.modtager.id,
                     "postforsendelse_id": postforsendelse_local.id,
                     "leverandørfaktura_nummer": 123456789.01234567890,
-                    "betales_af": "",
+                    "betales_af": "modtager",
                 }
             ),
             HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
@@ -932,6 +933,57 @@ class AfgiftsanmeldelseAPITest(AnmeldelsesTestDataMixin, TestCase):
             data=json_dump(
                 {
                     "leverandørfaktura_nummer": "54321",
+                }
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+        )
+
+        mock_check_user.assert_called_once_with(afgiftsanmeldelse_kladde)
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.json(), {"success": True})
+
+        # Verify the status was changed from "kladde" to "ny"
+        afgiftsanmeldelse_kladde.refresh_from_db()
+        self.assertEqual(afgiftsanmeldelse_kladde.status, "ny")
+
+    @patch("anmeldelse.api.AfgiftsanmeldelseAPI.check_user")
+    def test_update_leniency(self, mock_check_user):
+        postforsendelse_kladde, _ = Postforsendelse.objects.get_or_create(
+            postforsendelsesnummer="1337",
+            oprettet_af=self.user,
+            defaults={
+                "forsendelsestype": Postforsendelse.Forsendelsestype.SKIB,
+                "afsenderbykode": "8200",
+                "afgangsdato": "2024-05-06",
+                "kladde": True,
+            },
+        )
+
+        afgiftsanmeldelse_kladde = Afgiftsanmeldelse.objects.create(
+            **{
+                "afsender_id": self.afsender.id,
+                "modtager_id": self.modtager.id,
+                "postforsendelse_id": postforsendelse_kladde.id,
+                "leverandørfaktura_nummer": "12345",
+                "betales_af": "afsender",
+                "indførselstilladelse": "abcde",
+                "betalt": False,
+                "fuldmagtshaver": None,
+                "status": "kladde",
+                "oprettet_af": self.user,
+            }
+        )
+
+        resp = self.client.patch(
+            reverse(
+                "api-1.0.0:afgiftsanmeldelse_update", args=[afgiftsanmeldelse_kladde.id]
+            ),
+            data=json_dump(
+                {
+                    "leverandørfaktura_nummer": 543.21,
+                    "indførselstilladelse": 789,
+                    "toldkategori": 70,
                 }
             ),
             HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
@@ -1253,6 +1305,32 @@ class PrivatAfgiftsanmeldelseAPITest(TestCase):
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.json(), {"id": ANY})
 
+    def test_create_leniency(self):
+        resp = self.client.post(
+            reverse(f"api-1.0.0:privat_afgiftsanmeldelse_create"),
+            json_dump(
+                {
+                    "cpr": self.indberetter.cpr,
+                    "navn": "Test privatafgiftsanmeldelse",
+                    "adresse": "Silkeborgvej 260",
+                    "postnummer": 8230,
+                    "by": "Åbyhøj",
+                    "telefon": 13371337,
+                    "bookingnummer": 666,
+                    "indleveringsdato": "2022-01-01",
+                    "leverandørfaktura_nummer": 1234,
+                    "leverandørfaktura": base64.b64encode(
+                        b"%PDF-1.4\n%Fake PDF content"
+                    ).decode("utf-8"),
+                }
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+        )
+
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.json(), {"id": ANY})
+
     @patch("anmeldelse.api.PrivatAfgiftsanmeldelse.objects.create")
     def test_create_validation_error(self, mock_create):
         mock_validation_err_content = {
@@ -1506,7 +1584,53 @@ class PrivatAfgiftsanmeldelseAPITest(TestCase):
             HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
             content_type="application/json",
         )
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.json(), {"success": True})
 
+    def test_update_leniency(self):
+        resp = self.client.patch(
+            reverse(
+                f"api-1.0.0:privatafgiftsanmeldelse_update",
+                args=[self.privatafgiftsanmeldelse.id],
+            ),
+            json_dump(
+                {
+                    "navn": "Test privatafgiftsanmeldelse 1.2",
+                    "leverandørfaktura": base64.b64encode(
+                        b"%PDF-1.4\n%Fake PDF content - updated!"
+                    ).decode("utf-8"),
+                    "telefon": 45678952,
+                    "indførselstilladelse": 12.45,
+                    "bookingnummer": 98.36,
+                    "leverandørfaktura_nummer": 789.798,
+                }
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.json(), {"success": True})
+
+        resp = self.client.patch(
+            reverse(
+                f"api-1.0.0:privatafgiftsanmeldelse_update",
+                args=[self.privatafgiftsanmeldelse.id],
+            ),
+            json_dump(
+                {
+                    "navn": "Test privatafgiftsanmeldelse 1.2",
+                    "leverandørfaktura": base64.b64encode(
+                        b"%PDF-1.4\n%Fake PDF content - updated!"
+                    ).decode("utf-8"),
+                    "telefon": 45678952,
+                    "indførselstilladelse": 12.45,
+                    "bookingnummer": 98.36,
+                    "leverandørfaktura_nummer": "78998",
+                }
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+        )
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.json(), {"success": True})
 
