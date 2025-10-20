@@ -1,8 +1,13 @@
 from datetime import timedelta
+from typing import Any
 
 from common.models import Postnummer
 from django.utils.datetime_safe import date
 
+def coerce_num_to_str(value: Any) -> Any:
+    if isinstance(value, (int, float)):
+        return str(value)
+    return value
 
 def dato_næste_måned_start(dato: date) -> date:
     return date(
