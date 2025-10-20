@@ -41,7 +41,9 @@ log = logging.getLogger(__name__)
 
 
 class PostforsendelseIn(ModelSchema):
-    postforsendelsesnummer: Annotated[Optional[str], BeforeValidator(coerce_num_to_str)] = None
+    postforsendelsesnummer: Annotated[
+        Optional[str], BeforeValidator(coerce_num_to_str)
+    ] = None
     afsenderbykode: Annotated[Optional[str], BeforeValidator(coerce_num_to_str)] = None
 
     class Config:
@@ -56,7 +58,9 @@ class PostforsendelseIn(ModelSchema):
 
 
 class PartialPostforsendelseIn(ModelSchema):
-    postforsendelsesnummer: Annotated[Optional[str], BeforeValidator(coerce_num_to_str)] = None
+    postforsendelsesnummer: Annotated[
+        Optional[str], BeforeValidator(coerce_num_to_str)
+    ] = None
     afsenderbykode: Annotated[Optional[str], BeforeValidator(coerce_num_to_str)] = None
 
     class Config:

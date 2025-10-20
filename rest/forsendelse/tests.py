@@ -184,7 +184,6 @@ class PostforsendelseAPITests(TestCase):
                     "kladde": True,
                     "postforsendelsesnummer": 464,
                     "afsenderbykode": 1234,
-
                 }
             ),
         )
@@ -265,8 +264,13 @@ class PostforsendelseAPITests(TestCase):
         )
 
         self.assertEqual(resp.status_code, 200)
-        self.assertEqual(Postforsendelse.objects.get(pk=postforsendelse.pk).afsenderbykode, "9876")
-        self.assertEqual(Postforsendelse.objects.get(pk=postforsendelse.pk).postforsendelsesnummer, "547")
+        self.assertEqual(
+            Postforsendelse.objects.get(pk=postforsendelse.pk).afsenderbykode, "9876"
+        )
+        self.assertEqual(
+            Postforsendelse.objects.get(pk=postforsendelse.pk).postforsendelsesnummer,
+            "547",
+        )
         self.assertEqual(resp.json(), {"success": True})
 
     def test_list_postforsendelser_filter_user_query_none(self):
