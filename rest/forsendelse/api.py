@@ -4,11 +4,13 @@
 # mypy: disable-error-code="call-arg, attr-defined"
 import base64
 import logging
+from pydantic import BeforeValidator
 from typing import Annotated, Optional
 from uuid import uuid4
 
 from common.api import get_auth_methods
 from common.models import IndberetterProfile
+from common.util import coerce_num_to_str
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.db.models import QuerySet
@@ -39,6 +41,9 @@ log = logging.getLogger(__name__)
 
 
 class PostforsendelseIn(ModelSchema):
+    postforsendelsesnummer: Annotated[Optional[str], BeforeValidator(coerce_num_to_str)] = None
+    afsenderbykode: Annotated[Optional[str], BeforeValidator(coerce_num_to_str)] = None
+
     class Config:
         model = Postforsendelse
         model_fields = [
@@ -51,6 +56,9 @@ class PostforsendelseIn(ModelSchema):
 
 
 class PartialPostforsendelseIn(ModelSchema):
+    postforsendelsesnummer: Annotated[Optional[str], BeforeValidator(coerce_num_to_str)] = None
+    afsenderbykode: Annotated[Optional[str], BeforeValidator(coerce_num_to_str)] = None
+
     class Config:
         model = Postforsendelse
         model_fields = [
