@@ -7,7 +7,7 @@ import base64
 import logging
 from datetime import date, datetime, time, timedelta
 from decimal import Decimal
-from typing import Annotated, Any, List, Optional, Tuple
+from typing import Annotated, List, Optional, Tuple
 from uuid import uuid4
 
 import django.utils.timezone as tz
@@ -39,7 +39,7 @@ from ninja_extra.pagination import paginate
 from ninja_extra.schemas import NinjaPaginationResponseSchema
 from payment.models import Payment
 from project.util import RestPermission, json_dump
-from pydantic import BeforeValidator, field_validator, root_validator
+from pydantic import BeforeValidator, root_validator
 from sats.models import Vareafgiftssats
 
 log = logging.getLogger(__name__)
@@ -539,26 +539,16 @@ class AfgiftsanmeldelseAPI:
 
 
 class PrivatAfgiftsanmeldelseIn(ModelSchema):
-    bookingnummer: str
-    telefon: str
+    bookingnummer: Annotated[str, BeforeValidator(coerce_num_to_str)]
+    telefon: Annotated[str, BeforeValidator(coerce_num_to_str)]
     leverandørfaktura: Optional[str] = None  # Base64
     leverandørfaktura_navn: Optional[str] = None
-    leverandørfaktura_nummer: Optional[str] = None
-    indførselstilladelse: Optional[str] = None
-
-    @field_validator(
-        "leverandørfaktura_nummer",
-        "indførselstilladelse",
-        "bookingnummer",
-        "telefon",
-        mode="before",
-    )
-    @classmethod
-    def coerce_numbers_to_string(cls, value: Any):
-        # Take value of any type, to coerce num->str before normal Pydantic validation
-        if isinstance(value, (int, float)):
-            return str(value)
-        return value
+    leverandørfaktura_nummer: Annotated[
+        Optional[str], BeforeValidator(coerce_num_to_str)
+    ] = None
+    indførselstilladelse: Annotated[
+        Optional[str], BeforeValidator(coerce_num_to_str)
+    ] = None
 
     class Config:
         model = PrivatAfgiftsanmeldelse
@@ -578,26 +568,16 @@ class PrivatAfgiftsanmeldelseIn(ModelSchema):
 
 
 class PartialPrivatAfgiftsanmeldelseIn(ModelSchema):
-    telefon: Optional[str] = None
-    bookingnummer: Optional[str] = None
+    bookingnummer: Annotated[Optional[str], BeforeValidator(coerce_num_to_str)] = None
+    telefon: Annotated[Optional[str], BeforeValidator(coerce_num_to_str)] = None
     leverandørfaktura: Optional[str] = None  # Base64
     leverandørfaktura_navn: Optional[str] = None
-    leverandørfaktura_nummer: Optional[str] = None
-    indførselstilladelse: Optional[str] = None
-
-    @field_validator(
-        "leverandørfaktura_nummer",
-        "indførselstilladelse",
-        "bookingnummer",
-        "telefon",
-        mode="before",
-    )
-    @classmethod
-    def coerce_numbers_to_string(cls, value: Any):
-        # Take value of any type, to coerce num->str before normal Pydantic validation
-        if isinstance(value, (int, float)):
-            return str(value)
-        return value
+    leverandørfaktura_nummer: Annotated[
+        Optional[str], BeforeValidator(coerce_num_to_str)
+    ] = None
+    indførselstilladelse: Annotated[
+        Optional[str], BeforeValidator(coerce_num_to_str)
+    ] = None
 
     class Config:
         model = PrivatAfgiftsanmeldelse
