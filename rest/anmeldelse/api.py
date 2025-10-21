@@ -56,8 +56,12 @@ class AfgiftsanmeldelseIn(ModelSchema):
     kladde: Optional[bool] = False
     fuldmagtshaver_id: Optional[int] = None
     tf3: Optional[bool] = False
-    leverandørfaktura_nummer: Annotated[Optional[str], BeforeValidator(coerce_num_to_str)] = None
-    indførselstilladelse: Annotated[Optional[str], BeforeValidator(coerce_num_to_str)] = None
+    leverandørfaktura_nummer: Annotated[
+        Optional[str], BeforeValidator(coerce_num_to_str)
+    ] = None
+    indførselstilladelse: Annotated[
+        Optional[str], BeforeValidator(coerce_num_to_str)
+    ] = None
     toldkategori: Annotated[Optional[str], BeforeValidator(coerce_num_to_str)] = None
 
     class Config:
@@ -83,8 +87,12 @@ class PartialAfgiftsanmeldelseIn(ModelSchema):
     fuldmagtshaver_id: Optional[int] = None
     status: Optional[str] = None
     tf3: Optional[bool] = None
-    leverandørfaktura_nummer: Annotated[Optional[str], BeforeValidator(coerce_num_to_str)] = None
-    indførselstilladelse: Annotated[Optional[str], BeforeValidator(coerce_num_to_str)] = None
+    leverandørfaktura_nummer: Annotated[
+        Optional[str], BeforeValidator(coerce_num_to_str)
+    ] = None
+    indførselstilladelse: Annotated[
+        Optional[str], BeforeValidator(coerce_num_to_str)
+    ] = None
     toldkategori: Annotated[Optional[str], BeforeValidator(coerce_num_to_str)] = None
 
     class Config:

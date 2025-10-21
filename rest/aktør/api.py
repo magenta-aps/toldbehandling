@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: MPL-2.0
 # mypy: disable-error-code="call-arg, attr-defined"
 
-from pydantic import BeforeValidator
 from typing import Annotated, Optional
 
 from aktør.models import Afsender, Modtager, Speditør
@@ -18,6 +17,7 @@ from ninja_extra import api_controller, permissions, route
 from ninja_extra.pagination import paginate
 from ninja_extra.schemas import NinjaPaginationResponseSchema
 from project.util import RestPermission, json_dump
+from pydantic import BeforeValidator
 
 # Shared schemas
 

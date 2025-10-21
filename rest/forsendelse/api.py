@@ -4,7 +4,6 @@
 # mypy: disable-error-code="call-arg, attr-defined"
 import base64
 import logging
-from pydantic import BeforeValidator
 from typing import Annotated, Optional
 from uuid import uuid4
 
@@ -23,6 +22,7 @@ from ninja_extra.exceptions import PermissionDenied
 from ninja_extra.pagination import paginate
 from ninja_extra.schemas import NinjaPaginationResponseSchema
 from project.util import RestPermission, json_dump
+from pydantic import BeforeValidator
 
 log = logging.getLogger(__name__)
 # Django-ninja har endnu ikke understøttelse for PATCH med filer i multipart/form-data
