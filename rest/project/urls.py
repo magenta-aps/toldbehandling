@@ -5,22 +5,13 @@
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
+from django.contrib.auth import login
 from django.shortcuts import redirect
-from django.urls import path, reverse
+from django.urls import path
 from django.urls.resolvers import URLPattern, URLResolver
 from project.api import api
 from two_factor.admin import AdminSiteOTPRequired
 from two_factor.views import LoginView, QRGeneratorView, SetupCompleteView, SetupView
-
-
-class RestAdminSiteOTPRequired(AdminSiteOTPRequired):
-    def login(self, request, **kwargs):
-        if request.user.is_authenticated and not request.user.is_verified():
-            # If the user is logged in but twofactor is not enabled,
-            # Send him to the two-factor setup form
-            return redirect(reverse("admin_two_factor_setup"))
-        else:
-            return super().login(request, **kwargs)
 
 
 class RestAdminSetupView(SetupView):
@@ -28,12 +19,29 @@ class RestAdminSetupView(SetupView):
     qrcode_url = "admin_two_factor_qr"
 
 
-admin.site.__class__ = RestAdminSiteOTPRequired
+class RestAdminLoginView(LoginView):
+
+    def done(self, form_list, **kwargs):
+        """
+        Login the user and redirect to the desired page.
+        """
+
+        login(self.request, self.get_user())
+        device = getattr(self.get_user(), "otp_device", None)
+
+        # If the user does not have a device.
+        if not device:
+            return redirect("admin_two_factor_setup")
+        else:
+            return super().done(form_list, **kwargs)
+
+
+admin.site.__class__ = AdminSiteOTPRequired
 
 urlpatterns: list[URLResolver | URLPattern] = [
     path(
         "api/admin/login",
-        LoginView.as_view(),
+        RestAdminLoginView.as_view(),
         name="django_admin_login",
     ),
     path(
