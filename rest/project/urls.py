@@ -6,6 +6,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.auth import login
+from django.contrib.auth.forms import AuthenticationForm
 from django.shortcuts import redirect
 from django.urls import path
 from django.urls.resolvers import URLPattern, URLResolver
@@ -21,6 +22,9 @@ class RestAdminSetupView(SetupView):
 
 class RestAdminLoginView(LoginView):
 
+    if not settings.REQUIRE_2FA:  # type: ignore
+        form_list = (("auth", AuthenticationForm),)
+
     def done(self, form_list, **kwargs):
         """
         Login the user and redirect to the desired page.
@@ -30,13 +34,14 @@ class RestAdminLoginView(LoginView):
         device = getattr(self.get_user(), "otp_device", None)
 
         # If the user does not have a device.
-        if not device:
+        if not device and settings.REQUIRE_2FA:  # type: ignore
             return redirect("admin_two_factor_setup")
         else:
             return super().done(form_list, **kwargs)
 
 
-admin.site.__class__ = AdminSiteOTPRequired
+if settings.REQUIRE_2FA:  # type: ignore
+    admin.site.__class__ = AdminSiteOTPRequired
 
 urlpatterns: list[URLResolver | URLPattern] = [
     path(
