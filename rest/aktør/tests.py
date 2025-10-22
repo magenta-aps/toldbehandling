@@ -267,6 +267,52 @@ class AfsenderAPITest(TestCase):
             },
         )
 
+    def test_create_afsender_leniency(self):
+        resp = self.client.post(
+            reverse("api-1.0.0:afsender_create"),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+            data=json_dump(
+                {
+                    "payload": {
+                        "navn": "Jens",
+                        "adresse": "Herovre",
+                        "postnummer": 9878,
+                        "by": "Derovre",
+                        "postbox": 1234,
+                        "telefon": 78945612,
+                        "cvr": None,
+                        "kladde": None,
+                    }
+                }
+            ),
+        )
+
+        self.assertEqual(resp.status_code, 400)
+
+    def test_create_modtager_leniency(self):
+        resp = self.client.post(
+            reverse("api-1.0.0:modtager_create"),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+            data=json_dump(
+                {
+                    "payload": {
+                        "navn": "Jens",
+                        "adresse": "Herovre",
+                        "postnummer": 9878,
+                        "by": "Derovre",
+                        "postbox": 1234,
+                        "telefon": 78945612,
+                        "cvr": None,
+                        "kladde": None,
+                    }
+                }
+            ),
+        )
+
+        self.assertEqual(resp.status_code, 400)
+
     def test_create_modtager_error(self):
         resp = self.client.post(
             reverse("api-1.0.0:modtager_create"),

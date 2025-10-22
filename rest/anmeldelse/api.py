@@ -22,6 +22,7 @@ from anmeldelse.models import (
 )
 from common.api import UserOut, get_auth_methods
 from common.models import IndberetterProfile
+from common.util import coerce_num_to_str
 from django.contrib.auth.models import Group
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
@@ -38,7 +39,7 @@ from ninja_extra.pagination import paginate
 from ninja_extra.schemas import NinjaPaginationResponseSchema
 from payment.models import Payment
 from project.util import RestPermission, json_dump
-from pydantic import root_validator
+from pydantic import BeforeValidator, root_validator
 from sats.models import Vareafgiftssats
 
 log = logging.getLogger(__name__)
@@ -55,6 +56,13 @@ class AfgiftsanmeldelseIn(ModelSchema):
     kladde: Optional[bool] = False
     fuldmagtshaver_id: Optional[int] = None
     tf3: Optional[bool] = False
+    leverandørfaktura_nummer: Annotated[
+        Optional[str], BeforeValidator(coerce_num_to_str)
+    ] = None
+    indførselstilladelse: Annotated[
+        Optional[str], BeforeValidator(coerce_num_to_str)
+    ] = None
+    toldkategori: Annotated[Optional[str], BeforeValidator(coerce_num_to_str)] = None
 
     class Config:
         model = Afgiftsanmeldelse
@@ -75,11 +83,17 @@ class PartialAfgiftsanmeldelseIn(ModelSchema):
     leverandørfaktura: Optional[str] = None  # Base64
     leverandørfaktura_navn: Optional[str] = None
     betales_af: Optional[str] = None
-    toldkategori: Optional[str] = None
     kladde: Optional[bool] = False
     fuldmagtshaver_id: Optional[int] = None
     status: Optional[str] = None
     tf3: Optional[bool] = None
+    leverandørfaktura_nummer: Annotated[
+        Optional[str], BeforeValidator(coerce_num_to_str)
+    ] = None
+    indførselstilladelse: Annotated[
+        Optional[str], BeforeValidator(coerce_num_to_str)
+    ] = None
+    toldkategori: Annotated[Optional[str], BeforeValidator(coerce_num_to_str)] = None
 
     class Config:
         model = Afgiftsanmeldelse
@@ -525,8 +539,16 @@ class AfgiftsanmeldelseAPI:
 
 
 class PrivatAfgiftsanmeldelseIn(ModelSchema):
+    bookingnummer: Annotated[str, BeforeValidator(coerce_num_to_str)]
+    telefon: Annotated[str, BeforeValidator(coerce_num_to_str)]
     leverandørfaktura: Optional[str] = None  # Base64
     leverandørfaktura_navn: Optional[str] = None
+    leverandørfaktura_nummer: Annotated[
+        Optional[str], BeforeValidator(coerce_num_to_str)
+    ] = None
+    indførselstilladelse: Annotated[
+        Optional[str], BeforeValidator(coerce_num_to_str)
+    ] = None
 
     class Config:
         model = PrivatAfgiftsanmeldelse
@@ -546,8 +568,16 @@ class PrivatAfgiftsanmeldelseIn(ModelSchema):
 
 
 class PartialPrivatAfgiftsanmeldelseIn(ModelSchema):
+    bookingnummer: Annotated[Optional[str], BeforeValidator(coerce_num_to_str)] = None
+    telefon: Annotated[Optional[str], BeforeValidator(coerce_num_to_str)] = None
     leverandørfaktura: Optional[str] = None  # Base64
     leverandørfaktura_navn: Optional[str] = None
+    leverandørfaktura_nummer: Annotated[
+        Optional[str], BeforeValidator(coerce_num_to_str)
+    ] = None
+    indførselstilladelse: Annotated[
+        Optional[str], BeforeValidator(coerce_num_to_str)
+    ] = None
 
     class Config:
         model = PrivatAfgiftsanmeldelse
