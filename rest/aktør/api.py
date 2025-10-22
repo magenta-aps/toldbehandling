@@ -7,6 +7,7 @@ from typing import Annotated, Optional
 
 from aktør.models import Afsender, Modtager, Speditør
 from common.api import get_auth_methods
+from common.util import coerce_num_to_str
 from django.core.exceptions import ValidationError
 from django.db.models import Q
 from django.http import HttpResponseBadRequest
@@ -16,6 +17,7 @@ from ninja_extra import api_controller, permissions, route
 from ninja_extra.pagination import paginate
 from ninja_extra.schemas import NinjaPaginationResponseSchema
 from project.util import RestPermission, json_dump
+from pydantic import BeforeValidator
 
 # Shared schemas
 
@@ -42,6 +44,8 @@ class SharedAfsenderModtagerOut(FilterSchema):
 
 class AfsenderIn(ModelSchema):
     stedkode: Optional[int] = None
+    postbox: Annotated[Optional[str], BeforeValidator(coerce_num_to_str)] = None
+    telefon: Annotated[Optional[str], BeforeValidator(coerce_num_to_str)] = None
 
     class Config:
         model = Afsender
@@ -60,6 +64,8 @@ class AfsenderIn(ModelSchema):
 
 class PartialAfsenderIn(ModelSchema):
     stedkode: Optional[int] = None
+    postbox: Annotated[Optional[str], BeforeValidator(coerce_num_to_str)] = None
+    telefon: Annotated[Optional[str], BeforeValidator(coerce_num_to_str)] = None
 
     class Config:
         model = Modtager
@@ -78,6 +84,8 @@ class PartialAfsenderIn(ModelSchema):
 
 class AfsenderOut(ModelSchema):
     stedkode: Optional[int]
+    postbox: Annotated[Optional[str], BeforeValidator(coerce_num_to_str)] = None
+    telefon: Annotated[Optional[str], BeforeValidator(coerce_num_to_str)] = None
 
     class Config:
         model = Afsender
@@ -168,6 +176,8 @@ class AfsenderAPI:
 
 class ModtagerIn(ModelSchema):
     stedkode: Optional[int] = None
+    postbox: Annotated[Optional[str], BeforeValidator(coerce_num_to_str)] = None
+    telefon: Annotated[Optional[str], BeforeValidator(coerce_num_to_str)] = None
 
     class Config:
         model = Modtager
@@ -187,6 +197,8 @@ class ModtagerIn(ModelSchema):
 
 class PartialModtagerIn(ModelSchema):
     stedkode: Optional[int] = None
+    postbox: Annotated[Optional[str], BeforeValidator(coerce_num_to_str)] = None
+    telefon: Annotated[Optional[str], BeforeValidator(coerce_num_to_str)] = None
 
     class Config:
         model = Modtager
@@ -206,6 +218,8 @@ class PartialModtagerIn(ModelSchema):
 
 class ModtagerOut(ModelSchema):
     stedkode: Optional[int]
+    postbox: Annotated[Optional[str], BeforeValidator(coerce_num_to_str)] = None
+    telefon: Annotated[Optional[str], BeforeValidator(coerce_num_to_str)] = None
 
     class Config:
         model = Modtager

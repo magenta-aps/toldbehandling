@@ -9,6 +9,7 @@ from uuid import uuid4
 
 from common.api import get_auth_methods
 from common.models import IndberetterProfile
+from common.util import coerce_num_to_str
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.db.models import QuerySet
@@ -21,6 +22,7 @@ from ninja_extra.exceptions import PermissionDenied
 from ninja_extra.pagination import paginate
 from ninja_extra.schemas import NinjaPaginationResponseSchema
 from project.util import RestPermission, json_dump
+from pydantic import BeforeValidator
 
 log = logging.getLogger(__name__)
 # Django-ninja har endnu ikke understøttelse for PATCH med filer i multipart/form-data
@@ -39,6 +41,11 @@ log = logging.getLogger(__name__)
 
 
 class PostforsendelseIn(ModelSchema):
+    postforsendelsesnummer: Annotated[
+        Optional[str], BeforeValidator(coerce_num_to_str)
+    ] = None
+    afsenderbykode: Annotated[Optional[str], BeforeValidator(coerce_num_to_str)] = None
+
     class Config:
         model = Postforsendelse
         model_fields = [
@@ -51,6 +58,11 @@ class PostforsendelseIn(ModelSchema):
 
 
 class PartialPostforsendelseIn(ModelSchema):
+    postforsendelsesnummer: Annotated[
+        Optional[str], BeforeValidator(coerce_num_to_str)
+    ] = None
+    afsenderbykode: Annotated[Optional[str], BeforeValidator(coerce_num_to_str)] = None
+
     class Config:
         model = Postforsendelse
         model_fields = [
