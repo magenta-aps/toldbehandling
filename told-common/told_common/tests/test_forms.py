@@ -124,6 +124,32 @@ class TF10FormTest(TestCase):
         form.clean_with_formset(formset=[subform])
         self.assertIn("indførselstilladelse_alkohol", form.errors)
 
+        form = TF10FormTest.create_TF10Form(
+            varesatser={
+                1: Vareafgiftssats(
+                    id=1,
+                    afgiftstabel=2,
+                    vareart_da="Klovnesmøger",
+                    vareart_kl="Klovnesmøger",
+                    afgiftsgruppenummer=23456789,
+                    enhed=Vareafgiftssats.Enhed.KILOGRAM,
+                    afgiftssats="1.00",
+                    kræver_indførselstilladelse_alkohol=False,
+                    kræver_indførselstilladelse_tobak=True,
+                ),
+            }
+        )
+        self.assertTrue(form.is_valid())
+
+        subform = TF10VareForm(
+            varesatser=form.varesatser,
+            data={"vareafgiftssats": 1, "mængde": 2},
+        )
+        subform.is_valid()
+
+        form.clean_with_formset(formset=[subform])
+        self.assertIn("indførselstilladelse_tobak", form.errors)
+
     @staticmethod
     def create_TF10Form(
         varesatser: Optional[Dict] = None, kladde: Optional[bool] = None
