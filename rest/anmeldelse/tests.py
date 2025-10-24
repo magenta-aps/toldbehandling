@@ -659,7 +659,8 @@ class AfgiftsanmeldelseAPITest(AnmeldelsesTestDataMixin, TestCase):
                     "postforsendelse_id": int(postforsendelse_local.id),
                     "leverandørfaktura_nummer": 12345678901234567890,
                     "betales_af": "modtager",
-                    "indførselstilladelse": 2227,
+                    "indførselstilladelse_alkohol": 2227,
+                    "indførselstilladelse_tobak": 5547,
                 }
             ),
             HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
@@ -972,7 +973,8 @@ class AfgiftsanmeldelseAPITest(AnmeldelsesTestDataMixin, TestCase):
                 "postforsendelse_id": postforsendelse_kladde.id,
                 "leverandørfaktura_nummer": "12345",
                 "betales_af": "afsender",
-                "indførselstilladelse": "abcde",
+                "indførselstilladelse_alkohol": "abcde",
+                "indførselstilladelse_tobak": "opqr",
                 "betalt": False,
                 "fuldmagtshaver": None,
                 "status": "kladde",
@@ -987,7 +989,8 @@ class AfgiftsanmeldelseAPITest(AnmeldelsesTestDataMixin, TestCase):
             data=json_dump(
                 {
                     "leverandørfaktura_nummer": 543.21,
-                    "indførselstilladelse": 789,
+                    "indførselstilladelse_alkohol": 789,
+                    "indførselstilladelse_tobak": 789,
                     "toldkategori": 70,
                 }
             ),
