@@ -243,7 +243,8 @@ class PostforsendelseAPITests(TestCase):
             fragtforsendelse=None,
             leverandørfaktura_nummer="1234",
             betales_af="afsender",
-            indførselstilladelse="5678",
+            indførselstilladelse_alkohol="5678",
+            indførselstilladelse_tobak="9876",
             betalt=False,
             oprettet_af=postforsendelse.oprettet_af,
         )
