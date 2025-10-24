@@ -59,7 +59,10 @@ class AfgiftsanmeldelseIn(ModelSchema):
     leverandørfaktura_nummer: Annotated[
         Optional[str], BeforeValidator(coerce_num_to_str)
     ] = None
-    indførselstilladelse: Annotated[
+    indførselstilladelse_alkohol: Annotated[
+        Optional[str], BeforeValidator(coerce_num_to_str)
+    ] = None
+    indførselstilladelse_tobak: Annotated[
         Optional[str], BeforeValidator(coerce_num_to_str)
     ] = None
     toldkategori: Annotated[Optional[str], BeforeValidator(coerce_num_to_str)] = None
@@ -91,7 +94,10 @@ class PartialAfgiftsanmeldelseIn(ModelSchema):
     leverandørfaktura_nummer: Annotated[
         Optional[str], BeforeValidator(coerce_num_to_str)
     ] = None
-    indførselstilladelse: Annotated[
+    indførselstilladelse_alkohol: Annotated[
+        Optional[str], BeforeValidator(coerce_num_to_str)
+    ] = None
+    indførselstilladelse_tobak: Annotated[
         Optional[str], BeforeValidator(coerce_num_to_str)
     ] = None
     toldkategori: Annotated[Optional[str], BeforeValidator(coerce_num_to_str)] = None
