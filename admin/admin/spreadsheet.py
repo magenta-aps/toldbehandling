@@ -80,7 +80,8 @@ class VareafgiftssatsSpreadsheetUtil:
                 ):
                     value = format_decimal(value)
                 elif header in (
-                    "kræver_indførselstilladelse",
+                    "kræver_indførselstilladelse_alkohol",
+                    "kræver_indførselstilladelse_tobak",
                     "har_privat_tillægsafgift_alkohol",
                     "synlig_privat",
                 ):
@@ -132,8 +133,14 @@ class VareafgiftssatsSpreadsheetUtil:
             "required": False,
         },
         {
-            "label": "Kræver indførselstilladelse",
-            "field": "kræver_indførselstilladelse",
+            "label": "Kræver indførselstilladelse - Alkohol",
+            "field": "kræver_indførselstilladelse_alkohol",
+            "parser": parse_bool,
+            "required": True,
+        },
+        {
+            "label": "Kræver indførselstilladelse - Tobak",
+            "field": "kræver_indførselstilladelse_tobak",
             "parser": parse_bool,
             "required": True,
         },
