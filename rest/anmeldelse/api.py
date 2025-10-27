@@ -59,7 +59,10 @@ class AfgiftsanmeldelseIn(ModelSchema):
     leverandørfaktura_nummer: Annotated[
         Optional[str], BeforeValidator(coerce_num_to_str)
     ] = None
-    indførselstilladelse: Annotated[
+    indførselstilladelse_alkohol: Annotated[
+        Optional[str], BeforeValidator(coerce_num_to_str)
+    ] = None
+    indførselstilladelse_tobak: Annotated[
         Optional[str], BeforeValidator(coerce_num_to_str)
     ] = None
     toldkategori: Annotated[Optional[str], BeforeValidator(coerce_num_to_str)] = None
@@ -69,7 +72,8 @@ class AfgiftsanmeldelseIn(ModelSchema):
         model_fields = [
             "leverandørfaktura_nummer",
             "betales_af",
-            "indførselstilladelse",
+            "indførselstilladelse_alkohol",
+            "indførselstilladelse_tobak",
             "betalt",
             "toldkategori",
         ]
@@ -90,7 +94,10 @@ class PartialAfgiftsanmeldelseIn(ModelSchema):
     leverandørfaktura_nummer: Annotated[
         Optional[str], BeforeValidator(coerce_num_to_str)
     ] = None
-    indførselstilladelse: Annotated[
+    indførselstilladelse_alkohol: Annotated[
+        Optional[str], BeforeValidator(coerce_num_to_str)
+    ] = None
+    indførselstilladelse_tobak: Annotated[
         Optional[str], BeforeValidator(coerce_num_to_str)
     ] = None
     toldkategori: Annotated[Optional[str], BeforeValidator(coerce_num_to_str)] = None
@@ -100,7 +107,8 @@ class PartialAfgiftsanmeldelseIn(ModelSchema):
         model_fields = [
             "leverandørfaktura_nummer",
             "betales_af",
-            "indførselstilladelse",
+            "indførselstilladelse_alkohol",
+            "indførselstilladelse_tobak",
             "betalt",
             "status",
             "toldkategori",
@@ -124,7 +132,8 @@ class AfgiftsanmeldelseOut(ModelSchema):
             "leverandørfaktura_nummer",
             "leverandørfaktura",
             "betales_af",
-            "indførselstilladelse",
+            "indførselstilladelse_alkohol",
+            "indførselstilladelse_tobak",
             "afgift_total",
             "betalt",
             "dato",
@@ -192,7 +201,8 @@ class AfgiftsanmeldelseFilterSchema(FilterSchema):
     #     upload_to=afgiftsanmeldelse_upload_to,
     # )
     betales_af: Annotated[Optional[str], Field(None)]
-    indførselstilladelse: Annotated[Optional[str], Field(None)]
+    indførselstilladelse_alkohol: Annotated[Optional[str], Field(None)]
+    indførselstilladelse_tobak: Annotated[Optional[str], Field(None)]
     betalt: Annotated[Optional[bool], Field(None)]
     status: Annotated[Optional[str], Field(None)]
     fuldmagtshaver: Annotated[Optional[int], Field(None)]

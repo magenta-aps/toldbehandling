@@ -156,7 +156,8 @@ class CustomDutyRequest(PrismeRequestObject):
             "DlvModeId": self.leveringsmåde,
             "DeliveryDate": self.forsendelse.afgangsdato.isoformat(),
             "ImportAuthorizationNumber": self.empty_if_none(
-                self.afgiftsanmeldelse.indførselstilladelse
+                self.afgiftsanmeldelse.indførselstilladelse_alkohol
+                or self.afgiftsanmeldelse.indførselstilladelse_tobak
             ),
             "VendInvoiceNumber": self.empty_if_none(
                 self.afgiftsanmeldelse.leverandørfaktura_nummer

@@ -186,11 +186,11 @@ class TF10Form(BootstrapForm):
         label=_("Tlf."),
     )
     modtager_existing_id = forms.IntegerField(required=False, widget=forms.Select)
-    indførselstilladelse = DynamicField(
+    indførselstilladelse_alkohol = DynamicField(
         forms.CharField,
         max_length=12,
         required=False,
-        label=_("Indførsels­tilladelse nr."),
+        label=_("Indførsels­tilladelse nr. - Alkohol"),
         widget=lambda form: forms.TextInput(
             attrs=(
                 {
@@ -199,7 +199,29 @@ class TF10Form(BootstrapForm):
                         [
                             str(id)
                             for id, sats in form.varesatser.items()
-                            if sats.kræver_indførselstilladelse
+                            if sats.kræver_indførselstilladelse_alkohol
+                        ]
+                    ),
+                }
+                if form.varesatser
+                else {}
+            )
+        ),
+    )
+    indførselstilladelse_tobak = DynamicField(
+        forms.CharField,
+        max_length=12,
+        required=False,
+        label=_("Indførsels­tilladelse nr. - Tobak"),
+        widget=lambda form: forms.TextInput(
+            attrs=(
+                {
+                    "data-required-field": "[name$=vareafgiftssats]",
+                    "data-required-values": ",".join(
+                        [
+                            str(id)
+                            for id, sats in form.varesatser.items()
+                            if sats.kræver_indførselstilladelse_tobak
                         ]
                     ),
                 }
@@ -343,7 +365,8 @@ class TF10Form(BootstrapForm):
     def clean_with_formset(self, formset):
         # Perform validation on form and formset together
         if (
-            not self.cleaned_data["indførselstilladelse"]
+            not self.cleaned_data["indførselstilladelse_alkohol"]
+            or not self.cleaned_data["indførselstilladelse_tobak"]
             and not self.cleaned_data["kladde"]
         ):
             # Hvis vi ikke har en indførselstilladelse,
@@ -352,11 +375,20 @@ class TF10Form(BootstrapForm):
                 if self.varesatser and "vareafgiftssats" in subform.cleaned_data:
                     varesats_id = subform.cleaned_data["vareafgiftssats"]
                     vareafgiftssats = self.varesatser[int(varesats_id)]
-                    if vareafgiftssats.kræver_indførselstilladelse:
+                    if vareafgiftssats.kræver_indførselstilladelse_alkohol:
                         self.add_error(
-                            "indførselstilladelse",
+                            "indførselstilladelse_alkohol",
                             _(
-                                "Indførselstilladelse er påkrævet med "
+                                "Indførselstilladelse for alkohol er påkrævet med "
+                                "de angivne varearter"
+                            ),
+                        )
+                        break
+                    if vareafgiftssats.kræver_indførselstilladelse_tobak:
+                        self.add_error(
+                            "indførselstilladelse_tobak",
+                            _(
+                                "Indførselstilladelse for tobak er påkrævet med "
                                 "de angivne varearter"
                             ),
                         )

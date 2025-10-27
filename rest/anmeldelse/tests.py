@@ -150,7 +150,8 @@ class AnmeldelsesTestDataMixin:
                 "postforsendelse_id": cls.postforsendelse.id,
                 "leverandørfaktura_nummer": "12345",
                 "betales_af": "afsender",
-                "indførselstilladelse": "abcde",
+                "indførselstilladelse_alkohol": "abcde",
+                "indførselstilladelse_tobak": "opqrstu",
                 "betalt": False,
                 "fuldmagtshaver": None,
                 "status": "ny",
@@ -304,7 +305,8 @@ class AfgiftsanmeldelseTest(RestTestMixin, TestCase):
         "afsender_id": [1234, 0, -1, "a"],
         "modtager_id": [1234, 0, -1, "a"],
         "leverandørfaktura_nummer": ["123456789012345678901"],
-        "indførselstilladelse": ["123456789012345678901"],
+        "indførselstilladelse_alkohol": ["123456789012345678901"],
+        "indførselstilladelse_tobak": ["123456789012345678901"],
     }
 
     @property
@@ -657,7 +659,8 @@ class AfgiftsanmeldelseAPITest(AnmeldelsesTestDataMixin, TestCase):
                     "postforsendelse_id": int(postforsendelse_local.id),
                     "leverandørfaktura_nummer": 12345678901234567890,
                     "betales_af": "modtager",
-                    "indførselstilladelse": 2227,
+                    "indførselstilladelse_alkohol": 2227,
+                    "indførselstilladelse_tobak": 5547,
                 }
             ),
             HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
@@ -744,7 +747,8 @@ class AfgiftsanmeldelseAPITest(AnmeldelsesTestDataMixin, TestCase):
                         "leverandørfaktura_nummer": "12345",
                         "leverandørfaktura": "",
                         "betales_af": "afsender",
-                        "indførselstilladelse": "abcde",
+                        "indførselstilladelse_alkohol": "abcde",
+                        "indførselstilladelse_tobak": "opqrstu",
                         "afgift_total": "0.00",
                         "betalt": False,
                         "dato": ANY,
@@ -834,7 +838,8 @@ class AfgiftsanmeldelseAPITest(AnmeldelsesTestDataMixin, TestCase):
                 "leverandørfaktura_nummer": "12345",
                 "leverandørfaktura": "",
                 "betales_af": "afsender",
-                "indførselstilladelse": "abcde",
+                "indførselstilladelse_alkohol": "abcde",
+                "indførselstilladelse_tobak": "opqrstu",
                 "afgift_total": "0.00",
                 "betalt": False,
                 "dato": ANY,
@@ -918,7 +923,8 @@ class AfgiftsanmeldelseAPITest(AnmeldelsesTestDataMixin, TestCase):
                 "postforsendelse_id": postforsendelse_kladde.id,
                 "leverandørfaktura_nummer": "12345",
                 "betales_af": "afsender",
-                "indførselstilladelse": "abcde",
+                "indførselstilladelse_alkohol": "abcde",
+                "indførselstilladelse_tobak": "opqrstu",
                 "betalt": False,
                 "fuldmagtshaver": None,
                 "status": "kladde",
@@ -967,7 +973,8 @@ class AfgiftsanmeldelseAPITest(AnmeldelsesTestDataMixin, TestCase):
                 "postforsendelse_id": postforsendelse_kladde.id,
                 "leverandørfaktura_nummer": "12345",
                 "betales_af": "afsender",
-                "indførselstilladelse": "abcde",
+                "indførselstilladelse_alkohol": "abcde",
+                "indførselstilladelse_tobak": "opqr",
                 "betalt": False,
                 "fuldmagtshaver": None,
                 "status": "kladde",
@@ -982,7 +989,8 @@ class AfgiftsanmeldelseAPITest(AnmeldelsesTestDataMixin, TestCase):
             data=json_dump(
                 {
                     "leverandørfaktura_nummer": 543.21,
-                    "indførselstilladelse": 789,
+                    "indførselstilladelse_alkohol": 789,
+                    "indførselstilladelse_tobak": 789,
                     "toldkategori": 70,
                 }
             ),
@@ -1025,7 +1033,8 @@ class AfgiftsanmeldelseAPITest(AnmeldelsesTestDataMixin, TestCase):
                 ),
                 "leverandørfaktura_nummer": "12345",
                 "betales_af": "afsender",
-                "indførselstilladelse": "abcde",
+                "indførselstilladelse_alkohol": "abcde",
+                "indførselstilladelse_tobak": "opqrstu",
                 "betalt": False,
                 "fuldmagtshaver": None,
                 "status": "kladde",
@@ -1770,7 +1779,8 @@ class VarelinjeTest(RestTestMixin, TestCase):
             enhed=Vareafgiftssats.Enhed.SAMMENSAT,
             minimumsbeløb=None,
             afgiftssats=Decimal(0),
-            kræver_indførselstilladelse=False,
+            kræver_indførselstilladelse_alkohol=False,
+            kræver_indførselstilladelse_tobak=False,
         )
         Vareafgiftssats.objects.create(
             overordnet=personbiler,
@@ -1781,7 +1791,8 @@ class VarelinjeTest(RestTestMixin, TestCase):
             enhed=Vareafgiftssats.Enhed.ANTAL,
             minimumsbeløb=None,
             afgiftssats=Decimal(50_000),
-            kræver_indførselstilladelse=False,
+            kræver_indførselstilladelse_alkohol=False,
+            kræver_indførselstilladelse_tobak=False,
         )
         Vareafgiftssats.objects.create(
             overordnet=personbiler,
@@ -1794,7 +1805,8 @@ class VarelinjeTest(RestTestMixin, TestCase):
             segment_øvre=Decimal(150_000),
             minimumsbeløb=None,
             afgiftssats=Decimal(100),
-            kræver_indførselstilladelse=False,
+            kræver_indførselstilladelse_alkohol=False,
+            kræver_indførselstilladelse_tobak=False,
         )
         Vareafgiftssats.objects.create(
             overordnet=personbiler,
@@ -1806,7 +1818,8 @@ class VarelinjeTest(RestTestMixin, TestCase):
             segment_nedre=Decimal(150_000),
             minimumsbeløb=None,
             afgiftssats=Decimal(150),
-            kræver_indførselstilladelse=False,
+            kræver_indførselstilladelse_alkohol=False,
+            kræver_indførselstilladelse_tobak=False,
         )
         varelinje1 = Varelinje.objects.create(
             vareafgiftssats=personbiler,
@@ -2799,7 +2812,8 @@ class StatistikTest(RestMixin, TestCase):
             enhed=Vareafgiftssats.Enhed.KILOGRAM,
             minimumsbeløb=None,
             afgiftssats=Decimal(1000),
-            kræver_indførselstilladelse=False,
+            kræver_indførselstilladelse_alkohol=False,
+            kræver_indførselstilladelse_tobak=False,
         )
         self.varelinje2 = Varelinje.objects.create(
             vareafgiftssats=self.vareafgiftssats2,
@@ -3152,7 +3166,8 @@ def _create_afgiftsanmeldelse(user: User, idx: str = "1") -> Afgiftsanmeldelse:
             "postforsendelse_id": postforsendelse.id,
             "leverandørfaktura_nummer": "12345",
             "betales_af": "afsender",
-            "indførselstilladelse": "abcde",
+            "indførselstilladelse_alkohol": "abcde",
+            "indførselstilladelse_tobak": "opqrstu",
             "betalt": False,
             "fuldmagtshaver": None,
             "status": "ny",

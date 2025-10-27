@@ -533,7 +533,8 @@ class RestMixin:
         self.afgiftsanmeldelse_data = {
             "leverandørfaktura_nummer": "12345",
             "betales_af": "afsender",
-            "indførselstilladelse": "abcde",
+            "indførselstilladelse_alkohol": "abcde",
+            "indførselstilladelse_tobak": "opqrstu",
             "betalt": False,
             "fuldmagtshaver": None,
         }
@@ -550,7 +551,8 @@ class RestMixin:
             "afgiftsgruppenummer": 1234,
             "enhed": Vareafgiftssats.Enhed.KILOGRAM,
             "afgiftssats": "2.50",
-            "kræver_indførselstilladelse": False,
+            "kræver_indførselstilladelse_alkohol": False,
+            "kræver_indførselstilladelse_tobak": False,
             "har_privat_tillægsafgift_alkohol": False,
             "synlig_privat": False,
         }
