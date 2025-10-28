@@ -66,6 +66,12 @@ class AfgiftsanmeldelseIn(ModelSchema):
         Optional[str], BeforeValidator(coerce_num_to_str)
     ] = None
     toldkategori: Annotated[Optional[str], BeforeValidator(coerce_num_to_str)] = None
+    # Deprecated input parameter
+    indførselstilladelse: Annotated[
+        Optional[str],
+        Field(deprecated="This field is deprecated as of version 1.91.1"),
+        BeforeValidator(coerce_num_to_str),
+    ] = None
 
     class Config:
         model = Afgiftsanmeldelse
@@ -101,6 +107,12 @@ class PartialAfgiftsanmeldelseIn(ModelSchema):
         Optional[str], BeforeValidator(coerce_num_to_str)
     ] = None
     toldkategori: Annotated[Optional[str], BeforeValidator(coerce_num_to_str)] = None
+    # Deprecated input parameter
+    indførselstilladelse: Annotated[
+        Optional[str],
+        Field(deprecated="This field is deprecated as of version 1.91.1"),
+        BeforeValidator(coerce_num_to_str),
+    ] = None
 
     class Config:
         model = Afgiftsanmeldelse
@@ -277,6 +289,15 @@ class AfgiftsanmeldelseAPI:
 
             if "betales_af" in data and data["betales_af"] == "":
                 data["betales_af"] = None
+            # TODO: delete once https://redmine.magenta.dk/issues/67184 is done
+            if (
+                data["indførselstilladelse_alkohol"] is None
+                and data["indførselstilladelse_tobak"] is None
+                and data["indførselstilladelse"] is not None
+            ):
+                data["indførselstilladelse_alkohol"] = data["indførselstilladelse"]
+                data["indførselstilladelse_tobak"] = data["indførselstilladelse"]
+            del data["indførselstilladelse"]
 
             item = Afgiftsanmeldelse.objects.create(
                 **data, oprettet_af=self.context.request.user
@@ -419,6 +440,15 @@ class AfgiftsanmeldelseAPI:
                 raise PermissionDenied
 
         data = payload.dict(exclude_unset=True)
+        # TODO: delete once https://redmine.magenta.dk/issues/67184 is done
+        if (
+            "indførselstilladelse_alkohol" not in data
+            and "indførselstilladelse_tobak" not in data
+            and "indførselstilladelse" in data
+        ):
+            data["indførselstilladelse_alkohol"] = data["indførselstilladelse"]
+            data["indførselstilladelse_tobak"] = data["indførselstilladelse"]
+        del data["indførselstilladelse"]
 
         # Draft double-check
         kladde = data.pop("kladde", False)
