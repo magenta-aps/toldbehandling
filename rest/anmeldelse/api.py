@@ -297,7 +297,8 @@ class AfgiftsanmeldelseAPI:
             ):
                 data["indførselstilladelse_alkohol"] = data["indførselstilladelse"]
                 data["indførselstilladelse_tobak"] = data["indførselstilladelse"]
-            del data["indførselstilladelse"]
+            if "indførselstilladelse" in data:
+                del data["indførselstilladelse"]
 
             item = Afgiftsanmeldelse.objects.create(
                 **data, oprettet_af=self.context.request.user
@@ -448,7 +449,8 @@ class AfgiftsanmeldelseAPI:
         ):
             data["indførselstilladelse_alkohol"] = data["indførselstilladelse"]
             data["indførselstilladelse_tobak"] = data["indførselstilladelse"]
-        del data["indførselstilladelse"]
+        if "indførselstilladelse" in data:
+            del data["indførselstilladelse"]
 
         # Draft double-check
         kladde = data.pop("kladde", False)
