@@ -702,7 +702,9 @@ class AfgiftsanmeldelseAPITest(AnmeldelsesTestDataMixin, TestCase):
         )
 
         resp = self.client.patch(
-            reverse("api-1.0.0:afgiftsanmeldelse_update", args=[afgiftsanmeldelse_kladde.id]),
+            reverse(
+                "api-1.0.0:afgiftsanmeldelse_update", args=[afgiftsanmeldelse_kladde.id]
+            ),
             data=json_dump(
                 {
                     "leverandørfaktura_nummer": 12345678901234567890,
@@ -715,7 +717,9 @@ class AfgiftsanmeldelseAPITest(AnmeldelsesTestDataMixin, TestCase):
         )
         self.assertEqual(resp.status_code, 200)
 
-        afgiftsanmeldelse = Afgiftsanmeldelse.objects.get(id=afgiftsanmeldelse_kladde.id)
+        afgiftsanmeldelse = Afgiftsanmeldelse.objects.get(
+            id=afgiftsanmeldelse_kladde.id
+        )
         self.assertEqual(afgiftsanmeldelse.indførselstilladelse_alkohol, "4513")
         self.assertEqual(afgiftsanmeldelse.indførselstilladelse_tobak, "4513")
 
