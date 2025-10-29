@@ -69,7 +69,9 @@ class AfgiftsanmeldelseIn(ModelSchema):
     # Deprecated input parameter
     indførselstilladelse: Annotated[
         Optional[str],
-        Field(deprecated="This field is deprecated as of version 1.91.1. Use indførselstilladelse_alkohol or indførselstilladelse_tobak instead"),
+        Field(
+            deprecated="This field is deprecated as of version 1.91.1. Use indførselstilladelse_alkohol or indførselstilladelse_tobak instead"
+        ),
         BeforeValidator(coerce_num_to_str),
     ] = None
 
@@ -110,7 +112,9 @@ class PartialAfgiftsanmeldelseIn(ModelSchema):
     # Deprecated input parameter
     indførselstilladelse: Annotated[
         Optional[str],
-        Field(deprecated="This field is deprecated as of version 1.91.1. Use indførselstilladelse_alkohol or indførselstilladelse_tobak instead"),
+        Field(
+            deprecated="This field is deprecated as of version 1.91.1. Use indførselstilladelse_alkohol or indførselstilladelse_tobak instead"
+        ),
         BeforeValidator(coerce_num_to_str),
     ] = None
 
