@@ -863,7 +863,7 @@ class PrivatAfgiftsanmeldelseAPI:
 
 
 class VarelinjeIn(ModelSchema):
-    fakturabeløb: Optional[str] = None
+    fakturabeløb: Annotated[Optional[str], BeforeValidator(coerce_num_to_str)] = None
     afgiftsanmeldelse_id: Optional[int] = None
     privatafgiftsanmeldelse_id: Optional[int] = None
     vareafgiftssats_id: Optional[int] = None
@@ -938,6 +938,7 @@ class VarelinjeIn(ModelSchema):
 
 
 class PartialVarelinjeIn(ModelSchema):
+    fakturabeløb: Annotated[Optional[str], BeforeValidator(coerce_num_to_str)] = None
     afgiftsanmeldelse_id: Optional[int] = None
     vareafgiftssats_id: Optional[int] = None
 
