@@ -638,6 +638,91 @@ class AfgiftsanmeldelseAPITest(AnmeldelsesTestDataMixin, TestCase):
         afgiftsanmeldelse = Afgiftsanmeldelse.objects.get(id=new_row_id)
         self.assertEqual(afgiftsanmeldelse.betales_af, None)
 
+    # TODO: Remove once #67184 https://redmine.magenta.dk/issues/67184 is done
+    def test_create_with_deprecated_parameter(self):
+        postforsendelse_local, _ = Postforsendelse.objects.get_or_create(
+            postforsendelsesnummer="223344",
+            oprettet_af=self.user,
+            defaults={
+                "forsendelsestype": Postforsendelse.Forsendelsestype.SKIB,
+                "afsenderbykode": "8200",
+                "afgangsdato": "2023-11-03",
+                "kladde": False,
+            },
+        )
+
+        resp = self.client.post(
+            reverse("api-1.0.0:afgiftsanmeldelse_create"),
+            data=json_dump(
+                {
+                    "afsender_id": int(self.afsender.id),
+                    "modtager_id": int(self.modtager.id),
+                    "postforsendelse_id": int(postforsendelse_local.id),
+                    "leverandørfaktura_nummer": 12345678901234567890,
+                    "betales_af": "modtager",
+                    "indførselstilladelse": 4513,
+                }
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, 200)
+
+        new_row_id = int(resp.json()["id"])
+        afgiftsanmeldelse = Afgiftsanmeldelse.objects.get(id=new_row_id)
+        self.assertEqual(afgiftsanmeldelse.indførselstilladelse_alkohol, "4513")
+        self.assertEqual(afgiftsanmeldelse.indførselstilladelse_tobak, "4513")
+
+    # TODO: Remove once #67184 https://redmine.magenta.dk/issues/67184 is done
+    def test_update_with_deprecated_parameter(self):
+        postforsendelse_kladde, _ = Postforsendelse.objects.get_or_create(
+            postforsendelsesnummer="223344",
+            oprettet_af=self.user,
+            defaults={
+                "forsendelsestype": Postforsendelse.Forsendelsestype.SKIB,
+                "afsenderbykode": "8200",
+                "afgangsdato": "2023-11-03",
+                "kladde": True,
+            },
+        )
+        afgiftsanmeldelse_kladde = Afgiftsanmeldelse.objects.create(
+            **{
+                "afsender_id": self.afsender.id,
+                "modtager_id": self.modtager.id,
+                "postforsendelse_id": postforsendelse_kladde.id,
+                "leverandørfaktura_nummer": 12345,
+                "betales_af": "afsender",
+                "indførselstilladelse_alkohol": "abcd",
+                "indførselstilladelse_tobak": "opqr",
+                "betalt": False,
+                "fuldmagtshaver": None,
+                "status": "kladde",
+                "oprettet_af": self.user,
+            }
+        )
+
+        resp = self.client.patch(
+            reverse(
+                "api-1.0.0:afgiftsanmeldelse_update", args=[afgiftsanmeldelse_kladde.id]
+            ),
+            data=json_dump(
+                {
+                    "leverandørfaktura_nummer": 12345678901234567890,
+                    "betales_af": "modtager",
+                    "indførselstilladelse": 4513,
+                }
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, 200)
+
+        afgiftsanmeldelse = Afgiftsanmeldelse.objects.get(
+            id=afgiftsanmeldelse_kladde.id
+        )
+        self.assertEqual(afgiftsanmeldelse.indførselstilladelse_alkohol, "4513")
+        self.assertEqual(afgiftsanmeldelse.indførselstilladelse_tobak, "4513")
+
     def test_create_leniency(self):
         postforsendelse_local, _ = Postforsendelse.objects.get_or_create(
             postforsendelsesnummer="223344",
@@ -670,6 +755,8 @@ class AfgiftsanmeldelseAPITest(AnmeldelsesTestDataMixin, TestCase):
 
         new_row_id = int(resp.json()["id"])
         afgiftsanmeldelse = Afgiftsanmeldelse.objects.get(id=new_row_id)
+        self.assertEqual(afgiftsanmeldelse.indførselstilladelse_alkohol, "2227")
+        self.assertEqual(afgiftsanmeldelse.indførselstilladelse_tobak, "5547")
 
         postforsendelse_local, _ = Postforsendelse.objects.get_or_create(
             postforsendelsesnummer="223345",
