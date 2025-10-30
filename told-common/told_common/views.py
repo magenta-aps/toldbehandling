@@ -368,6 +368,9 @@ class TF10FormUpdateView(
 
     def form_valid(self, form, formset):
         self.anmeldelse_id = self.item.id
+        if form.cleaned_data["sidste_ændringsdato"] != self.item.sidste_ændringsdato:
+            raise Exception("Anmeldelsen er blevet opdateret siden den blev indlæst")
+
         afsender_id = self.rest_client.afsender.get_or_create(
             form.cleaned_data, form.cleaned_data
         )
@@ -596,8 +599,8 @@ class TF10FormUpdateView(
         )
 
     def get_initial(self):
-        initial = {}
         item = self.item
+        initial = {"sidste_ændringsdato": item.sidste_ændringsdato}
         if item:
             initial["kladde"] = item.status == "kladde"
             for key in ("afsender", "modtager"):
@@ -1187,6 +1190,10 @@ class TF5UpdateView(
 
     def form_valid(self, form, formset):
         self.anmeldelse_id = self.item.id
+
+        if form.cleaned_data["sidste_ændringsdato"] != self.item.sidste_ændringsdato:
+            raise Exception("Anmeldelsen er blevet opdateret siden den blev indlæst")
+
         self.rest_client.privat_afgiftsanmeldelse.update(
             self.anmeldelse_id,
             form.cleaned_data,
@@ -1305,8 +1312,8 @@ class TF5UpdateView(
         )
 
     def get_initial(self):
-        initial = {}
         item = self.item
+        initial = {"sidste_ændringsdato": item.sidste_ændringsdato}
         for field in dataclasses.fields(item):
             if field.name != "leverandørfaktura":
                 value = getattr(item, field.name)

@@ -210,6 +210,7 @@ class AfgiftsanmeldelseTest(RestTestMixin, TestCase):
                 "twofactor_enabled": False,
             },
             "oprettet_på_vegne_af": None,
+            "sidste_ændringsdato": ANY,
             # "afgift_total": '0',
         }
 
@@ -776,6 +777,7 @@ class AfgiftsanmeldelseAPITest(AnmeldelsesTestDataMixin, TestCase):
                         ).isoformat(),
                         "history_username": None,
                         "history_date": ANY,
+                        "sidste_ændringsdato": ANY,
                     }
                 ],
             },
@@ -866,6 +868,7 @@ class AfgiftsanmeldelseAPITest(AnmeldelsesTestDataMixin, TestCase):
                 ).isoformat(),
                 "history_username": None,
                 "history_date": ANY,
+                "sidste_ændringsdato": ANY,
             },
         )
 
@@ -1407,6 +1410,7 @@ class PrivatAfgiftsanmeldelseAPITest(TestCase):
                 "status": "ny",
                 "anonym": False,
                 "payment_status": "created",
+                "sidste_ændringsdato": ANY,
             },
         )
 
@@ -1460,6 +1464,7 @@ class PrivatAfgiftsanmeldelseAPITest(TestCase):
                         "status": "ny",
                         "anonym": False,
                         "payment_status": "created",
+                        "sidste_ændringsdato": ANY,
                     }
                 ],
             },

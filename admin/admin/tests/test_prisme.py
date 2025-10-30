@@ -184,6 +184,7 @@ class PrismeTest(TestCase):
             afgift_total=Decimal("140.00"),
             notater=[],
             prismeresponses=[],
+            sidste_ændringsdato="2024-01-01T02:00:00+00:00",
         )
         cls.anmeldelse2 = Afgiftsanmeldelse(
             id=2,
@@ -284,6 +285,7 @@ class PrismeTest(TestCase):
             afgift_total=Decimal("140.00"),
             notater=[],
             prismeresponses=[],
+            sidste_ændringsdato="2024-01-01T02:00:00+00:00",
         )
         cls.anmeldelse3 = Afgiftsanmeldelse(
             id=3,
@@ -382,6 +384,7 @@ class PrismeTest(TestCase):
             afgift_total=Decimal("140.00"),
             notater=[],
             prismeresponses=[],
+            sidste_ændringsdato="2024-01-01T02:00:00+00:00",
         )
 
     @staticmethod

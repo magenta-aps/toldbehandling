@@ -199,6 +199,7 @@ class TF10FormTest(TestCase):
                 "leverandørfaktura": None,
                 "fragtbrev": None,
                 "kladde": kladde if kladde else False,
+                "sidste_ændringsdato": "2020-01-02T00:00:00",
             },
             files={
                 "fragtbrev": SimpleUploadedFile(

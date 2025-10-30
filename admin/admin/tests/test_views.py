@@ -137,6 +137,7 @@ class BaseTest(HasLogin, TestCase):
         self.tf10_item.kategori = "73A"
         self.tf10_item.kræver_cvr = True
         self.tf10_item.betales_af = "afsender"
+        self.tf10_item.sidste_ændringsdato = "2024-01-01T02:00:00+00:00"
 
         self.tf10_item.oprettet_af = {
             "email": "jack@sparrow.sp",
@@ -185,6 +186,7 @@ class BaseTest(HasLogin, TestCase):
             indførselstilladelse="ABC123",
             varelinjer=[self.varelinje1, self.varelinje2],
             notater=[],
+            sidste_ændringsdato="2024-01-01T02:00:00+00:00",
         )
 
         self.tf5_item2 = PrivatAfgiftsanmeldelse(
@@ -207,6 +209,7 @@ class BaseTest(HasLogin, TestCase):
             indførselstilladelse=None,
             varelinjer=None,
             notater=None,
+            sidste_ændringsdato="2024-01-01T02:00:00+00:00",
         )
 
         items = [self.tf5_item1, self.tf5_item2]
@@ -445,6 +448,7 @@ class TestTF10HistoryListView(BaseTest):
             tf3=False,
             history_username=None,
             history_date="2025-07-10 09:00",
+            sidste_ændringsdato="2024-01-01T02:00:00+00:00",
         )
 
         self.notater = [
@@ -514,6 +518,7 @@ class TestTF10EditMultipleView(BaseTest):
             fuldmagtshaver=None,
             betales_af="importør",
             tf3=False,
+            sidste_ændringsdato="2024-01-01T02:00:00+00:00",
         )
 
         self.anmeldelse_2 = Afgiftsanmeldelse(
@@ -539,6 +544,7 @@ class TestTF10EditMultipleView(BaseTest):
             fuldmagtshaver=None,
             betales_af="modtager",
             tf3=True,
+            sidste_ændringsdato="2024-01-01T02:00:00+00:00",
         )
 
         self.rest_client_mock.afgiftanmeldelse.list.return_value = (
@@ -1014,6 +1020,7 @@ class TestTF10FormCreateView(BaseTest):
             "tf3": "False",
             "fragtbrev": MagicMock(),
             "leverandørfaktura": MagicMock(),
+            "sidste_ændringsdato": "2024-01-01T02:00:00+00:00",
         }
 
         self.url = reverse("tf10_create")
@@ -1095,6 +1102,7 @@ class TestTF10FormUpdateView(BaseTest):
             "tf3": "False",
             "fragtbrev": MagicMock(),
             "leverandørfaktura": MagicMock(),
+            "sidste_ændringsdato": "2024-01-01T02:00:00+00:00",
         }
 
         self.url = reverse("tf10_edit", kwargs={"id": 1})
@@ -1439,6 +1447,7 @@ class TestTF5UpdateView(BaseTest):
             "telefon": "44 55 44 11",
             "bookingnummer": 123,
             "indleveringsdato": "2025-01-01",
+            "sidste_ændringsdato": "2024-01-01T02:00:00+00:00",
         }
 
     def test_update(self):
