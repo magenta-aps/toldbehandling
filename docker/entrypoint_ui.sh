@@ -4,7 +4,7 @@
 #
 # SPDX-License-Identifier: MPL-2.0
 
-set -e
+set -eux
 MAKE_MIGRATIONS=${MAKE_MIGRATIONS:=false}
 MIGRATE=${MIGRATE:=false}
 TEST=${TEST:=false}
@@ -12,10 +12,10 @@ MAKEMESSAGES=${MAKEMESSAGES:=false}
 DJANGO_DEBUG=${DJANGO_DEBUG:=false}
 SKIP_IDP_METADATA=${SKIP_IDP_METADATA:=false}
 
-python manage.py wait_for_db
-
-python manage.py collectstatic --no-input --clear
 python manage.py compress --force
+python manage.py collectstatic --verbosity=0 --no-input
+
+python manage.py wait_for_db
 
 if [ "${MAKE_MIGRATIONS,,}" = true ]; then
   echo 'generating migrations'
