@@ -7,7 +7,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     {% compress css %}
-    <link type="text/x-scss" href="{% static 'bootstrap/theme.scss' %}" rel="stylesheet" media="screen" nonce="{{ request.csp_nonce }}">
+    <link type="text/x-scss" href="{% static 'bootstrap/theme.scss' %}" rel="stylesheet" media="screen">
     {% endcompress %}
     <link href="{% static 'material-design/filled.css' %}" rel="stylesheet" nonce="{{ request.csp_nonce }}" />
     <link rel="stylesheet" href="{% static 'toldbehandling/css/style.css' %}" >
