@@ -164,13 +164,10 @@ class RenderPdfTest(TestCase):
         self.assertTrue(pdf_bytes.startswith(b"%PDF"))
 
     def test_render_pdf_with_stylesheets(self):
-        # Use a temporary file to simulate a stylesheet
-        with tempfile.NamedTemporaryFile(
-            suffix=".css", mode="w", delete=False
-        ) as css_file:
-            css_file.write("body { color: red; }")
-            css_path = css_file.name
-
-        pdf_bytes = render_pdf(self.template_name, self.context, stylesheets=[css_path])
+        pdf_bytes = render_pdf(
+            self.template_name,
+            self.context,
+            stylesheets=["toldbehandling/css/style.css"],
+        )
         self.assertIsInstance(pdf_bytes, bytes)
         self.assertTrue(pdf_bytes.startswith(b"%PDF"))

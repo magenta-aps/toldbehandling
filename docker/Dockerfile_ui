@@ -8,16 +8,16 @@ ENV SUPERCRONIC_URL=https://github.com/aptible/supercronic/releases/download/v0.
     SUPERCRONIC_SHA1SUM=7dadd4ac827e7bd60b386414dfefc898ae5b6c63\
     PYTHONUNBUFFERED=1
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
-RUN mkdir /app && \
+RUN mkdir -p /app && \
+    mkdir -p /app/project/static/ && \
     mkdir -p /var/cache/idp && \
-    mkdir /static && \
     mkdir -p /tf5/tilladelser && \
     #gid/uid from salt
     groupadd -g 75130 -r toldbehandling && \
     groupadd -g 75100 -r certificate_exporter && \
     useradd -u 75130 --no-log-init -r -g toldbehandling -G certificate_exporter toldbehandling && \
-    chown -R toldbehandling:toldbehandling /var/cache/idp /static /tf5 && \
-    chmod a+w /var/cache/idp
+    chown -R toldbehandling:toldbehandling /var/cache/idp /app/project/static/ /tf5 && \
+    chmod a+w /var/cache/idp /app/project/static/
 
 # Font cache for pdf generation
 RUN mkdir -p /home/toldbehandling/.cache/fontconfig && \
@@ -59,6 +59,8 @@ USER toldbehandling
 ENTRYPOINT ["/entrypoint.sh"]
 WORKDIR /app
 RUN django-admin compilemessages --locale=kl --locale=da
+
 VOLUME /var/cache/idp
+VOLUME /app/project/static/
 
 CMD ["gunicorn","-b","0.0.0.0:8000","project.wsgi:application","-w","4","--timeout","120","--error-logfile","-","--capture-output"]

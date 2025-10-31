@@ -8,12 +8,12 @@ from functools import partial
 from typing import Any, BinaryIO, Callable, Dict, Iterable, Optional, Union
 
 import holidays
+from django.contrib.staticfiles.finders import find as find_staticfile
 from django.core.cache import cache
 from django.core.files import File
 from django.core.serializers.json import DjangoJSONEncoder
 from django.http import QueryDict
 from django.template.loader import render_to_string
-from django.templatetags.static import static
 from django.utils import translation
 from pypdf import PdfWriter
 from weasyprint import CSS, HTML
@@ -77,14 +77,14 @@ def render_pdf(
             if filename.endswith(".scss"):
                 # Compile SCSS to CSS
                 output = django_libsass.compile(
-                    filename=static(filename),
+                    filename=find_staticfile(filename),
                     output_style=django_libsass.OUTPUT_STYLE,
                     source_comments=django_libsass.SOURCE_COMMENTS,
                 )
                 stylesheet_objs.append(CSS(string=output))
             else:
                 # Use CSS file as-is
-                stylesheet_objs.append(CSS(filename=filename))
+                stylesheet_objs.append(CSS(filename=find_staticfile(filename)))
 
     return HTML(string=html).write_pdf(
         font_config=font_config, stylesheets=stylesheet_objs
