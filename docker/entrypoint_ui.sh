@@ -12,9 +12,6 @@ MAKEMESSAGES=${MAKEMESSAGES:=false}
 DJANGO_DEBUG=${DJANGO_DEBUG:=false}
 PULL_IDP_METADATA=${PULL_IDP_METADATA:=false}
 
-python manage.py compress --force
-python manage.py collectstatic --verbosity=0 --no-input
-
 python manage.py wait_for_db
 
 if [ "${MAKE_MIGRATIONS,,}" = true ]; then
@@ -38,5 +35,8 @@ if [ "${MAKEMESSAGES,,}" = true ]; then
   echo 'making messages'
   python manage.py make_messages --locale=kl --locale=da --no-obsolete --add-location file
 fi
+
+python manage.py collectstatic --verbosity=0 --no-input
+python manage.py compress --verbosity=1 --force
 
 exec "$@"
