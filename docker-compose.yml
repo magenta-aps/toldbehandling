@@ -85,6 +85,7 @@ services:
       - tf5-data:/tf5:rw
       - ./dev-environment/cert:/ssl:ro
       - ./log/ui.log:/log/ui.log:rw
+      - idp-data:/var/cache/idp:rw
     ports:
       - "8041:8000"
     environment:
@@ -219,6 +220,7 @@ volumes:
   postgres-data:
   file-data:
   tf5-data:
+  idp-data:
 
 networks:
   default:

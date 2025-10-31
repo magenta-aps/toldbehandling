@@ -96,7 +96,7 @@ SAML = {
     "metadata_remote": os.environ.get("SAML_IDP_METADATA"),
     # Til metadata-fetch mellem containere
     "metadata_remote_container": os.environ.get("SAML_IDP_METADATA_CONTAINER"),
-    "metadata": {"local": ["/var/cache/told/idp_metadata.xml"]},  # IdP Metadata
+    "metadata": {"local": ["/var/cache/idp/idp_metadata.xml"]},  # IdP Metadata
     "service": {
         "sp": {
             "name": os.environ.get("SAML_SP_NAME") or "Told",
