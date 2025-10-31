@@ -269,7 +269,10 @@ Unittest UI:
   script:
     - cd /app
     - cp -r ./told-common/told_common .
+    - chmod -R 775 /app/project/static/
     - python manage.py compress --force && python manage.py collectstatic --verbosity=0 --no-input
+    - ls -l /app/project/static
+    - cat /app/project/static/CACHE/manifest.json
     - coverage run manage.py test --parallel 4
     - coverage combine
     - coverage report --show-missing

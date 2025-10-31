@@ -12,7 +12,7 @@ MAKEMESSAGES=${MAKEMESSAGES:=false}
 DJANGO_DEBUG=${DJANGO_DEBUG:=false}
 SKIP_IDP_METADATA=${SKIP_IDP_METADATA:=false}
 
-python manage.py compress --force
+python manage.py compress --verbosity=3 --force
 python manage.py collectstatic --verbosity=0 --no-input
 
 python manage.py wait_for_db
