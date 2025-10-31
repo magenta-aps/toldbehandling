@@ -364,10 +364,10 @@ class TF10Form(BootstrapForm):
 
     def clean_with_formset(self, formset):
         # Perform validation on form and formset together
-        if (
-            not self.cleaned_data["indførselstilladelse_alkohol"]
-            or not self.cleaned_data["indførselstilladelse_tobak"]
-            and not self.cleaned_data["kladde"]
+        indførselstilladelse_alkohol = self.cleaned_data["indførselstilladelse_alkohol"]
+        indførselstilladelse_tobak = self.cleaned_data["indførselstilladelse_tobak"]
+        if not self.cleaned_data["kladde"] and not (
+            indførselstilladelse_alkohol and indførselstilladelse_tobak
         ):
             # Hvis vi ikke har en indførselstilladelse,
             # tjek om der er nogle varer der kræver det
@@ -375,7 +375,10 @@ class TF10Form(BootstrapForm):
                 if self.varesatser and "vareafgiftssats" in subform.cleaned_data:
                     varesats_id = subform.cleaned_data["vareafgiftssats"]
                     vareafgiftssats = self.varesatser[int(varesats_id)]
-                    if vareafgiftssats.kræver_indførselstilladelse_alkohol:
+                    if (
+                        vareafgiftssats.kræver_indførselstilladelse_alkohol
+                        and not indførselstilladelse_alkohol
+                    ):
                         self.add_error(
                             "indførselstilladelse_alkohol",
                             _(
@@ -384,7 +387,10 @@ class TF10Form(BootstrapForm):
                             ),
                         )
                         break
-                    if vareafgiftssats.kræver_indførselstilladelse_tobak:
+                    if (
+                        vareafgiftssats.kræver_indførselstilladelse_tobak
+                        and not indførselstilladelse_tobak
+                    ):
                         self.add_error(
                             "indførselstilladelse_tobak",
                             _(
