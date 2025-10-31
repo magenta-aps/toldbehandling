@@ -267,9 +267,10 @@ Unittest REST:
 Unittest UI:
   <<: *test-ui
   script:
+    - mkdir -p /app/project/static/
     - cd /app
     - cp -r ./told-common/told_common .
-    - python manage.py compress --force && python manage.py collectstatic --verbosity=0 --no-input
+    - python manage.py compress --force && python manage.py collectstatic --verbosity=1 --no-input
     - coverage run manage.py test --parallel 4
     - coverage combine
     - coverage report --show-missing
