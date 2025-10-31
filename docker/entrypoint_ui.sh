@@ -10,7 +10,7 @@ MIGRATE=${MIGRATE:=false}
 TEST=${TEST:=false}
 MAKEMESSAGES=${MAKEMESSAGES:=false}
 DJANGO_DEBUG=${DJANGO_DEBUG:=false}
-SKIP_IDP_METADATA=${SKIP_IDP_METADATA:=false}
+PULL_IDP_METADATA=${PULL_IDP_METADATA:=false}
 
 python manage.py wait_for_db
 
@@ -26,7 +26,7 @@ if [ "${MIGRATE,,}" = true ]; then
   python manage.py migrate
 fi
 python manage.py createcachetable
-if [ "${SKIP_IDP_METADATA,,}" = false ]; then
+if [ "${PULL_IDP_METADATA,,}" = true ]; then
   python manage.py update_mitid_idp_metadata
 fi
 
