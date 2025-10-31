@@ -60,5 +60,5 @@ ENTRYPOINT ["/entrypoint.sh"]
 WORKDIR /app
 RUN django-admin compilemessages --locale=kl --locale=da
 VOLUME /var/cache/told
-
+VOLUME /app/project/static/
 CMD ["gunicorn","-b","0.0.0.0:8000","project.wsgi:application","-w","4","--timeout","120","--error-logfile","-","--capture-output"]
