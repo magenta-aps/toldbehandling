@@ -255,6 +255,7 @@ class AfgiftanmeldelseRestClientTests(TestCase):
             "status": "OK",
             "dato": "2024-01-01",
             "beregnet_faktureringsdato": "2024-01-01",
+            "sidste_ændringsdato": "2020-01-02T00:00:00",
         }
 
     def test_compare_false_if_faktura_exists(self):
@@ -471,6 +472,7 @@ class PrivatAfgiftanmeldelseRestClientTests(TestCase):
             "oprettet_af": MagicMock(),
             "payment_status": "OK",
             "id": 123,
+            "sidste_ændringsdato": "2020-01-02T00:00:00",
         }
 
     def test_list(self):

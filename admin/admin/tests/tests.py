@@ -377,6 +377,7 @@ class TestGodkend(TestMixin, PermissionsTest, TestCase):
                 "dato": "2023-08-22T00:00:00-02:00",
                 "status": "afvist",
                 "beregnet_faktureringsdato": "2023-10-10",
+                "sidste_ændringsdato": "2023-08-22T00:00:00-02:00",
             }
         elif path == expected_prefix + "afgiftsanmeldelse/1/full":
             json_content = {
@@ -422,6 +423,7 @@ class TestGodkend(TestMixin, PermissionsTest, TestCase):
                 "dato": "2023-08-22T00:00:00-02:00",
                 "status": "afvist",
                 "beregnet_faktureringsdato": "2023-10-10",
+                "sidste_ændringsdato": "2023-08-22T00:00:00-02:00",
                 "oprettet_af": {
                     "username": "testuser1",
                     "first_name": "",
@@ -759,6 +761,7 @@ class TestPrisme(TestMixin, PermissionsTest, TestCase):
                 "dato": "2023-08-22T00:00:00-02:00",
                 "status": "afvist",
                 "beregnet_faktureringsdato": "2023-10-10",
+                "sidste_ændringsdato": "2023-08-22T00:00:00-02:00",
             }
         elif path == expected_prefix + "afgiftsanmeldelse/1/full":
             json_content = {
@@ -801,6 +804,7 @@ class TestPrisme(TestMixin, PermissionsTest, TestCase):
                 "afgift_total": "5000.00",
                 "betalt": False,
                 "dato": "2023-08-22T00:00:00-02:00",
+                "sidste_ændringsdato": "2023-08-22T00:00:00-02:00",
                 "status": "afvist",
                 "beregnet_faktureringsdato": "2023-10-10",
             }
@@ -1139,6 +1143,7 @@ class AnmeldelseHistoryListViewTest(PermissionsTest, TestCase):
                 "modtager": 1,
                 "postforsendelse": 1,
                 "dato": "2023-09-03T00:00:00-02:00",
+                "sidste_ændringsdato": "2023-08-22T00:00:00-02:00",
                 "beregnet_faktureringsdato": "2023-10-10",
                 "afgift_total": "0.00",
                 "fragtforsendelse": None,
@@ -1159,6 +1164,7 @@ class AnmeldelseHistoryListViewTest(PermissionsTest, TestCase):
                 "modtager": 1,
                 "postforsendelse": 1,
                 "dato": "2023-09-03T00:00:00-02:00",
+                "sidste_ændringsdato": "2023-08-22T00:00:00-02:00",
                 "beregnet_faktureringsdato": "2023-10-10",
                 "afgift_total": "0.00",
                 "fragtforsendelse": None,
@@ -1285,6 +1291,7 @@ class AnmeldelseHistoryDetailViewTest(PermissionsTest, TestCase):
                 "afgift_total": "5000.00",
                 "betalt": False,
                 "dato": "2023-10-06T00:00:00-02:00",
+                "sidste_ændringsdato": "2023-08-22T00:00:00-02:00",
                 "beregnet_faktureringsdato": "2023-10-10",
                 "status": "ny",
                 "history_username": "admin",
@@ -1408,6 +1415,7 @@ class AnmeldelseHistoryDetailViewTest(PermissionsTest, TestCase):
                         "afgift_total": "5000.00",
                         "betalt": False,
                         "dato": "2023-10-06T00:00:00-02:00",
+                        "sidste_ændringsdato": "2023-08-22T00:00:00-02:00",
                         "beregnet_faktureringsdato": "2023-10-10",
                         "status": "ny",
                         "tf3": False,
@@ -1618,6 +1626,7 @@ class AnmeldelseNotatTest(PermissionsTest, TestCase):
                 "betalt": False,
                 "dato": "2023-08-22T00:00:00-02:00",
                 "beregnet_faktureringsdato": "2023-10-10",
+                "sidste_ændringsdato": "2023-08-22T00:00:00-02:00",
                 "status": "afvist",
             }
         elif path == expected_prefix + "afgiftsanmeldelse/1/full":
@@ -1658,6 +1667,7 @@ class AnmeldelseNotatTest(PermissionsTest, TestCase):
                     "afgangsdato": "2023-11-03",
                 },
                 "dato": "2023-09-03T00:00:00-02:00",
+                "sidste_ændringsdato": "2023-08-22T00:00:00-02:00",
                 "beregnet_faktureringsdato": "2023-10-10",
                 "afgift_total": "5000.00",
                 "fragtforsendelse": None,
@@ -1802,6 +1812,7 @@ class AnmeldelseNotatTest(PermissionsTest, TestCase):
                     "forbindelsesnr": "1337",
                     "fragtbrevnr": "ABCDE1234567",
                     "afgangsdato": "2023-11-03",
+                    "sidste_ændringsdato": "2023-08-22T00:00:00-02:00",
                     "form-TOTAL_FORMS": "1",
                     "form-INITIAL_FORMS": "1",
                     "form-MIN_NUM_FORMS": "1",
@@ -2707,6 +2718,7 @@ class TF10EditMultipleViewTest(PermissionsTest, TestCase):
                     "afgift_total": "5000.00",
                     "betalt": False,
                     "dato": "2023-08-22T00:00:00-02:00",
+                    "sidste_ændringsdato": "2023-08-22T00:00:00-02:00",
                     "beregnet_faktureringsdato": "2023-10-10",
                     "status": "afvist",
                     "fuldmagtshaver": {"cvr": 12345678, "navn": "HepHey A/S"},
@@ -2751,6 +2763,7 @@ class TF10EditMultipleViewTest(PermissionsTest, TestCase):
                     "afgift_total": "5000.00",
                     "betalt": False,
                     "dato": "2023-08-22T00:00:00-02:00",
+                    "sidste_ændringsdato": "2023-08-22T00:00:00-02:00",
                     "beregnet_faktureringsdato": "2023-10-10",
                     "status": "afvist",
                     "fuldmagtshaver": {"cvr": 12345678, "navn": "HepHey A/S"},
@@ -2795,6 +2808,7 @@ class TF10EditMultipleViewTest(PermissionsTest, TestCase):
                     "afgift_total": "5000.00",
                     "betalt": False,
                     "dato": "2023-08-22T00:00:00-02:00",
+                    "sidste_ændringsdato": "2023-08-22T00:00:00-02:00",
                     "beregnet_faktureringsdato": "2023-10-10",
                     "status": "afvist",
                     "fuldmagtshaver": {"cvr": 12345678, "navn": "HepHey A/S"},
@@ -2922,6 +2936,7 @@ class TF10CreateTest(TestMixin, HasLogin, TestCase):
         "fragttype": "skibsfragt",
         "fragtbrevnr": "ABCDE1234567",
         "afgangsdato": "2023-11-03",
+        "sidste_ændringsdato": "2023-11-03",
         "form-TOTAL_FORMS": "1",
         "form-INITIAL_FORMS": "1",
         "form-0-vareafgiftssats": "1",
@@ -3840,6 +3855,7 @@ class TF5NotatTest(HasLogin, TestCase):
         "indførselstilladelse": "123",
         "leverandørfaktura_nummer": "123",
         "indleveringsdato": "2023-11-03",
+        "sidste_ændringsdato": "2024-01-24T12:23:17.315148+00:00",
         "form-TOTAL_FORMS": "1",
         "form-INITIAL_FORMS": "1",
         "form-0-id": "1",
@@ -3972,6 +3988,7 @@ class TF5NotatTest(HasLogin, TestCase):
                 "indførselstilladelse": None,
                 "leverandørfaktura": "",  # "/privatfakturaer/1/a.pdf",
                 "oprettet": "2024-01-24T12:23:17.315148+00:00",
+                "sidste_ændringsdato": "2024-01-24T12:23:17.315148+00:00",
                 "oprettet_af": {
                     "id": 10,
                     "username": "0111111111 / 12345678",
@@ -4160,6 +4177,7 @@ class TF5BankPaymentTest(HasLogin, TestCase):
                 "indførselstilladelse": None,
                 "leverandørfaktura": "",  # "/privatfakturaer/1/a.pdf",
                 "oprettet": "2024-01-24T12:23:17.315148+00:00",
+                "sidste_ændringsdato": "2024-01-24T12:23:17.315148+00:00",
                 "oprettet_af": {
                     "id": 10,
                     "username": "0111111111 / 12345678",

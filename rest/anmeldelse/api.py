@@ -168,6 +168,7 @@ class AfgiftsanmeldelseOut(ModelSchema):
         ]
 
     beregnet_faktureringsdato: str
+    sidste_ændringsdato: Optional[str] = None
 
     @staticmethod
     def resolve_beregnet_faktureringsdato(obj: Afgiftsanmeldelse):
@@ -653,6 +654,7 @@ class PartialPrivatAfgiftsanmeldelseIn(ModelSchema):
 class PrivatAfgiftsanmeldelseOut(ModelSchema):
     oprettet_af: Optional[UserOut]
     payment_status: Optional[str]
+    sidste_ændringsdato: Optional[str] = None
 
     class Config:
         model = PrivatAfgiftsanmeldelse
