@@ -365,6 +365,7 @@ class AfgiftanmeldelseRestClient(ModelRestClient):
             "fuldmagtshaver_id": data.get("fuldmagtshaver") or None,
             "status": status,
             "tf3": data.get("tf3", False),
+            "version": data.get("version"),
         }
 
     def create(
@@ -427,9 +428,11 @@ class AfgiftanmeldelseRestClient(ModelRestClient):
             self.rest.patch(f"afgiftsanmeldelse/{id}", mapped)
         return id
 
-    def set_status(self, id: int, status: str):
+    def set_status(self, id: int, status: str, version: int | None = None):
         if status in ("ny", "godkendt", "afvist", "slettet"):
-            self.rest.patch(f"afgiftsanmeldelse/{id}", {"status": status})
+            self.rest.patch(
+                f"afgiftsanmeldelse/{id}", {"status": status, "version": version}
+            )
         else:
             raise ValueError(
                 "status skal være 'ny', 'godkendt', 'afvist' eller 'slettet'"
@@ -557,6 +560,7 @@ class PrivatAfgiftanmeldelseRestClient(ModelRestClient):
                 "leverandørfaktura_nummer",
                 "indførselstilladelse",
                 "anonym",
+                "version",
             )
         }
         mapped.update(

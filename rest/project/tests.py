@@ -5,7 +5,7 @@
 from unittest import TestCase
 
 from django.core.exceptions import ValidationError
-from project.util import json_dump, strtobool
+from project.util import json_dump, save_or_raise_409, strtobool
 
 
 class UtilTest(TestCase):
@@ -33,3 +33,19 @@ class UtilTest(TestCase):
         for value in ("j", "ja", "nej", "null", "None", "yep", "hephey", "2"):
             with self.assertRaises(ValueError):
                 strtobool(value)
+
+    class DummyItem:
+        def save(self):
+            # Raise a non-concurrency ValidationError
+            raise ValidationError("Some validation error", code="some_error")
+
+    def test_non_concurrency_validation_error_is_reraised(self):
+        item = self.DummyItem()
+
+        with self.assertRaises(ValidationError) as cm:
+            save_or_raise_409(item)
+
+        exc = cm.exception
+        # Check that the exception is the original one
+        self.assertEqual(exc.message, "Some validation error")
+        self.assertEqual(exc.code, "some_error")

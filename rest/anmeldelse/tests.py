@@ -396,7 +396,8 @@ class AfgiftsanmeldelseTest(RestTestMixin, TestCase):
         data = response.json()
         self.assertEquals(data["count"], 1)
         self.assertEquals(
-            data["items"][0], {**self.expected_response_dict, "status": "godkendt"}
+            data["items"][0],
+            {**self.expected_response_dict, "status": "godkendt", "version": ANY},
         )
 
     def test_delete_success(self):
@@ -867,6 +868,7 @@ class AfgiftsanmeldelseAPITest(AnmeldelsesTestDataMixin, TestCase):
                         ).isoformat(),
                         "history_username": None,
                         "history_date": ANY,
+                        "version": ANY,
                     }
                 ],
             },
@@ -958,6 +960,7 @@ class AfgiftsanmeldelseAPITest(AnmeldelsesTestDataMixin, TestCase):
                 ).isoformat(),
                 "history_username": None,
                 "history_date": ANY,
+                "version": ANY,
             },
         )
 
@@ -989,6 +992,30 @@ class AfgiftsanmeldelseAPITest(AnmeldelsesTestDataMixin, TestCase):
         )
         self.assertEqual(resp.status_code, 200)
         mock_queryset_none.assert_called_once()
+
+    def test_update_outdated_version(self):
+        resp = self.client.patch(
+            reverse(
+                "api-1.0.0:afgiftsanmeldelse_update", args=[self.afgiftsanmeldelse.id]
+            ),
+            data=json_dump({"leverandørfaktura_nummer": "54321", "version": -1}),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+        )
+
+        self.assertEqual(resp.status_code, 409)
+
+    def test_update_deleted_version(self):
+        anmeldelse_id = self.afgiftsanmeldelse.id
+        self.afgiftsanmeldelse.delete()
+        resp = self.client.patch(
+            reverse("api-1.0.0:afgiftsanmeldelse_update", args=[anmeldelse_id]),
+            data=json_dump({"leverandørfaktura_nummer": "54321", "version": -1}),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+        )
+
+        self.assertEqual(resp.status_code, 404)
 
     @patch("anmeldelse.api.AfgiftsanmeldelseAPI.check_user")
     def test_update_status_kladde(self, mock_check_user):
@@ -1503,6 +1530,7 @@ class PrivatAfgiftsanmeldelseAPITest(TestCase):
                 "status": "ny",
                 "anonym": False,
                 "payment_status": "created",
+                "version": 0,
             },
         )
 
@@ -1556,6 +1584,7 @@ class PrivatAfgiftsanmeldelseAPITest(TestCase):
                         "status": "ny",
                         "anonym": False,
                         "payment_status": "created",
+                        "version": 0,
                     }
                 ],
             },
@@ -1682,6 +1711,26 @@ class PrivatAfgiftsanmeldelseAPITest(TestCase):
         )
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.json(), {"success": True})
+
+    def test_update_outdated_version(self):
+        resp = self.client.patch(
+            reverse(
+                f"api-1.0.0:privatafgiftsanmeldelse_update",
+                args=[self.privatafgiftsanmeldelse.id],
+            ),
+            json_dump(
+                {
+                    "navn": "Test privatafgiftsanmeldelse 1.2",
+                    "leverandørfaktura": base64.b64encode(
+                        b"%PDF-1.4\n%Fake PDF content - updated!"
+                    ).decode("utf-8"),
+                    "version": -1,
+                }
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+        )
+        self.assertEqual(resp.status_code, 409)
 
     def test_update_leniency(self):
         resp = self.client.patch(

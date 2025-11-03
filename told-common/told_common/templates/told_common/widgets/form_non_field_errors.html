@@ -1,0 +1,24 @@
+{% load i18n %}
+
+{% if form.non_field_errors %}
+  <div class="row">
+    <div class="col-12">
+      <div class="alert alert-danger d-flex align-items-center justify-content-between">
+        <div>
+          {% for error in form.non_field_errors.as_data %}
+            <p class="mb-0">{{ error.message }}</p>
+          {% endfor %}
+        </div>
+        <div>
+          {% for error in form.non_field_errors.as_data %}
+            {% if error.code == "concurrent_update" %}
+              <a href="{{ request.path }}" class="btn btn-danger">
+                {% trans "Genindlæs siden" %}
+              </a>
+            {% endif %}
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+{% endif %}

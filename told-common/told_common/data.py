@@ -341,6 +341,7 @@ class Afgiftsanmeldelse(ToldDataClass):
     fuldmagtshaver: Optional[Speditør] = None
     betales_af: Optional[str] = None
     tf3: Optional[bool] = False
+    version: Optional[int] = None
 
     @property
     def indberetter(self) -> Optional[dict]:
@@ -433,6 +434,7 @@ class PrivatAfgiftsanmeldelse(ToldDataClass):
     indførselstilladelse: Optional[str] = None
     varelinjer: Optional[List[Varelinje]] = None
     notater: Optional[List[Notat]] = None
+    version: Optional[int] = None
 
     @property
     def afgift_sum(self):

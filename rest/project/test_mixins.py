@@ -317,6 +317,8 @@ class RestMixin:
             for key, value in item.items():
                 if isinstance(value, File):
                     filekeys.add(key)
+                if key == "version":
+                    continue
                 items_nofiles[i][key] = value
         for key in filekeys:
             file1 = self.get_file_data(items_nofiles[0].pop(key))

@@ -38,7 +38,7 @@ from ninja_extra.exceptions import PermissionDenied
 from ninja_extra.pagination import paginate
 from ninja_extra.schemas import NinjaPaginationResponseSchema
 from payment.models import Payment
-from project.util import RestPermission, json_dump
+from project.util import RestPermission, json_dump, save_or_raise_409
 from pydantic import BeforeValidator, root_validator
 from sats.models import Vareafgiftssats
 
@@ -102,6 +102,7 @@ class PartialAfgiftsanmeldelseIn(ModelSchema):
     fuldmagtshaver_id: Optional[int] = None
     status: Optional[str] = None
     tf3: Optional[bool] = None
+    version: Optional[int] = None
     leverandørfaktura_nummer: Annotated[
         Optional[str], BeforeValidator(coerce_num_to_str)
     ] = None
@@ -168,6 +169,7 @@ class AfgiftsanmeldelseOut(ModelSchema):
         ]
 
     beregnet_faktureringsdato: str
+    version: Optional[int] = None
 
     @staticmethod
     def resolve_beregnet_faktureringsdato(obj: Afgiftsanmeldelse):
@@ -500,7 +502,7 @@ class AfgiftsanmeldelseAPI:
                 log.info("Der findes ikke en eksisterende leverandørfaktura")
 
         # Persist data & return
-        item.save()
+        save_or_raise_409(item)
         return {"success": True}
 
     @route.delete(
@@ -646,6 +648,7 @@ class PartialPrivatAfgiftsanmeldelseIn(ModelSchema):
             "indførselstilladelse",
             "anonym",
             "status",
+            "version",
         ]
         model_fields_optional = "__all__"
 
@@ -653,6 +656,7 @@ class PartialPrivatAfgiftsanmeldelseIn(ModelSchema):
 class PrivatAfgiftsanmeldelseOut(ModelSchema):
     oprettet_af: Optional[UserOut]
     payment_status: Optional[str]
+    version: Optional[int] = None
 
     class Config:
         model = PrivatAfgiftsanmeldelse
@@ -839,7 +843,7 @@ class PrivatAfgiftsanmeldelseAPI:
             item.leverandørfaktura = ContentFile(
                 base64.b64decode(leverandørfaktura), name=str(uuid4()) + ".pdf"
             )
-        item.save()
+        save_or_raise_409(item)
         return {"success": True}
 
     @staticmethod

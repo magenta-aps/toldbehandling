@@ -416,7 +416,7 @@ class AfgiftanmeldelseRestClientUpdateTests(TestCase):
             self.mock_rest.reset_mock()
             self.client.set_status(1, status)
             self.mock_rest.patch.assert_called_with(
-                "afgiftsanmeldelse/1", {"status": status}
+                "afgiftsanmeldelse/1", {"status": status, "version": None}
             )
 
     def test_set_status_invalid_raises(self):

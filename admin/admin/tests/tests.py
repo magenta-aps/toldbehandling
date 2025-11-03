@@ -30,7 +30,7 @@ from openpyxl import Workbook, load_workbook
 from requests import Response
 from told_common.data import Notat, Vareafgiftssats
 from told_common.forms import TF10VareForm
-from told_common.rest_client import RestClient
+from told_common.rest_client import RestClient, RestClientException
 from told_common.tests.tests import (
     AnmeldelseListViewTest,
     HasLogin,
@@ -617,8 +617,23 @@ class TestGodkend(TestMixin, PermissionsTest, TestCase):
         for url, data in self.patched:
             patched_map[url].append(json.loads(data))
         self.assertEquals(
-            patched_map[prefix + "afgiftsanmeldelse/1"], [{"status": "godkendt"}]
+            patched_map[prefix + "afgiftsanmeldelse/1"],
+            [{"version": None, "status": "godkendt"}],
         )
+
+    @patch.object(requests.sessions.Session, "patch")
+    @patch.object(requests.sessions.Session, "get")
+    def test_post_view_godkend_outdated_form(self, mock_get, mock_patch):
+        self.login()
+        view_url = reverse("tf10_view", kwargs={"id": 1})
+        mock_patch.side_effect = RestClientException(status_code=409, content="foo")
+        mock_get.side_effect = self.mock_requests_get
+        response = self.client.post(view_url, {"status": "godkendt", "version": -1})
+        self.assertEquals(response.status_code, 200)
+
+        errors = response.context["form"].non_field_errors().as_data()
+        self.assertEqual(len(errors), 1)
+        self.assertEqual(errors[0].code, "concurrent_update")
 
     @patch.object(requests.sessions.Session, "get")
     @patch.object(requests.sessions.Session, "post")
@@ -638,7 +653,8 @@ class TestGodkend(TestMixin, PermissionsTest, TestCase):
         for url, data in self.patched:
             patched_map[url].append(json.loads(data))
         self.assertEquals(
-            patched_map[prefix + "afgiftsanmeldelse/1"], [{"status": "afvist"}]
+            patched_map[prefix + "afgiftsanmeldelse/1"],
+            [{"version": None, "status": "afvist"}],
         )
 
     @patch.object(requests.sessions.Session, "patch")
@@ -3376,6 +3392,7 @@ class TF10CreateTest(TestMixin, HasLogin, TestCase):
                     "kladde": False,
                     "status": None,
                     "tf3": False,
+                    "version": None,
                 }
             ],
         )
@@ -3461,6 +3478,7 @@ class TF10CreateTest(TestMixin, HasLogin, TestCase):
                     "kladde": False,
                     "status": None,
                     "tf3": False,
+                    "version": None,
                 }
             ],
         )
@@ -3542,6 +3560,7 @@ class TF10CreateTest(TestMixin, HasLogin, TestCase):
                     "kladde": False,
                     "status": None,
                     "tf3": False,
+                    "version": None,
                 }
             ],
         )

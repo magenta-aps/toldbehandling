@@ -5,6 +5,7 @@ from datetime import date, timedelta
 from decimal import Decimal
 
 from aktør.models import Afsender, Modtager, Speditør
+from common.mixins import ConcurrentUpdateMixin
 from common.models import Postnummer
 from common.util import dato_måned_slut
 from django.contrib.auth.models import User
@@ -12,7 +13,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models import CheckConstraint, Q
-from django.db.models.signals import post_delete, post_save
+from django.db.models.signals import post_delete, post_save, pre_save
 from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
 from forsendelse.models import Fragtforsendelse, Postforsendelse
@@ -28,7 +29,7 @@ def privatafgiftsanmeldelse_upload_to(instance, filename):
     return f"privatfakturaer/{instance.pk}/{filename}"
 
 
-class Afgiftsanmeldelse(models.Model):
+class Afgiftsanmeldelse(ConcurrentUpdateMixin, models.Model):
     class Meta:
         ordering = ["id"]
         constraints = [
@@ -233,7 +234,7 @@ class Afgiftsanmeldelse(models.Model):
         return måned_slut + timedelta(days=ekstra_dage)
 
 
-class PrivatAfgiftsanmeldelse(models.Model):
+class PrivatAfgiftsanmeldelse(ConcurrentUpdateMixin, models.Model):
     history = HistoricalRecords()
     oprettet = models.DateTimeField(auto_now_add=True)
     oprettet_af = models.ForeignKey(
@@ -521,3 +522,16 @@ class Toldkategori(models.Model):
 
     def __str__(self):
         return f"Toldkategori(kategori={self.kategori}, navn={self.navn})"
+
+
+pre_save.connect(
+    Afgiftsanmeldelse.pre_save,
+    Afgiftsanmeldelse,
+    dispatch_uid="afgifsanmeldelse_pre_save",
+)
+
+pre_save.connect(
+    PrivatAfgiftsanmeldelse.pre_save,
+    PrivatAfgiftsanmeldelse,
+    dispatch_uid="privatafgifsanmeldelse_pre_save",
+)

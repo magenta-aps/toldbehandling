@@ -608,6 +608,7 @@ class TF10BlanketTest(BlanketMixin, TestMixin, HasLogin, TestCase):
                     "kladde": False,
                     "status": None,
                     "tf3": False,
+                    "version": None,
                 }
             ],
         )
@@ -676,6 +677,7 @@ class TF10BlanketTest(BlanketMixin, TestMixin, HasLogin, TestCase):
                     "kladde": False,
                     "status": None,
                     "tf3": False,
+                    "version": None,
                 }
             ],
         )
@@ -760,6 +762,7 @@ class TF10BlanketTest(BlanketMixin, TestMixin, HasLogin, TestCase):
                     "kladde": False,
                     "status": None,
                     "tf3": False,
+                    "version": None,
                 }
             ],
         )
@@ -1214,6 +1217,7 @@ class TF5BlanketTest(TestMixin, HasLogin, TestCase):
                     "leverandørfaktura": base64.b64encode(
                         "Testtekst".encode("utf-8")
                     ).decode("ascii"),
+                    "version": None,
                 }
             ],
         )

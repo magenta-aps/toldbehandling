@@ -31,7 +31,7 @@ from told_common.data import (
     Forsendelsestype,
     PrivatAfgiftsanmeldelse,
 )
-from told_common.rest_client import RestClient
+from told_common.rest_client import RestClient, RestClientException
 from told_common.util import (
     JSONEncoder,
     dataclass_map_to_dict,
@@ -436,18 +436,35 @@ class TF10FormUpdateView(
                 self.userdata["username"],
                 self.anmeldelse_id,
             )
-        self.rest_client.afgiftanmeldelse.update(
-            self.anmeldelse_id,
-            form.cleaned_data,
-            form.cleaned_data.get("leverandørfaktura"),
-            afsender_id,
-            modtager_id,
-            postforsendelse_id,
-            fragtforsendelse_id,
-            self.item,
-            force_write=True,
-            status=self.status(self.item, form),
-        )
+        try:
+            self.rest_client.afgiftanmeldelse.update(
+                self.anmeldelse_id,
+                form.cleaned_data,
+                form.cleaned_data.get("leverandørfaktura"),
+                afsender_id,
+                modtager_id,
+                postforsendelse_id,
+                fragtforsendelse_id,
+                self.item,
+                force_write=True,
+                status=self.status(self.item, form),
+            )
+        except RestClientException as e:
+            if e.status_code == 409:
+
+                form.add_error(
+                    None,
+                    forms.ValidationError(
+                        _(
+                            "Anmeldelsen er blevet opdateret siden den blev indlæst. "
+                            "Genindlæs siden for at se de seneste ændringer."
+                        ),
+                        code="concurrent_update",
+                    ),
+                )
+                return self.form_invalid(form, formset)
+            else:
+                raise
         log.info("TF10 %d opdateret", self.anmeldelse_id)
 
         data_map = {
@@ -596,8 +613,8 @@ class TF10FormUpdateView(
         )
 
     def get_initial(self):
-        initial = {}
         item = self.item
+        initial = {"version": item.version}
         if item:
             initial["kladde"] = item.status == "kladde"
             for key in ("afsender", "modtager"):
@@ -937,6 +954,7 @@ class TF10View(TF10BaseView, TemplateView):
             initial["toldkategori"] = self.object.toldkategori
         if self.object.modtager.stedkode:
             initial["modtager_stedkode"] = self.object.modtager.stedkode
+        initial["version"] = self.object.version
         return initial
 
     @cached_property
@@ -1188,13 +1206,31 @@ class TF5UpdateView(
 
     def form_valid(self, form, formset):
         self.anmeldelse_id = self.item.id
-        self.rest_client.privat_afgiftsanmeldelse.update(
-            self.anmeldelse_id,
-            form.cleaned_data,
-            form.cleaned_data.get("leverandørfaktura"),
-            self.item,
-            force_write=True,
-        )
+
+        try:
+            self.rest_client.privat_afgiftsanmeldelse.update(
+                self.anmeldelse_id,
+                form.cleaned_data,
+                form.cleaned_data.get("leverandørfaktura"),
+                self.item,
+                force_write=True,
+            )
+        except RestClientException as e:
+            if e.status_code == 409:
+
+                form.add_error(
+                    None,
+                    forms.ValidationError(
+                        _(
+                            "Anmeldelsen er blevet opdateret siden den blev indlæst. "
+                            "Genindlæs siden for at se de seneste ændringer."
+                        ),
+                        code="concurrent_update",
+                    ),
+                )
+                return self.form_invalid(form, formset)
+            else:
+                raise
 
         data_map = {
             subform.cleaned_data["id"]: subform.cleaned_data
@@ -1306,8 +1342,8 @@ class TF5UpdateView(
         )
 
     def get_initial(self):
-        initial = {}
         item = self.item
+        initial = {"version": item.version}
         for field in dataclasses.fields(item):
             if field.name != "leverandørfaktura":
                 value = getattr(item, field.name)

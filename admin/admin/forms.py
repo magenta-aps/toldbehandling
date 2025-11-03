@@ -100,6 +100,7 @@ class TF10ViewForm(BootstrapForm):
             attrs={"disabled": "disabled", "data-modal-required": "true"}
         ),
     )
+    version = forms.IntegerField(required=False)
 
     def clean(self):
         if self.cleaned_data.get("send_til_prisme"):
@@ -199,7 +200,9 @@ class TF10SearchForm(common_forms.TF10SearchForm):
             for toldkategori in form.toldkategorier
         ],
         required=False,
-        widget=ModifiableCheckboxSelectMultiple(attrs={}, subwidget_attrs={"class": "form-check-input"})
+        widget=ModifiableCheckboxSelectMultiple(
+            attrs={}, subwidget_attrs={"class": "form-check-input"}
+        ),
     )
 
 

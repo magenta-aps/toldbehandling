@@ -27,6 +27,7 @@ from told_common.data import (
     PrismeResponse,
     Vareafgiftssats,
 )
+from told_common.rest_client import RestClientException
 from told_common.util import filter_dict_values, format_daterange, join, join_words
 from told_common.view_mixins import (
     CatchErrorsMixin,
@@ -174,6 +175,7 @@ class TF10View(
         anmeldelse_id = self.kwargs["id"]
         send_til_prisme = form.cleaned_data["send_til_prisme"]
         status = form.cleaned_data["status"]
+        version = form.cleaned_data.get("version")
         notat = (
             form.cleaned_data["notat1"]
             or form.cleaned_data["notat2"]
@@ -277,7 +279,9 @@ class TF10View(
                     )
 
                     # UPDATE
-                    self.rest_client.afgiftanmeldelse.set_status(anmeldelse_id, status)
+                    self.rest_client.afgiftanmeldelse.set_status(
+                        anmeldelse_id, status, version
+                    )
                     self.rest_client.notat.create({"tekst": notat}, self.kwargs["id"])
 
                     if (
@@ -298,11 +302,28 @@ class TF10View(
                             },
                         )
                 else:
-                    self.rest_client.afgiftanmeldelse.set_status(anmeldelse_id, status)
+                    self.rest_client.afgiftanmeldelse.set_status(
+                        anmeldelse_id, status, version
+                    )
             else:
                 # Opret notat _efter_ den nye version af anmeldelsen, så vores historik-filtrering fungerer
                 if notat:
                     self.rest_client.notat.create({"tekst": notat}, self.kwargs["id"])
+
+        except RestClientException as e:
+            if e.status_code == 409:
+                form.add_error(
+                    None,
+                    forms.ValidationError(
+                        _(
+                            "Anmeldelsen er blevet opdateret siden den blev indlæst. "
+                            "Genindlæs siden for at se de seneste ændringer."
+                        ),
+                        code="concurrent_update",
+                    ),
+                )
+                return self.form_invalid(form)
+            raise
 
         except HTTPError as e:
             if e.response.status_code == 404:

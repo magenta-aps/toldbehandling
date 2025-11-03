@@ -30,6 +30,7 @@ from told_common.data import (
     Vareafgiftssats,
     Varelinje,
 )
+from told_common.rest_client import RestClientException
 from told_common.tests.tests import HasLogin
 
 
@@ -1110,6 +1111,28 @@ class TestTF10FormUpdateView(BaseTest):
         self.assertEqual(response.status_code, 302)
         self.rest_client_mock.afgiftanmeldelse.update.assert_called_once()
 
+    def test_edit_outdated_version(self):
+        self.rest_client_mock.afgiftanmeldelse.update.side_effect = RestClientException(
+            status_code=409, content="foo"
+        )
+        self.login()
+        response = self.client.post(self.url, data=self.data)
+
+        self.assertEqual(response.status_code, 200)
+
+        errors = response.context["form"].non_field_errors().as_data()
+        self.assertEqual(len(errors), 1)
+        self.assertEqual(errors[0].code, "concurrent_update")
+
+    def test_rest_client_error(self):
+        self.rest_client_mock.afgiftanmeldelse.update.side_effect = RestClientException(
+            status_code=500, content="foo"
+        )
+        self.login()
+        response = self.client.post(self.url, data=self.data)
+
+        self.assertEqual(response.status_code, 500)
+
     def test_edit_non_kladde(self):
         self.login()
         self.tf10_item.status = "må ikke redigeres"
@@ -1448,6 +1471,29 @@ class TestTF5UpdateView(BaseTest):
         response = self.client.post(self.url, self.data)
         self.assertEqual(response.status_code, 302)
         self.rest_client_mock.privat_afgiftsanmeldelse.update.assert_called_once()
+
+    def test_update_outdated_version(self):
+        self.rest_client_mock.privat_afgiftsanmeldelse.update.side_effect = (
+            RestClientException(status_code=409, content="foo")
+        )
+
+        self.login()
+        response = self.client.post(self.url, self.data)
+
+        self.assertEqual(response.status_code, 200)
+
+        errors = response.context["form"].non_field_errors().as_data()
+        self.assertEqual(len(errors), 1)
+        self.assertEqual(errors[0].code, "concurrent_update")
+
+    def test_rest_client_error(self):
+        self.rest_client_mock.privat_afgiftsanmeldelse.update.side_effect = (
+            RestClientException(status_code=500, content="foo")
+        )
+        self.login()
+        response = self.client.post(self.url, data=self.data)
+
+        self.assertEqual(response.status_code, 500)
 
     def test_view(self):
         self.login()

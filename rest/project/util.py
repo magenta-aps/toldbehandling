@@ -10,6 +10,8 @@ import orjson
 from django.core.exceptions import ValidationError
 from django.core.files import File
 from django.http import HttpRequest
+from django.utils.translation import gettext as _
+from ninja.errors import HttpError
 from ninja.renderers import BaseRenderer
 from ninja_extra import ControllerBase, permissions
 
@@ -43,6 +45,24 @@ class ORJSONRenderer(BaseRenderer):
 
 def json_dump(data: Union[Dict, List, ValidationError]):
     return ORJSONRenderer().dumps(data)
+
+
+def save_or_raise_409(item):
+    try:
+        item.save()
+    except ValidationError as e:
+        # Check if it's the concurrency error
+        if any(err.code == "concurrent_update" for err in e.error_list):
+            raise HttpError(
+                409,
+                _(
+                    (
+                        "Objektet er blevet opdateret "
+                        "af en anden bruger siden du åbnede den."
+                    )
+                ),
+            )
+        raise  # re-raise for other validation errors
 
 
 class RestPermission(permissions.BasePermission):
