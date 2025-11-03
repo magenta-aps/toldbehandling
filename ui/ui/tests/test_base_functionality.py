@@ -262,6 +262,7 @@ class TF10BlanketTest(BlanketMixin, TestMixin, HasLogin, TestCase):
                 "afgift_total": "658.00",
                 "betalt": True,
                 "dato": "2024-01-01T02:00:00+00:00",
+                "sidste_ændringsdato": "2024-01-01T02:00:00+00:00",
                 "status": "godkendt",
                 "oprettet_af": {
                     "id": 5,

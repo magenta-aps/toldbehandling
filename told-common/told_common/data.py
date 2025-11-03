@@ -332,6 +332,8 @@ class Afgiftsanmeldelse(ToldDataClass):
             mm_field=fields.Date(format="iso"),
         ),
     )
+
+    sidste_ændringsdato: Optional[str]
     notater: Optional[List[Notat]]
     prismeresponses: Optional[List[PrismeResponse]]
     varelinjer: Optional[List[Varelinje]] = None
@@ -428,6 +430,7 @@ class PrivatAfgiftsanmeldelse(ToldDataClass):
             mm_field=fields.DateTime(format="iso"),
         ),
     )
+    sidste_ændringsdato: Optional[str]
     oprettet_af: dict
     payment_status: str
     indførselstilladelse: Optional[str] = None
