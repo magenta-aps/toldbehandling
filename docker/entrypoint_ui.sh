@@ -4,7 +4,7 @@
 #
 # SPDX-License-Identifier: MPL-2.0
 
-set -eux
+set -e
 MAKE_MIGRATIONS=${MAKE_MIGRATIONS:=false}
 MIGRATE=${MIGRATE:=false}
 TEST=${TEST:=false}
