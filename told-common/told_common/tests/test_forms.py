@@ -150,10 +150,103 @@ class TF10FormTest(TestCase):
         form.clean_with_formset(formset=[subform])
         self.assertIn("indførselstilladelse_tobak", form.errors)
 
+    def test_clean_with_formset_successful(self):
+        form = TF10FormTest.create_TF10Form(
+            varesatser={
+                1: Vareafgiftssats(
+                    id=1,
+                    afgiftstabel=1,
+                    vareart_da="Båthorn Snaps",
+                    vareart_kl="Båthorn Snaps",
+                    afgiftsgruppenummer=12345678,
+                    enhed=Vareafgiftssats.Enhed.KILOGRAM,
+                    afgiftssats="1.00",
+                    kræver_indførselstilladelse_alkohol=True,
+                    kræver_indførselstilladelse_tobak=False,
+                ),
+            },
+            extra_data={"indførselstilladelse_alkohol": "VS123456"},
+        )
+        self.assertTrue(form.is_valid())
+
+        subform = TF10VareForm(
+            varesatser=form.varesatser,
+            data={"vareafgiftssats": 1, "mængde": 2},
+        )
+        subform.is_valid()
+
+        form.clean_with_formset(formset=[subform])
+        self.assertNotIn("indførselstilladelse_alkohol", form.errors)
+
+        form = TF10FormTest.create_TF10Form(
+            varesatser={
+                1: Vareafgiftssats(
+                    id=1,
+                    afgiftstabel=2,
+                    vareart_da="Klovnesmøger",
+                    vareart_kl="Klovnesmøger",
+                    afgiftsgruppenummer=23456789,
+                    enhed=Vareafgiftssats.Enhed.KILOGRAM,
+                    afgiftssats="1.00",
+                    kræver_indførselstilladelse_alkohol=False,
+                    kræver_indførselstilladelse_tobak=True,
+                ),
+            },
+            extra_data={"indførselstilladelse_tobak": "VS123456"},
+        )
+        self.assertTrue(form.is_valid())
+
+        subform = TF10VareForm(
+            varesatser=form.varesatser,
+            data={"vareafgiftssats": 1, "mængde": 2},
+        )
+        subform.is_valid()
+
+        form.clean_with_formset(formset=[subform])
+        self.assertNotIn("indførselstilladelse_tobak", form.errors)
+
     @staticmethod
     def create_TF10Form(
-        varesatser: Optional[Dict] = None, kladde: Optional[bool] = None
+        varesatser: Optional[Dict] = None,
+        kladde: Optional[bool] = None,
+        extra_data: Optional[Dict] = None,
     ):
+        data = {
+            "afsender_cvr": "12345678",
+            "afsender_navn": "TestFirma1",
+            "afsender_adresse": "Testvej 42",
+            "afsender_postnummer": "1234",
+            "afsender_by": "TestBy",
+            "afsender_postbox": "123",
+            "afsender_telefon": "123456",
+            "modtager_cvr": "12345679",
+            "modtager_navn": "TestFirma2",
+            "modtager_adresse": "Testvej 43",
+            "modtager_postnummer": "1234",
+            "modtager_by": "TestBy",
+            "modtager_postbox": "124",
+            "modtager_telefon": "123123",
+            # To verify clean_with_formset later
+            "indførselstilladelse_alkohol": None,
+            "indførselstilladelse_tobak": None,
+            "leverandørfaktura_nummer": "123",
+            "fragttype": "skibsfragt",
+            "fragtbrevnr": "ABCDE1234567",
+            "afgangsdato": "2023-11-03",
+            "form-TOTAL_FORMS": "1",
+            "form-INITIAL_FORMS": "1",
+            "form-0-vareafgiftssats": "1",
+            "form-0-mængde": "3",
+            "form-0-antal": "6",
+            "form-0-fakturabeløb": "100.00",
+            "forbindelsesnr": "ABC 337",
+            "betales_af": "afsender",
+            "leverandørfaktura": None,
+            "fragtbrev": None,
+            "kladde": kladde if kladde else False,
+        }
+        if extra_data:
+            data.update(extra_data)
         return TF10Form(
             varesatser=(
                 varesatser
@@ -197,40 +290,7 @@ class TF10FormTest(TestCase):
                     ),
                 }
             ),
-            data={
-                "afsender_cvr": "12345678",
-                "afsender_navn": "TestFirma1",
-                "afsender_adresse": "Testvej 42",
-                "afsender_postnummer": "1234",
-                "afsender_by": "TestBy",
-                "afsender_postbox": "123",
-                "afsender_telefon": "123456",
-                "modtager_cvr": "12345679",
-                "modtager_navn": "TestFirma2",
-                "modtager_adresse": "Testvej 43",
-                "modtager_postnummer": "1234",
-                "modtager_by": "TestBy",
-                "modtager_postbox": "124",
-                "modtager_telefon": "123123",
-                # To verify clean_with_formset later
-                "indførselstilladelse_alkohol": None,
-                "indførselstilladelse_tobak": None,
-                "leverandørfaktura_nummer": "123",
-                "fragttype": "skibsfragt",
-                "fragtbrevnr": "ABCDE1234567",
-                "afgangsdato": "2023-11-03",
-                "form-TOTAL_FORMS": "1",
-                "form-INITIAL_FORMS": "1",
-                "form-0-vareafgiftssats": "1",
-                "form-0-mængde": "3",
-                "form-0-antal": "6",
-                "form-0-fakturabeløb": "100.00",
-                "forbindelsesnr": "ABC 337",
-                "betales_af": "afsender",
-                "leverandørfaktura": None,
-                "fragtbrev": None,
-                "kladde": kladde if kladde else False,
-            },
+            data=data,
             files={
                 "fragtbrev": SimpleUploadedFile(
                     "fragtbrev.txt", b"\x00" * (5 * 1024 * 1024)  # 5MB
