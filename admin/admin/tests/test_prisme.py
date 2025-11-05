@@ -1,13 +1,13 @@
 import base64
 import os.path
 from copy import copy
+from datetime import date
 from decimal import Decimal
 from typing import List
 from unittest.mock import patch
 
 from django.core.files.base import ContentFile
 from django.test import TestCase, override_settings
-from django.utils.datetime_safe import date
 from lxml import etree
 from told_common.data import (
     Afgiftsanmeldelse,

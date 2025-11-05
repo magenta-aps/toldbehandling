@@ -69,8 +69,8 @@ class RestMixin:
     @classmethod
     def setUpClass(cls):
         super(RestMixin, cls).setUpClass()
-        cls.leverandørfaktura_file = ContentFile(b"file_content")
-        cls.fragtbrev_file = ContentFile(b"file_content")
+        cls.leverandørfaktura_file = ContentFile(b"file_content", name="test_file.txt")
+        cls.fragtbrev_file = ContentFile(b"file_content", name="test_file.txt")
         view_all_anmeldelser = Permission.objects.create(
             name="Kan se alle afgiftsanmeldelser, ikke kun egne",
             codename="view_all_anmeldelse",

@@ -2,12 +2,12 @@
 #
 # SPDX-License-Identifier: MPL-2.0
 import re
+from datetime import date
 
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import CheckConstraint, Q
-from django.utils.datetime_safe import date
 from django.utils.translation import gettext_lazy as _
 
 

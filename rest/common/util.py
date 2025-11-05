@@ -1,8 +1,7 @@
-from datetime import timedelta
+from datetime import date, timedelta
 from typing import Any
 
 from common.models import Postnummer
-from django.utils.datetime_safe import date
 
 
 def coerce_num_to_str(value: Any) -> Any:

@@ -4,12 +4,11 @@
 
 import random
 import string
-from datetime import timedelta
+from datetime import date, timedelta
 
 from django.contrib.auth.models import Group, User
 from django.core.files.base import ContentFile
 from django.core.management.base import BaseCommand
-from django.utils.datetime_safe import date
 from forsendelse.models import Fragtforsendelse, Postforsendelse
 
 
@@ -60,7 +59,9 @@ class Command(BaseCommand):
                 oprettet_af=users.order_by("?").first(),
                 afgangsdato=date.today() + timedelta(days=random.randint(-600, 600)),
             )
-            fragtforsendelse.fragtbrev.save("fragtbrev.txt", ContentFile("testdata"))
+            fragtforsendelse.fragtbrev.save(
+                "fragtbrev.txt", ContentFile("testdata", name="test_file.txt")
+            )
 
             Postforsendelse.objects.create(
                 forsendelsestype=postforsendelsestype,
