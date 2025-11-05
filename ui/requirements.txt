@@ -15,7 +15,7 @@ django-stubs[compatible-mypy]==5.2.5
 types-requests==2.31.0.20240218
 pymemcache==4.0.0
 setuptools==80.9.0
-tblib==3.0.0
+tblib==3.2.1
 
 django-csp==3.8
 django-csp[jinja2]
