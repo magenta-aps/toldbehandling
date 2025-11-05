@@ -622,6 +622,22 @@ class TestGodkend(TestMixin, PermissionsTest, TestCase):
             patched_map[prefix + "afgiftsanmeldelse/1"], [{"status": "godkendt"}]
         )
 
+    @patch.object(requests.sessions.Session, "patch")
+    @patch.object(requests.sessions.Session, "get")
+    def test_post_view_godkend_outdated_form(self, mock_get, mock_patch):
+        self.login()
+        view_url = reverse("tf10_view", kwargs={"id": 1})
+        mock_patch.side_effect = self.mock_requests_patch
+        mock_get.side_effect = self.mock_requests_get
+        response = self.client.post(
+            view_url, {"status": "godkendt", "sidste_ændringsdato": "2021"}
+        )
+        self.assertEquals(response.status_code, 200)
+
+        errors = response.context["form"].non_field_errors().as_data()
+        self.assertEqual(len(errors), 1)
+        self.assertEqual(errors[0].code, "concurrent_update")
+
     @patch.object(requests.sessions.Session, "get")
     @patch.object(requests.sessions.Session, "post")
     @patch.object(requests.sessions.Session, "patch")

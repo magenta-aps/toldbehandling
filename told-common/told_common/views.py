@@ -951,6 +951,7 @@ class TF10View(TF10BaseView, TemplateView):
             initial["toldkategori"] = self.object.toldkategori
         if self.object.modtager.stedkode:
             initial["modtager_stedkode"] = self.object.modtager.stedkode
+        initial["sidste_ændringsdato"] = self.object.sidste_ændringsdato
         return initial
 
     @cached_property
