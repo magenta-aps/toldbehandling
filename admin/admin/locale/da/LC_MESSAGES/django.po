@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-11-05 05:48-0200\n"
+"POT-Creation-Date: 2025-11-05 08:56-0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -287,4 +287,10 @@ msgstr ""
 
 #: admin/templatetags/admin_tags.py
 msgid "sammensat"
+msgstr ""
+
+#: admin/views.py
+msgid ""
+"Anmeldelsen er blevet opdateret siden den blev indlæst. Genindlæs siden for "
+"at se de seneste ændringer."
 msgstr ""

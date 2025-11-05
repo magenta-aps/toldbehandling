@@ -368,6 +368,21 @@ class TF10FormUpdateView(
 
     def form_valid(self, form, formset):
         self.anmeldelse_id = self.item.id
+
+        sidste_ændringsdato = form.cleaned_data.get("sidste_ændringsdato")
+        if sidste_ændringsdato and sidste_ændringsdato != self.item.sidste_ændringsdato:
+            form.add_error(
+                None,
+                forms.ValidationError(
+                    _(
+                        "Anmeldelsen er blevet opdateret siden den blev indlæst. "
+                        "Genindlæs siden for at se de seneste ændringer."
+                    ),
+                    code="concurrent_update",
+                ),
+            )
+            return self.form_invalid(form, formset)
+
         afsender_id = self.rest_client.afsender.get_or_create(
             form.cleaned_data, form.cleaned_data
         )
@@ -596,8 +611,8 @@ class TF10FormUpdateView(
         )
 
     def get_initial(self):
-        initial = {}
         item = self.item
+        initial = {"sidste_ændringsdato": item.sidste_ændringsdato}
         if item:
             initial["kladde"] = item.status == "kladde"
             for key in ("afsender", "modtager"):
@@ -937,6 +952,7 @@ class TF10View(TF10BaseView, TemplateView):
             initial["toldkategori"] = self.object.toldkategori
         if self.object.modtager.stedkode:
             initial["modtager_stedkode"] = self.object.modtager.stedkode
+        initial["sidste_ændringsdato"] = self.object.sidste_ændringsdato
         return initial
 
     @cached_property
@@ -1188,6 +1204,21 @@ class TF5UpdateView(
 
     def form_valid(self, form, formset):
         self.anmeldelse_id = self.item.id
+
+        sidste_ændringsdato = form.cleaned_data.get("sidste_ændringsdato")
+        if sidste_ændringsdato and sidste_ændringsdato != self.item.sidste_ændringsdato:
+            form.add_error(
+                None,
+                forms.ValidationError(
+                    _(
+                        "Anmeldelsen er blevet opdateret siden den blev indlæst. "
+                        "Genindlæs siden for at se de seneste ændringer."
+                    ),
+                    code="concurrent_update",
+                ),
+            )
+            return self.form_invalid(form, formset)
+
         self.rest_client.privat_afgiftsanmeldelse.update(
             self.anmeldelse_id,
             form.cleaned_data,
@@ -1306,8 +1337,8 @@ class TF5UpdateView(
         )
 
     def get_initial(self):
-        initial = {}
         item = self.item
+        initial = {"sidste_ændringsdato": item.sidste_ændringsdato}
         for field in dataclasses.fields(item):
             if field.name != "leverandørfaktura":
                 value = getattr(item, field.name)

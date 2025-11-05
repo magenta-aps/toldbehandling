@@ -136,6 +136,7 @@ class BaseTest(HasLogin, TestCase):
         self.tf10_item.kategori = "73A"
         self.tf10_item.kræver_cvr = True
         self.tf10_item.betales_af = "afsender"
+        self.tf10_item.sidste_ændringsdato = "2024-01-01T02:00:00+00:00"
 
         self.tf10_item.oprettet_af = {
             "email": "jack@sparrow.sp",
@@ -184,6 +185,7 @@ class BaseTest(HasLogin, TestCase):
             indførselstilladelse="ABC123",
             varelinjer=[self.varelinje1, self.varelinje2],
             notater=[],
+            sidste_ændringsdato="2024-01-01T02:00:00+00:00",
         )
 
         self.tf5_item2 = PrivatAfgiftsanmeldelse(
@@ -206,6 +208,7 @@ class BaseTest(HasLogin, TestCase):
             indførselstilladelse=None,
             varelinjer=None,
             notater=None,
+            sidste_ændringsdato="2024-01-01T02:00:00+00:00",
         )
 
         items = [self.tf5_item1, self.tf5_item2]
@@ -445,6 +448,7 @@ class TestTF10HistoryListView(BaseTest):
             tf3=False,
             history_username=None,
             history_date="2025-07-10 09:00",
+            sidste_ændringsdato="2024-01-01T02:00:00+00:00",
         )
 
         self.notater = [
@@ -515,6 +519,7 @@ class TestTF10EditMultipleView(BaseTest):
             fuldmagtshaver=None,
             betales_af="importør",
             tf3=False,
+            sidste_ændringsdato="2024-01-01T02:00:00+00:00",
         )
 
         self.anmeldelse_2 = Afgiftsanmeldelse(
@@ -541,6 +546,7 @@ class TestTF10EditMultipleView(BaseTest):
             fuldmagtshaver=None,
             betales_af="modtager",
             tf3=True,
+            sidste_ændringsdato="2024-01-01T02:00:00+00:00",
         )
 
         self.rest_client_mock.afgiftanmeldelse.list.return_value = (
@@ -1016,6 +1022,7 @@ class TestTF10FormCreateView(BaseTest):
             "tf3": "False",
             "fragtbrev": MagicMock(),
             "leverandørfaktura": MagicMock(),
+            "sidste_ændringsdato": "2024-01-01T02:00:00+00:00",
         }
 
         self.url = reverse("tf10_create")
@@ -1097,6 +1104,7 @@ class TestTF10FormUpdateView(BaseTest):
             "tf3": "False",
             "fragtbrev": MagicMock(),
             "leverandørfaktura": MagicMock(),
+            "sidste_ændringsdato": "2024-01-01T02:00:00+00:00",
         }
 
         self.url = reverse("tf10_edit", kwargs={"id": 1})
@@ -1109,6 +1117,18 @@ class TestTF10FormUpdateView(BaseTest):
 
         self.assertEqual(response.status_code, 302)
         self.rest_client_mock.afgiftanmeldelse.update.assert_called_once()
+
+    def test_edit_outdated_version(self):
+        self.login()
+        self.data["sidste_ændringsdato"] = "2024-01-01T01:00:00+00:00"
+        response = self.client.post(self.url, data=self.data)
+
+        self.assertEqual(response.status_code, 200)
+        self.rest_client_mock.afgiftanmeldelse.update.assert_not_called()
+
+        errors = response.context["form"].non_field_errors().as_data()
+        self.assertEqual(len(errors), 1)
+        self.assertEqual(errors[0].code, "concurrent_update")
 
     def test_edit_non_kladde(self):
         self.login()
@@ -1441,6 +1461,7 @@ class TestTF5UpdateView(BaseTest):
             "telefon": "44 55 44 11",
             "bookingnummer": 123,
             "indleveringsdato": "2025-01-01",
+            "sidste_ændringsdato": "2024-01-01T02:00:00+00:00",
         }
 
     def test_update(self):
@@ -1448,6 +1469,18 @@ class TestTF5UpdateView(BaseTest):
         response = self.client.post(self.url, self.data)
         self.assertEqual(response.status_code, 302)
         self.rest_client_mock.privat_afgiftsanmeldelse.update.assert_called_once()
+
+    def test_update_outdated_version(self):
+        self.login()
+        self.data["sidste_ændringsdato"] = "2024-01-01T01:00:00+00:00"
+        response = self.client.post(self.url, self.data)
+
+        self.assertEqual(response.status_code, 200)
+        self.rest_client_mock.privat_afgiftsanmeldelse.update.update.assert_not_called()
+
+        errors = response.context["form"].non_field_errors().as_data()
+        self.assertEqual(len(errors), 1)
+        self.assertEqual(errors[0].code, "concurrent_update")
 
     def test_view(self):
         self.login()

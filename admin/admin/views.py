@@ -190,6 +190,23 @@ class TF10View(
                 self.object.modtager.id, {"stedkode": stedkode}
             )
 
+        sidste_ændringsdato = form.cleaned_data.get("sidste_ændringsdato")
+        if (
+            sidste_ændringsdato
+            and sidste_ændringsdato != self.object.sidste_ændringsdato
+        ):
+            form.add_error(
+                None,
+                forms.ValidationError(
+                    _(
+                        "Anmeldelsen er blevet opdateret siden den blev indlæst. "
+                        "Genindlæs siden for at se de seneste ændringer."
+                    ),
+                    code="concurrent_update",
+                ),
+            )
+            return self.form_invalid(form)
+
         try:
             if send_til_prisme:
                 # Yderligere tjek for om brugeren må ændre noget.
