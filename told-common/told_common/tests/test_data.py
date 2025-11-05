@@ -50,6 +50,7 @@ class AfgiftsanmeldelseTest(TestCase):
             prismeresponses=None,
             oprettet_af={"navn": "Alice"},
             oprettet_på_vegne_af={"navn": "Bob"},
+            sidste_ændringsdato=self.now,
         )
         self.assertEqual(anmeldelse.indberetter, {"navn": "Bob"})
 
@@ -73,6 +74,7 @@ class AfgiftsanmeldelseTest(TestCase):
             prismeresponses=None,
             oprettet_af={"navn": "Alice"},
             oprettet_på_vegne_af=None,
+            sidste_ændringsdato=self.now,
         )
         self.assertEqual(anmeldelse.indberetter, {"navn": "Alice"})
 
@@ -97,6 +99,7 @@ class AfgiftsanmeldelseTest(TestCase):
             notater=None,
             prismeresponses=None,
             varelinjer=[v1, v2],
+            sidste_ændringsdato=self.now,
         )
         self.assertEqual(anmeldelse.afgift_sum, Decimal("300.75"))
 
@@ -120,6 +123,7 @@ class AfgiftsanmeldelseTest(TestCase):
             beregnet_faktureringsdato=self.today,
             notater=None,
             prismeresponses=None,
+            sidste_ændringsdato=self.now,
         )
         self.assertEqual(anmeldelse.forbindelsesnummer, "ABC123")
 
@@ -143,6 +147,7 @@ class AfgiftsanmeldelseTest(TestCase):
             beregnet_faktureringsdato=self.today,
             notater=None,
             prismeresponses=None,
+            sidste_ændringsdato=self.now,
         )
         self.assertEqual(anmeldelse.afgangsdato, self.today)
 
@@ -166,5 +171,6 @@ class AfgiftsanmeldelseTest(TestCase):
             beregnet_faktureringsdato=self.today,
             notater=None,
             prismeresponses=None,
+            sidste_ændringsdato=self.now,
         )
         self.assertEqual(anmeldelse.afgangsdato, self.today)

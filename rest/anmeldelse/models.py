@@ -19,6 +19,8 @@ from forsendelse.models import Fragtforsendelse, Postforsendelse
 from sats.models import Vareafgiftssats
 from simple_history.models import HistoricalRecords, HistoricForeignKey
 
+from .mixins import HistoryTimestampMixin
+
 
 def afgiftsanmeldelse_upload_to(instance, filename):
     return f"leverandørfakturaer/{instance.pk}/{filename}"
@@ -28,7 +30,7 @@ def privatafgiftsanmeldelse_upload_to(instance, filename):
     return f"privatfakturaer/{instance.pk}/{filename}"
 
 
-class Afgiftsanmeldelse(models.Model):
+class Afgiftsanmeldelse(HistoryTimestampMixin, models.Model):
     class Meta:
         ordering = ["id"]
         constraints = [
@@ -233,7 +235,7 @@ class Afgiftsanmeldelse(models.Model):
         return måned_slut + timedelta(days=ekstra_dage)
 
 
-class PrivatAfgiftsanmeldelse(models.Model):
+class PrivatAfgiftsanmeldelse(HistoryTimestampMixin, models.Model):
     history = HistoricalRecords()
     oprettet = models.DateTimeField(auto_now_add=True)
     oprettet_af = models.ForeignKey(

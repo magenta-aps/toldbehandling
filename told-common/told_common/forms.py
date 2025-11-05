@@ -315,6 +315,7 @@ class TF10Form(BootstrapForm):
             )
         ),
     )
+    sidste_ændringsdato = forms.CharField(required=False)
 
     def clean(self):
         if self.cleaned_data["kladde"]:
@@ -745,3 +746,4 @@ class TF5Form(BootstrapForm):
         required=False,
     )
     betal = forms.BooleanField(required=False)
+    sidste_ændringsdato = forms.CharField(required=False)
