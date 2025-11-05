@@ -190,7 +190,11 @@ class TF10View(
                 self.object.modtager.id, {"stedkode": stedkode}
             )
 
-        if form.cleaned_data["sidste_ændringsdato"] != self.object.sidste_ændringsdato:
+        sidste_ændringsdato = form.cleaned_data.get("sidste_ændringsdato")
+        if (
+            sidste_ændringsdato
+            and sidste_ændringsdato != self.object.sidste_ændringsdato
+        ):
             form.add_error(
                 None,
                 forms.ValidationError(

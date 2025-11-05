@@ -369,7 +369,8 @@ class TF10FormUpdateView(
     def form_valid(self, form, formset):
         self.anmeldelse_id = self.item.id
 
-        if form.cleaned_data["sidste_ændringsdato"] != self.item.sidste_ændringsdato:
+        sidste_ændringsdato = form.cleaned_data.get("sidste_ændringsdato")
+        if sidste_ændringsdato and sidste_ændringsdato != self.item.sidste_ændringsdato:
             form.add_error(
                 None,
                 forms.ValidationError(
@@ -1204,7 +1205,8 @@ class TF5UpdateView(
     def form_valid(self, form, formset):
         self.anmeldelse_id = self.item.id
 
-        if form.cleaned_data["sidste_ændringsdato"] != self.item.sidste_ændringsdato:
+        sidste_ændringsdato = form.cleaned_data.get("sidste_ændringsdato")
+        if sidste_ændringsdato and sidste_ændringsdato != self.item.sidste_ændringsdato:
             form.add_error(
                 None,
                 forms.ValidationError(
