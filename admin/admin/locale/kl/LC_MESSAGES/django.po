@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-09-01 10:17-0100\n"
+"POT-Creation-Date: 2025-11-05 05:48-0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -87,11 +87,31 @@ msgid "Dato skal være efter i dag"
 msgstr ""
 
 #: admin/templates/admin/admin_layout.html
-msgid "Version"
+msgid "Afgiftstabeller"
 msgstr ""
 
 #: admin/templates/admin/admin_layout.html
-msgid "Kildekode"
+msgid "Afgiftsanmeldelser"
+msgstr ""
+
+#: admin/templates/admin/admin_layout.html admin/views.py
+msgid "Private indførselstilladelser"
+msgstr ""
+
+#: admin/templates/admin/admin_layout.html admin/templates/admin/statistik.html
+msgid "Statistik"
+msgstr ""
+
+#: admin/templates/admin/admin_layout.html
+msgid "Log ud"
+msgstr ""
+
+#: admin/templates/admin/admin_layout.html
+msgid "Indstil tofaktor-autentificering"
+msgstr ""
+
+#: admin/templates/admin/afgiftstabel/form.html
+msgid "Opret"
 msgstr ""
 
 #: admin/templates/admin/afgiftstabel/handlinger.html
@@ -99,6 +119,27 @@ msgstr ""
 #: admin/templates/admin/blanket/tf10/link.html
 #: admin/templates/admin/blanket/tf5/actions.html
 msgid "Vis"
+msgstr ""
+
+#: admin/templates/admin/afgiftstabel/list.html
+msgid "Opret ny"
+msgstr ""
+
+#: admin/templates/admin/afgiftstabel/list.html
+msgid "Opret ny tabel fra regneark"
+msgstr ""
+
+#: admin/templates/admin/afgiftstabel/view.html
+msgid "Gem"
+msgstr ""
+
+#: admin/templates/admin/afgiftstabel/view.html
+#: admin/templates/admin/blanket/tf10/link.html
+msgid "Slet"
+msgstr ""
+
+#: admin/templates/admin/afgiftstabel/view.html
+msgid "Download"
 msgstr ""
 
 #: admin/templates/admin/afgiftstabel/view.html
@@ -176,6 +217,22 @@ msgstr ""
 msgid "Har privat tillægsafgift alkohol"
 msgstr ""
 
+#: admin/templates/admin/afgiftstabel/view.html
+msgid "Alkohol"
+msgstr ""
+
+#: admin/templates/admin/afgiftstabel/view.html
+msgid "Tobak"
+msgstr ""
+
+#: admin/templates/admin/afgiftstabel/view.html
+msgid "nej"
+msgstr ""
+
+#: admin/templates/admin/afgiftstabel/view.html
+msgid "Annullér"
+msgstr ""
+
 #: admin/templates/admin/blanket/tf10/history/list.html
 msgid "Ingen søgeresultater"
 msgstr ""
@@ -188,8 +245,8 @@ msgstr ""
 msgid "Redigér"
 msgstr ""
 
-#: admin/templates/admin/blanket/tf10/link.html
-msgid "Slet"
+#: admin/templates/admin/statistik.html
+msgid "Filtre"
 msgstr ""
 
 #: admin/templates/admin/statistik.html
@@ -198,6 +255,18 @@ msgstr ""
 
 #: admin/templates/admin/statistik.html
 msgid "Dato mellem"
+msgstr ""
+
+#: admin/templates/admin/statistik.html
+msgid "og"
+msgstr ""
+
+#: admin/templates/admin/statistik.html
+msgid "Søg"
+msgstr ""
+
+#: admin/templates/admin/statistik.html
+msgid "Download regneark"
 msgstr ""
 
 #: admin/templatetags/admin_tags.py
@@ -218,8 +287,4 @@ msgstr ""
 
 #: admin/templatetags/admin_tags.py
 msgid "sammensat"
-msgstr ""
-
-#: admin/views.py
-msgid "Private indførselstilladelser"
 msgstr ""

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2025-09-01 06:55-0100\n"
+"POT-Creation-Date: 2025-11-05 05:48-0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -160,10 +160,12 @@ msgid "Postnummer skal være på 4 cifre og må ikke begynde med 0"
 msgstr "Postnormu 4-nik kisitsiseqassaaq 0-imillu aallartissanani"
 
 #: told_common/forms.py
-#, fuzzy
-#| msgid "Indførselstilladelse nr."
-msgid "Indførsels­tilladelse nr."
-msgstr "Eqqussuisinnaanermut akuersissutip nr.-a"
+msgid "Indførsels­tilladelse nr. - Alkohol"
+msgstr ""
+
+#: told_common/forms.py
+msgid "Indførsels­tilladelse nr. - Tobak"
+msgstr ""
 
 #: told_common/forms.py
 #, fuzzy
@@ -209,10 +211,12 @@ msgid "Notat"
 msgstr "Oqaaseqaat"
 
 #: told_common/forms.py told_common/templates/told_common/tf10/list.html
+#: told_common/templates/told_common/tf5/view.html
 msgid "Nej"
 msgstr "Naamik"
 
 #: told_common/forms.py told_common/templates/told_common/tf10/list.html
+#: told_common/templates/told_common/tf5/view.html
 msgid "Ja"
 msgstr "Aap"
 
@@ -228,7 +232,6 @@ msgstr "-- Akiliisussaq toqqaruk"
 #: told_common/templates/told_common/tf10/form.html
 #: told_common/templates/told_common/tf10/list.html
 #: told_common/templates/told_common/tf10/view.html
-#: told_common/templates/told_common/tf5/list.html
 msgid "Afsender"
 msgstr "Nassiussisoq"
 
@@ -236,7 +239,6 @@ msgstr "Nassiussisoq"
 #: told_common/templates/told_common/tf10/form.html
 #: told_common/templates/told_common/tf10/list.html
 #: told_common/templates/told_common/tf10/view.html
-#: told_common/templates/told_common/tf5/list.html
 msgid "Modtager"
 msgstr "Tigusisussaq"
 
@@ -277,10 +279,12 @@ msgstr ""
 "pingasunik kisitsiseqassaaq"
 
 #: told_common/forms.py
-msgid "Indførselstilladelse er påkrævet med de angivne varearter"
+msgid "Indførselstilladelse for alkohol er påkrævet med de angivne varearter"
 msgstr ""
-"Nioqqutissat nalunaarsorneqartut eqqunneqassappata eqqussuisinnaanermut "
-"akuersissuteqartariaqarpoq"
+
+#: told_common/forms.py
+msgid "Indførselstilladelse for tobak er påkrævet med de angivne varearter"
+msgstr ""
 
 #: told_common/forms.py
 msgid "-- Vælg vareart"
@@ -290,30 +294,24 @@ msgstr "-- Nioqqutissat suunerat toqqaruk"
 msgid "Alle"
 msgstr "Tamaasa takutikkit"
 
-#: told_common/forms.py told_common/templates/told_common/tf10/view.html
-#: told_common/templates/told_common/tf5/list.html
-#: told_common/templates/told_common/tf5/view.html
+#: told_common/forms.py told_common/templates/told_common/tf5/list.html
 msgid "Ny"
 msgstr "Nutaaq"
 
 #: told_common/forms.py told_common/templates/told_common/tf10/form.html
-#: told_common/templates/told_common/tf10/view.html
 msgid "Kladde"
 msgstr "Allaqqitassiaq"
 
-#: told_common/forms.py told_common/templates/told_common/tf10/view.html
+#: told_common/forms.py told_common/templates/told_common/payment_status.html
 #: told_common/templates/told_common/tf5/list.html
-#: told_common/templates/told_common/tf5/view.html
 msgid "Afvist"
 msgstr "Itigartinneqarpoq"
 
-#: told_common/forms.py told_common/templates/told_common/tf10/view.html
-#: told_common/templates/told_common/tf5/list.html
-#: told_common/templates/told_common/tf5/view.html
+#: told_common/forms.py told_common/templates/told_common/tf5/list.html
 msgid "Godkendt"
 msgstr "Akuerineqarpoq"
 
-#: told_common/forms.py told_common/templates/told_common/tf10/view.html
+#: told_common/forms.py
 msgid "Afsluttet"
 msgstr "Naammassineqarpoq"
 
@@ -390,6 +388,22 @@ msgid "Fejlbesked:"
 msgstr ""
 
 #: told_common/templates/told_common/layout.html
+msgid "Om Akitsuut/Toldbehandling"
+msgstr ""
+
+#: told_common/templates/told_common/layout.html
+msgid "Version"
+msgstr "Suliarinerata qassissaat"
+
+#: told_common/templates/told_common/layout.html
+msgid "Kildekode"
+msgstr "Najoqqutarisap kodea"
+
+#: told_common/templates/told_common/layout.html
+msgid "Github - Toldbehandling"
+msgstr ""
+
+#: told_common/templates/told_common/layout.html
 msgid "Er du sikker på at du vil logge ud?"
 msgstr "Ilumut aniniarpit?"
 
@@ -409,6 +423,18 @@ msgstr "Nalunaaquttap akunnera"
 msgid "Ingen notater"
 msgstr "Allattugassaqanngilaq"
 
+#: told_common/templates/told_common/payment_status.html
+msgid "Ikke betalt"
+msgstr "Akilerneqanngilaq"
+
+#: told_common/templates/told_common/payment_status.html
+msgid "Reserveret"
+msgstr "Inniminnigaq"
+
+#: told_common/templates/told_common/payment_status.html
+msgid "Betalt"
+msgstr "Akilerneqareerput"
+
 #: told_common/templates/told_common/tf10/delete.html
 msgid "Slet afgiftsanmeldelse"
 msgstr ""
@@ -421,6 +447,11 @@ msgstr ""
 #: told_common/templates/told_common/tf10/form.html
 msgid "Afgiftsanmeldelse"
 msgstr "Akitsuusigasssanik nalunaaruteqarneq"
+
+#: told_common/templates/told_common/tf10/delete.html
+#: told_common/templates/told_common/tf10/list.html
+msgid "Dato"
+msgstr "Ulloq"
 
 #: told_common/templates/told_common/tf10/delete.html
 #: told_common/templates/told_common/tf10/view.html
@@ -540,6 +571,7 @@ msgstr "Ulloq nassiussat aallarunneqarfiat"
 
 #: told_common/templates/told_common/tf10/form.html
 #: told_common/templates/told_common/tf10/view.html
+#: told_common/templates/told_common/tf5/view.html
 msgid "Varelinjer med afgifter"
 msgstr "Titarnerit nioqqutissat akitsuutaasa allassimaffii"
 
@@ -611,11 +643,6 @@ msgid "Toldkategori"
 msgstr "Akitsuusigassat suunerat"
 
 #: told_common/templates/told_common/tf10/form.html
-#: told_common/templates/told_common/tf5/form.html
-msgid "Opdatér"
-msgstr "Nutarteruk"
-
-#: told_common/templates/told_common/tf10/form.html
 msgid "Indsend"
 msgstr "Nassiuguk"
 
@@ -666,8 +693,23 @@ msgstr ""
 
 #: told_common/templates/told_common/tf10/list.html
 #: told_common/templates/told_common/tf5/list.html
+msgid "Opret ny"
+msgstr "Nutaamik pilersitsiit"
+
+#: told_common/templates/told_common/tf10/list.html
+#: told_common/templates/told_common/tf5/list.html
+msgid "Filtre"
+msgstr ""
+
+#: told_common/templates/told_common/tf10/list.html
+#: told_common/templates/told_common/tf5/list.html
 msgid "Status"
 msgstr "Killiffik"
+
+#: told_common/templates/told_common/tf10/list.html
+#: told_common/templates/told_common/tf5/list.html
+msgid "Varetype"
+msgstr "Nioqqutissap suunera"
 
 #: told_common/templates/told_common/tf10/list.html
 #: told_common/templates/told_common/tf5/list.html
@@ -675,13 +717,14 @@ msgid "Oprettelsesdato mellem"
 msgstr "Ullut akornanni pilersinneqarpoq"
 
 #: told_common/templates/told_common/tf10/list.html
-msgid "Afgangsdato mellem"
-msgstr "Ullut akornanni nassiunneqarpoq"
+#: told_common/templates/told_common/tf5/list.html
+msgid "og"
+msgstr ""
 
 #: told_common/templates/told_common/tf10/list.html
 #: told_common/templates/told_common/tf5/list.html
-msgid "Varetype"
-msgstr "Nioqqutissap suunera"
+msgid "Afgangsdato mellem"
+msgstr "Ullut akornanni nassiunneqarpoq"
 
 #: told_common/templates/told_common/tf10/list.html
 #: told_common/templates/told_common/tf5/list.html
@@ -711,18 +754,6 @@ msgstr ""
 
 #: told_common/templates/told_common/tf10/list.html
 #: told_common/templates/told_common/tf5/list.html
-msgid "Opret ny"
-msgstr "Nutaamik pilersitsiit"
-
-#: told_common/templates/told_common/tf10/list.html
-#: told_common/templates/told_common/tf10/view.html
-#: told_common/templates/told_common/tf5/list.html
-#: told_common/templates/told_common/tf5/view.html
-msgid "Redigér"
-msgstr "Iluarsiuk"
-
-#: told_common/templates/told_common/tf10/list.html
-#: told_common/templates/told_common/tf5/list.html
 msgid ""
 "Der kan markeres flere linjer på én gang. Tryk på en linje for at markere "
 "den. Tryk igen for at fjerne markering.<br/> Hold Shift nede og tryk på en "
@@ -737,12 +768,23 @@ msgstr ""
 
 #: told_common/templates/told_common/tf10/list.html
 #: told_common/templates/told_common/tf5/list.html
-msgid "Nummer"
-msgstr "Normu"
+#, python-format
+msgid "%(total)s anmeldelse"
+msgid_plural "%(total)s anmeldelser"
+msgstr[0] ""
+msgstr[1] ""
 
 #: told_common/templates/told_common/tf10/list.html
-msgid "Dato"
-msgstr "Ulloq"
+#: told_common/templates/told_common/tf10/view.html
+#: told_common/templates/told_common/tf5/list.html
+#: told_common/templates/told_common/tf5/view.html
+msgid "Redigér"
+msgstr "Iluarsiuk"
+
+#: told_common/templates/told_common/tf10/list.html
+#: told_common/templates/told_common/tf5/list.html
+msgid "Nummer"
+msgstr "Normu"
 
 #: told_common/templates/told_common/tf10/list.html
 #, fuzzy
@@ -766,6 +808,34 @@ msgid "Afgiftsanmeldelse %(id)s"
 msgstr "Akitsuusigassanik nalunaarutip %(id)s"
 
 #: told_common/templates/told_common/tf10/view.html
+msgid "Godkend"
+msgstr "Akuerineqarpoq"
+
+#: told_common/templates/told_common/tf10/view.html
+msgid "Afvis"
+msgstr "Itigartiguk"
+
+#: told_common/templates/told_common/tf10/view.html
+msgid "Annullér godkendelse"
+msgstr "Akuerineqarnera atortussaajunnaarsiguk"
+
+#: told_common/templates/told_common/tf10/view.html
+msgid "Annullér afvisning"
+msgstr "Itigartinneqarnera atortussaajunnaarsiguk"
+
+#: told_common/templates/told_common/tf10/view.html
+msgid "Genindsend"
+msgstr ""
+
+#: told_common/templates/told_common/tf10/view.html
+msgid "Send til Prisme"
+msgstr "Prismemut nassiuguk"
+
+#: told_common/templates/told_common/tf10/view.html
+msgid "Historik"
+msgstr "Pisimasut"
+
+#: told_common/templates/told_common/tf10/view.html
 msgid "Oprettelsesdato"
 msgstr "Ulloq pilersinneqarfia"
 
@@ -774,6 +844,14 @@ msgstr "Ulloq pilersinneqarfia"
 #| msgid "Postnr."
 msgid "Postnummer"
 msgstr "Postnr."
+
+#: told_common/templates/told_common/tf10/view.html
+msgid "Indførselstilladelse - Alkohol"
+msgstr ""
+
+#: told_common/templates/told_common/tf10/view.html
+msgid "Indførselstilladelse - Tobak"
+msgstr ""
 
 #: told_common/templates/told_common/tf10/view.html
 msgid "Stedkode"
@@ -834,32 +912,8 @@ msgid "Ikke tilgængelig"
 msgstr "Takuneqarsinnaanngilaq"
 
 #: told_common/templates/told_common/tf10/view.html
-msgid "Godkend"
-msgstr "Akuerineqarpoq"
-
-#: told_common/templates/told_common/tf10/view.html
-msgid "Afvis"
-msgstr "Itigartiguk"
-
-#: told_common/templates/told_common/tf10/view.html
-msgid "Annullér godkendelse"
-msgstr "Akuerineqarnera atortussaajunnaarsiguk"
-
-#: told_common/templates/told_common/tf10/view.html
-msgid "Annullér afvisning"
-msgstr "Itigartinneqarnera atortussaajunnaarsiguk"
-
-#: told_common/templates/told_common/tf10/view.html
-msgid "Genindsend"
+msgid "Annuller"
 msgstr ""
-
-#: told_common/templates/told_common/tf10/view.html
-msgid "Send til Prisme"
-msgstr "Prismemut nassiuguk"
-
-#: told_common/templates/told_common/tf10/view.html
-msgid "Historik"
-msgstr "Pisimasut"
 
 #: told_common/templates/told_common/tf10/view.html
 msgid "Skriv en begrundelsen for afvisningen herunder."
@@ -940,7 +994,6 @@ msgid "Forventet dato for afgang til Grønland"
 msgstr "Ulloq Kalaallit Nunaannut aallarunneqarfissaattut naatsorsuutigisaq"
 
 #: told_common/templates/told_common/tf5/form.html
-#: told_common/templates/told_common/tf5/view.html
 msgid "Afgifter"
 msgstr "Akitsuutit"
 
@@ -960,20 +1013,12 @@ msgid "Ekspeditionsgebyr"
 msgstr "Sullissinermi akiliut"
 
 #: told_common/templates/told_common/tf5/form.html
+msgid "Opdatér"
+msgstr "Nutarteruk"
+
+#: told_common/templates/told_common/tf5/form.html
 msgid "Betal"
 msgstr "Akileruk"
-
-#: told_common/templates/told_common/tf5/list.html
-msgid "Indleveringsdato mellem"
-msgstr "Ulloq nassiussassat tunniunneqarfiat"
-
-#: told_common/templates/told_common/tf5/list.html
-msgid "Indleveringsdato mellem - mid"
-msgstr "-p aamma"
-
-#: told_common/templates/told_common/tf5/list.html
-msgid "Indleveringsdato mellem - end"
-msgstr "akornanni"
 
 #: told_common/templates/told_common/tf5/list.html
 #, fuzzy
@@ -1015,20 +1060,20 @@ msgstr ""
 "ataasiartumik akuersissut"
 
 #: told_common/templates/told_common/tf5/view.html
-msgid "Annulleret"
-msgstr "Atortussaajunnaarsinneqarpoq"
+msgid "Opret tilladelse"
+msgstr "Akuersissut suliariuk"
 
 #: told_common/templates/told_common/tf5/view.html
-msgid "Ikke betalt"
-msgstr "Akilerneqanngilaq"
+msgid "Send tilladelse"
+msgstr "Akuersissut nassiuguk"
 
 #: told_common/templates/told_common/tf5/view.html
-msgid "Reserveret"
-msgstr "Inniminnigaq"
+msgid "Download tilladelse"
+msgstr ""
 
 #: told_common/templates/told_common/tf5/view.html
-msgid "Betalt"
-msgstr "Akilerneqareerput"
+msgid "Opret betaling"
+msgstr ""
 
 #: told_common/templates/told_common/tf5/view.html
 msgid "Postnr/by"
@@ -1037,14 +1082,6 @@ msgstr "Postnr/Illoqarfik"
 #: told_common/templates/told_common/tf5/view.html
 msgid "Fakturanummer"
 msgstr "Fakturap normua"
-
-#: told_common/templates/told_common/tf5/view.html
-msgid "Opret tilladelse"
-msgstr "Akuersissut suliariuk"
-
-#: told_common/templates/told_common/tf5/view.html
-msgid "Send tilladelse"
-msgstr "Akuersissut nassiuguk"
 
 #: told_common/templates/told_common/widgets/file.html
 msgid "Gennemse..."
