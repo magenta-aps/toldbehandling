@@ -964,8 +964,7 @@ class AfgiftsanmeldelseAPITest(AnmeldelsesTestDataMixin, TestCase):
             },
         )
 
-    @patch("django.db.models.QuerySet.none")
-    def test_list_filter_user_no_cvr(self, mock_queryset_none):
+    def test_list_filter_user_no_cvr(self):
         user_private, user_private_token, _ = RestMixin.make_user(
             username="payment-test-user-private",
             plaintext_password="testpassword1337",
@@ -991,7 +990,8 @@ class AfgiftsanmeldelseAPITest(AnmeldelsesTestDataMixin, TestCase):
             content_type="application/json",
         )
         self.assertEqual(resp.status_code, 200)
-        mock_queryset_none.assert_called_once()
+        self.assertEqual(resp.json()["count"], 0)
+        self.assertEqual(len(resp.json()["items"]), 0)
 
     @patch("anmeldelse.api.AfgiftsanmeldelseAPI.check_user")
     def test_update_status_kladde(self, mock_check_user):

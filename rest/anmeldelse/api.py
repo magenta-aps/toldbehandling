@@ -559,13 +559,15 @@ class AfgiftsanmeldelseAPI:
             cvr = user.indberetter_data.cvr
         except IndberetterProfile.DoesNotExist:
             return qs.none()
-        if cvr is None:
-            return qs.none()
-        return qs.filter(
-            Q(oprettet_af__indberetter_data__cvr=cvr)
-            | Q(oprettet_på_vegne_af__indberetter_data__cvr=cvr)
-            | Q(fuldmagtshaver__cvr=cvr)
-        ).exclude(status="slettet")
+
+        filters = Q(oprettet_af__pk=user.pk) | Q(oprettet_på_vegne_af__pk=user.pk)
+        if cvr:
+            filters |= (
+                Q(oprettet_af__indberetter_data__cvr=cvr)
+                | Q(oprettet_på_vegne_af__indberetter_data__cvr=cvr)
+                | Q(fuldmagtshaver__cvr=cvr)
+            )
+        return qs.filter(filters).exclude(status="slettet")
 
     def check_user(self, item: Afgiftsanmeldelse):
         if not self.filter_user(Afgiftsanmeldelse.objects.filter(id=item.id)).exists():
