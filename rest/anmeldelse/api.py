@@ -1132,6 +1132,10 @@ class VarelinjeAPI:
             except IndberetterProfile.DoesNotExist:
                 pass
             else:
+                q |= qs.filter(
+                    Q(**{f"{a}__oprettet_af__pk": user.pk})
+                    | Q(**{f"{a}__oprettet_på_vegne_af__pk": user.pk})
+                )
                 if nr is not None:
                     q |= qs.filter(
                         Q(**{f"{a}__oprettet_af__indberetter_data__{c}": nr})
@@ -1291,6 +1295,10 @@ class NotatAPI:
             except IndberetterProfile.DoesNotExist:
                 pass
             else:
+                q |= qs.filter(
+                    Q(**{f"{a}__oprettet_af__pk": user.pk})
+                    | Q(**{f"{a}__oprettet_på_vegne_af__pk": user.pk})
+                )
                 if nr is not None:
                     q |= qs.filter(
                         Q(**{f"{a}__oprettet_af__indberetter_data__{c}": nr})

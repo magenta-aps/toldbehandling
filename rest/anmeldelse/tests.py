@@ -2364,7 +2364,7 @@ class VarelinjeAPITest(TestCase):
             content_type="application/json",
         )
 
-        self.assertEqual(resp.status_code, 403)
+        self.assertEqual(resp.status_code, 200)
 
         # Check CVR indberetterprofil
         (user, user_token, _, _, _) = _create_user_with_permissions(
