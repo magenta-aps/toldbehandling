@@ -169,6 +169,8 @@ class PostforsendelseAPI:
         if user.has_perm("forsendelse.view_all_postforsendelser"):
             return qs
         q = qs.none()
+        q |= qs.filter(afgiftsanmeldelse__oprettet_af__pk=user.pk)
+        q |= qs.filter(afgiftsanmeldelse__oprettet_på_vegne_af__pk=user.pk)
         try:
             cvr = getattr(user.indberetter_data, "cvr")
         except IndberetterProfile.DoesNotExist:
@@ -359,6 +361,8 @@ class FragtforsendelseAPI:
         if user.has_perm("forsendelse.view_all_fragtforsendelser"):
             return qs
         q = qs.none()
+        q |= qs.filter(afgiftsanmeldelse__oprettet_af__pk=user.pk)
+        q |= qs.filter(afgiftsanmeldelse__oprettet_på_vegne_af__pk=user.pk)
         try:
             cvr = getattr(user.indberetter_data, "cvr")
         except IndberetterProfile.DoesNotExist:
