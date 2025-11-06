@@ -39,7 +39,7 @@ class Command(BaseCommand):
             oprettet_af=Fragtforsendelse.objects.first().oprettet_af,
         )
         anmeldelse.leverandørfaktura.save(
-            "leverandørfaktura.txt", ContentFile("testdata")
+            "leverandørfaktura.txt", ContentFile("testdata", name="test_file1.txt")
         )
         today = datetime.now(tz=timezone.utc)
         tabel = Afgiftstabel.objects.filter(
@@ -100,7 +100,7 @@ class Command(BaseCommand):
             if dato < earliest_tabel:
                 dato = earliest_tabel
             anmeldelse.leverandørfaktura.save(
-                "leverandørfaktura.txt", ContentFile("testdata")
+                "leverandørfaktura.txt", ContentFile("testdata", name="test_file2.txt")
             )
             tabel = Afgiftstabel.objects.filter(
                 Q(gyldig_til__gte=dato) | Q(gyldig_til__isnull=True),
@@ -152,7 +152,7 @@ class Command(BaseCommand):
                 oprettet_af=users.order_by("?").first(),
             )
             anmeldelse.leverandørfaktura.save(
-                "leverandørfaktura.txt", ContentFile("testdata")
+                "leverandørfaktura.txt", ContentFile("testdata", name="test_file3.txt")
             )
             indleveringsdato = datetime.combine(
                 anmeldelse.indleveringsdato, datetime.min.time(), tzinfo=timezone.utc

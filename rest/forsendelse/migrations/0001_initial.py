@@ -3,7 +3,7 @@
 from django.conf import settings
 from django.db import migrations, models
 import django.db.models.deletion
-import django.utils.datetime_safe
+from datetime import date
 import forsendelse.models
 
 
@@ -21,7 +21,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('forsendelsestype', models.CharField(choices=[('S', 'Skib'), ('F', 'Fly')], default='S', max_length=1)),
-                ('afgangsdato', models.DateField(default=django.utils.datetime_safe.date.today)),
+                ('afgangsdato', models.DateField(default=date.today)),
                 ('postforsendelsesnummer', models.CharField(db_index=True, max_length=20)),
                 ('afsenderbykode', models.CharField(db_index=True, max_length=4)),
                 ('oprettet_af', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to=settings.AUTH_USER_MODEL)),
@@ -35,7 +35,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('forsendelsestype', models.CharField(choices=[('S', 'Skib'), ('F', 'Fly')], default='S', max_length=1)),
-                ('afgangsdato', models.DateField(default=django.utils.datetime_safe.date.today)),
+                ('afgangsdato', models.DateField(default=date.today)),
                 ('fragtbrevsnummer', models.CharField(db_index=True, max_length=20)),
                 ('forbindelsesnr', models.CharField(db_index=True, max_length=100)),
                 ('fragtbrev', models.FileField(blank=True, null=True, upload_to=forsendelse.models.fragtbrev_upload_to)),

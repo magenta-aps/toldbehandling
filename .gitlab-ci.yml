@@ -189,7 +189,7 @@ Build ER image:
   stage: test
   dependencies: [ ]
   services:
-    - name: postgres:13
+    - name: postgres:16
       alias: toldbehandling-db
     - name: memcached
       alias: toldbehandling-cache
