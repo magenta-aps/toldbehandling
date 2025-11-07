@@ -40,7 +40,7 @@ setuptools.setup(
     install_requires=[
         "django==4.2.24",
         "gunicorn==22.0.0",
-        "requests==2.31.0",
+        "requests==2.32.5",
         "dataclasses-json==0.6.7",
         "WeasyPrint==62.3",
         "holidays==0.81",
