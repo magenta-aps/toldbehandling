@@ -14,9 +14,6 @@ PULL_IDP_METADATA=${PULL_IDP_METADATA:=false}
 
 python manage.py wait_for_db
 
-python manage.py collectstatic --no-input --clear
-python manage.py compress --force
-
 if [ "${MAKE_MIGRATIONS,,}" = true ]; then
   echo 'generating migrations'
   python manage.py makemigrations --no-input
@@ -38,5 +35,8 @@ if [ "${MAKEMESSAGES,,}" = true ]; then
   echo 'making messages'
   python manage.py make_messages --locale=kl --locale=da --no-obsolete --add-location file
 fi
+
+python manage.py collectstatic --verbosity=0 --no-input
+python manage.py compress --verbosity=1 --force
 
 exec "$@"

@@ -270,7 +270,7 @@ Unittest UI:
   script:
     - cd /app
     - cp -r ./told-common/told_common .
-    - python manage.py collectstatic --no-input --clear
+    - python manage.py compress --verbosity=1 --force && python manage.py collectstatic --verbosity=0 --no-input
     - coverage run manage.py test --parallel 4
     - coverage combine
     - coverage report --show-missing
@@ -282,6 +282,7 @@ Unittest Admin:
   script:
     - cd /app
     - cp -r ./told-common/told_common .
+    - python manage.py compress --verbosity=1 --force && python manage.py collectstatic --verbosity=0 --no-input
     - coverage run manage.py test --parallel 4
     - coverage combine
     - coverage report --show-missing
