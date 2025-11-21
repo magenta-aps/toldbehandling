@@ -12,7 +12,7 @@ django-bootstrap-icons==0.9.0
 whitenoise==6.0.0
 mypy==1.18.2
 django-stubs[compatible-mypy]==5.2.5
-types-requests==2.31.0.20240218
+types-requests==2.32.4.20250913
 pymemcache==4.0.0
 setuptools==80.9.0
 tblib==3.2.1
