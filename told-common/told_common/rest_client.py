@@ -694,7 +694,10 @@ class VarelinjeRestClient(ModelRestClient):
         # False: data passer ikke, og der skal foretages en opdatering
         # True: data passer, og det er ikke nødvendigt at opdatere.
         for key in ("fakturabeløb", "vareafgiftssats_id", "antal", "mængde"):
-            if data[key] != existing[key]:
+            existing_value = existing[key]
+            if isinstance(existing_value, Vareafgiftssats):
+                existing_value = existing_value.id
+            if data[key] != existing_value:
                 return False
         return True
 

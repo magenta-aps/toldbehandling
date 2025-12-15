@@ -424,6 +424,58 @@ class Varelinje(models.Model):
         if self.vareafgiftssats:
             self.afgiftsbeløb = self.vareafgiftssats.beregn_afgift(self)
 
+    @property
+    def siblings_qs(self):
+        return Varelinje.objects.filter(
+            privatafgiftsanmeldelse=self.privatafgiftsanmeldelse,
+            afgiftsanmeldelse=self.afgiftsanmeldelse,
+        )
+
+    def pant_update_corresponding_gebyr(self):
+
+        prior_qs = self.history.order_by("-history_date")
+        prior_antal = self.antal
+        current_afgiftsgruppenummer = self.vareafgiftssats.afgiftsgruppenummer
+        prior_afgiftsgruppenummer = None
+        if prior_qs.count() > 1:
+            prior = prior_qs[1]
+            prior_antal = prior.antal
+            prior_afgiftsgruppenummer = prior.vareafgiftssats.afgiftsgruppenummer
+
+        if current_afgiftsgruppenummer == 101:
+            gebyr_linje = self.siblings_qs.filter(
+                vareafgiftssats__afgiftsgruppenummer=102, antal=prior_antal
+            ).first()
+            if gebyr_linje:
+                if gebyr_linje.antal != self.antal:
+                    gebyr_linje.antal = self.antal
+                    gebyr_linje.save()
+            else:
+                pant_gebyr_sats = Vareafgiftssats.objects.get(
+                    afgiftstabel=self.vareafgiftssats.afgiftstabel,
+                    afgiftsgruppenummer=102,
+                )
+                pant_gebyr, _ = Varelinje.objects.get_or_create(
+                    afgiftsanmeldelse=self.afgiftsanmeldelse,
+                    privatafgiftsanmeldelse=self.privatafgiftsanmeldelse,
+                    vareafgiftssats=pant_gebyr_sats,
+                    antal=self.antal,
+                    mængde=self.mængde,
+                )
+
+        elif prior_afgiftsgruppenummer == 101:
+            self.siblings_qs.filter(
+                vareafgiftssats__afgiftsgruppenummer=102, antal=prior_antal
+            ).delete()
+
+    def pant_delete_corresponding_gebyr(self):
+        if self.vareafgiftssats.afgiftsgruppenummer == 101:
+            gebyr_linje = self.siblings_qs.filter(
+                vareafgiftssats__afgiftsgruppenummer=102, antal=self.antal
+            ).first()
+            if gebyr_linje:
+                gebyr_linje.delete()
+
 
 class Notat(models.Model):
     class Meta:

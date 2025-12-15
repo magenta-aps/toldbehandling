@@ -1937,6 +1937,176 @@ class VarelinjeTest(RestTestMixin, TestCase):
             varelinje3.afgiftsbeløb, Decimal(50_000 + 1.0 * 100_000 + 1.5 * 350_000)
         )
 
+    def test_siblings_qs(self):
+        varelinje1 = Varelinje.objects.create(
+            vareafgiftssats=self.vareafgiftssats,
+            afgiftsanmeldelse=self.afgiftsanmeldelse,
+            antal=1,
+            mængde=10,
+            fakturabeløb=30_000,
+        )
+        varelinje2 = Varelinje.objects.create(
+            vareafgiftssats=self.vareafgiftssats,
+            afgiftsanmeldelse=self.afgiftsanmeldelse,
+            antal=1,
+            mængde=10,
+            fakturabeløb=65_000,
+        )
+        self.assertEqual(set(varelinje1.siblings_qs.all()), {varelinje1, varelinje2})
+        self.assertEqual(set(varelinje2.siblings_qs.all()), {varelinje1, varelinje2})
+
+    def test_pant_create_corresponding_gebyr(self):
+        pantsats = Vareafgiftssats.objects.create(
+            afgiftstabel=self.afgiftstabel,
+            vareart_da="pant",
+            vareart_kl="pant",
+            afgiftsgruppenummer=101,
+            enhed=Vareafgiftssats.Enhed.ANTAL,
+            afgiftssats=Decimal(0.5),
+        )
+        gebyrsats = Vareafgiftssats.objects.create(
+            afgiftstabel=self.afgiftstabel,
+            vareart_da="pantgebyr",
+            vareart_kl="pantgebyr",
+            afgiftsgruppenummer=102,
+            enhed=Vareafgiftssats.Enhed.ANTAL,
+            afgiftssats=Decimal(0.5),
+        )
+        varelinje1 = Varelinje.objects.create(
+            vareafgiftssats=pantsats,
+            afgiftsanmeldelse=self.afgiftsanmeldelse,
+            antal=10,
+            mængde=10,
+            fakturabeløb=30,
+        )
+        varelinje1.pant_update_corresponding_gebyr()
+        self.assertTrue(
+            Varelinje.objects.filter(
+                vareafgiftssats=gebyrsats,
+                afgiftsanmeldelse=self.afgiftsanmeldelse,
+                antal=10,
+            ).exists()
+        )
+
+    def test_pant_delete_corresponding_gebyr(self):
+        pantsats = Vareafgiftssats.objects.create(
+            afgiftstabel=self.afgiftstabel,
+            vareart_da="pant",
+            vareart_kl="pant",
+            afgiftsgruppenummer=101,
+            enhed=Vareafgiftssats.Enhed.ANTAL,
+            afgiftssats=Decimal(0.5),
+        )
+        gebyrsats = Vareafgiftssats.objects.create(
+            afgiftstabel=self.afgiftstabel,
+            vareart_da="pantgebyr",
+            vareart_kl="pantgebyr",
+            afgiftsgruppenummer=102,
+            enhed=Vareafgiftssats.Enhed.ANTAL,
+            afgiftssats=Decimal(0.5),
+        )
+        varelinje1 = Varelinje.objects.create(
+            vareafgiftssats=pantsats,
+            afgiftsanmeldelse=self.afgiftsanmeldelse,
+            antal=10,
+            mængde=10,
+            fakturabeløb=30,
+        )
+        varelinje2 = Varelinje.objects.create(
+            vareafgiftssats=gebyrsats,
+            afgiftsanmeldelse=self.afgiftsanmeldelse,
+            antal=10,
+            mængde=10,
+            fakturabeløb=30,
+        )
+
+        self.assertTrue(
+            Varelinje.objects.filter(
+                vareafgiftssats=gebyrsats,
+                afgiftsanmeldelse=self.afgiftsanmeldelse,
+                antal=10,
+            ).exists()
+        )
+        varelinje1.pant_delete_corresponding_gebyr()
+        self.assertFalse(
+            Varelinje.objects.filter(
+                vareafgiftssats=gebyrsats,
+                afgiftsanmeldelse=self.afgiftsanmeldelse,
+                antal=10,
+            ).exists()
+        )
+
+    def test_pant_update_corresponding_gebyr(self):
+        pantsats = Vareafgiftssats.objects.create(
+            afgiftstabel=self.afgiftstabel,
+            vareart_da="pant",
+            vareart_kl="pant",
+            afgiftsgruppenummer=101,
+            enhed=Vareafgiftssats.Enhed.ANTAL,
+            afgiftssats=Decimal(0.5),
+        )
+        gebyrsats = Vareafgiftssats.objects.create(
+            afgiftstabel=self.afgiftstabel,
+            vareart_da="pantgebyr",
+            vareart_kl="pantgebyr",
+            afgiftsgruppenummer=102,
+            enhed=Vareafgiftssats.Enhed.ANTAL,
+            afgiftssats=Decimal(0.5),
+        )
+        varelinje1 = Varelinje.objects.create(
+            vareafgiftssats=pantsats,
+            afgiftsanmeldelse=self.afgiftsanmeldelse,
+            antal=10,
+            mængde=10,
+            fakturabeløb=30,
+        )
+        varelinje1.pant_update_corresponding_gebyr()
+        self.assertEqual(
+            Varelinje.objects.get(
+                vareafgiftssats=gebyrsats, afgiftsanmeldelse=self.afgiftsanmeldelse
+            ).antal,
+            10,
+        )
+
+        # Change away from pant
+        varelinje1.vareafgiftssats = self.vareafgiftssats
+        varelinje1.save()
+        varelinje1.pant_update_corresponding_gebyr()
+        self.assertFalse(
+            Varelinje.objects.filter(
+                vareafgiftssats=gebyrsats, afgiftsanmeldelse=self.afgiftsanmeldelse
+            ).exists()
+        )
+
+        # Change back to pant and update antal
+        varelinje1.vareafgiftssats = pantsats
+        varelinje1.antal = 20
+        varelinje1.save()
+        varelinje1.pant_update_corresponding_gebyr()
+        self.assertEqual(
+            Varelinje.objects.get(
+                vareafgiftssats=gebyrsats, afgiftsanmeldelse=self.afgiftsanmeldelse
+            ).antal,
+            20,
+        )
+
+        # Change antal, keeping type
+        varelinje1.antal = 10
+        varelinje1.save()
+        varelinje1.pant_update_corresponding_gebyr()
+        qs = Varelinje.objects.filter(
+            vareafgiftssats=gebyrsats, afgiftsanmeldelse=self.afgiftsanmeldelse
+        )
+        self.assertEqual(qs.count(), 1)
+        self.assertEqual(qs.first().antal, 10)
+
+        # Not updating antal or type
+        varelinje1.kladde = False
+        varelinje1.save()
+        varelinje1.pant_update_corresponding_gebyr()
+        self.assertEqual(qs.count(), 1)
+        self.assertEqual(qs.first().antal, 10)
+
 
 class VarelinjeAPITest(TestCase):
     @classmethod
@@ -1976,6 +2146,21 @@ class VarelinjeAPITest(TestCase):
             enhed=Vareafgiftssats.Enhed.PROCENT,
         )
 
+        cls.pantsats = Vareafgiftssats.objects.create(
+            afgiftstabel=cls.afgiftstabel,
+            vareart_da="Pant",
+            vareart_kl="Pant",
+            afgiftsgruppenummer=101,
+            enhed=Vareafgiftssats.Enhed.ANTAL,
+        )
+        cls.pantafgiftssats = Vareafgiftssats.objects.create(
+            afgiftstabel=cls.afgiftstabel,
+            vareart_da="PantAfgift",
+            vareart_kl="PantAfgift",
+            afgiftsgruppenummer=102,
+            enhed=Vareafgiftssats.Enhed.ANTAL,
+        )
+
         # Privatafgifsanmeldelse for test of the VarelinjeAPI
         cls.privatafgiftsanmeldelse = PrivatAfgiftsanmeldelse.objects.create(
             **{
@@ -2009,6 +2194,52 @@ class VarelinjeAPITest(TestCase):
 
         self.assertEqual(resp.status_code, 200)
         self.assertEqual(resp.json(), {"id": ANY})
+
+    def test_ignore_pantgebyr(self):
+        resp = self.client.post(
+            reverse(f"api-1.0.0:varelinje_create"),
+            json_dump(
+                {
+                    "privatafgiftsanmeldelse_id": self.privatafgiftsanmeldelse.id,
+                    "vareafgiftssats_id": self.pantafgiftssats.id,
+                    "antal": 1,
+                }
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+        )
+        qs = Varelinje.objects.filter(
+            vareafgiftssats__afgiftsgruppenummer=102,
+            privatafgiftsanmeldelse=self.privatafgiftsanmeldelse,
+        )
+
+        self.assertEqual(qs.count(), 0)
+
+        resp = self.client.post(
+            reverse(f"api-1.0.0:varelinje_create"),
+            json_dump(
+                {
+                    "privatafgiftsanmeldelse_id": self.privatafgiftsanmeldelse.id,
+                    "vareafgiftssats_id": self.pantsats.id,
+                    "antal": 1,
+                }
+            ),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+        )
+
+        self.assertEqual(qs.count(), 1)
+
+        gebyrlinje = qs.first()
+        self.assertEqual(gebyrlinje.antal, 1)
+        resp = self.client.patch(
+            reverse(f"api-1.0.0:varelinje_update", kwargs={"id": gebyrlinje.id}),
+            data=json_dump({"antal": 2}),
+            HTTP_AUTHORIZATION=f"Bearer {self.user_token}",
+            content_type="application/json",
+        )
+        gebyrlinje.refresh_from_db()
+        self.assertEqual(gebyrlinje.antal, 1)
 
     def test_create_leniency(self):
         resp = self.client.post(
@@ -3193,6 +3424,7 @@ def _create_user_with_permissions(
     user_permissions = (
         [
             Permission.objects.get(codename=f"add_{resource}"),
+            Permission.objects.get(codename=f"change_{resource}"),
             Permission.objects.get(codename=f"view_{resource}"),
             Permission.objects.get(codename=f"delete_{resource}"),
         ]
