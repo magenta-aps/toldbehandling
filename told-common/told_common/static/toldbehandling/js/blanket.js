@@ -288,7 +288,7 @@ $(function () {
         }
     };
 
-    $("form").on("submit", checkPant);
+    // $("form").on("submit", checkPant);
 
     const calcSubAfgift = function(varesats, kg_l, antal, beløb) {
         const afgiftssats = varesats["afgiftssats"];

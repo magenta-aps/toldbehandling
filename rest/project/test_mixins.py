@@ -411,16 +411,26 @@ class RestMixin:
         if not hasattr(self, "_afgiftsanmeldelse"):
             self._afgiftsanmeldelse = Afgiftsanmeldelse.objects.first()
             if self._afgiftsanmeldelse is None:
+                postforsendelse = Postforsendelse.objects.create(
+                    postforsendelsesnummer="1234",
+                    oprettet_af=self.authorized_user,
+                    forsendelsestype=Postforsendelse.Forsendelsestype.SKIB,
+                    afsenderbykode="8200",
+                    kladde=False,
+                    afgangsdato=datetime.now(timezone.utc).date(),
+                )
+
                 data = {**self.afgiftsanmeldelse_data}
                 data.update(
                     {
                         "afsender": self.afsender,
                         "modtager": self.modtager,
                         "fragtforsendelse": None,
-                        "postforsendelse": self.postforsendelse,
+                        "postforsendelse": postforsendelse,
                         "oprettet_af": self.authorized_user,
                     }
                 )
+
                 self._afgiftsanmeldelse = Afgiftsanmeldelse.objects.create(**data)
 
                 faktura_id = self._afgiftsanmeldelse.pk

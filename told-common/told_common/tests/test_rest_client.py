@@ -552,6 +552,24 @@ class VarelinjeRestClientTests(TestCase):
         result = self.client.compare(data, existing)
         self.assertTrue(result)
 
+        existing = {
+            "fakturabeløb": "100",
+            "vareafgiftssats_id": Vareafgiftssats(
+                id=1,
+                enhed="kg",
+                overordnet=None,
+                afgiftstabel=1,
+                vareart_da="Test",
+                vareart_kl="Test",
+                afgiftsgruppenummer=110,
+                afgiftssats=Decimal("10.00"),
+            ),
+            "antal": 2,
+            "mængde": 3,
+        }
+        result = self.client.compare(data, existing)
+        self.assertTrue(result)
+
     def test_delete(self):
         self.client.delete(1)
         self.mock_rest.delete.assert_called_once()

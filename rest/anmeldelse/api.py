@@ -7,7 +7,7 @@ import base64
 import logging
 from datetime import date, datetime, time, timedelta
 from decimal import Decimal
-from typing import Annotated, List, Optional, Tuple
+from typing import Annotated, List, Optional, Tuple, Union
 from uuid import uuid4
 
 import django.utils.timezone as tz
@@ -39,7 +39,7 @@ from ninja_extra.pagination import paginate
 from ninja_extra.schemas import NinjaPaginationResponseSchema
 from payment.models import Payment
 from project.util import RestPermission, json_dump
-from pydantic import BeforeValidator, root_validator
+from pydantic import BeforeValidator, model_validator
 from sats.models import Vareafgiftssats
 
 log = logging.getLogger(__name__)
@@ -879,19 +879,19 @@ class VarelinjeIn(ModelSchema):
         model_fields = ["mængde", "antal", "kladde", "fakturabeløb"]
         model_fields_optional = ["mængde", "antal", "kladde", "fakturabeløb"]
 
-    @root_validator(pre=False, skip_on_failure=True)
-    def enhed_must_have_corresponding_field(cls, values):
-        if values.get("kladde") is not True:
-            vareafgiftssats_id: int | None = values.get("vareafgiftssats_id")
-            vareafgiftssats_afgiftsgruppenummer = values.get(
-                "vareafgiftssats_afgiftsgruppenummer"
+    @model_validator(mode="after")
+    def enhed_must_have_corresponding_field(self):
+        if self.kladde is not True:
+            vareafgiftssats_id: Union[int, None] = self.vareafgiftssats_id
+            vareafgiftssats_afgiftsgruppenummer = (
+                self.vareafgiftssats_afgiftsgruppenummer
             )
             id = None
             if vareafgiftssats_afgiftsgruppenummer not in (None, 0):
                 try:
                     id = VarelinjeAPI.get_varesats_id_by_kode(
-                        values.get("afgiftsanmeldelse_id"),
-                        values.get("privatafgiftsanmeldelse_id"),
+                        self.afgiftsanmeldelse_id,
+                        self.privatafgiftsanmeldelse_id,
                         vareafgiftssats_afgiftsgruppenummer,
                     )
                 except Http404:
@@ -922,12 +922,9 @@ class VarelinjeIn(ModelSchema):
                     }
                 )
 
-            if enhed == Vareafgiftssats.Enhed.ANTAL and values.get("antal") is None:
+            if enhed == Vareafgiftssats.Enhed.ANTAL and self.antal is None:
                 raise ValidationError({"__all__": "Must set antal"})
-            if (
-                enhed == Vareafgiftssats.Enhed.PROCENT
-                and values.get("fakturabeløb") is None
-            ):
+            if enhed == Vareafgiftssats.Enhed.PROCENT and self.fakturabeløb is None:
                 raise ValidationError({"__all__": "Must set fakturabeløb"})
             if (
                 enhed
@@ -935,10 +932,10 @@ class VarelinjeIn(ModelSchema):
                     Vareafgiftssats.Enhed.KILOGRAM,
                     Vareafgiftssats.Enhed.LITER,
                 )
-                and values.get("mængde") is None
+                and self.mængde is None
             ):
                 raise ValidationError({"__all__": "Must set mængde"})
-        return values
+        return self
 
 
 class PartialVarelinjeIn(ModelSchema):
@@ -1010,7 +1007,16 @@ class VarelinjeAPI:
                 )
                 if vareafgiftssats_id:
                     data["vareafgiftssats_id"] = vareafgiftssats_id
-            item = Varelinje.objects.create(**data)
+
+            item = Varelinje(**data)
+            if item.vareafgiftssats and item.vareafgiftssats.afgiftsgruppenummer == 102:
+                # Ignorer indkommende pantgebyr
+                # do not save()
+                return {"id": None}
+
+            item.save()
+            item.pant_update_corresponding_gebyr()
+
         except ValidationError as e:  # pragma: no cover
             # Actually tested in test_create__validation_exception,
             # but because of mocking, coverage doesn't pick it up
@@ -1105,16 +1111,24 @@ class VarelinjeAPI:
     def update(self, id: int, payload: PartialVarelinjeIn):
         item = get_object_or_404(Varelinje, id=id)
         self.check_user(item)
+
+        if item.vareafgiftssats and item.vareafgiftssats.afgiftsgruppenummer == 102:
+            return {"success": True}
+
         for attr, value in payload.dict(exclude_unset=True).items():
             if value is not None:
                 setattr(item, attr, value)
+        item.clean()
+
         item.save()
+        item.pant_update_corresponding_gebyr()
         return {"success": True}
 
     @route.delete("/{id}", auth=get_auth_methods(), url_name="varelinje_delete")
     def delete(self, id: int):
         item = get_object_or_404(Varelinje, id=id)
         self.check_user(item)
+        item.pant_delete_corresponding_gebyr()
         item.delete()
         return {"success": True}
 
