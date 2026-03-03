@@ -641,7 +641,7 @@ class TestAfgiftstabelDetailView(BaseTest):
         self.login()
         response = self.client.post(
             self.url,
-            data={"gyldig_fra": "02/02/2026 02:00", "offset": 120, "kladde": ""},
+            data={"gyldig_fra": "02/02/2030 02:00", "offset": 120, "kladde": ""},
         )
         self.assertEqual(response.status_code, 302)
 
@@ -650,7 +650,7 @@ class TestAfgiftstabelDetailView(BaseTest):
             {
                 "kladde": True,
                 "gyldig_fra": datetime.datetime(
-                    2026, 2, 2, 2, 0, tzinfo=tzoffset("offset", 7200)
+                    2030, 2, 2, 2, 0, tzinfo=tzoffset("offset", 7200)
                 ),
                 "offset": 120,
                 "delete": False,
@@ -669,7 +669,7 @@ class TestAfgiftstabelDetailView(BaseTest):
 
         response = self.client.post(
             self.url,
-            data={"gyldig_fra": "02/02/2026 02:00", "offset": 120, "kladde": ""},
+            data={"gyldig_fra": "02/02/2030 02:00", "offset": 120, "kladde": ""},
         )
         self.assertEqual(response.status_code, 500)
 
@@ -685,7 +685,7 @@ class TestAfgiftstabelDetailView(BaseTest):
 
         response = self.client.post(
             self.url,
-            data={"gyldig_fra": "02/02/2026 02:00", "offset": 120, "kladde": ""},
+            data={"gyldig_fra": "02/02/2030 02:00", "offset": 120, "kladde": ""},
         )
         self.assertEqual(response.status_code, 404)
         self.assertIn("Afgiftstabel findes ikke", str(response.content))
