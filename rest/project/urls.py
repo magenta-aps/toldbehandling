@@ -2,6 +2,7 @@
 #
 # SPDX-License-Identifier: MPL-2.0
 
+from anmeldelse.models import Afgiftsanmeldelse
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
@@ -42,6 +43,13 @@ class RestAdminLoginView(LoginView):
 
 if settings.REQUIRE_2FA:  # type: ignore
     admin.site.__class__ = AdminSiteOTPRequired
+
+
+class AfgiftsanmeldelseAdmin(admin.ModelAdmin):
+    pass
+
+
+admin.site.register(Afgiftsanmeldelse, AfgiftsanmeldelseAdmin)
 
 urlpatterns: list[URLResolver | URLPattern] = [
     path(
