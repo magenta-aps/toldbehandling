@@ -354,7 +354,7 @@ class AfgiftsanmeldelseAPI:
         order_by = self.map_sort(sort, order)
         if order_by:
             qs = qs.order_by(order_by, "id")
-        return list(qs)
+        return qs
 
     # List afgiftsanmeldelser. Relaterede objekter nestes i hvert item
     @route.get(
@@ -378,7 +378,7 @@ class AfgiftsanmeldelseAPI:
         order_by = self.map_sort(sort, order)
         if order_by:
             qs = qs.order_by(order_by, "id")
-        return list(qs)
+        return qs
 
     @route.get(
         "/{id}",
