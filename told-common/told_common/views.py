@@ -13,6 +13,7 @@ from urllib.parse import unquote
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import REDIRECT_FIELD_NAME
+from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import FileResponse, Http404, JsonResponse
 from django.shortcuts import redirect
@@ -901,12 +902,22 @@ class TF10ListView(
                 self.rest_client.varesatser.items(),
             )
         )
-        kwargs["afsendere"] = {
-            item[1]["id"]: item[1] for item in self.rest_client.afsendere.items()
-        }
-        kwargs["modtagere"] = {
-            item[1]["id"]: item[1] for item in self.rest_client.modtagere.items()
-        }
+        afsendere = cache.get("afsendere")
+        if not afsendere:
+            afsendere = {
+                item[1]["id"]: item[1] for item in self.rest_client.afsendere.items()
+            }
+            cache.set("afsendere", afsendere)
+        kwargs["afsendere"] = afsendere
+
+        modtagere = cache.get("modtagere")
+        if not modtagere:
+            modtagere = {
+                item[1]["id"]: item[1] for item in self.rest_client.modtagere.items()
+            }
+            cache.set("modtagere", modtagere)
+        kwargs["modtagere"] = modtagere
+
         kwargs["permissions"] = set(self.userdata.get("permissions") or [])
         return kwargs
 
