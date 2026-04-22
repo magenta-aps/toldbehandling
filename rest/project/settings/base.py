@@ -21,6 +21,8 @@ HOST_DOMAIN = os.environ.get("HOST_DOMAIN", "http://akitsuut.aka.gl")
 
 ALLOWED_HOSTS = json.loads(os.environ.get("ALLOWED_HOSTS", "[]"))
 CSRF_TRUSTED_ORIGINS = json.loads(os.environ.get("CSRF_ORIGINS", "[]"))
+CSRF_COOKIE_SECURE = not DEBUG
+SESSION_COOKIE_SECURE = not DEBUG
 
 ROOT_URLCONF = "project.urls"
 
