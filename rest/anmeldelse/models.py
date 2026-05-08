@@ -443,9 +443,26 @@ class Varelinje(models.Model):
             prior_afgiftsgruppenummer = prior.vareafgiftssats.afgiftsgruppenummer
 
         if current_afgiftsgruppenummer == 101:
-            gebyr_linje = self.siblings_qs.filter(
+
+            # Antal pantlinjer *ud over denne linje*, som har samme antal
+            pant_linjer_samme_antal_count = self.siblings_qs.filter(
+                vareafgiftssats__afgiftsgruppenummer=101, antal=prior_antal
+            ).count()
+
+            # Gebyrlinjer som har samme antal
+            gebyr_linjer_samme_antal = self.siblings_qs.filter(
                 vareafgiftssats__afgiftsgruppenummer=102, antal=prior_antal
-            ).first()
+            )
+
+            if gebyr_linjer_samme_antal.count() > pant_linjer_samme_antal_count:
+                # Vi har det antal gebyrlinjer der skal til,
+                # men der skal måske justeres
+                gebyr_linje = gebyr_linjer_samme_antal.first()
+            else:
+                # Hvis der er lige mange, eller færre gebyrlinjer,
+                # mangler vi mindst en gebyrlinje
+                gebyr_linje = None
+
             if gebyr_linje:
                 if gebyr_linje.antal != self.antal:
                     gebyr_linje.antal = self.antal
@@ -455,7 +472,7 @@ class Varelinje(models.Model):
                     afgiftstabel=self.vareafgiftssats.afgiftstabel,
                     afgiftsgruppenummer=102,
                 )
-                pant_gebyr, _ = Varelinje.objects.get_or_create(
+                Varelinje.objects.create(
                     afgiftsanmeldelse=self.afgiftsanmeldelse,
                     privatafgiftsanmeldelse=self.privatafgiftsanmeldelse,
                     vareafgiftssats=pant_gebyr_sats,
