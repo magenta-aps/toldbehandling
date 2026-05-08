@@ -444,7 +444,7 @@ class Varelinje(models.Model):
         if current_afgiftsgruppenummer == 101 or prior_afgiftsgruppenummer == 101:
             # Only makes sense to do this if line is or was pant
 
-            pant_gebyr_sats = Vareafgiftssats.objects.get(
+            gebyr_sats = Vareafgiftssats.objects.get(
                 afgiftstabel=self.vareafgiftssats.afgiftstabel,
                 afgiftsgruppenummer=102,
             )
@@ -453,19 +453,22 @@ class Varelinje(models.Model):
                 linje.pk: linje
                 for linje in self.siblings_qs.filter(
                     vareafgiftssats__afgiftsgruppenummer=101,
-                )
+                ).order_by("pk")
             }
             unpaired_gebyr: Dict[int, Varelinje] = {
                 linje.pk: linje
                 for linje in self.siblings_qs.filter(
                     vareafgiftssats__afgiftsgruppenummer=102,
-                )
+                ).order_by("pk")
             }
+
             for i, pant in list(unpaired_pant.items()):
                 for j, gebyr in list(unpaired_gebyr.items()):
+                    print(i, j)
                     if pant.antal == gebyr.antal:
                         del unpaired_pant[i]
                         del unpaired_gebyr[j]
+                        break
 
             for i, pant in list(unpaired_pant.items()):
                 if len(unpaired_gebyr) > 0:
@@ -476,11 +479,11 @@ class Varelinje(models.Model):
                     del unpaired_gebyr[j]
                 else:
                     Varelinje.objects.create(
-                        afgiftsanmeldelse=self.afgiftsanmeldelse,
-                        privatafgiftsanmeldelse=self.privatafgiftsanmeldelse,
-                        vareafgiftssats=pant_gebyr_sats,
-                        antal=self.antal,
-                        mængde=self.mængde,
+                        afgiftsanmeldelse=pant.afgiftsanmeldelse,
+                        privatafgiftsanmeldelse=pant.privatafgiftsanmeldelse,
+                        vareafgiftssats=gebyr_sats,
+                        antal=pant.antal,
+                        mængde=pant.mængde,
                     )
 
             for j, gebyr in list(unpaired_gebyr.items()):
