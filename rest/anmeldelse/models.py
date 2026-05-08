@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: MPL-2.0
 from datetime import date, timedelta
 from decimal import Decimal
+from typing import Dict
 
 from aktør.models import Afsender, Modtager, Speditør
 from common.models import Postnummer
@@ -434,56 +435,57 @@ class Varelinje(models.Model):
     def pant_update_corresponding_gebyr(self):
 
         prior_qs = self.history.order_by("-history_date")
-        prior_antal = self.antal
         current_afgiftsgruppenummer = self.vareafgiftssats.afgiftsgruppenummer
         prior_afgiftsgruppenummer = None
         if prior_qs.count() > 1:
             prior = prior_qs[1]
-            prior_antal = prior.antal
             prior_afgiftsgruppenummer = prior.vareafgiftssats.afgiftsgruppenummer
 
-        if current_afgiftsgruppenummer == 101:
+        if current_afgiftsgruppenummer == 101 or prior_afgiftsgruppenummer == 101:
+            # Only makes sense to do this if line is or was pant
 
-            # Antal pantlinjer *ud over denne linje*, som har samme antal
-            pant_linjer_samme_antal_count = self.siblings_qs.filter(
-                vareafgiftssats__afgiftsgruppenummer=101, antal=prior_antal
-            ).count()
-
-            # Gebyrlinjer som har samme antal
-            gebyr_linjer_samme_antal = self.siblings_qs.filter(
-                vareafgiftssats__afgiftsgruppenummer=102, antal=prior_antal
+            pant_gebyr_sats = Vareafgiftssats.objects.get(
+                afgiftstabel=self.vareafgiftssats.afgiftstabel,
+                afgiftsgruppenummer=102,
             )
 
-            if gebyr_linjer_samme_antal.count() > pant_linjer_samme_antal_count:
-                # Vi har det antal gebyrlinjer der skal til,
-                # men der skal måske justeres
-                gebyr_linje = gebyr_linjer_samme_antal.first()
-            else:
-                # Hvis der er lige mange, eller færre gebyrlinjer,
-                # mangler vi mindst en gebyrlinje
-                gebyr_linje = None
-
-            if gebyr_linje:
-                if gebyr_linje.antal != self.antal:
-                    gebyr_linje.antal = self.antal
-                    gebyr_linje.save()
-            else:
-                pant_gebyr_sats = Vareafgiftssats.objects.get(
-                    afgiftstabel=self.vareafgiftssats.afgiftstabel,
-                    afgiftsgruppenummer=102,
+            unpaired_pant: Dict[int, Varelinje] = {
+                linje.pk: linje
+                for linje in self.siblings_qs.filter(
+                    vareafgiftssats__afgiftsgruppenummer=101,
                 )
-                Varelinje.objects.create(
-                    afgiftsanmeldelse=self.afgiftsanmeldelse,
-                    privatafgiftsanmeldelse=self.privatafgiftsanmeldelse,
-                    vareafgiftssats=pant_gebyr_sats,
-                    antal=self.antal,
-                    mængde=self.mængde,
+            }
+            unpaired_gebyr: Dict[int, Varelinje] = {
+                linje.pk: linje
+                for linje in self.siblings_qs.filter(
+                    vareafgiftssats__afgiftsgruppenummer=102,
                 )
+            }
+            for i, pant in list(unpaired_pant.items()):
+                for j, gebyr in list(unpaired_gebyr.items()):
+                    if pant.antal == gebyr.antal:
+                        del unpaired_pant[i]
+                        del unpaired_gebyr[j]
 
-        elif prior_afgiftsgruppenummer == 101:
-            self.siblings_qs.filter(
-                vareafgiftssats__afgiftsgruppenummer=102, antal=prior_antal
-            ).delete()
+            for i, pant in list(unpaired_pant.items()):
+                if len(unpaired_gebyr) > 0:
+                    j, gebyr = list(unpaired_gebyr.items())[0]
+                    gebyr.antal = pant.antal
+                    gebyr.save()
+                    del unpaired_pant[i]
+                    del unpaired_gebyr[j]
+                else:
+                    Varelinje.objects.create(
+                        afgiftsanmeldelse=self.afgiftsanmeldelse,
+                        privatafgiftsanmeldelse=self.privatafgiftsanmeldelse,
+                        vareafgiftssats=pant_gebyr_sats,
+                        antal=self.antal,
+                        mængde=self.mængde,
+                    )
+
+            for j, gebyr in list(unpaired_gebyr.items()):
+                gebyr.delete()
+                del unpaired_gebyr[j]
 
     def pant_delete_corresponding_gebyr(self):
         if self.vareafgiftssats.afgiftsgruppenummer == 101:

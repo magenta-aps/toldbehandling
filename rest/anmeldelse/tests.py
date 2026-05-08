@@ -2078,6 +2078,17 @@ class VarelinjeTest(RestTestMixin, TestCase):
             ).exists()
         )
 
+        print(
+            Varelinje.objects.filter(
+                vareafgiftssats=gebyrsats, afgiftsanmeldelse=self.afgiftsanmeldelse
+            ).count()
+        )
+        print(
+            Varelinje.objects.filter(
+                vareafgiftssats=pantsats, afgiftsanmeldelse=self.afgiftsanmeldelse
+            ).count()
+        )
+
         # Change back to pant and update antal
         varelinje1.vareafgiftssats = pantsats
         varelinje1.antal = 20
