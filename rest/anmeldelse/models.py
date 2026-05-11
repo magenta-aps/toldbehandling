@@ -434,39 +434,69 @@ class Varelinje(models.Model):
     def pant_update_corresponding_gebyr(self):
 
         prior_qs = self.history.order_by("-history_date")
-        prior_antal = self.antal
         current_afgiftsgruppenummer = self.vareafgiftssats.afgiftsgruppenummer
         prior_afgiftsgruppenummer = None
         if prior_qs.count() > 1:
             prior = prior_qs[1]
-            prior_antal = prior.antal
             prior_afgiftsgruppenummer = prior.vareafgiftssats.afgiftsgruppenummer
 
-        if current_afgiftsgruppenummer == 101:
-            gebyr_linje = self.siblings_qs.filter(
-                vareafgiftssats__afgiftsgruppenummer=102, antal=prior_antal
-            ).first()
-            if gebyr_linje:
-                if gebyr_linje.antal != self.antal:
-                    gebyr_linje.antal = self.antal
-                    gebyr_linje.save()
-            else:
-                pant_gebyr_sats = Vareafgiftssats.objects.get(
-                    afgiftstabel=self.vareafgiftssats.afgiftstabel,
-                    afgiftsgruppenummer=102,
-                )
-                pant_gebyr, _ = Varelinje.objects.get_or_create(
-                    afgiftsanmeldelse=self.afgiftsanmeldelse,
-                    privatafgiftsanmeldelse=self.privatafgiftsanmeldelse,
-                    vareafgiftssats=pant_gebyr_sats,
-                    antal=self.antal,
-                    mængde=self.mængde,
-                )
+        if current_afgiftsgruppenummer == 101 or prior_afgiftsgruppenummer == 101:
+            # Only makes sense to do this if line is or was pant
 
-        elif prior_afgiftsgruppenummer == 101:
-            self.siblings_qs.filter(
-                vareafgiftssats__afgiftsgruppenummer=102, antal=prior_antal
-            ).delete()
+            gebyr_sats = Vareafgiftssats.objects.get(
+                afgiftstabel=self.vareafgiftssats.afgiftstabel,
+                afgiftsgruppenummer=102,
+            )
+
+            # We want to keep pant and gebyr lines in sync, meaning there should
+            # always be a 1:1 relationship between them, with the same amount
+            # So create two dicts holding pant and gebyr, and attempty to pair them off
+            unpaired_pant: dict[int, Varelinje] = {
+                linje.pk: linje
+                for linje in self.siblings_qs.filter(
+                    vareafgiftssats__afgiftsgruppenummer=101,
+                ).order_by("pk")
+            }
+            unpaired_gebyr: dict[int, Varelinje] = {
+                linje.pk: linje
+                for linje in self.siblings_qs.filter(
+                    vareafgiftssats__afgiftsgruppenummer=102,
+                ).order_by("pk")
+            }
+
+            # For each pant line, try to find a gebyr line with the same amount
+            # and remove both from the dicts
+            for i, pant in list(unpaired_pant.items()):
+                for j, gebyr in list(unpaired_gebyr.items()):
+                    if pant.antal == gebyr.antal:
+                        del unpaired_pant[i]
+                        del unpaired_gebyr[j]
+                        break
+
+            # For each remaining pant line (there were no matching gebyr lines)
+            # take an unmatched gebyr line and adjust its amount to match,
+            # then remove both from the dicts
+            for i, pant in list(unpaired_pant.items()):
+                if len(unpaired_gebyr) > 0:
+                    j, gebyr = list(unpaired_gebyr.items())[0]
+                    gebyr.antal = pant.antal
+                    gebyr.save()
+                    del unpaired_pant[i]
+                    del unpaired_gebyr[j]
+                else:
+                    # If there are no more gebyr lines, create as necessary
+                    Varelinje.objects.create(
+                        afgiftsanmeldelse=pant.afgiftsanmeldelse,
+                        privatafgiftsanmeldelse=pant.privatafgiftsanmeldelse,
+                        vareafgiftssats=gebyr_sats,
+                        antal=pant.antal,
+                        mængde=pant.mængde,
+                    )
+
+            # Any remaining unpaired gebyr lines should be deleted
+            for j, gebyr in list(unpaired_gebyr.items()):
+                gebyr.delete()
+                del unpaired_gebyr[j]
 
     def pant_delete_corresponding_gebyr(self):
         if self.vareafgiftssats.afgiftsgruppenummer == 101:
