@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: MPL-2.0
 from datetime import date, timedelta
 from decimal import Decimal
-from typing import Dict
 
 from aktør.models import Afsender, Modtager, Speditør
 from common.models import Postnummer
@@ -449,27 +448,35 @@ class Varelinje(models.Model):
                 afgiftsgruppenummer=102,
             )
 
-            unpaired_pant: Dict[int, Varelinje] = {
+            # We want to keep pant and gebyr lines in sync, meaning there should
+            # always be a 1:1 relationship between them, with the same amount
+            # So create two dicts holding pant and gebyr, and attempty to pair them off
+
+            unpaired_pant: dict[int, Varelinje] = {
                 linje.pk: linje
                 for linje in self.siblings_qs.filter(
                     vareafgiftssats__afgiftsgruppenummer=101,
                 ).order_by("pk")
             }
-            unpaired_gebyr: Dict[int, Varelinje] = {
+            unpaired_gebyr: dict[int, Varelinje] = {
                 linje.pk: linje
                 for linje in self.siblings_qs.filter(
                     vareafgiftssats__afgiftsgruppenummer=102,
                 ).order_by("pk")
             }
 
+            # For each pant line, try to find a gebyr line with the same amount
+            # and remove both from the dicts
             for i, pant in list(unpaired_pant.items()):
                 for j, gebyr in list(unpaired_gebyr.items()):
-                    print(i, j)
                     if pant.antal == gebyr.antal:
                         del unpaired_pant[i]
                         del unpaired_gebyr[j]
                         break
 
+            # For each remaining pant line (there were no matching gebyr lines)
+            # take an unmatched gebyr line and adjust its amount to match,
+            # then remove both from the dicts
             for i, pant in list(unpaired_pant.items()):
                 if len(unpaired_gebyr) > 0:
                     j, gebyr = list(unpaired_gebyr.items())[0]
@@ -478,6 +485,7 @@ class Varelinje(models.Model):
                     del unpaired_pant[i]
                     del unpaired_gebyr[j]
                 else:
+                    # If there are no more gebyr lines, create as necessary
                     Varelinje.objects.create(
                         afgiftsanmeldelse=pant.afgiftsanmeldelse,
                         privatafgiftsanmeldelse=pant.privatafgiftsanmeldelse,
@@ -486,6 +494,7 @@ class Varelinje(models.Model):
                         mængde=pant.mængde,
                     )
 
+            # Any remaining unpaired gebyr lines should be deleted
             for j, gebyr in list(unpaired_gebyr.items()):
                 gebyr.delete()
                 del unpaired_gebyr[j]
