@@ -451,7 +451,6 @@ class Varelinje(models.Model):
             # We want to keep pant and gebyr lines in sync, meaning there should
             # always be a 1:1 relationship between them, with the same amount
             # So create two dicts holding pant and gebyr, and attempty to pair them off
-
             unpaired_pant: dict[int, Varelinje] = {
                 linje.pk: linje
                 for linje in self.siblings_qs.filter(
