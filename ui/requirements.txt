@@ -1,4 +1,4 @@
-django==5.2.7
+django==5.2.14
 beautifulsoup4==4.13.5
 coverage==7.10.7
 humanize==4.13.0
