@@ -102,7 +102,7 @@ variables:
 .lint-default: &lint-default
   stage: lint
   needs: [ ]
-  image: python:3.11
+  image: python:3.14
 
 Lint Commits:
   extends: .lint:commits
