@@ -66,21 +66,21 @@ def get_auth_methods():
 
 
 class IndberetterProfileOut(ModelSchema):
-    class Config:
+    class Meta:
         model = IndberetterProfile
-        model_fields = ["cvr"]
+        fields = ["cvr"]
 
 
 class IndberetterProfileApiKeyOut(ModelSchema):
-    class Config:
+    class Meta:
         model = IndberetterProfile
-        model_fields = ["api_key"]
+        fields = ["api_key"]
 
 
 class IndberetterProfileIn(ModelSchema):
-    class Config:
+    class Meta:
         model = IndberetterProfile
-        model_fields = ["cpr", "cvr"]
+        fields = ["cpr", "cvr"]
 
 
 class UserOut(ModelSchema):
@@ -91,9 +91,9 @@ class UserOut(ModelSchema):
     )
     twofactor_enabled: bool
 
-    class Config:
+    class Meta:
         model = User
-        model_fields = [
+        fields = [
             "id",
             "username",
             "first_name",
@@ -104,22 +104,22 @@ class UserOut(ModelSchema):
 
     @staticmethod
     def resolve_groups(user: User):
-        return [group.name for group in user.groups.all()]
+        return [group.name for group in user.groups.all()] if user else []
 
     @staticmethod
     def resolve_permissions(user: User):
-        return sorted(user.get_all_permissions())
+        return sorted(user.get_all_permissions()) if user else []
 
     @staticmethod
     # https://github.com/vitalik/django-ninja/issues/350
     def resolve_indberetter_data(user: User):
-        if hasattr(user, "indberetter_data"):
+        if user is not None and hasattr(user, "indberetter_data"):
             return user.indberetter_data
         return None
 
     @staticmethod
     def resolve_twofactor_enabled(user: User) -> bool:
-        return TOTPDevice.objects.filter(user=user).exists()
+        return user is not None and TOTPDevice.objects.filter(user=user).exists()
 
 
 class UserOutWithTokens(Schema):
@@ -159,9 +159,9 @@ class UserIn(ModelSchema):
     groups: Optional[List[str]] = None
     indberetter_data: Optional[IndberetterProfileIn] = None
 
-    class Config:
+    class Meta:
         model = User
-        model_fields = ["username", "first_name", "last_name", "email"]
+        fields = ["username", "first_name", "last_name", "email"]
 
 
 class UserFilterSchema(FilterSchema):
@@ -437,9 +437,9 @@ class EboksBeskedIn(ModelSchema):
     privat_afgiftsanmeldelse_id: Optional[int] = None
     pdf: str  # base64
 
-    class Config:
+    class Meta:
         model = EboksBesked
-        model_fields = ["titel", "cpr", "cvr"]
+        fields = ["titel", "cpr", "cvr"]
 
 
 @api_controller(

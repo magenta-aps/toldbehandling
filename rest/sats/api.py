@@ -20,22 +20,22 @@ from sats.models import Afgiftstabel, Vareafgiftssats
 
 
 class AfgiftstabelIn(ModelSchema):
-    class Config:
+    class Meta:
         model = Afgiftstabel
-        model_fields = ["gyldig_fra", "kladde"]
+        fields = ["gyldig_fra", "kladde"]
 
 
 class PartialAfgiftstabelIn(ModelSchema):
-    class Config:
+    class Meta:
         model = Afgiftstabel
-        model_fields = ["gyldig_fra", "kladde"]
+        fields = ["gyldig_fra", "kladde"]
         model_fields_optional = "__all__"
 
 
 class AfgiftstabelOut(ModelSchema):
-    class Config:
+    class Meta:
         model = Afgiftstabel
-        model_fields = ["id", "gyldig_fra", "gyldig_til", "kladde"]
+        fields = ["id", "gyldig_fra", "gyldig_til", "kladde"]
 
 
 class AfgiftstabelFilterSchema(FilterSchema):
@@ -162,9 +162,9 @@ class VareafgiftssatsIn(ModelSchema):
     afgiftstabel_id: int
     overordnet_id: Optional[int] = None
 
-    class Config:
+    class Meta:
         model = Vareafgiftssats
-        model_fields = [
+        fields = [
             "vareart_da",
             "vareart_kl",
             "afgiftsgruppenummer",
@@ -193,9 +193,9 @@ class PartialVareafgiftssatsIn(ModelSchema):
     afgiftstabel_id: Optional[int] = None
     overordnet_id: Optional[int] = None
 
-    class Config:
+    class Meta:
         model = Vareafgiftssats
-        model_fields = [
+        fields = [
             "vareart_da",
             "vareart_kl",
             "afgiftsgruppenummer",
@@ -213,9 +213,9 @@ class PartialVareafgiftssatsIn(ModelSchema):
 
 
 class VareafgiftssatsOut(ModelSchema):
-    class Config:
+    class Meta:
         model = Vareafgiftssats
-        model_fields = [
+        fields = [
             "id",
             "afgiftstabel",
             "vareart_da",

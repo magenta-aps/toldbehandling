@@ -46,9 +46,9 @@ class PostforsendelseIn(ModelSchema):
     ] = None
     afsenderbykode: Annotated[Optional[str], BeforeValidator(coerce_num_to_str)] = None
 
-    class Config:
+    class Meta:
         model = Postforsendelse
-        model_fields = [
+        fields = [
             "forsendelsestype",
             "postforsendelsesnummer",
             "afsenderbykode",
@@ -63,9 +63,9 @@ class PartialPostforsendelseIn(ModelSchema):
     ] = None
     afsenderbykode: Annotated[Optional[str], BeforeValidator(coerce_num_to_str)] = None
 
-    class Config:
+    class Meta:
         model = Postforsendelse
-        model_fields = [
+        fields = [
             "forsendelsestype",
             "postforsendelsesnummer",
             "afsenderbykode",
@@ -76,9 +76,9 @@ class PartialPostforsendelseIn(ModelSchema):
 
 
 class PostforsendelseOut(ModelSchema):
-    class Config:
+    class Meta:
         model = Postforsendelse
-        model_fields = [
+        fields = [
             "id",
             "forsendelsestype",
             "postforsendelsesnummer",
@@ -195,9 +195,9 @@ class FragtforsendelseIn(ModelSchema):
     fragtbrev: Optional[str] = None  # Base64
     fragtbrev_navn: Optional[str] = None
 
-    class Config:
+    class Meta:
         model = Fragtforsendelse
-        model_fields = [
+        fields = [
             "forsendelsestype",
             "fragtbrevsnummer",
             "forbindelsesnr",
@@ -211,9 +211,9 @@ class PartialFragtforsendelseIn(ModelSchema):
     fragtbrev: Optional[str] = None  # Base64
     fragtbrev_navn: Optional[str] = None
 
-    class Config:
+    class Meta:
         model = Fragtforsendelse
-        model_fields = [
+        fields = [
             "forsendelsestype",
             "fragtbrevsnummer",
             "forbindelsesnr",
@@ -224,9 +224,9 @@ class PartialFragtforsendelseIn(ModelSchema):
 
 
 class FragtforsendelseOut(ModelSchema):
-    class Config:
+    class Meta:
         model = Fragtforsendelse
-        model_fields = [
+        fields = [
             "id",
             "forsendelsestype",
             "fragtbrevsnummer",
