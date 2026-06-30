@@ -275,47 +275,45 @@ class VareafgiftsSatsTest(TestCase):
             subsatser=None,
         )
 
-        self.assertEquals(sats1.text, "6,00 kr. pr kg")
-        self.assertEquals(sats1a.text, "6,00 kr. pr kg over 200,00 kg")
-        self.assertEquals(sats1b.text, "6,00 kr. pr kg under 400,00 kg")
-        self.assertEquals(sats1c.text, "6,00 kr. pr kg mellem 200,00 kg og 400,00 kg")
+        self.assertEqual(sats1.text, "6,00 kr. pr kg")
+        self.assertEqual(sats1a.text, "6,00 kr. pr kg over 200,00 kg")
+        self.assertEqual(sats1b.text, "6,00 kr. pr kg under 400,00 kg")
+        self.assertEqual(sats1c.text, "6,00 kr. pr kg mellem 200,00 kg og 400,00 kg")
 
-        self.assertEquals(sats2.text, "3,50 kr. pr liter")
-        self.assertEquals(sats2a.text, "3,50 kr. pr liter over 200,00 liter")
-        self.assertEquals(sats2b.text, "3,50 kr. pr liter under 400,00 liter")
-        self.assertEquals(
+        self.assertEqual(sats2.text, "3,50 kr. pr liter")
+        self.assertEqual(sats2a.text, "3,50 kr. pr liter over 200,00 liter")
+        self.assertEqual(sats2b.text, "3,50 kr. pr liter under 400,00 liter")
+        self.assertEqual(
             sats2c.text, "3,50 kr. pr liter mellem 200,00 liter og 400,00 liter"
         )
 
-        self.assertEquals(sats3.text, "2.530,00 kr. pr stk")
-        self.assertEquals(sats3a.text, "2.530,00 kr. pr stk over 200 stk")
-        self.assertEquals(sats3b.text, "2.530,00 kr. pr stk under 400 stk")
-        self.assertEquals(sats3c.text, "2.530,00 kr. pr stk mellem 200 stk og 400 stk")
+        self.assertEqual(sats3.text, "2.530,00 kr. pr stk")
+        self.assertEqual(sats3a.text, "2.530,00 kr. pr stk over 200 stk")
+        self.assertEqual(sats3b.text, "2.530,00 kr. pr stk under 400 stk")
+        self.assertEqual(sats3c.text, "2.530,00 kr. pr stk mellem 200 stk og 400 stk")
 
-        self.assertEquals(sats4.text, "100,00% af fakturabeløb")
-        self.assertEquals(sats4a.text, "100,00% af fakturabeløb over 200,00")
-        self.assertEquals(sats4b.text, "100,00% af fakturabeløb under 400,00")
-        self.assertEquals(
-            sats4c.text, "100,00% af fakturabeløb mellem 200,00 og 400,00"
-        )
+        self.assertEqual(sats4.text, "100,00% af fakturabeløb")
+        self.assertEqual(sats4a.text, "100,00% af fakturabeløb over 200,00")
+        self.assertEqual(sats4b.text, "100,00% af fakturabeløb under 400,00")
+        self.assertEqual(sats4c.text, "100,00% af fakturabeløb mellem 200,00 og 400,00")
 
-        self.assertEquals(sats7201.text, "50.000,00 kr. pr stk")
-        self.assertEquals(
+        self.assertEqual(sats7201.text, "50.000,00 kr. pr stk")
+        self.assertEqual(
             sats7202.text, "100,00% af fakturabeløb mellem 50.000,00 og 150.000,00"
         )
-        self.assertEquals(sats7203.text, "150,00% af fakturabeløb over 150.000,00")
-        self.assertEquals(
+        self.assertEqual(sats7203.text, "150,00% af fakturabeløb over 150.000,00")
+        self.assertEqual(
             sats72.text,
             "50.000,00 kr. pr stk + 100,00% af fakturabeløb mellem 50.000,00 og 150.000,00 + 150,00% af fakturabeløb over 150.000,00",
         )
-        self.assertEquals(sats72_2.text, None)
+        self.assertEqual(sats72_2.text, None)
 
     def test_format_decimal(self):
-        self.assertEquals(format_decimal(Decimal("1234.56")), "1.234,56")
+        self.assertEqual(format_decimal(Decimal("1234.56")), "1.234,56")
 
     def test_format_int(self):
-        self.assertEquals(format_int(Decimal("1234.00")), 1234)
-        self.assertEquals(format_int(Decimal("1234.99")), 1234)
+        self.assertEqual(format_int(Decimal("1234.00")), 1234)
+        self.assertEqual(format_int(Decimal("1234.99")), 1234)
 
     def test_populate_subs(self):
 

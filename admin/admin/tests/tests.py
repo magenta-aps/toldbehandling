@@ -116,15 +116,15 @@ class LoginTest(TestMixin, HasLogin, TestCase):
     def test_incorrect_login(self, mock_post, mock_get):
         mock_get.side_effect = self.mock_requests_get
         response = self.client.post(reverse("login"), {"username": "incorrect"})
-        self.assertEquals(response.status_code, 200)  # Rerender form
+        self.assertEqual(response.status_code, 200)  # Rerender form
         mock_post.assert_not_called()
         errors = self.get_errors(response.content)
-        self.assertEquals(errors["password"], ["Dette felt er påkrævet."])
+        self.assertEqual(errors["password"], ["Dette felt er påkrævet."])
 
         response = self.client.post(
             reverse("login"), {"username": "incorrect", "password": "credentials"}
         )
-        self.assertEquals(response.status_code, 200)  # Rerender form
+        self.assertEqual(response.status_code, 200)  # Rerender form
         mock_post.assert_called_with(
             f"{settings.REST_DOMAIN}/api/token/pair",
             json={"username": "incorrect", "password": "credentials"},
@@ -148,10 +148,10 @@ class LoginTest(TestMixin, HasLogin, TestCase):
             json={"username": "correct", "password": "credentials"},
             headers={"Content-Type": "application/json"},
         )
-        self.assertEquals(response.status_code, 302)
-        self.assertEquals(response.headers["Location"], "/")
-        self.assertEquals(self.client.session["access_token"], "123456")
-        self.assertEquals(self.client.session["refresh_token"], "abcdef")
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.headers["Location"], "/")
+        self.assertEqual(self.client.session["access_token"], "123456")
+        self.assertEqual(self.client.session["refresh_token"], "abcdef")
 
     @override_settings(REQUIRE_2FA=True, DEBUG=True)
     @patch.object(requests.sessions.Session, "get")
@@ -164,15 +164,15 @@ class LoginTest(TestMixin, HasLogin, TestCase):
         mock_get.side_effect = self.mock_requests_get
         self.login(userdata_extra={"twofactor_enabled": False})
         response = self.client.get(reverse("tf10_create"))
-        self.assertEquals(response.status_code, 302)
-        self.assertEquals(response.headers["Location"], reverse("twofactor:setup"))
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.headers["Location"], reverse("twofactor:setup"))
 
         self.logout()
 
         self.login(session_extra={"twofactor_authenticated": False})
         response = self.client.get(reverse("tf10_create"))
-        self.assertEquals(response.status_code, 302)
-        self.assertEquals(
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(
             response.headers["Location"],
             reverse("twofactor:login") + "?back=" + quote_plus(reverse("tf10_create")),
         )
@@ -246,7 +246,7 @@ class LoginTest(TestMixin, HasLogin, TestCase):
         with self.settings(NINJA_JWT={"ACCESS_TOKEN_LIFETIME": timedelta(seconds=1)}):
             response = self.client.get(reverse("rest", kwargs={"path": "afsender"}))
             # Check that token refresh is needed
-            self.assertEquals(self.client.session["access_token"], "7890ab")
+            self.assertEqual(self.client.session["access_token"], "7890ab")
 
     @patch.object(requests.sessions.Session, "get")
     @patch.object(
@@ -260,10 +260,10 @@ class LoginTest(TestMixin, HasLogin, TestCase):
             reverse("login") + "?back=/",
             {"username": "correct", "password": "credentials"},
         )
-        self.assertEquals(response.status_code, 302)
-        self.assertEquals(response.headers["Location"], "/")
-        self.assertEquals(self.client.session["access_token"], "123456")
-        self.assertEquals(self.client.session["refresh_token"], "abcdef")
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.headers["Location"], "/")
+        self.assertEqual(self.client.session["access_token"], "123456")
+        self.assertEqual(self.client.session["refresh_token"], "abcdef")
         response = self.client.get(reverse("logout"))
         self.assertNotIn("access_token", self.client.session)
         self.assertNotIn("refresh_token", self.client.session)
@@ -293,8 +293,8 @@ class LoginTest(TestMixin, HasLogin, TestCase):
         self.client.cookies[session_cookie].update(cookie_data)
 
         response = self.client.get(reverse("tf10_list"))
-        self.assertEquals(response.status_code, 302)
-        self.assertEquals(
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(
             response.headers["Location"],
             "/admin/login?back=" + quote_plus(reverse("tf10_list")),
         )
@@ -583,8 +583,8 @@ class TestGodkend(TestMixin, PermissionsTest, TestCase):
     def test_requires_login(self):
         url = str(reverse("tf10_list"))
         response = self.client.get(url)
-        self.assertEquals(response.status_code, 302)
-        self.assertEquals(
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(
             response.headers["Location"],
             reverse("login") + "?back=" + quote(url, safe=""),
         )
@@ -595,7 +595,7 @@ class TestGodkend(TestMixin, PermissionsTest, TestCase):
         url = reverse("tf10_view", kwargs={"id": 1})
         mock_get.side_effect = self.mock_requests_get
         response = self.client.get(url)
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
     @patch.object(requests.sessions.Session, "get")
     def test_get_view_not_found(self, mock_get):
@@ -603,7 +603,7 @@ class TestGodkend(TestMixin, PermissionsTest, TestCase):
         url = reverse("tf10_view", kwargs={"id": 2})
         mock_get.side_effect = self.mock_requests_get
         response = self.client.get(url)
-        self.assertEquals(response.status_code, 404)
+        self.assertEqual(response.status_code, 404)
 
     @patch.object(requests.sessions.Session, "patch")
     @patch.object(requests.sessions.Session, "get")
@@ -613,12 +613,12 @@ class TestGodkend(TestMixin, PermissionsTest, TestCase):
         mock_patch.side_effect = self.mock_requests_patch
         mock_get.side_effect = self.mock_requests_get
         response = self.client.post(view_url, {"status": "godkendt"})
-        self.assertEquals(response.status_code, 302)
+        self.assertEqual(response.status_code, 302)
         prefix = f"{settings.REST_DOMAIN}/api/"
         patched_map = defaultdict(list)
         for url, data in self.patched:
             patched_map[url].append(json.loads(data))
-        self.assertEquals(
+        self.assertEqual(
             patched_map[prefix + "afgiftsanmeldelse/1"], [{"status": "godkendt"}]
         )
 
@@ -632,7 +632,7 @@ class TestGodkend(TestMixin, PermissionsTest, TestCase):
         response = self.client.post(
             view_url, {"status": "godkendt", "sidste_ændringsdato": "2021"}
         )
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
         errors = response.context["form"].non_field_errors().as_data()
         self.assertEqual(len(errors), 1)
@@ -650,12 +650,12 @@ class TestGodkend(TestMixin, PermissionsTest, TestCase):
         response = self.client.post(
             view_url, {"status": "afvist", "notat2": "test afvist notat"}
         )
-        self.assertEquals(response.status_code, 302)
+        self.assertEqual(response.status_code, 302)
         prefix = f"{settings.REST_DOMAIN}/api/"
         patched_map = defaultdict(list)
         for url, data in self.patched:
             patched_map[url].append(json.loads(data))
-        self.assertEquals(
+        self.assertEqual(
             patched_map[prefix + "afgiftsanmeldelse/1"], [{"status": "afvist"}]
         )
 
@@ -680,7 +680,7 @@ class TestGodkend(TestMixin, PermissionsTest, TestCase):
         url = reverse("tf10_view", kwargs={"id": 1})
         mock_get.side_effect = self.mock_requests_error
         response = self.client.get(url)
-        self.assertEquals(response.status_code, 500)
+        self.assertEqual(response.status_code, 500)
 
     @patch.object(requests.sessions.Session, "get")
     def test_get_view_rest_error_401(self, mock_get):
@@ -688,7 +688,7 @@ class TestGodkend(TestMixin, PermissionsTest, TestCase):
         url = reverse("tf10_view", kwargs={"id": 1})
         mock_get.side_effect = self.mock_requests_error_401
         response = self.client.get(url)
-        self.assertEquals(response.status_code, 302)
+        self.assertEqual(response.status_code, 302)
 
     @patch.object(requests.sessions.Session, "patch")
     @patch.object(requests.sessions.Session, "get")
@@ -967,8 +967,8 @@ class TestPrisme(TestMixin, PermissionsTest, TestCase):
         mock_get.side_effect = self.mock_requests_get
         mock_patch.side_effect = self.mock_requests_patch
         response = self.client.post(view_url, {"send_til_prisme": "true"})
-        self.assertEquals(response.status_code, 200)
-        self.assertEquals(
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
             self.get_errors(response.content)["__all__"],
             [
                 "Der skal vælges en toldkategori når der sendes til Prisme",
@@ -984,19 +984,19 @@ class TestPrisme(TestMixin, PermissionsTest, TestCase):
                 "toldkategori": "70",
             },
         )
-        self.assertEquals(response.status_code, 302)
+        self.assertEqual(response.status_code, 302)
         prefix = f"{settings.REST_DOMAIN}/api/"
         patched = defaultdict(list)
         for url, data in self.patched:
             patched[url].append(json.loads(data))
-        self.assertEquals(patched[prefix + "modtager/1"][0]["stedkode"], 123)
-        self.assertEquals(
+        self.assertEqual(patched[prefix + "modtager/1"][0]["stedkode"], 123)
+        self.assertEqual(
             patched[prefix + "afgiftsanmeldelse/1"][0]["toldkategori"], "70"
         )
         posted = defaultdict(list)
         for url, data in self.posted:
             posted[url].append(json.loads(data))
-        self.assertEquals(
+        self.assertEqual(
             posted[prefix + "prismeresponse"],
             [
                 {
@@ -1104,7 +1104,7 @@ class AdminAnmeldelseListViewTest(PermissionsTest, AnmeldelseListViewTest, TestC
         response = self.client.get(url)
 
         mock_get.assert_called_once()
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
     @patch.object(requests.Session, "get")
     def test_delete_kladde(self, mock_get):
@@ -1120,7 +1120,7 @@ class AdminAnmeldelseListViewTest(PermissionsTest, AnmeldelseListViewTest, TestC
         response = self.client.get(url)
 
         mock_get.assert_called_once()
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
 
 class AnmeldelseHistoryListViewTest(PermissionsTest, TestCase):
@@ -1221,9 +1221,9 @@ class AnmeldelseHistoryListViewTest(PermissionsTest, TestCase):
         self.login()
         url = reverse("tf10_history", kwargs={"id": 1})
         response = self.client.get(url)
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         list_items = self.get_html_list(response.content)
-        self.assertEquals(
+        self.assertEqual(
             list_items,
             [
                 {
@@ -1956,8 +1956,8 @@ class AfgiftstabelListViewTest(PermissionsTest, TestCase):
     def test_requires_login(self):
         url = self.list_url
         response = self.client.get(url)
-        self.assertEquals(response.status_code, 302)
-        self.assertEquals(
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(
             response.headers["Location"],
             self.login_url + "?back=" + quote(url, safe=""),
         )
@@ -1969,9 +1969,9 @@ class AfgiftstabelListViewTest(PermissionsTest, TestCase):
         self.login()
         url = self.list_url
         response = self.client.get(url)
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         table_data = self.get_html_list(response.content)
-        self.assertEquals(
+        self.assertEqual(
             # Tag table_data og fjern alle html-tags i strengen. Join med mellemrum.
             self.strip_html_tags(table_data),
             [
@@ -1998,10 +1998,10 @@ class AfgiftstabelListViewTest(PermissionsTest, TestCase):
 
         url = self.list_url + "?json=1"
         response = self.client.get(url)
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         data = response.json()
 
-        self.assertEquals(
+        self.assertEqual(
             self.strip_html_tags(data),
             {
                 "total": 3,
@@ -2067,8 +2067,8 @@ class AfgiftstabelListViewTest(PermissionsTest, TestCase):
             url = self.list_url + f"?json=1&sort={test[0]}&order={test[1]}"
             response = self.client.get(url)
             numbers = [int(item["id"]) for item in response.json()["items"]]
-            self.assertEquals(response.status_code, 200)
-            self.assertEquals(numbers, test[2], f"{test[0]} {test[1]}")
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(numbers, test[2], f"{test[0]} {test[1]}")
 
     @patch.object(requests.sessions.Session, "get")
     def test_list_paginate(self, mock_get):
@@ -2093,8 +2093,8 @@ class AfgiftstabelListViewTest(PermissionsTest, TestCase):
             url = self.list_url + f"?json=1&offset={offset}&limit={limit}"
             response = self.client.get(url)
             numbers = [int(item["id"]) for item in response.json()["items"]]
-            self.assertEquals(response.status_code, 200)
-            self.assertEquals(numbers, expected)
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(numbers, expected)
 
 
 class AfgiftstabelDetailViewTest(PermissionsTest, TestCase):
@@ -2212,11 +2212,11 @@ class AfgiftstabelDetailViewTest(PermissionsTest, TestCase):
         self.login()
         response = self.client.get(reverse("afgiftstabel_view", kwargs={"id": 2}))
         soup = BeautifulSoup(response.content, "html.parser")
-        self.assertEquals(
+        self.assertEqual(
             self.parse_form_row(soup, "gyldig_fra"),
             [["Gyldig fra"], ["2022-01-01T00:00:00-03:00"]],
         )
-        self.assertEquals(
+        self.assertEqual(
             self.parse_form_row(soup, "gyldig_til"), [["Gyldig til"], ["-"]]
         )
 
@@ -2238,7 +2238,7 @@ class AfgiftstabelDetailViewTest(PermissionsTest, TestCase):
         patched_map = defaultdict(list)
         for url, data in self.patched:
             patched_map[url].append(json.loads(data))
-        self.assertEquals(
+        self.assertEqual(
             patched_map[prefix + "afgiftstabel/1"],
             [
                 {
@@ -2339,14 +2339,14 @@ class AfgiftstabelDownloadTest(PermissionsTest, TestCase):
         response = self.client.get(
             reverse("afgiftstabel_download", kwargs={"id": 1, "format": "xlsx"})
         )
-        self.assertEquals(response.status_code, 200)
-        self.assertEquals(
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
             response.headers["Content-Type"],
             "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         )
         self.assertTrue(len(response.content) > 0)
         workbook = load_workbook(BytesIO(response.content))
-        self.assertEquals(
+        self.assertEqual(
             list(workbook.active.values),
             [
                 (
@@ -2404,11 +2404,11 @@ class AfgiftstabelDownloadTest(PermissionsTest, TestCase):
         response = self.client.get(
             reverse("afgiftstabel_download", kwargs={"id": 1, "format": "csv"})
         )
-        self.assertEquals(response.status_code, 200)
-        self.assertEquals(response.headers["Content-Type"], "text/csv")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.headers["Content-Type"], "text/csv")
         self.assertTrue(len(response.content) > 0)
         reader = csv.reader(StringIO(response.content.decode("utf-8")))
-        self.assertEquals(
+        self.assertEqual(
             [row for row in reader],
             [
                 [
@@ -2560,17 +2560,17 @@ class AfgiftstabelUploadTest(TestMixin, HasLogin):
     def test_successful_upload(self, mock_post):
         mock_post.side_effect = self.mock_requests_post
         response = self.upload(self.data)
-        self.assertEquals(response.status_code, 302)
-        self.assertEquals(response.headers["Location"], reverse("afgiftstabel_list"))
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.headers["Location"], reverse("afgiftstabel_list"))
 
     @patch.object(requests.sessions.Session, "post")
     def test_failure_wrong_content_type(self, mock_post):
         mock_post.side_effect = self.mock_requests_post
         response = self.upload(self.data, "text/plain")
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         errors = self.get_errors(response.content)
         self.assertTrue("fil" in errors)
-        self.assertEquals(errors["fil"], ["Ugyldig content-type: text/plain"])
+        self.assertEqual(errors["fil"], ["Ugyldig content-type: text/plain"])
 
     @patch.object(requests.sessions.Session, "post")
     def test_failure_header_missing(self, mock_post):
@@ -2580,20 +2580,20 @@ class AfgiftstabelUploadTest(TestMixin, HasLogin):
             for line in data:
                 line.pop(i)
             response = self.upload(data)
-            self.assertEquals(response.status_code, 200)
+            self.assertEqual(response.status_code, 200)
             errors = self.get_errors(response.content)
             self.assertTrue("fil" in errors)
-            self.assertEquals(errors["fil"], [f"Mangler kolonne med {self.data[0][i]}"])
+            self.assertEqual(errors["fil"], [f"Mangler kolonne med {self.data[0][i]}"])
 
     @patch.object(requests.sessions.Session, "post")
     def test_failure_number_twice(self, mock_post):
         mock_post.side_effect = self.mock_requests_post
         self.data[3][0] = "2"
         response = self.upload(self.data)
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         errors = self.get_errors(response.content)
         self.assertTrue("fil" in errors)
-        self.assertEquals(
+        self.assertEqual(
             errors["fil"], ["Afgiftsgruppenummer 2 optræder to gange (linjer: 3, 4)"]
         )
 
@@ -2602,10 +2602,10 @@ class AfgiftstabelUploadTest(TestMixin, HasLogin):
         mock_post.side_effect = self.mock_requests_post
         self.data[3][1] = "4"
         response = self.upload(self.data)
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         errors = self.get_errors(response.content)
         self.assertTrue("fil" in errors)
-        self.assertEquals(
+        self.assertEqual(
             errors["fil"],
             [
                 "Afgiftssats med afgiftsgruppenummer 3 (linje 4) peger på overordnet 4, som ikke findes"
@@ -2617,10 +2617,10 @@ class AfgiftstabelUploadTest(TestMixin, HasLogin):
         mock_post.side_effect = self.mock_requests_post
         self.data[1][1] = "1"
         response = self.upload(self.data)
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         errors = self.get_errors(response.content)
         self.assertTrue("fil" in errors)
-        self.assertEquals(
+        self.assertEqual(
             errors["fil"],
             ["Vareafgiftssats 1 (linje 2) peger på sig selv som overordnet"],
         )
@@ -2632,10 +2632,10 @@ class AfgiftstabelUploadTest(TestMixin, HasLogin):
         self.data[2][1] = "1"
         self.data[3][1] = "2"
         response = self.upload(self.data)
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         errors = self.get_errors(response.content)
         self.assertTrue("fil" in errors)
-        self.assertEquals(
+        self.assertEqual(
             errors["fil"],
             [
                 "Vareafgiftssats 2 (linje 3) har 1 (linje 2) som overordnet, men 1 har også 2 i kæden af overordnede"
@@ -2887,8 +2887,8 @@ class TF10EditMultipleViewTest(PermissionsTest, TestCase):
     def test_get_redirect(self):
         self.login()
         response = self.client.get(reverse("tf10_edit_multiple") + "?id=1")
-        self.assertEquals(response.status_code, 302)
-        self.assertEquals(
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(
             response.headers["Location"], reverse("tf10_edit", kwargs={"id": 1})
         )
 
@@ -2897,7 +2897,7 @@ class TF10EditMultipleViewTest(PermissionsTest, TestCase):
         self.login()
         mock_get.side_effect = self.mock_requests_get
         response = self.client.get(reverse("tf10_edit_multiple") + "?id=1&id=2")
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         analysis = self.analyze_html(response.content)
         self.assertIn("forbindelsesnr", analysis["disabled_fields"])
         self.assertIn("afgangsdato", analysis["disabled_fields"])
@@ -2913,7 +2913,7 @@ class TF10EditMultipleViewTest(PermissionsTest, TestCase):
         self.login()
         mock_get.side_effect = self.mock_requests_get
         response = self.client.get(reverse("tf10_edit_multiple") + "?id=2&id=3")
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         analysis = self.analyze_html(response.content)
         self.assertNotIn("forbindelsesnr", analysis["disabled_fields"])
         self.assertNotIn("fragtbrevnr", analysis["disabled_fields"])
@@ -3011,16 +3011,16 @@ class TF10CreateTest(TestMixin, HasLogin, TestCase):
     #     with file.open("+") as fp:
     #         fp.write(b"testdata")
     #         file.seek(0)
-    #         self.assertEquals(RestClient._uploadfile_to_base64str(file), "dGVzdGRhdGE=")
+    #         self.assertEqual(RestClient._uploadfile_to_base64str(file), "dGVzdGRhdGE=")
     #     file = SimpleUploadedFile("testfile", b"testdata", "text/plain")
     #     file.seek(0)
-    #     self.assertEquals(RestClient._uploadfile_to_base64str(file), "dGVzdGRhdGE=")
+    #     self.assertEqual(RestClient._uploadfile_to_base64str(file), "dGVzdGRhdGE=")
 
     def test_requires_login(self):
         url = str(reverse("tf10_create"))
         response = self.client.get(url)
-        self.assertEquals(response.status_code, 302)
-        self.assertEquals(
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(
             response.headers["Location"],
             reverse("login") + "?back=" + quote(url, safe=""),
         )
@@ -3196,7 +3196,7 @@ class TF10CreateTest(TestMixin, HasLogin, TestCase):
         mock_get.side_effect = self.mock_requests_get
 
         response = self.client.get(url)
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         soup = BeautifulSoup(response.content, "html.parser")
         input_field_names = set(
             [
@@ -3259,19 +3259,19 @@ class TF10CreateTest(TestMixin, HasLogin, TestCase):
                 data=data, files=self.formfiles1, oprettet_på_vegne_af_choices=()
             )
             self.assertTrue(required_field in form.errors)
-            self.assertEquals(form.errors[required_field], ["Dette felt er påkrævet."])
+            self.assertEqual(form.errors[required_field], ["Dette felt er påkrævet."])
             html_errors = self.submit_get_errors(url, data)
             self.assertTrue(required_field in html_errors)
-            self.assertEquals(html_errors[required_field], ["Dette felt er påkrævet."])
+            self.assertEqual(html_errors[required_field], ["Dette felt er påkrævet."])
 
         files = {**self.formfiles1}
         del files["leverandørfaktura"]
         form = TF10CreateForm(
             data=self.formdata1, files=files, oprettet_på_vegne_af_choices=()
         )
-        self.assertEquals(form.errors["leverandørfaktura"], ["Dette felt er påkrævet."])
+        self.assertEqual(form.errors["leverandørfaktura"], ["Dette felt er påkrævet."])
         html_errors = self.submit_get_errors(url, {**self.formdata1, **files})
-        self.assertEquals(html_errors["leverandørfaktura"], ["Dette felt er påkrævet."])
+        self.assertEqual(html_errors["leverandørfaktura"], ["Dette felt er påkrævet."])
 
     def test_vareform_required_fields(self):
         varesatser = {
@@ -3309,7 +3309,7 @@ class TF10CreateTest(TestMixin, HasLogin, TestCase):
             del data[required_field]
             form = TF10VareForm(data=data, varesatser=varesatser)
             self.assertTrue(required_field in form.errors)
-            self.assertEquals(form.errors[required_field], ["Dette felt er påkrævet."])
+            self.assertEqual(form.errors[required_field], ["Dette felt er påkrævet."])
 
         for required_field, vareart in (
             ("mængde", 1),
@@ -3320,7 +3320,7 @@ class TF10CreateTest(TestMixin, HasLogin, TestCase):
             del data[required_field]
             form = TF10VareForm(data=data, varesatser=varesatser)
             self.assertTrue(required_field in form.errors, required_field)
-            self.assertEquals(
+            self.assertEqual(
                 form.errors[required_field],
                 ["Dette felt er påkrævet."],
                 required_field,
@@ -3334,12 +3334,12 @@ class TF10CreateTest(TestMixin, HasLogin, TestCase):
         mock_get.side_effect = self.mock_requests_get
         mock_post.side_effect = self.mock_requests_post
         response = self.client.post(url, data={**self.formdata1, **self.formfiles1})
-        self.assertEquals(response.status_code, 302)
+        self.assertEqual(response.status_code, 302)
         prefix = f"{settings.REST_DOMAIN}/api/"
         posted_map = defaultdict(list)
         for url, data in self.posted:
             posted_map[url].append(json.loads(data))
-        self.assertEquals(
+        self.assertEqual(
             posted_map[prefix + "afsender"],
             [
                 {
@@ -3354,7 +3354,7 @@ class TF10CreateTest(TestMixin, HasLogin, TestCase):
                 }
             ],
         )
-        self.assertEquals(
+        self.assertEqual(
             posted_map[prefix + "modtager"],
             [
                 {
@@ -3369,7 +3369,7 @@ class TF10CreateTest(TestMixin, HasLogin, TestCase):
                 }
             ],
         )
-        self.assertEquals(
+        self.assertEqual(
             posted_map[prefix + "fragtforsendelse"],
             [
                 {
@@ -3385,7 +3385,7 @@ class TF10CreateTest(TestMixin, HasLogin, TestCase):
                 }
             ],
         )
-        self.assertEquals(
+        self.assertEqual(
             posted_map[prefix + "afgiftsanmeldelse"],
             [
                 {
@@ -3421,15 +3421,15 @@ class TF10CreateTest(TestMixin, HasLogin, TestCase):
     #     mock_post.side_effect = self.mock_requests_post
     #     response = self.client.post(url, data={**self.formdata1, **self.formfiles1})
     #     response = self.client.post(url, data={**self.formdata1, **self.formfiles1})
-    #     self.assertEquals(response.status_code, 302)
+    #     self.assertEqual(response.status_code, 302)
     #     prefix = f"{settings.REST_DOMAIN}/api/"
     #     posted_map = defaultdict(list)
     #     for url, data in self.posted:
     #         posted_map[url].append(json.loads(data))
-    #     self.assertEquals(len(posted_map[prefix + "afsender"]), 1)
-    #     self.assertEquals(len(posted_map[prefix + "modtager"]), 1)
-    #     self.assertEquals(len(posted_map[prefix + "fragtforsendelse"]), 1)
-    #     self.assertEquals(len(posted_map[prefix + "afgiftsanmeldelse"]), 1)
+    #     self.assertEqual(len(posted_map[prefix + "afsender"]), 1)
+    #     self.assertEqual(len(posted_map[prefix + "modtager"]), 1)
+    #     self.assertEqual(len(posted_map[prefix + "fragtforsendelse"]), 1)
+    #     self.assertEqual(len(posted_map[prefix + "afgiftsanmeldelse"]), 1)
 
     @patch.object(requests.Session, "get")
     @patch.object(requests.Session, "post")
@@ -3441,20 +3441,20 @@ class TF10CreateTest(TestMixin, HasLogin, TestCase):
         mock_get.side_effect = self.mock_requests_get
         mock_post.side_effect = self.mock_requests_post
         response = self.client.post(url, data={**self.formdata1, **self.formfiles1})
-        self.assertEquals(response.status_code, 302, self.get_errors(response.content))
+        self.assertEqual(response.status_code, 302, self.get_errors(response.content))
         prefix = f"{settings.REST_DOMAIN}/api/"
         posted_map = defaultdict(list)
         for url, data in self.posted:
             posted_map[url].append(json.loads(data))
-        self.assertEquals(
+        self.assertEqual(
             posted_map[prefix + "afsender"],
             [],
         )
-        self.assertEquals(
+        self.assertEqual(
             posted_map[prefix + "modtager"],
             [],
         )
-        self.assertEquals(
+        self.assertEqual(
             posted_map[prefix + "fragtforsendelse"],
             [
                 {
@@ -3470,7 +3470,7 @@ class TF10CreateTest(TestMixin, HasLogin, TestCase):
                 }
             ],
         )
-        self.assertEquals(
+        self.assertEqual(
             posted_map[prefix + "afgiftsanmeldelse"],
             [
                 {
@@ -3504,12 +3504,12 @@ class TF10CreateTest(TestMixin, HasLogin, TestCase):
         mock_get.side_effect = self.mock_requests_get
         mock_post.side_effect = self.mock_requests_post
         response = self.client.post(url, data={**self.formdata2, **self.formfiles2})
-        self.assertEquals(response.status_code, 302)
+        self.assertEqual(response.status_code, 302)
         prefix = f"{settings.REST_DOMAIN}/api/"
         posted_map = defaultdict(list)
         for url, data in self.posted:
             posted_map[url].append(json.loads(data))
-        self.assertEquals(
+        self.assertEqual(
             posted_map[prefix + "afsender"],
             [
                 {
@@ -3524,7 +3524,7 @@ class TF10CreateTest(TestMixin, HasLogin, TestCase):
                 }
             ],
         )
-        self.assertEquals(
+        self.assertEqual(
             posted_map[prefix + "modtager"],
             [
                 {
@@ -3539,7 +3539,7 @@ class TF10CreateTest(TestMixin, HasLogin, TestCase):
                 }
             ],
         )
-        self.assertEquals(
+        self.assertEqual(
             posted_map[prefix + "postforsendelse"],
             [
                 {
@@ -3551,7 +3551,7 @@ class TF10CreateTest(TestMixin, HasLogin, TestCase):
                 }
             ],
         )
-        self.assertEquals(
+        self.assertEqual(
             posted_map[prefix + "afgiftsanmeldelse"],
             [
                 {
@@ -3600,11 +3600,11 @@ class TF10CreateTest(TestMixin, HasLogin, TestCase):
             "fragtbrev",
         ):
             self.assertTrue(file_field in form.errors)
-            self.assertEquals(
+            self.assertEqual(
                 form.errors[file_field], ["Filen er for stor; den må max. være 10.0 MB"]
             )
             self.assertTrue(file_field in html_errors)
-            self.assertEquals(
+            self.assertEqual(
                 html_errors[file_field], ["Filen er for stor; den må max. være 10.0 MB"]
             )
 
@@ -3724,7 +3724,7 @@ class StatistikTest(PermissionsTest, TestCase):
         self.assertTrue(isinstance(response, TemplateResponse))
         tabledata = self.get_html_list(response.content)
         summary_table = tabledata[0]
-        self.assertEquals(
+        self.assertEqual(
             summary_table,
             [
                 {
@@ -3740,7 +3740,7 @@ class StatistikTest(PermissionsTest, TestCase):
             ],
         )
         group_table = tabledata[1]
-        self.assertEquals(
+        self.assertEqual(
             group_table,
             [
                 {"Gruppe": "Ingen data"},
@@ -3765,7 +3765,7 @@ class StatistikTest(PermissionsTest, TestCase):
         self.assertTrue(isinstance(response, TemplateResponse))
         tabledata = self.get_html_list(response.content)
         summary_table = tabledata[0]
-        self.assertEquals(
+        self.assertEqual(
             summary_table,
             [
                 {
@@ -3781,7 +3781,7 @@ class StatistikTest(PermissionsTest, TestCase):
             ],
         )
         group_table = tabledata[1]
-        self.assertEquals(
+        self.assertEqual(
             group_table,
             [
                 {"Gruppe": "Ingen data"},
@@ -3806,14 +3806,14 @@ class StatistikTest(PermissionsTest, TestCase):
         self.assertTrue(isinstance(response, TemplateResponse))
         tabledata = self.get_html_list(response.content)
         summary_table = tabledata[0]
-        self.assertEquals(
+        self.assertEqual(
             summary_table,
             [
                 {"Afgiftsgruppe": "Ingen data"},
             ],
         )
         group_table = tabledata[1]
-        self.assertEquals(
+        self.assertEqual(
             group_table,
             [
                 {"Gruppe": "Ingen data"},
@@ -3838,7 +3838,7 @@ class StatistikTest(PermissionsTest, TestCase):
         self.assertTrue(isinstance(response, TemplateResponse))
         tabledata = self.get_html_list(response.content)
         summary_table = tabledata[0]
-        self.assertEquals(
+        self.assertEqual(
             summary_table,
             [
                 {
@@ -3854,7 +3854,7 @@ class StatistikTest(PermissionsTest, TestCase):
             ],
         )
         group_table = tabledata[1]
-        self.assertEquals(
+        self.assertEqual(
             group_table, [{"Afgift": "1.401.750,00", "Gruppe": "1234+5678"}]
         )
 
@@ -4279,7 +4279,7 @@ class TF5BankPaymentTest(HasLogin, TestCase):
         posted_map = defaultdict(list)
         for url, data in self.posted:
             posted_map[url].append(json.loads(data))
-        self.assertEquals(
+        self.assertEqual(
             posted_map[prefix + "payment"],
             [{"declaration_id": 1, "provider": "bank"}],
         )

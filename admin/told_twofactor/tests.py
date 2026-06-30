@@ -15,15 +15,15 @@ class TwoFactorSetupViewTest(HasLogin, TestMixin, TestCase):
 
     def test_requires_login(self):
         response = self.client.get(self.url, follow=False)
-        self.assertEquals(response.status_code, 302)
-        self.assertEquals(
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(
             response.headers["Location"], reverse("login") + "?next=" + self.url
         )
 
     def test_form_get(self):
         self.login()
         response = self.client.get(self.url, follow=False)
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
     def test_submit_fail(self):
         self.login()
@@ -34,9 +34,9 @@ class TwoFactorSetupViewTest(HasLogin, TestMixin, TestCase):
                 "generator-token": "123456",
             },
         )
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         errors = self.get_errors(response.content)
-        self.assertEquals(errors, {"generator-token": ["Ugyldig token"]})
+        self.assertEqual(errors, {"generator-token": ["Ugyldig token"]})
 
     @patch.object(TOTP, "token")
     @patch.object(TotpDeviceRestClient, "create")
@@ -61,8 +61,8 @@ class TwoFactorSetupViewTest(HasLogin, TestMixin, TestCase):
                     "generator-token": "112233",
                 },
             )
-            self.assertEquals(response.status_code, 302)
-            self.assertEquals(response.headers["Location"], expected_redirect)
+            self.assertEqual(response.status_code, 302)
+            self.assertEqual(response.headers["Location"], expected_redirect)
             sent = mock_create_device.call_args[0][0]
             del sent["key"]
             expected = {
@@ -103,7 +103,7 @@ class TwofactorLoginTest(HasLogin, TestMixin, TestCase):
         self.client.login()
         response = self.client.post(reverse("twofactor:login"))
         errors = self.get_errors(response.content)
-        self.assertEquals(errors, {"twofactor_token": ["Dette felt er påkrævet."]})
+        self.assertEqual(errors, {"twofactor_token": ["Dette felt er påkrævet."]})
         self.assertFalse(self.client.session.get("twofactor_authenticated", False))
 
     @patch.object(requests, "post")
@@ -114,7 +114,7 @@ class TwofactorLoginTest(HasLogin, TestMixin, TestCase):
             reverse("twofactor:login"), {"twofactor_token": "112233"}
         )
         errors = self.get_errors(response.content)
-        self.assertEquals(errors, {"twofactor_token": ["Ugyldig token"]})
+        self.assertEqual(errors, {"twofactor_token": ["Ugyldig token"]})
         self.assertFalse(self.client.session.get("twofactor_authenticated", False))
 
     @patch.object(requests, "post")
@@ -131,6 +131,6 @@ class TwofactorLoginTest(HasLogin, TestMixin, TestCase):
             self.client.login()
             response = self.client.post(url, {"twofactor_token": "112233"})
             self.assertTrue(self.client.session.get("twofactor_authenticated", False))
-            self.assertEquals(response.status_code, 302)
-            self.assertEquals(response.headers.get("Location"), expected_redirect)
+            self.assertEqual(response.status_code, 302)
+            self.assertEqual(response.headers.get("Location"), expected_redirect)
             self.client.logout()
