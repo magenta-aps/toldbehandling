@@ -1488,3 +1488,9 @@ class TestTF5UpdateView(BaseTest):
         self.assertEqual(response.status_code, 200)
         context = response.context_data
         self.assertEqual(context["item"].id, 1)
+
+
+class CSPTest(TestCase):
+    def test_loginpage(self):
+        response = self.client.get(reverse("login"))
+        self.assertIn("nonce-", response.headers["Content-Security-Policy"])

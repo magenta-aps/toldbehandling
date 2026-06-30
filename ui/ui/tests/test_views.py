@@ -156,6 +156,11 @@ class TF5Test(BaseTest):
         self.assertEqual(context["title"], "Mine indførselstilladelser")
         self.assertTrue(context["can_create"])
 
+    def test_csp(self):
+        self.login()
+        response = self.client.get(reverse("tf5_list"))
+        self.assertIn("nonce-", response.headers["Content-Security-Policy"])
+
     def test_tf5_view(self):
         self.login()
         response = self.client.get(reverse("tf5_view", kwargs={"id": 1}))
