@@ -72,7 +72,7 @@ class PartialPostforsendelseIn(ModelSchema):
             "afgangsdato",
             "kladde",
         ]
-        model_fields_optional = "__all__"
+        fields_optional = "__all__"
 
 
 class PostforsendelseOut(ModelSchema):
@@ -204,7 +204,7 @@ class FragtforsendelseIn(ModelSchema):
             "afgangsdato",
             "kladde",
         ]
-        model_fields_optional = "__all__"
+        fields_optional = "__all__"
 
 
 class PartialFragtforsendelseIn(ModelSchema):
@@ -220,7 +220,7 @@ class PartialFragtforsendelseIn(ModelSchema):
             "afgangsdato",
             "kladde",
         ]
-        model_fields_optional = "__all__"
+        fields_optional = "__all__"
 
 
 class FragtforsendelseOut(ModelSchema):

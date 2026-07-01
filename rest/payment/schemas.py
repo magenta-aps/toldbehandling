@@ -160,6 +160,6 @@ class PaymentItemResponse(BaseItem, PersistedModel):
     pass
 
 
-class PaymentResponse(BaseResponse, BasePayment, PersistedModel):
+class PaymentResponse(BaseResponse, BasePayment, PersistedModel):  # type: ignore[misc]
     declaration: PaymentDeclarationResponse
     provider_payment: Optional[ProviderPaymentResponse] = None

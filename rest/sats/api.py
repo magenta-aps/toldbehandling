@@ -29,7 +29,7 @@ class PartialAfgiftstabelIn(ModelSchema):
     class Meta:
         model = Afgiftstabel
         fields = ["gyldig_fra", "kladde"]
-        model_fields_optional = "__all__"
+        fields_optional = "__all__"
 
 
 class AfgiftstabelOut(ModelSchema):
@@ -178,7 +178,7 @@ class VareafgiftssatsIn(ModelSchema):
             "segment_øvre",
             "synlig_privat",
         ]
-        model_fields_optional = [
+        fields_optional = [
             "kræver_indførselstilladelse_alkohol",
             "kræver_indførselstilladelse_tobak",
             "har_privat_tillægsafgift_alkohol",
@@ -209,7 +209,7 @@ class PartialVareafgiftssatsIn(ModelSchema):
             "segment_øvre",
             "synlig_privat",
         ]
-        model_fields_optional = "__all__"
+        fields_optional = "__all__"
 
 
 class VareafgiftssatsOut(ModelSchema):

@@ -59,7 +59,7 @@ class AfsenderIn(ModelSchema):
             "cvr",
             "kladde",
         ]
-        model_fields_optional = "__all__"
+        fields_optional = "__all__"
 
 
 class PartialAfsenderIn(ModelSchema):
@@ -79,7 +79,7 @@ class PartialAfsenderIn(ModelSchema):
             "cvr",
             "kladde",
         ]
-        model_fields_optional = "__all__"
+        fields_optional = "__all__"
 
 
 class AfsenderOut(ModelSchema):
@@ -192,7 +192,7 @@ class ModtagerIn(ModelSchema):
             "kreditordning",
             "kladde",
         ]
-        model_fields_optional = "__all__"
+        fields_optional = "__all__"
 
 
 class PartialModtagerIn(ModelSchema):
@@ -213,7 +213,7 @@ class PartialModtagerIn(ModelSchema):
             "kreditordning",
             "kladde",
         ]
-        model_fields_optional = "__all__"
+        fields_optional = "__all__"
 
 
 class ModtagerOut(ModelSchema):

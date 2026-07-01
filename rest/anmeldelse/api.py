@@ -135,13 +135,13 @@ class PartialAfgiftsanmeldelseIn(ModelSchema):
             "status",
             "toldkategori",
         ]
-        model_fields_optional = "__all__"
+        fields_optional = "__all__"
 
 
 class AfgiftsanmeldelseOut(ModelSchema):
-    oprettet_af: Optional[UserOut] = None
-    oprettet_på_vegne_af: Optional[UserOut] = None
-    fuldmagtshaver: SpeditørOut = None
+    oprettet_af: Optional[UserOut]
+    oprettet_på_vegne_af: Optional[UserOut]
+    fuldmagtshaver: Optional[SpeditørOut] = None
 
     class Meta:
         model = Afgiftsanmeldelse
@@ -650,7 +650,7 @@ class PartialPrivatAfgiftsanmeldelseIn(ModelSchema):
             "anonym",
             "status",
         ]
-        model_fields_optional = "__all__"
+        fields_optional = "__all__"
 
 
 class PrivatAfgiftsanmeldelseOut(ModelSchema):
@@ -877,7 +877,7 @@ class VarelinjeIn(ModelSchema):
     class Meta:
         model = Varelinje
         fields = ["mængde", "antal", "kladde", "fakturabeløb"]
-        model_fields_optional = ["mængde", "antal", "kladde", "fakturabeløb"]
+        fields_optional = ["mængde", "antal", "kladde", "fakturabeløb"]
 
     @model_validator(mode="after")
     def enhed_must_have_corresponding_field(self):
@@ -951,7 +951,7 @@ class PartialVarelinjeIn(ModelSchema):
             "fakturabeløb",
             "kladde",
         ]
-        model_fields_optional = "__all__"
+        fields_optional = "__all__"
 
 
 class VarelinjeOut(ModelSchema):

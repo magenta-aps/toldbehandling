@@ -1677,7 +1677,7 @@ class PrivatAfgiftsanmeldelseAPITest(TestCase):
             json_dump(
                 {
                     "navn": "Test privatafgiftsanmeldelse 1.2",
-                    "leverandørfaktura": base64.b64encode(
+                    "leverandorfaktura": base64.b64encode(
                         b"%PDF-1.4\n%Fake PDF content - updated!"
                     ).decode("utf-8"),
                 }
