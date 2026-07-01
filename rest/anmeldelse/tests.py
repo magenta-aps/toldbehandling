@@ -40,11 +40,10 @@ from django.core.files.base import ContentFile
 from django.db.models import Q
 from django.db.models.signals import post_delete, post_save
 from django.http import Http404
-from django.test import TestCase, override_settings
+from django.test import TestCase
 from django.urls import reverse
 from django.utils.http import urlencode
 from forsendelse.models import Postforsendelse
-from ninja_extra.exceptions import PermissionDenied
 from payment.models import Payment
 from project.test_mixins import RestMixin, RestTestMixin
 from project.util import json_dump

@@ -3,7 +3,7 @@ import uuid
 from datetime import date, datetime, timedelta, timezone
 from decimal import Decimal
 from typing import Optional
-from unittest.mock import ANY, MagicMock, call, patch
+from unittest.mock import MagicMock, call, patch
 
 from anmeldelse.models import PrivatAfgiftsanmeldelse, Varelinje
 from django.conf import settings

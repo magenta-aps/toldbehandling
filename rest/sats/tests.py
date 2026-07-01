@@ -2,14 +2,13 @@
 #
 # SPDX-License-Identifier: MPL-2.0
 
-from datetime import date, datetime, timedelta, timezone
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from unittest.mock import patch
 
-from django.contrib.auth.models import Permission, User
+from django.contrib.auth.models import Permission
 from django.test import TestCase
 from django.urls import reverse
-from ninja_extra.exceptions import PermissionDenied
 from project.test_mixins import RestMixin, RestTestMixin
 from project.util import json_dump
 from sats.models import Afgiftstabel, Vareafgiftssats

@@ -2,12 +2,9 @@
 #
 # SPDX-License-Identifier: MPL-2.0
 
-from unittest.mock import MagicMock, patch
-
 from aktør.models import Afsender, Aktør, Modtager, Speditør
 from common.models import Postnummer
 from django.contrib.auth.models import Permission
-from django.core.exceptions import ValidationError
 from django.test import TestCase
 from django.urls import reverse
 from project.test_mixins import RestMixin, RestTestMixin
