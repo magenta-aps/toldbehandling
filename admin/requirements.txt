@@ -19,7 +19,7 @@ django-two-factor-auth==1.18.1
 django-phonenumber-field[phonenumberslite]==8.4.0
 mypy==1.18.2
 django-stubs[compatible-mypy]==5.2.9
-types-requests==2.33.0.20260518
+types-requests==2.33.0.20260712
 python-dateutil==2.9.0.post0
 types-python-dateutil==2.9.0.20260807
 pymemcache==4.0.0
