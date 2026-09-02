@@ -43,7 +43,7 @@ setuptools.setup(
         "requests==2.34.2",
         "dataclasses-json==0.6.7",
         "WeasyPrint==67.0",
-        "holidays==0.99",
+        "holidays==0.103",
         "pypdf==6.14.2",
         "django-forms-dynamic==1.0.0",
         "django_compressor==4.6.0",
