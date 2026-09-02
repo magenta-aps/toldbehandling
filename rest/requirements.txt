@@ -18,7 +18,7 @@ lxml==4.9.4
 requests==2.34.2
 django-otp==1.7.1
 mypy==1.18.2
-django-stubs[compatible-mypy]==5.2.9
+django-stubs[compatible-mypy]==6.1.0
 setuptools==80.10.2
 tabulate==0.10.0
 types-requests==2.33.0.20260712
