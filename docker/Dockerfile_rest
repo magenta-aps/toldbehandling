@@ -46,7 +46,7 @@ ENV COMMIT_TAG=${COMMIT_TAG:-HEAD}
 
 COPY ./docker/entrypoint_rest.sh /entrypoint.sh
 COPY --chown=toldbehandling:toldbehandling ./rest /app
-USER toldbehandling
+USER 75130
 EXPOSE 8000
 ENTRYPOINT ["/entrypoint.sh"]
 WORKDIR /app
