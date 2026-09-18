@@ -55,6 +55,6 @@ WORKDIR /app
 COPY ./dev-environment/rest.env rest.env
 
 # hadolint ignore=SC1091
-RUN set -a && source rest.env && set +a && python manage.py collectstatic --no-input --clear && rm rest.env
+RUN set -a && . rest.env && set +a && python manage.py collectstatic --no-input --clear && rm rest.env
 
 CMD ["gunicorn","-b","0.0.0.0:8000","project.wsgi:application","-w","4","--timeout","120","--error-logfile","-","--capture-output"]
