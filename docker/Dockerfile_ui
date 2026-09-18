@@ -55,7 +55,7 @@ COPY --chown=toldbehandling:toldbehandling ./ui /app
 RUN chown -R toldbehandling:toldbehandling /app
 COPY ./docker/entrypoint_ui.sh /entrypoint.sh
 EXPOSE 8000
-USER toldbehandling
+USER 75130
 ENTRYPOINT ["/entrypoint.sh"]
 WORKDIR /app
 RUN django-admin compilemessages --locale=kl --locale=da
