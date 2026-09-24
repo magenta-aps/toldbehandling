@@ -92,6 +92,7 @@ services:
       - MAKE_MIGRATIONS=true
       - MIGRATE=true
       - TEST=false
+      - ECHO_INTERFACE=http://localhost:8041
     networks:
       - default
       - database
@@ -122,6 +123,7 @@ services:
       - MAKE_MIGRATIONS=true
       - MIGRATE=true
       - TEST=false
+      - ECHO_INTERFACE=http://localhost:8040
     networks:
       - default
       - database

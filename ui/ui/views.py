@@ -6,7 +6,7 @@ import os
 from datetime import date, datetime, timezone
 from functools import cached_property
 from io import BytesIO
-from typing import Any, Dict
+from typing import Any, Dict, List
 
 from django.conf import settings
 from django.contrib import messages
@@ -19,6 +19,7 @@ from django.views.generic import FormView, RedirectView, TemplateView, View
 from requests import HTTPError
 from told_common import forms as common_forms
 from told_common import views as common_views
+from told_common.data import Speditør
 from told_common.util import (
     dataclass_map_to_dict,
     language,
@@ -69,8 +70,8 @@ class IndexView(LoginRequiredMixin, UiViewMixin, RedirectView):
 
 class SpeditørMixin:
     @cached_property
-    def speditører(self):
-        return self.rest_client.speditør.list()
+    def speditører(self) -> List[Speditør]:
+        return self.rest_client.speditør.list()  # type: ignore[attr-defined]
 
     @cached_property
     def is_speditør(self):
@@ -87,8 +88,9 @@ class SpeditørMixin:
 class TF10FormCreateView(UiViewMixin, SpeditørMixin, common_views.TF10FormCreateView):
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        if self.user_cvr is None or not self.is_speditør:
-            kwargs["speditører"] = self.speditører
+        kwargs["speditører"] = filter(
+            lambda speditør: speditør.cvr != self.user_cvr, self.speditører
+        )
         return kwargs
 
 
@@ -104,8 +106,9 @@ class TF10ListView(UiViewMixin, SpeditørMixin, common_views.TF10ListView):
 class TF10FormUpdateView(UiViewMixin, SpeditørMixin, common_views.TF10FormUpdateView):
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        if self.user_cvr is None or not self.is_speditør:
-            kwargs["speditører"] = self.speditører
+        kwargs["speditører"] = filter(
+            lambda speditør: speditør.cvr != self.user_cvr, self.speditører
+        )
         return kwargs
 
 
