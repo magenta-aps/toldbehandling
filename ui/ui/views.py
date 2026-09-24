@@ -71,7 +71,7 @@ class IndexView(LoginRequiredMixin, UiViewMixin, RedirectView):
 class SpeditørMixin:
     @cached_property
     def speditører(self) -> List[Speditør]:
-        return self.rest_client.speditør.list()
+        return self.rest_client.speditør.list()  # type: ignore[attr-defined]
 
     @cached_property
     def is_speditør(self):
