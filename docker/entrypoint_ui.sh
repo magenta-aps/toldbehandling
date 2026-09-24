@@ -38,5 +38,7 @@ fi
 
 python manage.py collectstatic --verbosity=0 --no-input
 python manage.py compress --verbosity=1 --force
-
+if [ $ECHO_INTERFACE ]; then
+    echo "Interface: $ECHO_INTERFACE"
+fi
 exec "$@"
