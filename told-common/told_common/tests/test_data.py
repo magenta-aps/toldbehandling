@@ -13,11 +13,11 @@ from told_common.data import (
 
 class TestData(TestCase):
     def test_unformat_decimal(self):
-        self.assertEquals(unformat_decimal("1,0"), Decimal("1.0"))
-        self.assertEquals(unformat_decimal("1.0"), Decimal("1.0"))
-        self.assertEquals(unformat_decimal("1"), Decimal("1"))
-        self.assertEquals(unformat_decimal("1.000,00"), Decimal("1000.00"))
-        self.assertEquals(unformat_decimal(None), None)
+        self.assertEqual(unformat_decimal("1,0"), Decimal("1.0"))
+        self.assertEqual(unformat_decimal("1.0"), Decimal("1.0"))
+        self.assertEqual(unformat_decimal("1"), Decimal("1"))
+        self.assertEqual(unformat_decimal("1.000,00"), Decimal("1000.00"))
+        self.assertEqual(unformat_decimal(None), None)
 
     def test_encode_optional_isoformat(self):
         dt = datetime(2023, 5, 17, 13, 45, 30)

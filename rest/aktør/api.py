@@ -47,9 +47,9 @@ class AfsenderIn(ModelSchema):
     postbox: Annotated[Optional[str], BeforeValidator(coerce_num_to_str)] = None
     telefon: Annotated[Optional[str], BeforeValidator(coerce_num_to_str)] = None
 
-    class Config:
+    class Meta:
         model = Afsender
-        model_fields = [
+        fields = [
             "navn",
             "adresse",
             "postnummer",
@@ -59,7 +59,7 @@ class AfsenderIn(ModelSchema):
             "cvr",
             "kladde",
         ]
-        model_fields_optional = "__all__"
+        fields_optional = "__all__"
 
 
 class PartialAfsenderIn(ModelSchema):
@@ -67,9 +67,9 @@ class PartialAfsenderIn(ModelSchema):
     postbox: Annotated[Optional[str], BeforeValidator(coerce_num_to_str)] = None
     telefon: Annotated[Optional[str], BeforeValidator(coerce_num_to_str)] = None
 
-    class Config:
+    class Meta:
         model = Modtager
-        model_fields = [
+        fields = [
             "navn",
             "adresse",
             "postnummer",
@@ -79,7 +79,7 @@ class PartialAfsenderIn(ModelSchema):
             "cvr",
             "kladde",
         ]
-        model_fields_optional = "__all__"
+        fields_optional = "__all__"
 
 
 class AfsenderOut(ModelSchema):
@@ -87,9 +87,9 @@ class AfsenderOut(ModelSchema):
     postbox: Annotated[Optional[str], BeforeValidator(coerce_num_to_str)] = None
     telefon: Annotated[Optional[str], BeforeValidator(coerce_num_to_str)] = None
 
-    class Config:
+    class Meta:
         model = Afsender
-        model_fields = [
+        fields = [
             "id",
             "navn",
             "adresse",
@@ -179,9 +179,9 @@ class ModtagerIn(ModelSchema):
     postbox: Annotated[Optional[str], BeforeValidator(coerce_num_to_str)] = None
     telefon: Annotated[Optional[str], BeforeValidator(coerce_num_to_str)] = None
 
-    class Config:
+    class Meta:
         model = Modtager
-        model_fields = [
+        fields = [
             "navn",
             "adresse",
             "postnummer",
@@ -192,7 +192,7 @@ class ModtagerIn(ModelSchema):
             "kreditordning",
             "kladde",
         ]
-        model_fields_optional = "__all__"
+        fields_optional = "__all__"
 
 
 class PartialModtagerIn(ModelSchema):
@@ -200,9 +200,9 @@ class PartialModtagerIn(ModelSchema):
     postbox: Annotated[Optional[str], BeforeValidator(coerce_num_to_str)] = None
     telefon: Annotated[Optional[str], BeforeValidator(coerce_num_to_str)] = None
 
-    class Config:
+    class Meta:
         model = Modtager
-        model_fields = [
+        fields = [
             "navn",
             "adresse",
             "postnummer",
@@ -213,7 +213,7 @@ class PartialModtagerIn(ModelSchema):
             "kreditordning",
             "kladde",
         ]
-        model_fields_optional = "__all__"
+        fields_optional = "__all__"
 
 
 class ModtagerOut(ModelSchema):
@@ -221,9 +221,9 @@ class ModtagerOut(ModelSchema):
     postbox: Annotated[Optional[str], BeforeValidator(coerce_num_to_str)] = None
     telefon: Annotated[Optional[str], BeforeValidator(coerce_num_to_str)] = None
 
-    class Config:
+    class Meta:
         model = Modtager
-        model_fields = [
+        fields = [
             "id",
             "navn",
             "adresse",
@@ -307,9 +307,9 @@ class ModtagerAPI:
 
 
 class SpeditørOut(ModelSchema):
-    class Config:
+    class Meta:
         model = Speditør
-        model_fields = [
+        fields = [
             "cvr",
             "navn",
         ]
