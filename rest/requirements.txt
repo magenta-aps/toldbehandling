@@ -1,5 +1,5 @@
 django==5.2.18
-gunicorn==22.0.0
+gunicorn==26.2.0
 psycopg==3.3.6
 coverage==7.17.0
 django-extensions==4.1
