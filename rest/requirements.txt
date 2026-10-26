@@ -23,5 +23,5 @@ setuptools==80.10.2
 tabulate==0.10.0
 types-requests==2.33.0.20261006
 types-tabulate==0.10.0.20261006
-pydantic==2.13.5
+pydantic==2.14.1
 tblib==3.2.2
