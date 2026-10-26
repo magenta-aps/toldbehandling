@@ -14,9 +14,9 @@ from payment.utils import convert_keys_to_snake_case
 
 
 class PaymentDeclaration(ModelSchema):
-    class Config:
+    class Meta:
         model = PrivatAfgiftsanmeldelse
-        model_fields = [
+        fields = [
             "id",
             "oprettet",
             "oprettet_af",
@@ -46,9 +46,9 @@ class BaseResponse(Schema):
 
 
 class BaseItem(ModelSchema):
-    class Config:
+    class Meta:
         model = Item
-        model_fields = [
+        fields = [
             "reference",
             "name",
             "quantity",
@@ -62,9 +62,9 @@ class BaseItem(ModelSchema):
 
 
 class BasePayment(ModelSchema):
-    class Config:
+    class Meta:
         model = Payment
-        model_fields = [
+        fields = [
             "amount",
             "currency",
             "reference",
@@ -160,6 +160,6 @@ class PaymentItemResponse(BaseItem, PersistedModel):
     pass
 
 
-class PaymentResponse(BaseResponse, BasePayment, PersistedModel):
+class PaymentResponse(BaseResponse, BasePayment, PersistedModel):  # type: ignore[misc]
     declaration: PaymentDeclarationResponse
     provider_payment: Optional[ProviderPaymentResponse] = None

@@ -323,7 +323,7 @@ class RestMixin:
             file2 = self.get_file_data(items_nofiles[1].pop(key))
             self.assertEqual(file1, file2)
         msg = str(msg) + f" {str(items_nofiles[0])}\n != \n{str(items_nofiles[1])}"
-        self.assertEquals(items_nofiles[0], items_nofiles[1], msg)
+        self.assertEqual(items_nofiles[0], items_nofiles[1], msg)
 
     def compare_in(self, itemlist: list, item: dict, msg: str) -> None:
         for expected in itemlist:
@@ -613,20 +613,20 @@ class RestTestMixin(RestMixin):
         response = self.client.get(
             url, HTTP_AUTHORIZATION=f"Bearer {self.authorized_access_token}"
         )
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         response = self.client.get(
             url, HTTP_AUTHORIZATION=f"Bearer {self.viewonly_access_token}"
         )
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         response = self.client.get(
             url, HTTP_AUTHORIZATION=f"Bearer {self.unauthorized_access_token}"
         )
-        self.assertEquals(response.status_code, 403)
+        self.assertEqual(response.status_code, 403)
         if self.object_restriction:
             response = self.client.get(
                 url, HTTP_AUTHORIZATION=f"Bearer {self.viewonly_own_access_token}"
             )
-            self.assertEquals(response.status_code, 403)
+            self.assertEqual(response.status_code, 403)
 
     def test_get(self):
         self.create_items()
@@ -799,21 +799,21 @@ class RestTestMixin(RestMixin):
             HTTP_AUTHORIZATION=f"Bearer {self.viewonly_access_token}",
             content_type="application/json",
         )
-        self.assertEquals(response.status_code, 403)
+        self.assertEqual(response.status_code, 403)
         response = self.client.post(
             url,
             data,
             HTTP_AUTHORIZATION=f"Bearer {self.unauthorized_access_token}",
             content_type="application/json",
         )
-        self.assertEquals(response.status_code, 403)
+        self.assertEqual(response.status_code, 403)
         response = self.client.post(
             url,
             data,
             HTTP_AUTHORIZATION=f"Bearer {self.authorized_access_token}",
             content_type="application/json",
         )
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
     def test_create(self):
         url = reverse(f"api-1.0.0:{self.create_function}")
@@ -914,21 +914,21 @@ class RestTestMixin(RestMixin):
             content_type="application/json",
             HTTP_AUTHORIZATION=f"Bearer {self.unauthorized_access_token}",
         )
-        self.assertEquals(response.status_code, 403)
+        self.assertEqual(response.status_code, 403)
         response = self.client.patch(
             url,
             data,
             content_type="application/json",
             HTTP_AUTHORIZATION=f"Bearer {self.viewonly_access_token}",
         )
-        self.assertEquals(response.status_code, 403)
+        self.assertEqual(response.status_code, 403)
         response = self.client.patch(
             url,
             data,
             content_type="application/json",
             HTTP_AUTHORIZATION=f"Bearer {self.authorized_access_token}",
         )
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
     def test_update(self):
         self.create_items()
@@ -969,7 +969,7 @@ class RestTestMixin(RestMixin):
                 secure=False,
                 HTTP_AUTHORIZATION=f"Bearer {self.authorized_access_token}",
             )
-            self.assertEquals(response.status_code, 404)
+            self.assertEqual(response.status_code, 404)
 
             url = reverse(
                 f"api-1.0.0:{self.delete_function}",
@@ -980,4 +980,4 @@ class RestTestMixin(RestMixin):
                 secure=False,
                 HTTP_AUTHORIZATION=f"Bearer {self.authorized_access_token}",
             )
-            self.assertEquals(response.status_code, 200)
+            self.assertEqual(response.status_code, 200)

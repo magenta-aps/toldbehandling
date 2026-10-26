@@ -168,10 +168,10 @@ class BlanketMixin:
 
 class TemplateTagsTest:
     def test_file_basename(self):
-        self.assertEquals(file_basename("/path/to/file.txt"), "file.txt")
+        self.assertEqual(file_basename("/path/to/file.txt"), "file.txt")
 
     def test_zfill(self):
-        self.assertEquals(zfill("444", 10), "0000000444")
+        self.assertEqual(zfill("444", 10), "0000000444")
 
 
 class LoginTest(TestMixin):
@@ -237,15 +237,15 @@ class LoginTest(TestMixin):
     def test_incorrect_login(self, mock_post, mock_get):
         mock_get.side_effect = self.mock_requests_get
         response = self.client.post(reverse("login"), {"username": "incorrect"})
-        self.assertEquals(response.status_code, 200)  # Rerender form
+        self.assertEqual(response.status_code, 200)  # Rerender form
         mock_post.assert_not_called()
         errors = self.get_errors(response.content)
-        self.assertEquals(errors["password"], ["Dette felt er påkrævet."])
+        self.assertEqual(errors["password"], ["Dette felt er påkrævet."])
 
         response = self.client.post(
             reverse("login"), {"username": "incorrect", "password": "credentials"}
         )
-        self.assertEquals(response.status_code, 200)  # Rerender form
+        self.assertEqual(response.status_code, 200)  # Rerender form
         mock_post.assert_called_with(
             f"{settings.REST_DOMAIN}/api/token/pair",
             json={"username": "incorrect", "password": "credentials"},
@@ -269,10 +269,10 @@ class LoginTest(TestMixin):
             json={"username": "correct", "password": "credentials"},
             headers={"Content-Type": "application/json"},
         )
-        self.assertEquals(response.status_code, 302)
-        self.assertEquals(response.headers["Location"], "/")
-        self.assertEquals(self.client.session["access_token"], "123456")
-        self.assertEquals(self.client.session["refresh_token"], "abcdef")
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.headers["Location"], "/")
+        self.assertEqual(self.client.session["access_token"], "123456")
+        self.assertEqual(self.client.session["refresh_token"], "abcdef")
 
     @patch.object(RestClient, "refresh_login")
     @patch.object(requests.sessions.Session, "get")
@@ -332,9 +332,9 @@ class LoginTest(TestMixin):
         # Set token max_age way down, so it will be refreshed
         with self.settings(NINJA_JWT={"ACCESS_TOKEN_LIFETIME": timedelta(seconds=1)}):
             response = self.client.get(reverse("rest", kwargs={"path": "afsender"}))
-            self.assertEquals(response.status_code, 200)
+            self.assertEqual(response.status_code, 200)
             # Check that token refresh is needed
-            self.assertEquals(self.client.session["access_token"], "7890ab")
+            self.assertEqual(self.client.session["access_token"], "7890ab")
 
     @patch.object(requests.sessions.Session, "get")
     @patch.object(
@@ -348,10 +348,10 @@ class LoginTest(TestMixin):
             reverse("login") + "?back=/",
             {"username": "correct", "password": "credentials"},
         )
-        self.assertEquals(response.status_code, 302)
-        self.assertEquals(response.headers["Location"], "/")
-        self.assertEquals(self.client.session["access_token"], "123456")
-        self.assertEquals(self.client.session["refresh_token"], "abcdef")
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.headers["Location"], "/")
+        self.assertEqual(self.client.session["access_token"], "123456")
+        self.assertEqual(self.client.session["refresh_token"], "abcdef")
         response = self.client.get(reverse("logout"), follow=False)
         self.assertNotIn("access_token", self.client.session)
         self.assertNotIn("refresh_token", self.client.session)
@@ -373,14 +373,14 @@ class LoginTest(TestMixin):
             }
         )
         response = self.client.get(self.restricted_url)
-        self.assertEquals(response.status_code, 302)
-        self.assertEquals(
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(
             response.headers["Location"],
             "/admin/login?back=" + quote_plus(self.restricted_url),
         )
         mock_get.return_value = self.create_response(500, "")
         response = self.client.get(self.restricted_url)
-        self.assertEquals(response.status_code, 302)
+        self.assertEqual(response.status_code, 302)
 
     @staticmethod
     def mock_post(url, data, **kwargs):
@@ -485,11 +485,11 @@ class TestRestClient(SimpleTestCase):
         # Each call should return in a new (unique) username being generated from the
         # `first_name`, `last_name` and `cvr` values.
         user1 = self._call_login_saml_user(iteration=0)
-        self.assertEquals(user1["username"], f"{self.first_name} {self.last_name}")
+        self.assertEqual(user1["username"], f"{self.first_name} {self.last_name}")
         user2 = self._call_login_saml_user(iteration=1)
-        self.assertEquals(user2["username"], f"{self.first_name} {self.last_name} (1)")
+        self.assertEqual(user2["username"], f"{self.first_name} {self.last_name} (1)")
         user3 = self._call_login_saml_user(iteration=2)
-        self.assertEquals(user3["username"], f"{self.first_name} {self.last_name} (2)")
+        self.assertEqual(user3["username"], f"{self.first_name} {self.last_name} (2)")
 
     def _call_login_saml_user(self, iteration: int = 0):
         client = RestClient(self.MockJwtTokenInfo())
@@ -722,7 +722,7 @@ class PermissionsTest(HasLogin):
             url = item[0]
             expected_status = item[2] if len(item) > 2 else 200
             response = self.client.get(url)
-            self.assertEquals(
+            self.assertEqual(
                 expected_status,
                 response.status_code,
                 f"Expected status {expected_status} "
@@ -751,7 +751,7 @@ class PermissionsTest(HasLogin):
             self.userdata["permissions"] = permissions
             self.login(self.userdata)
             response = self.client.get(url)
-            self.assertEquals(
+            self.assertEqual(
                 expected_status,
                 response.status_code,
                 f"Expected status {expected_status} "
@@ -779,7 +779,7 @@ class PermissionsTest(HasLogin):
                 self.userdata["permissions"] = reduced_permissions
                 self.login(self.userdata)
                 response = self.client.get(url)
-                self.assertEquals(
+                self.assertEqual(
                     403,
                     response.status_code,
                     f"Expected status {403} for url {url}, got {response.status_code}",
@@ -1142,8 +1142,8 @@ class AnmeldelseListViewTest(BlanketMixin, HasLogin):
     def test_requires_login(self):
         url = self.list_url
         response = self.client.get(url)
-        self.assertEquals(response.status_code, 302)
-        self.assertEquals(
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(
             response.headers["Location"],
             self.login_url + "?back=" + quote(url, safe=""),
         )
@@ -1155,7 +1155,7 @@ class AnmeldelseListViewTest(BlanketMixin, HasLogin):
         self.login()
         url = self.list_url
         response = self.client.get(url)
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         table_data = self.get_html_list(response.content)
         expected = [
             {
@@ -1215,11 +1215,11 @@ class AnmeldelseListViewTest(BlanketMixin, HasLogin):
         if self.can_select_multiple:
             expected = [{**item, "": ""} for item in expected]
 
-        self.assertEquals(table_data, expected)
+        self.assertEqual(table_data, expected)
 
         url = self.list_url + "?json=1"
         response = self.client.get(url)
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         data = response.json()
 
         def _view_button(id: int):
@@ -1380,7 +1380,7 @@ class AnmeldelseListViewTest(BlanketMixin, HasLogin):
                     f'<input type="checkbox" id="select_{id}" name="id" value="{id}"/>'
                 )
 
-        self.assertEquals(
+        self.assertEqual(
             modify_values(data, (str,), lambda s: collapse_newlines(s)), expected
         )
 
@@ -1406,8 +1406,8 @@ class AnmeldelseListViewTest(BlanketMixin, HasLogin):
             url = self.list_url + f"?json=1&sort={test[0]}&order={test[1]}"
             response = self.client.get(url)
             numbers = [int(item["id"]) for item in response.json()["items"]]
-            self.assertEquals(response.status_code, 200)
-            self.assertEquals(numbers, test[2])
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(numbers, test[2])
 
     @patch.object(requests.Session, "get")
     def test_list_filter(self, mock_get):
@@ -1436,13 +1436,13 @@ class AnmeldelseListViewTest(BlanketMixin, HasLogin):
         for field, value, expected in filter_tests:
             url = self.list_url + f"?json=1&{field}={value}"
             response = self.client.get(url)
-            self.assertEquals(
+            self.assertEqual(
                 response.status_code,
                 200,
                 f"Failed for {field}={value}: {response.content}",
             )
             numbers = [int(item["id"]) for item in response.json()["items"]]
-            self.assertEquals(
+            self.assertEqual(
                 set(numbers),
                 expected,
                 f"Failed for {field}={value}: {response.json()}",
@@ -1471,8 +1471,8 @@ class AnmeldelseListViewTest(BlanketMixin, HasLogin):
             url = self.list_url + f"?json=1&offset={offset}&limit={limit}"
             response = self.client.get(url)
             numbers = [int(item["id"]) for item in response.json()["items"]]
-            self.assertEquals(response.status_code, 200)
-            self.assertEquals(numbers, expected)
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(numbers, expected)
 
     @patch.object(requests.Session, "get")
     def test_form_invalid(self, mock_get):
@@ -1487,19 +1487,19 @@ class AnmeldelseListViewTest(BlanketMixin, HasLogin):
             for value in values:
                 url = self.list_url + f"?json=1&{field}={value}"
                 response = self.client.get(url)
-                self.assertEquals(response.status_code, 400, f"{url}")
+                self.assertEqual(response.status_code, 400, f"{url}")
                 data = response.json()
                 self.assertTrue("error" in data)
                 self.assertTrue(field in data["error"])
 
                 url = self.list_url + f"?{field}={value}"
                 response = self.client.get(url)
-                self.assertEquals(response.status_code, 200)
+                self.assertEqual(response.status_code, 200)
                 soup = BeautifulSoup(response.content, "html.parser")
                 error_fields = [
                     element["name"] for element in soup.find_all(class_="is-invalid")
                 ]
-                self.assertEquals(error_fields, [field])
+                self.assertEqual(error_fields, [field])
 
 
 class FileViewTest(HasLogin):
@@ -1551,9 +1551,9 @@ class FileViewTest(HasLogin):
             mock_get.side_effect = self.mock_requests_get
             mock_exists.return_value = True
             response = self.client.get(url)
-            self.assertEquals(response.status_code, 200)
+            self.assertEqual(response.status_code, 200)
             content = list(response.streaming_content)[0]
-            self.assertEquals(content, b"test_data")
+            self.assertEqual(content, b"test_data")
 
     @patch.object(requests.Session, "get")
     @patch.object(os.path, "exists")
@@ -1563,7 +1563,7 @@ class FileViewTest(HasLogin):
         mock_get.side_effect = self.mock_requests_get
         mock_exists.return_value = True
         response = self.client.get(url)
-        self.assertEquals(response.status_code, 404)
+        self.assertEqual(response.status_code, 404)
 
 
 def modify_values(item: Any, types: Tuple, action: Callable) -> Any:

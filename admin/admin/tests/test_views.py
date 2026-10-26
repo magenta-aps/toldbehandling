@@ -581,8 +581,8 @@ class TestTF10EditMultipleView(BaseTest):
         )
 
         self.assertEqual(response.status_code, 302)
-        self.rest_client_mock.postforsendelse.update.called_once()
-        self.rest_client_mock.notat.create.called_once()
+        self.rest_client_mock.postforsendelse.update.assert_called()
+        self.rest_client_mock.notat.create.assert_called()
 
     def test_edit_fragtforsendelse_items(self):
         self.login()
@@ -596,8 +596,8 @@ class TestTF10EditMultipleView(BaseTest):
         )
 
         self.assertEqual(response.status_code, 302)
-        self.rest_client_mock.fragtforsendelse.update.called_once()
-        self.rest_client_mock.notat.create.called_once()
+        self.rest_client_mock.fragtforsendelse.update.assert_called()
+        self.rest_client_mock.notat.create.assert_called()
 
 
 class TestAfgiftstabelDetailView(BaseTest):

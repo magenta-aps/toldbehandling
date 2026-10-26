@@ -78,9 +78,9 @@ class AfgiftsanmeldelseIn(ModelSchema):
         BeforeValidator(coerce_num_to_str),
     ] = None
 
-    class Config:
+    class Meta:
         model = Afgiftsanmeldelse
-        model_fields = [
+        fields = [
             "leverandørfaktura_nummer",
             "betales_af",
             "indførselstilladelse_alkohol",
@@ -124,9 +124,9 @@ class PartialAfgiftsanmeldelseIn(ModelSchema):
         BeforeValidator(coerce_num_to_str),
     ] = None
 
-    class Config:
+    class Meta:
         model = Afgiftsanmeldelse
-        model_fields = [
+        fields = [
             "leverandørfaktura_nummer",
             "betales_af",
             "indførselstilladelse_alkohol",
@@ -135,7 +135,7 @@ class PartialAfgiftsanmeldelseIn(ModelSchema):
             "status",
             "toldkategori",
         ]
-        model_fields_optional = "__all__"
+        fields_optional = "__all__"
 
 
 class AfgiftsanmeldelseOut(ModelSchema):
@@ -143,9 +143,9 @@ class AfgiftsanmeldelseOut(ModelSchema):
     oprettet_på_vegne_af: Optional[UserOut]
     fuldmagtshaver: Optional[SpeditørOut]
 
-    class Config:
+    class Meta:
         model = Afgiftsanmeldelse
-        model_fields = [
+        fields = [
             "id",
             "afsender",
             "modtager",
@@ -605,9 +605,9 @@ class PrivatAfgiftsanmeldelseIn(ModelSchema):
         Optional[str], BeforeValidator(coerce_num_to_str)
     ] = None
 
-    class Config:
+    class Meta:
         model = PrivatAfgiftsanmeldelse
-        model_fields = [
+        fields = [
             "cpr",
             "navn",
             "adresse",
@@ -634,9 +634,9 @@ class PartialPrivatAfgiftsanmeldelseIn(ModelSchema):
         Optional[str], BeforeValidator(coerce_num_to_str)
     ] = None
 
-    class Config:
+    class Meta:
         model = PrivatAfgiftsanmeldelse
-        model_fields = [
+        fields = [
             "cpr",
             "navn",
             "adresse",
@@ -650,7 +650,7 @@ class PartialPrivatAfgiftsanmeldelseIn(ModelSchema):
             "anonym",
             "status",
         ]
-        model_fields_optional = "__all__"
+        fields_optional = "__all__"
 
 
 class PrivatAfgiftsanmeldelseOut(ModelSchema):
@@ -658,9 +658,9 @@ class PrivatAfgiftsanmeldelseOut(ModelSchema):
     payment_status: Optional[str]
     sidste_ændringsdato: Optional[str] = None
 
-    class Config:
+    class Meta:
         model = PrivatAfgiftsanmeldelse
-        model_fields = [
+        fields = [
             "id",
             "cpr",
             "navn",
@@ -874,10 +874,10 @@ class VarelinjeIn(ModelSchema):
 
     vareafgiftssats_afgiftsgruppenummer: Optional[int] = None
 
-    class Config:
+    class Meta:
         model = Varelinje
-        model_fields = ["mængde", "antal", "kladde", "fakturabeløb"]
-        model_fields_optional = ["mængde", "antal", "kladde", "fakturabeløb"]
+        fields = ["mængde", "antal", "kladde", "fakturabeløb"]
+        fields_optional = ["mængde", "antal", "kladde", "fakturabeløb"]
 
     @model_validator(mode="after")
     def enhed_must_have_corresponding_field(self):
@@ -943,21 +943,21 @@ class PartialVarelinjeIn(ModelSchema):
     afgiftsanmeldelse_id: Optional[int] = None
     vareafgiftssats_id: Optional[int] = None
 
-    class Config:
+    class Meta:
         model = Varelinje
-        model_fields = [
+        fields = [
             "mængde",
             "antal",
             "fakturabeløb",
             "kladde",
         ]
-        model_fields_optional = "__all__"
+        fields_optional = "__all__"
 
 
 class VarelinjeOut(ModelSchema):
-    class Config:
+    class Meta:
         model = Varelinje
-        model_fields = [
+        fields = [
             "id",
             "afgiftsanmeldelse",
             "privatafgiftsanmeldelse",
@@ -1169,17 +1169,17 @@ class NotatIn(ModelSchema):
     afgiftsanmeldelse_id: Optional[int] = None
     privatafgiftsanmeldelse_id: Optional[int] = None
 
-    class Config:
+    class Meta:
         model = Notat
-        model_fields = ["tekst"]
+        fields = ["tekst"]
 
 
 class NotatOut(ModelSchema):
     navn: Optional[str] = None
 
-    class Config:
+    class Meta:
         model = Notat
-        model_fields = [
+        fields = [
             "id",
             "afgiftsanmeldelse",
             "privatafgiftsanmeldelse",
@@ -1330,15 +1330,15 @@ class NotatAPI:
 class PrismeResponseIn(ModelSchema):
     afgiftsanmeldelse_id: Optional[int] = None
 
-    class Config:
+    class Meta:
         model = PrismeResponse
-        model_fields = ["rec_id", "tax_notification_number", "delivery_date"]
+        fields = ["rec_id", "tax_notification_number", "delivery_date"]
 
 
 class PrismeResponseOut(ModelSchema):
-    class Config:
+    class Meta:
         model = PrismeResponse
-        model_fields = [
+        fields = [
             "id",
             "afgiftsanmeldelse",
             "rec_id",
@@ -1488,9 +1488,9 @@ class StatistikAPI:
 
 
 class ToldkategoriOut(ModelSchema):
-    class Config:
+    class Meta:
         model = Toldkategori
-        model_fields = [
+        fields = [
             "kategori",
             "navn",
             "kræver_cvr",
