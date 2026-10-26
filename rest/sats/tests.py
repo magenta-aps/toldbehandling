@@ -101,13 +101,13 @@ class AfgiftstabelTest(RestTestMixin, TestCase):
         tabeller = [tabel1, tabel2, tabel3]
         for tabel in tabeller:
             tabel.refresh_from_db()
-        self.assertEquals(
+        self.assertEqual(
             tabel1.gyldig_til, datetime(2021, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
         )
-        self.assertEquals(
+        self.assertEqual(
             tabel2.gyldig_til, datetime(2022, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
         )
-        self.assertEquals(tabel3.gyldig_til, None)
+        self.assertEqual(tabel3.gyldig_til, None)
 
         # Indsæt ny tabel midt i sekvensen og tjek at gyldig_til opdateres
         tabel4 = Afgiftstabel.objects.create(
@@ -116,14 +116,14 @@ class AfgiftstabelTest(RestTestMixin, TestCase):
         tabeller.append(tabel4)
         for tabel in tabeller:
             tabel.refresh_from_db()
-        self.assertEquals(
+        self.assertEqual(
             tabel1.gyldig_til, datetime(2021, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
         )
-        self.assertEquals(
+        self.assertEqual(
             tabel2.gyldig_til, datetime(2021, 7, 1, 0, 0, 0, tzinfo=timezone.utc)
         )
-        self.assertEquals(tabel3.gyldig_til, None)
-        self.assertEquals(
+        self.assertEqual(tabel3.gyldig_til, None)
+        self.assertEqual(
             tabel4.gyldig_til, datetime(2022, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
         )
 
@@ -132,14 +132,14 @@ class AfgiftstabelTest(RestTestMixin, TestCase):
         tabel4.save()
         for tabel in tabeller:
             tabel.refresh_from_db()
-        self.assertEquals(
+        self.assertEqual(
             tabel1.gyldig_til, datetime(2020, 3, 10, 0, 0, 0, tzinfo=timezone.utc)
         )
-        self.assertEquals(
+        self.assertEqual(
             tabel2.gyldig_til, datetime(2022, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
         )
-        self.assertEquals(tabel3.gyldig_til, None)
-        self.assertEquals(
+        self.assertEqual(tabel3.gyldig_til, None)
+        self.assertEqual(
             tabel4.gyldig_til, datetime(2021, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
         )
 

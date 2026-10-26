@@ -385,8 +385,8 @@ class AfgiftsanmeldelseTest(RestTestMixin, TestCase):
             url, HTTP_AUTHORIZATION=f"Bearer {self.approvedonly_access_token}"
         )
         data = response.json()
-        self.assertEquals(data["count"], 0)
-        self.assertEquals(data["items"], [])
+        self.assertEqual(data["count"], 0)
+        self.assertEqual(data["items"], [])
 
         self._afgiftsanmeldelse.status = "godkendt"
         self._afgiftsanmeldelse.save()
@@ -395,8 +395,8 @@ class AfgiftsanmeldelseTest(RestTestMixin, TestCase):
             url, HTTP_AUTHORIZATION=f"Bearer {self.approvedonly_access_token}"
         )
         data = response.json()
-        self.assertEquals(data["count"], 1)
-        self.assertEquals(
+        self.assertEqual(data["count"], 1)
+        self.assertEqual(
             data["items"][0], {**self.expected_response_dict, "status": "godkendt"}
         )
 
@@ -416,7 +416,7 @@ class AfgiftsanmeldelseTest(RestTestMixin, TestCase):
             ),
             HTTP_AUTHORIZATION=f"Bearer {self.authorized_access_token}",
         )
-        self.assertEquals(resp_delete_new.status_code, 200)
+        self.assertEqual(resp_delete_new.status_code, 200)
 
         # Test delete of "kladde"
         afgiftsanmeldelse_kladde = Afgiftsanmeldelse.objects.create(
@@ -432,7 +432,7 @@ class AfgiftsanmeldelseTest(RestTestMixin, TestCase):
             ),
             HTTP_AUTHORIZATION=f"Bearer {self.authorized_access_token}",
         )
-        self.assertEquals(resp_delete_kladde.status_code, 200)
+        self.assertEqual(resp_delete_kladde.status_code, 200)
 
         # Test delete of "afvist" with staff user
         afgiftsanmeldelse_rejected = Afgiftsanmeldelse.objects.create(
@@ -449,7 +449,7 @@ class AfgiftsanmeldelseTest(RestTestMixin, TestCase):
             ),
             HTTP_AUTHORIZATION=f"Bearer {self.staff_access_token}",
         )
-        self.assertEquals(resp_delete_new.status_code, 200)
+        self.assertEqual(resp_delete_new.status_code, 200)
 
         # Test delete of "godkendt" with staff user
         afgiftsanmeldelse_approved = Afgiftsanmeldelse.objects.create(
@@ -466,10 +466,10 @@ class AfgiftsanmeldelseTest(RestTestMixin, TestCase):
             ),
             HTTP_AUTHORIZATION=f"Bearer {self.staff_access_token}",
         )
-        self.assertEquals(resp_delete_new.status_code, 200)
+        self.assertEqual(resp_delete_new.status_code, 200)
 
         # Assert that all objects are deleted
-        self.assertEquals(Afgiftsanmeldelse.objects.count(), 0)
+        self.assertEqual(Afgiftsanmeldelse.objects.count(), 0)
 
     def test_delete_fail(self):
         invalid_statuses = ["godkendt", "afsluttet", "afvist"]
@@ -497,13 +497,13 @@ class AfgiftsanmeldelseTest(RestTestMixin, TestCase):
                 ),
                 HTTP_AUTHORIZATION=f"Bearer {self.authorized_access_token}",
             )
-            self.assertEquals(resp_delete.status_code, 403)
+            self.assertEqual(resp_delete.status_code, 403)
 
-        self.assertEquals(Afgiftsanmeldelse.objects.count(), len(invalid_statuses))
+        self.assertEqual(Afgiftsanmeldelse.objects.count(), len(invalid_statuses))
 
     def test_afgiftsanmeldelse_upload_to(self):
         result = privatafgiftsanmeldelse_upload_to(self.afgiftsanmeldelse, "test.pdf")
-        self.assertEquals(
+        self.assertEqual(
             result, f"privatfakturaer/{self.afgiftsanmeldelse.id}/test.pdf"
         )
 
@@ -1919,21 +1919,21 @@ class VarelinjeTest(RestTestMixin, TestCase):
             antal=1,
             fakturabeløb=30_000,
         )
-        self.assertEquals(varelinje1.afgiftsbeløb, Decimal(50_000))
+        self.assertEqual(varelinje1.afgiftsbeløb, Decimal(50_000))
         varelinje2 = Varelinje.objects.create(
             vareafgiftssats=personbiler,
             afgiftsanmeldelse=self.afgiftsanmeldelse,
             antal=1,
             fakturabeløb=65_000,
         )
-        self.assertEquals(varelinje2.afgiftsbeløb, Decimal(50_000 + 1.0 * 15_000))
+        self.assertEqual(varelinje2.afgiftsbeløb, Decimal(50_000 + 1.0 * 15_000))
         varelinje3 = Varelinje.objects.create(
             vareafgiftssats=personbiler,
             afgiftsanmeldelse=self.afgiftsanmeldelse,
             antal=1,
             fakturabeløb=500_000,
         )
-        self.assertEquals(
+        self.assertEqual(
             varelinje3.afgiftsbeløb, Decimal(50_000 + 1.0 * 100_000 + 1.5 * 350_000)
         )
 
@@ -3179,7 +3179,7 @@ class StatistikTest(RestMixin, TestCase):
     def test_statistik_access(self):
         url = reverse(f"api-1.0.0:statistik_get")
         response = self.client.get(url)
-        self.assertEquals(response.status_code, 401)
+        self.assertEqual(response.status_code, 401)
 
     def test_statistik(self):
         url = reverse(f"api-1.0.0:statistik_get")
@@ -3187,9 +3187,9 @@ class StatistikTest(RestMixin, TestCase):
             url, HTTP_AUTHORIZATION=f"Bearer {self.authorized_access_token}"
         )
         data = response.json()["items"]
-        self.assertEquals(len(data), 2)
+        self.assertEqual(len(data), 2)
         # Sorteret efter afgiftsgruppenummer
-        self.assertEquals(
+        self.assertEqual(
             data[0],
             {
                 # self.varelinje3 + self.varelinje_data
@@ -3202,7 +3202,7 @@ class StatistikTest(RestMixin, TestCase):
                 "sum_mængde": "715.000",
             },
         )
-        self.assertEquals(
+        self.assertEqual(
             data[1],
             {
                 "sum_afgiftsbeløb": "1400000.00",

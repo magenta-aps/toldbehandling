@@ -16,9 +16,9 @@ from ninja_extra.exceptions import AuthenticationFailed, PermissionDenied
 class TOTPDeviceIn(ModelSchema):
     user_id: int
 
-    class Config:
+    class Meta:
         model = TOTPDevice
-        model_fields = [
+        fields = [
             "key",
             "tolerance",
             "t0",
@@ -33,9 +33,9 @@ class TOTPDeviceIn(ModelSchema):
 class TOTPDeviceOut(ModelSchema):
     user_id: int
 
-    class Config:
+    class Meta:
         model = TOTPDevice
-        model_fields = [
+        fields = [
             "key",
             "tolerance",
             "t0",

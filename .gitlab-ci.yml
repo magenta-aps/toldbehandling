@@ -258,7 +258,7 @@ Unittest REST:
   <<: *test-rest
   script:
     - cd /app
-    - coverage run manage.py test --parallel 4
+    - coverage run manage.py test
     - coverage combine
     - coverage report --show-missing --fail-under=100
     - mv .coverage "${CI_PROJECT_DIR}/coverage_output/.coverage.${CI_JOB_ID}"
@@ -271,7 +271,7 @@ Unittest UI:
     - cd /app
     - cp -r ./told-common/told_common .
     - python manage.py compress --verbosity=1 --force && python manage.py collectstatic --verbosity=0 --no-input
-    - coverage run manage.py test --parallel 4
+    - coverage run manage.py test
     - coverage combine
     - coverage report --show-missing
     - mv .coverage "${CI_PROJECT_DIR}/coverage_output/.coverage.${CI_JOB_ID}"
@@ -283,7 +283,7 @@ Unittest Admin:
     - cd /app
     - cp -r ./told-common/told_common .
     - python manage.py compress --verbosity=1 --force && python manage.py collectstatic --verbosity=0 --no-input
-    - coverage run manage.py test --parallel 4
+    - coverage run manage.py test
     - coverage combine
     - coverage report --show-missing
     - mv .coverage "${CI_PROJECT_DIR}/coverage_output/.coverage.${CI_JOB_ID}"

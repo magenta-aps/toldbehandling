@@ -111,17 +111,17 @@ class TF10BlanketTest(BlanketMixin, TestMixin, HasLogin, TestCase):
         with file.open("+") as fp:
             fp.write(b"testdata")
             file.seek(0)
-            self.assertEquals(RestClient._uploadfile_to_base64str(file), "dGVzdGRhdGE=")
+            self.assertEqual(RestClient._uploadfile_to_base64str(file), "dGVzdGRhdGE=")
         file = SimpleUploadedFile("testfile", b"testdata", "text/plain")
         file.seek(0)
-        self.assertEquals(RestClient._uploadfile_to_base64str(file), "dGVzdGRhdGE=")
+        self.assertEqual(RestClient._uploadfile_to_base64str(file), "dGVzdGRhdGE=")
 
     @override_settings(LOGIN_BYPASS_ENABLED=False)
     def test_requires_login(self):
         url = str(reverse("tf10_create"))
         response = self.client.get(url)
-        self.assertEquals(response.status_code, 302)
-        self.assertEquals(
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(
             response.headers["Location"],
             reverse("login:login") + "?back=" + quote(url, safe=""),
         )
@@ -393,7 +393,7 @@ class TF10BlanketTest(BlanketMixin, TestMixin, HasLogin, TestCase):
         url = reverse("tf10_create")
         mock_get.side_effect = self.mock_requests_get
         response = self.client.get(url)
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         soup = BeautifulSoup(response.content, "html.parser")
         input_field_names = set(
             [
@@ -453,17 +453,17 @@ class TF10BlanketTest(BlanketMixin, TestMixin, HasLogin, TestCase):
             del data[required_field]
             form = TF10Form(data=data, files=self.formfiles1)
             self.assertTrue(required_field in form.errors)
-            self.assertEquals(form.errors[required_field], ["Dette felt er påkrævet."])
+            self.assertEqual(form.errors[required_field], ["Dette felt er påkrævet."])
             html_errors = self.submit_get_errors(url, data)
             self.assertTrue(required_field in html_errors)
-            self.assertEquals(html_errors[required_field], ["Dette felt er påkrævet."])
+            self.assertEqual(html_errors[required_field], ["Dette felt er påkrævet."])
 
         files = {**self.formfiles1}
         del files["leverandørfaktura"]
         form = TF10Form(data=self.formdata1, files=files)
-        self.assertEquals(form.errors["leverandørfaktura"], ["Dette felt er påkrævet."])
+        self.assertEqual(form.errors["leverandørfaktura"], ["Dette felt er påkrævet."])
         html_errors = self.submit_get_errors(url, {**self.formdata1, **files})
-        self.assertEquals(html_errors["leverandørfaktura"], ["Dette felt er påkrævet."])
+        self.assertEqual(html_errors["leverandørfaktura"], ["Dette felt er påkrævet."])
 
     def test_vareform_required_fields(self):
         varesatser = {
@@ -510,7 +510,7 @@ class TF10BlanketTest(BlanketMixin, TestMixin, HasLogin, TestCase):
             del data[required_field]
             form = TF10VareForm(data=data, varesatser=varesatser)
             self.assertTrue(required_field in form.errors)
-            self.assertEquals(form.errors[required_field], ["Dette felt er påkrævet."])
+            self.assertEqual(form.errors[required_field], ["Dette felt er påkrævet."])
 
         for required_field, vareart in (
             ("mængde", 1),
@@ -521,7 +521,7 @@ class TF10BlanketTest(BlanketMixin, TestMixin, HasLogin, TestCase):
             del data[required_field]
             form = TF10VareForm(data=data, varesatser=varesatser)
             self.assertTrue(required_field in form.errors, required_field)
-            self.assertEquals(
+            self.assertEqual(
                 form.errors[required_field], ["Dette felt er påkrævet."], required_field
             )
 
@@ -536,12 +536,12 @@ class TF10BlanketTest(BlanketMixin, TestMixin, HasLogin, TestCase):
         mock_get.side_effect = self.mock_requests_get
         mock_post.side_effect = self.mock_requests_post
         response = self.client.post(url, data={**self.formdata1, **self.formfiles1})
-        self.assertEquals(response.status_code, 302)
+        self.assertEqual(response.status_code, 302)
         prefix = f"{settings.REST_DOMAIN}/api/"
         posted_map = defaultdict(list)
         for url, data in self.posted:
             posted_map[url].append(json.loads(data))
-        self.assertEquals(
+        self.assertEqual(
             posted_map[prefix + "afsender"],
             [
                 {
@@ -556,7 +556,7 @@ class TF10BlanketTest(BlanketMixin, TestMixin, HasLogin, TestCase):
                 }
             ],
         )
-        self.assertEquals(
+        self.assertEqual(
             posted_map[prefix + "modtager"],
             [
                 {
@@ -571,7 +571,7 @@ class TF10BlanketTest(BlanketMixin, TestMixin, HasLogin, TestCase):
                 }
             ],
         )
-        self.assertEquals(
+        self.assertEqual(
             posted_map[prefix + "fragtforsendelse"],
             [
                 {
@@ -587,7 +587,7 @@ class TF10BlanketTest(BlanketMixin, TestMixin, HasLogin, TestCase):
                 }
             ],
         )
-        self.assertEquals(
+        self.assertEqual(
             posted_map[prefix + "afgiftsanmeldelse"],
             [
                 {
@@ -626,20 +626,20 @@ class TF10BlanketTest(BlanketMixin, TestMixin, HasLogin, TestCase):
         mock_get.side_effect = self.mock_requests_get
         mock_post.side_effect = self.mock_requests_post
         response = self.client.post(url, data={**self.formdata1, **self.formfiles1})
-        self.assertEquals(response.status_code, 302)
+        self.assertEqual(response.status_code, 302)
         prefix = f"{settings.REST_DOMAIN}/api/"
         posted_map = defaultdict(list)
         for url, data in self.posted:
             posted_map[url].append(json.loads(data))
-        self.assertEquals(
+        self.assertEqual(
             posted_map[prefix + "afsender"],
             [],
         )
-        self.assertEquals(
+        self.assertEqual(
             posted_map[prefix + "modtager"],
             [],
         )
-        self.assertEquals(
+        self.assertEqual(
             posted_map[prefix + "fragtforsendelse"],
             [
                 {
@@ -655,7 +655,7 @@ class TF10BlanketTest(BlanketMixin, TestMixin, HasLogin, TestCase):
                 }
             ],
         )
-        self.assertEquals(
+        self.assertEqual(
             posted_map[prefix + "afgiftsanmeldelse"],
             [
                 {
@@ -692,12 +692,12 @@ class TF10BlanketTest(BlanketMixin, TestMixin, HasLogin, TestCase):
         mock_get.side_effect = self.mock_requests_get
         mock_post.side_effect = self.mock_requests_post
         response = self.client.post(url, data={**self.formdata2, **self.formfiles2})
-        self.assertEquals(response.status_code, 302)
+        self.assertEqual(response.status_code, 302)
         prefix = f"{settings.REST_DOMAIN}/api/"
         posted_map = defaultdict(list)
         for url, data in self.posted:
             posted_map[url].append(json.loads(data))
-        self.assertEquals(
+        self.assertEqual(
             posted_map[prefix + "afsender"],
             [
                 {
@@ -712,7 +712,7 @@ class TF10BlanketTest(BlanketMixin, TestMixin, HasLogin, TestCase):
                 }
             ],
         )
-        self.assertEquals(
+        self.assertEqual(
             posted_map[prefix + "modtager"],
             [
                 {
@@ -727,7 +727,7 @@ class TF10BlanketTest(BlanketMixin, TestMixin, HasLogin, TestCase):
                 }
             ],
         )
-        self.assertEquals(
+        self.assertEqual(
             posted_map[prefix + "postforsendelse"],
             [
                 {
@@ -739,7 +739,7 @@ class TF10BlanketTest(BlanketMixin, TestMixin, HasLogin, TestCase):
                 }
             ],
         )
-        self.assertEquals(
+        self.assertEqual(
             posted_map[prefix + "afgiftsanmeldelse"],
             [
                 {
@@ -788,11 +788,11 @@ class TF10BlanketTest(BlanketMixin, TestMixin, HasLogin, TestCase):
             "fragtbrev",
         ):
             self.assertTrue(file_field in form.errors)
-            self.assertEquals(
+            self.assertEqual(
                 form.errors[file_field], ["Filen er for stor; den må max. være 10.0 MB"]
             )
             self.assertTrue(file_field in html_errors)
-            self.assertEquals(
+            self.assertEqual(
                 html_errors[file_field], ["Filen er for stor; den må max. være 10.0 MB"]
             )
 
@@ -802,7 +802,7 @@ class TF10BlanketTest(BlanketMixin, TestMixin, HasLogin, TestCase):
         url = reverse("tf10_edit", kwargs={"id": 1})
         mock_get.side_effect = self.mock_requests_get
         response = self.client.get(url)
-        self.assertEquals(response.status_code, 403)
+        self.assertEqual(response.status_code, 403)
 
     @patch.object(requests.Session, "get")
     def test_delete_not_allowed(self, mock_get):
@@ -818,7 +818,7 @@ class TF10BlanketTest(BlanketMixin, TestMixin, HasLogin, TestCase):
             self.login()
             url = reverse("tf10_delete", kwargs={"id": 1})
             response = self.client.get(url)
-            self.assertEquals(response.status_code, 403)
+            self.assertEqual(response.status_code, 403)
 
         mock_get.assert_has_calls(
             [
@@ -841,7 +841,7 @@ class TF10BlanketTest(BlanketMixin, TestMixin, HasLogin, TestCase):
         response = self.client.get(url)
 
         mock_get.assert_called_once()
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
     @patch.object(requests.Session, "get")
     def test_delete_kladde(self, mock_get):
@@ -857,7 +857,7 @@ class TF10BlanketTest(BlanketMixin, TestMixin, HasLogin, TestCase):
         response = self.client.get(url)
 
         mock_get.assert_called_once()
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
 
 
 class UiTemplateTagsTest(TemplateTagsTest, TestCase):
@@ -953,8 +953,8 @@ class TF5BlanketTest(TestMixin, HasLogin, TestCase):
             return
         url = str(reverse("tf5_create"))
         response = self.client.get(url)
-        self.assertEquals(response.status_code, 302)
-        self.assertEquals(
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(
             response.headers["Location"],
             reverse("login:login") + "?back=" + quote(url, safe=""),
         )
@@ -1050,7 +1050,7 @@ class TF5BlanketTest(TestMixin, HasLogin, TestCase):
         url = reverse("tf5_create")
         mock_get.side_effect = self.mock_requests_get
         response = self.client.get(url)
-        self.assertEquals(response.status_code, 200)
+        self.assertEqual(response.status_code, 200)
         soup = BeautifulSoup(response.content, "html.parser")
         input_field_names = set(
             [
@@ -1111,10 +1111,10 @@ class TF5BlanketTest(TestMixin, HasLogin, TestCase):
                 del files[required_field]
             form = TF5Form(data=data, files=files)
             self.assertTrue(required_field in form.errors)
-            self.assertEquals(form.errors[required_field], ["Dette felt er påkrævet."])
+            self.assertEqual(form.errors[required_field], ["Dette felt er påkrævet."])
             html_errors = self.submit_get_errors(url, data)
             self.assertTrue(required_field in html_errors)
-            self.assertEquals(html_errors[required_field], ["Dette felt er påkrævet."])
+            self.assertEqual(html_errors[required_field], ["Dette felt er påkrævet."])
 
     def test_vareform_required_fields(self):
         if not settings.TF5_ENABLED:
@@ -1163,7 +1163,7 @@ class TF5BlanketTest(TestMixin, HasLogin, TestCase):
             del data[required_field]
             form = TF10VareForm(data=data, varesatser=varesatser)
             self.assertTrue(required_field in form.errors)
-            self.assertEquals(form.errors[required_field], ["Dette felt er påkrævet."])
+            self.assertEqual(form.errors[required_field], ["Dette felt er påkrævet."])
 
         for required_field, vareart in (
             ("mængde", 1),
@@ -1174,7 +1174,7 @@ class TF5BlanketTest(TestMixin, HasLogin, TestCase):
             del data[required_field]
             form = TF10VareForm(data=data, varesatser=varesatser)
             self.assertTrue(required_field in form.errors, required_field)
-            self.assertEquals(
+            self.assertEqual(
                 form.errors[required_field], ["Dette felt er påkrævet."], required_field
             )
 
@@ -1191,12 +1191,12 @@ class TF5BlanketTest(TestMixin, HasLogin, TestCase):
         mock_get.side_effect = self.mock_requests_get
         mock_post.side_effect = self.mock_requests_post
         response = self.client.post(url, data={**self.formdata1, **self.formfiles1})
-        self.assertEquals(response.status_code, 302, self.get_errors(response.content))
+        self.assertEqual(response.status_code, 302, self.get_errors(response.content))
         prefix = f"{settings.REST_DOMAIN}/api/"
         posted_map = defaultdict(list)
         for url, data in self.posted:
             posted_map[url].append(json.loads(data))
-        self.assertEquals(
+        self.assertEqual(
             posted_map[prefix + "privat_afgiftsanmeldelse"],
             [
                 {
@@ -1240,11 +1240,11 @@ class TF5BlanketTest(TestMixin, HasLogin, TestCase):
         html_errors = self.submit_get_errors(url, {**data, **files})
         for file_field in ("leverandørfaktura",):
             self.assertTrue(file_field in form.errors)
-            self.assertEquals(
+            self.assertEqual(
                 form.errors[file_field], ["Filen er for stor; den må max. være 10.0 MB"]
             )
             self.assertTrue(file_field in html_errors)
-            self.assertEquals(
+            self.assertEqual(
                 html_errors[file_field], ["Filen er for stor; den må max. være 10.0 MB"]
             )
 
