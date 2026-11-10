@@ -1,4 +1,4 @@
-django==5.2.18
+django==5.2.19
 gunicorn==22.0.0
 psycopg==3.3.6
 coverage==7.17.2
