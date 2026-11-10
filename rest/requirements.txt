@@ -1,6 +1,6 @@
 django==5.2.19
 gunicorn==22.0.0
-psycopg==3.3.6
+psycopg==3.3.8
 coverage==7.17.2
 django-extensions==4.1
 pydotplus==2.0.2
