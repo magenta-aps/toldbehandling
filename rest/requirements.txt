@@ -4,7 +4,7 @@ psycopg==3.3.8
 coverage==7.17.2
 django-extensions==4.1
 pydotplus==2.0.2
-django-ninja==1.7.1
+django-ninja==1.8.0
 django-ninja-extra==0.31.7
 django-ninja-jwt==5.4.5
 orjson==3.13.0
